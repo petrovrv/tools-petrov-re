@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Electrolyser Sizing</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-23.3",
+  "id": "electrolyser_sizing",
+  "file": "electrolyser_sizing.html",
+  "listed": true,
+  "category": "oil-gas-h2",
+  "order": 140,
+  "title": {
+    "en": "Electrolyser Sizing",
+    "uk": "Розрахунок електролізера",
+    "de": "Elektrolyseur-Auslegung",
+    "nl": "Elektrolyserdimensionering",
+    "fr": "Dimensionnement d'électrolyseur",
+    "es": "Dimensionamiento de electrolizador",
+    "pl": "Dobór elektrolizera"
+  },
+  "summary": {
+    "en": "Sizes a PEM, alkaline or SOEC electrolysis plant from rated power: polarisation curve, hydrogen output, system kWh/kg and efficiency on LHV and HHV basis, stacks, heat, water and voltage degradation over stack life.",
+    "uk": "Розраховує електролізну установку PEM, лужну або SOEC за номінальною потужністю: поляризаційна крива, вихід водню, кВт·год/кг і ККД системи за НТЗ і ВТЗ, стеки, тепло, вода та деградація напруги за ресурс стека.",
+    "de": "Legt eine PEM-, alkalische oder SOEC-Elektrolyseanlage aus der Nennleistung aus: Polarisationskurve, Wasserstoffproduktion, System-kWh/kg und Wirkungsgrad auf Hu- und Ho-Basis, Stacks, Wärme, Wasser und Spannungsdegradation über die Stack-Lebensdauer.",
+    "nl": "Dimensioneert een PEM-, alkalische of SOEC-elektrolyse-installatie vanuit het nominaal vermogen: polarisatiecurve, waterstofproductie, systeem-kWh/kg en rendement op LHV- en HHV-basis, stacks, warmte, water en spanningsdegradatie over de stacklevensduur.",
+    "fr": "Dimensionne une installation d'électrolyse PEM, alcaline ou SOEC à partir de sa puissance nominale : courbe de polarisation, production d'hydrogène, kWh/kg et rendement système sur base PCI et PCS, empilements, chaleur, eau et dégradation de tension sur la vie des empilements.",
+    "es": "Dimensiona una planta de electrólisis PEM, alcalina o SOEC a partir de su potencia nominal: curva de polarización, producción de hidrógeno, kWh/kg y eficiencia del sistema en base PCI y PCS, stacks, calor, agua y degradación de tensión durante la vida del stack.",
+    "pl": "Dobiera instalację elektrolizy PEM, alkalicznej lub SOEC na podstawie mocy znamionowej: krzywa polaryzacji, produkcja wodoru, kWh/kg i sprawność systemu według Wd i Wg, stosy, ciepło, woda oraz degradacja napięcia w okresie eksploatacji stosu."
+  },
+  "description": {
+    "en": "The cell voltage is the sum of the reversible voltage (temperature correlation plus Nernst pressure term), a lumped activation overpotential and an ohmic loss from the area-specific resistance. Faraday's law converts the stack current into hydrogen; the system specific energy adds rectifier losses and balance-of-plant consumption, and the rated AC power then fixes production, current, cell and stack numbers, stack heat, water and oxygen. Voltage degradation gives end-of-life and life-averaged specific energy and the annual output for the full-load hours. The diagram shows the polarisation curve split into reversible, activation and ohmic parts with the operating point and the thermoneutral voltage.",
+    "uk": "Напруга комірки — сума оборотної напруги (температурна кореляція плюс член Нернста для тиску), узагальненої активаційної перенапруги та омічних втрат від питомого поверхневого опору. Закон Фарадея перетворює струм стека на водень; питома енергія системи додає втрати випрямляча й споживання допоміжного обладнання, після чого номінальна потужність визначає виробництво, струм, кількість комірок і стеків, тепло стека, воду й кисень. Деградація напруги дає питому енергію в кінці ресурсу й усереднену за ресурс, а також річний вихід за годинами повного навантаження. Діаграма показує поляризаційну криву з оборотною, активаційною та омічною складовими, робочу точку й термонейтральну напругу.",
+    "de": "Die Zellspannung ist die Summe aus reversibler Spannung (Temperaturkorrelation plus Nernst-Druckterm), einer zusammengefassten Aktivierungsüberspannung und dem ohmschen Verlust aus dem Flächenwiderstand. Das Faradaysche Gesetz wandelt den Stackstrom in Wasserstoff um; der spezifische Systemverbrauch ergänzt Gleichrichterverluste und Nebenanlagen, die Nenn-AC-Leistung legt dann Produktion, Strom, Zellen- und Stackanzahl, Stackwärme, Wasser und Sauerstoff fest. Die Spannungsdegradation liefert den spezifischen Verbrauch am Lebensdauerende und im Mittel sowie die Jahresproduktion für die Volllaststunden. Das Diagramm zeigt die Polarisationskurve mit reversiblem, Aktivierungs- und ohmschem Anteil, Betriebspunkt und thermoneutraler Spannung.",
+    "nl": "De celspanning is de som van de reversibele spanning (temperatuurcorrelatie plus Nernst-drukterm), een samengevoegde activeringsoverpotentiaal en het ohmse verlies uit de oppervlaktespecifieke weerstand. De wet van Faraday zet de stackstroom om in waterstof; het specifiek systeemverbruik telt gelijkrichterverliezen en balance-of-plant op, waarna het nominale AC-vermogen productie, stroom, aantal cellen en stacks, stackwarmte, water en zuurstof vastlegt. Spanningsdegradatie geeft het verbruik aan het einde en gemiddeld over de levensduur en de jaarproductie voor de vollasturen. Het diagram toont de polarisatiecurve met reversibel, activerings- en ohms deel, het werkpunt en de thermoneutrale spanning.",
+    "fr": "La tension de cellule est la somme de la tension réversible (corrélation en température plus terme de Nernst en pression), d'une surtension d'activation globale et de la perte ohmique issue de la résistance surfacique. La loi de Faraday convertit le courant en hydrogène ; la consommation spécifique du système ajoute les pertes du redresseur et des auxiliaires, puis la puissance AC nominale fixe la production, le courant, les nombres de cellules et d'empilements, la chaleur, l'eau et l'oxygène. La dégradation de tension donne la consommation spécifique en fin de vie et moyenne, et la production annuelle selon les heures pleine charge. Le diagramme montre la courbe de polarisation décomposée en parts réversible, d'activation et ohmique, avec le point de fonctionnement et la tension thermoneutre.",
+    "es": "La tensión de celda es la suma de la tensión reversible (correlación con la temperatura más término de Nernst de presión), un sobrepotencial de activación agrupado y la pérdida óhmica de la resistencia específica de área. La ley de Faraday convierte la corriente del stack en hidrógeno; el consumo específico del sistema añade las pérdidas del rectificador y de los auxiliares, y la potencia CA nominal fija entonces producción, corriente, número de celdas y stacks, calor del stack, agua y oxígeno. La degradación de tensión da el consumo específico al final de vida y promediado, y la producción anual según las horas a plena carga. El diagrama muestra la curva de polarización dividida en partes reversible, de activación y óhmica, con el punto de operación y la tensión termoneutra.",
+    "pl": "Napięcie ogniwa to suma napięcia odwracalnego (korelacja temperaturowa plus człon Nernsta dla ciśnienia), zagregowanego nadpotencjału aktywacyjnego i straty omowej z rezystancji powierzchniowej. Prawo Faradaya przelicza prąd stosu na wodór; zużycie właściwe systemu dodaje straty prostownika i urządzeń pomocniczych, a znamionowa moc AC wyznacza produkcję, prąd, liczbę ogniw i stosów, ciepło stosu, wodę i tlen. Degradacja napięcia daje zużycie właściwe na końcu i średnio w okresie eksploatacji oraz produkcję roczną dla godzin pełnego obciążenia. Wykres pokazuje krzywą polaryzacji z częścią odwracalną, aktywacyjną i omową, punkt pracy i napięcie termoneutralne."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Lumped single activation term and linear ohmic loss; no mass-transport limit, no part-load or dynamic operation, no stack temperature or pressure gradients. Default kinetic and resistance parameters are typical, not vendor data. Compression, water treatment reject, storage and costs are not included.",
+    "uk": "Одна узагальнена активаційна складова і лінійні омічні втрати; без обмеження масопереносу, часткового навантаження й динамічних режимів, без градієнтів температури й тиску в стеку. Типові кінетичні параметри й опір не є даними виробника. Стиснення, скиди водопідготовки, зберігання й витрати не враховано.",
+    "de": "Ein zusammengefasster Aktivierungsterm und linearer ohmscher Verlust; keine Stofftransportgrenze, kein Teillast- oder Dynamikbetrieb, keine Temperatur- oder Druckgradienten im Stack. Standardparameter für Kinetik und Widerstand sind typisch, keine Herstellerdaten. Verdichtung, Abwasser der Wasseraufbereitung, Speicherung und Kosten sind nicht enthalten.",
+    "nl": "Eén samengevoegde activeringsterm en lineair ohms verlies; geen massatransportgrens, geen deellast of dynamisch bedrijf, geen temperatuur- of drukgradiënten in de stack. Standaard kinetiek- en weerstandsparameters zijn typisch, geen leveranciersgegevens. Compressie, afvalwater van waterbehandeling, opslag en kosten zijn niet inbegrepen.",
+    "fr": "Un seul terme d'activation global et une perte ohmique linéaire ; pas de limite de transport de matière, ni charge partielle ni régime dynamique, ni gradients de température ou de pression dans l'empilement. Les paramètres cinétiques et de résistance par défaut sont typiques, pas des données fournisseur. Compression, rejets du traitement d'eau, stockage et coûts non inclus.",
+    "es": "Un único término de activación agrupado y pérdida óhmica lineal; sin límite de transporte de masa, sin carga parcial ni operación dinámica, sin gradientes de temperatura o presión en el stack. Los parámetros cinéticos y de resistencia por defecto son típicos, no datos del fabricante. No se incluyen compresión, rechazo del tratamiento de agua, almacenamiento ni costes.",
+    "pl": "Jeden zagregowany człon aktywacyjny i liniowa strata omowa; bez ograniczenia transportu masy, bez pracy przy obciążeniu częściowym i dynamicznej, bez gradientów temperatury i ciśnienia w stosie. Domyślne parametry kinetyczne i rezystancji są typowe, nie są danymi producenta. Sprężanie, odrzut z uzdatniania wody, magazynowanie i koszty nie są uwzględnione."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ogh-core.js",
+    "ogh-h2prod.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python implementation written from the published method (bench-src/ref/gen_electrolyser_sizing.py); benchmark driver bench-src/run_electrolyser_sizing.mjs. End-of-life curve on the diagram drawn as a resistance-like rise proportional to j."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "electrolyser_sizing-pyref",
+        "reference": "bench-src/ref/electrolyser_sizing_ref.json generated by bench-src/ref/gen_electrolyser_sizing.py, independent of the tool code",
+        "citations": [
+          "LeRoy, J. Electrochem. Soc. 127 (1980)",
+          "Ni, Leung, Leung, Int. J. Hydrogen Energy 32 (2007)",
+          "CoolProp 8"
+        ],
+        "cases": 16,
+        "passed": 16,
+        "tolerance": "relative 2e-3 per quantity; verdict string equal",
+        "run_at": "2026-10-23T14:58:54Z",
+        "artifact": "benchmarks/electrolyser_sizing.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "Use the reference script bench-src/ref/gen_electrolyser_sizing.py instead."
+  },
+  "handoff": {
+    "provides": [
+      "mdot",
+      "p",
+      "T"
+    ],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ogh-core.js?v=20c5dbb58770" defer></script>
+<script src="ogh-h2prod.js?v=cdd4c03d0ee7" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  function engine() {
+    return (window.OGH || {}).electrolyser_sizing || null;
+  }
+
+  var DEFAULTS = {"level":"simple","tech":"PEM","P_AC":20000000,"j":20000,"T":353.15,"p_c":3000000,"p_a":100000,"ASR":0.000012,"j0":5,"alpha":0.5,"eta_F":0.99,"eta_rect":0.97,"e_bop":3,"A_cell":0.1,"cells_stack":100,"FLH":5000,"deg_uV_h":2,"life_h":60000,"U_steam":0.7,"x_H2O_in":0.9};
+
+  function solve(s) {
+    var inp = {};
+    var k, e, r;
+    s = s || {};
+    for (k in s) {
+      if (Object.prototype.hasOwnProperty.call(s, k) && k !== 'level') {
+        inp[k] = s[k];
+      }
+    }
+    e = engine();
+    if (!e) return { ok: false, error: 'ogh-h2prod.js did not load' };
+    try {
+      r = e.solve(inp);
+      if (!r) throw new Error('no result returned');
+    } catch (err) {
+      return { ok: false, error: 'Invalid input: ' + (err && err.message ? err.message : String(err)) };
+    }
+    return r;
+  }
+
+  function sig(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (v === 0 || !isFinite(v)) return 2;
+    var d = n - 1 - Math.floor(Math.log(Math.abs(v)) / Math.LN10 + 1e-12);
+    if (d < 0) d = 0;
+    if (d > 8) d = 8;
+    return d;
+  }
+  function sigv(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (!isFinite(v)) return NaN;
+    if (v === 0) return 0;
+    n = Math.max(1, Math.min(21, Math.round(n)));
+    return Number(v.toPrecision(n));
+  }
+
+/* run 14 QA (by Claude): page-side translation of module warnings/errors and templated sentences */
+function TF(t, a) { var o = {}, k; for (k in t) o[k] = String(t[k]).replace(/\$(\d)/g, function (m, i) { return a[i - 1] != null ? String(a[i - 1]) : m; }); return o; }
+function TL(t) { return DiagramUI.t(t); }
+// r3 (Claude): numbers in translated warnings use the decimal comma in uk de nl fr es pl, the point in en (as on the h2use pages)
+function TFd(t, a) { var o = {}, k; for (k in t) o[k] = String(t[k]).replace(/\$(\d)/g, function (m, i) { var g = a[i - 1]; if (g == null) return m; g = String(g); return k === 'en' ? g : g.replace(/(\d)\.(\d)/g, '$1,$2'); }); return o; }
+function trW(w) { var i, m, L = WARN.concat(WARN_VALID, WARN_COMMON); w = String(w); for (i = 0; i < L.length; i++) { m = w.match(L[i][0]); if (m) return TFd(L[i][1], m.slice(1)); } return w; }
+var NORES = T('no valid result', 'немає коректного результату', 'kein gültiges Ergebnis', 'geen geldig resultaat', 'aucun résultat valide', 'sin resultado válido', 'brak poprawnego wyniku');
+var WARN_COMMON = [
+  [/^Invalid numeric value for (\S+)$/, T('Invalid numeric value for $1', 'Некоректне числове значення для $1', 'Ungültiger Zahlenwert für $1', 'Ongeldige numerieke waarde voor $1', 'Valeur numérique invalide pour $1', 'Valor numérico no válido para $1', 'Nieprawidłowa wartość liczbowa dla $1')],
+  [/^Invalid input: (.*)$/, T('Invalid input: $1', 'Некоректні вхідні дані: $1', 'Ungültige Eingabe: $1', 'Ongeldige invoer: $1', 'Entrée invalide : $1', 'Entrada no válida: $1', 'Nieprawidłowe dane wejściowe: $1')],
+  [/^EOS(?:\/calculation)? error: (.*)$/, T('Equation-of-state error: $1', 'Помилка рівняння стану: $1', 'Fehler der Zustandsgleichung: $1', 'Fout in de toestandsvergelijking: $1', 'Erreur de l\'équation d\'état : $1', 'Error de la ecuación de estado: $1', 'Błąd równania stanu: $1')],
+  [/^Unknown error$/, T('Unknown error', 'Невідома помилка', 'Unbekannter Fehler', 'Onbekende fout', 'Erreur inconnue', 'Error desconocido', 'Nieznany błąd')]
+];
+var WARN = [
+  [/^PEM current density outside/, T('PEM current density outside the usual 0.5-4 A/cm² range', 'Густина струму PEM поза звичайним діапазоном 0,5-4 А/см²', 'PEM-Stromdichte außerhalb des üblichen Bereichs 0,5-4 A/cm²', 'PEM-stroomdichtheid buiten het gebruikelijke bereik 0,5-4 A/cm²', 'Densité de courant PEM hors de la plage usuelle 0,5-4 A/cm²', 'Densidad de corriente PEM fuera del rango habitual 0,5-4 A/cm²', 'Gęstość prądu PEM poza typowym zakresem 0,5-4 A/cm²')],
+  [/^Alkaline current density outside/, T('Alkaline current density outside the usual 0.1-1 A/cm² range', 'Густина струму лужного електролізера поза звичайним діапазоном 0,1-1 А/см²', 'Alkalische Stromdichte außerhalb des üblichen Bereichs 0,1-1 A/cm²', 'Alkalische stroomdichtheid buiten het gebruikelijke bereik 0,1-1 A/cm²', 'Densité de courant alcaline hors de la plage usuelle 0,1-1 A/cm²', 'Densidad de corriente alcalina fuera del rango habitual 0,1-1 A/cm²', 'Gęstość prądu elektrolizera alkalicznego poza typowym zakresem 0,1-1 A/cm²')],
+  [/^SOEC cell voltage above 1\.5 V/, T('SOEC cell voltage above 1.5 V: risk of electrode delamination; lower j', 'Напруга комірки SOEC понад 1,5 В: ризик відшарування електродів; зменште j', 'SOEC-Zellspannung über 1,5 V: Gefahr der Elektrodendelamination; j senken', 'SOEC-celspanning boven 1,5 V: risico op delaminatie van de elektroden; verlaag j', 'Tension de cellule SOEC au-dessus de 1,5 V : risque de délaminage des électrodes ; réduisez j', 'Tensión de celda SOEC superior a 1,5 V: riesgo de delaminación de electrodos; reduzca j', 'Napięcie ogniwa SOEC powyżej 1,5 V: ryzyko delaminacji elektrod; obniż j')],
+  [/^Cell voltage above 2\.2 V/, T('Cell voltage above 2.2 V: high heat load and fast degradation', 'Напруга комірки понад 2,2 В: велике теплове навантаження і швидка деградація', 'Zellspannung über 2,2 V: hohe Wärmelast und schnelle Degradation', 'Celspanning boven 2,2 V: hoge warmtelast en snelle degradatie', 'Tension de cellule au-dessus de 2,2 V : forte charge thermique et dégradation rapide', 'Tensión de celda superior a 2,2 V: alta carga térmica y degradación rápida', 'Napięcie ogniwa powyżej 2,2 V: duże obciążenie cieplne i szybka degradacja')],
+  [/^Fewer than 2190 full-load hours/, T('Fewer than 2190 full-load hours per year: capital cost dominates the hydrogen cost', 'Менше 2190 годин повного навантаження на рік: капітальні витрати домінують у вартості водню', 'Weniger als 2190 Volllaststunden pro Jahr: die Investitionskosten dominieren die Wasserstoffkosten', 'Minder dan 2190 vollasturen per jaar: de investering domineert de waterstofkosten', 'Moins de 2190 heures pleine charge par an : le coût d\'investissement domine le coût de l\'hydrogène', 'Menos de 2190 horas equivalentes a plena carga al año: el coste de capital domina el coste del hidrógeno', 'Mniej niż 2190 godzin pełnego obciążenia rocznie: koszt inwestycji dominuje w koszcie wodoru')],
+  [/^Stack replacement within ([\d.]+) years$/, T('Stack replacement within $1 years', 'Заміна стека протягом $1 років', 'Stack-Austausch innerhalb von $1 Jahren', 'Stackvervanging binnen $1 jaar', 'Remplacement du stack sous $1 ans', 'Sustitución del stack en $1 años', 'Wymiana stosu w ciągu $1 lat')],
+  [/^tech must be PEM, AEL or SOEC$/, T('Technology must be PEM, AEL or SOEC', 'Технологія має бути PEM, AEL або SOEC', 'Technologie muss PEM, AEL oder SOEC sein', 'Technologie moet PEM, AEL of SOEC zijn', 'La technologie doit être PEM, AEL ou SOEC', 'La tecnología debe ser PEM, AEL o SOEC', 'Technologia musi być PEM, AEL lub SOEC')],
+  [/^Liquid-water electrolysis \(PEM, AEL\) needs T <= 373\.15 K$/, T('Liquid-water electrolysis (PEM, AEL) needs T ≤ 373.15 K', 'Електроліз рідкої води (PEM, AEL) потребує T ≤ 373,15 K', 'Flüssigwasser-Elektrolyse (PEM, AEL) erfordert T ≤ 373,15 K', 'Elektrolyse van vloeibaar water (PEM, AEL) vereist T ≤ 373,15 K', 'L\'électrolyse de l\'eau liquide (PEM, AEL) exige T ≤ 373,15 K', 'La electrólisis de agua líquida (PEM, AEL) requiere T ≤ 373,15 K', 'Elektroliza wody ciekłej (PEM, AEL) wymaga T ≤ 373,15 K')],
+  [/^SOEC needs T in 873\.15\.\.1173\.15 K$/, T('SOEC needs T in 873.15..1173.15 K', 'SOEC потребує T у межах 873,15..1173,15 K', 'SOEC erfordert T zwischen 873,15 und 1173,15 K', 'SOEC vereist T tussen 873,15 en 1173,15 K', 'La SOEC exige T entre 873,15 et 1173,15 K', 'SOEC requiere T entre 873,15 y 1173,15 K', 'SOEC wymaga T w zakresie 873,15..1173,15 K')]
+];
+var WARN_VALID = [
+  [/^emission factors must be >= 0$/, T('Emission factors must be ≥ 0', 'Коефіцієнти викидів мають бути ≥ 0', 'Emissionsfaktoren müssen ≥ 0 sein', 'Emissiefactoren moeten ≥ 0 zijn', 'Les facteurs d\'émission doivent être ≥ 0', 'Los factores de emisión deben ser ≥ 0', 'Wskaźniki emisji muszą być ≥ 0')],
+  [/^electricity inputs must be >= 0$/, T('Electricity inputs must be ≥ 0', 'Витрати електроенергії мають бути ≥ 0', 'Strombedarfswerte müssen ≥ 0 sein', 'Elektriciteitsinvoer moet ≥ 0 zijn', 'Les consommations électriques doivent être ≥ 0', 'Los consumos eléctricos deben ser ≥ 0', 'Zużycia energii elektrycznej muszą być ≥ 0')],
+  [/^type must be I, II, III or IV$/, T('Vessel type must be I, II, III or IV', 'Тип посудини має бути I, II, III або IV', 'Behältertyp muss I, II, III oder IV sein', 'Vattype moet I, II, III of IV zijn', 'Le type de réservoir doit être I, II, III ou IV', 'El tipo de recipiente debe ser I, II, III o IV', 'Typ zbiornika musi być I, II, III lub IV')],
+  [/^T_in must be >= 573\.15 K and below T_ref$/, T('T_in must be ≥ 573.15 K and below T_ref', 'T_in має бути ≥ 573,15 K і нижче T_ref', 'T_in muss ≥ 573,15 K und unter T_ref sein', 'T_in moet ≥ 573,15 K en onder T_ref zijn', 'T_in doit être ≥ 573,15 K et inférieure à T_ref', 'T_in debe ser ≥ 573,15 K e inferior a T_ref', 'T_in musi być ≥ 573,15 K i poniżej T_ref')],
+  [/^mdot, T_in and T_ic must be > 0$/, T('mdot, T_in and T_ic must be > 0', 'mdot, T_in і T_ic мають бути > 0', 'mdot, T_in und T_ic müssen > 0 sein', 'mdot, T_in en T_ic moeten > 0 zijn', 'mdot, T_in et T_ic doivent être > 0', 'mdot, T_in y T_ic deben ser > 0', 'mdot, T_in i T_ic muszą być > 0')],
+  [/^p_c and p_a must be > 0$/, T('p_c and p_a must be > 0', 'p_c і p_a мають бути > 0', 'p_c und p_a müssen > 0 sein', 'p_c en p_a moeten > 0 zijn', 'p_c et p_a doivent être > 0', 'p_c y p_a deben ser > 0', 'p_c i p_a muszą być > 0')],
+  [/^Require p_max > p_min >= 0$/, T('Required: p_max > p_min ≥ 0', 'Потрібно: p_max > p_min ≥ 0', 'Erforderlich: p_max > p_min ≥ 0', 'Vereist: p_max > p_min ≥ 0', 'Condition requise : p_max > p_min ≥ 0', 'Se requiere: p_max > p_min ≥ 0', 'Wymagane: p_max > p_min ≥ 0')],
+  [/^(\S+) must be an integer between (\d+) and (\d+)$/, T('$1 must be an integer between $2 and $3', '$1 має бути цілим числом від $2 до $3', '$1 muss eine ganze Zahl zwischen $2 und $3 sein', '$1 moet een geheel getal tussen $2 en $3 zijn', '$1 doit être un entier entre $2 et $3', '$1 debe ser un entero entre $2 y $3', '$1 musi być liczbą całkowitą od $2 do $3')],
+  [/^(\S+) must be a positive integer$/, T('$1 must be a positive integer', '$1 має бути додатним цілим числом', '$1 muss eine positive ganze Zahl sein', '$1 moet een positief geheel getal zijn', '$1 doit être un entier positif', '$1 debe ser un entero positivo', '$1 musi być dodatnią liczbą całkowitą')],
+  [/^(\S+) must be greater than (\S+)$/, T('$1 must be greater than $2', '$1 має бути більшим за $2', '$1 muss größer als $2 sein', '$1 moet groter zijn dan $2', '$1 doit être supérieur à $2', '$1 debe ser mayor que $2', '$1 musi być większe niż $2')],
+  [/^(\S+) must be above (.+)$/, T('$1 must be above $2', '$1 має бути вище $2', '$1 muss über $2 liegen', '$1 moet boven $2 liggen', '$1 doit être supérieur à $2', '$1 debe ser superior a $2', '$1 musi być powyżej $2')],
+  [/^(\S+) must be (?:in|within) (.+)$/, T('$1 must be in $2', '$1 має бути в межах $2', '$1 muss im Bereich $2 liegen', '$1 moet binnen $2 liggen', '$1 doit être dans $2', '$1 debe estar en $2', '$1 musi mieścić się w $2')],
+  [/^(\S+) must be > (.+)$/, T('$1 must be > $2', '$1 має бути > $2', '$1 muss > $2 sein', '$1 moet > $2 zijn', '$1 doit être > $2', '$1 debe ser > $2', '$1 musi być > $2')],
+  [/^(\S+) must be >= (.+)$/, T('$1 must be ≥ $2', '$1 має бути ≥ $2', '$1 muss ≥ $2 sein', '$1 moet ≥ $2 zijn', '$1 doit être ≥ $2', '$1 debe ser ≥ $2', '$1 musi być ≥ $2')],
+  [/^(\S+) must be <= (.+)$/, T('$1 must be ≤ $2', '$1 має бути ≤ $2', '$1 muss ≤ $2 sein', '$1 moet ≤ $2 zijn', '$1 doit être ≤ $2', '$1 debe ser ≤ $2', '$1 musi być ≤ $2')]
+];
+
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  var stage = null;
+  function LEGEND_ITEMS() {
+    return [
+      { label: T('Cell voltage, beginning of life', 'Напруга комірки, початок ресурсу', 'Zellspannung, Lebensdauerbeginn', 'Celspanning, begin levensduur', 'Tension de cellule, début de vie', 'Tensión de celda, inicio de vida', 'Napięcie ogniwa, początek eksploatacji'), series: 0 },
+      { label: T('Cell voltage, end of stack life', 'Напруга комірки, кінець ресурсу', 'Zellspannung, Lebensdauerende', 'Celspanning, einde levensduur', 'Tension de cellule, fin de vie', 'Tensión de celda, fin de vida', 'Napięcie ogniwa, koniec eksploatacji'), series: 3, dash: true },
+      { label: T('Reversible + activation', 'Оборотна + активаційна', 'Reversibel + Aktivierung', 'Reversibel + activering', 'Réversible + activation', 'Reversible + activación', 'Odwracalne + aktywacja'), series: 1, dash: true },
+      { label: T('Reversible voltage E_rev', 'Оборотна напруга E_rev', 'Reversible Spannung E_rev', 'Reversibele spanning E_rev', 'Tension réversible E_rev', 'Tensión reversible E_rev', 'Napięcie odwracalne E_rev'), series: 2, dash: true }
+    ];
+  }
+  function adoptStage(app) {
+    stage = app.stages[0] || null;
+    if (stage) stage.legend({ items: LEGEND_ITEMS() });
+  }
+
+  var ui = null;
+
+  function computeView(s){
+    last = solve(s); if (stage) stage.schedule();
+    var r = last, e;
+    if (!r || !r.ok) { e = (r && r.error) || 'Unknown error'; return { verdict: { tone: 'bad', text: trW(e) }, tiles: [], notes: [] }; }
+    function fin(v){ return typeof v === 'number' && isFinite(v); }
+    var tiles = [], notes = [], meters = [], tables = [], i, w, full = s.level === 'full';
+    function add(label, v, unit, learn, head, tone){ if (!fin(v)) return; var isInt = unit === '-' && v === Math.round(v) && Math.abs(v) >= 1; tiles.push({ label: label, value: isInt ? v : sigv(v, 4), hint: unit, precision: isInt ? 0 : sig(v, 4), tone: tone || null, learn: learn, headline: !!head }); }
+    function rd(v, n){ var k = Math.pow(10, n); return fin(v) ? Math.round(v * k) / k : null; }
+    var kg = DiagramUI.fmt(r.mdot_kg_h, { precision: 0 }), sec = DiagramUI.fmt(r.e_sys_kWh_kg, { precision: 1 });
+    var text = T(kg + ' kg/h of hydrogen at ' + sec + ' kWh/kg (system, beginning of life)',
+      kg + ' кг/год водню при ' + sec + ' кВт·год/кг (система, початок ресурсу)',
+      kg + ' kg/h Wasserstoff bei ' + sec + ' kWh/kg (System, Lebensdauerbeginn)',
+      kg + ' kg/h waterstof bij ' + sec + ' kWh/kg (systeem, begin levensduur)',
+      kg + ' kg/h d\'hydrogène à ' + sec + ' kWh/kg (système, début de vie)',
+      kg + ' kg/h de hidrógeno a ' + sec + ' kWh/kg (sistema, inicio de vida)',
+      kg + ' kg/h wodoru przy ' + sec + ' kWh/kg (system, początek eksploatacji)');
+    add(T('ṁ_H2 · hydrogen production', 'ṁ_H2 · виробництво водню', 'ṁ_H2 · Wasserstoffproduktion', 'ṁ_H2 · waterstofproductie', 'ṁ_H2 · production d\'hydrogène', 'ṁ_H2 · producción de hidrógeno', 'ṁ_H2 · produkcja wodoru'), r.mdot_kg_h, 'kg/h', 'faraday', true);
+    add(T('SEC · system specific energy', 'SEC · питома енергія системи', 'SEC · spezifischer Systemverbrauch', 'SEC · specifiek systeemverbruik', 'SEC · consommation spécifique système', 'SEC · consumo específico del sistema', 'SEC · zużycie właściwe systemu'), r.e_sys_kWh_kg, 'kWh/kg', 'system', true);
+    add(T('η_sys · system efficiency, LHV', 'η_sys · ККД системи, НТЗ', 'η_sys · Systemwirkungsgrad, Hu', 'η_sys · systeemrendement, LHV', 'η_sys · rendement système, PCI', 'η_sys · eficiencia del sistema, PCI', 'η_sys · sprawność systemu, Wd'), r.eta_sys_LHV * 100, '%', 'efficiency');
+    add(T('V_cell · cell voltage (BOL)', 'V_cell · напруга комірки (початок)', 'V_cell · Zellspannung (BOL)', 'V_cell · celspanning (BOL)', 'V_cell · tension de cellule (début)', 'V_cell · tensión de celda (inicio)', 'V_cell · napięcie ogniwa (początek)'), r.V_cell, 'V', 'polarisation');
+    add(T('Annual production', 'Річне виробництво', 'Jahresproduktion', 'Jaarproductie', 'Production annuelle', 'Producción anual', 'Produkcja roczna'), r.m_year_t, 't/y', 'annual');
+    add(T('N_stacks · number of stacks', 'N_stacks · кількість стеків', 'N_stacks · Anzahl Stacks', 'N_stacks · aantal stacks', 'N_stacks · nombre d\'empilements', 'N_stacks · número de stacks', 'N_stacks · liczba stosów'), r.N_stacks, '-', 'stack');
+    if (full) {
+      add(T('E_rev · reversible voltage', 'E_rev · оборотна напруга', 'E_rev · reversible Spannung', 'E_rev · reversibele spanning', 'E_rev · tension réversible', 'E_rev · tensión reversible', 'E_rev · napięcie odwracalne'), r.E_rev, 'V', 'reversible');
+      add(T('η_act · activation overpotential', 'η_act · активаційна перенапруга', 'η_act · Aktivierungsüberspannung', 'η_act · activeringsoverpotentiaal', 'η_act · surtension d\'activation', 'η_act · sobrepotencial de activación', 'η_act · nadpotencjał aktywacyjny'), r.eta_act, 'V', 'polarisation');
+      add(T('η_ohm · ohmic loss', 'η_ohm · омічні втрати', 'η_ohm · ohmscher Verlust', 'η_ohm · ohms verlies', 'η_ohm · perte ohmique', 'η_ohm · pérdida óhmica', 'η_ohm · strata omowa'), r.eta_ohm, 'V', 'polarisation');
+      add(T('V_EOL · cell voltage at end of stack life', 'V_EOL · напруга комірки в кінці ресурсу', 'V_EOL · Zellspannung am Lebensdauerende', 'V_EOL · celspanning aan einde levensduur', 'V_EOL · tension en fin de vie', 'V_EOL · tensión al final de vida', 'V_EOL · napięcie na końcu eksploatacji'), r.V_eol, 'V', 'degradation');
+      add(T('SEC averaged over stack life', 'SEC, усереднена за ресурс стека', 'SEC gemittelt über Stack-Lebensdauer', 'SEC gemiddeld over stacklevensduur', 'SEC moyenne sur la vie de l\'empilement', 'SEC promedio durante la vida del stack', 'SEC uśrednione w okresie eksploatacji'), r.e_sys_avg_kWh_kg, 'kWh/kg', 'degradation');
+      add(T('Q_stack · stack heat (+ to remove)', 'Q_stack · тепло стека (+ відводити)', 'Q_stack · Stackwärme (+ abzuführen)', 'Q_stack · stackwarmte (+ af te voeren)', 'Q_stack · chaleur de l\'empilement (+ à évacuer)', 'Q_stack · calor del stack (+ a evacuar)', 'Q_stack · ciepło stosu (+ do odprowadzenia)'), r.Q_stack / 1e6, 'MW', 'heat');
+      add(T('Water feed (stoichiometric)', 'Подача води (стехіометрична)', 'Wasserbedarf (stöchiometrisch)', 'Watervoeding (stoichiometrisch)', 'Eau d\'alimentation (stœchiométrique)', 'Agua de alimentación (estequiométrica)', 'Woda zasilająca (stechiometryczna)'), r.water_kg_h, 'kg/h', 'water');
+      add(T('N_cells · number of cells', 'N_cells · кількість комірок', 'N_cells · Anzahl Zellen', 'N_cells · aantal cellen', 'N_cells · nombre de cellules', 'N_cells · número de celdas', 'N_cells · liczba ogniw'), r.N_cells, '-', 'stack');
+      if (r.tech === 'SOEC') add(T('Steam raising heat (external)', 'Тепло на пароутворення (зовнішнє)', 'Wärme zur Dampferzeugung (extern)', 'Warmte voor stoomopwekking (extern)', 'Chaleur de production de vapeur (externe)', 'Calor de generación de vapor (externo)', 'Ciepło wytwarzania pary (zewnętrzne)'), r.e_steam_th_kWh_kg, 'kWh/kg', 'heat');
+    }
+    meters.push({ label: T('Thermoneutral / cell voltage', 'Термонейтральна / напруга комірки', 'Thermoneutrale / Zellspannung', 'Thermoneutrale / celspanning', 'Thermoneutre / tension de cellule', 'Termoneutra / tensión de celda', 'Termoneutralne / napięcie ogniwa'), ratio: Math.max(0, Math.min(1, r.eta_V_tn)), text: DiagramUI.fmt(r.eta_V_tn * 100, { precision: 1 }) + ' %', tone: r.eta_V_tn < 0.65 ? 'warn' : 'ok' });
+    if (full) {
+      tables.push({ title: T('Specific energy breakdown, kWh/kg H₂', 'Структура питомої енергії, кВт·год/кг H₂', 'Aufteilung spezifische Energie, kWh/kg H₂', 'Opbouw specifieke energie, kWh/kg H₂', 'Décomposition de l\'énergie spécifique, kWh/kg H₂', 'Desglose de energía específica, kWh/kg H₂', 'Struktura energii właściwej, kWh/kg H₂'),
+        head: [T('Item', 'Складова', 'Posten', 'Post', 'Poste', 'Partida', 'Pozycja'), T('BOL', 'Початок', 'BOL', 'BOL', 'Début', 'Inicio', 'Początek'), T('EOL', 'Кінець', 'EOL', 'EOL', 'Fin', 'Fin', 'Koniec')],
+        rows: [
+          [T('Stack (DC)', 'Стек (пост. струм)', 'Stack (DC)', 'Stack (DC)', 'Empilement (CC)', 'Stack (CC)', 'Stos (DC)'), rd(r.e_dc_kWh_kg, 2), rd((r.e_sys_eol_kWh_kg - state.e_bop) * state.eta_rect, 2)],
+          [T('Rectifier loss', 'Втрати випрямляча', 'Gleichrichterverlust', 'Gelijkrichterverlies', 'Pertes redresseur', 'Pérdidas del rectificador', 'Straty prostownika'), rd(r.breakdown.rectifier_loss_kWh_kg, 2), rd((r.e_sys_eol_kWh_kg - state.e_bop) * (1 - state.eta_rect), 2)],
+          [T('Balance of plant', 'Допоміжне обладнання', 'Nebenanlagen', 'Balance-of-plant', 'Auxiliaires', 'Equipos auxiliares', 'Urządzenia pomocnicze'), rd(state.e_bop, 2), rd(state.e_bop, 2)],
+          [T('System total', 'Система разом', 'System gesamt', 'Systeem totaal', 'Total système', 'Total del sistema', 'System razem'), rd(r.e_sys_kWh_kg, 2), rd(r.e_sys_eol_kWh_kg, 2)]
+        ] });
+    }
+    notes.push(T('Energy basis: ' + r.basis, 'Енергетична основа: НТЗ 119,96 МДж/кг, ВТЗ 141,79 МДж/кг (25 °C)', 'Energiebasis: Hu 119,96 MJ/kg, Ho 141,79 MJ/kg (25 °C)', 'Energiebasis: LHV 119,96 MJ/kg, HHV 141,79 MJ/kg (25 °C)', 'Base énergétique : PCI 119,96 MJ/kg, PCS 141,79 MJ/kg (25 °C)', 'Base energética: PCI 119,96 MJ/kg, PCS 141,79 MJ/kg (25 °C)', 'Podstawa energetyczna: Wd 119,96 MJ/kg, Wg 141,79 MJ/kg (25 °C)'));
+    if (r.warnings && r.warnings.length) { for (i = 0; i < r.warnings.length; i++) { w = r.warnings[i]; notes.push(trW(w)); } }
+    return { verdict: { tone: r.verdict === 'ok' ? 'ok' : 'warn', text: text }, tiles: tiles, meters: meters, tables: tables, notes: notes };
+  }
+
+  function onChange(key, value, app) {
+    // switching technology loads its typical cell and stack parameters (ogh-h2prod.js ELEC_TECH)
+    var e = engine(), t, k;
+    if (key !== 'tech' || !e || !e.tech || !e.tech[value]) return;
+    t = e.tech[value];
+    for (k in t) if (Object.prototype.hasOwnProperty.call(t, k) && k !== 'steam' && Object.prototype.hasOwnProperty.call(state, k)) state[k] = t[k];
+    if (value === 'SOEC') { state.A_cell = 0.01; state.cells_stack = 100; }
+    else if (value === 'AEL') { state.A_cell = 2.5; state.cells_stack = 300; }
+    else { state.A_cell = 0.1; state.cells_stack = 100; }
+    app.sync();
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'Electrolyser Sizing';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record '
+                  + 'and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'electrolyser_sizing',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      learn: {
+        version: 1,
+        intro: {
+          title: T('Electrolyser sizing', 'Розрахунок електролізера', 'Elektrolyseur-Auslegung', 'Dimensionering van een elektrolyser', 'Dimensionnement d\'électrolyseur', 'Dimensionamiento de electrolizador', 'Dobór elektrolizera'),
+          body: T(
+            'Sizes a PEM, alkaline or solid-oxide electrolysis plant from its rated power: cell voltage from a polarisation curve, hydrogen output by Faraday\'s law, system specific energy with rectifier and balance-of-plant losses, stack count, heat, water and the effect of voltage degradation over the stack life. Efficiencies are given on the LHV basis (HHV in the record), the method follows NREL H2A and IEA Global Hydrogen Review 2024 conventions.',
+            'Розраховує установку PEM, лужного або твердооксидного електролізу за номінальною потужністю: напруга комірки з поляризаційної кривої, вихід водню за законом Фарадея, питома енергія системи з втратами випрямляча й допоміжного обладнання, кількість стеків, тепло, вода та вплив деградації напруги за ресурс стека. ККД наведено за НТЗ (ВТЗ — у записі розрахунку), метод відповідає підходам NREL H2A та IEA Global Hydrogen Review 2024.',
+            'Legt eine PEM-, alkalische oder Festoxid-Elektrolyseanlage aus ihrer Nennleistung aus: Zellspannung aus einer Polarisationskurve, Wasserstoffproduktion nach dem Faradayschen Gesetz, spezifischer Systemverbrauch mit Gleichrichter- und Nebenanlagenverlusten, Stackanzahl, Wärme, Wasser und der Einfluss der Spannungsdegradation über die Stack-Lebensdauer. Wirkungsgrade auf Heizwertbasis (Brennwert im Rechenprotokoll), Vorgehen nach NREL H2A und IEA Global Hydrogen Review 2024.',
+            'Dimensioneert een PEM-, alkalische of vaste-oxide-elektrolyse-installatie vanuit het nominaal vermogen: celspanning uit een polarisatiecurve, waterstofproductie volgens de wet van Faraday, specifiek systeemverbruik met gelijkrichter- en balance-of-plantverliezen, aantal stacks, warmte, water en het effect van spanningsdegradatie over de stacklevensduur. Rendementen op LHV-basis (HHV in het rekenverslag), methode volgens NREL H2A en IEA Global Hydrogen Review 2024.',
+            'Dimensionne une installation d\'électrolyse PEM, alcaline ou à oxyde solide à partir de sa puissance nominale : tension de cellule issue d\'une courbe de polarisation, production d\'hydrogène par la loi de Faraday, consommation spécifique du système avec pertes du redresseur et des auxiliaires, nombre d\'empilements, chaleur, eau et effet de la dégradation de tension sur la vie de l\'empilement. Rendements sur base PCI (PCS dans la note de calcul), méthode selon NREL H2A et l\'IEA Global Hydrogen Review 2024.',
+            'Dimensiona una planta de electrólisis PEM, alcalina o de óxido sólido a partir de su potencia nominal: tensión de celda a partir de una curva de polarización, producción de hidrógeno por la ley de Faraday, consumo específico del sistema con pérdidas del rectificador y de los auxiliares, número de stacks, calor, agua y el efecto de la degradación de tensión durante la vida del stack. Eficiencias en base PCI (PCS en el registro de cálculo), método según NREL H2A e IEA Global Hydrogen Review 2024.',
+            'Dobiera instalację elektrolizy PEM, alkalicznej lub tlenkowej na podstawie mocy znamionowej: napięcie ogniwa z krzywej polaryzacji, produkcja wodoru z prawa Faradaya, zużycie właściwe systemu ze stratami prostownika i urządzeń pomocniczych, liczba stosów, ciepło, woda oraz wpływ degradacji napięcia w okresie eksploatacji stosu. Sprawności na bazie wartości opałowej (ciepło spalania w zapisie obliczeń), metoda zgodna z NREL H2A i IEA Global Hydrogen Review 2024.'
+          )
+        },
+        topics: {
+          tech: {
+            title: T('PEM, alkaline and solid oxide', 'PEM, лужний і твердооксидний', 'PEM, alkalisch und Festoxid', 'PEM, alkalisch en vaste oxide', 'PEM, alcalin et oxyde solide', 'PEM, alcalino y óxido sólido', 'PEM, alkaliczny i tlenkowy'),
+            body: T(
+              'Alkaline cells (KOH electrolyte, nickel electrodes) run at 0.2-0.6 A/cm² and are the cheapest per MW; PEM cells (Nafion membrane, iridium anode) reach 1-3 A/cm², deliver pressurised hydrogen and follow fast load changes; solid-oxide cells split steam at 700-850 °C and need less electricity per kg because heat supplies part of the energy. Choosing a technology loads its typical parameters.',
+              'Лужні комірки (електроліт KOH, нікелеві електроди) працюють при 0,2-0,6 A/см² і найдешевші за МВт; комірки PEM (мембрана Nafion, іридієвий анод) досягають 1-3 A/см², дають водень під тиском і швидко відстежують зміну навантаження; твердооксидні комірки розкладають пару при 700-850 °C і споживають менше електроенергії на кг, бо частину енергії дає тепло. Вибір технології завантажує її типові параметри.',
+              'Alkalische Zellen (KOH-Elektrolyt, Nickelelektroden) laufen bei 0,2-0,6 A/cm² und sind je MW am günstigsten; PEM-Zellen (Nafion-Membran, Iridiumanode) erreichen 1-3 A/cm², liefern Wasserstoff unter Druck und folgen schnellen Lastwechseln; Festoxidzellen spalten Dampf bei 700-850 °C und brauchen weniger Strom je kg, weil Wärme einen Teil der Energie liefert. Die Wahl der Technologie lädt deren typische Parameter.',
+              'Alkalische cellen (KOH-elektrolyt, nikkelelektroden) werken bij 0,2-0,6 A/cm² en zijn per MW het goedkoopst; PEM-cellen (Nafion-membraan, iridiumanode) halen 1-3 A/cm², leveren waterstof onder druk en volgen snelle lastwisselingen; vaste-oxidecellen splitsen stoom bij 700-850 °C en vragen minder elektriciteit per kg omdat warmte een deel van de energie levert. De keuze van technologie laadt haar typische parameters.',
+              'Les cellules alcalines (électrolyte KOH, électrodes nickel) fonctionnent à 0,2-0,6 A/cm² et sont les moins chères par MW ; les cellules PEM (membrane Nafion, anode iridium) atteignent 1-3 A/cm², livrent de l\'hydrogène sous pression et suivent des variations rapides ; les cellules à oxyde solide dissocient la vapeur à 700-850 °C et consomment moins d\'électricité par kg car la chaleur fournit une part de l\'énergie. Le choix de la technologie charge ses paramètres typiques.',
+              'Las celdas alcalinas (electrolito KOH, electrodos de níquel) operan a 0,2-0,6 A/cm² y son las más baratas por MW; las PEM (membrana Nafion, ánodo de iridio) alcanzan 1-3 A/cm², entregan hidrógeno a presión y siguen cambios rápidos de carga; las de óxido sólido disocian vapor a 700-850 °C y requieren menos electricidad por kg porque el calor aporta parte de la energía. Elegir la tecnología carga sus parámetros típicos.',
+              'Ogniwa alkaliczne (elektrolit KOH, elektrody niklowe) pracują przy 0,2-0,6 A/cm² i są najtańsze na MW; ogniwa PEM (membrana Nafion, anoda irydowa) osiągają 1-3 A/cm², dają wodór pod ciśnieniem i nadążają za szybkimi zmianami obciążenia; ogniwa tlenkowe rozkładają parę w 700-850 °C i zużywają mniej energii elektrycznej na kg, bo część energii dostarcza ciepło. Wybór technologii wczytuje jej typowe parametry.'
+            )
+          },
+          reversible: {
+            title: T('Reversible voltage', 'Оборотна напруга', 'Reversible Spannung', 'Reversibele spanning', 'Tension réversible', 'Tensión reversible', 'Napięcie odwracalne'),
+            body: T(
+              'E_rev is the thermodynamic minimum: 1.229 V for liquid water at 25 °C, falling about 0.9 mV/K, and about 0.99 V for steam at 750 °C (Ni et al. 2007). The Nernst term adds (RT/2F)·ln(p_H2·p_O2^0.5/a_H2O): 30 bar hydrogen costs only about 50 mV, which is why pressurised electrolysis saves compressor work.',
+              'E_rev — термодинамічний мінімум: 1,229 В для рідкої води при 25 °C зі зменшенням приблизно на 0,9 мВ/К і близько 0,99 В для пари при 750 °C (Ni et al. 2007). Член Нернста додає (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O): 30 бар водню коштують лише близько 50 мВ, тому електроліз під тиском економить роботу компресора.',
+              'E_rev ist das thermodynamische Minimum: 1,229 V für flüssiges Wasser bei 25 °C, sinkend um etwa 0,9 mV/K, und etwa 0,99 V für Dampf bei 750 °C (Ni et al. 2007). Der Nernst-Term addiert (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O): 30 bar Wasserstoff kosten nur etwa 50 mV, deshalb spart Druckelektrolyse Verdichterarbeit.',
+              'E_rev is het thermodynamisch minimum: 1,229 V voor vloeibaar water bij 25 °C, dalend met circa 0,9 mV/K, en circa 0,99 V voor stoom bij 750 °C (Ni et al. 2007). De Nernst-term telt (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O) op: 30 bar waterstof kost slechts circa 50 mV, daarom bespaart drukelektrolyse compressorarbeid.',
+              'E_rev est le minimum thermodynamique : 1,229 V pour l\'eau liquide à 25 °C, en baisse d\'environ 0,9 mV/K, et environ 0,99 V pour la vapeur à 750 °C (Ni et al. 2007). Le terme de Nernst ajoute (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O) : 30 bar d\'hydrogène ne coûtent qu\'environ 50 mV, d\'où l\'intérêt de l\'électrolyse sous pression pour la compression.',
+              'E_rev es el mínimo termodinámico: 1,229 V para agua líquida a 25 °C, bajando unos 0,9 mV/K, y unos 0,99 V para vapor a 750 °C (Ni et al. 2007). El término de Nernst añade (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O): 30 bar de hidrógeno cuestan solo unos 50 mV, por eso la electrólisis presurizada ahorra trabajo de compresión.',
+              'E_rev to minimum termodynamiczne: 1,229 V dla ciekłej wody w 25 °C, malejące o ok. 0,9 mV/K, oraz ok. 0,99 V dla pary w 750 °C (Ni i in. 2007). Człon Nernsta dodaje (RT/2F)·ln(p_H2·p_O2^0,5/a_H2O): 30 bar wodoru kosztuje tylko ok. 50 mV, dlatego elektroliza ciśnieniowa oszczędza pracę sprężarki.'
+            )
+          },
+          polarisation: {
+            title: T('Polarisation curve', 'Поляризаційна крива', 'Polarisationskurve', 'Polarisatiecurve', 'Courbe de polarisation', 'Curva de polarización', 'Krzywa polaryzacji'),
+            body: T(
+              'Cell voltage V = E_rev + η_act + η_ohm. Activation η_act = (RT/αF)·asinh(j/2j0) rises steeply at low current and then slowly (Tafel); ohmic loss η_ohm = ASR·j grows linearly and dominates at high current density. A higher j means fewer, cheaper stacks but more kWh per kg - the central design trade-off.',
+              'Напруга комірки V = E_rev + η_act + η_ohm. Активаційна η_act = (RT/αF)·asinh(j/2j0) різко зростає при малому струмі, далі повільно (Тафель); омічні втрати η_ohm = ASR·j зростають лінійно й переважають за великої густини струму. Більша j означає менше дешевших стеків, але більше кВт·год на кг — головний компроміс проєктування.',
+              'Zellspannung V = E_rev + η_act + η_ohm. Die Aktivierung η_act = (RT/αF)·asinh(j/2j0) steigt bei kleinem Strom steil und dann langsam (Tafel); der ohmsche Verlust η_ohm = ASR·j wächst linear und dominiert bei hoher Stromdichte. Höheres j bedeutet weniger, günstigere Stacks, aber mehr kWh je kg - der zentrale Auslegungskompromiss.',
+              'Celspanning V = E_rev + η_act + η_ohm. Activering η_act = (RT/αF)·asinh(j/2j0) stijgt steil bij lage stroom en daarna langzaam (Tafel); ohms verlies η_ohm = ASR·j groeit lineair en domineert bij hoge stroomdichtheid. Hogere j betekent minder, goedkopere stacks maar meer kWh per kg - de centrale ontwerpafweging.',
+              'Tension de cellule V = E_rev + η_act + η_ohm. L\'activation η_act = (RT/αF)·asinh(j/2j0) croît fortement à faible courant puis lentement (Tafel) ; la perte ohmique η_ohm = ASR·j croît linéairement et domine à forte densité de courant. Un j plus élevé signifie moins d\'empilements, moins chers, mais plus de kWh par kg : le compromis central de conception.',
+              'Tensión de celda V = E_rev + η_act + η_ohm. La activación η_act = (RT/αF)·asinh(j/2j0) crece rápidamente a baja corriente y luego despacio (Tafel); la pérdida óhmica η_ohm = ASR·j crece linealmente y domina a alta densidad de corriente. Un j mayor implica menos stacks y más baratos, pero más kWh por kg: el compromiso central del diseño.',
+              'Napięcie ogniwa V = E_rev + η_act + η_ohm. Nadpotencjał aktywacyjny η_act = (RT/αF)·asinh(j/2j0) rośnie stromo przy małym prądzie, potem wolno (Tafel); strata omowa η_ohm = ASR·j rośnie liniowo i dominuje przy dużej gęstości prądu. Większe j to mniej tańszych stosów, ale więcej kWh na kg - główny kompromis projektowy.'
+            )
+          },
+          faraday: {
+            title: T('Faraday\'s law', 'Закон Фарадея', 'Faradaysches Gesetz', 'Wet van Faraday', 'Loi de Faraday', 'Ley de Faraday', 'Prawo Faradaya'),
+            body: T(
+              'Each H₂ molecule needs two electrons: ṁ = η_F·I·M_H2/(2F), i.e. 26.6 kAh per kg. The Faradaic efficiency η_F (0.98-0.995) covers gas crossover and stray currents; the stack DC energy is therefore 2F·V/(η_F·M_H2), about 26.6 kWh/kg per volt of cell voltage.',
+              'Кожна молекула H₂ потребує двох електронів: ṁ = η_F·I·M_H2/(2F), тобто 26,6 кА·год на кг. Фарадеївська ефективність η_F (0,98-0,995) враховує перетікання газу та струми витоку; тому енергія стека постійного струму 2F·V/(η_F·M_H2), приблизно 26,6 кВт·год/кг на кожен вольт напруги комірки.',
+              'Jedes H₂-Molekül braucht zwei Elektronen: ṁ = η_F·I·M_H2/(2F), also 26,6 kAh je kg. Der Faraday-Wirkungsgrad η_F (0,98-0,995) erfasst Gas-Crossover und Streuströme; die DC-Stackenergie ist daher 2F·V/(η_F·M_H2), etwa 26,6 kWh/kg je Volt Zellspannung.',
+              'Elke H₂-molecule vraagt twee elektronen: ṁ = η_F·I·M_H2/(2F), dus 26,6 kAh per kg. Het Faraday-rendement η_F (0,98-0,995) dekt gascrossover en lekstromen; de DC-stackenergie is daarom 2F·V/(η_F·M_H2), circa 26,6 kWh/kg per volt celspanning.',
+              'Chaque molécule de H₂ demande deux électrons : ṁ = η_F·I·M_H2/(2F), soit 26,6 kAh par kg. Le rendement faradique η_F (0,98-0,995) couvre la perméation de gaz et les courants de fuite ; l\'énergie CC de l\'empilement vaut donc 2F·V/(η_F·M_H2), environ 26,6 kWh/kg par volt de tension de cellule.',
+              'Cada molécula de H₂ requiere dos electrones: ṁ = η_F·I·M_H2/(2F), es decir 26,6 kAh por kg. La eficiencia faradaica η_F (0,98-0,995) cubre el cruce de gases y las corrientes parásitas; la energía CC del stack es por tanto 2F·V/(η_F·M_H2), unos 26,6 kWh/kg por voltio de tensión de celda.',
+              'Każda cząsteczka H₂ wymaga dwóch elektronów: ṁ = η_F·I·M_H2/(2F), czyli 26,6 kAh na kg. Sprawność faradajowska η_F (0,98-0,995) obejmuje przenikanie gazu i prądy błądzące; energia DC stosu to więc 2F·V/(η_F·M_H2), ok. 26,6 kWh/kg na wolt napięcia ogniwa.'
+            )
+          },
+          system: {
+            title: T('System energy and balance of plant', 'Енергія системи й допоміжне обладнання', 'Systemenergie und Nebenanlagen', 'Systeemenergie en balance-of-plant', 'Énergie système et auxiliaires', 'Energía del sistema y auxiliares', 'Energia systemu i urządzenia pomocnicze'),
+            body: T(
+              'The grid sees SEC_sys = SEC_dc/η_rect + e_BoP: transformer-rectifier losses (2-5 %) plus pumps, cooling, gas drying and controls (typically 2-6 kWh/kg). Commercial systems quote 50-58 kWh/kg at the plant boundary; compression to storage is not included (see the H₂ compressor tool).',
+              'Мережа бачить SEC_sys = SEC_dc/η_rect + e_BoP: втрати трансформатора й випрямляча (2-5 %) плюс насоси, охолодження, осушення газу й керування (зазвичай 2-6 кВт·год/кг). Комерційні системи заявляють 50-58 кВт·год/кг на межі установки; стиснення для зберігання не враховано (див. інструмент «Компресор водню»).',
+              'Das Netz sieht SEC_sys = SEC_dc/η_rect + e_BoP: Trafo-Gleichrichter-Verluste (2-5 %) plus Pumpen, Kühlung, Gastrocknung und Steuerung (typisch 2-6 kWh/kg). Kommerzielle Systeme nennen 50-58 kWh/kg an der Anlagengrenze; die Verdichtung zur Speicherung ist nicht enthalten (siehe Werkzeug Wasserstoffverdichter).',
+              'Het net ziet SEC_sys = SEC_dc/η_rect + e_BoP: transformator-gelijkrichterverliezen (2-5 %) plus pompen, koeling, gasdroging en besturing (typisch 2-6 kWh/kg). Commerciële systemen noemen 50-58 kWh/kg op de installatiegrens; compressie voor opslag is niet inbegrepen (zie de tool Waterstofcompressor).',
+              'Le réseau voit SEC_sys = SEC_dc/η_rect + e_BoP : pertes transformateur-redresseur (2-5 %) plus pompes, refroidissement, séchage du gaz et contrôle (typiquement 2-6 kWh/kg). Les systèmes commerciaux annoncent 50-58 kWh/kg en limite d\'installation ; la compression vers le stockage n\'est pas incluse (voir l\'outil Compresseur d\'hydrogène).',
+              'La red ve SEC_sys = SEC_dc/η_rect + e_BoP: pérdidas de transformador y rectificador (2-5 %) más bombas, refrigeración, secado del gas y control (típicamente 2-6 kWh/kg). Los sistemas comerciales declaran 50-58 kWh/kg en el límite de planta; la compresión para almacenamiento no está incluida (véase la herramienta Compresor de hidrógeno).',
+              'Sieć widzi SEC_sys = SEC_dc/η_rect + e_BoP: straty transformatora i prostownika (2-5 %) plus pompy, chłodzenie, osuszanie gazu i sterowanie (zwykle 2-6 kWh/kg). Systemy komercyjne podają 50-58 kWh/kg na granicy instalacji; sprężanie do magazynowania nie jest uwzględnione (zob. narzędzie Sprężarka wodoru).'
+            )
+          },
+          efficiency: {
+            title: T('Efficiency and its basis', 'ККД і його основа', 'Wirkungsgrad und Bezugsbasis', 'Rendement en de basis', 'Rendement et sa base', 'Eficiencia y su base', 'Sprawność i jej podstawa'),
+            body: T(
+              'η_LHV = 33.32 kWh/kg / SEC and η_HHV = 39.38 kWh/kg / SEC; the same plant reads 18 % higher (relative) on HHV. The meter shows the voltage efficiency U_tn/V (thermoneutral 1.481 V for liquid water, 1.285 V for steam): below 1 the stack produces heat, above 1 (SOEC below U_tn) it needs heat.',
+              'η_НТЗ = 33,32 кВт·год/кг / SEC та η_ВТЗ = 39,38 кВт·год/кг / SEC; за ВТЗ та сама установка показує на 18 % (відносно) більше. Шкала показує ККД за напругою U_tn/V (термонейтральна 1,481 В для рідкої води, 1,285 В для пари): нижче 1 стек виділяє тепло, вище 1 (SOEC нижче U_tn) — потребує тепла.',
+              'η_Hu = 33,32 kWh/kg / SEC und η_Ho = 39,38 kWh/kg / SEC; auf Brennwertbasis liegt dieselbe Anlage relativ 18 % höher. Die Anzeige zeigt den Spannungswirkungsgrad U_tn/V (thermoneutral 1,481 V für flüssiges Wasser, 1,285 V für Dampf): unter 1 erzeugt der Stack Wärme, über 1 (SOEC unter U_tn) braucht er Wärme.',
+              'η_LHV = 33,32 kWh/kg / SEC en η_HHV = 39,38 kWh/kg / SEC; op HHV-basis scoort dezelfde installatie relatief 18 % hoger. De meter toont het spanningsrendement U_tn/V (thermoneutraal 1,481 V voor vloeibaar water, 1,285 V voor stoom): onder 1 produceert de stack warmte, boven 1 (SOEC onder U_tn) vraagt hij warmte.',
+              'η_PCI = 33,32 kWh/kg / SEC et η_PCS = 39,38 kWh/kg / SEC ; sur base PCS la même installation affiche 18 % de plus (en relatif). La jauge montre le rendement en tension U_tn/V (thermoneutre 1,481 V pour l\'eau liquide, 1,285 V pour la vapeur) : sous 1 l\'empilement produit de la chaleur, au-dessus (SOEC sous U_tn) il en consomme.',
+              'η_PCI = 33,32 kWh/kg / SEC y η_PCS = 39,38 kWh/kg / SEC; en base PCS la misma planta da un 18 % más (relativo). El indicador muestra la eficiencia de tensión U_tn/V (termoneutra 1,481 V para agua líquida, 1,285 V para vapor): por debajo de 1 el stack produce calor, por encima (SOEC bajo U_tn) lo necesita.',
+              'η_Wd = 33,32 kWh/kg / SEC i η_Wg = 39,38 kWh/kg / SEC; na cieple spalania ta sama instalacja wypada względnie o 18 % wyżej. Wskaźnik pokazuje sprawność napięciową U_tn/V (termoneutralne 1,481 V dla ciekłej wody, 1,285 V dla pary): poniżej 1 stos wytwarza ciepło, powyżej 1 (SOEC poniżej U_tn) potrzebuje ciepła.'
+            )
+          },
+          degradation: {
+            title: T('Degradation and stack life', 'Деградація і ресурс стека', 'Degradation und Stack-Lebensdauer', 'Degradatie en stacklevensduur', 'Dégradation et durée de vie', 'Degradación y vida del stack', 'Degradacja i trwałość stosu'),
+            body: T(
+              'At constant current the cell voltage creeps up by r µV/h (PEM 1-5, alkaline 1-3, SOEC 5-15). Over the stack life the voltage rises by r·life, so the specific energy at end of life is several kWh/kg higher; annual output here uses the mid-life voltage. Stacks are replaced when the voltage or efficiency limit is reached.',
+              'За сталого струму напруга комірки повільно зростає на r мкВ/год (PEM 1-5, лужні 1-3, SOEC 5-15). За ресурс стека напруга збільшується на r·ресурс, тож питома енергія в кінці ресурсу на кілька кВт·год/кг вища; річне виробництво тут розраховано за напругою посередині ресурсу. Стеки замінюють при досягненні межі напруги чи ККД.',
+              'Bei konstantem Strom steigt die Zellspannung um r µV/h (PEM 1-5, alkalisch 1-3, SOEC 5-15). Über die Stack-Lebensdauer wächst die Spannung um r·Lebensdauer, der spezifische Verbrauch am Ende liegt einige kWh/kg höher; die Jahresproduktion nutzt hier die Spannung zur Lebensdauermitte. Stacks werden bei Erreichen der Spannungs- oder Wirkungsgradgrenze getauscht.',
+              'Bij constante stroom kruipt de celspanning op met r µV/h (PEM 1-5, alkalisch 1-3, SOEC 5-15). Over de stacklevensduur stijgt de spanning met r·levensduur, zodat het specifiek verbruik aan het einde enkele kWh/kg hoger ligt; de jaarproductie gebruikt hier de spanning halverwege. Stacks worden vervangen bij het bereiken van de spannings- of rendementsgrens.',
+              'À courant constant, la tension de cellule monte de r µV/h (PEM 1-5, alcalin 1-3, SOEC 5-15). Sur la vie de l\'empilement, la tension augmente de r·durée, et la consommation spécifique en fin de vie est plus élevée de quelques kWh/kg ; la production annuelle utilise ici la tension à mi-vie. Les empilements sont remplacés à la limite de tension ou de rendement.',
+              'A corriente constante la tensión de celda sube r µV/h (PEM 1-5, alcalino 1-3, SOEC 5-15). Durante la vida del stack la tensión aumenta r·vida, de modo que el consumo específico al final es varios kWh/kg mayor; la producción anual usa aquí la tensión a media vida. Los stacks se sustituyen al alcanzar el límite de tensión o eficiencia.',
+              'Przy stałym prądzie napięcie ogniwa rośnie o r µV/h (PEM 1-5, alkaliczne 1-3, SOEC 5-15). W okresie eksploatacji stosu napięcie wzrasta o r·trwałość, więc zużycie właściwe na końcu jest wyższe o kilka kWh/kg; produkcja roczna wykorzystuje tu napięcie z połowy okresu. Stosy wymienia się po osiągnięciu granicy napięcia lub sprawności.'
+            )
+          },
+          stack: {
+            title: T('Cells and stacks', 'Комірки і стеки', 'Zellen und Stacks', 'Cellen en stacks', 'Cellules et empilements', 'Celdas y stacks', 'Ogniwa i stosy'),
+            body: T(
+              'Total current I = P_DC/V is shared by cells in series: the number of cells is I/(j·A_cell), rounded up, and they are grouped into stacks of a given cell count. Doubling j halves the active area and the stack count for the same power.',
+              'Загальний струм I = P_DC/V розподіляється між послідовними комірками: кількість комірок дорівнює I/(j·A_cell) з округленням угору, і їх групують у стеки із заданою кількістю комірок. Подвоєння j удвічі зменшує активну площу й кількість стеків за тієї самої потужності.',
+              'Der Gesamtstrom I = P_DC/V verteilt sich auf in Reihe geschaltete Zellen: Zellenzahl I/(j·A_cell), aufgerundet, gruppiert in Stacks mit gegebener Zellenzahl. Doppeltes j halbiert aktive Fläche und Stackanzahl bei gleicher Leistung.',
+              'De totale stroom I = P_DC/V wordt gedeeld over cellen in serie: het aantal cellen is I/(j·A_cell), naar boven afgerond, gegroepeerd in stacks met een gegeven celaantal. Dubbele j halveert actief oppervlak en aantal stacks bij gelijk vermogen.',
+              'Le courant total I = P_DC/V se répartit sur des cellules en série : nombre de cellules I/(j·A_cell), arrondi au supérieur, regroupées en empilements d\'un nombre de cellules donné. Doubler j divise par deux la surface active et le nombre d\'empilements à puissance égale.',
+              'La corriente total I = P_DC/V se reparte entre celdas en serie: número de celdas I/(j·A_cell), redondeado hacia arriba, agrupadas en stacks de un número de celdas dado. Doblar j reduce a la mitad el área activa y el número de stacks a igual potencia.',
+              'Prąd całkowity I = P_DC/V rozkłada się na ogniwa połączone szeregowo: liczba ogniw to I/(j·A_cell), zaokrąglona w górę, grupowana w stosy o zadanej liczbie ogniw. Podwojenie j zmniejsza o połowę powierzchnię czynną i liczbę stosów przy tej samej mocy.'
+            )
+          },
+          heat: {
+            title: T('Heat balance', 'Тепловий баланс', 'Wärmebilanz', 'Warmtebalans', 'Bilan thermique', 'Balance térmico', 'Bilans cieplny'),
+            body: T(
+              'Above the thermoneutral voltage the excess (V − U_tn)·I is released as heat and must be removed by the cooling system (often 20-30 % of the input power for PEM). SOEC near or below U_tn needs little cooling but needs external steam: about 6.5 kWh of heat per kg H₂ to raise steam from 15 °C water.',
+              'Вище термонейтральної напруги надлишок (V − U_tn)·I виділяється як тепло і має відводитися системою охолодження (для PEM часто 20-30 % споживаної потужності). SOEC поблизу або нижче U_tn майже не потребує охолодження, але потребує зовнішньої пари: близько 6,5 кВт·год тепла на кг H₂ для отримання пари з води при 15 °C.',
+              'Oberhalb der thermoneutralen Spannung wird der Überschuss (V − U_tn)·I als Wärme frei und muss abgeführt werden (bei PEM oft 20-30 % der Eingangsleistung). SOEC nahe oder unter U_tn braucht wenig Kühlung, aber externen Dampf: etwa 6,5 kWh Wärme je kg H₂ für die Dampferzeugung aus Wasser von 15 °C.',
+              'Boven de thermoneutrale spanning komt het overschot (V − U_tn)·I vrij als warmte die het koelsysteem moet afvoeren (bij PEM vaak 20-30 % van het ingangsvermogen). SOEC rond of onder U_tn vraagt weinig koeling maar wel externe stoom: circa 6,5 kWh warmte per kg H₂ om stoom te maken uit water van 15 °C.',
+              'Au-dessus de la tension thermoneutre, l\'excédent (V − U_tn)·I est libéré en chaleur à évacuer (souvent 20-30 % de la puissance absorbée en PEM). Une SOEC proche ou sous U_tn demande peu de refroidissement mais de la vapeur externe : environ 6,5 kWh de chaleur par kg H₂ pour vaporiser de l\'eau à 15 °C.',
+              'Por encima de la tensión termoneutra el exceso (V − U_tn)·I se libera como calor que debe evacuarse (en PEM a menudo el 20-30 % de la potencia de entrada). Una SOEC cerca o por debajo de U_tn necesita poca refrigeración pero sí vapor externo: unos 6,5 kWh de calor por kg de H₂ para generar vapor a partir de agua a 15 °C.',
+              'Powyżej napięcia termoneutralnego nadmiar (V − U_tn)·I wydziela się jako ciepło, które musi odebrać układ chłodzenia (w PEM często 20-30 % mocy wejściowej). SOEC w pobliżu lub poniżej U_tn wymaga mało chłodzenia, ale potrzebuje pary z zewnątrz: ok. 6,5 kWh ciepła na kg H₂ do wytworzenia pary z wody o 15 °C.'
+            )
+          },
+          water: {
+            title: T('Water and oxygen', 'Вода і кисень', 'Wasser und Sauerstoff', 'Water en zuurstof', 'Eau et oxygène', 'Agua y oxígeno', 'Woda i tlen'),
+            body: T(
+              'Stoichiometry fixes 8.94 kg of water in and 7.94 kg of oxygen out per kg of hydrogen. Real plants draw 10-15 kg/kg of raw water because demineralisation rejects part of it and cooling towers evaporate more; oxygen is usually vented but can be sold.',
+              'Стехіометрія задає 8,94 кг води на вході й 7,94 кг кисню на виході на кг водню. Реальні установки беруть 10-15 кг/кг сирої води, бо демінералізація скидає частину, а градирні випаровують ще; кисень зазвичай скидають в атмосферу, але його можна продавати.',
+              'Die Stöchiometrie legt 8,94 kg Wasser zu und 7,94 kg Sauerstoff ab je kg Wasserstoff fest. Reale Anlagen ziehen 10-15 kg/kg Rohwasser, weil die Vollentsalzung einen Teil verwirft und Kühltürme mehr verdunsten; Sauerstoff wird meist abgeblasen, kann aber verkauft werden.',
+              'De stoichiometrie legt 8,94 kg water in en 7,94 kg zuurstof uit per kg waterstof vast. Echte installaties nemen 10-15 kg/kg ruw water, omdat demineralisatie een deel afstoot en koeltorens meer verdampen; zuurstof wordt meestal afgeblazen maar kan worden verkocht.',
+              'La stœchiométrie impose 8,94 kg d\'eau en entrée et 7,94 kg d\'oxygène en sortie par kg d\'hydrogène. Les installations réelles prélèvent 10-15 kg/kg d\'eau brute car la déminéralisation en rejette une part et les tours de refroidissement en évaporent ; l\'oxygène est souvent rejeté mais peut être vendu.',
+              'La estequiometría fija 8,94 kg de agua de entrada y 7,94 kg de oxígeno de salida por kg de hidrógeno. Las plantas reales toman 10-15 kg/kg de agua bruta porque la desmineralización rechaza parte y las torres de refrigeración evaporan más; el oxígeno suele ventearse, aunque puede venderse.',
+              'Stechiometria ustala 8,94 kg wody na wejściu i 7,94 kg tlenu na wyjściu na kg wodoru. Rzeczywiste instalacje pobierają 10-15 kg/kg wody surowej, bo demineralizacja część odrzuca, a chłodnie odparowują więcej; tlen zwykle się wypuszcza, ale można go sprzedać.'
+            )
+          },
+          annual: {
+            title: T('Full-load hours and annual output', 'Години повного навантаження і річний вихід', 'Volllaststunden und Jahresproduktion', 'Vollasturen en jaarproductie', 'Heures pleine charge et production annuelle', 'Horas a plena carga y producción anual', 'Godziny pełnego obciążenia i produkcja roczna'),
+            body: T(
+              'Annual hydrogen = P_AC·FLH/SEC. Grid plants reach 5000-8000 full-load hours, solar-coupled plants about 1500-2500 and wind 3000-4500. Few hours spread the capital cost over little hydrogen, which drives the levelised cost (see the LCOH and RFNBO tool).',
+              'Річний водень = P_AC·FLH/SEC. Мережеві установки мають 5000-8000 годин повного навантаження, з сонячною генерацією — близько 1500-2500, з вітровою — 3000-4500. Мало годин розподіляє капітальні витрати на мало водню, що визначає приведену вартість (див. інструмент LCOH і RFNBO).',
+              'Jahreswasserstoff = P_AC·FLH/SEC. Netzanlagen erreichen 5000-8000 Volllaststunden, solargekoppelte etwa 1500-2500, Wind 3000-4500. Wenige Stunden verteilen die Investition auf wenig Wasserstoff und treiben die Gestehungskosten (siehe Werkzeug LCOH und RFNBO).',
+              'Jaarlijkse waterstof = P_AC·FLH/SEC. Netgekoppelde installaties halen 5000-8000 vollasturen, zon-gekoppelde circa 1500-2500 en wind 3000-4500. Weinig uren spreiden de investering over weinig waterstof en bepalen de kostprijs (zie de tool LCOH en RFNBO).',
+              'Hydrogène annuel = P_AC·FLH/SEC. Les installations réseau atteignent 5000-8000 heures pleine charge, celles couplées au solaire environ 1500-2500 et à l\'éolien 3000-4500. Peu d\'heures répartissent l\'investissement sur peu d\'hydrogène, ce qui pèse sur le coût actualisé (voir l\'outil LCOH et RFNBO).',
+              'Hidrógeno anual = P_AC·FLH/SEC. Las plantas conectadas a red alcanzan 5000-8000 horas a plena carga, las acopladas a solar unas 1500-2500 y a eólica 3000-4500. Pocas horas reparten la inversión entre poco hidrógeno, lo que eleva el coste nivelado (véase la herramienta LCOH y RFNBO).',
+              'Roczny wodór = P_AC·FLH/SEC. Instalacje sieciowe osiągają 5000-8000 godzin pełnego obciążenia, sprzężone z fotowoltaiką ok. 1500-2500, z wiatrem 3000-4500. Mało godzin rozkłada nakłady na mało wodoru, co podnosi koszt uśredniony (zob. narzędzie LCOH i RFNBO).'
+            )
+          }
+        },
+        tour: [
+          { topic: 'tech', focus: '[data-dgu-field="f-tech"]' },
+          { topic: 'polarisation', focus: '[data-dgu-field="f-j"]' },
+          { topic: 'reversible', focus: '[data-dgu-field="f-p_c"]' },
+          { topic: 'system', focus: '.dgu-verdict' },
+          { topic: 'efficiency', focus: '.dgu-stage' }
+        ]
+      },
+      panels: [
+        { id: 'how', slot: 'inputs', title: T('Calculation', 'Розрахунок', 'Berechnung', 'Berekening', 'Calcul', 'Cálculo', 'Obliczenia'), fields: [
+          { id: 'f-level', key: 'level', type: 'segmented', label: T('Level', 'Рівень', 'Stufe', 'Niveau', 'Niveau', 'Nivel', 'Poziom'), options: function () { return [['simple', T('Simple', 'Простий', 'Einfach', 'Eenvoudig', 'Simple', 'Simple', 'Prosty')], ['full', T('Full', 'Повний', 'Vollständig', 'Volledig', 'Complet', 'Completo', 'Pełny')]]; } }
+        ] },
+        { id: 'plant', slot: 'inputs', title: T('Plant', 'Установка', 'Anlage', 'Installatie', 'Installation', 'Planta', 'Instalacja'), fields: [
+          { id: 'f-tech', key: 'tech', type: 'select', learn: 'tech', label: T('Technology', 'Технологія', 'Technologie', 'Technologie', 'Technologie', 'Tecnología', 'Technologia'),
+            options: function () { return [
+              ['PEM', T('PEM (proton exchange membrane)', 'PEM (протонообмінна мембрана)', 'PEM (Protonenaustauschmembran)', 'PEM (protonuitwisselingsmembraan)', 'PEM (membrane échangeuse de protons)', 'PEM (membrana de intercambio de protones)', 'PEM (membrana protonowymienna)')],
+              ['AEL', T('Alkaline (AEL)', 'Лужний (AEL)', 'Alkalisch (AEL)', 'Alkalisch (AEL)', 'Alcalin (AEL)', 'Alcalino (AEL)', 'Alkaliczny (AEL)')],
+              ['SOEC', T('Solid oxide (SOEC, steam)', 'Твердооксидний (SOEC, пара)', 'Festoxid (SOEC, Dampf)', 'Vaste oxide (SOEC, stoom)', 'Oxyde solide (SOEC, vapeur)', 'Óxido sólido (SOEC, vapor)', 'Tlenkowy (SOEC, para)')]
+            ]; } },
+          { id: 'f-P_AC', key: 'P_AC', type: 'number', unit: 'W', display: 'MW', min: 1e4, max: 5e9, precision: 2, required: true, learn: 'system', label: T('Rated AC input power', 'Номінальна споживана потужність (змінний струм)', 'Nenn-Anschlussleistung (AC)', 'Nominaal AC-ingangsvermogen', 'Puissance AC nominale absorbée', 'Potencia nominal de entrada CA', 'Znamionowa moc wejściowa AC') },
+          { id: 'f-FLH', key: 'FLH', type: 'number', unit: 'h/y', min: 1, max: 8760, precision: 0, required: true, learn: 'annual', label: T('Full-load hours per year', 'Години повного навантаження на рік', 'Volllaststunden pro Jahr', 'Vollasturen per jaar', 'Heures équivalentes pleine charge par an', 'Horas equivalentes a plena carga al año', 'Godziny pełnego obciążenia rocznie') }
+        ] },
+        { id: 'cell', slot: 'inputs', title: T('Cell operating point', 'Робоча точка комірки', 'Betriebspunkt der Zelle', 'Werkpunt van de cel', 'Point de fonctionnement de la cellule', 'Punto de operación de la celda', 'Punkt pracy ogniwa'), fields: [
+          { id: 'f-j', key: 'j', type: 'number', unit: 'A/m²', min: 100, max: 6e4, precision: 0, required: true, learn: 'polarisation', label: T('Current density (1 A/cm² = 10 000 A/m²)', 'Густина струму (1 A/см² = 10 000 A/м²)', 'Stromdichte (1 A/cm² = 10 000 A/m²)', 'Stroomdichtheid (1 A/cm² = 10 000 A/m²)', 'Densité de courant (1 A/cm² = 10 000 A/m²)', 'Densidad de corriente (1 A/cm² = 10 000 A/m²)', 'Gęstość prądu (1 A/cm² = 10 000 A/m²)') },
+          { id: 'f-T', key: 'T', type: 'number', unit: 'K', display: 'degC', min: 274, max: 1173.15, precision: 1, required: true, learn: 'reversible', label: T('Stack temperature', 'Температура стека', 'Stack-Temperatur', 'Stacktemperatuur', 'Température de l\'empilement', 'Temperatura del stack', 'Temperatura stosu') },
+          { id: 'f-p_c', key: 'p_c', type: 'number', unit: 'Pa', display: 'bar', min: 1e4, max: 1e7, precision: 1, required: true, learn: 'reversible', label: T('Hydrogen (cathode) pressure', 'Тиск водню (катод)', 'Wasserstoffdruck (Kathode)', 'Waterstofdruk (kathode)', 'Pression d\'hydrogène (cathode)', 'Presión de hidrógeno (cátodo)', 'Ciśnienie wodoru (katoda)') },
+          { id: 'f-p_a', key: 'p_a', type: 'number', unit: 'Pa', display: 'bar', min: 1e4, max: 1e7, precision: 1, required: true, learn: 'reversible', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Oxygen (anode) pressure', 'Тиск кисню (анод)', 'Sauerstoffdruck (Anode)', 'Zuurstofdruk (anode)', 'Pression d\'oxygène (anode)', 'Presión de oxígeno (ánodo)', 'Ciśnienie tlenu (anoda)') },
+          { id: 'f-ASR', key: 'ASR', type: 'number', unit: 'Ω·m²', min: 0, max: 1e-3, precision: 7, required: true, learn: 'polarisation', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Area-specific resistance (0.1 Ω·cm² = 1e-5 Ω·m²)', 'Питомий поверхневий опір (0,1 Ом·см² = 1e-5 Ом·м²)', 'Flächenwiderstand (0,1 Ω·cm² = 1e-5 Ω·m²)', 'Oppervlaktespecifieke weerstand (0,1 Ω·cm² = 1e-5 Ω·m²)', 'Résistance surfacique (0,1 Ω·cm² = 1e-5 Ω·m²)', 'Resistencia específica de área (0,1 Ω·cm² = 1e-5 Ω·m²)', 'Rezystancja powierzchniowa (0,1 Ω·cm² = 1e-5 Ω·m²)') },
+          { id: 'f-j0', key: 'j0', type: 'number', unit: 'A/m²', min: 1e-6, max: 1e5, precision: 3, required: true, learn: 'polarisation', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Effective exchange current density j0', 'Ефективна густина струму обміну j0', 'Effektive Austauschstromdichte j0', 'Effectieve uitwisselingsstroomdichtheid j0', 'Densité de courant d\'échange effective j0', 'Densidad de corriente de intercambio efectiva j0', 'Efektywna gęstość prądu wymiany j0') },
+          { id: 'f-alpha', key: 'alpha', type: 'number', min: 0.1, max: 2, precision: 2, required: true, learn: 'polarisation', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Charge transfer coefficient α', 'Коефіцієнт перенесення заряду α', 'Durchtrittsfaktor α', 'Ladingsoverdrachtscoëfficiënt α', 'Coefficient de transfert de charge α', 'Coeficiente de transferencia de carga α', 'Współczynnik przejścia α') },
+          { id: 'f-eta_F', key: 'eta_F', type: 'number', min: 0.5, max: 1, precision: 3, required: true, learn: 'faraday', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Faradaic efficiency', 'Фарадеївська ефективність', 'Faraday-Wirkungsgrad', 'Faraday-rendement', 'Rendement faradique', 'Eficiencia faradaica', 'Sprawność faradajowska') },
+          { id: 'f-U_steam', key: 'U_steam', type: 'number', min: 0.05, max: 0.95, precision: 2, required: true, learn: 'reversible', visible: function (ctx) { return ctx.state.level === 'full' && ctx.state.tech === 'SOEC'; }, label: T('Steam utilisation (SOEC)', 'Ступінь перетворення пари (SOEC)', 'Dampfumsatz (SOEC)', 'Stoomconversie (SOEC)', 'Taux de conversion de la vapeur (SOEC)', 'Utilización del vapor (SOEC)', 'Stopień konwersji pary (SOEC)') },
+          { id: 'f-x_H2O_in', key: 'x_H2O_in', type: 'number', min: 0.5, max: 0.99, precision: 2, required: true, learn: 'reversible', visible: function (ctx) { return ctx.state.level === 'full' && ctx.state.tech === 'SOEC'; }, label: T('Steam mole fraction in feed (SOEC)', 'Мольна частка пари на вході (SOEC)', 'Dampf-Molanteil im Zulauf (SOEC)', 'Molfractie stoom in voeding (SOEC)', 'Fraction molaire de vapeur à l\'entrée (SOEC)', 'Fracción molar de vapor en la alimentación (SOEC)', 'Ułamek molowy pary w zasilaniu (SOEC)') }
+        ] },
+        { id: 'sys', slot: 'inputs', title: T('System and lifetime', 'Система і ресурс', 'System und Lebensdauer', 'Systeem en levensduur', 'Système et durée de vie', 'Sistema y vida útil', 'System i trwałość'), fields: [
+          { id: 'f-eta_rect', key: 'eta_rect', type: 'number', min: 0.8, max: 1, precision: 3, required: true, learn: 'system', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Rectifier and transformer efficiency', 'ККД випрямляча й трансформатора', 'Wirkungsgrad Gleichrichter und Trafo', 'Rendement gelijkrichter en transformator', 'Rendement redresseur et transformateur', 'Eficiencia de rectificador y transformador', 'Sprawność prostownika i transformatora') },
+          { id: 'f-e_bop', key: 'e_bop', type: 'number', unit: 'kWh/kg', min: 0, max: 20, precision: 2, required: true, learn: 'system', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Balance-of-plant consumption', 'Власні потреби допоміжного обладнання', 'Verbrauch der Nebenanlagen', 'Verbruik balance-of-plant', 'Consommation des auxiliaires', 'Consumo de equipos auxiliares', 'Zużycie urządzeń pomocniczych') },
+          { id: 'f-A_cell', key: 'A_cell', type: 'number', unit: 'm²', min: 1e-4, max: 10, precision: 4, required: true, learn: 'stack', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Active area per cell', 'Активна площа комірки', 'Aktive Fläche je Zelle', 'Actief oppervlak per cel', 'Surface active par cellule', 'Área activa por celda', 'Powierzchnia czynna ogniwa') },
+          { id: 'f-cells_stack', key: 'cells_stack', type: 'number', min: 1, max: 2000, precision: 0, required: true, learn: 'stack', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Cells per stack', 'Комірок у стеку', 'Zellen je Stack', 'Cellen per stack', 'Cellules par empilement', 'Celdas por stack', 'Ogniw w stosie') },
+          { id: 'f-deg_uV_h', key: 'deg_uV_h', type: 'number', unit: 'µV/h', min: 0, max: 100, precision: 1, required: true, learn: 'degradation', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Voltage degradation rate', 'Швидкість деградації напруги', 'Spannungsdegradationsrate', 'Spanningsdegradatiesnelheid', 'Taux de dégradation de tension', 'Tasa de degradación de tensión', 'Szybkość degradacji napięcia') },
+          { id: 'f-life_h', key: 'life_h', type: 'number', unit: 'h', min: 1000, max: 2e5, precision: 0, required: true, learn: 'degradation', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Stack life (operating hours)', 'Ресурс стека (години роботи)', 'Stack-Lebensdauer (Betriebsstunden)', 'Stacklevensduur (bedrijfsuren)', 'Durée de vie de l\'empilement (heures)', 'Vida del stack (horas de operación)', 'Trwałość stosu (godziny pracy)') }
+        ] }
+      ],
+      on: {
+        rebuild: adoptStage,
+        compute: computeView,
+        change: onChange
+      }
+    });
+
+    ui.panel({
+      id: 'io',
+      slot: 'inputs',
+      actionsAlign: 'end',
+      actions: [ui.resetAction()]
+    });
+
+    var EX = [
+      { id: 'default', label: T('PEM 20 MW, 30 bar H₂', 'PEM 20 МВт, 30 бар H₂', 'PEM 20 MW, 30 bar H₂', 'PEM 20 MW, 30 bar H₂', 'PEM 20 MW, 30 bar H₂', 'PEM 20 MW, 30 bar H₂', 'PEM 20 MW, 30 bar H₂'),
+        note: T('Look at e_sys: a grid-connected 20 MW PEM plant at 2 A/cm² and 80 °C needs 57.7 kWh/kg (58 % LHV) at beginning of life and 61.0 kWh/kg at end of stack life; 5000 full-load hours give 1684 t/year.',
+          'Подивіться на e_sys: мережева PEM-установка 20 МВт при 2 А/см² і 80 °C потребує 57,7 кВт·год/кг (58 % НТЗ) на початку і 61,0 кВт·год/кг наприкінці ресурсу стека; 5000 годин повного навантаження дають 1684 т/рік.',
+          'Achten Sie auf e_sys: eine netzgekoppelte 20-MW-PEM-Anlage bei 2 A/cm² und 80 °C braucht 57,7 kWh/kg (58 % Hu) zu Lebensbeginn und 61,0 kWh/kg am Ende der Stack-Lebensdauer; 5000 Volllaststunden ergeben 1684 t/Jahr.',
+          'Kijk naar e_sys: een netgekoppelde PEM-installatie van 20 MW bij 2 A/cm² en 80 °C vraagt 57,7 kWh/kg (58 % LHV) aan het begin en 61,0 kWh/kg aan het einde van de stacklevensduur; 5000 vollasturen geven 1684 t/jaar.',
+          'Regardez e_sys : une installation PEM de 20 MW raccordée au réseau, à 2 A/cm² et 80 °C, consomme 57,7 kWh/kg (58 % PCI) en début de vie et 61,0 kWh/kg en fin de vie du stack ; 5000 heures pleine charge donnent 1684 t/an.',
+          'Fíjese en e_sys: una planta PEM de 20 MW conectada a red, a 2 A/cm² y 80 °C, necesita 57,7 kWh/kg (58 % PCI) al inicio y 61,0 kWh/kg al final de la vida del stack; 5000 horas a plena carga dan 1684 t/año.',
+          'Spójrz na e_sys: sieciowa instalacja PEM 20 MW przy 2 A/cm² i 80 °C zużywa 57,7 kWh/kg (58 % wartości opałowej) na początku i 61,0 kWh/kg pod koniec życia stosu; 5000 godzin pełnego obciążenia daje 1684 t/rok.'),
+        apply: function (t) { setEx(t, 'PEM', { P_AC: 20e6, FLH: 5000 }); } },
+      { id: 'pem_low_j', label: T('PEM 20 MW at 1 A/cm²', 'PEM 20 МВт при 1 А/см²', 'PEM 20 MW bei 1 A/cm²', 'PEM 20 MW bij 1 A/cm²', 'PEM 20 MW à 1 A/cm²', 'PEM 20 MW a 1 A/cm²', 'PEM 20 MW przy 1 A/cm²'),
+        note: T('Look at N_stacks: halving the current density saves 8 % of the electricity (53.2 instead of 57.7 kWh/kg), but the plant needs 101 stacks instead of 47 - efficiency is bought with electrode area.',
+          'Подивіться на N_stacks: зменшення густини струму вдвічі заощаджує 8 % електроенергії (53,2 замість 57,7 кВт·год/кг), але потрібно 101 стек замість 47 — ефективність купується площею електродів.',
+          'Achten Sie auf N_stacks: die halbe Stromdichte spart 8 % Strom (53,2 statt 57,7 kWh/kg), aber die Anlage braucht 101 statt 47 Stacks - Wirkungsgrad wird mit Elektrodenfläche erkauft.',
+          'Kijk naar N_stacks: de stroomdichtheid halveren bespaart 8 % elektriciteit (53,2 in plaats van 57,7 kWh/kg), maar de installatie heeft 101 stacks nodig in plaats van 47 - rendement koop je met elektrodeoppervlak.',
+          'Regardez N_stacks : diviser la densité de courant par deux économise 8 % d\'électricité (53,2 au lieu de 57,7 kWh/kg), mais il faut 101 stacks au lieu de 47 - le rendement s\'achète en surface d\'électrode.',
+          'Fíjese en N_stacks: reducir a la mitad la densidad de corriente ahorra un 8 % de electricidad (53,2 en lugar de 57,7 kWh/kg), pero la planta necesita 101 stacks en vez de 47: la eficiencia se paga con área de electrodo.',
+          'Spójrz na N_stacks: zmniejszenie gęstości prądu o połowę oszczędza 8 % energii (53,2 zamiast 57,7 kWh/kg), ale instalacja potrzebuje 101 stosów zamiast 47 - sprawność kupuje się powierzchnią elektrod.'),
+        apply: function (t) { setEx(t, 'PEM', { P_AC: 20e6, FLH: 5000, j: 1e4 }); } },
+      { id: 'ael_100', label: T('Alkaline 100 MW, atmospheric', 'Лужний 100 МВт, атмосферний', 'Alkalisch 100 MW, atmosphärisch', 'Alkalisch 100 MW, atmosferisch', 'Alcalin 100 MW, atmosphérique', 'Alcalino 100 MW, atmosférico', 'Alkaliczny 100 MW, atmosferyczny'),
+        note: T('Look at V_cell: at 0.4 A/cm² the alkaline cell runs at 1.78 V and the plant needs 53.9 kWh/kg; 17 large stacks give 10 790 t/year, but the hydrogen leaves at 1 bar and still has to be compressed.',
+          'Подивіться на V_cell: при 0,4 А/см² лужна комірка працює на 1,78 В, установка потребує 53,9 кВт·год/кг; 17 великих стеків дають 10 790 т/рік, але водень виходить при 1 бар і його ще треба стиснути.',
+          'Achten Sie auf V_cell: bei 0,4 A/cm² arbeitet die alkalische Zelle mit 1,78 V und die Anlage braucht 53,9 kWh/kg; 17 große Stacks liefern 10 790 t/Jahr, der Wasserstoff kommt aber mit 1 bar und muss noch verdichtet werden.',
+          'Kijk naar V_cell: bij 0,4 A/cm² werkt de alkalische cel op 1,78 V en vraagt de installatie 53,9 kWh/kg; 17 grote stacks leveren 10 790 t/jaar, maar de waterstof komt vrij op 1 bar en moet nog gecomprimeerd worden.',
+          'Regardez V_cell : à 0,4 A/cm² la cellule alcaline fonctionne à 1,78 V et l\'installation consomme 53,9 kWh/kg ; 17 grands stacks donnent 10 790 t/an, mais l\'hydrogène sort à 1 bar et doit encore être comprimé.',
+          'Fíjese en V_cell: a 0,4 A/cm² la celda alcalina trabaja a 1,78 V y la planta necesita 53,9 kWh/kg; 17 stacks grandes dan 10 790 t/año, pero el hidrógeno sale a 1 bar y aún hay que comprimirlo.',
+          'Spójrz na V_cell: przy 0,4 A/cm² ogniwo alkaliczne pracuje przy 1,78 V, a instalacja zużywa 53,9 kWh/kg; 17 dużych stosów daje 10 790 t/rok, ale wodór wychodzi pod 1 bar i trzeba go jeszcze sprężyć.'),
+        apply: function (t) { setEx(t, 'AEL', { P_AC: 100e6, FLH: 6000 }); } },
+      { id: 'soec_10', label: T('SOEC 10 MW, steam at 750 °C', 'SOEC 10 МВт, пара 750 °C', 'SOEC 10 MW, Dampf bei 750 °C', 'SOEC 10 MW, stoom bij 750 °C', 'SOEC 10 MW, vapeur à 750 °C', 'SOEC 10 MW, vapor a 750 °C', 'SOEC 10 MW, para 750 °C'),
+        note: T('Look at e_sys and the warning: steam electrolysis needs only 40.8 kWh/kg of electricity (plus 6.5 kWh/kg of heat to raise steam) because heat supplies part of the splitting energy, but with a 20 000 h stack life and 7500 h/year the stacks must be replaced every 2.7 years.',
+          'Подивіться на e_sys і попередження: паровий електроліз потребує лише 40,8 кВт·год/кг електроенергії (плюс 6,5 кВт·год/кг тепла на пару), бо частину енергії розщеплення дає тепло, але з ресурсом стека 20 000 год і 7500 год/рік стеки треба міняти кожні 2,7 року.',
+          'Achten Sie auf e_sys und die Warnung: Dampfelektrolyse braucht nur 40,8 kWh/kg Strom (plus 6,5 kWh/kg Wärme für den Dampf), weil Wärme einen Teil der Spaltenergie liefert, doch bei 20 000 h Stack-Lebensdauer und 7500 h/Jahr müssen die Stacks alle 2,7 Jahre getauscht werden.',
+          'Kijk naar e_sys en de waarschuwing: stoomelektrolyse vraagt maar 40,8 kWh/kg elektriciteit (plus 6,5 kWh/kg warmte voor stoom) omdat warmte een deel van de splitsingsenergie levert, maar met 20 000 h stacklevensduur en 7500 h/jaar moeten de stacks elke 2,7 jaar vervangen worden.',
+          'Regardez e_sys et l\'avertissement : l\'électrolyse vapeur ne demande que 40,8 kWh/kg d\'électricité (plus 6,5 kWh/kg de chaleur pour la vapeur) car la chaleur fournit une partie de l\'énergie de dissociation, mais avec 20 000 h de durée de vie et 7500 h/an il faut remplacer les stacks tous les 2,7 ans.',
+          'Fíjese en e_sys y el aviso: la electrólisis de vapor necesita solo 40,8 kWh/kg de electricidad (más 6,5 kWh/kg de calor para el vapor) porque el calor aporta parte de la energía de disociación, pero con 20 000 h de vida del stack y 7500 h/año hay que sustituir los stacks cada 2,7 años.',
+          'Spójrz na e_sys i ostrzeżenie: elektroliza pary potrzebuje tylko 40,8 kWh/kg energii elektrycznej (plus 6,5 kWh/kg ciepła na parę), bo ciepło dostarcza część energii rozkładu, ale przy żywotności stosu 20 000 h i 7500 h/rok stosy trzeba wymieniać co 2,7 roku.'),
+        apply: function (t) { setEx(t, 'SOEC', { P_AC: 10e6, FLH: 7500 }); } },
+      { id: 'pem_offgrid', label: T('PEM 5 MW on solar PV', 'PEM 5 МВт від сонячної СЕС', 'PEM 5 MW an Photovoltaik', 'PEM 5 MW op zon-PV', 'PEM 5 MW sur photovoltaïque', 'PEM 5 MW con fotovoltaica', 'PEM 5 MW z fotowoltaiki'),
+        note: T('Look at the annual output: the same PEM design on solar PV uses the same 57.7 kWh/kg, but 2000 h give only 168 t/year - 34 t per MW instead of 84 t per MW on the grid, so the capital cost per kg is 2.5 times higher.',
+          'Подивіться на річний вихід: та сама PEM-установка від СЕС має ті самі 57,7 кВт·год/кг, але 2000 год дають лише 168 т/рік — 34 т на МВт замість 84 т на МВт від мережі, тож капітальні витрати на кг у 2,5 раза вищі.',
+          'Achten Sie auf die Jahresmenge: dieselbe PEM-Auslegung an PV braucht dieselben 57,7 kWh/kg, aber 2000 h ergeben nur 168 t/Jahr - 34 t je MW statt 84 t je MW am Netz, die Kapitalkosten je kg sind also 2,5-mal höher.',
+          'Kijk naar de jaarproductie: hetzelfde PEM-ontwerp op zon-PV gebruikt dezelfde 57,7 kWh/kg, maar 2000 h geven maar 168 t/jaar - 34 t per MW in plaats van 84 t per MW op het net, dus de kapitaalkosten per kg zijn 2,5 keer hoger.',
+          'Regardez la production annuelle : la même conception PEM sur photovoltaïque consomme les mêmes 57,7 kWh/kg, mais 2000 h ne donnent que 168 t/an - 34 t par MW au lieu de 84 t par MW sur le réseau, le coût d\'investissement par kg est donc 2,5 fois plus élevé.',
+          'Fíjese en la producción anual: el mismo diseño PEM con fotovoltaica usa los mismos 57,7 kWh/kg, pero 2000 h dan solo 168 t/año: 34 t por MW en lugar de 84 t por MW en red, así que el coste de capital por kg es 2,5 veces mayor.',
+          'Spójrz na roczną produkcję: ta sama instalacja PEM z fotowoltaiki zużywa te same 57,7 kWh/kg, ale 2000 h daje tylko 168 t/rok - 34 t na MW zamiast 84 t na MW z sieci, więc koszt kapitałowy na kg jest 2,5 razy wyższy.'),
+        apply: function (t) { setEx(t, 'PEM', { P_AC: 5e6, FLH: 2000 }); } }
+    ];
+    function setEx(t, tech, over) {
+      var s = t || state, e = engine(), b = e && e.tech ? e.tech[tech] : null, k;
+      s.tech = tech; s.level = 'simple'; s.eta_rect = 0.97; s.U_steam = 0.7; s.x_H2O_in = 0.9;
+      if (b) for (k in b) if (Object.prototype.hasOwnProperty.call(b, k) && k !== 'steam') s[k] = b[k];
+      s.A_cell = tech === 'SOEC' ? 0.01 : (tech === 'AEL' ? 2.5 : 0.1); s.cells_stack = tech === 'AEL' ? 300 : 100;
+      for (k in over) if (Object.prototype.hasOwnProperty.call(over, k)) s[k] = over[k];
+    }
+    ui.examples(EX);
+
+    ui.stage({
+      caption: T('Polarisation curve: cell voltage against current density', 'Поляризаційна крива: напруга комірки від густини струму', 'Polarisationskurve: Zellspannung über Stromdichte', 'Polarisatiecurve: celspanning tegen stroomdichtheid', 'Courbe de polarisation : tension de cellule selon la densité de courant', 'Curva de polarización: tensión de celda frente a densidad de corriente', 'Krzywa polaryzacji: napięcie ogniwa w funkcji gęstości prądu'),
+      minHeight: 300,
+      a11y: function () {
+        if (!last || !last.ok) return TL(NORES);
+        return TL(TF(T('Cell voltage $1 V at $2 A/cm²; reversible $3 V, thermoneutral $4 V.', 'Напруга комірки $1 В при $2 А/см²; оборотна $3 В, термонейтральна $4 В.', 'Zellspannung $1 V bei $2 A/cm²; reversibel $3 V, thermoneutral $4 V.', 'Celspanning $1 V bij $2 A/cm²; reversibel $3 V, thermoneutraal $4 V.', 'Tension de cellule $1 V à $2 A/cm² ; réversible $3 V, thermoneutre $4 V.', 'Tensión de celda $1 V a $2 A/cm²; reversible $3 V, termoneutra $4 V.', 'Napięcie ogniwa $1 V przy $2 A/cm²; odwracalne $3 V, termoneutralne $4 V.'), [DiagramUI.fmt(last.V_cell, { precision: 3 }), DiagramUI.fmt(state.j / 1e4, { precision: 2 }), DiagramUI.fmt(last.E_rev, { precision: 3 }), DiagramUI.fmt(last.U_tn, { precision: 3 })]));
+      },
+      render: function (size, st) {
+        var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+        var cs = getComputedStyle(document.documentElement);
+        var muted = cs.getPropertyValue('--muted').trim() || '#888', line = cs.getPropertyValue('--line').trim() || '#ccc', font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+        ctx.clearRect(0, 0, w, h);
+        if (!last || !last.ok || !last.curve || !last.curve.length) return;
+        var C = last.curve, k, x1 = C[C.length - 1].j / 1e4, y0 = Math.min(last.E_rev, last.U_tn) - 0.1, y1 = Math.max(C[C.length - 1].V, last.V_eol, last.U_tn) + 0.05;
+        var L = coarse ? 44 : 54, RR = 14, TOP = 12, B = coarse ? 36 : 44, pw = w - L - RR, ph = h - TOP - B;
+        if (pw <= 10 || ph <= 10) return;
+        function X(v) { return L + v / x1 * pw; }
+        function Y(v) { return TOP + ph - (v - y0) / (y1 - y0) * ph; }
+        ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.beginPath();
+        ctx.moveTo(L, TOP); ctx.lineTo(L, TOP + ph); ctx.lineTo(L + pw, TOP + ph); ctx.stroke();
+        ctx.fillStyle = muted; ctx.font = (coarse ? 10 : 11) + 'px ' + font;
+        var xt = DiagramUI.ticks(0, x1, pw, size.density), yt = DiagramUI.ticks(y0, y1, ph, size.density);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        for (k = 0; k < xt.length; k++) { if (xt[k] < 0 || xt[k] > x1) continue; var px = X(xt[k]);
+          ctx.beginPath(); ctx.moveTo(px, TOP + ph); ctx.lineTo(px, TOP + ph + 4); ctx.stroke();
+          ctx.fillText(DiagramUI.fmt(xt[k], { precision: 2 }), px, TOP + ph + 6); }
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (k = 0; k < yt.length; k++) { if (yt[k] < y0 || yt[k] > y1) continue; var py = Y(yt[k]);
+          ctx.beginPath(); ctx.moveTo(L - 4, py); ctx.lineTo(L, py); ctx.stroke();
+          ctx.fillText(DiagramUI.fmt(yt[k], { precision: 2 }), L - 6, py); }
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('j, A/cm²', L + pw / 2, h - 2);
+        ctx.save(); ctx.translate(12, TOP + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'middle'; ctx.fillText('V_cell, V', 0, 0); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(L, TOP, pw, ph); ctx.clip();
+        function hline(v, col, dash) { ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(L + pw, Y(v)); ctx.stroke(); ctx.setLineDash([]); }
+        hline(last.E_rev, DiagramUI.series(2), [2, 3]);
+        hline(last.U_tn, muted, [6, 4]);
+        function curve(f, col, width, dash) { ctx.strokeStyle = col; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(X(0), Y(f(null))); for (k = 0; k < C.length; k++) ctx.lineTo(X(C[k].j / 1e4), Y(f(C[k]))); ctx.stroke(); ctx.setLineDash([]); }
+        curve(function (c) { return c ? c.E_rev + c.act : last.E_rev; }, DiagramUI.series(1), 1.5, [5, 3]);
+        curve(function (c) { return c ? c.V : last.E_rev; }, DiagramUI.series(0), 2, []);
+        var dv = last.V_eol - last.V_cell;
+        if (dv > 0) curve(function (c) { return c ? c.V + dv * c.j / state.j : last.E_rev; }, DiagramUI.series(3), 1.5, [6, 4]);
+        ctx.fillStyle = DiagramUI.series(0); ctx.beginPath(); ctx.arc(X(state.j / 1e4), Y(last.V_cell), coarse ? 3.5 : 4.5, 0, 2 * Math.PI); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = muted; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('U_tn ' + DiagramUI.fmt(last.U_tn, { precision: 3 }) + ' V', L + 6, Y(last.U_tn) - 2);
+      }
+    });
+    adoptStage(ui);
+
+    ui.ready();
+    window['__electrolyser_sizing'] = { ui: ui, state: state, solve: solve, last: function () { return last; } };
+  }
+
+  /* ======================================================= 3. the data layer */
+  function isPosNum(v) {
+    return typeof v === 'number' && isFinite(v) && v > 0;
+  }
+
+  function buildRecord() {
+    if (!last) return null;
+    var inKeys = ['level', 'tech', 'P_AC', 'j', 'T', 'p_c', 'p_a', 'ASR', 'j0', 'alpha', 'eta_F', 'eta_rect', 'e_bop', 'A_cell', 'cells_stack', 'FLH', 'deg_uV_h', 'life_h', 'U_steam', 'x_H2O_in'],
+        outKeys = ['E_rev', 'eta_act', 'eta_ohm', 'V_cell', 'V_eol', 'V_avg', 'U_tn', 'eta_V_tn', 'e_dc_kWh_kg', 'e_sys_kWh_kg', 'e_sys_avg_kWh_kg', 'e_sys_eol_kWh_kg',
+                   'eta_sys_LHV', 'eta_sys_HHV', 'mdot_kg_h', 'm_year_t', 'P_DC', 'P_bop', 'I_total', 'N_cells', 'N_stacks', 'Q_stack', 'water_kg_h', 'o2_kg_h',
+                   'e_steam_th_kWh_kg', 'stack_years', 'basis', 'verdict'],
+        inputs = {}, outputs = {}, units = {}, warnings = [], i, k;
+    var UNIT = {
+      level: '-', tech: '-', P_AC: 'W', j: 'A/m2', T: 'K', p_c: 'Pa', p_a: 'Pa', ASR: 'ohm m2', j0: 'A/m2', alpha: '-', eta_F: '-', eta_rect: '-',
+      e_bop: 'kWh/kg', A_cell: 'm2', cells_stack: '-', FLH: 'h/y', deg_uV_h: 'uV/h', life_h: 'h', U_steam: '-', x_H2O_in: '-',
+      E_rev: 'V', eta_act: 'V', eta_ohm: 'V', V_cell: 'V', V_eol: 'V', V_avg: 'V', U_tn: 'V', eta_V_tn: '-', e_dc_kWh_kg: 'kWh/kg', e_sys_kWh_kg: 'kWh/kg',
+      e_sys_avg_kWh_kg: 'kWh/kg', e_sys_eol_kWh_kg: 'kWh/kg', eta_sys_LHV: '- (LHV)', eta_sys_HHV: '- (HHV)', mdot_kg_h: 'kg/h', m_year_t: 't/y', P_DC: 'W',
+      P_bop: 'W', I_total: 'A', N_cells: '-', N_stacks: '-', Q_stack: 'W', water_kg_h: 'kg/h', o2_kg_h: 'kg/h', e_steam_th_kWh_kg: 'kWh/kg (thermal)',
+      stack_years: 'y', basis: '-', verdict: '-'
+    };
+    for (i = 0; i < inKeys.length; i++) { k = inKeys[i]; inputs[k] = state[k]; units[k] = UNIT[k]; }
+    if (last.ok) {
+      for (i = 0; i < outKeys.length; i++) { k = outKeys[i]; outputs[k] = last[k]; units[k] = UNIT[k]; }
+      warnings = (last.warnings || []).slice();
+    } else {
+      warnings = [last.error];
+    }
+    return {
+      inputs: inputs, outputs: outputs, units: units,
+      model: {
+        equations: [
+          'E_rev = E0(T) + (R T/2F) ln(p_H2 p_O2^0.5 / a_H2O); E0 = 1.229 - 0.9e-3 (T - 298.15) liquid, 1.253 - 2.4516e-4 T steam',
+          'V = E_rev + (R T/(alpha F)) asinh(j/(2 j0)) + ASR j',
+          'SEC_dc = 2 F V / (eta_F M_H2); SEC_sys = SEC_dc/eta_rect + e_bop',
+          'm_H2 = P_AC / SEC_sys; I = P_DC / V; N_cells = ceil(I/(j A_cell))',
+          'V_EOL = V + r_deg life_h; annual output uses V at mid-life',
+          'Q_stack = (V - U_tn) I, U_tn = 1.481 V (liquid) or 1.285 V (steam)'
+        ],
+        ranges: ['PEM/AEL: T <= 100 C', 'SOEC: 600-900 C', 'single lumped activation term, no mass-transport loss'],
+        notes: ['Energy basis LHV 119.96 MJ/kg and HHV 141.79 MJ/kg at 25 C', 'Water stoichiometric only (no purification reject)', 'SOEC steam heat reported separately as thermal energy']
+      },
+      warnings: warnings
+    };
+  }
+
+  function hoRow(o) { var r = {}, k; for (k in o) if (typeof o[k][0] === 'number' && isFinite(o[k][0])) r[k] = { value: o[k][0], unit: o[k][1] }; return r; }
+
+  var HANDOFF = {
+    provides: ['mdot', 'p', 'T'],
+    accepts: [],
+    build: function () {
+      if (!last || !last.ok) return null;
+      return {
+        quantities: {
+          mdot: { value: last.mdot, unit: 'kg/s' },
+          p: { value: state.p_c, unit: 'Pa' },
+          T: { value: Math.min(state.T, 313.15), unit: 'K' }
+        },
+        sets: {
+          h2_product: [hoRow({ purity: [0.999, '-'], e_sys: [last.e_sys_kWh_kg * 3.6e6, 'J/kg'], mdot_year_avg: [last.m_year_t * 1000 / 31536000, 'kg/s'] })],
+          composition: [hoRow({ h2: [1, '-'] })]
+        }
+      };
+    },
+    apply: function () {}
+  };
+
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'electrolyser_sizing',
+        file: 'electrolyser_sizing.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); last = solve(state);
+                                      if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord,
+        handoff: HANDOFF
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

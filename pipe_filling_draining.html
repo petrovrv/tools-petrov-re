@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipe Filling / Draining</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-15.handoff-guard-4-number-locale",
+  "id": "pipe-filling-draining",
+  "file": "pipe_filling_draining.html",
+  "listed": true,
+  "category": "transients",
+  "order": 18,
+  "title": {
+    "en": "Pipe Filling / Draining",
+    "uk": "Заповнення / спорожнення трубопроводу",
+    "de": "Rohrfüllung / -entleerung",
+    "nl": "Leiding vullen / ledigen",
+    "fr": "Remplissage / vidange de conduite",
+    "es": "Llenado / vaciado de tubería",
+    "pl": "Napełnianie / opróżnianie rurociągu"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — inertial liquid filling/draining model coupling tank level and pipe velocity with Darcy/local losses, showing startup and level transient.",
+    "uk": "Pipe / Vessel Transients — інерційна liquid модель filling/draining зі зв’язком tank level та pipe velocity і Darcy/local losses.",
+    "de": "Pipe / Vessel Transients — inertiales Flüssigkeitsmodell für Füllen/Entleeren mit gekoppeltem Behälterstand und Rohrgeschwindigkeit sowie Darcy-/Einzelverlusten.",
+    "nl": "Pipe / Vessel Transients — inertieel vloeistofmodel voor vullen/ledigen met gekoppeld tankniveau en leidingsnelheid plus Darcy/lokale verliezen.",
+    "fr": "Pipe / Vessel Transients — modèle inertiel de remplissage/vidange couplant niveau de réservoir et vitesse en conduite avec pertes Darcy/singulières.",
+    "es": "Pipe / Vessel Transients — modelo inercial de llenado/vaciado que acopla nivel de tanque y velocidad de tubería con pérdidas Darcy/locales.",
+    "pl": "Pipe / Vessel Transients — inercyjny model napełniania/opróżniania sprzęgający poziom zbiornika i prędkość w rurze z oporami Darcy’ego/miejscowymi."
+  },
+  "description": {
+    "en": "A reduced liquid-column ODE: pipe acceleration follows the instantaneous hydrostatic head minus Darcy/local velocity-squared losses, while a finite tank area changes level from the pipe flow.",
+    "uk": "Знижена ODE liquid column: прискорення в трубі задається hydrostatic head мінус Darcy/local v² losses, а finite tank area змінює level від pipe flow.",
+    "de": "Reduzierte Flüssigkeitssäulen-ODE: Rohrbeschleunigung aus hydrostatischer Druckhöhe minus Darcy-/Einzelverlusten proportional v²; endliche Behälterfläche ändert den Füllstand durch den Rohrstrom.",
+    "nl": "Gereduceerde vloeistofkolom-ODE: leidingversnelling uit hydrostatische hoogte minus Darcy/lokale v²-verliezen; eindig tankoppervlak verandert niveau door leidingdebiet.",
+    "fr": "ODE réduite de colonne liquide : accélération par charge hydrostatique instantanée moins pertes Darcy/singulières en v²; la surface finie du réservoir fait évoluer le niveau.",
+    "es": "ODE reducida de columna líquida: aceleración por carga hidrostática instantánea menos pérdidas Darcy/locales v²; el área finita del tanque cambia el nivel por el caudal.",
+    "pl": "Zredukowane ODE słupa cieczy: przyspieszenie z chwilowej wysokości hydrostatycznej minus straty Darcy’ego/miejscowe v²; skończona powierzchnia zbiornika zmienia poziom przez przepływ rury."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Rigid full-bore liquid column, incompressible fluid, no trapped air, free-surface sloshing, cavitation, water hammer, moving wetting front or pipe elasticity. For fast valve events and elastic-wave physics use Water Hammer. The volumetric flow has no field of its own: it is accepted up to the flow whose required head reaches the ±10 000 m bound of the driving-head field, 2.89 m³/s at the default diameter, length, friction factor and fitting coefficient, and that figure is shown at the moment a larger flow is refused.",
+    "uk": "Жорсткий повний стовп нестисливої рідини; без trapped air, free-surface sloshing, cavitation, water hammer, moving wetting front або pipe elasticity. Для fast valve events та elastic waves використовуйте Water Hammer. Об’ємна витрата не має власного поля: її приймають до витрати, чий потрібний напір досягає межі ±10 000 м поля напору, тобто 2,89 м³/с за типових діаметра, довжини, коефіцієнта тертя та коефіцієнта місцевих опорів; це число показують у момент відмови більшій витраті.",
+    "de": "Starre vollgefüllte inkompressible Flüssigkeitssäule; keine eingeschlossene Luft, freie-Oberflächen-Schwingung, Kavitation, Druckstoß, bewegte Benetzungsfront oder Rohrelastizität. Für schnelle Ventilereignisse Water Hammer verwenden. Der Volumenstrom hat kein eigenes Feld: angenommen wird er bis zu dem Strom, dessen erforderliche Förderhöhe die Grenze ±10 000 m des Höhenfeldes erreicht, 2,89 m³/s bei Standarddurchmesser, -länge, -Reibungsbeiwert und -Einzelwiderstand; diese Zahl wird in dem Moment gezeigt, in dem ein größerer Strom abgewiesen wird.",
+    "nl": "Starre volledig gevulde onsamendrukbare vloeistofkolom; geen ingesloten lucht, klotsen, cavitatie, waterslag, bewegend natfront of leidingelasticiteit. Voor snelle klepgebeurtenissen Water Hammer gebruiken. Het volumedebiet heeft geen eigen veld: het wordt aanvaard tot het debiet waarvan de vereiste opvoerhoogte de grens ±10 000 m van het hoogteveld bereikt, 2,89 m³/s bij de standaarddiameter, -lengte, -wrijvingsfactor en -weerstandscoëfficiënt; dat getal wordt getoond op het moment dat een groter debiet wordt geweigerd.",
+    "fr": "Colonne liquide rigide pleine et incompressible; sans air piégé, ballottement, cavitation, coup de bélier, front de mouillage mobile ni élasticité de conduite. Pour événements rapides utiliser Water Hammer. Le débit volumique n’a pas de champ propre : il est accepté jusqu’au débit dont la hauteur requise atteint la borne ±10 000 m du champ de hauteur, soit 2,89 m³/s au diamètre, à la longueur, au coefficient de frottement et au coefficient de perte singulière par défaut ; ce nombre est affiché au moment où un débit plus grand est refusé.",
+    "es": "Columna líquida rígida completamente llena e incompresible; sin aire atrapado, oleaje de superficie, cavitación, golpe de ariete, frente de mojado móvil ni elasticidad de tubería. Para eventos rápidos use Water Hammer. El caudal volumétrico no tiene campo propio: se acepta hasta el caudal cuya altura requerida alcanza el límite de ±10 000 m del campo de altura, 2,89 m³/s con el diámetro, la longitud, el factor de fricción y el coeficiente de pérdida por defecto; esa cifra se muestra en el momento en que se rechaza un caudal mayor.",
+    "pl": "Sztywny pełny słup cieczy nieściśliwej; bez uwięzionego powietrza, falowania powierzchni, kawitacji, uderzenia hydraulicznego, ruchomego frontu zwilżania i sprężystości rury. Dla szybkich zdarzeń użyj Water Hammer. Strumień objętości nie ma własnego pola: jest przyjmowany do strumienia, którego wymagana wysokość podnoszenia osiąga granicę ±10 000 m pola wysokości, czyli 2,89 m³/s przy domyślnej średnicy, długości, współczynniku tarcia i współczynniku oporu miejscowego; ta liczba jest pokazywana w chwili odrzucenia większego strumienia."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "The march was replaced: an L-stable two-stage Rosenbrock scheme whose step comes from its own embedded error estimate, so the reported terminal time no longer depends on the simulated-time window, which previously set the step. It is benchmarked against an independent Python reference that reduces the equation pair to a closed form in the head domain plus one quadrature, with no time step at all, anchored to the frictionless mass-oscillation period, Torricelli's law and the Riccati/tanh limit; 253 checks, all passing. An independent reference and the author's own harness, no third-party review.",
+      "uk": "Схему маршу замінено: L-стійкий двостадійний метод Розенброка, крок якого задає власна вбудована оцінка похибки, тож указаний кінцевий час більше не залежить від вікна часу моделювання, яке раніше визначало крок. Перевірено за незалежним еталоном на Python, що зводить пару рівнянь до замкненої форми в області напору та однієї квадратури, взагалі без кроку за часом, із прив’язкою до періоду безфрикційних коливань маси, закону Торрічеллі та границі Ріккаті/tanh; 253 перевірки, усі пройдено. Незалежний еталон і власний стенд автора, без стороннього рецензування.",
+      "de": "Der Zeitmarsch wurde ersetzt: ein L-stabiles zweistufiges Rosenbrock-Verfahren, dessen Schritt aus der eigenen eingebetteten Fehlerschätzung folgt, sodass die ausgewiesene Endzeit nicht mehr vom Simulationszeitfenster abhängt, das den Schritt früher festlegte. Geprüft gegen eine unabhängige Python-Referenz, die das Gleichungspaar auf eine geschlossene Form im Druckhöhenbereich plus eine einzige Quadratur zurückführt, ganz ohne Zeitschritt, verankert an der Periode der reibungsfreien Massenschwingung, dem Gesetz von Torricelli und dem Riccati/tanh-Grenzfall; 253 Prüfungen, alle bestanden. Eine unabhängige Referenz und der eigene Prüfstand des Autors, keine Prüfung durch Dritte.",
+      "nl": "De tijdmars is vervangen: een L-stabiele tweestaps Rosenbrock-methode waarvan de stap volgt uit de eigen ingebedde foutschatting, zodat de gerapporteerde eindtijd niet langer afhangt van het simulatietijdvenster, dat de stap voorheen bepaalde. Getoetst aan een onafhankelijke Python-referentie die het stelsel herleidt tot een gesloten vorm in het opvoerhoogtedomein plus één kwadratuur, zonder enige tijdstap, verankerd aan de periode van de wrijvingsloze massaslingering, de wet van Torricelli en de Riccati/tanh-limiet; 253 controles, alle geslaagd. Een onafhankelijke referentie en het eigen testtuig van de auteur, geen toetsing door derden.",
+      "fr": "La marche temporelle a été remplacée : une méthode de Rosenbrock à deux étages, L-stable, dont le pas découle de sa propre estimation d’erreur intégrée, de sorte que le temps final rapporté ne dépend plus de la fenêtre de temps simulé, qui fixait auparavant le pas. Vérifiée contre une référence Python indépendante qui ramène le couple d’équations à une forme fermée dans le domaine de la charge plus une seule quadrature, sans aucun pas de temps, ancrée sur la période de l’oscillation de masse sans frottement, la loi de Torricelli et la limite de Riccati/tanh ; 253 contrôles, tous réussis. Une référence indépendante et le banc d’essai de l’auteur, sans revue par un tiers.",
+      "es": "La marcha temporal se ha sustituido: un método de Rosenbrock de dos etapas, L-estable, cuyo paso procede de su propia estimación de error incorporada, de modo que el tiempo final informado ya no depende de la ventana de tiempo simulado, que antes fijaba el paso. Comprobada frente a una referencia independiente en Python que reduce el par de ecuaciones a una forma cerrada en el dominio de la carga más una única cuadratura, sin ningún paso de tiempo, anclada en el período de la oscilación de masa sin fricción, la ley de Torricelli y el límite de Riccati/tanh; 253 comprobaciones, todas superadas. Una referencia independiente y el banco de pruebas del propio autor, sin revisión por terceros.",
+      "pl": "Marsz czasowy wymieniono: L-stabilna dwustopniowa metoda Rosenbrocka, której krok wynika z własnej wbudowanej oceny błędu, więc podawany czas końcowy nie zależy już od okna czasu symulacji, które wcześniej wyznaczało krok. Sprawdzono względem niezależnego wzorca w Pythonie, który sprowadza układ równań do postaci zamkniętej w dziedzinie wysokości ciśnienia oraz jednej kwadratury, bez żadnego kroku czasowego, zakotwiczonego w okresie bezstratnych drgań masy, prawie Torricellego i granicy Riccatiego/tanh; 253 sprawdzenia, wszystkie zaliczone. Niezależny wzorzec i własne narzędzie testowe autora, bez recenzji strony trzeciej."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "pipe-filling-draining-independent-python-v1",
+        "reference": "An independent Python reference written from a first-principles re-derivation of the rigid liquid-column momentum equation and the pipe/tank continuity equation, solved by a structurally different route: the pair is reduced analytically to a linear first-order ODE for v^2 as a function of the driving head, which is solved in closed form, so the velocity-versus-head curve, the peak velocity and the level at which the column stops are exact algebra with no discretisation at all; the trajectory in time is a single quadrature in the head domain with both square-root endpoint singularities removed exactly by substitution, so there is no time step anywhere in the reference. Verified before use against an implicit stiff integrator (scipy Radau) run on the original two-equation system, against order doubling of its own quadrature, and against published closed forms and asymptotics: the frictionless mass-oscillation period and amplitude, the frozen-head Riccati/tanh solution, Torricelli's law and the Torricelli drain-time law with its leading inertial correction, and Colebrook-White solved to convergence. The page is driven in a real browser through its own permalink state codec and every quantity it reports is graded against that reference. The superseded in-page limit checks are retained in this artifact, relabelled as self-checks, with their acceptance bands rebuilt so that none is a function of the simulated-time input.",
+        "reference_provenance": "Independent second implementation in Python (gen_pipe_filling_draining.py, sections 1-3), derived from first principles and solved by closed form plus quadrature in the head domain; no part of the page JavaScript is ported or paraphrased. Run outside the browser; the page is driven separately through its permalink state codec and only its reported outputs are read. Self-verified by 40 checks against published closed forms, published asymptotics, an implicit stiff integrator and quadrature order doubling before any grading. Equation numbering in the cited monographs could not be verified offline, so those two results are cited by edition and chapter subject rather than by equation number; the equations themselves are written out in section 1 and re-derived there.",
+        "citations": [
+          "Rigid water-column (lumped-inertia) momentum equation (L/g) dV/dt = H - c V|V| together with tank continuity dh/dt = -+ (A_pipe/A_tank) V: E. B. Wylie and V. L. Streeter, Fluid Transients in Systems, Prentice Hall, Englewood Cliffs NJ, 1993, rigid-column chapter; and M. H. Chaudhry, Applied Hydraulic Transients, 3rd ed., Springer, New York, 2014, surge-tank chapter. Re-derived from Newton's second law for the column in section 1 of this file and implemented from that derivation.",
+          "Frictionless mass oscillation of a tank-pipe-reservoir system: the level is harmonic about the boundary level at omega = sqrt(g A_pipe/(A_tank L)), period T = 2 pi sqrt(A_tank L/(g A_pipe)), with the column overshooting by exactly its initial head. Classical frictionless surge-tank result (Chaudhry, 3rd ed., surge-tank chapter; Wylie and Streeter, 1993, rigid-column chapter). Used here as the anchor for the terminal time and terminal level of the zero-loss cases.",
+          "Riccati/tanh solution of the rigid-column equation at frozen head, v = v_inf tanh(g H t/(L v_inf)) with v_inf = sqrt(2 g H/K_t): obtained in section 1 by integrating (1) with H held constant; the same limit is quoted in the surge-tank and rigid-column literature above.",
+          "Torricelli's law v = sqrt(2 g H) for efflux under a head (E. Torricelli, De Motu Gravium Naturaliter Descendentium, 1644), recovered here as the K_t = 1 quasi-steady limit, and its integrated drain-time law t = (2 sqrt(H0)/alpha) sqrt(K_t/(2 g)), whose leading inertial correction is measured in section 3 at 1.19/(beta H0).",
+          "C. F. Colebrook, Turbulent flow in pipes, with particular reference to the transition region between the smooth and rough pipe laws, Journal of the Institution of Civil Engineers 11 (1939) 133-156. Solved to convergence (bisection on 1/sqrt(f), residual below 1e-15 relative) to set the Darcy factor of the friction-only case at a stated Reynolds number and relative roughness, rather than picking a round number. Reproduces the published smooth-pipe Moody value 0.0180 at Re = 1e5.",
+          "J. G. Verwer, E. J. Spee, J. G. Blom and W. Hundsdorfer, A second-order Rosenbrock method applied to photochemical dispersion problems, SIAM Journal on Scientific Computing 20 (1999) 1456-1480 -- the ROS2 scheme, gamma = 1 - 1/sqrt(2), that the corrected page march now uses. Cited for what the tool does, not as a reference for grading it."
+        ],
+        "cases": 253,
+        "passed": 253,
+        "tolerance": "Every driven output is graded at 1e-6 of its own physical scale: the initial driving head H0 = |h0 - h_boundary| for the level and for the driving-head pressure (through rho g H0), the closed-form peak velocity for velocities and for the volume flow (through A_pipe), and the elapsed transient for the time. That band is fixed by two things and by nothing the user can type. First, the page's march holds its own embedded ROS2 error estimate to RTOL = 1e-7 per step, so 1e-6 is ten times the integrator's declared step-control tolerance; a 400-point randomised scan over the whole declared input box put the largest departure from this reference at 5.0e-8, twenty times inside the band. Second, the reference itself contributes nothing at that level: its Gauss-Legendre quadrature moves by less than 1e-9 relative when the order is quadrupled from 80 to 320, and it agrees with an independent Radau integration of the original two-equation system to between 1e-10 and 1e-8. The band is also far below the tool's own printed precision (elapsed 2 dp, level and velocity 3 dp), so the printed answer is the looser of the two constraints everywhere. Cases with no driving head have no scale, and are graded on absolute floors of 1e-9 m, 1e-12 m/s and 1e-12 s. The published anchors carry their own derived bands, stated per case: the frictionless half period and mirror level at 1e-6 relative; Torricelli's velocity at the finite-tank head drop alpha*v*t/(2 H0) plus the march band; the quasi-steady drain-time law at twice its own leading inertial correction 1.19/(beta H0). The invariance group requires the terminal time, level and peak velocity to be IDENTICAL to the last bit across simulated-time windows from 1.05x to 89700x the transient; the band is zero because the corrected march contains no dependence on that input at all.",
+        "run_at": "2026-10-16T09:53:32Z",
+        "artifact": "benchmarks/pipe_filling_draining.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "Vdot",
+      "p",
+      "dp",
+      "D",
+      "L",
+      "rho"
+    ],
+    "accepts": [
+      "D",
+      "L",
+      "rho",
+      "Vdot"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"mode":"drain","Atank":20.0,"h0":8.0,"hBoundary":0.0,"D":0.15,"L":40.0,"f":0.02,"K":2.0,"rho":998.0,"tEnd":300.0};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  /* AGENTS §2.2.1 -- one locale map for the on-screen chart and the report figure.
+     The digits are this chart's own and are not re-rounded; only the decimal
+     separator is re-written, by the framework map that the report engine reads.
+     group:false keeps the axis label ungrouped, which is what it has always been
+     and what the English rendering must stay (NUMBER-FORMAT.md rule 2). */
+  var sepNum = function (s) {
+    try { return window.DiagramUI.num.sep(s, { digits: 'raw', group: false }); }
+    catch (e) { return s; }
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return sepNum(v.toExponential(1));
+    return sepNum(String(Math.round(v * 1000) / 1000));
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{title:"Pipe filling / draining — inertial liquid-column transient",
+ sumDrain:"A tank of plan area {At} m² standing at {h0} m discharges to a boundary held at {hb} m through a liquid-filled pipe of {D} mm bore and {L} m column length, total loss coefficient {Kt}. After {t} s the level is {h} m and the pipe velocity {v} m/s, carrying {Q} m³/s.",
+ sumFill:"A source held at {hb} m fills a tank of plan area {At} m² from {h0} m through a liquid-filled pipe of {D} mm bore and {L} m column length, total loss coefficient {Kt}. After {t} s the level is {h} m and the pipe velocity {v} m/s, carrying {Q} m³/s.",
+ concHorizon:"The requested horizon ended with driving head still available, so the terminal state is a snapshot of a transient still running.",
+ concDrained:"Driving head was exhausted inside the requested horizon; the march stopped with the levels equal and the column at rest.",
+ system:"One liquid-filled pipe connects a tank of fixed plan area to a boundary held at a fixed level. The level difference drives the column against friction and local losses; the column's own inertia sets how fast the velocity can follow. Tank level and pipe velocity are solved together, so the head decays as the flow moves inventory.",
+ figCap:"Tank level and pipe velocity against time. Level is read on the left axis, velocity on the right.",
+ ckHarm:"Zero-loss harmonic limit",ckHarmB:"Setting the Darcy factor and the local K to zero reduces the pair to d²u/dt² = −(g A_pipe/(A_tank L)) u, whose level history is a cosine about the boundary level. The solver is run on that input vector and compared with the closed solution point by point.",
+ ckTanh:"Constant-head lossy limit",ckTanhB:"A tank plan area large enough that the level does not move holds the head fixed, and dv/dt = (g H − K_t v²/2)/L integrates to v = v_∞ tanh(g H t/(L v_∞)) with v_∞ = √(2 g H/K_t). The solver is run on that input vector and compared with the closed solution point by point.",
+ ckHandoff:"Handoff level closure",ckHandoffB:"The SI handoff turns an incoming volume flow into a level offset ΔH = v²(fL/D + K)/(2g), placed above the boundary for drain and below it for fill. Inverting that head through the same loss coefficient must return the velocity it was built from, and the two branches must sit symmetrically about the boundary level.",
+ ckConv:"Step-refinement convergence",ckConvB:"The same march under a step-control tolerance of 1e-6 and of 1e-7, each measured against the zero-loss closed solution. The scheme is a second-order Rosenbrock method under error control, so tightening the tolerance must not increase the departure.",
+ ckHorizon:"Termination branch",ckHorizonB:"The march stops either at the requested simulation time or when the driving head reaches zero with the column at rest. Which one occurred decides whether the terminal state can be read as a settled state.",
+ ckHead:"Terminal driving head",ckHeadB:"Head remaining at the last step, on the branch that ran. Pipe velocity is clipped at zero in the march, so a level that crosses the boundary cannot flow back and a negative head would mean the column overshot.",
+ flowTank:"Tank (plan area, level)",flowPipe:"Liquid-filled pipe (D, L, f, K)",flowBoundary:"Boundary level",flowSource:"Source level",
+ rDrain:"drain",rFill:"fill",rHorizon:"simulation time reached",rDrained:"driving head exhausted",
+ rVdot:"Volume flow",rPeak:"Peak pipe velocity",rDrive:"Driving head pressure",
+ rH0:"Initial tank level",rHB:"Boundary level",rHead0:"Initial driving head",rHeadEnd:"Terminal driving head",
+ rKt:"Total loss coefficient fL/D + K",rApipe:"Pipe flow area",rAlpha:"Area ratio A_pipe / A_tank",
+ rVol:"Volume transferred",rVqs:"Quasi-steady velocity at terminal head",rTau:"Inertial time constant",
+ rModeWhy:"Sets the sign of the level equation and which side supplies the head",
+ rKtWhy:"Fixes the velocity the head can sustain: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Fixes how fast the head decays as inventory moves: dh/dt = ±(A_pipe/A_tank) v",
+ riskWaveT:"Elastic wave propagation",riskWave:"The column is treated as rigid and incompressible, so no pressure wave travels along it. A valve closure or pump trip that matters on the wave timescale 2L/a belongs to the water-hammer model, which this tool names as its handoff target.",
+ riskClipT:"Velocity clipped at zero",riskClip:"The march holds pipe velocity at or above zero, so the column cannot reverse. A case whose level crosses the boundary stops there instead of oscillating back, and the terminal driving head reports whether that happened.",
+ riskFricT:"Constant friction factor",riskFric:"The Darcy factor is an input held fixed for the whole transient. It does not follow the Reynolds number as velocity rises from rest, so the early part of the acceleration carries that error.",
+ mNote:"Rigid incompressible liquid column of fixed length in a rigid pipe. Constant Darcy factor and local K, uniform tank plan area, fixed boundary level, no trapped gas and no wave elasticity."},
+uk:{title:"Заповнення / спорожнення труби — інерційний перехідний процес стовпа рідини",
+ sumDrain:"Резервуар площею {At} м² з рівнем {h0} м спорожнюється до межі на рівні {hb} м через заповнену рідиною трубу діаметром {D} мм і довжиною стовпа {L} м, сумарний коефіцієнт втрат {Kt}. Через {t} с рівень становить {h} м, швидкість у трубі {v} м/с, витрата {Q} м³/с.",
+ sumFill:"Джерело на рівні {hb} м заповнює резервуар площею {At} м² з рівня {h0} м через заповнену рідиною трубу діаметром {D} мм і довжиною стовпа {L} м, сумарний коефіцієнт втрат {Kt}. Через {t} с рівень становить {h} м, швидкість у трубі {v} м/с, витрата {Q} м³/с.",
+ concHorizon:"Задане вікно завершилося, коли рушійний напір ще залишався, тож кінцевий стан — це зріз процесу, що триває.",
+ concDrained:"Рушійний напір вичерпався в межах заданого вікна; розрахунок зупинився при рівних рівнях і нерухомому стовпі.",
+ system:"Одна заповнена рідиною труба з’єднує резервуар сталої площі з межею на фіксованому рівні. Різниця рівнів жене стовп проти тертя та місцевих опорів; інерція самого стовпа визначає, наскільки швидко змінюється швидкість. Рівень і швидкість розв’язуються разом, тому напір спадає в міру перетікання об’єму.",
+ figCap:"Рівень у резервуарі та швидкість у трубі за часом. Рівень читається на лівій осі, швидкість — на правій.",
+ ckHarm:"Границя без втрат — гармонічна",ckHarmB:"Нульові коефіцієнт Дарсі й місцевий K зводять систему до d²u/dt² = −(g A_труби/(A_резерв L)) u, і рівень стає косинусом навколо граничного рівня. Розв’язувач запускають на цьому наборі вхідних даних і зіставляють із замкненим розв’язком поточково.",
+ ckTanh:"Границя сталого напору з втратами",ckTanhB:"Достатньо велика площа резервуара утримує напір незмінним, і dv/dt = (g H − K_t v²/2)/L інтегрується у v = v_∞ tanh(g H t/(L v_∞)) з v_∞ = √(2 g H/K_t). Розв’язувач запускають на цьому наборі вхідних даних і зіставляють із замкненим розв’язком поточково.",
+ ckHandoff:"Замикання рівня при передаванні",ckHandoffB:"Передавання SI перетворює вхідну об’ємну витрату на зсув рівня ΔH = v²(fL/D + K)/(2g), розміщений вище межі для спорожнення і нижче для заповнення. Обернення цього напору через той самий коефіцієнт втрат має повернути початкову швидкість, а дві гілки мають лежати симетрично відносно граничного рівня.",
+ ckConv:"Збіжність при згущенні кроку",ckConvB:"Той самий марш із допуском керування кроком 1e-6 і 1e-7, кожен зіставлений із замкненим розв’язком без втрат. Схема — метод Розенброка другого порядку з контролем похибки, тож звуження допуску не може збільшити відхилення.",
+ ckHorizon:"Гілка завершення",ckHorizonB:"Розрахунок зупиняється або на заданому часі моделювання, або коли рушійний напір сягає нуля при нерухомому стовпі. Те, що сталося, визначає, чи можна читати кінцевий стан як усталений.",
+ ckHead:"Кінцевий рушійний напір",ckHeadB:"Напір, що залишився на останньому кроці, для гілки, яка виконувалася. Швидкість у трубі обмежена знизу нулем, тож рівень, що перетнув межу, не може потекти назад, а від’ємний напір означав би перебіг стовпа.",
+ flowTank:"Резервуар (площа, рівень)",flowPipe:"Заповнена рідиною труба (D, L, f, K)",flowBoundary:"Граничний рівень",flowSource:"Рівень джерела",
+ rDrain:"спорожнення",rFill:"заповнення",rHorizon:"досягнуто час моделювання",rDrained:"рушійний напір вичерпано",
+ rVdot:"Об’ємна витрата",rPeak:"Пікова швидкість у трубі",rDrive:"Тиск рушійного напору",
+ rH0:"Початковий рівень у резервуарі",rHB:"Граничний рівень",rHead0:"Початковий рушійний напір",rHeadEnd:"Кінцевий рушійний напір",
+ rKt:"Сумарний коефіцієнт втрат fL/D + K",rApipe:"Площа перерізу труби",rAlpha:"Відношення площ A_труби / A_резерв",
+ rVol:"Перекачаний об’єм",rVqs:"Квазістаціонарна швидкість при кінцевому напорі",rTau:"Інерційна стала часу",
+ rModeWhy:"Задає знак рівняння рівня і те, який бік дає напір",
+ rKtWhy:"Визначає швидкість, яку здатен утримати напір: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Визначає, як швидко спадає напір у міру перетікання: dh/dt = ±(A_труби/A_резерв) v",
+ riskWaveT:"Поширення пружних хвиль",riskWave:"Стовп вважається жорстким і нестисливим, тож хвиля тиску ним не біжить. Закриття засувки чи зупинка насоса, що мають значення на часовому масштабі 2L/a, належать до моделі гідроудару, яку цей інструмент вказує як ціль передавання.",
+ riskClipT:"Швидкість обмежена нулем",riskClip:"Розрахунок тримає швидкість у трубі не нижче нуля, тож стовп не може розвернутися. Випадок, у якому рівень перетинає межу, зупиняється там замість коливання назад, а кінцевий рушійний напір показує, чи це сталося.",
+ riskFricT:"Сталий коефіцієнт тертя",riskFric:"Коефіцієнт Дарсі — вхідна величина, незмінна на весь процес. Він не стежить за числом Рейнольдса, поки швидкість зростає від нуля, тож рання частина розгону несе цю похибку.",
+ mNote:"Жорсткий нестисливий стовп рідини сталої довжини в жорсткій трубі. Сталі коефіцієнт Дарсі й місцевий K, рівномірна площа резервуара, фіксований граничний рівень, без защемленого газу і без пружності хвиль."},
+de:{title:"Rohrfüllung / -entleerung — träger Flüssigkeitssäulenvorgang",
+ sumDrain:"Ein Behälter mit {At} m² Grundfläche auf {h0} m entleert zu einem Randniveau von {hb} m durch ein flüssigkeitsgefülltes Rohr mit {D} mm Durchmesser und {L} m Säulenlänge, Gesamtverlustbeiwert {Kt}. Nach {t} s liegt der Stand bei {h} m und die Rohrgeschwindigkeit bei {v} m/s, entsprechend {Q} m³/s.",
+ sumFill:"Eine Quelle auf {hb} m füllt einen Behälter mit {At} m² Grundfläche von {h0} m aus durch ein flüssigkeitsgefülltes Rohr mit {D} mm Durchmesser und {L} m Säulenlänge, Gesamtverlustbeiwert {Kt}. Nach {t} s liegt der Stand bei {h} m und die Rohrgeschwindigkeit bei {v} m/s, entsprechend {Q} m³/s.",
+ concHorizon:"Das angeforderte Fenster endete, während noch Treibhöhe vorhanden war; der Endzustand ist eine Momentaufnahme eines laufenden Vorgangs.",
+ concDrained:"Die Treibhöhe war innerhalb des angeforderten Fensters aufgebraucht; die Rechnung hielt bei gleichen Niveaus und ruhender Säule an.",
+ system:"Ein flüssigkeitsgefülltes Rohr verbindet einen Behälter fester Grundfläche mit einem Rand auf festem Niveau. Die Niveaudifferenz treibt die Säule gegen Reibung und Einzelwiderstände; die Trägheit der Säule bestimmt, wie schnell die Geschwindigkeit folgen kann. Stand und Geschwindigkeit werden gemeinsam gelöst, sodass die Treibhöhe mit der verschobenen Menge abfällt.",
+ figCap:"Behälterstand und Rohrgeschwindigkeit über der Zeit. Der Stand wird links abgelesen, die Geschwindigkeit rechts.",
+ ckHarm:"Verlustfreier harmonischer Grenzfall",ckHarmB:"Darcy-Beiwert und Einzel-K gleich null führen auf d²u/dt² = −(g A_Rohr/(A_Behälter L)) u; der Standverlauf ist dann ein Kosinus um das Randniveau. Der Solver wird auf diesem Eingabevektor gefahren und Punkt für Punkt mit der geschlossenen Lösung verglichen.",
+ ckTanh:"Verlustbehafteter Grenzfall fester Treibhöhe",ckTanhB:"Eine so große Grundfläche, dass der Stand stehen bleibt, hält die Treibhöhe fest, und dv/dt = (g H − K_t v²/2)/L integriert zu v = v_∞ tanh(g H t/(L v_∞)) mit v_∞ = √(2 g H/K_t). Der Solver wird auf diesem Eingabevektor gefahren und Punkt für Punkt mit der geschlossenen Lösung verglichen.",
+ ckHandoff:"Niveauschluss der Übergabe",ckHandoffB:"Die SI-Übergabe setzt einen eingehenden Volumenstrom in einen Niveauversatz ΔH = v²(fL/D + K)/(2g) um, oberhalb des Randes beim Entleeren und unterhalb beim Füllen. Die Rückrechnung dieser Höhe über denselben Verlustbeiwert muss die Ausgangsgeschwindigkeit liefern, und beide Zweige müssen symmetrisch zum Randniveau liegen.",
+ ckConv:"Konvergenz bei Schrittverfeinerung",ckConvB:"Derselbe Marsch mit einer Schrittsteuerungstoleranz von 1e-6 und von 1e-7, jeweils gegen die verlustfreie geschlossene Lösung gemessen. Das Verfahren ist ein Rosenbrock-Verfahren zweiter Ordnung mit Fehlersteuerung, daher darf eine straffere Toleranz die Abweichung nicht vergrößern.",
+ ckHorizon:"Abbruchzweig",ckHorizonB:"Der Marsch endet entweder bei der angeforderten Simulationszeit oder wenn die Treibhöhe bei ruhender Säule null wird. Was eingetreten ist, entscheidet, ob der Endzustand als eingeschwungen gelesen werden darf.",
+ ckHead:"Treibhöhe am Ende",ckHeadB:"Im letzten Schritt verbleibende Höhe auf dem gefahrenen Zweig. Die Rohrgeschwindigkeit wird im Marsch bei null abgeschnitten, ein Stand jenseits des Randes kann also nicht zurückströmen, und eine negative Höhe hieße, die Säule ist übergeschwungen.",
+ flowTank:"Behälter (Grundfläche, Stand)",flowPipe:"Flüssigkeitsgefülltes Rohr (D, L, f, K)",flowBoundary:"Randniveau",flowSource:"Quellniveau",
+ rDrain:"entleeren",rFill:"füllen",rHorizon:"Simulationszeit erreicht",rDrained:"Treibhöhe aufgebraucht",
+ rVdot:"Volumenstrom",rPeak:"Maximale Rohrgeschwindigkeit",rDrive:"Treibhöhendruck",
+ rH0:"Anfangsstand im Behälter",rHB:"Randniveau",rHead0:"Anfängliche Treibhöhe",rHeadEnd:"Treibhöhe am Ende",
+ rKt:"Gesamtverlustbeiwert fL/D + K",rApipe:"Rohrquerschnitt",rAlpha:"Flächenverhältnis A_Rohr / A_Behälter",
+ rVol:"Verschobenes Volumen",rVqs:"Quasistationäre Geschwindigkeit bei Endhöhe",rTau:"Trägheitszeitkonstante",
+ rModeWhy:"Legt das Vorzeichen der Standgleichung fest und welche Seite die Höhe liefert",
+ rKtWhy:"Bestimmt die Geschwindigkeit, die die Höhe tragen kann: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Bestimmt, wie schnell die Höhe mit der verschobenen Menge abfällt: dh/dt = ±(A_Rohr/A_Behälter) v",
+ riskWaveT:"Elastische Wellenausbreitung",riskWave:"Die Säule gilt als starr und inkompressibel, es läuft also keine Druckwelle durch sie. Ein Schieberschluss oder Pumpenausfall, der auf der Wellenzeitskala 2L/a zählt, gehört zum Druckstoßmodell, das dieses Werkzeug als Übergabeziel nennt.",
+ riskClipT:"Geschwindigkeit bei null abgeschnitten",riskClip:"Der Marsch hält die Rohrgeschwindigkeit bei null oder darüber, die Säule kann also nicht umkehren. Ein Fall, dessen Stand den Rand überschreitet, endet dort statt zurückzuschwingen, und die Treibhöhe am Ende zeigt, ob das eingetreten ist.",
+ riskFricT:"Konstanter Reibungsbeiwert",riskFric:"Der Darcy-Beiwert ist eine für den ganzen Vorgang feste Eingabe. Er folgt der Reynolds-Zahl nicht, während die Geschwindigkeit aus der Ruhe ansteigt; der frühe Teil der Beschleunigung trägt diesen Fehler.",
+ mNote:"Starre inkompressible Flüssigkeitssäule fester Länge in starrem Rohr. Konstanter Darcy-Beiwert und Einzel-K, gleichförmige Behältergrundfläche, festes Randniveau, kein eingeschlossenes Gas, keine Wellenelastizität."},
+nl:{title:"Leiding vullen / ledigen — inertiële vloeistofkolomtransiënt",
+ sumDrain:"Een tank met {At} m² grondvlak op {h0} m loost naar een grens op {hb} m via een vloeistofgevulde leiding van {D} mm boring en {L} m kolomlengte, totale verliescoëfficiënt {Kt}. Na {t} s staat het niveau op {h} m en de leidingsnelheid op {v} m/s, goed voor {Q} m³/s.",
+ sumFill:"Een bron op {hb} m vult een tank met {At} m² grondvlak vanaf {h0} m via een vloeistofgevulde leiding van {D} mm boring en {L} m kolomlengte, totale verliescoëfficiënt {Kt}. Na {t} s staat het niveau op {h} m en de leidingsnelheid op {v} m/s, goed voor {Q} m³/s.",
+ concHorizon:"Het gevraagde venster eindigde terwijl er nog drijfhoogte over was; de eindtoestand is een momentopname van een lopend verloop.",
+ concDrained:"De drijfhoogte was binnen het gevraagde venster op; de berekening stopte bij gelijke niveaus met de kolom in rust.",
+ system:"Eén vloeistofgevulde leiding verbindt een tank met vast grondvlak met een grens op vast niveau. Het niveauverschil drijft de kolom tegen wrijving en lokale weerstanden in; de traagheid van de kolom bepaalt hoe snel de snelheid kan volgen. Niveau en snelheid worden samen opgelost, zodat de drijfhoogte afneemt naarmate inhoud verplaatst wordt.",
+ figCap:"Tankniveau en leidingsnelheid tegen de tijd. Het niveau wordt links afgelezen, de snelheid rechts.",
+ ckHarm:"Verliesvrije harmonische limiet",ckHarmB:"Darcy-factor en lokale K op nul brengen het stelsel terug tot d²u/dt² = −(g A_leiding/(A_tank L)) u, waarmee het niveauverloop een cosinus om het grensniveau is. De solver draait op die invoervector en wordt punt voor punt met de gesloten oplossing vergeleken.",
+ ckTanh:"Verliesgevende limiet bij vaste drijfhoogte",ckTanhB:"Een grondvlak groot genoeg om het niveau stil te houden houdt de drijfhoogte vast, en dv/dt = (g H − K_t v²/2)/L integreert tot v = v_∞ tanh(g H t/(L v_∞)) met v_∞ = √(2 g H/K_t). De solver draait op die invoervector en wordt punt voor punt met de gesloten oplossing vergeleken.",
+ ckHandoff:"Niveausluiting van de overdracht",ckHandoffB:"De SI-overdracht zet een binnenkomend volumedebiet om in een niveauverschuiving ΔH = v²(fL/D + K)/(2g), boven de grens bij ledigen en eronder bij vullen. Die hoogte terugrekenen via dezelfde verliescoëfficiënt moet de oorspronkelijke snelheid opleveren, en beide takken moeten symmetrisch om het grensniveau liggen.",
+ ckConv:"Convergentie bij stapverfijning",ckConvB:"Dezelfde mars met een stapregeltolerantie van 1e-6 en van 1e-7, elk gemeten tegen de verliesvrije gesloten oplossing. Het schema is een Rosenbrock-methode van tweede orde met foutregeling, dus een strakkere tolerantie mag de afwijking niet vergroten.",
+ ckHorizon:"Beëindigingstak",ckHorizonB:"De mars stopt ofwel op de gevraagde simulatietijd, ofwel wanneer de drijfhoogte nul wordt met de kolom in rust. Wat er gebeurde bepaalt of de eindtoestand als ingespeeld gelezen mag worden.",
+ ckHead:"Drijfhoogte aan het eind",ckHeadB:"Resterende hoogte bij de laatste stap, op de tak die liep. De leidingsnelheid wordt in de mars op nul afgekapt, dus een niveau dat de grens passeert kan niet terugstromen, en een negatieve hoogte zou betekenen dat de kolom doorgeschoten is.",
+ flowTank:"Tank (grondvlak, niveau)",flowPipe:"Vloeistofgevulde leiding (D, L, f, K)",flowBoundary:"Grensniveau",flowSource:"Bronniveau",
+ rDrain:"ledigen",rFill:"vullen",rHorizon:"simulatietijd bereikt",rDrained:"drijfhoogte op",
+ rVdot:"Volumedebiet",rPeak:"Piekleidingsnelheid",rDrive:"Drijfhoogtedruk",
+ rH0:"Beginniveau in de tank",rHB:"Grensniveau",rHead0:"Aanvankelijke drijfhoogte",rHeadEnd:"Drijfhoogte aan het eind",
+ rKt:"Totale verliescoëfficiënt fL/D + K",rApipe:"Doorstroomoppervlak leiding",rAlpha:"Oppervlakteverhouding A_leiding / A_tank",
+ rVol:"Verplaatst volume",rVqs:"Quasi-stationaire snelheid bij eindhoogte",rTau:"Traagheidstijdconstante",
+ rModeWhy:"Bepaalt het teken van de niveauvergelijking en welke zijde de hoogte levert",
+ rKtWhy:"Bepaalt de snelheid die de hoogte kan dragen: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Bepaalt hoe snel de hoogte afneemt naarmate inhoud verschuift: dh/dt = ±(A_leiding/A_tank) v",
+ riskWaveT:"Elastische golfvoortplanting",riskWave:"De kolom geldt als star en onsamendrukbaar, dus er loopt geen drukgolf doorheen. Een afsluiterdichting of pompuitval die telt op de golftijdschaal 2L/a hoort bij het waterslagmodel, dat deze tool als overdrachtsdoel noemt.",
+ riskClipT:"Snelheid afgekapt op nul",riskClip:"De mars houdt de leidingsnelheid op nul of hoger, dus de kolom kan niet omkeren. Een geval waarvan het niveau de grens passeert stopt daar in plaats van terug te slingeren, en de drijfhoogte aan het eind laat zien of dat gebeurd is.",
+ riskFricT:"Constante wrijvingsfactor",riskFric:"De Darcy-factor is een invoer die het hele verloop vast blijft. Hij volgt het Reynoldsgetal niet terwijl de snelheid uit stilstand oploopt, dus het vroege deel van de versnelling draagt die fout.",
+ mNote:"Starre onsamendrukbare vloeistofkolom van vaste lengte in een starre leiding. Constante Darcy-factor en lokale K, uniform tankgrondvlak, vast grensniveau, geen ingesloten gas en geen golfelasticiteit."},
+fr:{title:"Remplissage / vidange de conduite — transitoire inertiel de colonne liquide",
+ sumDrain:"Un réservoir de {At} m² de surface au niveau {h0} m se vide vers une limite tenue à {hb} m par une conduite pleine de liquide de {D} mm d’alésage et {L} m de colonne, coefficient de perte total {Kt}. Après {t} s le niveau est de {h} m et la vitesse en conduite de {v} m/s, soit {Q} m³/s.",
+ sumFill:"Une source tenue à {hb} m remplit un réservoir de {At} m² de surface depuis {h0} m par une conduite pleine de liquide de {D} mm d’alésage et {L} m de colonne, coefficient de perte total {Kt}. Après {t} s le niveau est de {h} m et la vitesse en conduite de {v} m/s, soit {Q} m³/s.",
+ concHorizon:"La fenêtre demandée s’est achevée alors qu’il restait de la charge motrice; l’état final est un instantané d’un transitoire en cours.",
+ concDrained:"La charge motrice s’est épuisée à l’intérieur de la fenêtre demandée; le calcul s’est arrêté à niveaux égaux, colonne au repos.",
+ system:"Une conduite pleine de liquide relie un réservoir de surface fixe à une limite tenue à niveau fixe. L’écart de niveau pousse la colonne contre le frottement et les pertes locales; l’inertie de la colonne fixe la vitesse à laquelle le débit peut suivre. Niveau et vitesse sont résolus ensemble, de sorte que la charge décroît à mesure que le volume se déplace.",
+ figCap:"Niveau du réservoir et vitesse en conduite en fonction du temps. Le niveau se lit à gauche, la vitesse à droite.",
+ ckHarm:"Limite harmonique sans pertes",ckHarmB:"Un facteur de Darcy et un K local nuls ramènent le système à d²u/dt² = −(g A_conduite/(A_réservoir L)) u, dont le niveau est un cosinus autour du niveau limite. Le solveur est lancé sur ce vecteur d’entrées et comparé point par point à la solution fermée.",
+ ckTanh:"Limite avec pertes à charge constante",ckTanhB:"Une surface de réservoir assez grande pour immobiliser le niveau fige la charge, et dv/dt = (g H − K_t v²/2)/L s’intègre en v = v_∞ tanh(g H t/(L v_∞)) avec v_∞ = √(2 g H/K_t). Le solveur est lancé sur ce vecteur d’entrées et comparé point par point à la solution fermée.",
+ ckHandoff:"Fermeture du niveau au transfert",ckHandoffB:"Le transfert SI convertit un débit volumique entrant en un décalage de niveau ΔH = v²(fL/D + K)/(2g), placé au-dessus de la limite en vidange et en dessous en remplissage. Inverser cette charge avec le même coefficient de perte doit rendre la vitesse de départ, et les deux branches doivent être symétriques par rapport au niveau limite.",
+ ckConv:"Convergence par raffinement du pas",ckConvB:"La même marche avec une tolérance de contrôle du pas de 1e-6 puis de 1e-7, chacune mesurée contre la solution fermée sans pertes. Le schéma est une méthode de Rosenbrock du second ordre à contrôle d’erreur, donc resserrer la tolérance ne doit pas accroître l’écart.",
+ ckHorizon:"Branche d’arrêt",ckHorizonB:"La marche s’arrête soit au temps de simulation demandé, soit quand la charge motrice atteint zéro, colonne au repos. Ce qui s’est produit décide si l’état final peut se lire comme un état établi.",
+ ckHead:"Charge motrice finale",ckHeadB:"Charge restant au dernier pas, sur la branche exécutée. La vitesse en conduite est bornée à zéro dans la marche, donc un niveau qui franchit la limite ne peut refluer, et une charge négative signifierait que la colonne a dépassé.",
+ flowTank:"Réservoir (surface, niveau)",flowPipe:"Conduite pleine de liquide (D, L, f, K)",flowBoundary:"Niveau limite",flowSource:"Niveau source",
+ rDrain:"vidange",rFill:"remplissage",rHorizon:"temps de simulation atteint",rDrained:"charge motrice épuisée",
+ rVdot:"Débit volumique",rPeak:"Vitesse de pointe en conduite",rDrive:"Pression de charge motrice",
+ rH0:"Niveau initial du réservoir",rHB:"Niveau limite",rHead0:"Charge motrice initiale",rHeadEnd:"Charge motrice finale",
+ rKt:"Coefficient de perte total fL/D + K",rApipe:"Section de la conduite",rAlpha:"Rapport de sections A_conduite / A_réservoir",
+ rVol:"Volume transféré",rVqs:"Vitesse quasi permanente à la charge finale",rTau:"Constante de temps inertielle",
+ rModeWhy:"Fixe le signe de l’équation de niveau et le côté qui fournit la charge",
+ rKtWhy:"Fixe la vitesse que la charge peut soutenir : v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Fixe la vitesse de décroissance de la charge à mesure que le volume se déplace : dh/dt = ±(A_conduite/A_réservoir) v",
+ riskWaveT:"Propagation d’onde élastique",riskWave:"La colonne est traitée comme rigide et incompressible, donc aucune onde de pression ne la parcourt. Une fermeture de vanne ou un arrêt de pompe qui compte à l’échelle de temps 2L/a relève du modèle de coup de bélier, que cet outil désigne comme cible de transfert.",
+ riskClipT:"Vitesse bornée à zéro",riskClip:"La marche maintient la vitesse en conduite à zéro ou au-dessus, la colonne ne peut donc pas s’inverser. Un cas dont le niveau franchit la limite s’y arrête au lieu d’osciller en retour, et la charge motrice finale indique si cela s’est produit.",
+ riskFricT:"Facteur de frottement constant",riskFric:"Le facteur de Darcy est une entrée figée pour tout le transitoire. Il ne suit pas le nombre de Reynolds pendant que la vitesse monte depuis l’arrêt, et le début de l’accélération porte cette erreur.",
+ mNote:"Colonne liquide rigide et incompressible de longueur fixe dans une conduite rigide. Facteur de Darcy et K local constants, surface de réservoir uniforme, niveau limite fixe, sans gaz piégé ni élasticité d’onde."},
+es:{title:"Llenado / vaciado de tubería — transitorio inercial de columna líquida",
+ sumDrain:"Un tanque de {At} m² de planta al nivel {h0} m descarga a una frontera fijada en {hb} m por una tubería llena de líquido de {D} mm de diámetro y {L} m de columna, coeficiente de pérdida total {Kt}. Tras {t} s el nivel es {h} m y la velocidad en tubería {v} m/s, equivalente a {Q} m³/s.",
+ sumFill:"Una fuente fijada en {hb} m llena un tanque de {At} m² de planta desde {h0} m por una tubería llena de líquido de {D} mm de diámetro y {L} m de columna, coeficiente de pérdida total {Kt}. Tras {t} s el nivel es {h} m y la velocidad en tubería {v} m/s, equivalente a {Q} m³/s.",
+ concHorizon:"La ventana solicitada terminó con carga motriz aún disponible; el estado final es una instantánea de un transitorio en curso.",
+ concDrained:"La carga motriz se agotó dentro de la ventana solicitada; el cálculo se detuvo con niveles iguales y la columna en reposo.",
+ system:"Una tubería llena de líquido conecta un tanque de planta fija con una frontera a nivel fijo. La diferencia de niveles impulsa la columna contra la fricción y las pérdidas locales; la inercia de la columna fija con qué rapidez puede seguir la velocidad. Nivel y velocidad se resuelven juntos, de modo que la carga decae a medida que se traslada volumen.",
+ figCap:"Nivel del tanque y velocidad en tubería frente al tiempo. El nivel se lee en el eje izquierdo y la velocidad en el derecho.",
+ ckHarm:"Límite armónico sin pérdidas",ckHarmB:"Con factor de Darcy y K local nulos el sistema se reduce a d²u/dt² = −(g A_tubería/(A_tanque L)) u, y el nivel es un coseno alrededor del nivel de frontera. El solver se ejecuta sobre ese vector de entradas y se compara punto a punto con la solución cerrada.",
+ ckTanh:"Límite con pérdidas a carga constante",ckTanhB:"Una planta lo bastante grande para inmovilizar el nivel mantiene fija la carga, y dv/dt = (g H − K_t v²/2)/L se integra a v = v_∞ tanh(g H t/(L v_∞)) con v_∞ = √(2 g H/K_t). El solver se ejecuta sobre ese vector de entradas y se compara punto a punto con la solución cerrada.",
+ ckHandoff:"Cierre de nivel en la transferencia",ckHandoffB:"La transferencia SI convierte un caudal volumétrico entrante en un desplazamiento de nivel ΔH = v²(fL/D + K)/(2g), por encima de la frontera en vaciado y por debajo en llenado. Invertir esa carga con el mismo coeficiente de pérdida debe devolver la velocidad de partida, y ambas ramas deben quedar simétricas respecto al nivel de frontera.",
+ ckConv:"Convergencia al refinar el paso",ckConvB:"La misma marcha con una tolerancia de control de paso de 1e-6 y de 1e-7, medida cada una contra la solución cerrada sin pérdidas. El esquema es un método de Rosenbrock de segundo orden con control de error, así que estrechar la tolerancia no debe aumentar la desviación.",
+ ckHorizon:"Rama de terminación",ckHorizonB:"La marcha se detiene en el tiempo de simulación solicitado o cuando la carga motriz llega a cero con la columna en reposo. Lo ocurrido decide si el estado final puede leerse como estado asentado.",
+ ckHead:"Carga motriz final",ckHeadB:"Carga restante en el último paso, en la rama que se ejecutó. La velocidad en tubería se recorta a cero en la marcha, así que un nivel que cruza la frontera no puede refluir, y una carga negativa significaría que la columna se pasó.",
+ flowTank:"Tanque (planta, nivel)",flowPipe:"Tubería llena de líquido (D, L, f, K)",flowBoundary:"Nivel de frontera",flowSource:"Nivel de fuente",
+ rDrain:"vaciado",rFill:"llenado",rHorizon:"tiempo de simulación alcanzado",rDrained:"carga motriz agotada",
+ rVdot:"Caudal volumétrico",rPeak:"Velocidad máxima en tubería",rDrive:"Presión de carga motriz",
+ rH0:"Nivel inicial del tanque",rHB:"Nivel de frontera",rHead0:"Carga motriz inicial",rHeadEnd:"Carga motriz final",
+ rKt:"Coeficiente de pérdida total fL/D + K",rApipe:"Área de paso de la tubería",rAlpha:"Relación de áreas A_tubería / A_tanque",
+ rVol:"Volumen trasegado",rVqs:"Velocidad cuasiestacionaria a la carga final",rTau:"Constante de tiempo inercial",
+ rModeWhy:"Fija el signo de la ecuación de nivel y qué lado aporta la carga",
+ rKtWhy:"Fija la velocidad que la carga puede sostener: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Fija con qué rapidez decae la carga al trasladarse volumen: dh/dt = ±(A_tubería/A_tanque) v",
+ riskWaveT:"Propagación de onda elástica",riskWave:"La columna se trata como rígida e incompresible, así que ninguna onda de presión la recorre. Un cierre de válvula o una parada de bomba que cuente en la escala 2L/a pertenece al modelo de golpe de ariete, que esta herramienta señala como destino de transferencia.",
+ riskClipT:"Velocidad recortada a cero",riskClip:"La marcha mantiene la velocidad en tubería en cero o por encima, de modo que la columna no puede invertirse. Un caso cuyo nivel cruza la frontera se detiene allí en vez de oscilar de vuelta, y la carga motriz final indica si eso ocurrió.",
+ riskFricT:"Factor de fricción constante",riskFric:"El factor de Darcy es una entrada fija para todo el transitorio. No sigue al número de Reynolds mientras la velocidad sube desde el reposo, y la parte temprana de la aceleración arrastra ese error.",
+ mNote:"Columna líquida rígida e incompresible de longitud fija en tubería rígida. Factor de Darcy y K local constantes, planta de tanque uniforme, nivel de frontera fijo, sin gas atrapado ni elasticidad de onda."},
+pl:{title:"Napełnianie / opróżnianie rurociągu — inercyjny stan przejściowy słupa cieczy",
+ sumDrain:"Zbiornik o polu {At} m² na poziomie {h0} m opróżnia się do brzegu utrzymywanego na {hb} m przez wypełniony cieczą rurociąg o średnicy {D} mm i długości słupa {L} m, sumaryczny współczynnik strat {Kt}. Po {t} s poziom wynosi {h} m, prędkość w rurze {v} m/s, co daje {Q} m³/s.",
+ sumFill:"Źródło utrzymywane na {hb} m napełnia zbiornik o polu {At} m² z poziomu {h0} m przez wypełniony cieczą rurociąg o średnicy {D} mm i długości słupa {L} m, sumaryczny współczynnik strat {Kt}. Po {t} s poziom wynosi {h} m, prędkość w rurze {v} m/s, co daje {Q} m³/s.",
+ concHorizon:"Żądane okno zakończyło się, gdy wysokość napędowa była jeszcze dostępna; stan końcowy to migawka trwającego procesu.",
+ concDrained:"Wysokość napędowa wyczerpała się w żądanym oknie; obliczenie zatrzymało się przy równych poziomach i słupie w spoczynku.",
+ system:"Jeden wypełniony cieczą rurociąg łączy zbiornik o stałym polu z brzegiem na stałym poziomie. Różnica poziomów pcha słup wbrew tarciu i oporom miejscowym; bezwładność samego słupa decyduje, jak szybko prędkość może za tym nadążyć. Poziom i prędkość rozwiązywane są razem, więc wysokość napędowa maleje w miarę przemieszczania objętości.",
+ figCap:"Poziom zbiornika i prędkość w rurze w czasie. Poziom odczytuje się na osi lewej, prędkość na prawej.",
+ ckHarm:"Granica bezstratna — harmoniczna",ckHarmB:"Zerowy współczynnik Darcy’ego i zerowe K sprowadzają układ do d²u/dt² = −(g A_rury/(A_zbiornika L)) u, a przebieg poziomu jest kosinusem wokół poziomu brzegowego. Solver uruchamiany jest na tym wektorze danych i porównywany punkt po punkcie z rozwiązaniem zamkniętym.",
+ ckTanh:"Granica stratna przy stałej wysokości",ckTanhB:"Pole zbiornika na tyle duże, by poziom stał w miejscu, utrzymuje wysokość stałą, a dv/dt = (g H − K_t v²/2)/L całkuje się do v = v_∞ tanh(g H t/(L v_∞)) przy v_∞ = √(2 g H/K_t). Solver uruchamiany jest na tym wektorze danych i porównywany punkt po punkcie z rozwiązaniem zamkniętym.",
+ ckHandoff:"Domknięcie poziomu przy przekazaniu",ckHandoffB:"Przekazanie SI zamienia napływający strumień objętości na przesunięcie poziomu ΔH = v²(fL/D + K)/(2g), powyżej brzegu przy opróżnianiu i poniżej przy napełnianiu. Odwrócenie tej wysokości tym samym współczynnikiem strat musi zwrócić wyjściową prędkość, a obie gałęzie muszą leżeć symetrycznie względem poziomu brzegowego.",
+ ckConv:"Zbieżność przy zagęszczaniu kroku",ckConvB:"Ten sam marsz przy tolerancji sterowania krokiem 1e-6 i 1e-7, każdy mierzony wobec bezstratnego rozwiązania zamkniętego. Schemat to metoda Rosenbrocka drugiego rzędu ze sterowaniem błędem, więc zacieśnienie tolerancji nie może zwiększyć odchyłki.",
+ ckHorizon:"Gałąź zakończenia",ckHorizonB:"Marsz kończy się albo na żądanym czasie symulacji, albo gdy wysokość napędowa osiąga zero przy słupie w spoczynku. To, co nastąpiło, rozstrzyga, czy stan końcowy wolno czytać jako ustalony.",
+ ckHead:"Końcowa wysokość napędowa",ckHeadB:"Wysokość pozostała w ostatnim kroku, na gałęzi, która się wykonała. Prędkość w rurze jest w marszu obcinana do zera, więc poziom, który przekroczył brzeg, nie może popłynąć z powrotem, a ujemna wysokość oznaczałaby przeregulowanie słupa.",
+ flowTank:"Zbiornik (pole, poziom)",flowPipe:"Rurociąg wypełniony cieczą (D, L, f, K)",flowBoundary:"Poziom brzegowy",flowSource:"Poziom źródła",
+ rDrain:"opróżnianie",rFill:"napełnianie",rHorizon:"osiągnięto czas symulacji",rDrained:"wyczerpana wysokość napędowa",
+ rVdot:"Strumień objętości",rPeak:"Szczytowa prędkość w rurze",rDrive:"Ciśnienie wysokości napędowej",
+ rH0:"Początkowy poziom w zbiorniku",rHB:"Poziom brzegowy",rHead0:"Początkowa wysokość napędowa",rHeadEnd:"Końcowa wysokość napędowa",
+ rKt:"Sumaryczny współczynnik strat fL/D + K",rApipe:"Pole przekroju rury",rAlpha:"Stosunek pól A_rury / A_zbiornika",
+ rVol:"Przemieszczona objętość",rVqs:"Prędkość quasi-ustalona przy wysokości końcowej",rTau:"Bezwładnościowa stała czasowa",
+ rModeWhy:"Ustala znak równania poziomu i to, która strona dostarcza wysokość",
+ rKtWhy:"Ustala prędkość, jaką wysokość jest w stanie utrzymać: v_∞ = √(2 g ΔH / K_t)",
+ rAreaWhy:"Ustala, jak szybko wysokość maleje w miarę przemieszczania objętości: dh/dt = ±(A_rury/A_zbiornika) v",
+ riskWaveT:"Propagacja fali sprężystej",riskWave:"Słup traktowany jest jako sztywny i nieściśliwy, więc fala ciśnienia przez niego nie biegnie. Zamknięcie zaworu lub wybieg pompy liczące się w skali czasu 2L/a należą do modelu uderzenia hydraulicznego, który to narzędzie wskazuje jako cel przekazania.",
+ riskClipT:"Prędkość obcięta do zera",riskClip:"Marsz utrzymuje prędkość w rurze na poziomie zera lub wyżej, więc słup nie może się odwrócić. Przypadek, w którym poziom przekracza brzeg, zatrzymuje się tam zamiast wahnąć z powrotem, a końcowa wysokość napędowa pokazuje, czy tak się stało.",
+ riskFricT:"Stały współczynnik tarcia",riskFric:"Współczynnik Darcy’ego to dana wejściowa stała na cały proces. Nie podąża za liczbą Reynoldsa, gdy prędkość rośnie od spoczynku, więc wczesna część rozpędzania niesie ten błąd.",
+ mNote:"Sztywny nieściśliwy słup cieczy o stałej długości w sztywnej rurze. Stały współczynnik Darcy’ego i K miejscowe, jednorodne pole zbiornika, stały poziom brzegowy, bez uwięzionego gazu i bez sprężystości falowej."}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '—';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+
+/* Verification computed live from the current state.
+   Two analytic limiting cases of the shipped equations carry the grading. Both
+   are obtained by calling solve() on a modified input vector, so the marched
+   side of every comparison is the shipped solver itself. */
+var DGC_G=9.80665;
+function dgcWith(s,o){var r={};for(var k in s)r[k]=s[k];for(var k in o)r[k]=o[k];return r;}
+function dgcGeom(s){var Ap=Math.PI*s.D*s.D/4;
+  return {Ap:Ap,Kt:s.f*s.L/s.D+s.K,alpha:Ap/s.Atank,
+          head0:(s.mode==='fill'?(s.hBoundary-s.h0):(s.h0-s.hBoundary))};}
+/* The same ROS2 march as solve(), with the step-control tolerance left free so the
+   terminal answer can be watched under refinement. Nothing else differs. There is
+   no partition of the display window left to refine: the step comes from the
+   scheme's own error estimate, so the refinement knob is that tolerance. */
+function dgcMarch(s,rtol){
+  var r=solve(s,rtol);
+  return {x:r.series[0].x,h:r.series[0].y,v:r.series[1].y,t:r.time,vEnd:r.v,steps:r.series[0].x.length};
+}
+/* Zero loss (f = 0, K = 0) reduces the pair to d2u/dt2 = -(g A_pipe / A_tank L) u,
+   so the level is a cosine about the boundary level at omega = sqrt(g A_p/(A_t L)).
+   Returns the largest level departure over the recorded history. */
+function dgcHarmonic(s,rtol){
+  var gm=dgcGeom(s),w=Math.sqrt(DGC_G*gm.Ap/(s.Atank*s.L)),u0=s.h0-s.hBoundary;
+  var r=dgcMarch(dgcWith(s,{f:0,K:0}),rtol);
+  var e=0,at=null;
+  for(var k=0;k<r.x.length;k++){
+    var d=Math.abs(r.h[k]-(s.hBoundary+u0*Math.cos(w*r.x[k])));
+    if(d>e){e=d;at=r.x[k];}
+  }
+  return {err:e,at:at,omega:w,halfPeriod:w>0?Math.PI/w:null,n:r.x.length,t:r.t};
+}
+/* A tank plan area large enough that the level does not move holds the head at
+   its initial value. The velocity equation is then dv/dt = (g H - Kt v^2/2)/L,
+   whose solution is v = v_inf tanh(g H t /(L v_inf)) with v_inf = sqrt(2 g H/Kt). */
+function dgcConstHead(s){
+  var gm=dgcGeom(s),H=gm.head0;
+  if(!(H>0)||!(gm.Kt>0))return null;
+  var r=solve(dgcWith(s,{Atank:s.Atank*1e9}));
+  var vinf=Math.sqrt(2*DGC_G*H/gm.Kt),a=DGC_G*H/s.L;
+  var X=r.series[0].x,V=r.series[1].y,e=0,at=null;
+  for(var k=0;k<X.length;k++){
+    var d=Math.abs(V[k]-vinf*Math.tanh(a*X[k]/vinf));
+    if(d>e){e=d;at=X[k];}
+  }
+  return {err:e,at:at,vinf:vinf,tau:vinf/a,vEnd:V.length?V[V.length-1]:0,n:X.length};
+}
+/* Returns one row per case: what was measured, what it was measured against,
+   the difference and the verdict. No case reports a verdict it cannot show the
+   numbers for. */
+function dgcVerify(s){
+  var out=[],r=solve(s),gm=dgcGeom(s),moved=r.series[0].x.length>0;
+  /* Acceptance bands below are the second-order truncation bound of the ROS2
+     march at its declared step-control tolerance RTOL = 1e-7, expressed on the
+     physical scale each check measures. They do not contain tEnd, and nothing
+     the user can type widens them. */
+  var DGC_TOL_LEVEL=1e-6, DGC_TOL_VEL=1e-5;
+
+  // 1. Zero-loss harmonic limit. Acceptance comes from the solver's own
+  //    step-control tolerance, not from the display window: the march holds its
+  //    embedded error estimate to RTOL = 1e-7 per step, so the level may depart
+  //    from the exact cosine by at most 1e-6 of its amplitude |h0 - hB|.
+  var hm=moved?dgcHarmonic(s,0):null;
+  var hmTol=hm?DGC_TOL_LEVEL*Math.abs(s.h0-s.hBoundary):null;
+  out.push({id:'zero-loss-harmonic-limit',key:'ckHarm',graded:!!hm,
+    got:hm?hm.err:null,ref:0,abs:hm?hm.err:null,rel:null,tol:hmTol,unit:'m',dp:8,
+    pass:hm?hm.err<=hmTol:false,status:hm?(hm.err<=hmTol?'pass':'attention'):'info',
+    extra:hm?{omega:hm.omega,halfPeriod:hm.halfPeriod,at:hm.at,points:hm.n}:null});
+
+  // 2. Constant-head lossy limit. Acceptance is again the scheme's own
+  //    step-control bound, here 1e-5 of the terminal velocity v_inf.
+  var ch=moved?dgcConstHead(s):null;
+  var chTol=ch?DGC_TOL_VEL*ch.vinf:null;
+  out.push({id:'constant-head-tanh-limit',key:'ckTanh',graded:!!ch,
+    got:ch?ch.err:null,ref:0,abs:ch?ch.err:null,rel:null,tol:chTol,unit:'m/s',dp:8,
+    pass:ch?ch.err<=chTol:false,status:ch?(ch.err<=chTol?'pass':'attention'):'info',
+    extra:ch?{vinf:ch.vinf,tau:ch.tau,vEnd:ch.vEnd,at:ch.at}:null});
+
+  // 3. Handoff level closure. The tool's handoff apply() turns an incoming Vdot
+  //    into a level offset headReq = v^2 (fL/D+K)/(2g) placed above the boundary
+  //    for drain and below it for fill. Inverting that head through the same
+  //    loss coefficient must return the velocity it was built from, and the two
+  //    branches must place the level symmetrically about the boundary.
+  var vIn=gm.Ap>0?Math.abs(r.Vdot)/gm.Ap:0;
+  var headReq=vIn*vIn*gm.Kt/(2*DGC_G);
+  var hDrain=s.hBoundary+headReq,hFill=s.hBoundary-headReq;
+  var vBack=gm.Kt>0?Math.sqrt(2*DGC_G*headReq/gm.Kt):0;
+  var relV=vIn>0?Math.abs(vBack-vIn)/vIn:0;
+  // The offsets are formed by adding and subtracting the same head to the same
+  // boundary level, so their sum is a floating-point residue on the scale of
+  // that head; it is held to the same relative precision as the velocity.
+  var relS=headReq>0?Math.abs((hDrain-s.hBoundary)+(hFill-s.hBoundary))/headReq:0;
+  var signOk=headReq>0?(hDrain>s.hBoundary&&hFill<s.hBoundary):(hDrain===hFill);
+  var relH=Math.max(relV,relS),okH=signOk&&relH<=1e-12;
+  out.push({id:'handoff-head-sign-closure',key:'ckHandoff',graded:true,
+    got:vBack,ref:vIn,abs:Math.abs(vBack-vIn),rel:relH,tol:1e-12,unit:'m/s',dp:8,
+    pass:okH,status:okH?'pass':'attention',
+    extra:{headReq:headReq,hDrain:hDrain,hFill:hFill,relVelocity:relV,relSymmetry:relS,signOk:signOk}});
+
+  // 4. Step refinement against the zero-loss exact solution. The march is a
+  //    second-order Rosenbrock method under error control, so tightening the
+  //    step-control tolerance tenfold must not increase the departure from the
+  //    exact level. There is no window partition left to refine.
+  var e1=moved?dgcHarmonic(s,1e-6).err:null,e2=moved?dgcHarmonic(s,1e-7).err:null;
+  var ord=(e1&&e2&&e2>0)?e1/e2:null;
+  out.push({id:'step-refinement-convergence',key:'ckConv',graded:moved,
+    got:e2,ref:e1,abs:e2,rel:null,tol:e1,unit:'m',dp:9,
+    pass:moved?(e2<=e1):false,status:moved?(e2<=e1?'pass':'attention'):'info',
+    extra:{eCoarse:e1,eFine:e2,rtolCoarse:1e-6,rtolFine:1e-7,ratio:ord}});
+
+  // 5. Did the march reach the requested horizon, or run out of driving head?
+  //    Both are legitimate terminations; which one happened decides how the
+  //    terminal state may be read. No criterion, so this is recorded, not graded.
+  var atHorizon=r.time>=s.tEnd-1e-12;
+  out.push({id:'termination-branch',key:'ckHorizon',graded:false,
+    got:r.time,ref:s.tEnd,rel:null,unit:'s',dp:4,pass:true,status:'info',
+    word:atHorizon?'rHorizon':'rDrained'});
+
+  // 6. Terminal driving head and the branch that produced it. The march clips
+  //    velocity at zero, so a level that crosses the boundary cannot flow back;
+  //    the sign of the terminal head says whether that happened.
+  var headEnd=s.mode==='fill'?(s.hBoundary-r.h):(r.h-s.hBoundary);
+  out.push({id:'terminal-driving-head',key:'ckHead',graded:false,
+    got:headEnd,ref:gm.head0,rel:null,unit:'m',dp:5,pass:true,status:'info',
+    word:s.mode==='fill'?'rFill':'rDrain',
+    extra:{crossed:headEnd<0,vTerminal:r.v}});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption and no axis titles. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+function dgcPlotSpec(){
+  if(!last||!last.series||last.series.length<2)return null;
+  return {x:{label:dgcLabel('time'),unit:'s'},
+    series:[{x:last.series[0].x,y:last.series[0].y,label:dgcLabel('level'),unit:'m',color:'#1f6feb'},
+            {x:last.series[1].x,y:last.series[1].y,label:dgcLabel('velocity'),unit:'m/s',color:'#d1651a'}]};
+}
+var DGC_AXIS={
+ time:{en:'Time',uk:'Час',de:'Zeit',nl:'Tijd',fr:'Temps',es:'Tiempo',pl:'Czas'},
+ level:{en:'Tank level',uk:'Рівень у резервуарі',de:'Behälterstand',nl:'Tankniveau',fr:'Niveau du réservoir',es:'Nivel del tanque',pl:'Poziom zbiornika'},
+ velocity:{en:'Pipe velocity',uk:'Швидкість у трубі',de:'Rohrgeschwindigkeit',nl:'Leidingsnelheid',fr:'Vitesse en conduite',es:'Velocidad en tubería',pl:'Prędkość w rurze'}
+};
+function dgcLabel(k){var l=dgcLang();return (DGC_AXIS[k]&&(DGC_AXIS[k][l]||DGC_AXIS[k].en))||k;}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{}, o=rec.outputs||{}, u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var n=dgcNum, g=DGC_G, fill=i.mode==='fill';
+  var gm=dgcGeom(i);
+  var headEnd=fill?(i.hBoundary-o.h_final):(o.h_final-i.hBoundary);
+  var atHorizon=o.elapsed>=i.tEnd-1e-12;
+
+  var summary=dgcRt(fill?'sumFill':'sumDrain')
+    .replace('{At}',n(i.Atank,2)).replace('{h0}',n(i.h0,3)).replace('{hb}',n(i.hBoundary,3))
+    .replace('{D}',n(i.D*1000,1)).replace('{L}',n(i.L,2)).replace('{Kt}',n(gm.Kt,3))
+    .replace('{t}',n(o.elapsed,2)).replace('{h}',n(o.h_final,3))
+    .replace('{v}',n(o.v_final,3)).replace('{Q}',n(o.Vdot_final,4));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcLabel('level'),n(o.h_final,3),'m'),
+    row(dgcLabel('velocity'),n(o.v_final,3),'m/s'),
+    row(dgcRt('rVdot'),n(o.Vdot_final,4),'m³/s'),
+    row(dgcRt('rPeak'),n(o.v_peak,3),'m/s'),
+    row(dgcRt('rDrive'),n(o.dp_head_final/1000,2),'kPa'),
+    row(ctx.label('elapsed',u.elapsed||'s'),n(o.elapsed,2),'s')
+  ];
+  /* Quantities the tiles do not carry: the geometry that sets the timescale and
+     the two closed-form figures the terminal state can be read against. */
+  var vqs=gm.Kt>0&&headEnd>0?Math.sqrt(2*g*headEnd/gm.Kt):null;
+  var vinf0=gm.Kt>0&&gm.head0>0?Math.sqrt(2*g*gm.head0/gm.Kt):null;
+  var tau=vinf0&&gm.head0>0?i.L*vinf0/(g*gm.head0):null;
+  var results=tiles.concat([
+    row(dgcRt('rH0'),n(i.h0,3),'m',dgcRt('rHB')+': '+n(i.hBoundary,3)+' m'),
+    row(dgcRt('rHead0'),n(gm.head0,3),'m',dgcRt('rHeadEnd')+': '+n(headEnd,3)+' m'),
+    row(dgcRt('rKt'),n(gm.Kt,4),'-','fL/D = '+n(i.f*i.L/i.D,4)+' · K = '+n(i.K,3)),
+    row(dgcRt('rApipe'),n(gm.Ap*1e4,3),'cm²',dgcRt('rAlpha')+': '+Number(gm.alpha).toExponential(3)),
+    row(dgcRt('rVol'),n(i.Atank*Math.abs(i.h0-o.h_final),3),'m³'),
+    row(dgcRt('rVqs'),vqs===null?'—':n(vqs,3),'m/s',vinf0===null?'':'v_∞(t=0) = '+n(vinf0,3)+' m/s'),
+    row(dgcRt('rTau'),tau===null?'—':n(tau,2),'s')
+  ]);
+
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'attention');
+    var actual,criterion='',note='';
+    if(c.key==='ckHarm'){
+      actual=c.got===null?'—':'max |Δh| = '+Number(c.got).toExponential(3)+' m';
+      criterion=c.tol===null?'—':'≤ ω |h₀ − h_b| Δt = '+Number(c.tol).toExponential(3)+' m';
+      if(c.extra)note='ω = '+Number(c.extra.omega).toExponential(4)+' rad/s · '+
+        dgcRt('rHead0')+' '+n(gm.head0,3)+' m · '+n(c.extra.points,0)+' pts';
+    } else if(c.key==='ckTanh'){
+      actual=c.got===null?'—':'max |Δv| = '+Number(c.got).toExponential(3)+' m/s';
+      criterion=c.tol===null?'—':'≤ (g H / L) Δt = '+Number(c.tol).toExponential(3)+' m/s';
+      if(c.extra)note='v_∞ = '+n(c.extra.vinf,4)+' m/s · τ = '+n(c.extra.tau,3)+' s';
+    } else if(c.key==='ckHandoff'){
+      actual='max(|Δv|/v, Σ/ΔH) = '+Number(c.rel).toExponential(2);
+      criterion='≤ 1·10⁻¹²';
+      if(c.extra)note='ΔH = '+n(c.extra.headReq,5)+' m · '+dgcRt('rDrain')+' '+n(c.extra.hDrain,5)+
+        ' m · '+dgcRt('rFill')+' '+n(c.extra.hFill,5)+' m · Σ/ΔH = '+Number(c.extra.relSymmetry).toExponential(2);
+    } else if(c.key==='ckConv'){
+      actual=c.got===null?'—':'max |Δh| = '+Number(c.got).toExponential(3)+' m';
+      criterion=c.ref===null?'—':'≤ '+Number(c.ref).toExponential(3)+' m';
+      if(c.extra&&c.extra.eCoarse&&c.extra.eFine)
+        note='step tolerance 1·10⁻⁶ → 1·10⁻⁷, departure ratio '+n(c.extra.eCoarse/c.extra.eFine,2)+'×';
+    } else if(c.key==='ckHorizon'){
+      actual=n(c.got,3)+' s ('+dgcRt(c.word)+')';
+      criterion=ctx.label('tEnd',u.tEnd||'s')+' = '+n(c.ref,3)+' s';
+    } else {
+      actual=n(c.got,4)+' m ('+dgcRt(c.word)+')';
+      criterion=dgcRt('rHead0')+' = '+n(c.ref,4)+' m';
+      if(c.extra)note='v = '+n(c.extra.vTerminal,4)+' m/s';
+    }
+    return {status:st,title:dgcRt(c.key),actual:actual,criterion:criterion,
+            basis:dgcRt(c.key+'B'),detail:note};
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckHorizon'),detail:w});});
+
+  var decisions=[
+    row(ctx.label('mode',u.mode||'-'),dgcRt(fill?'rFill':'rDrain'),'',dgcRt('rModeWhy')),
+    row('f · K',n(i.f,4)+' · '+n(i.K,3),'',dgcRt('rKtWhy')),
+    row('A_pipe / A_tank',Number(gm.alpha).toExponential(3),'',dgcRt('rAreaWhy'))
+  ];
+
+  var g1='1 · '+dgcRt('flowTank'), g2='2 · '+dgcRt('flowPipe');
+  var inputs=[
+    {label:ctx.label('mode',u.mode||'-'),value:dgcRt(fill?'rFill':'rDrain'),unit:'',group:g1},
+    {label:ctx.label('Atank',u.Atank),value:n(i.Atank,3),unit:'m²',group:g1},
+    {label:dgcRt('rH0'),value:n(i.h0,3),unit:'m',group:g1},
+    {label:dgcRt('rHB'),value:n(i.hBoundary,3),unit:'m',group:g1},
+    {label:ctx.label('D',u.D),value:n(i.D*1000,2),unit:'mm',group:g2},
+    {label:ctx.label('L',u.L),value:n(i.L,3),unit:'m',group:g2},
+    {label:ctx.label('f',u.f),value:n(i.f,4),unit:'-',group:g2},
+    {label:ctx.label('K',u.K),value:n(i.K,3),unit:'-',group:g2},
+    {label:ctx.label('rho',u.rho),value:n(i.rho,1),unit:'kg/m³',group:g2},
+    {label:ctx.label('tEnd',u.tEnd),value:n(i.tEnd,2),unit:'s',group:g2}
+  ];
+
+  /* The flow is written in the direction the branch that ran actually moves. */
+  var flow=fill
+    ?[{label:dgcRt('flowSource'),detail:n(i.hBoundary,3)+' m'},
+      {label:dgcRt('flowPipe'),detail:n(i.D*1000,1)+' mm · '+n(i.L,2)+' m · K_t '+n(gm.Kt,3)},
+      {label:dgcRt('flowTank'),detail:n(i.Atank,2)+' m² · '+n(i.h0,3)+' m'}]
+    :[{label:dgcRt('flowTank'),detail:n(i.Atank,2)+' m² · '+n(i.h0,3)+' m'},
+      {label:dgcRt('flowPipe'),detail:n(i.D*1000,1)+' mm · '+n(i.L,2)+' m · K_t '+n(gm.Kt,3)},
+      {label:dgcRt('flowBoundary'),detail:n(i.hBoundary,3)+' m'}];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,
+      conclusion:atHorizon?dgcRt('concHorizon'):dgcRt('concDrained')},
+    system:{text:dgcRt('system'),flow:flow},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskWaveT'),detail:dgcRt('riskWave')},
+           {status:'attention',title:dgcRt('riskClipT'),detail:dgcRt('riskClip')},
+           {status:'attention',title:dgcRt('riskFricT'),detail:dgcRt('riskFric')}],
+    method:{
+      equations:['dv/dt = [g ΔH − (fL/D + K) v|v| / 2] / L','dh/dt = ± (A_pipe / A_tank) v',
+        'ΔH = h − h_b (drain), h_b − h (fill)','V̇ = A_pipe v','Δp = ρ g max(0, ΔH)'],
+      ranges:['incompressible full liquid column','rigid pipe','no trapped gas or water-hammer elasticity'],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Scenarios the published benchmark covers. Both branches of the mode input are
+   exercised, and both ways the march can terminate. They live here rather than
+   in a separate harness so the artifact is defined by the tool it describes. */
+var DGC_BENCH_CASES=[
+ {id:'drain-shipped-default',note:'Shipped default: 20 m² tank at 8 m draining to 0 m through 150 mm / 40 m',
+  s:{mode:'drain',Atank:20,h0:8,hBoundary:0,D:0.15,L:40,f:0.02,K:2,rho:998,tEnd:300}},
+ {id:'drain-window-shorter-than-transient',note:'Same drain case with the window cut to 20 s, before the column is up to speed',
+  s:{mode:'drain',Atank:20,h0:8,hBoundary:0,D:0.15,L:40,f:0.02,K:2,rho:998,tEnd:20}},
+ {id:'drain-to-level-equalisation',note:'Small tank drained until the driving head is exhausted inside the window',
+  s:{mode:'drain',Atank:3,h0:4,hBoundary:0,D:0.25,L:12,f:0.02,K:3,rho:998,tEnd:600}},
+ {id:'fill-from-fixed-source',note:'Fill branch: source held at 7 m filling a 40 m² tank from 0.5 m',
+  s:{mode:'fill',Atank:40,h0:0.5,hBoundary:7,D:0.2,L:60,f:0.018,K:3,rho:998,tEnd:900}},
+ {id:'fill-to-level-equalisation',note:'Fill branch run until the level reaches the source and the column stops',
+  s:{mode:'fill',Atank:5,h0:0.5,hBoundary:7,D:0.25,L:20,f:0.02,K:4,rho:998,tEnd:600}}
+];
+/* Rebuilds the published benchmark record from this page. Open the tool and
+   call window.__dgcBenchmark() to reproduce benchmarks/pipe_filling_draining.json. */
+function dgcBenchmark(scenarios){
+  var list=scenarios||DGC_BENCH_CASES, cases=[], total=0, passed=0;
+  list.forEach(function(sc){
+    var v=dgcVerify(sc.s);
+    var cmp=v.map(function(c){
+      if(c.graded){total++; if(c.pass)passed++;}
+      return {check:c.id,
+        got:(c.got===undefined?null:c.got),
+        ref:(c.ref===undefined?null:c.ref),
+        abs:(c.abs===undefined?null:c.abs),
+        rel:(c.rel===undefined?null:c.rel),
+        tol:(c.tol===undefined?null:c.tol),
+        unit:c.unit,extra:c.extra||null,
+        graded:!!c.graded,
+        status:c.status||(c.pass?'pass':'fail'),ok:c.graded?!!c.pass:null};
+    });
+    cases.push({id:sc.id,note:sc.note,inputs:sc.s,cmp:cmp,
+      pass:cmp.every(function(x){return !x.graded||x.ok;})});
+  });
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var pick=function(ci,id){return cases[ci].cmp.filter(function(x){return x.check===id;})[0];};
+  var h0=pick(0,'zero-loss-harmonic-limit'), t0=pick(0,'constant-head-tanh-limit'), c0=pick(0,'step-refinement-convergence');
+  var ex=function(x,n){return x==null?'—':Number(x).toExponential(n);};
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'pipe-filling-draining',file:'pipe_filling_draining.html',manifest_revision:rev,
+    reference:'IN-PAGE SELF-CHECK, not the benchmark reference. Two closed-form limiting cases of the shipped equations plus a closure of the SI handoff level offset, all recomputed in the page against solve() run on the limiting input vector. The tool is benchmarked against an independent Python reference run outside the browser; these rows are carried inside the published artifact as labelled self-checks.',
+    reference_citations:['Zero loss (f = 0, K = 0) reduces the level of dv/dt = [g dH - (fL/D+K) v|v|/2]/L with dh/dt = +/- (A_pipe/A_tank) v to h_b + (h0 - h_b) cos(omega t), omega = sqrt(g A_pipe/(A_tank L)).','A tank plan area large enough to hold the head fixed reduces the same pair to v = v_inf tanh(g H t/(L v_inf)), v_inf = sqrt(2 g H/K_t).','Handoff level offset dH = v^2 (fL/D + K)/(2g) as implemented in the handoff apply() of pipe_filling_draining.html.'],
+    reference_provenance:'recomputed in page; self-check only. The benchmark reference is gen_pipe_filling_draining.py, an independent second implementation that reduces the pair to a closed form in the head domain plus one quadrature and never runs the page code.',
+    tolerance:'Each limiting case must agree with the closed solution to within the march\'s own step-control bound, expressed on the physical scale it measures and containing no input the user can type: 1e-6 of the level amplitude |h0 - h_b| for the harmonic case and 1e-5 of v_inf for the constant-head case, both ten times the ROS2 embedded-error tolerance RTOL = 1e-7 that the march holds per step. Handoff closure to floating-point precision (1e-12 relative), covering both the velocity recovered from the level offset and the symmetry of the two branch offsets about the boundary level, with the drain offset above that level and the fill offset below it. Tightening the step-control tolerance from 1e-6 to 1e-7 must not increase the level departure. Observed on the shipped default: level departure '+ex(h0&&h0.got,3)+' m against a band of '+ex(h0&&h0.tol,3)+' m, velocity departure '+ex(t0&&t0.got,3)+' m/s against '+ex(t0&&t0.tol,3)+' m/s, and the level departure falling to '+ex(c0&&c0.got,3)+' m at the tighter tolerance.',
+    run_at:new Date().toISOString().replace(/\.\d+Z$/,'Z'),
+    total:total,passed:passed,failed:total-passed,flagged:0,page_errors:[],
+    grading:'total counts checks with an acceptance criterion. The termination branch and the terminal driving head report the state of the solved case and carry no criterion, so they are recorded with their status and excluded from the count.',
+    cases:cases,
+    not_benchmarked:[
+      'Moving wetting front and air entrainment during initial pipe filling.',
+      'Water-hammer elasticity and wave propagation, which the tool hands off rather than models.',
+      'Reverse flow after the level crosses the boundary; the march stops when the column first comes to rest and does not let it swing back.',
+      'Reynolds-dependent friction; the Darcy factor is an input held constant.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page; it is checked by the external harness.',
+      'The finite-tank, finite-loss trajectory itself, which has no closed form and is graded only by the external independent reference.'],
+    notes:[
+      'These are SELF-CHECKS: each case runs the shipped solver and a closed solution inside the page, so they cannot carry the benchmark claim on their own. Inputs, measured value, reference value and tolerance are recorded per check, so any verdict can be reproduced by calling window.__dgcBenchmark() on the tool.',
+      'Both branches of the mode input are covered, and both terminations: three cases end at the requested simulation time, two when the column comes to rest.',
+      'No acceptance band here is a function of the simulated-time input. The bands were rebuilt when the march was replaced; the superseded ones were one of the solver\'s own steps, dt = tEnd/1200, which grew with the error they were meant to catch.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"operation\"]'},{topic:'t3',focus:'[data-dgu-panel=\"pipe\"]'},{topic:'t4',focus:'[data-dgu-panel=\"io\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"mode":"drain","Atank":20,"h0":8,"hBoundary":0});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"mode":"drain","D":0.3,"f":0.005,"K":0.2});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"mode":"drain","Atank":1.5,"h0":8,"hBoundary":0});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"mode":"fill","Atank":20,"h0":2,"hBoundary":8});}}];
+
+
+/* Time integration of the reduced liquid-column pair.  The state is carried as the
+   driving head H (positive while liquid still moves toward the other boundary) and
+   the pipe velocity v:
+
+       dH/dt = -(A_pipe/A_tank) v
+       dv/dt = [g H - (fL/D + K) v|v| / 2] / L
+
+   Two properties of that pair decide the scheme.
+
+   (a) It is stiff.  The drag relaxes velocity on L/(K_t v) -- milliseconds for a
+       short pipe with heavy local loss -- while the level moves on
+       A_tank H/(A_pipe v), which can be days.  The march is therefore ROS2, the
+       two-stage second-order Rosenbrock method of Verwer, Spee, Blom and
+       Hundsdorfer (SIAM J. Sci. Comput. 20 (1999) 1456), with gamma = 1 - 1/sqrt(2).
+       ROS2 is L-stable, so the stiff drag can never grow whatever the step is.
+
+   (b) The step is chosen by the scheme's own embedded first-order estimate against
+       a tolerance fixed on the initial physical scales -- the head amplitude H0 and
+       the smaller of the loss-limited and inertia-limited velocity scales.  It is
+       therefore taken from the transient.  The simulated-time input tEnd enters the
+       march only through Math.min(dt, tEnd - t), which can shorten the last step to
+       land exactly on the requested horizon and can never lengthen any step.  The
+       reported terminal time, level, velocity and peak velocity are independent of
+       tEnd: widening the display window returns the same numbers.
+
+   The terminal event (v reaching zero) and the velocity peak (dv/dt changing sign)
+   are each located inside the step that brackets them by bisection on the step
+   length, so neither is quantised to the partition.  The plotted history is
+   decimated afterwards, so curve resolution costs the answer nothing. */
+function solve(s,rtolIn){
+  var g=9.80665,Ap=Math.PI*s.D*s.D/4,Kt=s.f*s.L/s.D+s.K,L=s.L,
+      alpha=Ap/s.Atank,fill=s.mode==='fill',
+      H0=fill?(s.hBoundary-s.h0):(s.h0-s.hBoundary),
+      RTOL=(rtolIn>0?rtolIn:1e-7),GUARD=400000,NPLOT=1200,GAM=1-Math.SQRT1_2,
+      H=H0,v=0,t=0,peak=0,n=0,rej=0,guardHit=false,
+      tx=[],th=[],tv=[];
+  function acc(H1,v1){return (g*H1-Kt*v1*Math.abs(v1)/2)/L;}
+  /* One ROS2 step. Returns [H, v, errH, errV]; the error pair is the difference
+     between the second-order result and its embedded first-order companion. */
+  function stage(H1,v1,dt){
+    var a12=GAM*dt*alpha,a21=-GAM*dt*g/L,a22=1+GAM*dt*Kt*Math.abs(v1)/L,
+        det=a22-a12*a21,
+        r1=-alpha*v1,r2=acc(H1,v1),
+        k1a=(a22*r1-a12*r2)/det,k1b=(r2-a21*r1)/det,
+        H2=H1+dt*k1a,v2=v1+dt*k1b,
+        q1=-alpha*v2-2*k1a,q2=acc(H2,v2)-2*k1b,
+        k2a=(a22*q1-a12*q2)/det,k2b=(q2-a21*q1)/det;
+    return [H1+1.5*dt*k1a+0.5*dt*k2a,v1+1.5*dt*k1b+0.5*dt*k2b,
+            0.5*dt*(k1a+k2a),0.5*dt*(k1b+k2b)];
+  }
+  if(H0>0&&alpha>0&&L>0&&s.tEnd>0){
+    var vLoss=Kt>0?Math.sqrt(2*g*H0/Kt):Infinity,
+        vOsc=H0*Math.sqrt(g/(alpha*L)),
+        vScale=Math.min(vLoss,vOsc),hScale=H0,
+        atolH=1e-3*RTOL*hScale,atolV=1e-3*RTOL*vScale,
+        tau=Math.min(L*vScale/(g*H0),Math.sqrt(L/(g*alpha))),
+        dtNext=1e-6*tau,dtFloor=1e-12*tau,
+        accPrev=acc(H0,0),peakDone=false,i,j,m,q,st,lo,hi,dt,err,fac;
+    tx.push(0);th.push(s.h0);tv.push(0);
+    while(t<s.tEnd&&n<GUARD){
+      if(H<=0&&v<=0)break;
+      dt=Math.min(Math.max(dtNext,dtFloor),s.tEnd-t);
+      if(!(dt>0))break;
+      st=stage(H,v,dt);
+      err=Math.max(Math.abs(st[2])/(atolH+RTOL*Math.abs(H)),
+                   Math.abs(st[3])/(atolV+RTOL*Math.abs(v)));
+      if(err>1&&dt>dtFloor&&rej<40){
+        dtNext=Math.max(dtFloor,dt*Math.max(0.2,0.9/Math.sqrt(err)));rej++;continue;}
+      if(st[1]<=0){
+        lo=0;hi=dt;
+        for(i=0;i<60;i++){m=0.5*(lo+hi);if(stage(H,v,m)[1]>0)lo=m;else hi=m;}
+        dt=hi;st=stage(H,v,dt);st[1]=0;
+      }
+      var Hp=H,vp=v;
+      H=st[0];v=st[1]>0?st[1]:0;t+=dt;n++;rej=0;
+      fac=Math.max(0.2,Math.min(4,0.9/Math.sqrt(err>1e-16?err:1e-16)));
+      dtNext=dt*fac;
+      if(v>peak)peak=v;
+      var accNew=acc(H,v);
+      if(!peakDone&&accPrev>0&&accNew<=0){
+        lo=0;hi=dt;
+        for(j=0;j<60;j++){m=0.5*(lo+hi);q=stage(Hp,vp,m);if(acc(q[0],q[1])>0)lo=m;else hi=m;}
+        q=stage(Hp,vp,0.5*(lo+hi));
+        if(q[1]>peak)peak=q[1];
+        peakDone=true;
+      }
+      accPrev=accNew;
+      tx.push(t);th.push(fill?(s.hBoundary-H):(s.hBoundary+H));tv.push(v);
+      if(v<=0&&H<=0)break;
+    }
+    guardHit=n>=GUARD;
+  }
+  var hEnd=n>0?(fill?(s.hBoundary-H):(s.hBoundary+H)):s.h0,
+      x=[],hh=[],vv=[],stride=Math.max(1,Math.ceil(tx.length/NPLOT)),k;
+  for(k=0;k<tx.length;k+=stride){x.push(tx[k]);hh.push(th[k]);vv.push(tv[k]);}
+  if(tx.length&&x[x.length-1]!==tx[tx.length-1]){
+    x.push(tx[tx.length-1]);hh.push(th[th.length-1]);vv.push(tv[tv.length-1]);}
+  var Vdot=Ap*v,dp=s.rho*g*Math.max(0,fill?(s.hBoundary-hEnd):(hEnd-s.hBoundary)),w=[];
+  if(s.Atank<=0||s.L<=0)w.push('Tank area and liquid-column length must be positive.');
+  if(guardHit)w.push('Step guard reached before the column came to rest; the terminal time is a lower bound.');
+  return {h:hEnd,v:v,Vdot:Vdot,p:101325+dp,dp:dp,rho:s.rho,peak:peak,time:t,
+    series:[{x:x,y:hh},{x:x,y:vv}],
+    a11y:'Tank level and pipe velocity history.',
+    warnings:w,
+    notes:['Total loss coefficient fL/D + K = '+Kt.toPrecision(4)+'.',
+           'Time integration: L-stable two-stage Rosenbrock (ROS2) march with the step set by its own embedded error estimate at a tolerance of '+RTOL+' on the initial head and velocity scales; the terminal stop and the velocity peak are located by bisection inside the step that brackets them. The simulation-time input can only shorten the final step onto the requested horizon; it does not set the step, and the reported terminal state does not depend on it.',
+           'Steps taken: '+n+'.']};}
+
+function degrade(){
+  document.title="Pipe Filling / Draining";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Pipe Filling / Draining";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"pipe-filling-draining",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · inertial liquid-column ODE","Pipe / Vessel Transients · ODE інерційного стовпа рідини","Pipe / Vessel Transients · träge Flüssigkeitssäulen-ODE","Pipe / Vessel Transients · inertiële vloeistofkolom-ODE","Pipe / Vessel Transients · ODE inertielle de colonne liquide","Pipe / Vessel Transients · ODE inercial de columna líquida","Pipe / Vessel Transients · inercyjne ODE słupa cieczy"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Use Drain for a tank discharging to a lower boundary level; Fill for a fixed upstream source level filling a tank. The pipe is assumed already liquid-filled.","Drain — спорожнення резервуара до нижчого граничного рівня; Fill — наповнення резервуара від джерела з фіксованим рівнем. Труба вважається вже заповненою рідиною.","Drain: Behälter entleert zu tieferem Randniveau; Fill: konstantes Oberwasserniveau füllt den Behälter. Das Rohr gilt bereits als flüssigkeitsgefüllt.","Drain: tank loost naar lager grensniveau; Fill: vast bronpeil vult een tank. De leiding wordt reeds vloeistofgevuld verondersteld.","Drain : réservoir vers niveau aval plus bas; Fill : source amont fixe remplissant un réservoir. La conduite est supposée déjà pleine.","Drain: tanque descarga a nivel inferior; Fill: fuente aguas arriba fija llena un tanque. La tubería se supone ya llena.","Drain: zbiornik opróżnia się do niższego poziomu; Fill: stałe źródło napełnia zbiornik. Rura jest założona jako już wypełniona cieczą.")}],
+    panels:[{id:"operation",slot:'inputs',learn:'t1',title:T("Operation","Операція","Betrieb","Bedrijf","Fonctionnement","Operación","Tryb"),fields:[{id:'f-mode',key:'mode',label:T("Mode","Режим","Modus","Modus","Mode","Modo","Tryb"),type:'select',options:[["drain",T("Drain tank","Спорожнення резервуара","Behälter entleeren","Tank ledigen","Vidange réservoir","Vaciar tanque","Opróżnianie zbiornika")],["fill",T("Fill tank","Заповнення резервуара","Behälter füllen","Tank vullen","Remplissage réservoir","Llenar tanque","Napełnianie zbiornika")]]},{id:'f-Atank',key:'Atank',label:T("Tank plan area","Площа резервуара","Behältergrundfläche","Tankoppervlak","Surface du réservoir","Área del tanque","Pole zbiornika"),type:'number',unit:"m²",min:0.001,max:100000000.0},{id:'f-h0',key:'h0',label:T("Initial tank level","Початковий рівень","Anfangsfüllstand","Beginniveau","Niveau initial","Nivel inicial","Poziom początkowy"),type:'number',unit:"m",min:-10000.0,max:10000.0},{id:'f-hBoundary',key:'hBoundary',label:T("Other boundary level","Інший граничний рівень","Anderes Randniveau","Ander grensniveau","Autre niveau limite","Otro nivel de frontera","Drugi poziom brzegowy"),type:'number',unit:"m",min:-10000.0,max:10000.0}]},{id:"pipe",slot:'inputs',learn:'t2',title:T("Pipe","Труба","Rohr","Leiding","Conduite","Tubería","Rura"),fields:[{id:'f-D',key:'D',label:T("Internal diameter","Внутрішній діаметр","Innendurchmesser","Binnendiameter","Diamètre intérieur","Diámetro interior","Średnica wewnętrzna"),type:'number',unit:"m",display:"mm",min:0.001,max:5},{id:'f-L',key:'L',label:T("Liquid-column length","Довжина стовпа","Flüssigkeitssäulenlänge","Lengte vloeistofkolom","Longueur de colonne liquide","Longitud de columna líquida","Długość słupa cieczy"),type:'number',unit:"m",min:0.01,max:1000000.0},{id:'f-f',key:'f',label:T("Darcy friction factor","Коефіцієнт тертя Дарсі","Darcy-Reibungsbeiwert","Darcy-wrijvingsfactor","Facteur de Darcy","Factor de Darcy","Współczynnik Darcy’ego"),type:'number',min:0,max:1},{id:'f-K',key:'K',label:T("Sum of local K","Сума місцевих K","Summe Einzel-K","Som lokale K","Somme des K","Suma de K","Suma K"),type:'number',min:0,max:100000.0},{id:'f-rho',key:'rho',label:T("Liquid density","Густина рідини","Flüssigkeitsdichte","Vloeistofdichtheid","Masse volumique","Densidad","Gęstość"),type:'number',unit:"kg/m³",min:1,max:20000},{id:'f-tEnd',key:'tEnd',label:T("Simulation time","Час моделювання","Simulationszeit","Simulatietijd","Temps de simulation","Tiempo de simulación","Czas symulacji"),type:'number',unit:"s",min:0.01,max:10000000.0}]}],
+    footer:T("dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. This is liquid-column inertia, not water-hammer wave propagation.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Це інерція стовпа рідини, а не поширення хвиль гідроудару.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Flüssigkeitssäulenträgheit, keine Druckstoß-Wellenausbreitung.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Vloeistofkolomtraagheid, geen waterslaggolven.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Inertie de colonne liquide, pas propagation d’onde de coup de bélier.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Inercia de columna líquida, no propagación de golpe de ariete.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Bezwładność słupa cieczy, nie propagacja fal uderzenia hydraulicznego."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Final tank level","Кінцевий рівень","Endfüllstand","Eindniveau","Niveau final","Nivel final","Poziom końcowy"),value:last.h,hint:"m",precision:3},{label:T("Final pipe velocity","Кінцева швидкість","Endgeschwindigkeit","Eindsnelheid","Vitesse finale","Velocidad final","Prędkość końcowa"),value:last.v,hint:"m/s",precision:3},{label:T("Final volume flow","Кінцева об’ємна витрата","End-Volumenstrom","Eindvolumestroom","Débit volumique final","Caudal volumétrico final","Końcowy przepływ objętościowy"),value:last.Vdot,hint:"m³/s",precision:4},{label:T("Peak velocity","Пікова швидкість","Maximalgeschwindigkeit","Pieksnelheid","Vitesse de pointe","Velocidad máxima","Prędkość szczytowa"),value:last.peak,hint:"m/s",precision:3},{label:T("Driving head pressure","Тиск рушійного напору","Treibdruckhöhe","Aandrijfdruk","Pression de charge motrice","Presión motriz","Ciśnienie wysokości napędowej"),value:last.dp/1000,hint:"kPa",precision:2,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Tank level and pipe velocity history","Історія рівня резервуара та швидкості в трубі","Behälterstand und Rohrgeschwindigkeit","Tankniveau en leidingsnelheid","Niveau du réservoir et vitesse conduite","Nivel del tanque y velocidad de tubería","Przebieg poziomu zbiornika i prędkości w rurze"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+/* ---- handoff receiver bound (AGENTS.md 2.4; _docs/TZ-engineering-workflow.md 5.1)
+   -----------------------------------------------------------------------------
+   An incoming SI quantity is held to the bound this tool's own typed field
+   declares, read from that field, so the keyboard and the wire carry one number.
+   Where the field declares none, the bound is the one this tool's own model
+   states and the limitations carry it. Outside the bound the state does not
+   change and the user is told the quantity, the figure that arrived and the
+   bound; the refused name goes into neither `accepted` nor `ignored`, because
+   this tool does use that quantity (AGENTS 2.4).
+   No magnitude band is used to tell one medium from another: gasline-packing at
+   its own field maximum of 1,00e+8 Pa ships 680,67 kg/m3, inside the
+   400-2000 kg/m3 band a liquid receiver would use. The medium belongs on the
+   wire (AGENTS 2.7 W-1). */
+var HO_TXT={range:T("{q} = {v} {u} received from {f} lies outside the range this tool accepts ({lo} to {hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, лежить поза діапазоном, який приймає цей інструмент ({lo}…{hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt außerhalb des Bereichs, den dieses Werkzeug annimmt ({lo} bis {hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt buiten het bereik dat deze tool aanvaardt ({lo} tot {hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} se situe hors de la plage acceptée par cet outil ({lo} à {hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda fuera del rango que acepta esta herramienta ({lo} a {hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} leży poza zakresem przyjmowanym przez to narzędzie ({lo} do {hi} {u}) i nie zostało zastosowane."),
+ rangeLo:T("{q} = {v} {u} received from {f} is below the minimum this tool accepts ({lo} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, менше за мінімум, який приймає цей інструмент ({lo} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt unter dem Mindestwert, den dieses Werkzeug annimmt ({lo} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt onder het minimum dat deze tool aanvaardt ({lo} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} est inférieur au minimum accepté par cet outil ({lo} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda por debajo del mínimo que acepta esta herramienta ({lo} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} jest mniejsze od minimum przyjmowanego przez to narzędzie ({lo} {u}) i nie zostało zastosowane."),
+ rangeHi:T("{q} = {v} {u} received from {f} is above the maximum this tool accepts ({hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, перевищує максимум, який приймає цей інструмент ({hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt über dem Höchstwert, den dieses Werkzeug annimmt ({hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt boven het maximum dat deze tool aanvaardt ({hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} dépasse le maximum accepté par cet outil ({hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} supera el máximo que acepta esta herramienta ({hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} przekracza maksimum przyjmowane przez to narzędzie ({hi} {u}) i nie zostało zastosowane."),
+ impossible:T("{q} = {v} {u} received from {f} is not a physically possible value for this quantity and was not applied.","{q} = {v} {u}, отримане від {f}, фізично неможливе для цієї величини і не застосоване.","{q} = {v} {u} von {f} ist für diese Größe physikalisch nicht möglich und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} is voor deze grootheid fysisch niet mogelijk en is niet toegepast.","{q} = {v} {u} reçu de {f} n'est pas une valeur physiquement possible pour cette grandeur et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} no es un valor físicamente posible para esta magnitud y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} nie jest fizycznie możliwą wartością tej wielkości i nie zostało zastosowane.")};
+function hoRanges(){
+ /* D, L and rho are the min/max this tool's own fields declare. Vdot has no
+    field of its own: it is turned into the driving head h0, whose field is
+    bounded +-10000 m, so the flow accepted is the one whose required head stays
+    inside that bound at the current D, L, f and K. Below, Vdot is required to be
+    positive only, which is what the tool's own head form requires; no other
+    lower bound is declared anywhere on this page. */
+ var Ap=Math.PI*state.D*state.D/4,
+     res=(state.f*state.L/state.D+state.K),
+     vMax=res>0?Math.sqrt(2*9.80665*1e4/res):Infinity; /* 1e4 m = field 'f-h0' max 10000 */
+ return {D:{lo:0.001,hi:5,u:'m'},          /* field 'f-D'   min 0.001 max 5     */
+  L:{lo:0.01,hi:1e6,u:'m'},                /* field 'f-L'   min 0.01  max 1e6   */
+  rho:{lo:1,hi:20000,u:'kg/m³'},           /* field 'f-rho' min 1     max 20000 */
+  Vdot:{pos:1,hi:vMax*Ap,u:'m³/s'}};}      /* no field of its own; h0 via 'f-h0' */
+function hoNum(v){if(v==null||typeof v!=='number'||!isFinite(v))return '—';if(v===0)return '0';var a=Math.abs(v);
+ if(a!==0&&(a<0.01||a>=1e6)){var e=Math.floor(Math.log10(a));return dgcNum(v/Math.pow(10,e),2)+'e'+(e<0?'':'+')+e;}
+ return dgcNum(v,a>=100?1:(a>=1?2:4));}
+function hoTxt(k){var m=HO_TXT[k];return m[dgcLang()]||m.en;}
+/* A quantity refused for range is not a quantity this tool does not use: the
+   sentence above names it, its range and the figure received, so it is kept out
+   of the `ignored` list the runtime prints as "this tool does not use them"
+   (AGENTS 2.4). HO_REF holds the refused names of the payload being applied. */
+var HO_REF=[];
+/* A bound has whichever ends the receiving field declares: two, one or none.
+   `pos` marks a quantity this tool's own validation requires strictly positive. */
+function hoOut(v,r){if(!r||typeof v!=='number'||!isFinite(v))return true;
+ if(r.pos&&!(v>0))return true;
+ if(r.lo!=null&&v<r.lo)return true;
+ if(r.hi!=null&&v>r.hi)return true;
+ return false;}
+function hoRefuse(k,v,r,from){
+ HO_REF.push(k);
+ /* The sentence follows the bound: a receiver whose own field declares only a
+    minimum states only that minimum, and a quantity held to no declared bound at
+    all is refused as a physically impossible value (AGENTS 2.4). */
+ /* A non-positive value of a strictly positive quantity is impossible whatever
+    other end the bound has; the range sentences are for a value that is possible
+    and out of bounds. */
+ var hoKey=(function(r,v){if(r&&r.pos&&!(v>0))return 'impossible';
+  var lo=r&&r.lo!=null&&isFinite(r.lo),hi=r&&r.hi!=null&&isFinite(r.hi);
+  return lo&&hi?'range':(lo?'rangeLo':(hi?'rangeHi':'impossible'));})(r,v);
+ var s=hoTxt(hoKey).split('{q}').join(k).split('{v}').join(hoNum(v))
+  .split('{lo}').join(hoNum(r?r.lo:NaN)).split('{hi}').join(hoNum(r?r.hi:NaN))
+  .split('{u}').join(r?r.u:'').split('{f}').join(from);
+ try{if(window.Diagram&&Diagram.notify)Diagram.notify(s,'warn');}catch(e){}}
+function hoApply(p){
+ var q=(p&&p.quantities)||{},from=(p&&p.from&&p.from.tool)||'?',R=hoRanges(),acc=[],ign=[];
+ HO_REF.length=0;
+ function take(k,set){var o=q[k];if(!o)return;var v=Number(o.value),r=R[k];
+  if(hoOut(v,r)){hoRefuse(k,v,r,from);return;}
+  set(v);acc.push(k);}
+ take('D',function(v){state.D=v;});
+ take('L',function(v){state.L=v;});
+ take('rho',function(v){state.rho=v;});
+ take('Vdot',function(v){var Ap=Math.PI*state.D*state.D/4,vIn=Math.abs(v)/Ap,
+  headReq=vIn*vIn*(state.f*state.L/state.D+state.K)/(2*9.80665);
+  state.h0=state.hBoundary+(state.mode==='fill'?-headReq:headReq);});
+ var ord=Object.keys(q);
+ ord.forEach(function(k){if(acc.indexOf(k)<0&&ign.indexOf(k)<0&&HO_REF.indexOf(k)<0)ign.push(k);});
+ acc.sort(function(a,b){return ord.indexOf(a)-ord.indexOf(b);});
+ last=solve(state);if(ui){ui.sync();ui.run();}
+ return {accepted:acc,ignored:ign};}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"pipe-filling-draining",file:"pipe_filling_draining.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"mode":state["mode"],"Atank":state["Atank"],"h0":state["h0"],"hBoundary":state["hBoundary"],"D":state["D"],"L":state["L"],"f":state["f"],"K":state["K"],"rho":state["rho"],"tEnd":state["tEnd"]},outputs:{"h_final":last.h,"v_final":last.v,"Vdot_final":last.Vdot,"v_peak":last.peak,"dp_head_final":last.dp,"p_abs_final":last.p,"elapsed":last.time},units:{"mode":"-","Atank":"m2","h0":"m","hBoundary":"m","D":"m","L":"m","f":"-","K":"-","rho":"kg/m3","tEnd":"s","h_final":"m","v_final":"m/s","Vdot_final":"m3/s","v_peak":"m/s","dp_head_final":"Pa","p_abs_final":"Pa","elapsed":"s"},model:{equations:["dv/dt = [g DeltaH - (fL/D+K) v|v|/2] / L", "dh/dt = +/- A_pipe v / A_tank", "Vdot = A_pipe v"],ranges:["incompressible full liquid column", "rigid pipe", "no trapped gas or water-hammer elasticity"],notes:["reduced liquid-column inertia model; Water Hammer is the handoff target for elastic-wave analysis"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef compute():\n    mode=INPUTS['mode']; Atank=INPUTS['Atank']; h0=INPUTS['h0']; hb=INPUTS['hBoundary']\n    D=INPUTS['D']; L=INPUTS['L']; f=INPUTS['f']; K=INPUTS['K']; rho=INPUTS['rho']; tEnd=INPUTS['tEnd']\n    g=9.80665; Ap=math.pi*D*D/4; Kt=f*L/D+K; alpha=Ap/Atank; fill=(mode=='fill')\n    H0=(hb-h0) if fill else (h0-hb)\n    RTOL=1e-7; GUARD=400000; GAM=1.0-2.0**-0.5\n    def acc(H,v): return (g*H-Kt*v*abs(v)/2.0)/L\n    def stage(H,v,dt):\n        a12=GAM*dt*alpha; a21=-GAM*dt*g/L; a22=1.0+GAM*dt*Kt*abs(v)/L; det=a22-a12*a21\n        r1=-alpha*v; r2=acc(H,v)\n        k1a=(a22*r1-a12*r2)/det; k1b=(r2-a21*r1)/det\n        H2=H+dt*k1a; v2=v+dt*k1b\n        q1=-alpha*v2-2.0*k1a; q2=acc(H2,v2)-2.0*k1b\n        k2a=(a22*q1-a12*q2)/det; k2b=(q2-a21*q1)/det\n        return (H+1.5*dt*k1a+0.5*dt*k2a, v+1.5*dt*k1b+0.5*dt*k2b,\n                0.5*dt*(k1a+k2a), 0.5*dt*(k1b+k2b))\n    H=H0; v=0.0; t=0.0; peak=0.0; n=0; rej=0\n    if H0>0 and alpha>0 and L>0 and tEnd>0:\n        vLoss=math.sqrt(2*g*H0/Kt) if Kt>0 else float('inf')\n        vScale=min(vLoss,H0*math.sqrt(g/(alpha*L))); hScale=H0\n        atolH=1e-3*RTOL*hScale; atolV=1e-3*RTOL*vScale\n        tau=min(L*vScale/(g*H0), math.sqrt(L/(g*alpha)))\n        dtNext=1e-6*tau; dtFloor=1e-12*tau\n        accPrev=acc(H0,0.0); peakDone=False\n        while t<tEnd and n<GUARD:\n            if H<=0 and v<=0: break\n            dt=min(max(dtNext,dtFloor), tEnd-t)\n            if not dt>0: break\n            st=stage(H,v,dt)\n            err=max(abs(st[2])/(atolH+RTOL*abs(H)), abs(st[3])/(atolV+RTOL*abs(v)))\n            if err>1 and dt>dtFloor and rej<40:\n                dtNext=max(dtFloor, dt*max(0.2, 0.9/math.sqrt(err))); rej+=1; continue\n            if st[1]<=0:\n                lo=0.0; hi=dt\n                for _ in range(60):\n                    m=0.5*(lo+hi)\n                    if stage(H,v,m)[1]>0: lo=m\n                    else: hi=m\n                dt=hi; st=list(stage(H,v,dt)); st[1]=0.0\n            Hp=H; vp=v\n            H=st[0]; v=st[1] if st[1]>0 else 0.0; t+=dt; n+=1; rej=0\n            dtNext=dt*max(0.2, min(4.0, 0.9/math.sqrt(err if err>1e-16 else 1e-16)))\n            if v>peak: peak=v\n            accNew=acc(H,v)\n            if (not peakDone) and accPrev>0 and accNew<=0:\n                lo=0.0; hi=dt\n                for _ in range(60):\n                    m=0.5*(lo+hi); q=stage(Hp,vp,m)\n                    if acc(q[0],q[1])>0: lo=m\n                    else: hi=m\n                q=stage(Hp,vp,0.5*(lo+hi))\n                if q[1]>peak: peak=q[1]\n                peakDone=True\n            accPrev=accNew\n            if v<=0 and H<=0: break\n    hEnd=((hb-H) if fill else (hb+H)) if n>0 else h0\n    Vdot=Ap*v; dp=rho*g*max(0.0,(hb-hEnd) if fill else (hEnd-hb))\n    return {'h_final':hEnd,'v_final':v,'Vdot_final':Vdot,'v_peak':peak,\n            'dp_head_final':dp,'p_abs_final':101325+dp,'elapsed':t}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations, the same ROS2 march and the same transient-derived step control used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and exported Python evaluate the same equations, the same Rosenbrock stage coefficients and the same step-selection rule in the same order; tolerance only covers floating-point implementation differences.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["Vdot", "p", "dp", "D", "L", "rho"],accepts:["D", "L", "rho", "Vdot"],build:function(){if(!last)return null;return {quantities:{Vdot:{value:last.Vdot,unit:'m3/s'},p:{value:last.p,unit:'Pa'},dp:{value:last.dp,unit:'Pa'},D:{value:state.D,unit:'m'},L:{value:state.L,unit:'m'},rho:{value:state.rho,unit:'kg/m3'}}};},apply:function(p){return hoApply(p);}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipe Filling / Draining</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-09-04.transients-1.7",
+  "id": "pipe-filling-draining",
+  "file": "pipe_filling_draining.html",
+  "listed": true,
+  "category": "transients",
+  "order": 18,
+  "title": {
+    "en": "Pipe Filling / Draining",
+    "uk": "Заповнення / спорожнення трубопроводу",
+    "de": "Rohrfüllung / -entleerung",
+    "nl": "Leiding vullen / ledigen",
+    "fr": "Remplissage / vidange de conduite",
+    "es": "Llenado / vaciado de tubería",
+    "pl": "Napełnianie / opróżnianie rurociągu"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — inertial liquid filling/draining model coupling tank level and pipe velocity with Darcy/local losses, showing startup and level transient.",
+    "uk": "Pipe / Vessel Transients — інерційна liquid модель filling/draining зі зв’язком tank level та pipe velocity і Darcy/local losses.",
+    "de": "Pipe / Vessel Transients — inertiales Flüssigkeitsmodell für Füllen/Entleeren mit gekoppeltem Behälterstand und Rohrgeschwindigkeit sowie Darcy-/Einzelverlusten.",
+    "nl": "Pipe / Vessel Transients — inertieel vloeistofmodel voor vullen/ledigen met gekoppeld tankniveau en leidingsnelheid plus Darcy/lokale verliezen.",
+    "fr": "Pipe / Vessel Transients — modèle inertiel de remplissage/vidange couplant niveau de réservoir et vitesse en conduite avec pertes Darcy/singulières.",
+    "es": "Pipe / Vessel Transients — modelo inercial de llenado/vaciado que acopla nivel de tanque y velocidad de tubería con pérdidas Darcy/locales.",
+    "pl": "Pipe / Vessel Transients — inercyjny model napełniania/opróżniania sprzęgający poziom zbiornika i prędkość w rurze z oporami Darcy’ego/miejscowymi."
+  },
+  "description": {
+    "en": "A reduced liquid-column ODE: pipe acceleration follows the instantaneous hydrostatic head minus Darcy/local velocity-squared losses, while a finite tank area changes level from the pipe flow.",
+    "uk": "Знижена ODE liquid column: прискорення в трубі задається hydrostatic head мінус Darcy/local v² losses, а finite tank area змінює level від pipe flow.",
+    "de": "Reduzierte Flüssigkeitssäulen-ODE: Rohrbeschleunigung aus hydrostatischer Druckhöhe minus Darcy-/Einzelverlusten proportional v²; endliche Behälterfläche ändert den Füllstand durch den Rohrstrom.",
+    "nl": "Gereduceerde vloeistofkolom-ODE: leidingversnelling uit hydrostatische hoogte minus Darcy/lokale v²-verliezen; eindig tankoppervlak verandert niveau door leidingdebiet.",
+    "fr": "ODE réduite de colonne liquide : accélération par charge hydrostatique instantanée moins pertes Darcy/singulières en v²; la surface finie du réservoir fait évoluer le niveau.",
+    "es": "ODE reducida de columna líquida: aceleración por carga hidrostática instantánea menos pérdidas Darcy/locales v²; el área finita del tanque cambia el nivel por el caudal.",
+    "pl": "Zredukowane ODE słupa cieczy: przyspieszenie z chwilowej wysokości hydrostatycznej minus straty Darcy’ego/miejscowe v²; skończona powierzchnia zbiornika zmienia poziom przez przepływ rury."
+  },
+  "status": "prototype",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Rigid full-bore liquid column, incompressible fluid, no trapped air, free-surface sloshing, cavitation, water hammer, moving wetting front or pipe elasticity. For fast valve events and elastic-wave physics use Water Hammer.",
+    "uk": "Жорсткий повний стовп нестисливої рідини; без trapped air, free-surface sloshing, cavitation, water hammer, moving wetting front або pipe elasticity. Для fast valve events та elastic waves використовуйте Water Hammer.",
+    "de": "Starre vollgefüllte inkompressible Flüssigkeitssäule; keine eingeschlossene Luft, freie-Oberflächen-Schwingung, Kavitation, Druckstoß, bewegte Benetzungsfront oder Rohrelastizität. Für schnelle Ventilereignisse Water Hammer verwenden.",
+    "nl": "Starre volledig gevulde onsamendrukbare vloeistofkolom; geen ingesloten lucht, klotsen, cavitatie, waterslag, bewegend natfront of leidingelasticiteit. Voor snelle klepgebeurtenissen Water Hammer gebruiken.",
+    "fr": "Colonne liquide rigide pleine et incompressible; sans air piégé, ballottement, cavitation, coup de bélier, front de mouillage mobile ni élasticité de conduite. Pour événements rapides utiliser Water Hammer.",
+    "es": "Columna líquida rígida completamente llena e incompresible; sin aire atrapado, oleaje de superficie, cavitación, golpe de ariete, frente de mojado móvil ni elasticidad de tubería. Para eventos rápidos use Water Hammer.",
+    "pl": "Sztywny pełny słup cieczy nieściśliwej; bez uwięzionego powietrza, falowania powierzchni, kawitacji, uderzenia hydraulicznego, ruchomego frontu zwilżania i sprężystości rury. Dla szybkich zdarzeń użyj Water Hammer."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "The Heun moving-level integration is checked against closed-form limiting cases: harmonic lossless finite-tank motion and the constant-head lossy Riccati/tanh solution; time-horizon regression is recorded separately.",
+      "uk": "Інтегрування Heun для рухомого рівня перевірено замкненими граничними випадками: гармонічним рухом finite tank без втрат і Riccati/tanh-розв’язком для сталого напору з втратами; регресію часового горизонту записано окремо.",
+      "de": "Die Heun-Integration des bewegten Pegels ist gegen geschlossene Grenzfälle geprüft: harmonische verlustfreie Bewegung eines endlichen Behälters und die Riccati/tanh-Lösung bei konstantem Druckhöhenverlust; die Zeithorizont-Regression ist separat dokumentiert.",
+      "nl": "De Heun-integratie van het bewegende niveau is getoetst aan gesloten grensgevallen: harmonische verliesvrije beweging van een eindige tank en de Riccati/tanh-oplossing bij constante opvoerhoogte met verliezen; de tijdshorizonregressie is apart vastgelegd.",
+      "fr": "L’intégration Heun du niveau mobile est vérifiée par des cas limites fermés: mouvement harmonique sans pertes d’un réservoir fini et solution Riccati/tanh à charge constante avec pertes; la régression de l’horizon temporel est consignée séparément.",
+      "es": "La integración Heun del nivel móvil se comprueba con casos límite cerrados: movimiento armónico sin pérdidas de un tanque finito y solución Riccati/tanh con carga constante y pérdidas; la regresión del horizonte temporal se registra por separado.",
+      "pl": "Całkowanie Heuna ruchomego poziomu sprawdzono względem zamkniętych przypadków granicznych: harmonicznego ruchu bez strat dla skończonego zbiornika oraz rozwiązania Riccatiego/tanh przy stałej wysokości i stratach; regresję horyzontu czasu zapisano oddzielnie."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "pipe-filling-draining-qa-20260904",
+        "reference": "Closed lossless finite-tank harmonic solution, constant-head lossy Riccati/tanh solution, horizon regression and signed fill/drain handoff check.",
+        "citations": [
+          "QA-PIPE-FILLING-DRAINING-2026-09-03.json (analytic limiting-case record).",
+          "QA-PIPE-FILLING-DRAINING-HANDOFF-2026-09-04.json (handoff regression record)."
+        ],
+        "cases": 3,
+        "passed": 3,
+        "tolerance": "Lossless level error < 2e-6 m on the documented case; lossy constant-head velocity approximately 1e-10 m/s or better; handoff sign exact to floating-point precision.",
+        "run_at": "2026-09-04T21:35:00Z",
+        "artifact": "benchmarks/pipe_filling_draining.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "Vdot",
+      "p",
+      "dp",
+      "D",
+      "L",
+      "rho"
+    ],
+    "accepts": [
+      "D",
+      "L",
+      "rho",
+      "Vdot"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"mode":"drain","Atank":20.0,"h0":8.0,"hBoundary":0.0,"D":0.15,"L":40.0,"f":0.02,"K":2.0,"rho":998.0,"tEnd":300.0};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+
+function solve(s){var g=9.80665,Ap=Math.PI*s.D*s.D/4,Kt=s.f*s.L/s.D+s.K,h=s.h0,v=0,t=0,dtNom=Math.max(s.tEnd/1200,1e-5),x=[],hh=[],vv=[],peak=0,n=0,sign=s.mode==='fill'?1:-1,alpha=Ap/s.Atank;function rhs(hh0,vv0){var head=s.mode==='fill'?(s.hBoundary-hh0):(hh0-s.hBoundary);return {dh:sign*alpha*vv0,dv:(g*head-Kt*vv0*Math.abs(vv0)/2)/s.L};}while(t<s.tEnd&&n<10000){var head=s.mode==='fill'?(s.hBoundary-h):(h-s.hBoundary);if(head<=0&&Math.abs(v)<1e-5)break;var dt=Math.min(dtNom,s.tEnd-t),k1=rhs(h,v),hp=h+k1.dh*dt,vp=Math.max(0,v+k1.dv*dt),k2=rhs(hp,vp);h+=0.5*(k1.dh+k2.dh)*dt;v=Math.max(0,v+0.5*(k1.dv+k2.dv)*dt);peak=Math.max(peak,v);t+=dt;n++;x.push(t);hh.push(h);vv.push(v);}var Vdot=Ap*v,dp=s.rho*g*Math.max(0,s.mode==='fill'?(s.hBoundary-h):(h-s.hBoundary));return {h:h,v:v,Vdot:Vdot,p:101325+dp,dp:dp,rho:s.rho,peak:peak,time:t,series:[{x:x,y:hh},{x:x,y:vv}],a11y:'Tank level and pipe velocity history.',warnings:(s.Atank<=0||s.L<=0?['Tank area and liquid-column length must be positive.']:[]),notes:['Total loss coefficient fL/D + K = '+Kt.toPrecision(4)+'.','Time integration: two-stage Heun predictor-corrector with the final step clipped to the requested horizon.']};}
+
+function degrade(){
+  document.title="Pipe Filling / Draining";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Pipe Filling / Draining";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),w=size.w,h=size.h, padL=size.density==='coarse'?42:54,padR=14,padT=14,padB=32;
+  ctx.clearRect(0,0,w,h); if(!last||!last.series||!last.series.length)return;
+  var xs=[],ys=[]; last.series.forEach(function(s){(s.x||[]).forEach(function(v){if(isFinite(v))xs.push(v)});(s.y||[]).forEach(function(v){if(isFinite(v))ys.push(v)})});
+  if(!xs.length||!ys.length)return;
+  var xmin=Math.min.apply(null,xs),xmax=Math.max.apply(null,xs),ymin=Math.min.apply(null,ys),ymax=Math.max.apply(null,ys);
+  if(xmax===xmin){xmax=xmin+1;} if(ymax===ymin){var d=Math.max(1,Math.abs(ymin)*.05);ymin-=d;ymax+=d;}
+  var X=function(x){return padL+(w-padL-padR)*(x-xmin)/(xmax-xmin)};
+  var Y=function(y){return h-padB-(h-padT-padB)*(y-ymin)/(ymax-ymin)};
+  var cs=getComputedStyle(document.documentElement), muted=cs.getPropertyValue('--muted').trim()||'#777', line=cs.getPropertyValue('--line').trim()||'#ddd';
+  ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(padL,padT);ctx.lineTo(padL,h-padB);ctx.lineTo(w-padR,h-padB);ctx.stroke();
+  ctx.fillStyle=muted;ctx.font='400 11px '+(cs.getPropertyValue('--font').trim()||'sans-serif');ctx.textAlign='right';
+  DiagramUI.ticks(ymin,ymax,h-padT-padB,size.density).forEach(function(v){var y=Y(v);ctx.beginPath();ctx.moveTo(padL-4,y);ctx.lineTo(padL,y);ctx.stroke();ctx.fillText(DiagramUI.fmt(v,{precision:2}),padL-7,y+4)});
+  ctx.textAlign='center';DiagramUI.ticks(xmin,xmax,w-padL-padR,size.density).forEach(function(v){var x=X(v);ctx.beginPath();ctx.moveTo(x,h-padB);ctx.lineTo(x,h-padB+4);ctx.stroke();ctx.fillText(DiagramUI.fmt(v,{precision:2}),x,h-10)});
+  last.series.forEach(function(s,idx){ctx.strokeStyle=DiagramUI.series(idx);ctx.lineWidth=2;ctx.beginPath();var began=false;(s.x||[]).forEach(function(x,i){var y=(s.y||[])[i];if(!isFinite(x)||!isFinite(y))return;if(!began){ctx.moveTo(X(x),Y(y));began=true}else ctx.lineTo(X(x),Y(y));});ctx.stroke();});
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"pipe-filling-draining",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    subtitle:T("Pipe / Vessel Transients · inertial liquid-column ODE","Pipe / Vessel Transients · ODE інерційного стовпа рідини","Pipe / Vessel Transients · träge Flüssigkeitssäulen-ODE","Pipe / Vessel Transients · inertiële vloeistofkolom-ODE","Pipe / Vessel Transients · ODE inertielle de colonne liquide","Pipe / Vessel Transients · ODE inercial de columna líquida","Pipe / Vessel Transients · inercyjne ODE słupa cieczy"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Use Drain for a tank discharging to a lower boundary level; Fill for a fixed upstream source level filling a tank. The pipe is assumed already liquid-filled.","Drain — спорожнення резервуара до нижчого граничного рівня; Fill — наповнення резервуара від джерела з фіксованим рівнем. Труба вважається вже заповненою рідиною.","Drain: Behälter entleert zu tieferem Randniveau; Fill: konstantes Oberwasserniveau füllt den Behälter. Das Rohr gilt bereits als flüssigkeitsgefüllt.","Drain: tank loost naar lager grensniveau; Fill: vast bronpeil vult een tank. De leiding wordt reeds vloeistofgevuld verondersteld.","Drain : réservoir vers niveau aval plus bas; Fill : source amont fixe remplissant un réservoir. La conduite est supposée déjà pleine.","Drain: tanque descarga a nivel inferior; Fill: fuente aguas arriba fija llena un tanque. La tubería se supone ya llena.","Drain: zbiornik opróżnia się do niższego poziomu; Fill: stałe źródło napełnia zbiornik. Rura jest założona jako już wypełniona cieczą.")}],
+    panels:[{id:"operation",slot:'inputs',title:T("Operation","Операція","Betrieb","Bedrijf","Fonctionnement","Operación","Tryb"),fields:[{id:'f-mode',key:'mode',label:T("Mode","Режим","Modus","Modus","Mode","Modo","Tryb"),type:'select',options:[["drain",T("Drain tank","Спорожнення резервуара","Behälter entleeren","Tank ledigen","Vidange réservoir","Vaciar tanque","Opróżnianie zbiornika")],["fill",T("Fill tank","Заповнення резервуара","Behälter füllen","Tank vullen","Remplissage réservoir","Llenar tanque","Napełnianie zbiornika")]]},{id:'f-Atank',key:'Atank',label:T("Tank plan area","Площа резервуара","Behältergrundfläche","Tankoppervlak","Surface du réservoir","Área del tanque","Pole zbiornika"),type:'number',unit:"m²",min:0.001,max:100000000.0},{id:'f-h0',key:'h0',label:T("Initial tank level","Початковий рівень","Anfangsfüllstand","Beginniveau","Niveau initial","Nivel inicial","Poziom początkowy"),type:'number',unit:"m",min:-10000.0,max:10000.0},{id:'f-hBoundary',key:'hBoundary',label:T("Other boundary level","Інший граничний рівень","Anderes Randniveau","Ander grensniveau","Autre niveau limite","Otro nivel de frontera","Drugi poziom brzegowy"),type:'number',unit:"m",min:-10000.0,max:10000.0}]},{id:"pipe",slot:'inputs',title:T("Pipe","Труба","Rohr","Leiding","Conduite","Tubería","Rura"),fields:[{id:'f-D',key:'D',label:T("Internal diameter","Внутрішній діаметр","Innendurchmesser","Binnendiameter","Diamètre intérieur","Diámetro interior","Średnica wewnętrzna"),type:'number',unit:"m",display:"mm",min:0.001,max:5},{id:'f-L',key:'L',label:T("Liquid-column length","Довжина стовпа","Flüssigkeitssäulenlänge","Lengte vloeistofkolom","Longueur de colonne liquide","Longitud de columna líquida","Długość słupa cieczy"),type:'number',unit:"m",min:0.01,max:1000000.0},{id:'f-f',key:'f',label:T("Коефіцієнт тертя Дарсі","Коефіцієнт тертя Дарсі","Darcy-Reibungsbeiwert","Darcy-wrijvingsfactor","Facteur de Darcy","Factor Darcy","Współczynnik Darcy’ego"),type:'number',min:0,max:1},{id:'f-K',key:'K',label:T("Sum of local K","Сума місцевих K","Summe Einzel-K","Som lokale K","Somme des K","Suma de K","Suma K"),type:'number',min:0,max:100000.0},{id:'f-rho',key:'rho',label:T("Liquid density","Густина рідини","Flüssigkeitsdichte","Vloeistofdichtheid","Masse volumique","Densidad","Gęstość"),type:'number',unit:"kg/m³",min:1,max:20000},{id:'f-tEnd',key:'tEnd',label:T("Simulation time","Час моделювання","Simulationszeit","Simulatietijd","Temps de simulation","Tiempo de simulación","Czas symulacji"),type:'number',unit:"s",min:0.01,max:10000000.0}]}],
+    footer:T("dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. This is liquid-column inertia, not water-hammer wave propagation.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Це інерція стовпа рідини, а не поширення хвиль гідроудару.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Flüssigkeitssäulenträgheit, keine Druckstoß-Wellenausbreitung.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Vloeistofkolomtraagheid, geen waterslaggolven.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Inertie de colonne liquide, pas propagation d’onde de coup de bélier.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Inercia de columna líquida, no propagación de golpe de ariete.","dv/dt = [gΔH − (fL/D+ΣK)v|v|/2]/L; dh/dt = ±(Apipe/Atank)v. Bezwładność słupa cieczy, nie propagacja fal uderzenia hydraulicznego."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Final tank level","Кінцевий рівень","Endfüllstand","Eindniveau","Niveau final","Nivel final","Poziom końcowy"),value:last.h,hint:"m",precision:3},{label:T("Final pipe velocity","Кінцева швидкість","Endgeschwindigkeit","Eindsnelheid","Vitesse finale","Velocidad final","Prędkość końcowa"),value:last.v,hint:"m/s",precision:3},{label:T("Final volume flow","Кінцева об’ємна витрата","End-Volumenstrom","Eindvolumestroom","Débit volumique final","Caudal volumétrico final","Końcowy przepływ objętościowy"),value:last.Vdot,hint:"m³/s",precision:4},{label:T("Peak velocity","Пікова швидкість","Maximalgeschwindigkeit","Pieksnelheid","Vitesse de pointe","Velocidad máxima","Prędkość szczytowa"),value:last.peak,hint:"m/s",precision:3},{label:T("Тиск рушійного напору","Тиск рушійного напору","Treibdruckhöhe","Aandrijfdruk","Pression de charge motrice","Presión motriz","Ciśnienie wysokości napędowej"),value:last.dp/1000,hint:"kPa",precision:2,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.panel({id:'io',slot:'inputs',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Tank level and pipe velocity history","Історія рівня резервуара та швидкості в трубі","Behälterstand und Rohrgeschwindigkeit","Tankniveau en leidingsnelheid","Niveau du réservoir et vitesse conduite","Nivel del tanque y velocidad de tubería","Przebieg poziomu zbiornika i prędkości w rurze"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"pipe-filling-draining",file:"pipe_filling_draining.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"mode":state["mode"],"Atank":state["Atank"],"h0":state["h0"],"hBoundary":state["hBoundary"],"D":state["D"],"L":state["L"],"f":state["f"],"K":state["K"],"rho":state["rho"],"tEnd":state["tEnd"]},outputs:{"h_final":last.h,"v_final":last.v,"Vdot_final":last.Vdot,"v_peak":last.peak,"dp_head_final":last.dp,"p_abs_final":last.p,"elapsed":last.time},units:{"mode":"-","Atank":"m2","h0":"m","hBoundary":"m","D":"m","L":"m","f":"-","K":"-","rho":"kg/m3","tEnd":"s","h_final":"m","v_final":"m/s","Vdot_final":"m3/s","v_peak":"m/s","dp_head_final":"Pa","p_abs_final":"Pa","elapsed":"s"},model:{equations:["dv/dt = [g DeltaH - (fL/D+K) v|v|/2] / L", "dh/dt = +/- A_pipe v / A_tank", "Vdot = A_pipe v"],ranges:["incompressible full liquid column", "rigid pipe", "no trapped gas or water-hammer elasticity"],notes:["reduced liquid-column inertia model; Water Hammer is the handoff target for elastic-wave analysis"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef compute():\n    mode=INPUTS['mode']; Atank=INPUTS['Atank']; h=INPUTS['h0']; hb=INPUTS['hBoundary']; D=INPUTS['D']; L=INPUTS['L']; f=INPUTS['f']; K=INPUTS['K']; rho=INPUTS['rho']; tEnd=INPUTS['tEnd']\n    g=9.80665; Ap=math.pi*D*D/4; Kt=f*L/D+K; v=0.0; t=0.0; dt_nom=max(tEnd/1200,1e-5); peak=0.0; n=0; sign=1 if mode=='fill' else -1; alpha=Ap/Atank\n    def rhs(hh,vv):\n        head=(hb-hh) if mode=='fill' else (hh-hb)\n        return sign*alpha*vv, (g*head-Kt*vv*abs(vv)/2)/L\n    while t<tEnd and n<10000:\n        head=(hb-h) if mode=='fill' else (h-hb)\n        if head<=0 and abs(v)<1e-5: break\n        dt=min(dt_nom,tEnd-t); dh1,dv1=rhs(h,v); hp=h+dh1*dt; vp=max(0.0,v+dv1*dt); dh2,dv2=rhs(hp,vp); h+=0.5*(dh1+dh2)*dt; v=max(0.0,v+0.5*(dv1+dv2)*dt); peak=max(peak,v); t+=dt; n+=1\n    Vdot=Ap*v; dp=rho*g*max(0.0,(hb-h) if mode=='fill' else (h-hb))\n    return {'h_final':h,'v_final':v,'Vdot_final':Vdot,'v_peak':peak,'dp_head_final':dp,'p_abs_final':101325+dp,'elapsed':t}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and exported Python evaluate the same equations and stepping order; tolerance only covers floating-point implementation differences.'}};},
+ handoff:{provides:["Vdot", "p", "dp", "D", "L", "rho"],accepts:["D", "L", "rho", "Vdot"],build:function(){if(!last)return null;return {quantities:{Vdot:{value:last.Vdot,unit:'m3/s'},p:{value:last.p,unit:'Pa'},dp:{value:last.dp,unit:'Pa'},D:{value:state.D,unit:'m'},L:{value:state.L,unit:'m'},rho:{value:state.rho,unit:'kg/m3'}}};},apply:function(p){var q=p&&p.quantities||{};if(q.D)state.D=q.D.value;if(q.L)state.L=q.L.value;if(q.rho)state.rho=q.rho.value;if(q.Vdot){var Ap=Math.PI*state.D*state.D/4,vIn=Math.abs(q.Vdot.value)/Ap,headReq=vIn*vIn*(state.f*state.L/state.D+state.K)/(2*9.80665);state.h0=state.hBoundary+(state.mode==='fill'?-headReq:headReq);};last=solve(state);if(ui){ui.sync();ui.run();}}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

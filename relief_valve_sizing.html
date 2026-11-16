@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief Valve Sizing — Preliminary</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-15.handoff-guard-3-number-locale",
+  "id": "relief-valve-sizing",
+  "file": "relief_valve_sizing.html",
+  "listed": true,
+  "category": "transients",
+  "order": 16,
+  "title": {
+    "en": "Relief Valve Sizing — Preliminary",
+    "uk": "Попередній підбір запобіжного клапана",
+    "de": "Vorbemessung Sicherheitsventil",
+    "nl": "Voorselectie veiligheidsklep",
+    "fr": "Pré-dimensionnement soupape",
+    "es": "Predimensionado válvula de alivio",
+    "pl": "Wstępny dobór zaworu bezpieczeństwa"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — physics-based preliminary relief area for ideal gas or incompressible liquid, with automatic gas choking check and equivalent throat diameter.",
+    "uk": "Pipe / Vessel Transients — попередня фізична площа relief для ideal gas або incompressible liquid з автоматичною перевіркою choking та equivalent diameter.",
+    "de": "Pipe / Vessel Transients — physikalische Vorbemessung der Entlastungsfläche für ideales Gas oder inkompressible Flüssigkeit mit automatischer Sperrprüfung und äquivalentem Durchmesser.",
+    "nl": "Pipe / Vessel Transients — fysische voorselectie van ontlastoppervlak voor ideaal gas of onsamendrukbare vloeistof met automatische chokingcheck en equivalente diameter.",
+    "fr": "Pipe / Vessel Transients — pré-dimensionnement physique de section de décharge pour gaz parfait ou liquide incompressible avec contrôle automatique du blocage et diamètre équivalent.",
+    "es": "Pipe / Vessel Transients — predimensionado físico del área de alivio para gas ideal o líquido incompresible con comprobación automática de choking y diámetro equivalente.",
+    "pl": "Pipe / Vessel Transients — fizyczny wstępny dobór pola zaworu dla gazu doskonałego lub cieczy nieściśliwej z automatyczną kontrolą przepływu krytycznego i średnicą równoważną."
+  },
+  "description": {
+    "en": "Required orifice area from target mass flow and either the ideal-gas compressible orifice equation or incompressible Bernoulli relation. It is deliberately a physics screen, not an API/ISO code calculation.",
+    "uk": "Потрібна площа отвору з цільової масової витрати та ideal-gas compressible orifice equation або incompressible Bernoulli relation. Це фізичний screen, не API/ISO code calculation.",
+    "de": "Erforderliche Öffnungsfläche aus Zielmassenstrom und entweder Idealgas-Blendenströmung oder inkompressibler Bernoulli-Beziehung. Bewusst physikalisches Screening, keine API/ISO-Auslegung.",
+    "nl": "Vereiste orifice-oppervlakte uit doelmassastroom en ideaal-gas compressibele orificevergelijking of onsamendrukbare Bernoulli-relatie. Bewust een fysisch scherm, geen API/ISO-codeberekening.",
+    "fr": "Section requise à partir du débit massique cible et de l’équation d’orifice gaz parfait compressible ou de Bernoulli incompressible. Écran physique, pas un calcul réglementaire API/ISO.",
+    "es": "Área requerida a partir del caudal másico objetivo y ecuación de orificio compresible de gas ideal o relación de Bernoulli incompresible. Es un cribado físico, no cálculo normativo API/ISO.",
+    "pl": "Wymagane pole z docelowego strumienia masy oraz równania kryzy dla gazu doskonałego lub Bernoulliego dla cieczy. To celowo screening fizyczny, a nie obliczenie wg API/ISO."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "No API 520/521 or ISO 4126 correction factors, certified effective areas, overpressure/accumulation rules, viscosity corrections, two-phase sizing, reaction forces, inlet/outlet pressure-loss checks or valve dynamics.",
+    "uk": "Без correction factors API 520/521 або ISO 4126, certified effective areas, правил overpressure/accumulation, viscosity corrections, two-phase sizing, reaction forces, inlet/outlet pressure-loss checks або valve dynamics.",
+    "de": "Keine API-520/521- oder ISO-4126-Korrekturfaktoren, zertifizierten effektiven Flächen, Überdruck/Akkumulationsregeln, Viskositätskorrekturen, Zweiphasenauslegung, Reaktionskräfte, Zu-/Ablaufdruckverlustprüfungen oder Ventildynamik.",
+    "nl": "Geen API 520/521- of ISO 4126-correctiefactoren, gecertificeerde effectieve oppervlakken, overdruk/accumulatieregels, viscositeitscorrecties, tweefasensizing, reactiekrachten, in-/uitlaatdrukverlieschecks of klepdynamiek.",
+    "fr": "Sans facteurs correctifs API 520/521 ou ISO 4126, sections certifiées, règles de surpression/accumulation, corrections de viscosité, dimensionnement diphasique, efforts de réaction, pertes d’entrée/sortie ni dynamique de soupape.",
+    "es": "Sin factores de corrección API 520/521 o ISO 4126, áreas efectivas certificadas, reglas de sobrepresión/acumulación, correcciones de viscosidad, sizing bifásico, fuerzas de reacción, pérdidas de entrada/salida ni dinámica de válvula.",
+    "pl": "Bez współczynników API 520/521 lub ISO 4126, certyfikowanych pól efektywnych, zasad nadciśnienia/akumulacji, korekt lepkości, doboru dwufazowego, sił reakcji, kontroli strat na wlocie/wylocie i dynamiki zaworu."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "The gas and liquid sizing cores are graded against an independent reference implemented in Python along three routes: one-dimensional isentropic nozzle flow parametrised by the throat Mach number and verified against NACA Report 1135 Table I; the API 520 Part I and ISO 4126-1 sizing equations implemented from the standards' own published form and constants; and real-gas checks from CoolProp. 41 driven cases span isentropic exponent 1.05 to 1.67, molar mass from hydrogen to n-octane, set pressure 1.2 to 300 bar, back pressure from vacuum through the critical transition into deep subcritical flow, compressibility 0.70 to 1.25, and liquid service, giving 298 independent checks; the 49 in-page algebraic identities are merged and kept, labelled as self-checks. Agreement with the published sizing equations is limited only by the rounding of each standard's own printed constant: 1.9e-5 for the API 520 SI and ISO 4126-1 critical coefficients, 1.1e-3 for the API 520 US customary coefficient. Verification used an independent reference and the author's own harness; there has been no third-party review. The comparison requires every correction factor the tool does not implement to be set to unity, and API 520/521 or ISO 4126 compliance and certified-valve corrections are not claimed.",
+      "uk": "Ядра підбору для газу та рідини перевірено за незалежним еталоном, реалізованим мовою Python трьома шляхами: одновимірна ізоентропна течія в соплі, параметризована числом Маха в горлі та звірена з таблицею I звіту NACA Report 1135; рівняння підбору API 520 Part I та ISO 4126-1, реалізовані за опублікованою формою і сталими самих стандартів; перевірки реального газу через CoolProp. 41 розрахований випадок охоплює показник ізоентропи від 1,05 до 1,67, молярну масу від водню до н-октану, тиск спрацювання від 1,2 до 300 бар, протитиск від вакууму через критичний перехід до глибоко докритичної області, коефіцієнт стисливості від 0,70 до 1,25 та рідинну службу; це дає 298 незалежних перевірок. 49 алгебраїчних тотожностей усередині сторінки збережено та позначено як самоперевірки. Розбіжність з опублікованими рівняннями підбору обмежена лише округленням сталих самих стандартів: 1,9e-5 для критичних коефіцієнтів API 520 SI та ISO 4126-1 і 1,1e-3 для коефіцієнта API 520 в американських одиницях. Використано незалежний еталон і власний стенд автора; стороннього рецензування не було. Порівняння можливе лише за умови, що всі поправкові коефіцієнти, яких інструмент не реалізує, дорівнюють одиниці; відповідність API 520/521 або ISO 4126 та сертифіковані поправки клапана не заявляються.",
+      "de": "Die Auslegungskerne für Gas und Flüssigkeit werden gegen eine unabhängige, in Python umgesetzte Referenz geprüft, die drei Wege verfolgt: eindimensionale isentrope Düsenströmung, über die Mach-Zahl im engsten Querschnitt parametrisiert und gegen Tabelle I des NACA Report 1135 verifiziert; die Auslegungsgleichungen aus API 520 Part I und ISO 4126-1, umgesetzt nach der veröffentlichten Form und den Konstanten der Normen selbst; sowie Realgasprüfungen mit CoolProp. 41 gerechnete Fälle überspannen den Isentropenexponenten von 1,05 bis 1,67, die Molmasse von Wasserstoff bis n-Oktan, den Ansprechdruck von 1,2 bis 300 bar, den Gegendruck von Vakuum über den kritischen Übergang bis tief in den unterkritischen Bereich, den Kompressibilitätsfaktor von 0,70 bis 1,25 und den Flüssigkeitsbetrieb; daraus ergeben sich 298 unabhängige Prüfungen. Die 49 algebraischen Identitäten in der Seite bleiben erhalten und sind als Selbstprüfungen gekennzeichnet. Die Abweichung von den veröffentlichten Auslegungsgleichungen ist allein durch die Rundung der genormten Konstanten begrenzt: 1,9e-5 für die kritischen Koeffizienten von API 520 SI und ISO 4126-1, 1,1e-3 für den Koeffizienten in US-Einheiten. Verwendet wurden eine unabhängige Referenz und der eigene Prüfstand des Autors; eine Prüfung durch Dritte fand nicht statt. Der Vergleich setzt voraus, dass alle vom Werkzeug nicht umgesetzten Korrekturfaktoren gleich eins gesetzt werden; API-520/521- oder ISO-4126-Konformität und zertifizierte Ventilkorrekturen werden nicht beansprucht.",
+      "nl": "De sizingkernen voor gas en vloeistof worden getoetst aan een onafhankelijke, in Python uitgewerkte referentie langs drie routes: eendimensionale isentrope mondstukstroming, geparametriseerd met het machgetal in de keel en geverifieerd tegen tabel I van NACA Report 1135; de dimensioneringsvergelijkingen uit API 520 Part I en ISO 4126-1, uitgewerkt volgens de gepubliceerde vorm en de constanten van de normen zelf; en realgascontroles met CoolProp. 41 doorgerekende gevallen bestrijken de isentrope exponent van 1,05 tot 1,67, de molmassa van waterstof tot n-octaan, de aanspreekdruk van 1,2 tot 300 bar, de tegendruk van vacuüm via de kritische overgang tot diep subkritisch, de compressibiliteitsfactor van 0,70 tot 1,25 en vloeistofbedrijf; dat levert 298 onafhankelijke controles op. De 49 algebraïsche identiteiten in de pagina blijven behouden en zijn gemarkeerd als zelfcontroles. De afwijking van de gepubliceerde dimensioneringsvergelijkingen wordt alleen begrensd door de afronding van de constanten van de normen zelf: 1,9e-5 voor de kritische coëfficiënten van API 520 SI en ISO 4126-1, 1,1e-3 voor de coëfficiënt in Amerikaanse eenheden. Er is gebruikgemaakt van een onafhankelijke referentie en de eigen testopstelling van de auteur; beoordeling door derden heeft niet plaatsgevonden. De vergelijking vereist dat alle correctiefactoren die het gereedschap niet implementeert op één worden gezet; conformiteit met API 520/521 of ISO 4126 en gecertificeerde klepcorrecties worden niet geclaimd.",
+      "fr": "Les noyaux de dimensionnement gaz et liquide sont évalués par rapport à une référence indépendante écrite en Python suivant trois voies : écoulement isentropique unidimensionnel en tuyère, paramétré par le nombre de Mach au col et vérifié sur le tableau I du NACA Report 1135 ; les équations de dimensionnement d'API 520 Part I et d'ISO 4126-1, mises en œuvre selon la forme et les constantes publiées par les normes elles-mêmes ; et des contrôles gaz réel avec CoolProp. 41 cas calculés couvrent l'exposant isentropique de 1,05 à 1,67, la masse molaire de l'hydrogène au n-octane, la pression de tarage de 1,2 à 300 bar, la contre-pression du vide au régime nettement sous-critique en passant par la transition critique, le facteur de compressibilité de 0,70 à 1,25 et le service liquide ; il en résulte 298 contrôles indépendants. Les 49 identités algébriques internes à la page sont conservées et signalées comme autocontrôles. L'écart aux équations de dimensionnement publiées n'est limité que par l'arrondi des constantes propres à chaque norme : 1,9e-5 pour les coefficients critiques d'API 520 SI et d'ISO 4126-1, 1,1e-3 pour le coefficient en unités américaines. La vérification s'appuie sur une référence indépendante et le banc d'essai de l'auteur ; aucune relecture par un tiers n'a eu lieu. La comparaison exige que tous les facteurs correctifs non implémentés par l'outil soient pris égaux à un ; aucune conformité API 520/521 ou ISO 4126 ni correction certifiée de soupape n'est revendiquée.",
+      "es": "Los núcleos de dimensionado de gas y de líquido se evalúan frente a una referencia independiente escrita en Python por tres vías: flujo isentrópico unidimensional en tobera, parametrizado por el número de Mach en la garganta y verificado contra la tabla I del NACA Report 1135; las ecuaciones de dimensionado de API 520 Part I e ISO 4126-1, implementadas según la forma y las constantes publicadas por las propias normas; y comprobaciones de gas real con CoolProp. 41 casos calculados abarcan el exponente isentrópico de 1,05 a 1,67, la masa molar desde el hidrógeno hasta el n-octano, la presión de tarado de 1,2 a 300 bar, la contrapresión desde vacío hasta régimen muy subcrítico pasando por la transición crítica, el factor de compresibilidad de 0,70 a 1,25 y el servicio con líquido; de ahí resultan 298 comprobaciones independientes. Las 49 identidades algebraicas internas de la página se conservan y se marcan como autocomprobaciones. La diferencia respecto a las ecuaciones de dimensionado publicadas está limitada únicamente por el redondeo de las constantes propias de cada norma: 1,9e-5 para los coeficientes críticos de API 520 SI e ISO 4126-1 y 1,1e-3 para el coeficiente en unidades estadounidenses. Se ha usado una referencia independiente y el banco de pruebas del propio autor; no ha habido revisión por terceros. La comparación exige fijar en uno todos los factores de corrección que la herramienta no implementa; no se afirma conformidad con API 520/521 o ISO 4126 ni correcciones certificadas de válvula.",
+      "pl": "Rdzenie doboru dla gazu i cieczy są oceniane względem niezależnego wzorca napisanego w Pythonie trzema drogami: jednowymiarowy przepływ izentropowy w dyszy, sparametryzowany liczbą Macha w przekroju krytycznym i zweryfikowany z tabelą I raportu NACA Report 1135; równania doboru z API 520 Part I i ISO 4126-1, zaimplementowane zgodnie z opublikowaną postacią i stałymi samych norm; oraz kontrole gazu rzeczywistego z CoolProp. 41 policzonych przypadków obejmuje wykładnik izentropy od 1,05 do 1,67, masę molową od wodoru do n-oktanu, ciśnienie nastawy od 1,2 do 300 bar, przeciwciśnienie od próżni przez przejście krytyczne aż do głęboko podkrytycznego, współczynnik ściśliwości od 0,70 do 1,25 oraz pracę z cieczą; daje to 298 niezależnych sprawdzeń. 49 tożsamości algebraicznych wewnątrz strony zachowano i oznaczono jako samosprawdzenia. Rozbieżność z opublikowanymi równaniami doboru jest ograniczona wyłącznie zaokrągleniem stałych właściwych każdej normie: 1,9e-5 dla współczynników krytycznych API 520 SI i ISO 4126-1 oraz 1,1e-3 dla współczynnika w jednostkach amerykańskich. Użyto niezależnego wzorca i własnego stanowiska autora; nie było recenzji strony trzeciej. Porównanie wymaga przyjęcia wartości jeden dla wszystkich współczynników korekcyjnych, których narzędzie nie implementuje; nie deklaruje się zgodności z API 520/521 lub ISO 4126 ani certyfikowanych korekt zaworu."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "relief-valve-sizing-external-20260912",
+        "reference": "An external reference implemented in Python along three routes that never read the tool's arithmetic. (1) First principles: one-dimensional isentropic nozzle flow parametrised by throat Mach number, the mass flux assembled as rho*w and the choking point located numerically by maximising that flux, verified against NACA Report 1135 Table I at M=1, k=1.4 (p/p0 = 0.528282, T/T0 = 0.833333, rho/rho0 = 0.633938) to better than 4e-7. (2) The published sizing equations themselves, implemented from the standards' own stated algebraic form and their own printed constants in their own units: API Standard 520 Part I, 9th ed. (2014), clause 5.6.3 (critical vapour, C = 520 sqrt(k(2/(k+1))^((k+1)/(k-1))) US customary and 0.03948 sqrt(...) SI), clause 5.6.4 (subcritical vapour, 735 and 17.9, with F2) and clause 5.8.1.2 (liquid, 38 and 11.78); and ISO 4126-1:2013 clause 7.3.3.1 (critical vapour, C = 3.948 sqrt(...)). The API and ISO coefficient tables are reproduced from these forms (C = 315, 337, 356, 373, 387, 400 at k = 1.0 to 2.0; ISO C = 2.703 at k = 1.4). (3) Real-gas choked flux from the CoolProp multiparameter equations of state, used to measure what the tool's declared ideal-gas idealisation costs. The three routes are cross-checked against each other before any tool output is graded. The 49 in-page algebraic identities from the previous artifact are merged and kept, labelled self-check, and counted separately.",
+        "citations": ["A. H. Shapiro, \"The Dynamics and Thermodynamics of Compressible Fluid Flow\", vol. 1, Ronald Press, New York, 1953, ch. 4: eq. 4.14 (stagnation temperature ratio), eq. 4.15 (stagnation pressure ratio), eq. 4.19 (critical pressure ratio), eq. 4.21 (mass flux), Table B.2.", "Ames Research Staff, \"Equations, Tables and Charts for Compressible Flow\", NACA Report 1135, 1953, Table I (isentropic flow): at M = 1 and gamma = 1.4, p/p0 = 0.528282, T/T0 = 0.833333, rho/rho0 = 0.633938; reproduced by the first-principles route to better than 4e-7.", "API Standard 520, \"Sizing, Selection, and Installation of Pressure-relieving Devices, Part I - Sizing and Selection\", American Petroleum Institute, 9th edition, July 2014: clause 5.6.3 (critical-flow vapour sizing and the coefficient C), clause 5.6.4 (subcritical-flow vapour sizing and F2), clause 5.8.1.2 (liquid sizing for valves not requiring capacity certification).", "ISO 4126-1:2013, \"Safety devices for protection against excessive pressure - Part 1: Safety valves\", clause 7.3.3.1 (critical flow, compressible fluids) and the tabulated coefficient C.", "E. W. Lemmon, R. T. Jacobsen, S. G. Penoncello, D. G. Friend, \"Thermodynamic Properties of Air...\", J. Phys. Chem. Ref. Data 29 (2000) 331; U. Setzmann and W. Wagner, \"A New Equation of State ... for Methane\", J. Phys. Chem. Ref. Data 20 (1991) 1061; J. W. Leachman et al., \"Fundamental Equations of State for Parahydrogen, Normal Hydrogen, and Orthohydrogen\", J. Phys. Chem. Ref. Data 38 (2009) 721; R. Span and W. Wagner, \"A New Equation of State for Carbon Dioxide...\", J. Phys. Chem. Ref. Data 25 (1996) 1509 - as implemented in CoolProp 8.0.", "CODATA 2018 / SI Brochure 9th ed. for the molar gas constant and the exact pound, psi, inch and US gallon conversion factors used to move between the standards' unit systems."],
+        "cases": 347,
+        "passed": 347,
+        "tolerance": "Each tolerance comes from the physics or from the standard's own printed precision. First-principles routes: 1e-12 relative, the double-precision path difference between two arithmetic assemblies of the same exact solution. API 520 clause 5.6.3 critical: 5.0e-5 SI and 2.5e-3 US customary, from the rounding of the published constants 0.03948 and 520 against the exact 0.0394807513 and 519.4483 that isentropic flow implies (1.903e-5 and 1.062e-3). ISO 4126-1 clause 7.3.3.1: 5.0e-5, from 3.948 against 3.948075127 (1.903e-5). API 520 clause 5.6.4 subcritical: 1.5e-3, from 17.9 against 17.9101653 (5.676e-4) and 735 against 734.6096 (5.316e-4). API 520 clause 5.8.1.2 liquid: 2.0e-4 SI and 6.0e-4 US customary, from 11.78 against 11.779218 (6.64e-5) and 38 against 37.99242 (1.99e-4). Regime classification and the declared-boundary refusal are categorical. The merged in-page self-checks keep the page's own 1e-12 identity figure. No code-compliance tolerance is claimed and no result here is a compliance statement.",
+        "reference_provenance": "Written independently in Python for this benchmark. The page's JavaScript was read only for input names, units, defaults, the declared phase switch, the declared model boundary and the list of reported quantities; nothing was transcribed, ported or paraphrased from it, and no reference route evaluates any expression taken from it. The reference was self-verified before any tool output was graded: NACA TR-1135 Table I reproduced to 4e-7; the numerically located choking point matched to the closed form of Shapiro eq. 4.19 over k = 1.05 to 1.8; branch continuity and flux stationarity checked at the transition; the limits k -> 1, Z -> 1, back pressure -> 0 and back pressure -> upstream checked; the API 520 and ISO 4126-1 published coefficient tables reproduced; and each standard's printed constant compared with the exact unit-consistent constant it rounds. Grading tolerances are read off that last comparison, i.e. off each standard's own stated numerical precision, never off what the tool produces. A negative control was run before publication: three deliberately falsified expectations produced exactly the corresponding failures and moved nothing else.",
+        "run_at": "2026-10-16T09:53:41Z",
+        "artifact": "benchmarks/relief_valve_sizing.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "A",
+      "mdot",
+      "p",
+      "T",
+      "rho"
+    ],
+    "accepts": [
+      "T",
+      "p",
+      "rho",
+      "mdot"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"phase":"gas","mdot":1.0,"p1":1100000.0,"pb":101325.0,"T":373.15,"Cd":0.9,"gamma":1.4,"R":287.05,"Z":1.0,"rho":998.0};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  /* AGENTS §2.2.1 -- one locale map for the on-screen chart and the report figure.
+     The digits are this chart's own and are not re-rounded; only the decimal
+     separator is re-written, by the framework map that the report engine reads.
+     group:false keeps the axis label ungrouped, which is what it has always been
+     and what the English rendering must stay (NUMBER-FORMAT.md rule 2). */
+  var sepNum = function (s) {
+    try { return window.DiagramUI.num.sep(s, { digits: 'raw', group: false }); }
+    catch (e) { return s; }
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return sepNum(v.toExponential(1));
+    return sepNum(String(Math.round(v * 1000) / 1000));
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{title:"Relief valve sizing — required flow area from the orifice relation",
+ summary:"A required relief of {m} kg/s at {p1} bar into a back pressure of {pb} bar, treated as {phase}, calls for {A} mm² of flow area at a discharge coefficient of {Cd}, an equivalent bore of {d} mm. The governing branch is {branch}, with an ideal mass flux of {G} kg/(m²·s).",
+ concScope:"The figure is the flow area this one relation requires. It is not a certified effective orifice area and it does not select a device: certified Kd, the correction factors of API 520/521 and ISO 4126, standard orifice designations and the inlet and outlet installation criteria all sit outside this tool.",
+ system:"Required area follows from a single mass-flux relation divided by the discharge coefficient. For a gas the flux is the perfect-gas orifice value at the pressure ratio across the device, taken from the critical expression below the transition ratio and from the subcritical expression above it. For a liquid it is the incompressible Bernoulli value. The flux carries no dependence on the required flow, so area rises in proportion to it.",
+ figCap:"Required flow area against target mass flow, from zero to 120 % of the target. The slope is the area each kilogram per second calls for.",
+ ckSize:"Sizing-form closure",
+ ckSizeB:"The relief flow recovered from the reported area as Cd·A·G, against the flow that was asked for. This reads the sizing form A = ṁ/(Cd·G) backwards and tests the arithmetic of the area.",
+ ckDia:"Equivalent-bore closure",
+ ckDiaB:"The circular area π d²/4 formed from the reported equivalent bore, against the reported flow area. The bore is a restatement of the area and has to return it.",
+ ckRoute:"Mass flux by an independent route",
+ ckRouteB:"For a gas the flux is rebuilt as density times velocity at the throat: the sonic state ρ*·a* on the critical branch, the isentropically expanded state ρ₂·v₂ on the subcritical branch. For a liquid it is rebuilt from the velocity head, v = √(2Δp/ρ) and G = ρ·v. Each reduces algebraically to the expression the tool evaluates along a different arithmetic path.",
+ ckCont:"Branch continuity at the transition ratio",
+ ckContB:"The critical and subcritical gas expressions evaluated at the transition ratio (2/(γ+1))^(γ/(γ−1)) with this case's gas properties. The subcritical flux is stationary there, so the two expressions return one value and the switch introduces no step.",
+ ckZ:"Inverse square-root compressibility scaling",
+ ckZB:"Both gas branches carry the compressibility factor only as 1/√Z. The flux computed at the case's Z, multiplied by √Z, has to return the flux computed at Z = 1.",
+ ckTarget:"Plotted curve at the target flow",
+ ckTargetB:"The curve is sampled at 61 points from zero to 120 % of the target, so the sample at 100 % is the reported area. Figure and results table therefore carry one area.",
+ ckLin:"Proportionality of area to flow",
+ ckLinB:"Mass flux is set by the pressure ratio and the fluid state alone, so required area rises in proportion to required flow. Reported here is the largest departure of the 61 samples from a straight line through the origin.",
+ ckReg:"Governing branch",
+ ckRegB:"The pressure ratio across the device against the transition ratio, together with the phase model in force. The branch decides which expression sets the mass flux and with it the area.",
+ rPhaseGas:"an ideal gas",rPhaseLiq:"an incompressible liquid",
+ rBrChoked:"critical",rBrSub:"subcritical",rBrLiq:"incompressible Bernoulli",
+ riskCodeT:"Code compliance and device selection",
+ riskCode:"No part of API 520/521 or ISO 4126 is implemented here. Certified Kd, the back-pressure, viscosity and two-phase correction factors, the standard orifice letter designations, the inlet pressure-drop criterion and the outlet built-up back-pressure criterion are all absent. An area from this page cannot support a claim of compliance and cannot stand as a device selection.",
+ riskPropT:"Fluid model",
+ riskProp:"The gas branch is a perfect gas with constant γ and one compressibility factor supplied by the user; the liquid branch is single-phase and incompressible. Flashing, two-phase relief, condensable vapour and viscous-liquid correction lie outside the model.",
+ riskStateT:"Relieving state",
+ riskState:"Upstream pressure, temperature and back pressure are taken as given constants. Accumulation, inlet line loss, built-up back pressure from the discharge header and any transient in the relieving scenario remain the user's to establish.",
+ mNote:"The discharge coefficient is entered directly and multiplies the ideal flux. It stands in for no certified Kd and carries no derating.",
+ axFlow:"Target mass flow",axArea:"Required flow area",
+ rArea:"Required flow area",rBore:"Equivalent bore",rFlux:"Ideal mass flux",
+ rRhoUp:"Upstream density",rRatio:"Pressure ratio p_b/p₁",rDp:"Differential pressure",
+ rP1:"Relieving pressure",rPb:"Back pressure",rT:"Relieving temperature",
+ rMdot:"Required mass flow",rCd:"Discharge coefficient",rAreaCd:"Ideal area at Cd = 1",
+ rRc:"Transition pressure ratio",rOfTrans:"times the transition ratio",
+ rVel:"Throat velocity",rSlope:"Area per unit flow",rPhaseLabel:"Phase model",
+ flowSource:"Relieving source",flowValve:"Relief device",flowDischarge:"Discharge",
+ dPhase:"Phase model",dPhaseWhy:"The phase decides which mass-flux relation applies to the whole calculation.",
+ dCd:"Discharge coefficient",dCdWhy:"Entered directly and applied as a multiplier on the ideal flux.",
+ dZ:"Compressibility factor",dZWhy:"Enters both gas branches as 1/√Z and is held constant across the expansion.",
+ dBack:"Back pressure",dBackWhy:"Sets the pressure ratio, and with it whether the critical branch governs."},
+uk:{title:"Підбір площі скидного клапана — потрібна площа з рівняння отвору",
+ summary:"Потрібне скидання {m} кг/с за {p1} бар у протитиск {pb} бар, трактоване як {phase}, вимагає {A} мм² площі за коефіцієнта витрати {Cd}, тобто еквівалентного отвору {d} мм. Керівна гілка — {branch}, з ідеальним масовим потоком {G} кг/(м²·с).",
+ concScope:"Ця величина є площею, якої вимагає одне це співвідношення. Вона не є сертифікованою ефективною площею отвору і не є вибором виробу: сертифікований Kd, поправкові коефіцієнти API 520/521 та ISO 4126, стандартні позначення отворів і критерії монтажу на вході та виході лежать поза цим інструментом.",
+ system:"Потрібна площа випливає з єдиного співвідношення масового потоку, поділеного на коефіцієнт витрати. Для газу це значення для отвору ідеального газу за перепадом тиску на виробі: критичний вираз нижче перехідного відношення і докритичний вище нього. Для рідини це нестислива формула Бернуллі. Потік не залежить від потрібної витрати, тож площа зростає пропорційно до неї.",
+ figCap:"Потрібна площа залежно від цільової масової витрати, від нуля до 120 % цілі. Нахил — площа, якої вимагає кожен кілограм за секунду.",
+ ckSize:"Замикання форми підбору",
+ ckSizeB:"Витрата, відновлена з наведеної площі як Cd·A·G, проти витрати, яку було задано. Це прочитання формули A = ṁ/(Cd·G) у зворотному напрямку, що перевіряє арифметику площі.",
+ ckDia:"Замикання еквівалентного отвору",
+ ckDiaB:"Площа кола π d²/4, утворена з наведеного еквівалентного отвору, проти наведеної площі. Отвір є переформулюванням площі й має її повертати.",
+ ckRoute:"Масовий потік незалежним шляхом",
+ ckRouteB:"Для газу потік відновлюється як добуток густини та швидкості в горлі: звуковий стан ρ*·a* на критичній гілці, ізоентропно розширений стан ρ₂·v₂ на докритичній. Для рідини — зі швидкісного напору, v = √(2Δp/ρ) та G = ρ·v. Кожен шлях алгебраїчно зводиться до виразу інструмента іншою арифметичною дорогою.",
+ ckCont:"Неперервність гілок у перехідному відношенні",
+ ckContB:"Критичний і докритичний газові вирази, обчислені за перехідного відношення (2/(γ+1))^(γ/(γ−1)) із властивостями газу цього випадку. Докритичний потік там стаціонарний, тож обидва вирази дають одне значення і перемикання не створює стрибка.",
+ ckZ:"Масштабування стисливості як 1/√Z",
+ ckZB:"Обидві газові гілки містять коефіцієнт стисливості лише як 1/√Z. Потік, обчислений за Z цього випадку й помножений на √Z, має повертати потік, обчислений за Z = 1.",
+ ckTarget:"Побудована крива за цільової витрати",
+ ckTargetB:"Крива дискретизована 61 точкою від нуля до 120 % цілі, тож точка на 100 % є наведеною площею. Рисунок і таблиця результатів несуть одну площу.",
+ ckLin:"Пропорційність площі до витрати",
+ ckLinB:"Масовий потік задається лише відношенням тисків і станом середовища, тож потрібна площа зростає пропорційно до потрібної витрати. Наведено найбільше відхилення 61 точки від прямої через початок координат.",
+ ckReg:"Керівна гілка",
+ ckRegB:"Відношення тисків на виробі проти перехідного відношення разом із чинною моделлю фази. Гілка визначає, який вираз задає масовий потік, а з ним і площу.",
+ rPhaseGas:"ідеальний газ",rPhaseLiq:"нестислива рідина",
+ rBrChoked:"критична",rBrSub:"докритична",rBrLiq:"нестислива формула Бернуллі",
+ riskCodeT:"Відповідність нормам і вибір виробу",
+ riskCode:"Жодна частина API 520/521 чи ISO 4126 тут не реалізована. Сертифікований Kd, поправки на протитиск, в'язкість і двофазність, стандартні літерні позначення отворів, критерій втрати тиску на вході та критерій набутого протитиску на виході — усе це відсутнє. Площа з цієї сторінки не може підтверджувати відповідність нормам і не може бути вибором виробу.",
+ riskPropT:"Модель середовища",
+ riskProp:"Газова гілка — ідеальний газ зі сталим γ та одним коефіцієнтом стисливості, заданим користувачем; рідинна гілка — однофазна нестислива. Скипання, двофазне скидання, конденсовна пара та поправка на в'язку рідину лежать поза моделлю.",
+ riskStateT:"Стан скидання",
+ riskState:"Тиск і температура перед клапаном та протитиск беруться як задані сталі. Накопичення, втрати у вхідній лінії, набутий протитиск колектора скидання та будь-який перехідний процес сценарію скидання встановлює користувач.",
+ mNote:"Коефіцієнт витрати вводиться прямо і множить ідеальний потік. Він не заміщує жодного сертифікованого Kd і не містить зниження.",
+ axFlow:"Цільова масова витрата",axArea:"Потрібна площа",
+ rArea:"Потрібна площа",rBore:"Еквівалентний отвір",rFlux:"Ідеальний масовий потік",
+ rRhoUp:"Густина перед виробом",rRatio:"Відношення тисків p_b/p₁",rDp:"Перепад тиску",
+ rP1:"Тиск скидання",rPb:"Протитиск",rT:"Температура скидання",
+ rMdot:"Потрібна масова витрата",rCd:"Коефіцієнт витрати",rAreaCd:"Ідеальна площа за Cd = 1",
+ rRc:"Перехідне відношення тисків",rOfTrans:"рази перехідного відношення",
+ rVel:"Швидкість у горлі",rSlope:"Площа на одиницю витрати",rPhaseLabel:"Модель фази",
+ flowSource:"Джерело скидання",flowValve:"Скидний пристрій",flowDischarge:"Скидання",
+ dPhase:"Модель фази",dPhaseWhy:"Фаза визначає, яке співвідношення масового потоку застосовується до всього розрахунку.",
+ dCd:"Коефіцієнт витрати",dCdWhy:"Вводиться прямо і застосовується як множник до ідеального потоку.",
+ dZ:"Коефіцієнт стисливості",dZWhy:"Входить в обидві газові гілки як 1/√Z і лишається сталим упродовж розширення.",
+ dBack:"Протитиск",dBackWhy:"Задає відношення тисків, а з ним і те, чи керує критична гілка."},
+de:{title:"Sicherheitsventil-Auslegung — erforderliche Fläche aus der Blendenbeziehung",
+ summary:"Eine geforderte Abblaseleistung von {m} kg/s bei {p1} bar gegen einen Gegendruck von {pb} bar, behandelt als {phase}, verlangt {A} mm² Strömungsfläche bei einem Ausflussbeiwert von {Cd}, entsprechend einer Bohrung von {d} mm. Maßgebend ist der Zweig {branch}, mit einem idealen Massenfluss von {G} kg/(m²·s).",
+ concScope:"Die Zahl ist die Strömungsfläche, die diese eine Beziehung verlangt. Sie ist keine zertifizierte wirksame Blendenfläche und sie wählt kein Gerät aus: zertifizierter Kd, die Korrekturfaktoren aus API 520/521 und ISO 4126, die genormten Blendenbezeichnungen sowie die Einbaukriterien für Zu- und Ableitung liegen außerhalb dieses Werkzeugs.",
+ system:"Die erforderliche Fläche folgt aus einer einzigen Massenflussbeziehung, geteilt durch den Ausflussbeiwert. Für ein Gas ist der Fluss der Idealgas-Blendenwert beim Druckverhältnis über dem Gerät, unterhalb des Übergangsverhältnisses aus dem kritischen und oberhalb aus dem unterkritischen Ausdruck. Für eine Flüssigkeit ist es der inkompressible Bernoulli-Wert. Der Fluss hängt nicht vom geforderten Massenstrom ab, die Fläche steigt daher proportional mit ihm.",
+ figCap:"Erforderliche Strömungsfläche über dem Zielmassenstrom, von null bis 120 % des Ziels. Die Steigung ist die Fläche je Kilogramm pro Sekunde.",
+ ckSize:"Schließung der Auslegungsform",
+ ckSizeB:"Der aus der ausgegebenen Fläche als Cd·A·G zurückgerechnete Massenstrom gegen den geforderten. Das liest die Auslegungsform A = ṁ/(Cd·G) rückwärts und prüft die Arithmetik der Fläche.",
+ ckDia:"Schließung der Ersatzbohrung",
+ ckDiaB:"Die Kreisfläche π d²/4 aus der ausgegebenen Ersatzbohrung gegen die ausgegebene Strömungsfläche. Die Bohrung ist eine Umformulierung der Fläche und muss sie zurückgeben.",
+ ckRoute:"Massenfluss über einen unabhängigen Weg",
+ ckRouteB:"Für ein Gas wird der Fluss als Dichte mal Geschwindigkeit im engsten Querschnitt aufgebaut: Schallzustand ρ*·a* im kritischen Zweig, isentrop entspannter Zustand ρ₂·v₂ im unterkritischen. Für eine Flüssigkeit aus der Geschwindigkeitshöhe, v = √(2Δp/ρ) und G = ρ·v. Jeder Weg führt algebraisch auf den Ausdruck des Werkzeugs über eine andere Rechenfolge.",
+ ckCont:"Zweigstetigkeit am Übergangsverhältnis",
+ ckContB:"Kritischer und unterkritischer Gasausdruck, ausgewertet am Übergangsverhältnis (2/(γ+1))^(γ/(γ−1)) mit den Gaseigenschaften dieses Falls. Der unterkritische Fluss ist dort stationär, beide Ausdrücke liefern einen Wert und der Wechsel erzeugt keine Stufe.",
+ ckZ:"Skalierung mit 1/√Z",
+ ckZB:"Beide Gaszweige tragen den Realgasfaktor nur als 1/√Z. Der beim Z des Falls berechnete Fluss, mit √Z multipliziert, muss den bei Z = 1 berechneten Fluss zurückgeben.",
+ ckTarget:"Gezeichnete Kurve beim Zielmassenstrom",
+ ckTargetB:"Die Kurve ist mit 61 Punkten von null bis 120 % des Ziels abgetastet, der Punkt bei 100 % ist daher die ausgegebene Fläche. Bild und Ergebnistabelle tragen somit eine Fläche.",
+ ckLin:"Proportionalität von Fläche und Massenstrom",
+ ckLinB:"Der Massenfluss folgt allein aus Druckverhältnis und Fluidzustand, die erforderliche Fläche steigt daher proportional zum geforderten Massenstrom. Angegeben ist die größte Abweichung der 61 Punkte von einer Ursprungsgeraden.",
+ ckReg:"Maßgebender Zweig",
+ ckRegB:"Das Druckverhältnis über dem Gerät gegen das Übergangsverhältnis, zusammen mit dem geltenden Phasenmodell. Der Zweig entscheidet, welcher Ausdruck den Massenfluss und damit die Fläche setzt.",
+ rPhaseGas:"ideales Gas",rPhaseLiq:"inkompressible Flüssigkeit",
+ rBrChoked:"kritisch",rBrSub:"unterkritisch",rBrLiq:"inkompressibles Bernoulli",
+ riskCodeT:"Normkonformität und Geräteauswahl",
+ riskCode:"Kein Teil von API 520/521 oder ISO 4126 ist hier umgesetzt. Zertifizierter Kd, die Korrekturen für Gegendruck, Viskosität und Zweiphasigkeit, die genormten Buchstabenbezeichnungen der Blenden, das Kriterium für den Zulauf-Druckverlust und das Kriterium für den aufgebauten Gegendruck fehlen sämtlich. Eine Fläche von dieser Seite trägt keine Konformitätsaussage und ersetzt keine Geräteauswahl.",
+ riskPropT:"Fluidmodell",
+ riskProp:"Der Gaszweig ist ein ideales Gas mit konstantem γ und einem vom Benutzer gesetzten Realgasfaktor; der Flüssigkeitszweig ist einphasig und inkompressibel. Ausdampfen, Zweiphasenabblasung, kondensierbarer Dampf und die Korrektur für zähe Flüssigkeiten liegen außerhalb des Modells.",
+ riskStateT:"Abblasezustand",
+ riskState:"Vordruck, Temperatur und Gegendruck gelten als gegebene Konstanten. Ansprechüberdruck, Zulaufverlust, aufgebauter Gegendruck aus der Sammelleitung und jede Transiente des Abblaseszenarios bleiben beim Anwender.",
+ mNote:"Der Ausflussbeiwert wird direkt eingegeben und multipliziert den idealen Fluss. Er vertritt keinen zertifizierten Kd und enthält keine Abminderung.",
+ axFlow:"Zielmassenstrom",axArea:"Erforderliche Strömungsfläche",
+ rArea:"Erforderliche Strömungsfläche",rBore:"Ersatzbohrung",rFlux:"Idealer Massenfluss",
+ rRhoUp:"Dichte vor dem Gerät",rRatio:"Druckverhältnis p_b/p₁",rDp:"Differenzdruck",
+ rP1:"Abblasedruck",rPb:"Gegendruck",rT:"Abblasetemperatur",
+ rMdot:"Geforderter Massenstrom",rCd:"Ausflussbeiwert",rAreaCd:"Ideale Fläche bei Cd = 1",
+ rRc:"Übergangs-Druckverhältnis",rOfTrans:"mal das Übergangsverhältnis",
+ rVel:"Geschwindigkeit im engsten Querschnitt",rSlope:"Fläche je Massenstrom",rPhaseLabel:"Phasenmodell",
+ flowSource:"Abblasequelle",flowValve:"Abblasegerät",flowDischarge:"Abströmung",
+ dPhase:"Phasenmodell",dPhaseWhy:"Die Phase entscheidet, welche Massenflussbeziehung für die ganze Rechnung gilt.",
+ dCd:"Ausflussbeiwert",dCdWhy:"Direkt eingegeben und als Faktor auf den idealen Fluss angewandt.",
+ dZ:"Realgasfaktor",dZWhy:"Geht in beide Gaszweige als 1/√Z ein und bleibt über die Entspannung konstant.",
+ dBack:"Gegendruck",dBackWhy:"Setzt das Druckverhältnis und damit, ob der kritische Zweig maßgebend ist."},
+nl:{title:"Veiligheidsklepdimensionering — vereist doorstroomoppervlak uit de orifice-relatie",
+ summary:"Een vereiste afblaas van {m} kg/s bij {p1} bar tegen een tegendruk van {pb} bar, behandeld als {phase}, vraagt {A} mm² doorstroomoppervlak bij een uitstroomcoëfficiënt van {Cd}, oftewel een equivalente boring van {d} mm. De bepalende tak is {branch}, met een ideale massaflux van {G} kg/(m²·s).",
+ concScope:"Het getal is het doorstroomoppervlak dat deze ene relatie vraagt. Het is geen gecertificeerd effectief orifice-oppervlak en het kiest geen toestel: gecertificeerde Kd, de correctiefactoren uit API 520/521 en ISO 4126, de genormeerde orifice-aanduidingen en de installatiecriteria voor toe- en afvoer liggen alle buiten dit gereedschap.",
+ system:"Het vereiste oppervlak volgt uit één massafluxrelatie gedeeld door de uitstroomcoëfficiënt. Voor een gas is de flux de ideaal-gaswaarde bij de drukverhouding over het toestel, onder de overgangsverhouding uit de kritische en erboven uit de subkritische uitdrukking. Voor een vloeistof is het de onsamendrukbare Bernoulli-waarde. De flux hangt niet van de vereiste massastroom af, dus het oppervlak stijgt evenredig mee.",
+ figCap:"Vereist doorstroomoppervlak tegen de doelmassastroom, van nul tot 120 % van het doel. De helling is het oppervlak per kilogram per seconde.",
+ ckSize:"Sluiting van de dimensioneringsvorm",
+ ckSizeB:"De uit het gemelde oppervlak teruggerekende massastroom Cd·A·G tegen de gevraagde massastroom. Dit leest de vorm A = ṁ/(Cd·G) achterstevoren en toetst de rekenkunde van het oppervlak.",
+ ckDia:"Sluiting van de equivalente boring",
+ ckDiaB:"Het cirkeloppervlak π d²/4 uit de gemelde equivalente boring tegen het gemelde doorstroomoppervlak. De boring is een herformulering van het oppervlak en moet het teruggeven.",
+ ckRoute:"Massaflux langs een onafhankelijke weg",
+ ckRouteB:"Voor een gas wordt de flux opgebouwd als dichtheid maal snelheid in de keel: de sonische toestand ρ*·a* op de kritische tak, de isentroop geëxpandeerde toestand ρ₂·v₂ op de subkritische. Voor een vloeistof uit de snelheidshoogte, v = √(2Δp/ρ) en G = ρ·v. Elk pad herleidt algebraïsch tot de uitdrukking van het gereedschap langs een andere rekenvolgorde.",
+ ckCont:"Takcontinuïteit bij de overgangsverhouding",
+ ckContB:"De kritische en de subkritische gasuitdrukking, geëvalueerd bij de overgangsverhouding (2/(γ+1))^(γ/(γ−1)) met de gaseigenschappen van dit geval. De subkritische flux is daar stationair, dus beide uitdrukkingen leveren één waarde en de omschakeling geeft geen sprong.",
+ ckZ:"Schaling met 1/√Z",
+ ckZB:"Beide gastakken dragen de compressibiliteitsfactor uitsluitend als 1/√Z. De flux berekend bij de Z van het geval, vermenigvuldigd met √Z, moet de flux bij Z = 1 teruggeven.",
+ ckTarget:"Getekende kromme bij de doelmassastroom",
+ ckTargetB:"De kromme is bemonsterd met 61 punten van nul tot 120 % van het doel, zodat het punt bij 100 % het gemelde oppervlak is. Figuur en resultatentabel dragen daarmee één oppervlak.",
+ ckLin:"Evenredigheid van oppervlak en massastroom",
+ ckLinB:"De massaflux volgt alleen uit de drukverhouding en de fluïdumtoestand, dus het vereiste oppervlak stijgt evenredig met de vereiste massastroom. Gemeld is de grootste afwijking van de 61 punten van een rechte door de oorsprong.",
+ ckReg:"Bepalende tak",
+ ckRegB:"De drukverhouding over het toestel tegen de overgangsverhouding, samen met het geldende fasemodel. De tak bepaalt welke uitdrukking de massaflux en daarmee het oppervlak vastlegt.",
+ rPhaseGas:"een ideaal gas",rPhaseLiq:"een onsamendrukbare vloeistof",
+ rBrChoked:"kritisch",rBrSub:"subkritisch",rBrLiq:"onsamendrukbare Bernoulli",
+ riskCodeT:"Normconformiteit en toestelkeuze",
+ riskCode:"Geen enkel deel van API 520/521 of ISO 4126 is hier geïmplementeerd. Gecertificeerde Kd, de correcties voor tegendruk, viscositeit en tweefasenstroming, de genormeerde letteraanduidingen van orifices, het criterium voor toevoerdrukverlies en het criterium voor opgebouwde tegendruk ontbreken alle. Een oppervlak van deze pagina draagt geen conformiteitsuitspraak en vervangt geen toestelkeuze.",
+ riskPropT:"Fluïdummodel",
+ riskProp:"De gastak is een ideaal gas met constante γ en één door de gebruiker gegeven compressibiliteitsfactor; de vloeistoftak is eenfasig en onsamendrukbaar. Flashing, tweefasenafblaas, condenseerbare damp en de correctie voor viskeuze vloeistof vallen buiten het model.",
+ riskStateT:"Afblaastoestand",
+ riskState:"Bovendruk, temperatuur en tegendruk gelden als gegeven constanten. Accumulatie, toevoerleidingverlies, opgebouwde tegendruk uit het afblaascollector en elke transiënt in het afblaasscenario blijven aan de gebruiker.",
+ mNote:"De uitstroomcoëfficiënt wordt rechtstreeks ingevoerd en vermenigvuldigt de ideale flux. Hij vervangt geen gecertificeerde Kd en bevat geen derating.",
+ axFlow:"Doelmassastroom",axArea:"Vereist doorstroomoppervlak",
+ rArea:"Vereist doorstroomoppervlak",rBore:"Equivalente boring",rFlux:"Ideale massaflux",
+ rRhoUp:"Dichtheid vóór het toestel",rRatio:"Drukverhouding p_b/p₁",rDp:"Drukverschil",
+ rP1:"Afblaasdruk",rPb:"Tegendruk",rT:"Afblaastemperatuur",
+ rMdot:"Vereiste massastroom",rCd:"Uitstroomcoëfficiënt",rAreaCd:"Ideaal oppervlak bij Cd = 1",
+ rRc:"Overgangsdrukverhouding",rOfTrans:"maal de overgangsverhouding",
+ rVel:"Keelsnelheid",rSlope:"Oppervlak per massastroom",rPhaseLabel:"Fasemodel",
+ flowSource:"Afblaasbron",flowValve:"Afblaastoestel",flowDischarge:"Afvoer",
+ dPhase:"Fasemodel",dPhaseWhy:"De fase bepaalt welke massafluxrelatie voor de hele berekening geldt.",
+ dCd:"Uitstroomcoëfficiënt",dCdWhy:"Rechtstreeks ingevoerd en als factor op de ideale flux toegepast.",
+ dZ:"Compressibiliteitsfactor",dZWhy:"Komt in beide gastakken binnen als 1/√Z en blijft constant over de expansie.",
+ dBack:"Tegendruk",dBackWhy:"Bepaalt de drukverhouding en daarmee of de kritische tak bepalend is."},
+fr:{title:"Dimensionnement de soupape — section requise par la relation d'orifice",
+ summary:"Un débit de décharge requis de {m} kg/s à {p1} bar contre une contre-pression de {pb} bar, traité comme {phase}, appelle {A} mm² de section de passage pour un coefficient de décharge de {Cd}, soit un alésage équivalent de {d} mm. La branche gouvernante est {branch}, avec un flux massique idéal de {G} kg/(m²·s).",
+ concScope:"Ce chiffre est la section de passage qu'exige cette seule relation. Ce n'est pas une section d'orifice effective certifiée et cela ne choisit aucun appareil : le Kd certifié, les facteurs correctifs d'API 520/521 et d'ISO 4126, les désignations normalisées d'orifices et les critères d'installation amont et aval se situent hors de cet outil.",
+ system:"La section requise découle d'une seule relation de flux massique divisée par le coefficient de décharge. Pour un gaz, le flux est la valeur d'orifice en gaz parfait au rapport de pression traversant l'appareil, tirée de l'expression critique sous le rapport de transition et de l'expression sous-critique au-dessus. Pour un liquide, c'est la valeur de Bernoulli incompressible. Le flux ne dépend pas du débit requis, la section croît donc proportionnellement à celui-ci.",
+ figCap:"Section requise en fonction du débit massique cible, de zéro à 120 % de la cible. La pente est la section appelée par chaque kilogramme par seconde.",
+ ckSize:"Fermeture de la forme de dimensionnement",
+ ckSizeB:"Le débit reconstitué à partir de la section indiquée, Cd·A·G, face au débit demandé. Cela lit la forme A = ṁ/(Cd·G) à l'envers et teste l'arithmétique de la section.",
+ ckDia:"Fermeture de l'alésage équivalent",
+ ckDiaB:"La section circulaire π d²/4 formée depuis l'alésage équivalent indiqué, face à la section de passage indiquée. L'alésage est une reformulation de la section et doit la restituer.",
+ ckRoute:"Flux massique par une voie indépendante",
+ ckRouteB:"Pour un gaz le flux est reconstruit comme masse volumique fois vitesse au col : l'état sonique ρ*·a* sur la branche critique, l'état détendu isentropiquement ρ₂·v₂ sur la branche sous-critique. Pour un liquide, depuis la hauteur cinétique, v = √(2Δp/ρ) et G = ρ·v. Chaque voie se ramène algébriquement à l'expression de l'outil par un autre enchaînement de calculs.",
+ ckCont:"Continuité des branches au rapport de transition",
+ ckContB:"Les expressions gazeuses critique et sous-critique évaluées au rapport de transition (2/(γ+1))^(γ/(γ−1)) avec les propriétés de gaz de ce cas. Le flux sous-critique y est stationnaire, les deux expressions rendent donc une seule valeur et la commutation n'introduit aucun saut.",
+ ckZ:"Mise à l'échelle en 1/√Z",
+ ckZB:"Les deux branches gazeuses ne portent le facteur de compressibilité que comme 1/√Z. Le flux calculé au Z du cas, multiplié par √Z, doit rendre le flux calculé à Z = 1.",
+ ckTarget:"Courbe tracée au débit cible",
+ ckTargetB:"La courbe est échantillonnée en 61 points de zéro à 120 % de la cible, le point à 100 % est donc la section indiquée. Figure et tableau des résultats portent ainsi une seule section.",
+ ckLin:"Proportionnalité de la section au débit",
+ ckLinB:"Le flux massique ne dépend que du rapport de pression et de l'état du fluide, la section requise croît donc proportionnellement au débit requis. Est indiqué le plus grand écart des 61 points à une droite passant par l'origine.",
+ ckReg:"Branche gouvernante",
+ ckRegB:"Le rapport de pression traversant l'appareil face au rapport de transition, avec le modèle de phase en vigueur. La branche décide quelle expression fixe le flux massique et avec lui la section.",
+ rPhaseGas:"un gaz parfait",rPhaseLiq:"un liquide incompressible",
+ rBrChoked:"critique",rBrSub:"sous-critique",rBrLiq:"Bernoulli incompressible",
+ riskCodeT:"Conformité normative et choix de l'appareil",
+ riskCode:"Aucune partie d'API 520/521 ni d'ISO 4126 n'est implémentée ici. Le Kd certifié, les corrections de contre-pression, de viscosité et de diphasique, les désignations normalisées d'orifices, le critère de perte de charge amont et le critère de contre-pression engendrée à l'aval sont tous absents. Une section issue de cette page ne soutient aucune affirmation de conformité et ne vaut pas choix d'appareil.",
+ riskPropT:"Modèle de fluide",
+ riskProp:"La branche gazeuse est un gaz parfait à γ constant et un facteur de compressibilité fourni par l'utilisateur; la branche liquide est monophasique et incompressible. Le flash, la décharge diphasique, la vapeur condensable et la correction de liquide visqueux sortent du modèle.",
+ riskStateT:"État de décharge",
+ riskState:"Pression amont, température et contre-pression sont prises comme constantes données. L'accumulation, la perte de charge de la ligne d'entrée, la contre-pression engendrée par le collecteur et tout transitoire du scénario de décharge restent à établir par l'utilisateur.",
+ mNote:"Le coefficient de décharge est saisi directement et multiplie le flux idéal. Il ne tient lieu d'aucun Kd certifié et ne porte aucune minoration.",
+ axFlow:"Débit massique cible",axArea:"Section requise",
+ rArea:"Section de passage requise",rBore:"Alésage équivalent",rFlux:"Flux massique idéal",
+ rRhoUp:"Masse volumique amont",rRatio:"Rapport de pression p_b/p₁",rDp:"Pression différentielle",
+ rP1:"Pression de décharge",rPb:"Contre-pression",rT:"Température de décharge",
+ rMdot:"Débit massique requis",rCd:"Coefficient de décharge",rAreaCd:"Section idéale à Cd = 1",
+ rRc:"Rapport de pression de transition",rOfTrans:"fois le rapport de transition",
+ rVel:"Vitesse au col",rSlope:"Section par unité de débit",rPhaseLabel:"Modèle de phase",
+ flowSource:"Source de décharge",flowValve:"Organe de décharge",flowDischarge:"Refoulement",
+ dPhase:"Modèle de phase",dPhaseWhy:"La phase décide quelle relation de flux massique s'applique à tout le calcul.",
+ dCd:"Coefficient de décharge",dCdWhy:"Saisi directement et appliqué comme facteur sur le flux idéal.",
+ dZ:"Facteur de compressibilité",dZWhy:"Entre dans les deux branches gazeuses en 1/√Z et reste constant pendant la détente.",
+ dBack:"Contre-pression",dBackWhy:"Fixe le rapport de pression et avec lui le caractère gouvernant de la branche critique."},
+es:{title:"Dimensionado de válvula de alivio — área requerida por la relación de orificio",
+ summary:"Un alivio requerido de {m} kg/s a {p1} bar contra una contrapresión de {pb} bar, tratado como {phase}, exige {A} mm² de área de paso con un coeficiente de descarga de {Cd}, es decir un diámetro equivalente de {d} mm. La rama gobernante es {branch}, con un flujo másico ideal de {G} kg/(m²·s).",
+ concScope:"La cifra es el área de paso que exige esta única relación. No es un área efectiva de orificio certificada y no selecciona ningún dispositivo: el Kd certificado, los factores de corrección de API 520/521 e ISO 4126, las designaciones normalizadas de orificio y los criterios de instalación de entrada y salida quedan fuera de esta herramienta.",
+ system:"El área requerida sale de una única relación de flujo másico dividida por el coeficiente de descarga. Para un gas el flujo es el valor de orificio de gas ideal a la relación de presiones a través del dispositivo, tomado de la expresión crítica por debajo de la relación de transición y de la subcrítica por encima. Para un líquido es el valor de Bernoulli incompresible. El flujo no depende del caudal requerido, así que el área crece en proporción a él.",
+ figCap:"Área de paso requerida frente al caudal másico objetivo, de cero al 120 % del objetivo. La pendiente es el área que exige cada kilogramo por segundo.",
+ ckSize:"Cierre de la forma de dimensionado",
+ ckSizeB:"El caudal recuperado del área indicada como Cd·A·G, frente al caudal solicitado. Esto lee la forma A = ṁ/(Cd·G) al revés y prueba la aritmética del área.",
+ ckDia:"Cierre del diámetro equivalente",
+ ckDiaB:"El área circular π d²/4 formada con el diámetro equivalente indicado, frente al área de paso indicada. El diámetro es una reformulación del área y debe devolverla.",
+ ckRoute:"Flujo másico por una vía independiente",
+ ckRouteB:"Para un gas el flujo se reconstruye como densidad por velocidad en la garganta: el estado sónico ρ*·a* en la rama crítica y el estado expandido isentrópicamente ρ₂·v₂ en la subcrítica. Para un líquido, a partir de la altura de velocidad, v = √(2Δp/ρ) y G = ρ·v. Cada vía se reduce algebraicamente a la expresión de la herramienta por otro camino aritmético.",
+ ckCont:"Continuidad de ramas en la relación de transición",
+ ckContB:"Las expresiones de gas crítica y subcrítica evaluadas en la relación de transición (2/(γ+1))^(γ/(γ−1)) con las propiedades de gas de este caso. El flujo subcrítico es estacionario allí, de modo que ambas expresiones devuelven un valor y la conmutación no introduce escalón.",
+ ckZ:"Escalado con 1/√Z",
+ ckZB:"Ambas ramas de gas llevan el factor de compresibilidad solo como 1/√Z. El flujo calculado con la Z del caso, multiplicado por √Z, debe devolver el flujo calculado con Z = 1.",
+ ckTarget:"Curva trazada en el caudal objetivo",
+ ckTargetB:"La curva se muestrea en 61 puntos de cero al 120 % del objetivo, por lo que el punto al 100 % es el área indicada. Figura y tabla de resultados llevan así una sola área.",
+ ckLin:"Proporcionalidad del área al caudal",
+ ckLinB:"El flujo másico lo fijan únicamente la relación de presiones y el estado del fluido, así que el área requerida crece en proporción al caudal requerido. Se indica la mayor desviación de los 61 puntos respecto de una recta por el origen.",
+ ckReg:"Rama gobernante",
+ ckRegB:"La relación de presiones a través del dispositivo frente a la relación de transición, junto con el modelo de fase vigente. La rama decide qué expresión fija el flujo másico y con él el área.",
+ rPhaseGas:"un gas ideal",rPhaseLiq:"un líquido incompresible",
+ rBrChoked:"crítica",rBrSub:"subcrítica",rBrLiq:"Bernoulli incompresible",
+ riskCodeT:"Conformidad normativa y selección del dispositivo",
+ riskCode:"Ninguna parte de API 520/521 ni de ISO 4126 está implementada aquí. El Kd certificado, las correcciones por contrapresión, viscosidad y flujo bifásico, las designaciones normalizadas de orificio, el criterio de pérdida de carga de entrada y el criterio de contrapresión generada en la salida faltan todos. Un área de esta página no sostiene ninguna afirmación de conformidad y no equivale a una selección de dispositivo.",
+ riskPropT:"Modelo de fluido",
+ riskProp:"La rama de gas es un gas ideal con γ constante y un factor de compresibilidad dado por el usuario; la rama líquida es monofásica e incompresible. La vaporización súbita, el alivio bifásico, el vapor condensable y la corrección por líquido viscoso quedan fuera del modelo.",
+ riskStateT:"Estado de alivio",
+ riskState:"Presión aguas arriba, temperatura y contrapresión se toman como constantes dadas. La sobrepresión acumulada, la pérdida en la línea de entrada, la contrapresión generada por el colector y cualquier transitorio del escenario de alivio quedan a cargo del usuario.",
+ mNote:"El coeficiente de descarga se introduce directamente y multiplica el flujo ideal. No sustituye a ningún Kd certificado y no lleva reducción.",
+ axFlow:"Caudal másico objetivo",axArea:"Área de paso requerida",
+ rArea:"Área de paso requerida",rBore:"Diámetro equivalente",rFlux:"Flujo másico ideal",
+ rRhoUp:"Densidad aguas arriba",rRatio:"Relación de presiones p_b/p₁",rDp:"Presión diferencial",
+ rP1:"Presión de alivio",rPb:"Contrapresión",rT:"Temperatura de alivio",
+ rMdot:"Caudal másico requerido",rCd:"Coeficiente de descarga",rAreaCd:"Área ideal con Cd = 1",
+ rRc:"Relación de presiones de transición",rOfTrans:"veces la relación de transición",
+ rVel:"Velocidad en la garganta",rSlope:"Área por unidad de caudal",rPhaseLabel:"Modelo de fase",
+ flowSource:"Fuente de alivio",flowValve:"Dispositivo de alivio",flowDischarge:"Descarga",
+ dPhase:"Modelo de fase",dPhaseWhy:"La fase decide qué relación de flujo másico rige todo el cálculo.",
+ dCd:"Coeficiente de descarga",dCdWhy:"Se introduce directamente y se aplica como factor sobre el flujo ideal.",
+ dZ:"Factor de compresibilidad",dZWhy:"Entra en ambas ramas de gas como 1/√Z y se mantiene constante en la expansión.",
+ dBack:"Contrapresión",dBackWhy:"Fija la relación de presiones y con ella si gobierna la rama crítica."},
+pl:{title:"Dobór pola zaworu bezpieczeństwa — wymagane pole z zależności kryzowej",
+ summary:"Wymagany upust {m} kg/s przy {p1} bar do przeciwciśnienia {pb} bar, traktowany jako {phase}, wymaga {A} mm² pola przepływu przy współczynniku wypływu {Cd}, czyli średnicy równoważnej {d} mm. Gałęzią rządzącą jest {branch}, przy idealnej gęstości strumienia masy {G} kg/(m²·s).",
+ concScope:"Ta liczba jest polem przepływu, którego wymaga ta jedna zależność. Nie jest certyfikowanym efektywnym polem kryzy i nie stanowi doboru wyrobu: certyfikowane Kd, współczynniki poprawkowe API 520/521 i ISO 4126, znormalizowane oznaczenia kryz oraz kryteria montażu na wlocie i wylocie leżą poza tym narzędziem.",
+ system:"Wymagane pole wynika z jednej zależności na gęstość strumienia masy podzielonej przez współczynnik wypływu. Dla gazu strumień to wartość kryzowa gazu doskonałego przy stosunku ciśnień na wyrobie: z wyrażenia krytycznego poniżej stosunku przejścia i z podkrytycznego powyżej. Dla cieczy to wartość nieściśliwego Bernoulliego. Strumień nie zależy od wymaganego natężenia, więc pole rośnie proporcjonalnie do niego.",
+ figCap:"Wymagane pole przepływu względem docelowego strumienia masy, od zera do 120 % celu. Nachylenie to pole przypadające na kilogram na sekundę.",
+ ckSize:"Domknięcie formy doboru",
+ ckSizeB:"Strumień odtworzony z podanego pola jako Cd·A·G wobec strumienia zadanego. To odczyt formy A = ṁ/(Cd·G) wstecz, sprawdzający arytmetykę pola.",
+ ckDia:"Domknięcie średnicy równoważnej",
+ ckDiaB:"Pole koła π d²/4 utworzone z podanej średnicy równoważnej wobec podanego pola przepływu. Średnica jest przeformułowaniem pola i musi je zwracać.",
+ ckRoute:"Gęstość strumienia masy inną drogą",
+ ckRouteB:"Dla gazu strumień odbudowuje się jako gęstość razy prędkość w gardzieli: stan dźwiękowy ρ*·a* na gałęzi krytycznej, stan rozprężony izentropowo ρ₂·v₂ na podkrytycznej. Dla cieczy z wysokości prędkości, v = √(2Δp/ρ) oraz G = ρ·v. Każda droga sprowadza się algebraicznie do wyrażenia narzędzia inną kolejnością działań.",
+ ckCont:"Ciągłość gałęzi przy stosunku przejścia",
+ ckContB:"Krytyczne i podkrytyczne wyrażenie gazowe obliczone przy stosunku przejścia (2/(γ+1))^(γ/(γ−1)) z właściwościami gazu tego przypadku. Strumień podkrytyczny jest tam stacjonarny, więc oba wyrażenia dają jedną wartość i przełączenie nie wprowadza skoku.",
+ ckZ:"Skalowanie jak 1/√Z",
+ ckZB:"Obie gałęzie gazowe niosą współczynnik ściśliwości wyłącznie jako 1/√Z. Strumień obliczony przy Z tego przypadku, pomnożony przez √Z, musi zwrócić strumień obliczony przy Z = 1.",
+ ckTarget:"Wykreślona krzywa przy strumieniu docelowym",
+ ckTargetB:"Krzywa jest próbkowana w 61 punktach od zera do 120 % celu, więc punkt przy 100 % jest podanym polem. Rysunek i tabela wyników niosą zatem jedno pole.",
+ ckLin:"Proporcjonalność pola do strumienia",
+ ckLinB:"Gęstość strumienia masy ustalają wyłącznie stosunek ciśnień i stan czynnika, więc wymagane pole rośnie proporcjonalnie do wymaganego strumienia. Podano największe odstępstwo 61 punktów od prostej przez początek układu.",
+ ckReg:"Gałąź rządząca",
+ ckRegB:"Stosunek ciśnień na wyrobie wobec stosunku przejścia wraz z obowiązującym modelem fazy. Gałąź rozstrzyga, które wyrażenie ustala gęstość strumienia masy, a z nią pole.",
+ rPhaseGas:"gaz doskonały",rPhaseLiq:"ciecz nieściśliwa",
+ rBrChoked:"krytyczna",rBrSub:"podkrytyczna",rBrLiq:"nieściśliwy Bernoulli",
+ riskCodeT:"Zgodność z normami i dobór wyrobu",
+ riskCode:"Żadna część API 520/521 ani ISO 4126 nie jest tu zaimplementowana. Certyfikowane Kd, poprawki na przeciwciśnienie, lepkość i przepływ dwufazowy, znormalizowane oznaczenia literowe kryz, kryterium spadku ciśnienia na wlocie oraz kryterium narastającego przeciwciśnienia na wylocie — wszystkie są nieobecne. Pole z tej strony nie uzasadnia zgodności z normą i nie zastępuje doboru wyrobu.",
+ riskPropT:"Model czynnika",
+ riskProp:"Gałąź gazowa to gaz doskonały o stałym γ i jednym współczynniku ściśliwości podanym przez użytkownika; gałąź cieczowa jest jednofazowa i nieściśliwa. Odparowanie rzutowe, upust dwufazowy, para kondensowalna i poprawka na ciecz lepką leżą poza modelem.",
+ riskStateT:"Stan upustu",
+ riskState:"Ciśnienie przed zaworem, temperaturę i przeciwciśnienie przyjmuje się jako zadane stałe. Narost ciśnienia, strata na przewodzie wlotowym, narastające przeciwciśnienie kolektora i wszelki stan przejściowy scenariusza upustu pozostają po stronie użytkownika.",
+ mNote:"Współczynnik wypływu wprowadza się wprost i mnoży on strumień idealny. Nie zastępuje żadnego certyfikowanego Kd i nie zawiera obniżenia.",
+ axFlow:"Docelowy strumień masy",axArea:"Wymagane pole przepływu",
+ rArea:"Wymagane pole przepływu",rBore:"Średnica równoważna",rFlux:"Idealna gęstość strumienia masy",
+ rRhoUp:"Gęstość przed wyrobem",rRatio:"Stosunek ciśnień p_b/p₁",rDp:"Różnica ciśnień",
+ rP1:"Ciśnienie upustu",rPb:"Przeciwciśnienie",rT:"Temperatura upustu",
+ rMdot:"Wymagany strumień masy",rCd:"Współczynnik wypływu",rAreaCd:"Pole idealne przy Cd = 1",
+ rRc:"Stosunek ciśnień przejścia",rOfTrans:"razy stosunek przejścia",
+ rVel:"Prędkość w gardzieli",rSlope:"Pole na jednostkę strumienia",rPhaseLabel:"Model fazy",
+ flowSource:"Źródło upustu",flowValve:"Wyrób upustowy",flowDischarge:"Wylot",
+ dPhase:"Model fazy",dPhaseWhy:"Faza rozstrzyga, która zależność gęstości strumienia masy obowiązuje w całym obliczeniu.",
+ dCd:"Współczynnik wypływu",dCdWhy:"Wprowadzany wprost i stosowany jako mnożnik strumienia idealnego.",
+ dZ:"Współczynnik ściśliwości",dZWhy:"Wchodzi do obu gałęzi gazowych jako 1/√Z i pozostaje stały w czasie rozprężania.",
+ dBack:"Przeciwciśnienie",dBackWhy:"Ustala stosunek ciśnień, a wraz z nim to, czy rządzi gałąź krytyczna."}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '—';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+
+/* Verification computed live from the current state.
+   Every item below is an algebraic identity of the tool's own two mass-flux
+   relations, or a statement tying the plotted curve to the reported area.
+   Nothing here touches code compliance: no API or ISO criterion is evaluated,
+   and no tolerance in this file is a code-compliance tolerance. */
+function dgcRvTerms(s){
+  var gas=s.phase==='gas';
+  var rc=Math.pow(2/(s.gamma+1),s.gamma/(s.gamma-1));
+  var r=s.p1>0?Math.max(0,Math.min(1,s.pb/s.p1)):1;
+  var rho1=(s.Z>0&&s.R>0&&s.T>0)?s.p1/(s.Z*s.R*s.T):NaN;
+  return {gas:gas,rc:rc,r:r,rho1:rho1,dp:s.p1-s.pb};
+}
+/* Mass flux rebuilt as density times velocity at the throat. On the critical
+   branch that is the sonic state; on the subcritical branch the isentropically
+   expanded state at back pressure. For a liquid it is the velocity head. Each
+   reduces to the expression the tool evaluates, by a different arithmetic path. */
+function dgcRvThroatFlux(s){
+  var t=dgcRvTerms(s);
+  if(!t.gas){
+    if(!(s.p1>s.pb&&s.rho>0))return {G:0,v:0,rho:s.rho};
+    var vL=Math.sqrt(2*(s.p1-s.pb)/s.rho);
+    return {G:s.rho*vL,v:vL,rho:s.rho};
+  }
+  if(!(s.p1>s.pb&&s.T>0&&s.Z>0))return {G:0,v:0,rho:t.rho1};
+  var g=s.gamma;
+  if(t.r<=t.rc){
+    var rhoT=t.rho1*Math.pow(2/(g+1),1/(g-1));
+    var aT=Math.sqrt(g*s.Z*s.R*s.T*2/(g+1));
+    return {G:rhoT*aT,v:aT,rho:rhoT};
+  }
+  var rho2=t.rho1*Math.pow(t.r,1/g);
+  var v2=Math.sqrt(2*g*s.Z*s.R*s.T/(g-1)*(1-Math.pow(t.r,(g-1)/g)));
+  return {G:rho2*v2,v:v2,rho:rho2};
+}
+/* Returns one row per check: what was measured, what it was measured against,
+   the difference and the verdict. A row without a criterion is recorded as a
+   diagnostic and is excluded from the graded count. */
+function dgcVerify(s){
+  var out=[],r=solve(s),t=dgcRvTerms(s);
+  var rel=function(a,b){return (isFinite(a)&&isFinite(b)&&b!==0)?Math.abs(a-b)/Math.abs(b):null;};
+
+  // 1. The sizing form read backwards: Cd A G must return the required flow.
+  var mBack=s.Cd*r.A*r.G, relS=rel(mBack,s.mdot);
+  out.push({id:'sizing-form-closure',key:'ckSize',graded:true,
+    got:mBack,ref:s.mdot,abs:Math.abs(mBack-s.mdot),rel:relS,tol:1e-12,unit:'kg/s',dp:9,
+    pass:relS!=null&&relS<=1e-12,status:(relS!=null&&relS<=1e-12)?'pass':'fail'});
+
+  // 2. The equivalent bore is a restatement of the area.
+  var aBack=Math.PI*r.d*r.d/4, relD=rel(aBack,r.A);
+  out.push({id:'equivalent-bore-closure',key:'ckDia',graded:true,
+    got:aBack,ref:r.A,abs:Math.abs(aBack-r.A),rel:relD,tol:1e-12,unit:'m2',dp:12,
+    pass:relD!=null&&relD<=1e-12,status:(relD!=null&&relD<=1e-12)?'pass':'fail'});
+
+  // 3. Mass flux by the throat-state route.
+  var th=dgcRvThroatFlux(s), relG=rel(th.G,r.G);
+  out.push({id:'mass-flux-independent-route',key:'ckRoute',graded:true,
+    got:th.G,ref:r.G,abs:Math.abs(th.G-r.G),rel:relG,tol:1e-12,unit:'kg/(m2 s)',dp:9,
+    pass:relG!=null&&relG<=1e-12,status:(relG!=null&&relG<=1e-12)?'pass':'fail',
+    extra:{route:t.gas?(t.r<=t.rc?'sonic-throat':'isentropic-expansion'):'bernoulli-head',
+           throat_velocity:th.v,throat_density:th.rho}});
+
+  // 4. The two gas branches meet at the transition ratio. Evaluated with this
+  //    case's gas properties, whichever phase the case itself runs.
+  var g=s.gamma;
+  var Gc=s.p1*Math.sqrt(g/(s.Z*s.R*s.T))*Math.pow(2/(g+1),(g+1)/(2*(g-1)));
+  var zc=Math.pow(t.rc,2/g)-Math.pow(t.rc,(g+1)/g);
+  var Gs=s.p1*Math.sqrt(2*g/(s.Z*s.R*s.T*(g-1))*zc);
+  var relC=rel(Gs,Gc);
+  var atRc=gasOrifice(s.p1,s.T,t.rc*s.p1,1,1,s.gamma,s.R,s.Z);
+  out.push({id:'critical-subcritical-branch-continuity',key:'ckCont',graded:true,
+    got:Gs,ref:Gc,abs:Math.abs(Gs-Gc),rel:relC,tol:1e-12,unit:'kg/(m2 s)',dp:9,
+    pass:relC!=null&&relC<=1e-12,status:(relC!=null&&relC<=1e-12)?'pass':'fail',
+    extra:{r_transition:t.rc,branch_taken_at_transition:atRc.choked?'critical':'subcritical'}});
+
+  // 5. Both gas branches carry Z only as 1/sqrt(Z).
+  var Gz=gasOrifice(s.p1,s.T,s.pb,1,1,s.gamma,s.R,s.Z).G;
+  var G1=gasOrifice(s.p1,s.T,s.pb,1,1,s.gamma,s.R,1).G;
+  var scaled=Gz*Math.sqrt(s.Z), relZ=rel(scaled,G1);
+  out.push({id:'compressibility-inverse-sqrt-z-scaling',key:'ckZ',graded:true,
+    got:scaled,ref:G1,abs:Math.abs(scaled-G1),rel:relZ,tol:1e-12,unit:'kg/(m2 s)',dp:9,
+    pass:relZ!=null&&relZ<=1e-12,status:(relZ!=null&&relZ<=1e-12)?'pass':'fail',
+    extra:{Z:s.Z}});
+
+  // 6. The plotted curve passes through the reported area at the target flow.
+  var xs=(r.series&&r.series[0]&&r.series[0].x)||[];
+  var ys=(r.series&&r.series[0]&&r.series[0].y)||[];
+  var yTarget=ys.length>50?ys[50]:null;
+  var relT=yTarget!=null?rel(yTarget/1e6,r.A):null;
+  out.push({id:'plotted-area-at-target-flow',key:'ckTarget',graded:true,
+    got:yTarget!=null?yTarget/1e6:null,ref:r.A,
+    abs:yTarget!=null?Math.abs(yTarget/1e6-r.A):null,rel:relT,tol:1e-12,unit:'m2',dp:12,
+    pass:relT!=null&&relT<=1e-12,status:(relT!=null&&relT<=1e-12)?'pass':'fail',
+    extra:{sample:50,flow_at_sample:xs.length>50?xs[50]:null}});
+
+  // 7. Area is proportional to flow: the samples lie on a line through zero.
+  var k=(s.mdot>0&&isFinite(r.A))?r.A*1e6/s.mdot:NaN, dev=0, span=ys.length?ys[ys.length-1]:0;
+  for(var i=0;i<ys.length;i++){
+    var e=Math.abs(ys[i]-k*xs[i]); if(isFinite(e)&&e>dev)dev=e;
+  }
+  var relL=(span>0)?dev/span:null;
+  out.push({id:'area-proportional-to-flow',key:'ckLin',graded:true,
+    got:dev,ref:span,abs:dev,rel:relL,tol:1e-12,unit:'mm2',dp:9,
+    pass:relL!=null&&relL<=1e-12,status:(relL!=null&&relL<=1e-12)?'pass':'fail',
+    extra:{samples:ys.length,slope_mm2_per_kg_s:k}});
+
+  // 8. Which branch governs. This reports the state of the solved case and
+  //    carries no criterion.
+  out.push({id:'governing-branch',key:'ckReg',graded:false,
+    got:t.r,ref:t.rc,rel:null,unit:'-',dp:4,
+    pass:true,status:'info',
+    word:!t.gas?'rBrLiq':(r.choked?'rBrChoked':'rBrSub'),
+    extra:{phase:s.phase,r:t.r,r_transition:t.rc,margin:t.rc>0?t.r/t.rc:null,dp:t.dp}});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption, no axis title and no unit. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+/* One series: required flow area against target mass flow. The x axis of this
+   tool is a mass flow, so it is labelled as one. */
+function dgcPlotSpec(){
+  if(!last||!last.series||!last.series.length)return null;
+  var s0=last.series[0];
+  if(!s0||!s0.x||!s0.x.length)return null;
+  return {x:{label:dgcRt('axFlow'),unit:'kg/s'},
+    series:[{x:s0.x,y:s0.y,label:dgcRt('axArea'),unit:'mm²',color:'#1f6feb'}]};
+}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{}, o=rec.outputs||{}, u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var n=dgcNum, ex=function(v,d){return (v==null||!isFinite(v))?'—':Number(v).toExponential(d);};
+  var t=dgcRvTerms(i), th=dgcRvThroatFlux(i);
+  var gas=t.gas;
+  var branchKey=!gas?'rBrLiq':(last.choked?'rBrChoked':'rBrSub');
+  var phaseKey=gas?'rPhaseGas':'rPhaseLiq';
+  var slope=i.mdot>0?o.A_required*1e6/i.mdot:NaN;
+
+  var summary=dgcRt('summary')
+    .replace('{m}',n(i.mdot,3)).replace('{p1}',n(i.p1/1e5,3)).replace('{pb}',n(i.pb/1e5,3))
+    .replace('{phase}',dgcRt(phaseKey))
+    .replace('{A}',n(o.A_required*1e6,1)).replace('{Cd}',n(i.Cd,2))
+    .replace('{d}',n(o.D_equiv*1000,2))
+    .replace('{branch}',dgcRt(branchKey)).replace('{G}',n(o.mass_flux_ideal,1));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcRt('rArea'),n(o.A_required*1e6,1),'mm²'),
+    row(dgcRt('rBore'),n(o.D_equiv*1000,2),'mm'),
+    row(dgcRt('rFlux'),n(o.mass_flux_ideal,1),'kg/(m²·s)'),
+    row(dgcRt('rRhoUp'),n(o.rho_upstream,3),'kg/m³'),
+    row(dgcRt('rRatio'),n(t.r,4),'-'),
+    row(dgcRt('rDp'),n(t.dp/1e5,3),'bar')
+  ];
+  var results=tiles.concat([
+    row(dgcRt('rP1'),n(i.p1/1e5,3),'bar'),
+    row(dgcRt('rPb'),n(i.pb/1e5,3),'bar'),
+    row(dgcRt('rMdot'),n(i.mdot,3),'kg/s'),
+    row(dgcRt('rT'),n(i.T-273.15,1),'°C',n(i.T,2)+' K'),
+    row(dgcRt('rCd'),n(i.Cd,3),'-'),
+    row(dgcRt('rAreaCd'),n(o.A_required*i.Cd*1e6,1),'mm²'),
+    row(dgcRt('rRc'),n(t.rc,4),'-',
+        t.rc>0?n(t.r/t.rc,3)+' '+dgcRt('rOfTrans'):''),
+    row(dgcRt('rVel'),n(th.v,1),'m/s'),
+    row(dgcRt('rSlope'),n(slope,1),'mm²/(kg/s)'),
+    row(dgcRt('rPhaseLabel'),dgcRt(phaseKey),'',dgcRt(branchKey))
+  ]);
+
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'fail');
+    var actual='—',criterion='≤ 1·10⁻¹²',note='';
+    if(c.key==='ckSize'){
+      actual='|Δṁ| / ṁ = '+ex(c.rel,2);
+      note=n(c.got,6)+' kg/s · '+n(c.ref,6)+' kg/s';
+    } else if(c.key==='ckDia'){
+      actual='|ΔA| / A = '+ex(c.rel,2);
+      note='π d²/4 = '+n(c.got*1e6,4)+' mm²';
+    } else if(c.key==='ckRoute'){
+      actual='|ΔG| / G = '+ex(c.rel,2);
+      note=c.extra.route+' · ρ '+n(c.extra.throat_density,4)+' kg/m³ · v '+n(c.extra.throat_velocity,2)+' m/s';
+    } else if(c.key==='ckCont'){
+      actual='|ΔG| / G = '+ex(c.rel,2);
+      criterion='≤ 1·10⁻¹², r = '+n(c.extra.r_transition,6);
+      note=n(c.got,4)+' kg/(m²·s) · '+n(c.ref,4)+' kg/(m²·s)';
+    } else if(c.key==='ckZ'){
+      actual='|ΔG| / G = '+ex(c.rel,2);
+      criterion='≤ 1·10⁻¹², Z = '+n(c.extra.Z,3);
+    } else if(c.key==='ckTarget'){
+      actual='|ΔA| / A = '+ex(c.rel,2);
+      note=n(c.extra.flow_at_sample,4)+' kg/s → '+n(c.got*1e6,4)+' mm²';
+    } else if(c.key==='ckLin'){
+      actual='max |ΔA| / A(120 %) = '+ex(c.rel,2);
+      criterion='≤ 1·10⁻¹², '+c.extra.samples+' ×';
+      note=n(c.extra.slope_mm2_per_kg_s,3)+' mm²/(kg/s)';
+    } else {
+      actual=dgcRt(c.word);
+      if(c.extra.phase==='liquid'){
+        criterion='Δp = '+n(c.extra.dp/1e5,3)+' bar';
+        note='p_b/p₁ = '+n(c.extra.r,4);
+      } else {
+        criterion='r_c = '+n(c.ref,4);
+        note='p_b/p₁ = '+n(c.extra.r,4)+' · '+(c.extra.margin!=null?n(c.extra.margin,3):'—')+' '+dgcRt('rOfTrans');
+      }
+    }
+    return {status:st,title:dgcRt(c.key),actual:actual,criterion:criterion,
+            basis:dgcRt(c.key+'B'),detail:note};
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckReg'),detail:w});});
+
+  var decisions=[
+    row(dgcRt('dPhase'),dgcRt(phaseKey),'',dgcRt('dPhaseWhy')),
+    row(dgcRt('dCd'),n(i.Cd,3),'',dgcRt('dCdWhy')),
+    row(dgcRt('dZ'),n(i.Z,3),'',dgcRt('dZWhy')),
+    row(dgcRt('dBack'),n(i.pb/1e5,3)+' bar','',dgcRt('dBackWhy'))
+  ];
+
+  var gSvc='1 · '+dgcRt('flowSource'), gProp='2 · '+dgcRt('flowValve');
+  var inputs=[
+    {label:ctx.label('phase',u.phase),value:dgcRt(phaseKey),unit:'',group:gSvc},
+    {label:ctx.label('mdot',u.mdot),value:n(i.mdot,3),unit:'kg/s',group:gSvc},
+    {label:ctx.label('p1',u.p1),value:n(i.p1/1e5,3),unit:'bar',group:gSvc},
+    {label:ctx.label('pb',u.pb),value:n(i.pb/1e5,3),unit:'bar',group:gSvc},
+    {label:ctx.label('Cd',u.Cd),value:n(i.Cd,3),unit:'-',group:gProp},
+    {label:ctx.label('T',u.T),value:n(i.T-273.15,2),unit:'°C',group:gProp},
+    {label:ctx.label('gamma',u.gamma),value:n(i.gamma,3),unit:'-',group:gProp},
+    {label:ctx.label('R',u.R),value:n(i.R,2),unit:'J/(kg·K)',group:gProp},
+    {label:ctx.label('Z',u.Z),value:n(i.Z,3),unit:'-',group:gProp},
+    {label:ctx.label('rho',u.rho),value:n(i.rho,1),unit:'kg/m³',group:gProp}
+  ];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,conclusion:dgcRt('concScope')},
+    system:{text:dgcRt('system'),
+      flow:[{label:dgcRt('flowSource'),detail:n(i.p1/1e5,2)+' bar / '+n(i.T-273.15,1)+' °C · '+n(i.mdot,3)+' kg/s'},
+            {label:dgcRt('flowValve'),detail:n(o.A_required*1e6,1)+' mm² · Cd '+n(i.Cd,2)},
+            {label:dgcRt('flowDischarge'),detail:n(i.pb/1e5,3)+' bar · '+dgcRt(branchKey)}]},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskCodeT'),detail:dgcRt('riskCode')},
+           {status:'attention',title:dgcRt('riskPropT'),detail:dgcRt('riskProp')},
+           {status:'attention',title:dgcRt('riskStateT'),detail:dgcRt('riskState')}],
+    method:{
+      equations:['A = ṁ / (C_d G);  d = √(4 A / π)',
+        'r = p_b / p₁;  r_c = (2/(γ+1))^(γ/(γ−1))',
+        'gas, r ≤ r_c:  G = p₁ √(γ/(Z R T)) (2/(γ+1))^((γ+1)/(2(γ−1)))',
+        'gas, r > r_c:  G = p₁ √(2γ/(Z R T (γ−1)) · [r^(2/γ) − r^((γ+1)/γ)])',
+        'liquid:  G = √(2 ρ (p₁ − p_b))'],
+      ranges:['preliminary physics screen only',
+        'perfect gas with one constant Z, or single-phase incompressible liquid',
+        'no API 520/521 or ISO 4126 correction factor, certified Kd or standard orifice designation'],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Scenarios the published benchmark covers. They live here rather than in a
+   separate harness so the artifact is defined by the tool it describes. */
+var DGC_BENCH_CASES=[
+ {id:'default-air-critical',note:'Shipped default: air at 11 bar relieving to atmosphere, critical branch',
+  s:{phase:'gas',mdot:1,p1:1100000,pb:101325,T:373.15,Cd:0.9,gamma:1.4,R:287.05,Z:1,rho:998}},
+ {id:'steam-vapour-critical',note:'Vapour with gamma 1.30 at 30 bar / 500 K into a 2 bar header',
+  s:{phase:'gas',mdot:4.5,p1:3000000,pb:200000,T:500,Cd:0.85,gamma:1.3,R:461.526,Z:1,rho:998}},
+ {id:'high-pressure-gas-z-0-85',note:'150 bar hydrocarbon vapour with a compressibility factor of 0.85',
+  s:{phase:'gas',mdot:12,p1:15000000,pb:1500000,T:320,Cd:0.9,gamma:1.31,R:518.28,Z:0.85,rho:998}},
+ {id:'subcritical-back-pressure',note:'Back pressure at 0.80 of upstream: the subcritical branch governs',
+  s:{phase:'gas',mdot:2,p1:400000,pb:320000,T:300,Cd:0.9,gamma:1.4,R:287.05,Z:1,rho:998}},
+ {id:'near-transition-ratio',note:'Pressure ratio 1.0001 times the transition ratio, just onto the subcritical branch',
+  s:{phase:'gas',mdot:2,p1:400000,pb:211334,T:300,Cd:0.9,gamma:1.4,R:287.05,Z:1,rho:998}},
+ {id:'light-gas-high-pressure',note:'Helium (gamma 1.667, R 2077 J/(kg·K)) at 200 bar with Z 1.05',
+  s:{phase:'gas',mdot:0.4,p1:20000000,pb:101325,T:293.15,Cd:0.975,gamma:1.667,R:2077,Z:1.05,rho:998}},
+ {id:'liquid-bernoulli-branch',note:'Water at 16 bar to atmosphere on the incompressible branch',
+  s:{phase:'liquid',mdot:25,p1:1600000,pb:101325,T:293.15,Cd:0.65,gamma:1.4,R:287.05,Z:1,rho:998}}
+];
+/* Rebuilds the published benchmark record from this page. Open the tool and
+   call window.__dgcBenchmark() to reproduce benchmarks/relief_valve_sizing.json. */
+function dgcBenchmark(scenarios){
+  var list=scenarios||DGC_BENCH_CASES, cases=[], total=0, passed=0, flagged=0;
+  list.forEach(function(sc){
+    var v=dgcVerify(sc.s);
+    var cmp=v.map(function(c){
+      if(c.graded){total++; if(c.pass)passed++;}
+      else if(c.status==='attention')flagged++;
+      return {check:c.id,
+        got:(c.got===undefined?null:c.got),
+        ref:(c.ref===undefined?null:c.ref),
+        abs:(c.abs===undefined?null:c.abs),
+        rel:(c.rel===undefined?null:c.rel),
+        tol:(c.tol===undefined?null:c.tol),
+        unit:c.unit,extra:c.extra||null,
+        graded:!!c.graded,
+        status:c.status||(c.pass?'pass':'fail'),ok:c.graded?!!c.pass:null};
+    });
+    cases.push({id:sc.id,note:sc.note,inputs:sc.s,cmp:cmp,
+      pass:cmp.every(function(x){return !x.graded||x.ok;})});
+  });
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var worst=0;
+  cases.forEach(function(c){c.cmp.forEach(function(x){
+    if(x.graded&&x.rel!=null&&isFinite(x.rel)&&x.rel>worst)worst=x.rel;});});
+  var ex=function(x,n){return (x==null||!isFinite(x))?'—':Number(x).toExponential(n);};
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'relief-valve-sizing',file:'relief_valve_sizing.html',manifest_revision:rev,
+    reference:'Algebraic identities of the tool\'s own two mass-flux relations, recomputed in the page: the sizing form A = mdot/(Cd G) read backwards, the equivalent-bore restatement, the mass flux rebuilt as density times velocity at the throat, the critical/subcritical branch continuity at the transition pressure ratio, the 1/sqrt(Z) compressibility scaling, and the plotted curve against the reported area. Every figure recorded here is recomputed in the page.',
+    reference_citations:[
+      'Orifice and sizing relations as implemented in relief_valve_sizing.html and listed in its record model.equations.',
+      'The throat-state route rebuilds the same flux from the sonic state on the critical branch and from the isentropically expanded state on the subcritical branch, so it reaches the tool\'s expression along a different arithmetic path.'],
+    reference_provenance:'recomputed in page',
+    tolerance:'Algebraic cross-check, branch continuity, compressibility scaling and figure-to-result agreement to floating-point precision, taken as 1e-12 relative. No code-compliance tolerance is claimed. Largest relative residual observed across all graded checks: '+ex(worst,3)+'.',
+    scope:'This artifact records the internal consistency of one physical relation. It makes no statement about API 520/521 or ISO 4126 compliance, and an area produced by this tool is not a certified effective orifice area and is not a valve selection.',
+    run_at:new Date().toISOString().replace(/\.\d+Z$/,'Z'),
+    total:total,passed:passed,failed:total-passed,flagged:flagged,page_errors:[],
+    grading:'total counts checks with an acceptance criterion. The governing branch reports the state of the solved case and carries no criterion, so it is recorded with its status and excluded from the count.',
+    cases:cases,
+    not_benchmarked:[
+      'Certified Kd and the API 520/521 and ISO 4126 correction factors for back pressure, viscosity and two-phase flow.',
+      'Standard orifice letter designations and the selection of a catalogue device.',
+      'Installation criteria: inlet pressure drop and outlet built-up back pressure.',
+      'Certified valve performance, blowdown, chatter and reseat behaviour.',
+      'Two-phase and flashing relief, condensable vapour and real-gas property variation across the expansion.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page.'],
+    notes:[
+      'Each case runs the shipped solver and the independent routes inside the page. Inputs, measured value, reference value and tolerance are recorded per check, so any verdict can be reproduced by calling window.__dgcBenchmark() on the tool.',
+      'Branch continuity and the 1/sqrt(Z) scaling are properties of the gas relations alone, so they are evaluated with each case\'s gas properties including the liquid case, where the liquid branch is the one that sets the reported area.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"service\"]'},{topic:'t3',focus:'[data-dgu-panel=\"gasprops\"]'},{topic:'t4',focus:'[data-dgu-panel=\"io\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"phase":"gas","p1":1100000.0,"pb":101325});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"phase":"gas","p1":1100000.0,"pb":800000.0});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"phase":"gas","p1":2000000.0,"pb":100000.0,"Z":1.15,"gamma":1.3});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"phase":"liquid","mdot":10,"p1":800000.0,"pb":100000.0,"rho":998,"Cd":0.8});}}];
+
+
+function gasOrifice(pu,Tu,pd,Cd,A,gamma,R,Z){
+ if(!(pu>pd&&Tu>0&&A>0&&Cd>0&&Z>0))return {mdot:0,choked:false,G:0,r:pd/Math.max(pu,1)};
+ var r=Math.max(0,Math.min(1,pd/pu));
+ var rc=Math.pow(2/(gamma+1),gamma/(gamma-1));
+ var G;
+ if(r<=rc){G=pu*Math.sqrt(gamma/(Z*R*Tu))*Math.pow(2/(gamma+1),(gamma+1)/(2*(gamma-1)));return {mdot:Cd*A*G,choked:true,G:G,r:r};}
+ var z=Math.max(0,Math.pow(r,2/gamma)-Math.pow(r,(gamma+1)/gamma));
+ G=pu*Math.sqrt(2*gamma/(Z*R*Tu*(gamma-1))*z);return {mdot:Cd*A*G,choked:false,G:G,r:r};
+}
+
+function solve(s){var gas=s.phase==='gas',G,choked=false;if(gas){var q=gasOrifice(s.p1,s.T,s.pb,1,1,s.gamma,s.R,s.Z);G=q.G;choked=q.choked;}else G=s.p1>s.pb?Math.sqrt(2*s.rho*(s.p1-s.pb)):0;var A=(s.Cd>0&&G>0)?s.mdot/(s.Cd*G):Infinity,d=Math.sqrt(4*A/Math.PI),rho=gas?s.p1/(s.Z*s.R*s.T):s.rho,x=[],y=[];for(var i=0;i<=60;i++){var m=s.mdot*1.2*i/60;x.push(m);y.push((s.Cd>0&&G>0)?1e6*m/(s.Cd*G):NaN);}return {A:A,d:d,G:G,choked:choked,rho:rho,mdot:s.mdot,p:s.p1,T:s.T,series:[{x:x,y:y}],a11y:'Required relief area versus mass flow.',warnings:(s.p1<=s.pb?['Relieving upstream pressure must exceed back pressure.']:[]),notes:[gas?(choked?'Ideal-gas flow is choked at the specified back pressure.':'Ideal-gas flow is subcritical at the specified back pressure.'):'Liquid sizing uses incompressible Bernoulli only.']};}
+
+function degrade(){
+  document.title="Relief Valve Sizing \u2014 Preliminary";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Relief Valve Sizing \u2014 Preliminary";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"relief-valve-sizing",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · relief-area physics screen","Pipe / Vessel Transients · фізичний скринінг площі скидного клапана","Pipe / Vessel Transients · physikalisches Entlastungsflächen-Screening","Pipe / Vessel Transients · fysische relief-area screening","Pipe / Vessel Transients · écran physique de section de décharge","Pipe / Vessel Transients · cribado físico de área de alivio","Pipe / Vessel Transients · fizyczny screening pola zaworu"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Choose gas or liquid. Gas uses perfect-gas choked/subcritical flow with a user-supplied constant compressibility Z; liquid uses incompressible Bernoulli. This is upstream of standards-based valve selection, not a substitute for it.","Оберіть газ або рідину. Для газу використовується критична/докритична течія ідеального газу; для рідини — нестислива формула Бернуллі. Це фізичне ядро перед нормативним підбором, а не його заміна.","Gas oder Flüssigkeit wählen. Gas: ideales Gas, gesperrt/unterkritisch; Flüssigkeit: inkompressibles Bernoulli. Dies ist vorgelagerte Physik, kein Ersatz für normgerechte Auswahl.","Kies gas of vloeistof. Gas: ideaal-gas choked/subkritisch; vloeistof: onsamendrukbare Bernoulli. Dit is upstreamfysica, geen vervanging voor normselectie.","Choisir gaz ou liquide. Gaz : gaz parfait bloqué/sous-critique; liquide : Bernoulli incompressible. C’est la physique amont, pas un remplacement de la sélection normative.","Elija gas o líquido. Gas: gas ideal crítico/subcrítico; líquido: Bernoulli incompresible. Es física previa, no sustituto de selección normativa.","Wybierz gaz lub ciecz. Gaz: przepływ krytyczny/podkrytyczny gazu doskonałego; ciecz: Bernoulli nieściśliwe. To fizyka wstępna, nie zamiennik doboru normowego.")}],
+    panels:[{id:"service",slot:'inputs',learn:'t1',title:T("Service","Середовище","Medium","Medium","Service","Servicio","Medium"),fields:[{id:'f-phase',key:'phase',label:T("Phase model","Модель фази","Phasenmodell","Fasemodel","Modèle de phase","Modelo de fase","Model fazy"),type:'select',options:[["gas",T("Ideal gas","Ідеальний газ","Ideales Gas","Ideaal gas","Gaz parfait","Gas ideal","Gaz doskonały")],["liquid",T("Incompressible liquid","Нестислива рідина","Inkompressible Flüssigkeit","Onsamedrukbare vloeistof","Liquide incompressible","Líquido incompresible","Ciecz nieściśliwa")]]},{id:'f-mdot',key:'mdot',label:T("Required mass flow","Потрібна масова витрата","Erforderlicher Massenstrom","Vereiste massastroom","Débit massique requis","Caudal másico requerido","Wymagany strumień masy"),type:'number',unit:"kg/s",min:1e-06,max:1000000.0},{id:'f-p1',key:'p1',label:T("Relieving upstream pressure","Тиск перед клапаном","Entlastungs-Vordruck","Relieving bovendruk","Pression amont de décharge","Presión aguas arriba","Ciśnienie przed zaworem"),type:'number',unit:"Pa",display:"bar",min:1000.0,max:200000000.0},{id:'f-pb',key:'pb',label:T("Back pressure","Протитиск","Gegendruck","Tegendruk","Contre-pression","Contrapresión","Przeciwciśnienie"),type:'number',unit:"Pa",display:"bar",min:0,max:200000000.0},{id:'f-Cd',key:'Cd',label:T("Discharge coefficient","Коефіцієнт витрати","Ausflussbeiwert","Uitstroomcoëfficiënt","Coefficient de décharge","Coeficiente de descarga","Współczynnik wypływu"),type:'number',min:0.05,max:1.2,step:0.01,precision:2}]},{id:"gasprops",slot:'inputs',learn:'t2',title:T("Gas / liquid properties","Властивості","Gas- / Flüssigkeitseigenschaften","Gas- / vloeistofeigenschappen","Propriétés gaz / liquide","Propiedades gas / líquido","Właściwości gazu / cieczy"),fields:[{id:'f-T',key:'T',label:T("Gas temperature","Температура газу","Gastemperatur","Gastemperatuur","Température du gaz","Temperatura del gas","Temperatura gazu"),type:'number',unit:"K",display:"degC",min:100,max:2500},{id:'f-gamma',key:'gamma',label:T("Gas γ","Газ γ","Gas γ","Gas γ","Gaz γ","Gas γ","Gaz γ"),type:'number',min:1.01,max:1.8,step:0.01,precision:3},{id:'f-R',key:'R',label:T("Gas constant R","Газова стала R","Gaskonstante R","Gasconstante R","Constante R","Constante R","Stała gazowa R"),type:'number',unit:"J/(kg·K)",min:50,max:2000},{id:'f-Z',key:'Z',label:T("Compressibility Z","Коефіцієнт стисливості Z","Kompressibilitätsfaktor Z","Compressibiliteitsfactor Z","Facteur de compressibilité Z","Factor de compresibilidad Z","Współczynnik ściśliwości Z"),type:'number',min:0.1,max:2,step:0.01,precision:3},{id:'f-rho',key:'rho',label:T("Liquid density","Густина рідини","Flüssigkeitsdichte","Vloeistofdichtheid","Masse volumique liquide","Densidad del líquido","Gęstość cieczy"),type:'number',unit:"kg/m³",min:1,max:20000}]}],
+    footer:T("Gas: A = ṁ/(Cd·G), G from perfect-gas choking/subcritical relation with constant Z. Liquid: A = ṁ/[Cd·sqrt(2ρΔp)].","Газ: A = ṁ/(Cd·G), де G визначається з критичної/докритичної течії ідеального газу. Рідина: A = ṁ/[Cd·sqrt(2ρΔp)].","Gas: A = ṁ/(Cd·G), G aus Idealgas-Sperr-/Unterkritisch-Beziehung. Flüssigkeit: A = ṁ/[Cd·sqrt(2ρΔp)].","Gas: A = ṁ/(Cd·G), G uit ideaal-gas choking/subkritische relatie. Vloeistof: A = ṁ/[Cd·sqrt(2ρΔp)].","Gaz : A = ṁ/(Cd·G), G par relation gaz parfait bloquée/sous-critique. Liquide : A = ṁ/[Cd·sqrt(2ρΔp)].","Gas: A = ṁ/(Cd·G), G de relación de gas ideal crítico/subcrítico. Líquido: A = ṁ/[Cd·sqrt(2ρΔp)].","Gaz: A = ṁ/(Cd·G), G z zależności gazu doskonałego krytycznej/podkrytycznej. Ciecz: A = ṁ/[Cd·sqrt(2ρΔp)]."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Required area","Потрібна площа","Erforderliche Fläche","Vereist oppervlak","Section requise","Área requerida","Wymagane pole"),value:last.A*1e6,hint:"mm²",precision:1},{label:T("Equivalent diameter","Еквівалентний діаметр","Äquivalentdurchmesser","Equivalente diameter","Diamètre équivalent","Diámetro equivalente","Średnica równoważna"),value:last.d*1000,hint:"mm",precision:2},{label:T("Ideal mass flux","Ідеальний масовий потік","Idealer Massenfluss","Ideale massaflux","Flux massique idéal","Flujo másico ideal","Idealny strumień powierzchniowy"),value:last.G,hint:"kg/(m²·s)",precision:1},{label:T("Upstream density","Густина перед клапаном","Vordichte","Bovendichtheid","Masse volumique amont","Densidad aguas arriba","Gęstość przed zaworem"),value:last.rho,hint:"kg/m³",precision:3,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Required area versus target mass flow (same state, 0–120 % of target)","Потрібна площа залежно від масової витрати (той самий стан, 0–120% цільової)","Erforderliche Fläche über Zielmassenstrom (gleicher Zustand, 0–120 %)","Vereist oppervlak versus doelmassastroom (zelfde toestand, 0–120%)","Section requise selon débit massique (même état, 0–120 %)","Área requerida frente a caudal objetivo (mismo estado, 0–120 %)","Wymagane pole względem strumienia masy (ten sam stan, 0–120%)"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+/* ---- handoff receiver bound (AGENTS.md 2.4; _docs/TZ-engineering-workflow.md 5.1)
+   -----------------------------------------------------------------------------
+   An incoming SI quantity is held to the bound this tool's own typed field
+   declares, read from that field, so the keyboard and the wire carry one number.
+   Where the field declares none, the bound is the one this tool's own model
+   states and the limitations carry it. Outside the bound the state does not
+   change and the user is told the quantity, the figure that arrived and the
+   bound; the refused name goes into neither `accepted` nor `ignored`, because
+   this tool does use that quantity (AGENTS 2.4).
+   No magnitude band is used to tell one medium from another: gasline-packing at
+   its own field maximum of 1,00e+8 Pa ships 680,67 kg/m3, inside the
+   400-2000 kg/m3 band a liquid receiver would use. The medium belongs on the
+   wire (AGENTS 2.7 W-1). */
+var HO_TXT={range:T("{q} = {v} {u} received from {f} lies outside the range this tool accepts ({lo} to {hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, лежить поза діапазоном, який приймає цей інструмент ({lo}…{hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt außerhalb des Bereichs, den dieses Werkzeug annimmt ({lo} bis {hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt buiten het bereik dat deze tool aanvaardt ({lo} tot {hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} se situe hors de la plage acceptée par cet outil ({lo} à {hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda fuera del rango que acepta esta herramienta ({lo} a {hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} leży poza zakresem przyjmowanym przez to narzędzie ({lo} do {hi} {u}) i nie zostało zastosowane."),
+ rangeLo:T("{q} = {v} {u} received from {f} is below the minimum this tool accepts ({lo} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, менше за мінімум, який приймає цей інструмент ({lo} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt unter dem Mindestwert, den dieses Werkzeug annimmt ({lo} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt onder het minimum dat deze tool aanvaardt ({lo} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} est inférieur au minimum accepté par cet outil ({lo} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda por debajo del mínimo que acepta esta herramienta ({lo} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} jest mniejsze od minimum przyjmowanego przez to narzędzie ({lo} {u}) i nie zostało zastosowane."),
+ rangeHi:T("{q} = {v} {u} received from {f} is above the maximum this tool accepts ({hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, перевищує максимум, який приймає цей інструмент ({hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt über dem Höchstwert, den dieses Werkzeug annimmt ({hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt boven het maximum dat deze tool aanvaardt ({hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} dépasse le maximum accepté par cet outil ({hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} supera el máximo que acepta esta herramienta ({hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} przekracza maksimum przyjmowane przez to narzędzie ({hi} {u}) i nie zostało zastosowane."),
+ impossible:T("{q} = {v} {u} received from {f} is not a physically possible value for this quantity and was not applied.","{q} = {v} {u}, отримане від {f}, фізично неможливе для цієї величини і не застосоване.","{q} = {v} {u} von {f} ist für diese Größe physikalisch nicht möglich und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} is voor deze grootheid fysisch niet mogelijk en is niet toegepast.","{q} = {v} {u} reçu de {f} n'est pas une valeur physiquement possible pour cette grandeur et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} no es un valor físicamente posible para esta magnitud y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} nie jest fizycznie możliwą wartością tej wielkości i nie zostało zastosowane.")};
+function hoRanges(){
+ /* Each bound is the min/max this tool's own field declares. The rho field is
+    the 'Liquid density' of the incompressible branch. */
+ return {T:{lo:100,hi:2500,u:'K'},        /* field 'f-T'    min 100   max 2500  */
+  p:{lo:1000,hi:2e8,u:'Pa'},              /* field 'f-p1'   min 1000  max 2e8   */
+  mdot:{lo:1e-6,hi:1e6,u:'kg/s'},         /* field 'f-mdot' min 1e-6  max 1e6   */
+  rho:{lo:1,hi:20000,u:'kg/m³'}};}          /* field 'f-rho'  min 1     max 20000 */
+function hoNum(v){if(v==null||typeof v!=='number'||!isFinite(v))return '—';if(v===0)return '0';var a=Math.abs(v);
+ if(a!==0&&(a<0.01||a>=1e6)){var e=Math.floor(Math.log10(a));return dgcNum(v/Math.pow(10,e),2)+'e'+(e<0?'':'+')+e;}
+ return dgcNum(v,a>=100?1:(a>=1?2:4));}
+function hoTxt(k){var m=HO_TXT[k];return m[dgcLang()]||m.en;}
+/* A quantity refused for range is not a quantity this tool does not use: the
+   sentence above names it, its range and the figure received, so it is kept out
+   of the `ignored` list the runtime prints as "this tool does not use them"
+   (AGENTS 2.4). HO_REF holds the refused names of the payload being applied. */
+var HO_REF=[];
+/* A bound has whichever ends the receiving field declares: two, one or none.
+   `pos` marks a quantity this tool's own validation requires strictly positive. */
+function hoOut(v,r){if(!r||typeof v!=='number'||!isFinite(v))return true;
+ if(r.pos&&!(v>0))return true;
+ if(r.lo!=null&&v<r.lo)return true;
+ if(r.hi!=null&&v>r.hi)return true;
+ return false;}
+function hoRefuse(k,v,r,from){
+ HO_REF.push(k);
+ /* The sentence follows the bound: a receiver whose own field declares only a
+    minimum states only that minimum, and a quantity held to no declared bound at
+    all is refused as a physically impossible value (AGENTS 2.4). */
+ /* A non-positive value of a strictly positive quantity is impossible whatever
+    other end the bound has; the range sentences are for a value that is possible
+    and out of bounds. */
+ var hoKey=(function(r,v){if(r&&r.pos&&!(v>0))return 'impossible';
+  var lo=r&&r.lo!=null&&isFinite(r.lo),hi=r&&r.hi!=null&&isFinite(r.hi);
+  return lo&&hi?'range':(lo?'rangeLo':(hi?'rangeHi':'impossible'));})(r,v);
+ var s=hoTxt(hoKey).split('{q}').join(k).split('{v}').join(hoNum(v))
+  .split('{lo}').join(hoNum(r?r.lo:NaN)).split('{hi}').join(hoNum(r?r.hi:NaN))
+  .split('{u}').join(r?r.u:'').split('{f}').join(from);
+ try{if(window.Diagram&&Diagram.notify)Diagram.notify(s,'warn');}catch(e){}}
+function hoApply(p){
+ var q=(p&&p.quantities)||{},from=(p&&p.from&&p.from.tool)||'?',R=hoRanges(),acc=[],ign=[];
+ HO_REF.length=0;
+ function take(k,set){var o=q[k];if(!o)return;var v=Number(o.value),r=R[k];
+  if(hoOut(v,r)){hoRefuse(k,v,r,from);return;}
+  set(v);acc.push(k);}
+ take('T',function(v){state.T=v;});
+ take('p',function(v){state.p1=v;});
+ take('rho',function(v){state.rho=v;});
+ take('mdot',function(v){state.mdot=v;});
+ var ord=Object.keys(q);
+ ord.forEach(function(k){if(acc.indexOf(k)<0&&ign.indexOf(k)<0&&HO_REF.indexOf(k)<0)ign.push(k);});
+ acc.sort(function(a,b){return ord.indexOf(a)-ord.indexOf(b);});
+ last=solve(state);if(ui){ui.sync();ui.run();}
+ return {accepted:acc,ignored:ign};}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"relief-valve-sizing",file:"relief_valve_sizing.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"phase":state["phase"],"mdot":state["mdot"],"p1":state["p1"],"pb":state["pb"],"T":state["T"],"Cd":state["Cd"],"gamma":state["gamma"],"R":state["R"],"Z":state["Z"],"rho":state["rho"]},outputs:{"A_required":last.A,"D_equiv":last.d,"mass_flux_ideal":last.G,"rho_upstream":last.rho},units:{"phase":"-","mdot":"kg/s","p1":"Pa","pb":"Pa","T":"K","Cd":"-","gamma":"-","R":"J/(kg K)","Z":"-","rho":"kg/m3","A_required":"m2","D_equiv":"m","mass_flux_ideal":"kg/(m2 s)","rho_upstream":"kg/m3"},model:{equations:["gas: A = mdot / (Cd G), G from perfect-gas compressible orifice relation with constant Z", "liquid: A = mdot / (Cd sqrt(2 rho DeltaP))", "D_equiv = sqrt(4 A / pi)"],ranges:["preliminary physics screen only", "perfect gas with constant Z or incompressible single-phase liquid"],notes:["does not implement API 520/521 or ISO 4126 correction factors or certified orifice designations"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef gas_orifice(pu, Tu, pd, Cd, A, gamma, R, Z):\n    if not (pu > pd and Tu > 0 and A > 0 and Cd > 0 and Z > 0):\n        return 0.0, False, 0.0\n    r=max(0.0,min(1.0,pd/pu)); rc=(2/(gamma+1))**(gamma/(gamma-1))\n    if r <= rc:\n        G=pu*math.sqrt(gamma/(Z*R*Tu))*(2/(gamma+1))**((gamma+1)/(2*(gamma-1)))\n        return Cd*A*G, True, G\n    z=max(0.0,r**(2/gamma)-r**((gamma+1)/gamma))\n    G=pu*math.sqrt(2*gamma/(Z*R*Tu*(gamma-1))*z)\n    return Cd*A*G, False, G\n\ndef compute():\n    phase=INPUTS['phase']; mdot=INPUTS['mdot']; p1=INPUTS['p1']; pb=INPUTS['pb']; T=INPUTS['T']; Cd=INPUTS['Cd']; gamma=INPUTS['gamma']; R=INPUTS['R']; Z=INPUTS['Z']; rhoL=INPUTS['rho']\n    if phase=='gas':\n        _,_,G=gas_orifice(p1,T,pb,1.0,1.0,gamma,R,Z); rho=p1/(Z*R*T)\n    else:\n        G=math.sqrt(2*rhoL*(p1-pb)) if p1>pb else 0.0; rho=rhoL\n    A=mdot/(Cd*G) if Cd>0 and G>0 else float('inf'); d=math.sqrt(4*A/math.pi)\n    return {'A_required':A,'D_equiv':d,'mass_flux_ideal':G,'rho_upstream':rho}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and Python evaluate the same closed-form expressions in the same branch; tolerance allows only floating-point pow/sqrt roundoff.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["A", "mdot", "p", "T", "rho"],accepts:["T", "p", "rho", "mdot"],build:function(){if(!last)return null;return {quantities:{A:{value:last.A,unit:'m2'},mdot:{value:state.mdot,unit:'kg/s'},p:{value:state.p1,unit:'Pa'},T:{value:state.T,unit:'K'},rho:{value:last.rho,unit:'kg/m3'}}};},apply:function(p){return hoApply(p);}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

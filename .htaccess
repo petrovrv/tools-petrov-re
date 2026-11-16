@@ -1,0 +1,36 @@
+# The framework and the tool sheets change often and must never be served
+# stale. Without this the edge cache held several builds of diagram-common.js
+# under a seven-day max-age and answered the same URL with a different one on
+# each request: on 2026-09-10 the plain URL returned v4.1, v4.2 and a v3.7.3
+# from 4 September, depending on which node replied.
+# no-cache is revalidation, not no-store: an unchanged file still answers 304.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm|js|mjs|json|css)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+    Header unset Expires
+    Header unset Pragma
+  </FilesMatch>
+</IfModule>
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/javascript "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 0 seconds"
+  ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType text/css "access plus 0 seconds"
+</IfModule>
+<IfModule LiteSpeed>
+  CacheDisable public /
+</IfModule>
+
+# Every tool opens with its manifest: a JSON block of translated titles,
+# descriptions and validation prose that runs to tens of kilobytes. That puts
+# <meta charset="utf-8"> far past the 1024 bytes a browser prescans for it —
+# in nuclideatlas.html it sits at byte 82,590 — so until now the encoding of
+# every page rested on the browser's own detector, and a headless render of
+# the French sheet came back as "Atlas des nuclÃ©ides". Declared in the header
+# it is read before the first byte of body.
+AddDefaultCharset utf-8
+AddType "text/html; charset=utf-8" .html .htm
+AddType "text/javascript; charset=utf-8" .js .mjs
+AddType "application/json; charset=utf-8" .json

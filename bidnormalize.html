@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commercial Bid Normalisation</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-14.bidnormalize-1.1",
+  "id": "bidnormalize",
+  "file": "bidnormalize.html",
+  "listed": true,
+  "category": "tendering",
+  "order": 20,
+  "title": {
+    "en": "Commercial Bid Normalisation",
+    "uk": "Комерційна нормалізація пропозицій",
+    "de": "Kaufmännische Angebotsnormierung",
+    "nl": "Commerciële normalisatie van offertes",
+    "fr": "Normalisation commerciale des offres",
+    "es": "Normalización económica de ofertas",
+    "pl": "Normalizacja handlowa ofert"
+  },
+  "summary": {
+    "en": "What does each bid really cost, apples to apples? Arithmetic check of the price schedule (KB 18.04.2017 art. 34), missing prices filled by the art. 86 formula, options per art. 87, rebates, currency, delivery-term (Incoterms 2020) gaps and payment terms as present value, with a ranked table for the award.",
+    "uk": "Скільки насправді коштує кожна пропозиція, якщо порівнювати однакове з однаковим? Арифметична перевірка цінової таблиці (KB 18.04.2017, ст. 34), відсутні ціни за формулою ст. 86, опції за ст. 87, знижки, валюта, різниця умов поставки (Incoterms 2020) і умови оплати як приведена вартість, з ранжованою таблицею для присудження.",
+    "de": "Was kostet jedes Angebot wirklich, bei gleichem Leistungsumfang? Rechnerische Prüfung des Leistungsverzeichnisses (KB 18.04.2017 Art. 34), fehlende Preise nach der Formel von Art. 86, Optionen nach Art. 87, Nachlässe, Währung, Unterschiede der Lieferbedingungen (Incoterms 2020) und Zahlungsbedingungen als Barwert, mit einer Rangliste für die Zuschlagsentscheidung.",
+    "nl": "Wat kost elke offerte werkelijk, appels met appels vergeleken? Rekenkundig nazicht van de inventaris (KB 18.04.2017 art. 34), ontbrekende prijzen volgens de formule van art. 86, opties volgens art. 87, kortingen, munteenheid, verschil in leveringsvoorwaarden (Incoterms 2020) en betalingsvoorwaarden als contante waarde, met een gerangschikte tabel voor de gunning.",
+    "fr": "Que coûte réellement chaque offre, à périmètre égal ? Vérification arithmétique de l’inventaire (AR 18.04.2017, art. 34), prix manquants par la formule de l’art. 86, options selon l’art. 87, rabais, devise, écarts de conditions de livraison (Incoterms 2020) et conditions de paiement en valeur actuelle, avec un classement pour l’attribution.",
+    "es": "¿Cuánto cuesta realmente cada oferta, comparando lo mismo con lo mismo? Revisión aritmética del presupuesto (KB 18.04.2017, art. 34), precios omitidos con la fórmula del art. 86, opciones según el art. 87, descuentos, divisa, diferencias de condiciones de entrega (Incoterms 2020) y condiciones de pago como valor actual, con una tabla ordenada para la adjudicación.",
+    "pl": "Ile naprawdę kosztuje każda oferta przy porównywalnym zakresie? Sprawdzenie rachunkowe kosztorysu ofertowego (KB 18.04.2017 art. 34), brakujące ceny według wzoru z art. 86, opcje według art. 87, rabaty, waluta, różnice warunków dostawy (Incoterms 2020) i warunki płatności jako wartość bieżąca, z rankingiem do wyboru oferty."
+  },
+  "description": {
+    "en": "For the commercial evaluation of a tender (client side): each line of the price schedule is checked (quantity × unit price against the stated amount) and every correction is logged next to the original; Belgian KB 18.04.2017 art. 34 has no general 'unit price prevails' rule, so the evaluator decides per line which figure reflects the bidder's intention, with a tender-wide fallback. Missing prices are filled with P = L·Y/X (art. 86 §2) or the offer is set aside; required and permitted options always count, free options only when included (art. 87 §1). Rebates and exchange rates bring every bid to the evaluation currency, delivery stages missing from the bid's Incoterms 2020 rule are added at the bidder's logistics cost (with import duty on the customs value), and advances and retentions are priced at the client's cost of money. The ranked table, the correction log and a project file go to the award-criteria and life-cycle-cost tools.",
+    "uk": "Для комерційної оцінки тендеру (сторона замовника): кожен рядок цінової таблиці перевіряється (кількість × ціна за одиницю проти зазначеної суми), кожне виправлення записується поруч з оригіналом; бельгійський KB 18.04.2017, ст. 34, не містить загального правила «ціна за одиницю переважає», тож оцінювач вирішує для кожного рядка, яка цифра відображає намір учасника, із загальним правилом за замовчуванням. Відсутні ціни заповнюються за P = L·Y/X (ст. 86 §2) або пропозиція відхиляється; обов’язкові та дозволені опції враховуються завжди, вільні — лише якщо їх включено (ст. 87 §1). Знижки та курси приводять кожну пропозицію до валюти оцінки, етапи поставки, яких немає в правилі Incoterms 2020 пропозиції, додаються за логістичною вартістю учасника (з митом на митну вартість), аванси та утримання оцінюються за вартістю грошей замовника. Ранжована таблиця, журнал виправлень і файл проєкту передаються в інструменти критеріїв присудження та вартості життєвого циклу.",
+    "de": "Für die kaufmännische Angebotswertung (Auftraggeberseite): Jede Position des Leistungsverzeichnisses wird geprüft (Menge × Einheitspreis gegen den angegebenen Gesamtbetrag) und jede Korrektur neben dem Original protokolliert; der belgische KB 18.04.2017 Art. 34 kennt keine allgemeine Regel ‚Einheitspreis geht vor‘, deshalb entscheidet der Prüfer je Position, welche Zahl dem Willen des Bieters entspricht, mit einer ausschreibungsweiten Ersatzregel. Fehlende Preise werden mit P = L·Y/X (Art. 86 §2) ergänzt oder das Angebot wird ausgeschieden; geforderte und zugelassene Optionen zählen immer, freie Optionen nur, wenn sie einbezogen werden (Art. 87 §1). Nachlässe und Wechselkurse bringen jedes Angebot in die Wertungswährung, im Incoterms-2020-Klausel des Angebots fehlende Lieferabschnitte werden zu den Logistikkosten des Bieters ergänzt (mit Einfuhrzoll auf den Zollwert), Anzahlungen und Einbehalte werden mit den Kapitalkosten des Auftraggebers bewertet. Rangliste, Korrekturprotokoll und Projektdatei gehen an die Werkzeuge für Zuschlagskriterien und Lebenszykluskosten.",
+    "nl": "Voor de commerciële beoordeling van een aanbesteding (kant van de aanbestedende overheid): elke post van de inventaris wordt nagerekend (hoeveelheid × eenheidsprijs tegenover het opgegeven bedrag) en elke verbetering wordt naast het origineel geregistreerd; het Belgische KB 18.04.2017 art. 34 kent geen algemene regel ‘de eenheidsprijs primeert’, dus beslist de beoordelaar per post welk cijfer de werkelijke bedoeling van de inschrijver weergeeft, met een terugvalregel voor de hele opdracht. Ontbrekende prijzen worden aangevuld met P = L·Y/X (art. 86 §2) of de offerte wordt geweerd; vereiste en toegestane opties tellen altijd mee, vrije opties alleen als ze worden opgenomen (art. 87 §1). Kortingen en wisselkoersen brengen elke offerte naar de beoordelingsmunt, leveringsstappen die de Incoterms 2020-regel van de offerte niet dekt worden toegevoegd tegen de logistieke kost van de inschrijver (met invoerrechten op de douanewaarde), en voorschotten en inhoudingen worden gewaardeerd tegen de kapitaalkost van de aanbestedende overheid. De gerangschikte tabel, het verbeteringslogboek en een projectbestand gaan naar de tools voor gunningscriteria en levenscycluskosten.",
+    "fr": "Pour l’évaluation commerciale d’un marché (côté pouvoir adjudicateur) : chaque poste de l’inventaire est vérifié (quantité × prix unitaire face au montant indiqué) et chaque correction est consignée à côté de l’original ; l’AR belge du 18.04.2017, art. 34, ne contient pas de règle générale « le prix unitaire prévaut », l’évaluateur décide donc poste par poste quel chiffre reflète l’intention du soumissionnaire, avec une règle par défaut pour tout le marché. Les prix manquants sont complétés par P = L·Y/X (art. 86 §2) ou l’offre est écartée ; les options exigées et autorisées comptent toujours, les options libres seulement si elles sont retenues (art. 87 §1). Rabais et taux de change ramènent chaque offre à la devise d’évaluation, les étapes de livraison non couvertes par la règle Incoterms 2020 de l’offre sont ajoutées au coût logistique du soumissionnaire (avec droits d’importation sur la valeur en douane), et avances et retenues sont valorisées au coût de l’argent du pouvoir adjudicateur. Le classement, le journal des corrections et un fichier projet alimentent les outils de critères d’attribution et de coût du cycle de vie.",
+    "es": "Para la evaluación económica de una licitación (lado del poder adjudicador): cada partida del presupuesto se comprueba (cantidad × precio unitario frente al importe indicado) y cada corrección queda registrada junto al original; el KB belga de 18.04.2017, art. 34, no contiene una regla general de «prevalece el precio unitario», así que el evaluador decide por partida qué cifra refleja la intención del licitador, con una regla por defecto para toda la licitación. Los precios omitidos se completan con P = L·Y/X (art. 86 §2) o la oferta se descarta; las opciones exigidas y permitidas cuentan siempre, las libres solo si se incluyen (art. 87 §1). Descuentos y tipos de cambio llevan cada oferta a la divisa de evaluación, las etapas de entrega que no cubre la regla Incoterms 2020 de la oferta se añaden al coste logístico del licitador (con aranceles sobre el valor en aduana), y anticipos y retenciones se valoran al coste del dinero del poder adjudicador. La tabla ordenada, el registro de correcciones y un archivo de proyecto pasan a las herramientas de criterios de adjudicación y de coste del ciclo de vida.",
+    "pl": "Do oceny handlowej przetargu (strona zamawiającego): każda pozycja kosztorysu jest sprawdzana (ilość × cena jednostkowa wobec podanej wartości), a każda poprawka zapisywana obok oryginału; belgijski KB 18.04.2017 art. 34 nie zawiera ogólnej reguły „cena jednostkowa ma pierwszeństwo”, więc oceniający decyduje dla każdej pozycji, która liczba oddaje rzeczywisty zamiar wykonawcy, z regułą domyślną dla całego postępowania. Brakujące ceny uzupełnia się wzorem P = L·Y/X (art. 86 §2) albo ofertę się odrzuca; opcje wymagane i dopuszczone liczą się zawsze, opcje dowolne tylko po ich włączeniu (art. 87 §1). Rabaty i kursy walut sprowadzają każdą ofertę do waluty oceny, etapy dostawy nieobjęte regułą Incoterms 2020 oferty dolicza się po kosztach logistyki wykonawcy (z cłem od wartości celnej), a zaliczki i zatrzymania wycenia się po koszcie pieniądza zamawiającego. Ranking, rejestr poprawek i plik projektu trafiają do narzędzi kryteriów oceny ofert i kosztu cyklu życia."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Engineering and commercial analysis, not legal advice. Which figure reflects the bidder's intention is the evaluator's decision (KB 18.04.2017 art. 34 §2); the tool logs it but does not make it. The Incoterms cost split is our own model of the ICC 2020 rules; logistics costs, duty rates, exchange rates and the discount rate are user inputs. Belgian federal rules only; regional and sector rules and the tender documents prevail.",
+    "uk": "Інженерно-комерційний аналіз, не юридична консультація. Яка цифра відображає намір учасника — рішення оцінювача (KB 18.04.2017, ст. 34 §2); інструмент його записує, але не ухвалює. Розподіл витрат за Incoterms — наша власна модель правил ICC 2020; логістичні витрати, ставки мита, курси валют і ставка дисконтування вводить користувач. Лише бельгійські федеральні правила; регіональні, галузеві правила й тендерна документація мають перевагу.",
+    "de": "Technisch-kaufmännische Analyse, keine Rechtsberatung. Welche Zahl dem Willen des Bieters entspricht, entscheidet der Prüfer (KB 18.04.2017 Art. 34 §2); das Werkzeug protokolliert die Entscheidung, trifft sie aber nicht. Die Kostenaufteilung nach Incoterms ist unser eigenes Modell der ICC-Regeln 2020; Logistikkosten, Zollsätze, Wechselkurse und Kalkulationszins sind Eingaben. Nur belgisches Bundesrecht; regionale und sektorale Regeln sowie die Vergabeunterlagen haben Vorrang.",
+    "nl": "Technisch-commerciële analyse, geen juridisch advies. Welk cijfer de bedoeling van de inschrijver weergeeft, beslist de beoordelaar (KB 18.04.2017 art. 34 §2); de tool registreert die beslissing maar neemt ze niet. De kostenverdeling volgens Incoterms is ons eigen model van de ICC-regels 2020; logistieke kosten, invoerrechten, wisselkoersen en de actualisatievoet zijn invoer van de gebruiker. Alleen Belgische federale regels; gewestelijke en sectorale regels en de opdrachtdocumenten hebben voorrang.",
+    "fr": "Analyse technique et commerciale, pas un avis juridique. Le chiffre qui reflète l’intention du soumissionnaire relève de la décision de l’évaluateur (AR 18.04.2017, art. 34 §2) ; l’outil la consigne mais ne la prend pas. La répartition des coûts selon les Incoterms est notre propre modèle des règles ICC 2020 ; coûts logistiques, droits de douane, taux de change et taux d’actualisation sont saisis par l’utilisateur. Règles fédérales belges uniquement ; les règles régionales et sectorielles et les documents du marché prévalent.",
+    "es": "Análisis técnico y comercial, no asesoramiento jurídico. Qué cifra refleja la intención del licitador lo decide el evaluador (KB 18.04.2017, art. 34 §2); la herramienta lo registra pero no lo decide. El reparto de costes según Incoterms es nuestro propio modelo de las reglas ICC 2020; costes logísticos, aranceles, tipos de cambio y tasa de descuento los introduce el usuario. Solo normas federales belgas; prevalecen las normas regionales y sectoriales y los pliegos.",
+    "pl": "Analiza techniczno-handlowa, nie porada prawna. Która liczba oddaje zamiar wykonawcy, decyduje oceniający (KB 18.04.2017 art. 34 §2); narzędzie tę decyzję zapisuje, ale jej nie podejmuje. Podział kosztów według Incoterms to nasz własny model reguł ICC 2020; koszty logistyki, stawki celne, kursy walut i stopę dyskontową wprowadza użytkownik. Tylko belgijskie przepisy federalne; pierwszeństwo mają przepisy regionalne i sektorowe oraz dokumenty zamówienia."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "tool_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "dependencies": ["tnd-core.js", "tnd-bidnorm.js"],
+  "network_access": { "mode": "none" },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python reference (bench-src/ref/gen_bidnormalize.py) written from KB 18.04.2017 art. 34, 48 §3, 86 §2 and 87 §1, the Incoterms 2020 cost structure and standard discounting: presets, hand cases (art. 86 worked example, 11 × 11 Incoterm matrix, payment present value) and seeded random tenders."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "kb-2017-art34-86-87-incoterms-npv",
+        "reference": "bench-src/ref/gen_bidnormalize.py — independent Python of the published method (KB 18.04.2017 art. 34, 86 §2, 87 §1; Incoterms 2020 cost split; present-value discounting)",
+        "citations": [
+          "KB 18.04.2017 / AR 18.04.2017 art. 34, 48 §3, 86 §2, 87 §1 (ejustice.just.fgov.be consolidated text, read 14.11.2026)",
+          "Wet 17.06.2016 art. 81",
+          "ICC Incoterms 2020 (structure)",
+          "IEC 60300-3-3 (discounting, structure)"
+        ],
+        "cases": 350,
+        "passed": 350,
+        "tolerance": "money values relative 1e-9 or 1e-6 absolute; ranks and the lowest bid exact",
+        "run_at": "2026-11-14T23:53:31Z",
+        "artifact": "benchmarks/bidnormalize.json"
+      }
+    ]
+  },
+  "report": { "pdf": true, "source_attribution": true },
+  "python_export": {
+    "supported": false,
+    "reason": "The ranked table and the correction log are exported as CSV and as the calculation record; an independent Python reference of the same method lives in bench-src/ref/gen_bidnormalize.py."
+  },
+  "handoff": { "provides": [], "accepts": [] },
+  "workflow": { "entry": "calculate", "lifecycle": ["procurement"], "inputsFrom": [], "outputsTo": [] },
+  "state_codec": { "permalink": true, "record": "tools.petrov.re/calculation-record/v1" },
+  "ui": { "framework": "tools.petrov.re/ui/v1", "level": 3 }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="tnd-core.js" defer></script>
+<script src="tnd-bidnorm.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  var TOOL = 'bidnormalize';
+  function lib() { return window.TndBidNorm || null; }
+  function core() { return window.TndCore || null; }
+
+  /* state: amounts in each bid's own currency, percentages in % (engine uses fractions) */
+  var DEFAULTS = {
+    cur: 'EUR', rate: 3, T: 10, ref: 'DAP', refDays: 30, arith: 'unit', missing: 'fill', priceOnly: false,
+    items: [
+      { id: '01', desc: 'Lump-sum works', unit: 'FF', qty: 1, kind: 'base', up: null, include: true },
+      { id: '02', desc: 'Measured item', unit: 'm', qty: 100, kind: 'base', up: null, include: true }
+    ],
+    bids: [
+      { id: 'B1', name: 'Bidder 1', currency: 'EUR', fx: 1, readout: null, rebate: 0, incoterm: 'DAP', duty: 0, tech: 'pass', adv: 0, ret: 0, retM: 0, days: 30 },
+      { id: 'B2', name: 'Bidder 2', currency: 'EUR', fx: 1, readout: null, rebate: 0, incoterm: 'DAP', duty: 0, tech: 'pass', adv: 0, ret: 0, retM: 0, days: 30 }
+    ],
+    lines: [
+      { bid: 'B1', item: '01', up: 50000, amount: 50000, decision: 'auto' }, { bid: 'B1', item: '02', up: 120, amount: 12000, decision: 'auto' },
+      { bid: 'B2', item: '01', up: 47000, amount: 47000, decision: 'auto' }, { bid: 'B2', item: '02', up: 150, amount: 15000, decision: 'auto' }
+    ],
+    logistics: [],
+    tenderRef: '', evaluator: ''
+  };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  function n(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+  function engineInput(s) {
+    var pc = function (v) { return n(v) == null ? 0 : v / 100; };
+    return {
+      cur: s.cur, rate: pc(s.rate), T: n(s.T) || 0, ref: s.ref, refDays: n(s.refDays) == null ? 30 : s.refDays, arith: s.arith, missing: s.missing, priceOnly: !!s.priceOnly,
+      items: (s.items || []).map(function (it) { return { id: String(it.id || '').trim(), desc: it.desc, unit: it.unit, qty: n(it.qty), kind: it.kind, up: n(it.up), include: !!it.include }; }),
+      bids: (s.bids || []).map(function (b) {
+        return { id: String(b.id || '').trim(), name: b.name, currency: b.currency, fx: n(b.fx) == null ? 1 : b.fx, readout: n(b.readout), rebate: pc(b.rebate),
+                 incoterm: b.incoterm, duty: pc(b.duty), tech: b.tech, payment: { adv: pc(b.adv), ret: pc(b.ret), retM: n(b.retM) || 0, days: n(b.days) == null ? 30 : b.days } };
+      }),
+      lines: (s.lines || []).map(function (l) { return { bid: String(l.bid || ''), item: String(l.item || ''), up: n(l.up), amount: n(l.amount), decision: l.decision || 'auto' }; }),
+      logistics: (s.logistics || []).map(function (x) { return { bid: String(x.bid || ''), el: x.el, amount: n(x.amount) }; })
+    };
+  }
+  function solve(s) {
+    var L = lib();
+    if (!L) return { ok: false, errors: ['engine'] };
+    try { return L.normalize(engineInput(s)); } catch (e) { return { ok: false, errors: ['exception'], msg: String(e && e.message || e) }; }
+  }
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var LANGS = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  function TF(fn) { var o = {}; LANGS.forEach(function (l) { o[l] = fn(l); }); return o; }
+  function lang() { try { var l = window.DiagramUI && DiagramUI.domainLang ? DiagramUI.domainLang() : 'en'; return LANGS.indexOf(l) >= 0 ? l : 'en'; } catch (e) { return 'en'; } }
+  function money(v, l, cur) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); cur = cur || state.cur || 'EUR';
+    if (C && C.money) return C.money(v, cur, l, 0);
+    return Math.round(v).toLocaleString() + ' ' + cur;
+  }
+  function signed(v, l, cur) { if (v == null || !isFinite(v)) return '—'; if (Math.abs(v) < 0.5) return '0'; return (v > 0 ? '+' : '') + money(v, l, cur); }
+  function pct(v, l, d) { if (v == null || !isFinite(v)) return '—'; var C = core(); return C && C.pct ? C.pct(v, l, d == null ? 1 : d) : (Math.round(v * 1000) / 10) + ' %'; }
+  function num(v, l, d) { if (v == null || !isFinite(v)) return '—'; var C = core(); return C && C.fmt ? C.fmt(v, l, d == null ? 2 : d) : String(v); }
+
+  var S = {
+    subtitle: T('What does each bid really cost, apples to apples?', 'Скільки насправді коштує кожна пропозиція, якщо порівнювати однакове?', 'Was kostet jedes Angebot wirklich, bei gleichem Umfang?', 'Wat kost elke offerte werkelijk, appels met appels?', 'Que coûte réellement chaque offre, à périmètre égal ?', '¿Cuánto cuesta realmente cada oferta, comparando lo mismo?', 'Ile naprawdę kosztuje każda oferta przy tym samym zakresie?'),
+    pProject: T('Tender project', 'Тендерний проєкт', 'Ausschreibungsprojekt', 'Aanbestedingsproject', 'Projet de marché', 'Proyecto de licitación', 'Projekt przetargowy'),
+    pTender: T('Evaluation rules', 'Правила оцінки', 'Wertungsregeln', 'Beoordelingsregels', 'Règles d’évaluation', 'Reglas de evaluación', 'Zasady oceny'),
+    pItems: T('Price schedule (items)', 'Цінова таблиця (позиції)', 'Leistungsverzeichnis (Positionen)', 'Inventaris / meetstaat (posten)', 'Inventaire / métré (postes)', 'Presupuesto (partidas)', 'Kosztorys / przedmiar (pozycje)'),
+    pBids: T('Bids', 'Пропозиції', 'Angebote', 'Offertes', 'Offres', 'Ofertas', 'Oferty'),
+    pLines: T('Prices offered per item', 'Ціни учасників за позиціями', 'Angebotene Preise je Position', 'Geboden prijzen per post', 'Prix offerts par poste', 'Precios ofertados por partida', 'Ceny oferowane w pozycjach'),
+    pLog: T('Logistics costs for delivery-term gaps', 'Логістичні витрати для різниці умов поставки', 'Logistikkosten für Lieferbedingungs-Lücken', 'Logistieke kosten voor verschillen in leveringsvoorwaarden', 'Coûts logistiques des écarts de conditions de livraison', 'Costes logísticos de las diferencias de entrega', 'Koszty logistyki dla różnic warunków dostawy'),
+    pRec: T('Record', 'Протокол', 'Protokoll', 'Verslag', 'Fiche', 'Registro', 'Protokół'),
+    cur: T('Evaluation currency', 'Валюта оцінки', 'Wertungswährung', 'Beoordelingsmunt', 'Devise d’évaluation', 'Divisa de evaluación', 'Waluta oceny'),
+    rate: T('Client’s cost of money', 'Вартість грошей замовника', 'Kapitalkosten des Auftraggebers', 'Kapitaalkost van de aanbestedende overheid', 'Coût de l’argent du pouvoir adjudicateur', 'Coste del dinero del poder adjudicador', 'Koszt pieniądza zamawiającego'),
+    rateHint: T('Per year, used to price advances, retentions and payment days', 'На рік; для оцінки авансів, утримань і строків оплати', 'Pro Jahr; bewertet Anzahlungen, Einbehalte und Zahlungsfristen', 'Per jaar; waardeert voorschotten, inhoudingen en betalingstermijnen', 'Par an ; valorise avances, retenues et délais de paiement', 'Anual; valora anticipos, retenciones y plazos de pago', 'Rocznie; wycenia zaliczki, zatrzymania i terminy płatności'),
+    T: T('Award to delivery / completion', 'Від присудження до поставки / завершення', 'Zuschlag bis Lieferung / Fertigstellung', 'Gunning tot levering / oplevering', 'Attribution à livraison / réception', 'Adjudicación a entrega / recepción', 'Od wyboru do dostawy / odbioru'),
+    ref: T('Reference delivery term', 'Еталонна умова поставки', 'Referenz-Lieferbedingung', 'Referentie-leveringsvoorwaarde', 'Condition de livraison de référence', 'Condición de entrega de referencia', 'Referencyjny warunek dostawy'),
+    refHint: T('All bids are brought to this Incoterms 2020 rule; DDP site = landed cost', 'Усі пропозиції приводяться до цього правила Incoterms 2020; DDP об’єкт = повна вартість доставки', 'Alle Angebote werden auf diese Incoterms-2020-Klausel gebracht; DDP Baustelle = Einstandskosten', 'Alle offertes worden naar deze Incoterms 2020-regel gebracht; DDP werf = kostprijs ter plaatse', 'Toutes les offres sont ramenées à cette règle Incoterms 2020 ; DDP chantier = coût rendu', 'Todas las ofertas se llevan a esta regla Incoterms 2020; DDP obra = coste puesto en obra', 'Wszystkie oferty sprowadza się do tej reguły Incoterms 2020; DDP budowa = koszt z dostawą'),
+    refDays: T('Reference payment term', 'Еталонний строк оплати', 'Referenz-Zahlungsziel', 'Referentie-betalingstermijn', 'Délai de paiement de référence', 'Plazo de pago de referencia', 'Referencyjny termin płatności'),
+    arith: T('If the bidder’s intention stays unclear', 'Якщо намір учасника лишається неясним', 'Wenn der Wille des Bieters unklar bleibt', 'Als de bedoeling van de inschrijver onduidelijk blijft', 'Si l’intention du soumissionnaire reste incertaine', 'Si la intención del licitador sigue sin estar clara', 'Gdy zamiar wykonawcy pozostaje niejasny'),
+    arithUnit: T('Unit price × quantity applies', 'Застосовується ціна за одиницю × кількість', 'Einheitspreis × Menge gilt', 'Eenheidsprijs × hoeveelheid geldt', 'Prix unitaire × quantité s’applique', 'Se aplica precio unitario × cantidad', 'Obowiązuje cena jednostkowa × ilość'),
+    arithStated: T('Stated line amount applies', 'Застосовується зазначена сума рядка', 'Angegebener Positionsbetrag gilt', 'Opgegeven postbedrag geldt', 'Montant du poste indiqué s’applique', 'Se aplica el importe indicado', 'Obowiązuje podana wartość pozycji'),
+    arithHint: T('Fallback per art. 34 §2 for lines left on “auto”; decide per line where you can', 'Правило за замовчуванням за ст. 34 §2 для рядків «авто»; де можете, вирішуйте для кожного рядка', 'Ersatzregel nach Art. 34 §2 für Positionen auf „auto“; wo möglich je Position entscheiden', 'Terugvalregel volgens art. 34 §2 voor posten op “auto”; beslis waar mogelijk per post', 'Règle par défaut selon l’art. 34 §2 pour les postes sur « auto » ; décidez par poste si possible', 'Regla por defecto según el art. 34 §2 para partidas en «auto»; decida por partida cuando pueda', 'Reguła domyślna wg art. 34 §2 dla pozycji „auto”; gdzie możesz, decyduj dla każdej pozycji'),
+    missing: T('Missing price', 'Відсутня ціна', 'Fehlender Preis', 'Ontbrekende prijs', 'Prix manquant', 'Precio omitido', 'Brakująca cena'),
+    missFill: T('Fill with P = L·Y/X (art. 86 §2)', 'Заповнити P = L·Y/X (ст. 86 §2)', 'Ergänzen mit P = L·Y/X (Art. 86 §2)', 'Aanvullen met P = L·Y/X (art. 86 §2)', 'Compléter par P = L·Y/X (art. 86 §2)', 'Completar con P = L·Y/X (art. 86 §2)', 'Uzupełnić P = L·Y/X (art. 86 §2)'),
+    missReject: T('Offer irregular, not ranked', 'Пропозиція неправильна, без рангу', 'Angebot nicht ordnungsgemäß, ohne Rang', 'Offerte onregelmatig, niet gerangschikt', 'Offre irrégulière, non classée', 'Oferta irregular, sin clasificar', 'Oferta nieprawidłowa, bez rangi'),
+    id: T('No.', '№', 'Nr.', 'Nr.', 'N°', 'N.º', 'Nr'),
+    desc: T('Description', 'Опис', 'Beschreibung', 'Omschrijving', 'Description', 'Descripción', 'Opis'),
+    unit: T('Unit', 'Од.', 'Einheit', 'Eenheid', 'Unité', 'Unidad', 'J.m.'),
+    qty: T('Quantity', 'Кількість', 'Menge', 'Hoeveelheid', 'Quantité', 'Cantidad', 'Ilość'),
+    kind: T('Kind', 'Тип', 'Art', 'Soort', 'Nature', 'Tipo', 'Rodzaj'),
+    psum: T('Provisional sum', 'Резервна сума', 'Vom AG vorgegebener Betrag', 'Te verantwoorden som', 'Somme à justifier', 'Partida alzada a justificar', 'Kwota tymczasowa'),
+    incl: T('Included', 'Включено', 'Einbezogen', 'Opgenomen', 'Retenue', 'Incluida', 'Włączona'),
+    kBase: T('Base', 'Основна', 'Grundposition', 'Basis', 'Base', 'Base', 'Podstawowa'),
+    kProv: T('Provisional sum (client’s figure)', 'Резервна сума (цифра замовника)', 'Vorgegebener Betrag (Zahl des AG)', 'Te verantwoorden som (bedrag van de overheid)', 'Somme à justifier (montant du pouvoir adjudicateur)', 'Partida a justificar (cifra del poder adjudicador)', 'Kwota tymczasowa (kwota zamawiającego)'),
+    kReq: T('Required option', 'Обов’язкова опція', 'Geforderte Option', 'Vereiste optie', 'Option exigée', 'Opción exigida', 'Opcja wymagana'),
+    kPerm: T('Permitted option', 'Дозволена опція', 'Zugelassene Option', 'Toegestane optie', 'Option autorisée', 'Opción permitida', 'Opcja dopuszczona'),
+    kFree: T('Free option', 'Вільна опція', 'Freie Option', 'Vrije optie', 'Option libre', 'Opción libre', 'Opcja dowolna'),
+    bid: T('Bid', 'Пропозиція', 'Angebot', 'Offerte', 'Offre', 'Oferta', 'Oferta'),
+    name: T('Bidder', 'Учасник', 'Bieter', 'Inschrijver', 'Soumissionnaire', 'Licitador', 'Wykonawca'),
+    currency: T('Currency', 'Валюта', 'Währung', 'Munt', 'Devise', 'Divisa', 'Waluta'),
+    fx: T('Rate to eval. currency', 'Курс до валюти оцінки', 'Kurs zur Wertungswährung', 'Koers naar beoordelingsmunt', 'Taux vers devise d’éval.', 'Cambio a divisa de eval.', 'Kurs do waluty oceny'),
+    readout: T('Amount read out at opening', 'Сума, оголошена при розкритті', 'Bei der Öffnung verlesener Betrag', 'Bij de opening afgelezen bedrag', 'Montant lu à l’ouverture', 'Importe leído en la apertura', 'Kwota odczytana przy otwarciu'),
+    rebate: T('Rebate', 'Знижка', 'Nachlass', 'Korting', 'Rabais', 'Descuento', 'Rabat'),
+    incoterm: T('Incoterm', 'Incoterm', 'Incoterm', 'Incoterm', 'Incoterm', 'Incoterm', 'Incoterm'),
+    duty: T('Import duty', 'Мито', 'Einfuhrzoll', 'Invoerrecht', 'Droit d’importation', 'Arancel', 'Cło'),
+    tech: T('Technical', 'Технічно', 'Technisch', 'Technisch', 'Technique', 'Técnica', 'Technicznie'),
+    pass: T('pass', 'відповідає', 'erfüllt', 'conform', 'conforme', 'cumple', 'spełnia'),
+    fail: T('fail', 'не відповідає', 'nicht erfüllt', 'niet conform', 'non conforme', 'no cumple', 'nie spełnia'),
+    open: T('open', 'не оцінено', 'offen', 'open', 'en cours', 'pendiente', 'otwarta'),
+    adv: T('Advance', 'Аванс', 'Anzahlung', 'Voorschot', 'Avance', 'Anticipo', 'Zaliczka'),
+    ret: T('Retention', 'Утримання', 'Einbehalt', 'Inhouding', 'Retenue', 'Retención', 'Zatrzymanie'),
+    retM: T('Retention released after', 'Утримання повертається через', 'Einbehalt frei nach', 'Inhouding vrij na', 'Retenue libérée après', 'Retención liberada tras', 'Zatrzymanie zwolnione po'),
+    days: T('Payment days', 'Строк оплати', 'Zahlungsziel', 'Betalingstermijn', 'Délai de paiement', 'Plazo de pago', 'Termin płatności'),
+    up: T('Unit price', 'Ціна за од.', 'Einheitspreis', 'Eenheidsprijs', 'Prix unitaire', 'Precio unitario', 'Cena jedn.'),
+    amount: T('Stated amount', 'Зазначена сума', 'Angegebener Betrag', 'Opgegeven bedrag', 'Montant indiqué', 'Importe indicado', 'Podana wartość'),
+    decision: T('Decision', 'Рішення', 'Entscheidung', 'Beslissing', 'Décision', 'Decisión', 'Decyzja'),
+    dAuto: T('auto (fallback)', 'авто (за замовч.)', 'auto (Ersatzregel)', 'auto (terugval)', 'auto (défaut)', 'auto (defecto)', 'auto (domyślna)'),
+    dUnit: T('unit price × qty', 'ціна × кількість', 'EP × Menge', 'EP × hoeveelheid', 'PU × quantité', 'PU × cantidad', 'cena × ilość'),
+    dStated: T('stated amount', 'зазначена сума', 'angegebener Betrag', 'opgegeven bedrag', 'montant indiqué', 'importe indicado', 'podana wartość'),
+    computed: T('Qty × unit price', 'Кількість × ціна', 'Menge × EP', 'Hoeveelheid × EP', 'Quantité × PU', 'Cantidad × PU', 'Ilość × cena'),
+    diff: T('Difference', 'Різниця', 'Differenz', 'Verschil', 'Écart', 'Diferencia', 'Różnica'),
+    el: T('Delivery stage', 'Етап поставки', 'Lieferabschnitt', 'Leveringsstap', 'Étape de livraison', 'Etapa de entrega', 'Etap dostawy'),
+    elAmount: T('Cost (eval. currency)', 'Вартість (валюта оцінки)', 'Kosten (Wertungswährung)', 'Kost (beoordelingsmunt)', 'Coût (devise d’éval.)', 'Coste (divisa de eval.)', 'Koszt (waluta oceny)'),
+    E1: T('E1 packing and loading at origin', 'E1 пакування й навантаження у відправника', 'E1 Verpackung und Verladung ab Werk', 'E1 verpakking en laden bij vertrek', 'E1 emballage et chargement au départ', 'E1 embalaje y carga en origen', 'E1 pakowanie i załadunek u nadawcy'),
+    E2: T('E2 export clearance', 'E2 експортне оформлення', 'E2 Ausfuhrabfertigung', 'E2 uitvoerformaliteiten', 'E2 dédouanement export', 'E2 despacho de exportación', 'E2 odprawa wywozowa'),
+    E3: T('E3 delivery onto the main carrier', 'E3 доставка на основний транспорт', 'E3 Übergabe an den Haupttransport', 'E3 levering aan het hoofdvervoer', 'E3 remise au transport principal', 'E3 entrega al transporte principal', 'E3 przekazanie do przewozu głównego'),
+    E4: T('E4 main carriage', 'E4 основне перевезення', 'E4 Haupttransport', 'E4 hoofdvervoer', 'E4 transport principal', 'E4 transporte principal', 'E4 przewóz główny'),
+    E5: T('E5 transit insurance', 'E5 страхування вантажу', 'E5 Transportversicherung', 'E5 transportverzekering', 'E5 assurance transport', 'E5 seguro de transporte', 'E5 ubezpieczenie transportu'),
+    E6: T('E6 on-carriage to site', 'E6 доставка до об’єкта', 'E6 Nachlauf zur Baustelle', 'E6 natransport naar de werf', 'E6 post-acheminement au chantier', 'E6 transporte final a obra', 'E6 dowóz na budowę'),
+    E7: T('E7 unloading at site', 'E7 розвантаження на об’єкті', 'E7 Entladen auf der Baustelle', 'E7 lossen op de werf', 'E7 déchargement au chantier', 'E7 descarga en obra', 'E7 rozładunek na budowie'),
+    E8: T('E8 import clearance (duty added)', 'E8 імпортне оформлення (+ мито)', 'E8 Einfuhrabfertigung (+ Zoll)', 'E8 invoerformaliteiten (+ invoerrecht)', 'E8 dédouanement import (+ droits)', 'E8 despacho de importación (+ arancel)', 'E8 odprawa przywozowa (+ cło)'),
+    addItem: T('Add item', 'Додати позицію', 'Position hinzufügen', 'Post toevoegen', 'Ajouter un poste', 'Añadir partida', 'Dodaj pozycję'),
+    addBid: T('Add bid', 'Додати пропозицію', 'Angebot hinzufügen', 'Offerte toevoegen', 'Ajouter une offre', 'Añadir oferta', 'Dodaj ofertę'),
+    addLine: T('Add price line', 'Додати рядок ціни', 'Preiszeile hinzufügen', 'Prijsregel toevoegen', 'Ajouter une ligne de prix', 'Añadir línea de precio', 'Dodaj wiersz ceny'),
+    addLog: T('Add logistics cost', 'Додати логістичну витрату', 'Logistikkosten hinzufügen', 'Logistieke kost toevoegen', 'Ajouter un coût logistique', 'Añadir coste logístico', 'Dodaj koszt logistyki'),
+    linesNote: T('Choose a bid, then enter its unit price and stated amount per item. Leave both empty for a missing price. Only one of the two given = that one counts.', 'Оберіть пропозицію й введіть її ціну за одиницю та зазначену суму для кожної позиції. Залиште обидві порожніми, якщо ціни немає. Вказано лише одну з двох — враховується вона.', 'Angebot wählen, dann je Position Einheitspreis und angegebenen Betrag eingeben. Beide leer lassen für einen fehlenden Preis. Nur einer der beiden angegeben = dieser zählt.', 'Kies een offerte en vul per post de eenheidsprijs en het opgegeven bedrag in. Laat beide leeg voor een ontbrekende prijs. Slechts één van beide ingevuld = die telt.', 'Choisissez une offre, puis saisissez par poste son prix unitaire et le montant indiqué. Laissez les deux vides pour un prix manquant. Un seul des deux donné = c’est lui qui compte.', 'Elija una oferta e introduzca por partida su precio unitario y el importe indicado. Deje ambos vacíos si falta el precio. Si solo se da uno, cuenta ese.', 'Wybierz ofertę i wpisz dla każdej pozycji cenę jednostkową i podaną wartość. Brak ceny = oba pola puste. Podana tylko jedna z dwóch = liczy się ona.'),
+    logNote: T('Cost of the delivery stages a bid does not include but the reference term does (or the reverse), per bid, in the evaluation currency. Only the stages in which the two rules differ are used.', 'Вартість етапів поставки, яких пропозиція не включає, а еталонна умова включає (або навпаки), для кожної пропозиції у валюті оцінки. Використовуються лише етапи, якими правила відрізняються.', 'Kosten der Lieferabschnitte, die ein Angebot nicht enthält, die Referenzbedingung aber schon (oder umgekehrt), je Angebot in der Wertungswährung. Verwendet werden nur die Abschnitte, in denen sich beide Klauseln unterscheiden.', 'Kost van de leveringsstappen die een offerte niet bevat maar de referentievoorwaarde wel (of omgekeerd), per offerte, in de beoordelingsmunt. Alleen de stappen waarin beide regels verschillen, worden gebruikt.', 'Coût des étapes de livraison que l’offre n’inclut pas mais que la condition de référence inclut (ou l’inverse), par offre, en devise d’évaluation. Seules les étapes où les deux règles diffèrent sont utilisées.', 'Coste de las etapas de entrega que la oferta no incluye pero la condición de referencia sí (o al revés), por oferta, en la divisa de evaluación. Solo se usan las etapas en que difieren ambas reglas.', 'Koszt etapów dostawy, których oferta nie obejmuje, a warunek referencyjny tak (lub odwrotnie), dla każdej oferty w walucie oceny. Używa się tylko etapów, w których reguły się różnią.'),
+    tenderRef: T('Tender reference', 'Номер закупівлі', 'Vergabenummer', 'Referentie van de opdracht', 'Référence du marché', 'Referencia de la licitación', 'Znak postępowania'),
+    evaluator: T('Evaluator', 'Оцінювач', 'Prüfer', 'Beoordelaar', 'Évaluateur', 'Evaluador', 'Oceniający'),
+    csv: T('Download CSV', 'Завантажити CSV', 'CSV herunterladen', 'CSV downloaden', 'Télécharger le CSV', 'Descargar CSV', 'Pobierz CSV'),
+    print: T('Print record', 'Друкувати протокол', 'Protokoll drucken', 'Verslag afdrukken', 'Imprimer la fiche', 'Imprimir registro', 'Drukuj protokół'),
+    tBest: T('Lowest normalised bid', 'Найнижча нормалізована пропозиція', 'Niedrigstes normiertes Angebot', 'Laagste genormaliseerde offerte', 'Offre normalisée la plus basse', 'Oferta normalizada más baja', 'Najniższa oferta znormalizowana'),
+    tN: T('Its normalised price', 'Її нормалізована ціна', 'Sein normierter Preis', 'Genormaliseerde prijs', 'Son prix normalisé', 'Su precio normalizado', 'Jej cena znormalizowana'),
+    tChanged: T('First place vs opening', 'Перше місце проти розкриття', 'Erster Platz gegenüber Öffnung', 'Eerste plaats t.o.v. opening', 'Première place vs ouverture', 'Primer puesto frente a apertura', 'Pierwsze miejsce wobec otwarcia'),
+    changedYes: T('changed', 'змінилося', 'geändert', 'gewijzigd', 'changée', 'cambia', 'zmienione'),
+    changedNo: T('unchanged', 'без змін', 'unverändert', 'ongewijzigd', 'inchangée', 'sin cambio', 'bez zmian'),
+    tCorr: T('Corrections / fills', 'Виправлення / доповнення', 'Korrekturen / Ergänzungen', 'Verbeteringen / aanvullingen', 'Corrections / compléments', 'Correcciones / completados', 'Poprawki / uzupełnienia'),
+    tSpread: T('Spread of ranked bids', 'Розкид ранжованих', 'Spanne der gewerteten', 'Spreiding gerangschikte', 'Écart des offres classées', 'Dispersión de las ofertas', 'Rozrzut ofert'),
+    tabRank: T('Ranking after normalisation', 'Рейтинг після нормалізації', 'Rangfolge nach Normierung', 'Rangschikking na normalisatie', 'Classement après normalisation', 'Clasificación tras normalizar', 'Ranking po normalizacji'),
+    hBid: T('Bid', 'Пропозиція', 'Angebot', 'Offerte', 'Offre', 'Oferta', 'Oferta'),
+    hRead: T('Read out', 'Оголошено', 'Verlesen', 'Afgelezen', 'Lu', 'Leído', 'Odczytano'),
+    hArith: T('Arithmetic', 'Арифметика', 'Rechnerisch', 'Rekenkundig', 'Arithmétique', 'Aritmética', 'Rachunkowo'),
+    hFill: T('Missing (art. 86)', 'Відсутні (ст. 86)', 'Fehlend (Art. 86)', 'Ontbrekend (art. 86)', 'Manquants (art. 86)', 'Omitidos (art. 86)', 'Brakujące (art. 86)'),
+    hOpt: T('Options', 'Опції', 'Optionen', 'Opties', 'Options', 'Opciones', 'Opcje'),
+    hRebate: T('Rebate', 'Знижка', 'Nachlass', 'Korting', 'Rabais', 'Descuento', 'Rabat'),
+    hS: T('In eval. currency', 'У валюті оцінки', 'In Wertungswährung', 'In beoordelingsmunt', 'En devise d’éval.', 'En divisa de eval.', 'W walucie oceny'),
+    hGap: T('Delivery gap', 'Різниця поставки', 'Lieferlücke', 'Leveringsverschil', 'Écart livraison', 'Diferencia entrega', 'Różnica dostawy'),
+    hPay: T('Payment terms', 'Умови оплати', 'Zahlungsbed.', 'Betalingsvw.', 'Paiement', 'Pago', 'Płatność'),
+    hN: T('Normalised', 'Нормалізована', 'Normiert', 'Genormaliseerd', 'Normalisé', 'Normalizado', 'Znormalizowana'),
+    hRank: T('Rank (opening → now)', 'Ранг (розкриття → зараз)', 'Rang (Öffnung → jetzt)', 'Rang (opening → nu)', 'Rang (ouverture → maint.)', 'Puesto (apertura → ahora)', 'Miejsce (otwarcie → teraz)'),
+    hDelta: T('Above best', 'Понад найкращу', 'Über Bestem', 'Boven beste', 'Au-dessus du meilleur', 'Sobre la mejor', 'Ponad najlepszą'),
+    notRanked: T('not ranked', 'без рангу', 'ohne Rang', 'niet gerangschikt', 'non classée', 'sin clasificar', 'bez rangi'),
+    tabLog: T('Correction log (KB 18.04.2017 art. 34 §3: corrections identifiable next to the original)', 'Журнал виправлень (KB 18.04.2017, ст. 34 §3: виправлення видно поруч з оригіналом)', 'Korrekturprotokoll (KB 18.04.2017 Art. 34 §3: Korrekturen neben dem Original erkennbar)', 'Verbeteringslogboek (KB 18.04.2017 art. 34 §3: verbeteringen herkenbaar naast het origineel)', 'Journal des corrections (AR 18.04.2017, art. 34 §3 : corrections identifiables à côté de l’original)', 'Registro de correcciones (KB 18.04.2017, art. 34 §3: correcciones identificables junto al original)', 'Rejestr poprawek (KB 18.04.2017 art. 34 §3: poprawki widoczne obok oryginału)'),
+    hItem: T('Item', 'Позиція', 'Position', 'Post', 'Poste', 'Partida', 'Pozycja'),
+    hStated: T('Stated', 'Зазначено', 'Angegeben', 'Opgegeven', 'Indiqué', 'Indicado', 'Podano'),
+    hComp: T('Computed', 'Обчислено', 'Berechnet', 'Berekend', 'Calculé', 'Calculado', 'Obliczono'),
+    hUsed: T('Used', 'Прийнято', 'Verwendet', 'Gebruikt', 'Retenu', 'Usado', 'Przyjęto'),
+    hRule: T('Basis', 'Підстава', 'Grundlage', 'Grondslag', 'Base', 'Base', 'Podstawa'),
+    rUnit: T('art. 34: unit price × quantity', 'ст. 34: ціна × кількість', 'Art. 34: EP × Menge', 'art. 34: EP × hoeveelheid', 'art. 34 : PU × quantité', 'art. 34: PU × cantidad', 'art. 34: cena × ilość'),
+    rStated: T('art. 34: stated amount kept', 'ст. 34: зазначену суму збережено', 'Art. 34: angegebener Betrag bleibt', 'art. 34: opgegeven bedrag behouden', 'art. 34 : montant indiqué maintenu', 'art. 34: se mantiene el importe', 'art. 34: podana wartość zachowana'),
+    rProv: T('art. 34: provisional sum is the client’s figure', 'ст. 34: резервна сума — цифра замовника', 'Art. 34: vorgegebener Betrag des AG', 'art. 34: te verantwoorden som is het bedrag van de overheid', 'art. 34 : somme à justifier du pouvoir adjudicateur', 'art. 34: partida a justificar del poder adjudicador', 'art. 34: kwota tymczasowa zamawiającego'),
+    r48: T('art. 48 §3 / 87 §1: priced option disregarded (price-only award)', 'ст. 48 §3 / 87 §1: опцію з доплатою не враховано (лише ціна)', 'Art. 48 §3 / 87 §1: Option mit Mehrpreis bleibt außer Betracht (nur Preis)', 'art. 48 §3 / 87 §1: optie met meerprijs buiten beschouwing (enkel prijs)', 'art. 48 §3 / 87 §1 : option avec supplément écartée (prix seul)', 'art. 48 §3 / 87 §1: opción con sobreprecio descartada (solo precio)', 'art. 48 §3 / 87 §1: opcja z dopłatą pominięta (tylko cena)'),
+    priceOnly: T('Award on price (or cost) only', 'Присудження лише за ціною (або вартістю)', 'Zuschlag nur nach Preis (oder Kosten)', 'Gunning enkel op basis van prijs (of kosten)', 'Attribution sur le seul prix (ou coût)', 'Adjudicación solo por precio (o coste)', 'Wybór wyłącznie według ceny (lub kosztu)'),
+    priceOnlyHint: T('KB 18.04.2017 art. 48 §3: no extra price for free or permitted options; a priced one is disregarded (art. 87 §1 al. 4)', 'KB 18.04.2017, ст. 48 §3: вільні та дозволені опції без доплати; опцію з доплатою не враховують (ст. 87 §1, абз. 4)', 'KB 18.04.2017 Art. 48 §3: kein Mehrpreis für freie oder zugelassene Optionen; eine bepreiste bleibt außer Betracht (Art. 87 §1 Abs. 4)', 'KB 18.04.2017 art. 48 §3: geen meerprijs voor vrije of toegestane opties; een geprijsde wordt buiten beschouwing gelaten (art. 87 §1, 4e lid)', 'AR 18.04.2017, art. 48 §3 : aucun supplément pour les options libres ou autorisées ; une option chiffrée est écartée (art. 87 §1, al. 4)', 'KB 18.04.2017, art. 48 §3: sin sobreprecio en opciones libres o permitidas; la que lo lleve se descarta (art. 87 §1, párr. 4)', 'KB 18.04.2017 art. 48 §3: bez dopłaty za opcje dowolne lub dopuszczone; opcję z ceną się pomija (art. 87 §1 ust. 4)'),
+    w48: T('free or permitted options with an extra price were disregarded (KB 18.04.2017 art. 48 §3, art. 87 §1 al. 4). If the option cannot be separated from the offer, the offer is irregular under art. 76 — the tool cannot judge that.', 'вільні або дозволені опції з доплатою не враховано (KB 18.04.2017, ст. 48 §3, ст. 87 §1, абз. 4). Якщо опцію не можна відокремити від пропозиції, пропозиція неправильна за ст. 76 — цього інструмент не оцінює.', 'freie oder zugelassene Optionen mit Mehrpreis bleiben außer Betracht (KB 18.04.2017 Art. 48 §3, Art. 87 §1 Abs. 4). Lässt sich die Option nicht vom Angebot trennen, ist das Angebot nach Art. 76 zu beurteilen — das kann das Werkzeug nicht.', 'vrije of toegestane opties met meerprijs werden buiten beschouwing gelaten (KB 18.04.2017 art. 48 §3, art. 87 §1, 4e lid). Kan de optie niet van de offerte worden gescheiden, dan is de offerte onregelmatig volgens art. 76 — dat beoordeelt de tool niet.', 'des options libres ou autorisées avec supplément ont été écartées (AR 18.04.2017, art. 48 §3, art. 87 §1, al. 4). Si l’option ne peut être séparée de l’offre, l’offre est irrégulière au sens de l’art. 76 — l’outil ne peut en juger.', 'se descartaron opciones libres o permitidas con sobreprecio (KB 18.04.2017, art. 48 §3, art. 87 §1, párr. 4). Si la opción no puede separarse de la oferta, esta es irregular según el art. 76 — la herramienta no lo juzga.', 'pominięto opcje dowolne lub dopuszczone z dopłatą (KB 18.04.2017 art. 48 §3, art. 87 §1 ust. 4). Jeśli opcji nie da się oddzielić od oferty, oferta jest nieprawidłowa wg art. 76 — tego narzędzie nie ocenia.'),
+    wNoDonor: T('no ranked bid priced this item, so art. 86 §2 cannot fill it; it is left out of the comparison for every bid (tool rule).', 'жодна ранжована пропозиція не оцінила цю позицію, тож ст. 86 §2 не може її заповнити; позицію вилучено з порівняння для всіх (правило інструмента).', 'kein gewertetes Angebot hat diese Position bepreist, Art. 86 §2 kann sie nicht ergänzen; sie bleibt für alle Angebote außerhalb des Vergleichs (Regel des Werkzeugs).', 'geen gerangschikte offerte prijsde deze post, dus art. 86 §2 kan hem niet aanvullen; hij blijft voor alle offertes buiten de vergelijking (regel van de tool).', 'aucune offre classée n’a chiffré ce poste, l’art. 86 §2 ne peut le compléter ; il est retiré de la comparaison pour toutes les offres (règle de l’outil).', 'ninguna oferta clasificada valoró esta partida, el art. 86 §2 no puede completarla; queda fuera de la comparación para todas (regla de la herramienta).', 'żadna oceniana oferta nie wyceniła tej pozycji, więc art. 86 §2 nie pozwala jej uzupełnić; pozycję pominięto w porównaniu dla wszystkich ofert (reguła narzędzia).'),
+    wDonorBlank: T('some bids used for L and X left items blank themselves; their totals are lower, so X is lower and the filled price higher. Art. 86 §2 is silent on this — check the fill, or treat the omission as irregular.', 'деякі пропозиції, взяті для L і X, самі мають пропуски; їхні підсумки менші, тож X менше, а заповнена ціна більша. Ст. 86 §2 про це мовчить — перевірте заповнення або визнайте пропуск неправильністю.', 'einige für L und X verwendete Angebote haben selbst Lücken; ihre Summen sind kleiner, X kleiner und der ergänzte Preis höher. Art. 86 §2 schweigt dazu — Ergänzung prüfen oder die Lücke als nicht ordnungsgemäß behandeln.', 'sommige offertes die voor L en X dienen, hebben zelf lege posten; hun totaal is lager, dus X lager en de aangevulde prijs hoger. Art. 86 §2 zwijgt hierover — controleer de aanvulling of beschouw de leemte als onregelmatig.', 'certaines offres servant à L et X ont elles-mêmes des postes vides ; leurs totaux sont plus bas, donc X plus bas et le prix complété plus haut. L’art. 86 §2 est muet sur ce point — vérifiez le complément ou traitez l’omission comme irrégulière.', 'algunas ofertas usadas para L y X dejaron partidas en blanco; sus totales son menores, X menor y el precio completado mayor. El art. 86 §2 no dice nada — revise el completado o trate la omisión como irregular.', 'niektóre oferty użyte do L i X same mają puste pozycje; ich sumy są niższe, więc X niższe, a uzupełniona cena wyższa. Art. 86 §2 tego nie rozstrzyga — sprawdź uzupełnienie albo uznaj lukę za nieprawidłowość.'),
+    wNeg: T('negative price or cost entered (allowed only for an explicit credit item):', 'введено від’ємну ціну чи витрату (допустимо лише для явної позиції-кредиту):', 'negativer Preis oder Kosten eingegeben (nur für eine ausdrückliche Gutschriftposition zulässig):', 'negatieve prijs of kost ingevoerd (alleen toegelaten voor een uitdrukkelijke creditpost):', 'prix ou coût négatif saisi (admis seulement pour un poste de crédit explicite) :', 'precio o coste negativo (solo admisible en una partida de abono explícita):', 'wprowadzono ujemną cenę lub koszt (dopuszczalne tylko dla wyraźnej pozycji uznania):'),
+    wInput: T('impossible input (exchange rate ≤ 0, rebate outside 0–100 %, negative duty, advance, retention or days); not ranked.', 'неможливе значення (курс ≤ 0, знижка поза 0–100 %, від’ємні мито, аванс, утримання чи дні); без рангу.', 'unmögliche Eingabe (Kurs ≤ 0, Nachlass außerhalb 0–100 %, negativer Zoll, Anzahlung, Einbehalt oder Tage); ohne Rang.', 'onmogelijke invoer (koers ≤ 0, korting buiten 0–100 %, negatief invoerrecht, voorschot, inhouding of dagen); niet gerangschikt.', 'saisie impossible (taux ≤ 0, rabais hors 0–100 %, droits, avance, retenue ou jours négatifs) ; non classée.', 'valor imposible (cambio ≤ 0, descuento fuera de 0–100 %, arancel, anticipo, retención o días negativos); sin clasificar.', 'niemożliwa wartość (kurs ≤ 0, rabat poza 0–100 %, ujemne cło, zaliczka, zatrzymanie lub dni); bez rangi.'),
+    wOverflow: T('the result is not a finite number (amounts too large); not ranked.', 'результат не є скінченним числом (надто великі суми); без рангу.', 'das Ergebnis ist keine endliche Zahl (Beträge zu groß); ohne Rang.', 'het resultaat is geen eindig getal (bedragen te groot); niet gerangschikt.', 'le résultat n’est pas un nombre fini (montants trop grands) ; non classée.', 'el resultado no es un número finito (importes demasiado grandes); sin clasificar.', 'wynik nie jest liczbą skończoną (zbyt duże kwoty); bez rangi.'),
+    tie: T('tie', 'нічия', 'Gleichstand', 'gelijke stand', 'égalité', 'empate', 'remis'),
+    tieHint: T('art. 87 §2: ask the tied bidders for written price reductions, then draw lots', 'ст. 87 §2: попросіть учасників письмово знизити ціну, потім жереб', 'Art. 87 §2: schriftliche Preisnachlässe der Gleichrangigen anfordern, danach Los', 'art. 87 §2: vraag de betrokken inschrijvers schriftelijke prijsverminderingen, daarna loting', 'art. 87 §2 : demander aux soumissionnaires ex æquo des réductions de prix écrites, puis tirage au sort', 'art. 87 §2: pedir a los empatados rebajas de precio por escrito y después sorteo', 'art. 87 §2: poproś wykonawców o pisemne obniżki cen, potem losowanie'),
+    useNothing: T('This tool takes nothing from that module. It reads technical verdicts from a project package (Import project-package) and its own saved evaluation (Restore my saved evaluation).', 'Цей інструмент нічого не бере з того модуля. Він читає технічні висновки з пакета проєкту (Імпорт project-package) і власну збережену оцінку (Відновити збережену оцінку).', 'Dieses Werkzeug übernimmt aus jenem Modul nichts. Es liest technische Ergebnisse aus einem Projektpaket (Import project-package) und seine eigene gespeicherte Wertung (Gespeicherte Wertung laden).', 'Deze tool neemt niets over uit die module. Ze leest technische oordelen uit een projectpakket (Import project-package) en haar eigen opgeslagen beoordeling (Opgeslagen beoordeling terugzetten).', 'Cet outil ne reprend rien de ce module. Il lit les verdicts techniques d’un paquet projet (Import project-package) et sa propre évaluation enregistrée (Restaurer mon évaluation).', 'Esta herramienta no toma nada de ese módulo. Lee veredictos técnicos de un paquete de proyecto (Import project-package) y su propia evaluación guardada (Restaurar mi evaluación).', 'To narzędzie nic nie bierze z tego modułu. Czyta werdykty techniczne z pakietu projektu (Import project-package) i własną zapisaną ocenę (Przywróć zapisaną ocenę).'),
+    hasOwn: T('The imported project holds a saved evaluation of this tool — press “Restore my saved evaluation” to apply it.', 'Імпортований проєкт містить збережену оцінку цього інструмента — натисніть «Відновити збережену оцінку», щоб застосувати її.', 'Das importierte Projekt enthält eine gespeicherte Wertung dieses Werkzeugs — „Gespeicherte Wertung laden“ übernimmt sie.', 'Het geïmporteerde project bevat een opgeslagen beoordeling van deze tool — klik op “Opgeslagen beoordeling terugzetten” om ze toe te passen.', 'Le projet importé contient une évaluation enregistrée de cet outil — cliquez sur « Restaurer mon évaluation » pour l’appliquer.', 'El proyecto importado contiene una evaluación guardada de esta herramienta — pulse «Restaurar mi evaluación» para aplicarla.', 'Zaimportowany projekt zawiera zapisaną ocenę tego narzędzia — kliknij „Przywróć zapisaną ocenę”, aby ją zastosować.'),
+    tooBig: T('Nothing applied: the saved evaluation exceeds the limits of this tool (200 items, 40 bids, 8 000 price lines, 400 logistics lines):', 'Нічого не застосовано: збережена оцінка перевищує межі інструмента (200 позицій, 40 пропозицій, 8 000 рядків цін, 400 логістичних рядків):', 'Nichts übernommen: die gespeicherte Wertung überschreitet die Grenzen des Werkzeugs (200 Positionen, 40 Angebote, 8 000 Preiszeilen, 400 Logistikzeilen):', 'Niets toegepast: de opgeslagen beoordeling overschrijdt de grenzen van de tool (200 posten, 40 offertes, 8 000 prijsregels, 400 logistieke regels):', 'Rien appliqué : l’évaluation enregistrée dépasse les limites de l’outil (200 postes, 40 offres, 8 000 lignes de prix, 400 lignes logistiques) :', 'No se aplicó nada: la evaluación guardada supera los límites de la herramienta (200 partidas, 40 ofertas, 8 000 líneas de precio, 400 líneas logísticas):', 'Nic nie zastosowano: zapisana ocena przekracza limity narzędzia (200 pozycji, 40 ofert, 8 000 wierszy cen, 400 wierszy logistyki):'),
+    partyClash: T('Party number already used in the project for another firm; saved under:', 'Номер учасника вже використано в проєкті для іншої фірми; збережено як:', 'Parteinummer im Projekt schon für eine andere Firma vergeben; gespeichert als:', 'Partijnummer in het project al gebruikt voor een andere firma; opgeslagen als:', 'Numéro de partie déjà utilisé dans le projet pour une autre entreprise ; enregistré sous :', 'Número de parte ya usado en el proyecto para otra empresa; guardado como:', 'Numer strony już użyty w projekcie dla innej firmy; zapisano jako:'),
+    gridBid: T('Prices of bid', 'Ціни пропозиції', 'Preise des Angebots', 'Prijzen van offerte', 'Prix de l’offre', 'Precios de la oferta', 'Ceny oferty'),
+    gridCount: T('items priced', 'позицій з ціною', 'Positionen bepreist', 'posten geprijsd', 'postes chiffrés', 'partidas con precio', 'pozycji z ceną'),
+    stMissing: T('missing', 'немає ціни', 'fehlt', 'ontbreekt', 'manquant', 'omitido', 'brak'),
+    stNotOffered: T('not offered', 'не запропоновано', 'nicht angeboten', 'niet aangeboden', 'non proposée', 'no ofrecida', 'nie oferowana'),
+    stDisc: T('qty × price ≠ amount', 'кільк. × ціна ≠ сума', 'Menge × EP ≠ Betrag', 'hoeveelheid × EP ≠ bedrag', 'qté × PU ≠ montant', 'cant. × PU ≠ importe', 'ilość × cena ≠ wartość'),
+    st48: T('disregarded (art. 48 §3)', 'не враховано (ст. 48 §3)', 'außer Betracht (Art. 48 §3)', 'buiten beschouwing (art. 48 §3)', 'écartée (art. 48 §3)', 'descartada (art. 48 §3)', 'pominięta (art. 48 §3)'),
+    stState: T('Status', 'Стан', 'Status', 'Status', 'État', 'Estado', 'Stan'),
+    rFill: T('art. 86 §2: P = L·Y/X', 'ст. 86 §2: P = L·Y/X', 'Art. 86 §2: P = L·Y/X', 'art. 86 §2: P = L·Y/X', 'art. 86 §2 : P = L·Y/X', 'art. 86 §2: P = L·Y/X', 'art. 86 §2: P = L·Y/X'),
+    autoTag: T('fallback', 'за замовч.', 'Ersatzregel', 'terugval', 'défaut', 'defecto', 'domyślnie'),
+    noLog: T('No arithmetic errors, no missing prices.', 'Арифметичних помилок і відсутніх цін немає.', 'Keine Rechenfehler, keine fehlenden Preise.', 'Geen rekenfouten, geen ontbrekende prijzen.', 'Aucune erreur arithmétique, aucun prix manquant.', 'Sin errores aritméticos ni precios omitidos.', 'Brak błędów rachunkowych i brakujących cen.'),
+    tabGap: T('Delivery-term gap (Incoterms 2020) and payment terms', 'Різниця умов поставки (Incoterms 2020) і умови оплати', 'Lieferbedingungen (Incoterms 2020) und Zahlungsbedingungen', 'Leveringsvoorwaarden (Incoterms 2020) en betalingsvoorwaarden', 'Conditions de livraison (Incoterms 2020) et de paiement', 'Condiciones de entrega (Incoterms 2020) y de pago', 'Warunki dostawy (Incoterms 2020) i płatności'),
+    hStages: T('Stages added (+) / removed (−)', 'Етапи додано (+) / вилучено (−)', 'Abschnitte ergänzt (+) / abgezogen (−)', 'Stappen toegevoegd (+) / afgetrokken (−)', 'Étapes ajoutées (+) / retirées (−)', 'Etapas añadidas (+) / restadas (−)', 'Etapy dodane (+) / odjęte (−)'),
+    hTerms: T('Advance / retention / days', 'Аванс / утримання / дні', 'Anzahlung / Einbehalt / Tage', 'Voorschot / inhouding / dagen', 'Avance / retenue / jours', 'Anticipo / retención / días', 'Zaliczka / zatrzymanie / dni'),
+    hPV: T('PV factor', 'Коеф. PV', 'Barwertfaktor', 'CW-factor', 'Facteur VA', 'Factor VA', 'Współczynnik PV'),
+    noteArith: T('KB 18.04.2017 art. 34 §2 has no general rule that the unit price prevails: the contracting authority looks for the bidder’s real intention (overall analysis, comparison with the other offers and market prices) and may ask for clarification; only if the intention cannot be established may it apply the stated unit prices or set the offer aside as irregular.', 'KB 18.04.2017, ст. 34 §2, не містить загального правила про перевагу ціни за одиницю: замовник з’ясовує справжній намір учасника (загальний аналіз, порівняння з іншими пропозиціями та ринковими цінами) і може попросити роз’яснення; лише якщо намір встановити неможливо, він може застосувати зазначені ціни за одиницю або відхилити пропозицію як неправильну.', 'KB 18.04.2017 Art. 34 §2 kennt keine allgemeine Regel, dass der Einheitspreis vorgeht: der Auftraggeber ermittelt den wirklichen Willen des Bieters (Gesamtanalyse, Vergleich mit den anderen Angeboten und Marktpreisen) und kann Aufklärung verlangen; nur wenn der Wille nicht feststellbar ist, darf er die angegebenen Einheitspreise anwenden oder das Angebot als nicht ordnungsgemäß ausschließen.', 'KB 18.04.2017 art. 34 §2 kent geen algemene regel dat de eenheidsprijs primeert: de aanbestedende overheid zoekt de werkelijke bedoeling van de inschrijver (globale analyse, vergelijking met de andere offertes en de marktprijzen) en kan verduidelijking vragen; alleen als die bedoeling niet kan worden vastgesteld, mag ze de opgegeven eenheidsprijzen toepassen of de offerte als onregelmatig weren.', 'L’AR du 18.04.2017, art. 34 §2, ne prévoit pas de règle générale selon laquelle le prix unitaire prévaut : le pouvoir adjudicateur recherche l’intention réelle du soumissionnaire (analyse globale, comparaison avec les autres offres et les prix du marché) et peut demander des précisions ; ce n’est que si l’intention ne peut être établie qu’il peut appliquer les prix unitaires indiqués ou écarter l’offre comme irrégulière.', 'El KB de 18.04.2017, art. 34 §2, no establece que prevalezca en general el precio unitario: el poder adjudicador busca la intención real del licitador (análisis global, comparación con las demás ofertas y los precios de mercado) y puede pedir aclaraciones; solo si la intención no puede establecerse puede aplicar los precios unitarios indicados o descartar la oferta por irregular.', 'KB 18.04.2017 art. 34 §2 nie zawiera ogólnej reguły pierwszeństwa ceny jednostkowej: zamawiający ustala rzeczywisty zamiar wykonawcy (analiza całościowa, porównanie z innymi ofertami i cenami rynkowymi) i może zażądać wyjaśnień; dopiero gdy zamiaru nie da się ustalić, może zastosować podane ceny jednostkowe albo odrzucić ofertę jako nieprawidłową.'),
+    noteFillPool: T('L and X are taken over the other bids that priced the item; technically non-compliant and set-aside bids are left out (tool choice).', 'L і X беруться з інших пропозицій, що оцінили позицію; технічно невідповідні та відхилені пропозиції не враховуються (вибір інструмента).', 'L und X werden über die anderen Angebote gebildet, die die Position bepreist haben; technisch nicht konforme und ausgeschiedene Angebote bleiben außen vor (Wahl des Werkzeugs).', 'L en X worden genomen over de andere offertes die de post hebben geprijsd; technisch niet-conforme en geweerde offertes blijven buiten beschouwing (keuze van de tool).', 'L et X portent sur les autres offres qui ont chiffré le poste ; les offres techniquement non conformes et écartées sont exclues (choix de l’outil).', 'L y X se toman de las demás ofertas que valoraron la partida; las técnicamente no conformes y las descartadas quedan fuera (elección de la herramienta).', 'L i X liczy się z pozostałych ofert, które wyceniły pozycję; oferty technicznie niezgodne i odrzucone pomija się (wybór narzędzia).'),
+    noteRefDDP: T('With non-EU bidders, use DDP site as the reference: it compares landed cost including import duty.', 'Якщо є учасники з-поза ЄС, беріть еталоном DDP об’єкт: так порівнюється повна вартість разом з митом.', 'Bei Bietern außerhalb der EU DDP Baustelle als Referenz verwenden: so werden Einstandskosten mit Einfuhrzoll verglichen.', 'Met inschrijvers van buiten de EU: neem DDP werf als referentie, dan vergelijkt u de kostprijs ter plaatse inclusief invoerrechten.', 'Avec des soumissionnaires hors UE, prenez DDP chantier comme référence : on compare alors le coût rendu, droits compris.', 'Con licitadores de fuera de la UE, tome DDP obra como referencia: así se compara el coste puesto en obra con aranceles.', 'Przy wykonawcach spoza UE przyjmij DDP budowa jako odniesienie: porównuje się wtedy koszt z dostawą i cłem.'),
+    notePay: T('Payment adjustment = price × (PV of the bid’s payment profile ÷ PV of 100 % paid at delivery + reference days − 1). An advance costs the client money, a retention saves it.', 'Коригування оплати = ціна × (PV графіка оплати пропозиції ÷ PV 100 % оплати при поставці + еталонні дні − 1). Аванс коштує замовнику грошей, утримання їх економить.', 'Zahlungskorrektur = Preis × (Barwert des Zahlungsplans ÷ Barwert von 100 % bei Lieferung + Referenztage − 1). Eine Anzahlung kostet den Auftraggeber Geld, ein Einbehalt spart es.', 'Correctie betaling = prijs × (CW van het betalingsprofiel ÷ CW van 100 % betaald bij levering + referentiedagen − 1). Een voorschot kost de overheid geld, een inhouding bespaart het.', 'Ajustement paiement = prix × (VA du profil de paiement ÷ VA de 100 % payés à la livraison + jours de référence − 1). Une avance coûte au pouvoir adjudicateur, une retenue lui fait gagner.', 'Ajuste de pago = precio × (VA del perfil de pago ÷ VA del 100 % pagado a la entrega + días de referencia − 1). Un anticipo cuesta dinero al poder adjudicador, una retención lo ahorra.', 'Korekta płatności = cena × (PV harmonogramu płatności ÷ PV 100 % zapłaty przy dostawie + dni referencyjne − 1). Zaliczka kosztuje zamawiającego, zatrzymanie oszczędza.'),
+    wNoReadout: T('No amount read out: the corrected total is used as the starting point.', 'Суму не оголошено: за основу взято виправлений підсумок.', 'Kein verlesener Betrag: der korrigierte Gesamtbetrag ist der Ausgangspunkt.', 'Geen afgelezen bedrag: het verbeterde totaal is het vertrekpunt.', 'Aucun montant lu : le total corrigé sert de point de départ.', 'Sin importe leído: se parte del total corregido.', 'Brak odczytanej kwoty: punktem wyjścia jest poprawiona suma.'),
+    wNoFill: T('cannot be filled: no other ranked bid priced the item; the bid is not ranked.', 'неможливо заповнити: жодна інша ранжована пропозиція не оцінила позицію; пропозиція без рангу.', 'nicht ergänzbar: kein anderes gewertetes Angebot hat die Position bepreist; ohne Rang.', 'kan niet worden aangevuld: geen andere gerangschikte offerte prijsde de post; niet gerangschikt.', 'impossible à compléter : aucune autre offre classée n’a chiffré le poste ; non classée.', 'no se puede completar: ninguna otra oferta clasificada valoró la partida; sin clasificar.', 'nie da się uzupełnić: żadna inna oceniana oferta nie wyceniła pozycji; bez rangi.'),
+    wPay: T('advance + retention exceed 100 %; the bid is not ranked.', 'аванс + утримання перевищують 100 %; пропозиція без рангу.', 'Anzahlung + Einbehalt über 100 %; ohne Rang.', 'voorschot + inhouding boven 100 %; niet gerangschikt.', 'avance + retenue au-delà de 100 % ; non classée.', 'anticipo + retención superan el 100 %; sin clasificar.', 'zaliczka + zatrzymanie ponad 100 %; bez rangi.'),
+    wRejected: T('set aside: missing price and the policy is “irregular”.', 'відхилено: відсутня ціна, а правило — «неправильна».', 'ausgeschieden: fehlender Preis, Regel „nicht ordnungsgemäß“.', 'geweerd: ontbrekende prijs en de regel is “onregelmatig”.', 'écartée : prix manquant et règle « irrégulière ».', 'descartada: precio omitido y regla «irregular».', 'odrzucona: brak ceny, reguła „nieprawidłowa”.'),
+    wTech: T('technically non-compliant: shown, not ranked.', 'технічно не відповідає: показано, без рангу.', 'technisch nicht konform: gezeigt, ohne Rang.', 'technisch niet conform: getoond, niet gerangschikt.', 'techniquement non conforme : affichée, non classée.', 'técnicamente no conforme: se muestra, sin clasificar.', 'technicznie niezgodna: pokazana, bez rangi.'),
+    wDup: T('Duplicate number:', 'Повторний номер:', 'Doppelte Nummer:', 'Dubbel nummer:', 'Numéro en double :', 'Número duplicado:', 'Powtórzony numer:'),
+    wOrphan: T('Price line for an unknown bid or item ignored:', 'Рядок ціни з невідомою пропозицією чи позицією пропущено:', 'Preiszeile mit unbekanntem Angebot oder Position ignoriert:', 'Prijsregel voor onbekende offerte of post genegeerd:', 'Ligne de prix d’une offre ou d’un poste inconnu ignorée :', 'Línea de precio de oferta o partida desconocida ignorada:', 'Pominięto wiersz ceny nieznanej oferty lub pozycji:'),
+    errInput: T('Cannot normalise: ', 'Неможливо нормалізувати: ', 'Normierung nicht möglich: ', 'Normalisatie niet mogelijk: ', 'Normalisation impossible : ', 'No se puede normalizar: ', 'Nie można znormalizować: '),
+    errNoBids: T('add at least one bid', 'додайте хоча б одну пропозицію', 'mindestens ein Angebot anlegen', 'voeg minstens één offerte toe', 'ajoutez au moins une offre', 'añada al menos una oferta', 'dodaj co najmniej jedną ofertę'),
+    errNoItems: T('add at least one item', 'додайте хоча б одну позицію', 'mindestens eine Position anlegen', 'voeg minstens één post toe', 'ajoutez au moins un poste', 'añada al menos una partida', 'dodaj co najmniej jedną pozycję'),
+    errEngine: T('The calculation engine (tnd-bidnorm.js) did not load.', 'Розрахунковий модуль (tnd-bidnorm.js) не завантажився.', 'Das Rechenmodul (tnd-bidnorm.js) wurde nicht geladen.', 'De rekenmodule (tnd-bidnorm.js) is niet geladen.', 'Le moteur de calcul (tnd-bidnorm.js) ne s’est pas chargé.', 'El motor de cálculo (tnd-bidnorm.js) no se cargó.', 'Moduł obliczeń (tnd-bidnorm.js) się nie załadował.'),
+    vBest: T('Lowest normalised bid', 'Найнижча нормалізована пропозиція', 'Niedrigstes normiertes Angebot', 'Laagste genormaliseerde offerte', 'Offre normalisée la plus basse', 'Oferta normalizada más baja', 'Najniższa oferta znormalizowana'),
+    vWas: T('lowest at opening was', 'найнижчою при розкритті була', 'bei der Öffnung niedrigstes war', 'laagste bij de opening was', 'la plus basse à l’ouverture était', 'la más baja en la apertura era', 'najniższą przy otwarciu była'),
+    vSame: T('same as the lowest at opening', 'та сама, що й найнижча при розкритті', 'wie das niedrigste bei der Öffnung', 'dezelfde als de laagste bij de opening', 'la même qu’à l’ouverture', 'la misma que en la apertura', 'ta sama co najniższa przy otwarciu'),
+    vNone: T('No bid can be ranked.', 'Жодну пропозицію не можна ранжувати.', 'Kein Angebot kann gewertet werden.', 'Geen enkele offerte kan worden gerangschikt.', 'Aucune offre ne peut être classée.', 'Ninguna oferta puede clasificarse.', 'Żadnej oferty nie można sklasyfikować.'),
+    stageCap: T('Read-out price (light) against normalised price (solid), in the evaluation currency', 'Оголошена ціна (світла) проти нормалізованої (суцільна), у валюті оцінки', 'Verlesener Preis (hell) gegen normierten Preis (voll), in Wertungswährung', 'Afgelezen prijs (licht) tegenover genormaliseerde prijs (vol), in beoordelingsmunt', 'Prix lu (clair) face au prix normalisé (plein), en devise d’évaluation', 'Precio leído (claro) frente a normalizado (sólido), en divisa de evaluación', 'Cena odczytana (jasna) wobec znormalizowanej (pełna), w walucie oceny'),
+    a11yMain: T('Bars of read-out and normalised price per bid. Lowest normalised:', 'Стовпчики оголошеної й нормалізованої ціни для кожної пропозиції. Найнижча нормалізована:', 'Balken verlesener und normierter Preise je Angebot. Niedrigstes normiertes:', 'Staven van afgelezen en genormaliseerde prijs per offerte. Laagste genormaliseerde:', 'Barres du prix lu et du prix normalisé par offre. Plus basse normalisée :', 'Barras de precio leído y normalizado por oferta. Más baja normalizada:', 'Słupki ceny odczytanej i znormalizowanej dla ofert. Najniższa znormalizowana:'),
+    a11yNone: T('No result yet.', 'Результату ще немає.', 'Noch kein Ergebnis.', 'Nog geen resultaat.', 'Pas encore de résultat.', 'Aún no hay resultado.', 'Brak wyniku.'),
+    save: T('Save to project', 'Зберегти в проєкт', 'Im Projekt speichern', 'In project opslaan', 'Enregistrer dans le projet', 'Guardar en el proyecto', 'Zapisz w projekcie'),
+    restore: T('Restore my saved evaluation', 'Відновити збережену оцінку', 'Gespeicherte Wertung laden', 'Opgeslagen beoordeling terugzetten', 'Restaurer mon évaluation', 'Restaurar mi evaluación', 'Przywróć zapisaną ocenę'),
+    saved: T('Saved: modules.bidnormalize and the bids block (normalised price, corrections, options, Incoterm, payment).', 'Збережено: modules.bidnormalize і блок bids (нормалізована ціна, виправлення, опції, Incoterm, оплата).', 'Gespeichert: modules.bidnormalize und Block bids (normierter Preis, Korrekturen, Optionen, Incoterm, Zahlung).', 'Opgeslagen: modules.bidnormalize en het blok bids (genormaliseerde prijs, verbeteringen, opties, Incoterm, betaling).', 'Enregistré : modules.bidnormalize et le bloc bids (prix normalisé, corrections, options, Incoterm, paiement).', 'Guardado: modules.bidnormalize y el bloque bids (precio normalizado, correcciones, opciones, Incoterm, pago).', 'Zapisano: modules.bidnormalize i blok bids (cena znormalizowana, poprawki, opcje, Incoterm, płatność).'),
+    restored: T('Saved evaluation restored.', 'Збережену оцінку відновлено.', 'Gespeicherte Wertung geladen.', 'Opgeslagen beoordeling teruggezet.', 'Évaluation restaurée.', 'Evaluación restaurada.', 'Przywrócono zapisaną ocenę.'),
+    nothing: T('The project holds no saved evaluation of this tool.', 'У проєкті немає збереженої оцінки цього інструмента.', 'Das Projekt enthält keine gespeicherte Wertung dieses Werkzeugs.', 'Het project bevat geen opgeslagen beoordeling van deze tool.', 'Le projet ne contient aucune évaluation enregistrée de cet outil.', 'El proyecto no contiene ninguna evaluación guardada de esta herramienta.', 'Projekt nie zawiera zapisanej oceny tego narzędzia.'),
+    refused: T('Nothing applied: the saved data failed the checks.', 'Нічого не застосовано: збережені дані не пройшли перевірку.', 'Nichts übernommen: die gespeicherten Daten haben die Prüfung nicht bestanden.', 'Niets toegepast: de opgeslagen gegevens doorstonden de controle niet.', 'Rien appliqué : les données enregistrées n’ont pas passé les contrôles.', 'No se aplicó nada: los datos guardados no superaron los controles.', 'Nic nie zastosowano: zapisane dane nie przeszły kontroli.'),
+    pkgTech: T('Technical verdicts taken from the project package (bidevaluation, knock-out = fail):', 'Технічні висновки взято з пакета проєкту (bidevaluation, knock-out = не відповідає):', 'Technische Ergebnisse aus dem Projektpaket übernommen (bidevaluation, K.-o. = nicht erfüllt):', 'Technische oordelen overgenomen uit het projectpakket (bidevaluation, knock-out = niet conform):', 'Verdicts techniques repris du paquet projet (bidevaluation, éliminatoire = non conforme) :', 'Veredictos técnicos tomados del paquete del proyecto (bidevaluation, eliminatorio = no cumple):', 'Werdykty techniczne z pakietu projektu (bidevaluation, knock-out = nie spełnia):'),
+    pkgNone: T('The project package has no technical evaluation with bidders matching these bids.', 'У пакеті проєкту немає технічної оцінки з учасниками, що збігаються з цими пропозиціями.', 'Das Projektpaket enthält keine technische Wertung mit passenden Bietern.', 'Het projectpakket bevat geen technische beoordeling met overeenkomende inschrijvers.', 'Le paquet projet ne contient aucune évaluation technique avec des soumissionnaires correspondants.', 'El paquete del proyecto no contiene una evaluación técnica con licitadores coincidentes.', 'Pakiet projektu nie zawiera oceny technicznej z pasującymi wykonawcami.'),
+    month: T('months', 'міс.', 'Monate', 'maanden', 'mois', 'meses', 'mies.'),
+    dayU: T('days', 'дн.', 'Tage', 'dagen', 'jours', 'días', 'dni'),
+    dis: T('Engineering and commercial analysis, not legal advice. The tender documents and the applicable law prevail.', 'Інженерно-комерційний аналіз, не юридична консультація. Перевагу мають тендерна документація та чинне право.', 'Technisch-kaufmännische Analyse, keine Rechtsberatung. Vergabeunterlagen und geltendes Recht haben Vorrang.', 'Technisch-commerciële analyse, geen juridisch advies. De opdrachtdocumenten en het toepasselijke recht hebben voorrang.', 'Analyse technique et commerciale, pas un avis juridique. Les documents du marché et le droit applicable prévalent.', 'Análisis técnico y comercial, no asesoramiento jurídico. Prevalecen los pliegos y la ley aplicable.', 'Analiza techniczno-handlowa, nie porada prawna. Pierwszeństwo mają dokumenty zamówienia i prawo.')
+  };
+  var KIND_OPTS = function () { return [['base', S.kBase], ['provisional', S.kProv], ['req_option', S.kReq], ['perm_option', S.kPerm], ['free_option', S.kFree]]; };
+  var INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CPT', 'CFR', 'CIP', 'CIF', 'DAP', 'DPU', 'DDP'];
+  var EL = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8'];
+  function bidOpts() { return (state.bids || []).map(function (b) { return [String(b.id), String(b.id)]; }); }
+  function itemOpts() { return (state.items || []).map(function (it) { return [String(it.id), String(it.id)]; }); }
+  function itemById(id) { var r = null; (state.items || []).forEach(function (it) { if (String(it.id) === String(id)) r = it; }); return r; }
+  function bidById(id, R) { var r = null; ((R || last || {}).bids || []).forEach(function (b) { if (b.id === id) r = b; }); return r; }
+  function bidCur(id) { var r = state.cur; (state.bids || []).forEach(function (b) { if (String(b.id) === String(id)) r = b.currency || state.cur; }); return r; }
+
+  var ui = null, stage = null;
+  function adoptStage(app) { ui = app; }
+
+  function computeView(s) {
+    last = solve(s);
+    if (stage) stage.schedule();
+    var R = last, LG = lang();
+    function str(v) { return v && typeof v === 'object' ? (v[LG] != null ? v[LG] : v.en) : v; }
+    if (!R || !R.ok) {
+      var msg = R && R.errors && R.errors[0] === 'engine' ? S.errEngine
+        : TF(function (l) { return S.errInput[l] + (R && R.errors ? R.errors.map(function (k) { return k === 'nobids' ? S.errNoBids[l] : (k === 'noitems' ? S.errNoItems[l] : k); }).join(', ') : ''); });
+      return { verdict: { tone: 'bad', text: msg }, tiles: [], notes: [] };
+    }
+    var best = bidById(R.best), rb = bidById(R.readoutBest), tiles = [], tables = [], notes = [];
+    var verdict;
+    if (!best) verdict = { tone: 'bad', text: S.vNone };
+    else verdict = { tone: R.winnerChanged || R.tie.length ? 'warn' : 'ok', text: TF(function (l) {
+      return S.vBest[l] + ': ' + (R.tie.length ? S.tie[l] + ' ' + R.tie.join(' = ') : best.name) + ' — ' + money(best.N, l)
+        + (R.tie.length ? ' · ' + S.tieHint[l] : (R.winnerChanged && rb ? ' · ' + S.vWas[l] + ' ' + rb.name + ' (' + money(rb.readoutEval, l) + ')' : ' · ' + S.vSame[l]));
+    }) };
+    function tile(label, value, hint, learn, tone, headline) { tiles.push({ label: label, value: str(value), hint: str(hint || ''), learn: learn, tone: tone || null, headline: headline !== false }); }
+    if (best && R.tie.length) tile(S.tBest, TF(function (l) { return S.tie[l] + ': ' + R.tie.join(' = '); }), S.tieHint, 'rank', 'warn');
+    else tile(S.tBest, best ? best.name : '—', best ? best.id : '', 'rank', best ? 'ok' : 'bad');
+    tile(S.tN, TF(function (l) { return best ? money(best.N, l) : '—'; }), best ? TF(function (l) { return S.hRead[l] + ' ' + money(best.readoutEval, l); }) : '', 'rank');
+    tile(S.tChanged, R.winnerChanged ? S.changedYes : S.changedNo, rb ? TF(function (l) { return S.hRead[l] + ': ' + rb.name; }) : '', 'rank', R.winnerChanged ? 'warn' : 'ok');
+    tile(S.tCorr, R.nCorrections + ' / ' + R.nFills, '', 'arith', R.nCorrections + R.nFills ? 'warn' : 'ok', false);
+    tile(S.tSpread, TF(function (l) { return pct(R.spread, l, 1); }), '', 'rank', null, false);
+
+    /* ranking table */
+    var rows = R.bids.slice().sort(function (a, b) {
+      if (a.ranked !== b.ranked) return a.ranked ? -1 : 1;
+      return (a.N - b.N) || (a.id < b.id ? -1 : 1);
+    }).map(function (b) {
+      var bc = b.currency;
+      return { chosen: b.id === R.best, dim: !b.ranked, cells: [
+        b.id + ' ' + b.name,
+        { text: TF(function (l) { return money(b.readout != null ? b.readout : b.base, l, bc); }), num: true },
+        { text: TF(function (l) { return signed(b.arith, l, bc); }), num: true, tone: Math.abs(b.arith) > 0.5 ? 'warn' : null },
+        { text: TF(function (l) { return signed(b.fillTotal, l, bc); }), num: true, tone: b.fillTotal ? 'warn' : null },
+        { text: TF(function (l) { return signed(b.options, l, bc); }), num: true },
+        { text: TF(function (l) { return signed(b.rebateAmt, l, bc); }), num: true },
+        { text: TF(function (l) { return money(b.S, l); }), num: true },
+        { text: TF(function (l) { return signed(b.gap, l); }), num: true, tone: Math.abs(b.gap) > 0.5 ? 'warn' : null },
+        { text: TF(function (l) { return signed(b.payAdj, l); }), num: true },
+        { text: TF(function (l) { return money(b.N, l); }), num: true, tone: b.id === R.best ? 'ok' : null },
+        { text: b.ranked ? TF(function (l) { return (b.readoutRank || '—') + ' → ' + b.rank; }) : S.notRanked, num: true, tone: b.ranked && b.rank !== b.readoutRank ? 'warn' : null },
+        { text: TF(function (l) { return b.deltaBest == null ? '—' : (b.deltaBest < 0.5 ? '0' : '+' + money(b.deltaBest, l) + ' (' + pct(b.deltaBestPct, l, 1) + ')'); }), num: true }
+      ] };
+    });
+    tables.push({ title: S.tabRank, head: [S.hBid, { label: S.hRead, num: true }, { label: S.hArith, num: true }, { label: S.hFill, num: true }, { label: S.hOpt, num: true }, { label: S.hRebate, num: true },
+      { label: S.hS, num: true }, { label: S.hGap, num: true }, { label: S.hPay, num: true }, { label: S.hN, num: true }, { label: S.hRank, num: true }, { label: S.hDelta, num: true }], rows: rows });
+
+    /* correction log */
+    var lrows = [];
+    R.bids.forEach(function (b) {
+      b.log.forEach(function (x) {
+        var basis = x.rule === 'art86' ? S.rFill : (x.rule === 'art48' ? S.r48 : (x.decision === 'provisional' ? S.rProv : (x.decision === 'unit' ? S.rUnit : S.rStated)));
+        lrows.push({ cells: [b.id, x.item,
+          { text: TF(function (l) { return x.stated == null ? '—' : money(x.stated, l, b.currency); }), num: true },
+          { text: TF(function (l) { return money(x.computed, l, b.currency); }), num: true },
+          { text: TF(function (l) { return money(x.corrected, l, b.currency); }), num: true },
+          { text: TF(function (l) { return signed(x.delta, l, b.currency); }), num: true, tone: Math.abs(x.delta) > 0.5 ? 'warn' : null },
+          { text: TF(function (l) {
+            var t = basis[l];
+            if (x.rule === 'art86') t += ' (L ' + money(x.L, l, b.currency) + ', Y ' + money(x.Y, l, b.currency) + ', X ' + money(x.X, l, b.currency) + ', n ' + x.n + ')';
+            else if (x.auto) t += ' (' + S.autoTag[l] + ')';
+            return t; }) }
+        ] });
+      });
+    });
+    if (lrows.length) tables.push({ title: S.tabLog, head: [S.hBid, S.hItem, { label: S.hStated, num: true }, { label: S.hComp, num: true }, { label: S.hUsed, num: true }, { label: S.diff, num: true }, S.hRule], rows: lrows });
+    else notes.push(S.noLog);
+
+    /* delivery and payment */
+    var grows = R.bids.map(function (b) {
+      var src = (state.bids || []).filter(function (x) { return String(x.id) === b.id; })[0] || {};
+      return { dim: !b.ranked, cells: [b.id, b.incoterm + ' → ' + R.ref,
+        { text: TF(function (l) { return b.gapParts.length ? b.gapParts.map(function (p) { return (p.sign > 0 ? '+' : '−') + p.el + ' ' + money(p.cost, l); }).join(', ') : '—'; }) },
+        { text: TF(function (l) { return signed(b.gap, l); }), num: true },
+        { text: TF(function (l) { return num(src.adv || 0, l, 0) + ' % / ' + num(src.ret || 0, l, 0) + ' % (' + num(src.retM || 0, l, 0) + ' ' + S.month[l] + ') / ' + num(src.days == null ? 30 : src.days, l, 0) + ' ' + S.dayU[l]; }) },
+        { text: TF(function (l) { return num(b.payFactor, l, 4); }), num: true },
+        { text: TF(function (l) { return signed(b.payAdj, l); }), num: true }
+      ] };
+    });
+    tables.push({ title: S.tabGap, head: [S.hBid, S.incoterm, S.hStages, { label: S.hGap, num: true }, S.hTerms, { label: S.hPV, num: true }, { label: S.hPay, num: true }], rows: grows });
+
+    /* notes */
+    R.bids.forEach(function (b) {
+      if (b.rejected) notes.push(TF(function (l) { return b.id + ': ' + S.wRejected[l]; }));
+      if (b.tech === 'fail') notes.push(TF(function (l) { return b.id + ': ' + S.wTech[l]; }));
+      if (b.reasons.indexOf('nofill') >= 0) notes.push(TF(function (l) { return b.id + ' ' + b.missing.join(', ') + ': ' + S.wNoFill[l]; }));
+      if (b.reasons.indexOf('payment') >= 0) notes.push(TF(function (l) { return b.id + ': ' + S.wPay[l]; }));
+      if (b.reasons.indexOf('noReadout') >= 0) notes.push(TF(function (l) { return b.id + ': ' + S.wNoReadout[l]; }));
+      if (b.reasons.some(function (k) { return ['fx', 'rebate', 'duty', 'payRange'].indexOf(k) >= 0; })) notes.push(TF(function (l) { return b.id + ': ' + S.wInput[l]; }));
+      if (b.reasons.indexOf('overflow') >= 0) notes.push(TF(function (l) { return b.id + ': ' + S.wOverflow[l]; }));
+    });
+    var negs = [], holes = [];
+    (R.warnings || []).forEach(function (w) {
+      if (w.k === 'dupItem' || w.k === 'dupBid') notes.push(TF(function (l) { return S.wDup[l] + ' ' + (w.item || w.bid); }));
+      if (w.k === 'orphanLine') notes.push(TF(function (l) { return S.wOrphan[l] + ' ' + (w.bid || '?') + ' / ' + (w.item || '?'); }));
+      if (w.k === 'noDonor') notes.push(TF(function (l) { return w.item + ': ' + S.wNoDonor[l]; }));
+      if (w.k === 'donorBlank') holes.push(w.bid + '/' + w.item + ' ← ' + w.donors.join(', '));
+      if (w.k === 'negLine' || w.k === 'negCost') negs.push(w.bid + '/' + (w.item || w.el));
+    });
+    if (holes.length) notes.push(TF(function (l) { return holes.join('; ') + ': ' + S.wDonorBlank[l]; }));
+    if (negs.length) notes.push(TF(function (l) { return S.wNeg[l] + ' ' + negs.join(', '); }));
+    if (R.nDisregarded) notes.push(TF(function (l) { return R.bids.filter(function (b) { return b.log.some(function (x) { return x.rule === 'art48'; }); }).map(function (b) { return b.id; }).join(', ') + ': ' + S.w48[l]; }));
+    if (R.nCorrections) notes.push(S.noteArith);
+    if (R.nFills) notes.push(S.noteFillPool);
+    if (R.ref !== 'DDP' && R.bids.some(function (b) { return b.duty > 0; })) notes.push(S.noteRefDDP);
+    if (R.bids.some(function (b) { return Math.abs(b.payAdj) > 0.5; })) notes.push(S.notePay);
+    notes.push(S.dis);
+    gridAfterCompute();
+    return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1'); h.textContent = 'Commercial Bid Normalisation';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    last = solve(state);
+  }
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  /* ---- CSV: ranking + correction log ---- */
+  function csvText() {
+    var R = last; if (!R || !R.ok) return '';
+    var rows = [];
+    R.bids.forEach(function (b) {
+      rows.push(['ranking', b.id, b.name, '', b.currency, b.readout, b.arith, b.fillTotal, b.options, b.rebateAmt, b.fx, b.S, b.gap, b.payAdj, b.N, b.readoutRank || '', b.rank || '', b.ranked ? '' : (b.tech === 'fail' ? 'technical fail' : b.reasons.join(' '))]);
+    });
+    R.bids.forEach(function (b) {
+      b.log.forEach(function (x) {
+        rows.push(['correction', b.id, b.name, x.item, b.currency, x.stated == null ? '' : x.stated, x.computed, x.corrected, x.delta, x.decision + (x.auto ? ' (fallback)' : ''), x.rule === 'art86' ? 'KB 18.04.2017 art. 86 par. 2 L=' + x.L + ' Y=' + x.Y + ' X=' + x.X : (x.rule === 'art48' ? 'KB 18.04.2017 art. 48 par. 3, art. 87 par. 1 al. 4' : 'KB 18.04.2017 art. 34'), '', '', '', '', '', '', '']);
+      });
+    });
+    var cols = ['kind', 'bid', 'bidder', 'item', 'currency', 'readout_or_stated', 'arith_or_computed', 'fill_or_used', 'options_or_delta', 'rebate_or_decision', 'fx_or_basis', 'S_eval', 'delivery_gap', 'payment_adj', 'normalised', 'rank_opening', 'rank', 'note'];
+    var C = core();
+    if (C && C.csv) return C.csv(rows, cols, { lang: 'en' });
+    return cols.join(',') + '\r\n' + rows.map(function (r) { return r.map(function (v) { v = v == null ? '' : String(v); if (/^[=+\-@\t\r]/.test(v) && isNaN(+v)) v = '\'' + v; return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n') + '\r\n';
+  }
+  function download(name, type, text) {
+    var a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: type }));
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ---- project bar (tnd-core.js) ---- */
+  var bar = null, useMsg = null;
+  function showMsg(text, tone) {
+    if (!useMsg) return;
+    useMsg.textContent = text || '';
+    useMsg.style.display = text ? '' : 'none';
+    useMsg.style.borderColor = tone === 'bad' ? 'var(--bad,#c0392b)' : (tone === 'warn' ? 'var(--warn,#d68910)' : 'var(--line,#e2e7ee)');
+  }
+  function projectPayload(doc) {
+    var R = last; if (!R || !R.ok) return null;
+    doc = doc || (bar && bar.getDoc ? bar.getDoc() : null) || {};
+    var prevBids = Array.isArray(doc.bids) ? doc.bids : [], byParty = {};
+    prevBids.forEach(function (b, i) { if (b && b.party) byParty[b.party + '\u0001' + (b.lot || 'L1')] = i; });
+    var bids = prevBids.map(function (b) { return JSON.parse(JSON.stringify(b)); });
+    /* parties: match by name first, then by number; a number already used for another firm gets a suffix (R-15) */
+    var parties = Array.isArray(doc.parties) ? JSON.parse(JSON.stringify(doc.parties)) : [];
+    var norm = function (x) { return String(x || '').trim().toLowerCase(); }, pid = {}, clash = [];
+    R.bids.forEach(function (b) {
+      var byName = parties.filter(function (p) { return p && p.name && norm(p.name) === norm(b.name); })[0];
+      if (byName) { pid[b.id] = byName.id; return; }
+      var byId = parties.filter(function (p) { return p && p.id === b.id; })[0];
+      if (!byId || !byId.name) { pid[b.id] = b.id; if (!byId) parties.push({ id: b.id, name: b.name, role: 'bidder', jv: [] }); else byId.name = b.name; return; }
+      var k = 2, nid = b.id + '-' + k;
+      while (parties.some(function (p) { return p && p.id === nid; })) { k++; nid = b.id + '-' + k; }
+      parties.push({ id: nid, name: b.name, role: 'bidder', jv: [] }); pid[b.id] = nid; clash.push(b.id + ' → ' + nid);
+    });
+    projectPayload.clash = clash;
+    R.bids.forEach(function (b) {
+      var src = (state.bids || []).filter(function (x) { return String(x.id) === b.id; })[0] || {};
+      var mine = {
+        party: pid[b.id], lot: 'L1', price: b.ranked && b.N >= 0 ? b.N : null, price_currency: state.cur,
+        corrections: b.log.map(function (x) { return { item: x.item, stated: x.stated, computed: x.computed, used: x.corrected, delta: x.delta, decision: x.decision, rule: x.rule === 'art86' ? 'KB 18.04.2017 art. 86 §2' : (x.rule === 'art48' ? 'KB 18.04.2017 art. 48 §3, art. 87 §1' : 'KB 18.04.2017 art. 34') }; }),
+        options: b.optList.map(function (o) { return { item: o.item, kind: o.kind, value: o.value, filled: o.filled }; }),
+        incoterm: b.incoterm,
+        payment: { advance: (src.adv || 0) / 100, retention: (src.ret || 0) / 100, retention_months: src.retM || 0, days: src.days == null ? 30 : src.days }
+      };
+      var k = pid[b.id] + '\u0001L1';
+      if (byParty[k] != null) { var t = bids[byParty[k]]; Object.keys(mine).forEach(function (q) { t[q] = mine[q]; }); }
+      else bids.push(mine);
+    });
+    var st = sanitize(JSON.parse(JSON.stringify(state))); delete st.__over;
+    return {
+      state: st,
+      results: { best: R.best, readout_best: R.readoutBest, winner_changed: R.winnerChanged, currency: state.cur, reference_term: R.ref,
+                 ranking: R.ranked.map(function (b) { return { id: b.id, name: b.name, normalised: b.N, rank: b.rank, readout_rank: b.readoutRank }; }) },
+      summary: { text: (R.best ? 'Lowest normalised ' + R.best + ' ' + Math.round(bidById(R.best).N) + ' ' + state.cur : 'no ranked bid') + (R.winnerChanged ? ', first place changed vs opening' : '') + ', ' + R.nCorrections + ' corrections, ' + R.nFills + ' fills' },
+      blocks: { bids: bids, parties: parties }
+    };
+  }
+  function commitProject() {
+    if (!bar) return null;
+    var doc = bar.getDoc(), p = projectPayload(doc);
+    if (!p) return null;
+    try { var res = bar.commit(p); var cl = projectPayload.clash || []; showMsg(S.saved[lang()] + (cl.length ? ' ' + S.partyClash[lang()] + ' ' + cl.join(', ') : ''), cl.length ? 'warn' : 'ok'); return res || true; } catch (e) { showMsg(String(e && e.message || e), 'bad'); return null; }
+  }
+  function restoreFrom(doc) {
+    var L = lang(), m = doc && doc.modules && doc.modules[TOOL];
+    if (!m || !m.state || typeof m.state !== 'object') { showMsg(S.nothing[L], 'warn'); return { ok: false }; }
+    var clean = sanitize(m.state);
+    if (clean.__over) { showMsg(S.tooBig[L] + ' ' + clean.__over.join(', '), 'bad'); return { ok: false, over: clean.__over }; }
+    if (!clean.items || !clean.bids) { showMsg(S.refused[L], 'bad'); return { ok: false }; }
+    applyClean(clean);
+    if (ui) { ui.sync(); ui.run(); }
+    showMsg(S.restored[L], 'ok');
+    return { ok: true };
+  }
+  /* items and bids replaced -> price lines and logistics are replaced too (never keep the previous evaluation's lines) */
+  function applyClean(clean) {
+    Object.keys(DEFAULTS).forEach(function (k) { if (clean[k] !== undefined) state[k] = clean[k]; });
+    if (clean.items || clean.bids) { state.lines = clean.lines || []; state.logistics = clean.logistics || []; }
+    grid.sig = '';
+  }
+  function usePackage(pkg) {
+    var L = lang(), taken = [];
+    (pkg && pkg.bid_evaluations || []).forEach(function (ev) {
+      (ev && Array.isArray(ev.bidders) ? ev.bidders : []).forEach(function (bd) {
+        if (!bd) return;
+        (state.bids || []).forEach(function (b) {
+          var same = (bd.id && String(bd.id) === String(b.id)) || (bd.name && b.name && String(bd.name).trim().toLowerCase() === String(b.name).trim().toLowerCase());
+          if (!same) return;
+          b.tech = bd.knock_out ? 'fail' : 'pass';
+          taken.push(b.id + ' ' + (b.tech === 'fail' ? S.fail[L] : S.pass[L]));
+        });
+      });
+    });
+    if (taken.length) { if (ui) { ui.sync(); ui.run(); } showMsg(S.pkgTech[L] + ' ' + taken.join(', '), 'ok'); }
+    else showMsg(S.pkgNone[L], 'warn');
+    return { ok: taken.length > 0, taken: taken };
+  }
+  function mountBar(box) {
+    var C = core();
+    if (!C || !C.ui || bar) return;
+    try {
+      var lc = document.createElement('div'); box.appendChild(lc);
+      C.ui.lifecycle({ mount: lc, toolId: TOOL, role: 'client', lang: lang });
+      var host = document.createElement('div'); box.appendChild(host);
+      bar = C.ui.projectBar({ mount: host, toolId: TOOL, lang: lang,
+        onChange: function (doc) { /* import/new: nothing applied silently; say when our own saved evaluation is there */
+          if (doc && doc.modules && doc.modules[TOOL]) showMsg(S.hasOwn[lang()], 'warn'); },
+        onUse: function (k, mod, doc) { /* other tools' modules are no input of this tool: say so instead of a silent no-op */
+          var C2 = core(), info = C2 && C2.TOOLS ? C2.TOOLS.filter(function (x) { return x.id === k; })[0] : null;
+          var nm = info && info.name ? (info.name[lang()] || info.name.en || k) : k;
+          showMsg(nm + ': ' + S.useNothing[lang()] + (doc && doc.modules && doc.modules[TOOL] ? ' ' + S.hasOwn[lang()] : ''), 'warn'); },
+        onPackage: function (pkg) { usePackage(pkg); } });
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:6px';
+      var css = 'min-height:var(--ctl-h,32px);padding:0 10px;border:1px solid var(--line,#e2e7ee);border-radius:var(--radius-sm,8px);background:var(--panel-2,#f9fafc);color:var(--ink,#12161d);cursor:pointer;font:inherit';
+      var b1 = document.createElement('button'); b1.type = 'button'; b1.setAttribute('data-bn', 'save'); b1.style.cssText = css; b1.textContent = '↥ ' + S.save[lang()];
+      b1.addEventListener('click', commitProject);
+      var b2 = document.createElement('button'); b2.type = 'button'; b2.setAttribute('data-bn', 'restore'); b2.style.cssText = css; b2.textContent = S.restore[lang()];
+      b2.addEventListener('click', function () { if (bar) restoreFrom(bar.getDoc()); });
+      row.appendChild(b1); row.appendChild(b2); box.appendChild(row);
+      useMsg = document.createElement('div');
+      useMsg.setAttribute('role', 'status'); useMsg.setAttribute('data-bn', 'msg');
+      useMsg.style.cssText = 'display:none;margin-top:6px;padding:6px 8px;border:1px solid var(--line,#e2e7ee);border-left-width:4px;border-radius:var(--radius-sm,8px);font-size:0.92em';
+      box.appendChild(useMsg);
+    } catch (e) { bar = null; }
+  }
+
+  /* ---- price grid: one bid at a time, one row per item (replaces a list of item×bid rows with full selects; R-3) ---- */
+  var grid = { box: null, bid: null, sig: '', rows: {}, timer: null };
+  var COMMA = { uk: 1, de: 1, nl: 1, fr: 1, es: 1, pl: 1 };
+  function numIn(v) { if (v == null || !isFinite(v)) return ''; var t = String(v); return COMMA[lang()] ? t.replace('.', ',') : t; }
+  function numOut(t) {
+    t = String(t == null ? '' : t).replace(/[\s\u00a0\u202f']/g, '');
+    if (t === '') return null;
+    if (COMMA[lang()]) t = t.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'); else t = t.replace(/,/g, '');
+    var v = +t; return isFinite(v) ? v : undefined;
+  }
+  function lineIdx(bid, item) { var k = -1; (state.lines || []).forEach(function (l, i) { if (String(l.bid) === String(bid) && String(l.item) === String(item)) k = i; }); return k; }
+  function gridSig() {
+    var b = grid.bid;
+    return lang() + '|' + b + '|' + (state.bids || []).map(function (x) { return x.id + ':' + x.currency; }).join(',') + '|'
+      + (state.items || []).map(function (it) { return [it.id, it.qty, it.kind, it.up, it.desc].join(':'); }).join(',') + '|'
+      + JSON.stringify((state.lines || []).filter(function (l) { return String(l.bid) === String(b); }));
+  }
+  function gridCell(tag, text, css) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (css) e.style.cssText = css; return e; }
+  var GC = 'padding:3px 6px;border-bottom:1px solid var(--line,#e2e7ee);white-space:nowrap';
+  var GI = 'width:100%;min-width:78px;max-width:130px;box-sizing:border-box;min-height:var(--ctl-h,30px);padding:0 6px;border:1px solid var(--line,#e2e7ee);border-radius:var(--radius-sm,6px);background:var(--panel,#fff);color:var(--ink,#12161d);font:inherit;text-align:right';
+  function renderGrid() {
+    var box = grid.box; if (!box) return;
+    var ids = (state.bids || []).map(function (b) { return String(b.id); });
+    if (ids.indexOf(grid.bid) < 0) grid.bid = ids[0] || null;
+    var sig = gridSig(); if (sig === grid.sig && box.firstChild) return;
+    grid.sig = sig; grid.rows = {};
+    var l = lang(), bid = grid.bid;
+    box.textContent = '';
+    var head = gridCell('div', null, 'display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px');
+    var lab = gridCell('label', S.gridBid[l], 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:100%;min-width:0');
+    var sel = document.createElement('select'); sel.setAttribute('data-bn', 'grid-bid'); sel.style.cssText = GI.replace('text-align:right', 'text-align:left') + ';width:auto;max-width:100%;min-width:0';
+    (state.bids || []).forEach(function (b) { var o = document.createElement('option'); o.value = String(b.id); o.textContent = b.id + (b.name ? ' — ' + b.name : ''); sel.appendChild(o); });
+    sel.value = bid || '';
+    sel.addEventListener('change', function () { grid.bid = sel.value; grid.sig = ''; renderGrid(); gridAfterCompute(); });
+    lab.appendChild(sel); head.appendChild(lab);
+    var cnt = gridCell('span', '', 'color:var(--muted,#667);font-size:.92em'); cnt.setAttribute('data-bn', 'grid-count'); head.appendChild(cnt); grid.count = cnt;
+    box.appendChild(head);
+    if (!bid) return;
+    var wrap = gridCell('div', null, 'overflow-x:auto;max-width:100%');
+    var tb = document.createElement('table'); tb.setAttribute('data-bn', 'grid'); tb.style.cssText = 'border-collapse:collapse;width:100%;font-size:.92em';
+    var thr = document.createElement('tr');
+    [S.hItem, S.up, S.amount, S.diff, S.decision, S.stState, S.computed].forEach(function (h, i) { var th = gridCell('th', h[l], GC + ';text-align:' + (i >= 1 && i <= 3 || i === 6 ? 'right' : 'left') + ';font-weight:600'); th.scope = 'col'; thr.appendChild(th); });
+    var thead = document.createElement('thead'); thead.appendChild(thr); tb.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    var cur = bidCur(bid);
+    (state.items || []).forEach(function (it) {
+      var iid = String(it.id), li = lineIdx(bid, iid), ln = li >= 0 ? state.lines[li] : null;
+      var tr = document.createElement('tr');
+      /* item cell: number, description and quantity stacked, so the two price inputs stay in view in the narrow input column */
+      var dsc = String(it.desc || ''), tdi = gridCell('td', null, GC + ';white-space:normal;min-width:100px;max-width:150px');
+      tdi.appendChild(gridCell('strong', iid, '')); tdi.title = dsc;
+      tdi.appendChild(gridCell('div', dsc.length > 44 ? dsc.slice(0, 43) + '…' : dsc, 'font-size:.86em;color:var(--muted,#667);line-height:1.25'));
+      tdi.appendChild(gridCell('div', (n(it.qty) == null ? '—' : num(it.qty, l, it.qty % 1 ? 2 : 0)) + ' ' + (it.unit || ''), 'font-size:.86em;color:var(--muted,#667)'));
+      tr.appendChild(tdi);
+      var row = { tr: tr };
+      ['up', 'amount'].forEach(function (key) {
+        var td = gridCell('td', null, GC), inp = document.createElement('input');
+        inp.type = 'text'; inp.inputMode = 'decimal'; inp.style.cssText = GI; inp.value = ln ? numIn(ln[key]) : '';
+        inp.setAttribute('aria-label', (key === 'up' ? S.up[l] : S.amount[l]) + ' — ' + bid + ' / ' + iid); inp.setAttribute('data-bn', 'g-' + key);
+        inp.placeholder = '—';
+        inp.addEventListener('input', function () { gridEdit(iid, key, inp); });
+        inp.addEventListener('change', function () { gridEdit(iid, key, inp, true); });
+        td.appendChild(inp); tr.appendChild(td); row[key] = inp;
+      });
+      row.diff = gridCell('td', '', GC + ';text-align:right'); tr.appendChild(row.diff);
+      var tdd = gridCell('td', null, GC), ds = document.createElement('select'); ds.style.cssText = GI.replace('text-align:right', 'text-align:left');
+      ds.setAttribute('aria-label', S.decision[l] + ' — ' + bid + ' / ' + iid); ds.setAttribute('data-bn', 'g-decision');
+      [['auto', S.dAuto], ['unit', S.dUnit], ['stated', S.dStated]].forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1][l]; ds.appendChild(op); });
+      ds.value = ln && ln.decision ? ln.decision : 'auto';
+      ds.addEventListener('change', function () { gridEdit(iid, 'decision', ds, true); });
+      tdd.appendChild(ds); tr.appendChild(tdd); row.dec = ds;
+      row.st = gridCell('td', '', GC); tr.appendChild(row.st);
+      row.comp = gridCell('td', '', GC + ';text-align:right'); tr.appendChild(row.comp);
+      grid.rows[iid] = row; tbody.appendChild(tr);
+    });
+    tb.appendChild(tbody); wrap.appendChild(tb); box.appendChild(wrap);
+    grid.cur = cur;
+  }
+  function gridEdit(iid, key, ctl, now) {
+    var bid = grid.bid; if (!bid) return;
+    var v;
+    if (key === 'decision') v = ctl.value;
+    else { v = numOut(ctl.value); if (v === undefined) { ctl.style.borderColor = 'var(--bad,#c0392b)'; return; } ctl.style.borderColor = ''; }
+    var li = lineIdx(bid, iid);
+    if (li < 0) { state.lines.push({ bid: bid, item: iid, up: null, amount: null, decision: 'auto' }); li = state.lines.length - 1; }
+    state.lines[li][key] = v;
+    grid.sig = gridSig();
+    clearTimeout(grid.timer);
+    var go = function () { if (ui) ui.run(); };
+    if (now) go(); else grid.timer = setTimeout(go, 180);
+  }
+  function gridAfterCompute() {
+    if (!grid.box) return;
+    renderGrid();
+    var R = last, bid = grid.bid, l = lang(), r = R && R.ok ? bidById(bid, R) : null, priced = 0, tot = 0;
+    Object.keys(grid.rows).forEach(function (iid) {
+      var row = grid.rows[iid], it = itemById(iid), li = lineIdx(bid, iid), ln = li >= 0 ? state.lines[li] : null;
+      var up = ln ? n(ln.up) : null, am = ln ? n(ln.amount) : null, q = it ? n(it.qty) : null;
+      var comp = it && it.kind === 'provisional' ? (n(it.up) || 0) * (q == null ? 1 : q) : (up != null && q != null ? q * up : null);
+      row.comp.textContent = comp == null ? '' : num(comp, l, 2);
+      var d = it && it.kind !== 'provisional' && up != null && am != null && q != null ? q * up - am : null;
+      row.diff.textContent = d != null && Math.abs(d) > 0.005 ? num(d, l, 2) : '';
+      row.diff.style.color = row.diff.textContent ? 'var(--warn,#b9770e)' : '';
+      var x = r && r.lines ? r.lines[iid] : null, st = '', tone = '';
+      if (x) {
+        if (x.flag === 'missing') { st = S.stMissing[l]; tone = 'var(--bad,#c0392b)'; }
+        else if (x.flag === 'notOffered') st = S.stNotOffered[l];
+        else if (x.flag === 'discrepancy') { st = S.stDisc[l] + ' → ' + (x.decision === 'unit' ? S.dUnit[l] : S.dStated[l]); tone = 'var(--warn,#b9770e)'; }
+        else if (x.flag === 'art48') { st = S.st48[l]; tone = 'var(--warn,#b9770e)'; }
+        if (x.value != null || x.flag === 'art48') priced++;
+      }
+      tot++;
+      row.st.textContent = st; row.st.style.color = tone;
+    });
+    if (grid.count) grid.count.textContent = priced + ' / ' + tot + ' ' + S.gridCount[l];
+  }
+
+  function buildInterface() {
+    var LEARN = buildLearn();
+    ui = DiagramUI.app({
+      id: TOOL, mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: DEFAULTS,
+      subtitle: S.subtitle,
+      notices: [{ id: 'genre', tone: 'warn', sticky: false,
+        title: T('Commercial analysis, not legal advice', 'Комерційний аналіз, не юридична консультація', 'Kaufmännische Analyse, keine Rechtsberatung', 'Commerciële analyse, geen juridisch advies', 'Analyse commerciale, pas un avis juridique', 'Análisis comercial, no asesoramiento jurídico', 'Analiza handlowa, nie porada prawna'),
+        text: T('Which figure reflects the bidder’s intention is your decision (KB 18.04.2017 art. 34 §2); the tool logs it. Logistics costs, duty and exchange rates are your inputs.',
+                'Яка цифра відображає намір учасника — вирішуєте ви (KB 18.04.2017, ст. 34 §2); інструмент це записує. Логістичні витрати, мито й курси вводите ви.',
+                'Welche Zahl dem Willen des Bieters entspricht, entscheiden Sie (KB 18.04.2017 Art. 34 §2); das Werkzeug protokolliert es. Logistikkosten, Zoll und Kurse sind Ihre Eingaben.',
+                'Welk cijfer de bedoeling van de inschrijver weergeeft, beslist u (KB 18.04.2017 art. 34 §2); de tool registreert het. Logistieke kosten, invoerrechten en koersen zijn uw invoer.',
+                'Le chiffre qui reflète l’intention du soumissionnaire, c’est vous qui le décidez (AR 18.04.2017, art. 34 §2) ; l’outil le consigne. Coûts logistiques, droits et taux de change sont vos saisies.',
+                'Qué cifra refleja la intención del licitador lo decide usted (KB 18.04.2017, art. 34 §2); la herramienta lo registra. Costes logísticos, aranceles y tipos de cambio los introduce usted.',
+                'To, która liczba oddaje zamiar wykonawcy, decydujesz ty (KB 18.04.2017 art. 34 §2); narzędzie to zapisuje. Koszty logistyki, cło i kursy wprowadzasz ty.') }],
+      learn: LEARN,
+      panels: [
+        { id: 'project', slot: 'inputs', title: S.pProject, collapsible: true, collapsed: true,
+          visible: !!(core() && core().ui), render: function (box) { mountBar(box); } },
+        { id: 'tender', slot: 'inputs', title: S.pTender, learn: 'method', fields: [
+          { id: 'f-cur', key: 'cur', type: 'text', label: S.cur, learn: 'fx' },
+          { id: 'f-arith', key: 'arith', type: 'select', label: S.arith, hint: S.arithHint, learn: 'arith',
+            options: function () { return [['unit', S.arithUnit], ['stated', S.arithStated]]; } },
+          { id: 'f-missing', key: 'missing', type: 'select', label: S.missing, learn: 'missing',
+            options: function () { return [['fill', S.missFill], ['reject', S.missReject]]; } },
+          { id: 'f-priceOnly', key: 'priceOnly', type: 'toggle', label: S.priceOnly, hint: S.priceOnlyHint, learn: 'options' },
+          { id: 'f-ref', key: 'ref', type: 'select', label: S.ref, hint: S.refHint, learn: 'incoterms',
+            options: function () { return INCOTERMS.map(function (x) { return [x, x]; }); } },
+          { id: 'f-rate', key: 'rate', type: 'number', unit: '%', min: 0, max: 50, step: 0.1, label: S.rate, hint: S.rateHint, learn: 'payment' },
+          { id: 'f-T', key: 'T', type: 'number', min: 0, max: 120, step: 1, label: TF(function (l) { return S.T[l] + ' (' + S.month[l] + ')'; }), learn: 'payment' },
+          { id: 'f-refDays', key: 'refDays', type: 'number', min: 0, max: 365, step: 1, label: TF(function (l) { return S.refDays[l] + ' (' + S.dayU[l] + ')'; }), learn: 'payment' }
+        ] },
+        { id: 'items', slot: 'inputs', title: S.pItems, learn: 'options', collapsible: true, fields: [
+          { id: 'f-items', key: 'items', type: 'list', label: S.pItems, addLabel: S.addItem, minRows: 1, maxRows: 200, reorder: true,
+            row: [ { key: 'id', type: 'text', label: S.id, width: '56px' },
+                   { key: 'desc', type: 'text', label: S.desc },
+                   { key: 'unit', type: 'text', label: S.unit, width: '56px' },
+                   { key: 'qty', type: 'number', label: S.qty, min: 0, step: 'any', width: '90px' },
+                   { key: 'kind', type: 'select', label: S.kind, options: KIND_OPTS },
+                   { key: 'up', type: 'number', label: S.psum, min: 0, step: 'any', width: '110px', placeholder: '—' },
+                   { key: 'include', type: 'toggle', label: S.incl } ],
+            newRow: function (rows) { return { id: String(rows.length + 1).padStart(2, '0'), desc: '', unit: 'pc', qty: 1, kind: 'base', up: null, include: true }; } }
+        ] },
+        { id: 'bids', slot: 'inputs', title: S.pBids, learn: 'payment', collapsible: true, fields: [
+          { id: 'f-bids', key: 'bids', type: 'list', label: S.pBids, addLabel: S.addBid, minRows: 1, maxRows: 40, reorder: true,
+            row: [ { key: 'id', type: 'text', label: S.bid, width: '56px' },
+                   { key: 'name', type: 'text', label: S.name },
+                   { key: 'tech', type: 'select', label: S.tech, options: function () { return [['pass', S.pass], ['fail', S.fail], ['', S.open]]; } },
+                   { key: 'readout', type: 'number', label: S.readout, min: 0, step: 'any', width: '120px', placeholder: '—' },
+                   { key: 'currency', type: 'text', label: S.currency, width: '56px' },
+                   { key: 'fx', type: 'number', label: S.fx, min: 0, step: 'any', width: '80px' },
+                   { key: 'rebate', type: 'number', label: TF(function (l) { return S.rebate[l] + ' %'; }), min: 0, max: 100, step: 'any', width: '70px' },
+                   { key: 'incoterm', type: 'select', label: S.incoterm, options: function () { return INCOTERMS.map(function (x) { return [x, x]; }); } },
+                   { key: 'duty', type: 'number', label: TF(function (l) { return S.duty[l] + ' %'; }), min: 0, max: 100, step: 'any', width: '70px' },
+                   { key: 'adv', type: 'number', label: TF(function (l) { return S.adv[l] + ' %'; }), min: 0, max: 100, step: 'any', width: '70px' },
+                   { key: 'ret', type: 'number', label: TF(function (l) { return S.ret[l] + ' %'; }), min: 0, max: 100, step: 'any', width: '70px' },
+                   { key: 'retM', type: 'number', label: TF(function (l) { return S.retM[l] + ' (' + S.month[l] + ')'; }), min: 0, max: 240, step: 1, width: '70px' },
+                   { key: 'days', type: 'number', label: TF(function (l) { return S.days[l] + ' (' + S.dayU[l] + ')'; }), min: 0, max: 365, step: 1, width: '70px' } ],
+            newRow: function (rows) { return { id: 'B' + (rows.length + 1), name: '', currency: state.cur || 'EUR', fx: 1, readout: null, rebate: 0, incoterm: state.ref || 'DAP', duty: 0, tech: 'pass', adv: 0, ret: 0, retM: 0, days: 30 }; } }
+        ] },
+        { id: 'lines', slot: 'inputs', title: S.pLines, learn: 'arith', collapsible: true, fields: [
+          { id: 'f-linesnote', type: 'note', label: S.linesNote, get: function () { return null; } },
+          { id: 'f-lines', type: 'custom', label: S.pLines, render: function (box) { grid.box = box; grid.sig = ''; renderGrid(); } }
+        ] },
+        { id: 'logistics', slot: 'inputs', title: S.pLog, learn: 'incoterms', collapsible: true, collapsed: true, fields: [
+          { id: 'f-lognote', type: 'note', label: S.logNote, get: function () { return null; } },
+          { id: 'f-logistics', key: 'logistics', type: 'list', label: S.pLog, addLabel: S.addLog, minRows: 0, maxRows: 400, reorder: false,
+            row: [ { key: 'bid', type: 'select', label: S.bid, options: function () { return bidOpts(); } },
+                   { key: 'el', type: 'select', label: S.el, options: function () { return EL.map(function (e) { return [e, S[e]]; }); } },
+                   { key: 'amount', type: 'number', label: S.elAmount, min: 0, step: 'any', width: '130px' } ],
+            newRow: function () { var b = (state.bids || [])[0]; return { bid: b ? String(b.id) : '', el: 'E4', amount: 0 }; } }
+        ] },
+        { id: 'record', slot: 'inputs', title: S.pRec, collapsible: true, collapsed: true, fields: [
+          { id: 'f-tenderRef', key: 'tenderRef', type: 'text', label: S.tenderRef },
+          { id: 'f-evaluator', key: 'evaluator', type: 'text', label: S.evaluator }
+        ] }
+      ],
+      footer: T('Method: KB 18.04.2017 art. 34 (arithmetic and material errors), art. 86 §2 (missing price P = L·Y/X), art. 87 §1 (options), art. 48 §3 (options in a price-only award) — ejustice.just.fgov.be consolidated text, read 14.11.2026. Incoterms 2020 (ICC): rule names and cost-allocation structure in our own model. Present value v(t) = (1 + i)^(−t/12), t in months from award.',
+                'Метод: KB 18.04.2017, ст. 34 (арифметичні та матеріальні помилки), ст. 86 §2 (відсутня ціна P = L·Y/X), ст. 87 §1 (опції), ст. 48 §3 (опції при присудженні лише за ціною) — консолідований текст ejustice.just.fgov.be, прочитано 14.11.2026. Incoterms 2020 (ICC): назви правил і структура розподілу витрат у нашій власній моделі. Приведена вартість v(t) = (1 + i)^(−t/12), t у місяцях від присудження.',
+                'Methode: KB 18.04.2017 Art. 34 (Rechen- und sachliche Fehler), Art. 86 §2 (fehlender Preis P = L·Y/X), Art. 87 §1 (Optionen), Art. 48 §3 (Optionen bei reiner Preiswertung) — konsolidierter Text ejustice.just.fgov.be, gelesen 14.11.2026. Incoterms 2020 (ICC): Klauselnamen und Kostenaufteilung in unserem eigenen Modell. Barwert v(t) = (1 + i)^(−t/12), t in Monaten ab Zuschlag.',
+                'Methode: KB 18.04.2017 art. 34 (reken- en materiële fouten), art. 86 §2 (ontbrekende prijs P = L·Y/X), art. 87 §1 (opties), art. 48 §3 (opties bij gunning enkel op prijs) — gecoördineerde tekst ejustice.just.fgov.be, gelezen 14.11.2026. Incoterms 2020 (ICC): namen van de regels en kostenverdeling in ons eigen model. Contante waarde v(t) = (1 + i)^(−t/12), t in maanden vanaf de gunning.',
+                'Méthode : AR 18.04.2017, art. 34 (erreurs arithmétiques et matérielles), art. 86 §2 (prix manquant P = L·Y/X), art. 87 §1 (options), art. 48 §3 (options en attribution sur le seul prix) — texte coordonné ejustice.just.fgov.be, lu le 14.11.2026. Incoterms 2020 (ICC) : noms des règles et répartition des coûts dans notre propre modèle. Valeur actuelle v(t) = (1 + i)^(−t/12), t en mois depuis l’attribution.',
+                'Método: KB 18.04.2017, art. 34 (errores aritméticos y materiales), art. 86 §2 (precio omitido P = L·Y/X), art. 87 §1 (opciones), art. 48 §3 (opciones con adjudicación solo por precio) — texto consolidado ejustice.just.fgov.be, leído el 14.11.2026. Incoterms 2020 (ICC): nombres de las reglas y reparto de costes en nuestro propio modelo. Valor actual v(t) = (1 + i)^(−t/12), t en meses desde la adjudicación.',
+                'Metoda: KB 18.04.2017 art. 34 (błędy rachunkowe i materialne), art. 86 §2 (brakująca cena P = L·Y/X), art. 87 §1 (opcje), art. 48 §3 (opcje przy wyborze tylko według ceny) — tekst skonsolidowany ejustice.just.fgov.be, odczyt 14.11.2026. Incoterms 2020 (ICC): nazwy reguł i podział kosztów w naszym własnym modelu. Wartość bieżąca v(t) = (1 + i)^(−t/12), t w miesiącach od wyboru oferty.'),
+      on: { rebuild: adoptStage, compute: computeView }
+    });
+
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end',
+      actions: [ { label: S.csv, run: function () { var t = csvText(); if (t) download('bidnormalize.csv', 'text/csv', t); } },
+                 { label: S.print, run: function () { try { window.print(); } catch (e) { /* no print in this context */ } } },
+                 ui.resetAction() ] });
+
+    ui.examples(buildExamples());
+
+    stage = ui.stage({
+      caption: S.stageCap, minHeight: 260,
+      a11y: function () {
+        var l = lang(), b = last && last.ok ? bidById(last.best) : null;
+        if (!b) return S.a11yNone[l];
+        return S.a11yMain[l] + ' ' + b.name + ', ' + money(b.N, l) + '.';
+      },
+      render: renderStage
+    });
+    adoptStage(ui);
+    ui.ready();
+    window.__bidnormalize = { ui: ui, state: state, solve: solve, engineInput: engineInput, last: function () { return last; }, csv: csvText,
+                              projectPayload: projectPayload, commitProject: commitProject, restoreFrom: restoreFrom, usePackage: usePackage, sanitize: sanitize, record: buildRecord,
+                              bar: function () { return bar; } };
+  }
+
+  function renderStage(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#888', ink = cs.getPropertyValue('--ink').trim() || '#222';
+    var font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+    ctx.clearRect(0, 0, w, h);
+    if (!last || !last.ok) return;
+    var R = last, l = lang();
+    var list = R.bids.slice().sort(function (a, b) { if (a.ranked !== b.ranked) return a.ranked ? -1 : 1; return a.N - b.N; });
+    if (!list.length) return;
+    var vmax = 0;
+    list.forEach(function (b) { vmax = Math.max(vmax, b.N, b.readoutEval); });
+    if (!(vmax > 0)) return;
+    var Lm = coarse ? 70 : 150, Rm = coarse ? 70 : 110, TOP = 8, B = 22, pw = w - Lm - Rm;
+    var rowH = Math.max(18, Math.min(44, (h - TOP - B) / list.length)), bh = Math.max(6, rowH * 0.32);
+    if (pw < 40) return;
+    var col = DiagramUI.series(0), col1 = DiagramUI.series(1);
+    ctx.font = (coarse ? 10 : 12) + 'px ' + font;
+    function X(v) { return Lm + Math.max(0, v) / vmax * pw; }
+    var xt = DiagramUI.ticks(0, vmax, pw, size.density) || [];
+    ctx.strokeStyle = muted; ctx.globalAlpha = 0.25;
+    xt.forEach(function (t) { var px = X(t); ctx.beginPath(); ctx.moveTo(px, TOP); ctx.lineTo(px, TOP + rowH * list.length); ctx.stroke(); });
+    ctx.globalAlpha = 1; ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    xt.forEach(function (t, i) { if (coarse && i % 2) return; ctx.fillText(num(t / 1000, l, 0) + 'k', X(t), TOP + rowH * list.length + 4); });
+    list.forEach(function (b, i) {
+      var y = TOP + i * rowH + rowH / 2;
+      ctx.fillStyle = b.ranked ? ink : muted; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      var lab = (b.ranked ? b.rank + '. ' : '× ') + (coarse ? b.id : (b.id + ' ' + b.name).slice(0, 22));
+      ctx.fillText(lab, Lm - 6, y);
+      ctx.globalAlpha = 0.35; ctx.fillStyle = col1; ctx.fillRect(Lm, y - bh - 1, X(b.readoutEval) - Lm, bh); ctx.globalAlpha = 1;
+      ctx.fillStyle = b.ranked ? col : muted; ctx.fillRect(Lm, y + 1, X(b.N) - Lm, bh);
+      ctx.fillStyle = muted; ctx.textAlign = 'left';
+      ctx.fillText(money(b.N, l), Math.min(X(Math.max(b.N, b.readoutEval)) + 4, w - Rm + 4), y);
+    });
+  }
+
+  /* ---- examples: inputs come from TndBidNorm.PRESETS; each aha is a test in bench-src/run_bidnormalize.mjs ---- */
+  var EXT = {
+    'be-works': { label: T('Belgian open procedure: pool HVAC renovation, 4 bids', 'Бельгійська відкрита процедура: реконструкція ОВК басейну, 4 пропозиції', 'Belgisches offenes Verfahren: HLK-Sanierung eines Hallenbads, 4 Angebote', 'Openbare procedure: renovatie HVAC gemeentelijk zwembad, 4 offertes', 'Procédure ouverte belge : rénovation HVAC d’une piscine, 4 offres', 'Procedimiento abierto belga: renovación de climatización de una piscina, 4 ofertas', 'Belgijska procedura otwarta: modernizacja HVAC pływalni, 4 oferty'),
+      aha: T('The lowest at opening (HVAC Liège, 619 k€) ends second: its missing price for the pool heat exchangers, filled per art. 86, adds about 123 k€; Klimaat Brabant’s unit-price × quantity error (+18 k€) drops it to third — Thermo Gent, third at opening, wins.', 'Найнижча при розкритті (HVAC Liège, 619 тис. €) опиняється другою: її відсутня ціна теплообмінників басейну, заповнена за ст. 86, додає близько 123 тис. €; помилка «ціна × кількість» у Klimaat Brabant (+18 тис. €) опускає її на третє місце — перемагає Thermo Gent, третя при розкритті.', 'Das niedrigste Angebot bei der Öffnung (HVAC Liège, 619 T€) landet auf Platz 2: sein fehlender Preis der Beckenwärmetauscher, nach Art. 86 ergänzt, bringt rund 123 T€; der Fehler Einheitspreis × Menge bei Klimaat Brabant (+18 T€) wirft es auf Platz 3 — Thermo Gent, bei der Öffnung Dritter, gewinnt.', 'De laagste bij de opening (HVAC Liège, 619 k€) eindigt tweede: haar ontbrekende prijs voor de zwembadwarmtewisselaars, aangevuld volgens art. 86, voegt ongeveer 123 k€ toe; de fout eenheidsprijs × hoeveelheid van Klimaat Brabant (+18 k€) duwt die naar de derde plaats — Thermo Gent, derde bij de opening, wint.', 'L’offre la plus basse à l’ouverture (HVAC Liège, 619 k€) finit deuxième : son prix manquant des échangeurs de la piscine, complété selon l’art. 86, ajoute environ 123 k€ ; l’erreur prix unitaire × quantité de Klimaat Brabant (+18 k€) la fait tomber troisième — Thermo Gent, troisième à l’ouverture, l’emporte.', 'La más baja en la apertura (HVAC Liège, 619 k€) acaba segunda: su precio omitido de los intercambiadores de la piscina, completado según el art. 86, suma unos 123 k€; el error precio unitario × cantidad de Klimaat Brabant (+18 k€) la baja al tercer puesto — gana Thermo Gent, tercera en la apertura.', 'Najniższa przy otwarciu (HVAC Liège, 619 tys. €) kończy druga: jej brakująca cena wymienników basenowych, uzupełniona wg art. 86, dodaje ok. 123 tys. €; błąd cena jednostkowa × ilość w Klimaat Brabant (+18 tys. €) spycha ją na trzecie miejsce — wygrywa Thermo Gent, trzecia przy otwarciu.') },
+    'epc-equipment': { label: T('Private utility: two 40 MVA transformers, EXW / FCA / FOB Shanghai / DDP', 'Приватна енергокомпанія: два трансформатори 40 МВА, EXW / FCA / FOB Шанхай / DDP', 'Privater Versorger: zwei 40-MVA-Transformatoren, EXW / FCA / FOB Shanghai / DDP', 'Private netbeheerder: twee transformatoren 40 MVA, EXW / FCA / FOB Shanghai / DDP', 'Gestionnaire privé : deux transformateurs 40 MVA, EXW / FCA / FOB Shanghai / DDP', 'Distribuidora privada: dos transformadores de 40 MVA, EXW / FCA / FOB Shanghái / DDP', 'Prywatny operator: dwa transformatory 40 MVA, EXW / FCA / FOB Szanghaj / DDP'),
+      aha: T('The Chinese FOB offer is 225 k€ cheaper at opening, but freight, insurance, on-carriage, duty and its 30 % advance make it third at DDP site; the German ex-works bid wins. (Import duty 1.7 % is a learning assumption — check TARIC for CN 8504 23 00.)', 'Китайська пропозиція FOB при розкритті дешевша на 225 тис. €, але фрахт, страхування, доставка, мито і 30 % авансу роблять її третьою на умовах DDP об’єкт; перемагає німецька пропозиція EXW. (Мито 1,7 % — навчальне припущення; перевірте TARIC для CN 8504 23 00.)', 'Das chinesische FOB-Angebot ist bei der Öffnung 225 T€ günstiger, doch Fracht, Versicherung, Nachlauf, Zoll und 30 % Anzahlung machen es bei DDP Baustelle zum Dritten; das deutsche Ab-Werk-Angebot gewinnt. (Einfuhrzoll 1,7 % ist eine Lernannahme — TARIC für KN 8504 23 00 prüfen.)', 'De Chinese FOB-offerte is bij de opening 225 k€ goedkoper, maar vracht, verzekering, natransport, invoerrechten en het voorschot van 30 % maken haar derde bij DDP werf; de Duitse af-fabriek-offerte wint. (Invoerrecht 1,7 % is een leeraanname — controleer TARIC voor GN 8504 23 00.)', 'L’offre chinoise FOB est 225 k€ moins chère à l’ouverture, mais fret, assurance, post-acheminement, droits et 30 % d’avance la placent troisième en DDP chantier ; l’offre allemande à l’usine l’emporte. (Droit d’importation de 1,7 % : hypothèse d’apprentissage — vérifier TARIC pour la NC 8504 23 00.)', 'La oferta china FOB es 225 k€ más barata en la apertura, pero flete, seguro, transporte final, arancel y su anticipo del 30 % la dejan tercera en DDP obra; gana la oferta alemana en fábrica. (Arancel del 1,7 %: supuesto didáctico — compruebe TARIC para la NC 8504 23 00.)', 'Chińska oferta FOB jest przy otwarciu tańsza o 225 tys. €, ale fracht, ubezpieczenie, dowóz, cło i 30 % zaliczki stawiają ją na trzecim miejscu przy DDP budowa; wygrywa niemiecka oferta EXW. (Cło 1,7 % to założenie szkoleniowe — sprawdź TARIC dla CN 8504 23 00.)') },
+    'options-free': { label: T('Air-handling units, price only: required maintenance option and a priced free option', 'Припливно-витяжні установки, лише ціна: обов’язкова опція обслуговування та вільна опція з доплатою', 'Lüftungsgeräte, nur Preis: geforderte Wartungsoption und freie Option mit Mehrpreis', 'Luchtbehandelingskasten, enkel prijs: vereiste onderhoudsoptie en vrije optie met meerprijs', 'Centrales de traitement d’air, prix seul : option exigée de maintenance et option libre avec supplément', 'Climatizadoras, solo precio: opción exigida de mantenimiento y opción libre con sobreprecio', 'Centrale wentylacyjne, tylko cena: wymagana opcja serwisu i opcja dowolna z dopłatą'),
+      aha: T('The required 5-year maintenance option always counts (art. 87): the cheapest base price (Ventilatie Noord) drops to third. The authority takes the free EC-fan option into account, but two bidders priced it as an extra — in a price-only award art. 48 §3 forbids that, so it is disregarded (art. 87 §1 al. 4) and ClimaSud stays first.', 'Обов’язкова опція 5-річного обслуговування враховується завжди (ст. 87): найдешевша базова ціна (Ventilatie Noord) падає на третє місце. Замовник враховує вільну опцію EC-вентиляторів, але двоє учасників додали до неї доплату — при присудженні лише за ціною ст. 48 §3 це забороняє, тож опцію не враховано (ст. 87 §1, абз. 4), і ClimaSud лишається першою.', 'Die geforderte 5-Jahres-Wartung zählt immer (Art. 87): der günstigste Grundpreis (Ventilatie Noord) fällt auf Platz 3. Der Auftraggeber berücksichtigt die freie EC-Ventilator-Option, doch zwei Bieter verlangen dafür einen Mehrpreis — bei reiner Preiswertung verbietet Art. 48 §3 das, die Option bleibt außer Betracht (Art. 87 §1 Abs. 4) und ClimaSud bleibt vorn.', 'De vereiste onderhoudsoptie van 5 jaar telt altijd mee (art. 87): de laagste basisprijs (Ventilatie Noord) zakt naar de derde plaats. De overheid neemt de vrije optie EC-ventilatoren in aanmerking, maar twee inschrijvers vragen er een meerprijs voor — bij gunning enkel op prijs verbiedt art. 48 §3 dat, dus wordt de optie buiten beschouwing gelaten (art. 87 §1, 4e lid) en blijft ClimaSud eerste.', 'L’option exigée de maintenance 5 ans compte toujours (art. 87) : le prix de base le plus bas (Ventilatie Noord) tombe troisième. Le pouvoir adjudicateur retient l’option libre ventilateurs EC, mais deux soumissionnaires y attachent un supplément — en attribution sur le seul prix, l’art. 48 §3 l’interdit, l’option est donc écartée (art. 87 §1, al. 4) et ClimaSud reste premier.', 'La opción exigida de mantenimiento de 5 años cuenta siempre (art. 87): el precio base más bajo (Ventilatie Noord) cae al tercer puesto. El poder adjudicador tiene en cuenta la opción libre de ventiladores EC, pero dos licitadores le pusieron sobreprecio — en una adjudicación solo por precio el art. 48 §3 lo prohíbe, así que se descarta (art. 87 §1, párr. 4) y ClimaSud sigue primera.', 'Wymagana opcja 5-letniego serwisu liczy się zawsze (art. 87): najniższa cena podstawowa (Ventilatie Noord) spada na trzecie miejsce. Zamawiający uwzględnia opcję dowolną wentylatorów EC, ale dwóch wykonawców doliczyło do niej dopłatę — przy wyborze wyłącznie według ceny art. 48 §3 tego zabrania, więc opcję się pomija (art. 87 §1 ust. 4) i ClimaSud pozostaje pierwsza.') },
+    'payment-terms': { label: T('Three equal prices, different payment terms (8 %/year)', 'Три однакові ціни, різні умови оплати (8 %/рік)', 'Drei gleiche Preise, unterschiedliche Zahlungsbedingungen (8 %/Jahr)', 'Drie gelijke prijzen, andere betalingsvoorwaarden (8 %/jaar)', 'Trois prix égaux, conditions de paiement différentes (8 %/an)', 'Tres precios iguales, condiciones de pago distintas (8 %/año)', 'Trzy równe ceny, różne warunki płatności (8 %/rok)'),
+      aha: T('At 8 % a year a 30 % advance is worth +2.6 % of the price against the client, a 10 % retention for 24 months with 60-day payment −2.1 % in its favour: a 4.7 % swing between equal prices.', 'За 8 % на рік аванс 30 % коштує замовнику +2,6 % ціни, утримання 10 % на 24 місяці з оплатою за 60 днів дає −2,1 % на його користь: різниця 4,7 % між однаковими цінами.', 'Bei 8 % pro Jahr kostet eine Anzahlung von 30 % den Auftraggeber +2,6 % des Preises, ein Einbehalt von 10 % über 24 Monate mit 60 Tagen Zahlungsziel bringt −2,1 %: 4,7 % Unterschied bei gleichen Preisen.', 'Bij 8 % per jaar kost een voorschot van 30 % de overheid +2,6 % van de prijs, een inhouding van 10 % gedurende 24 maanden met betaling op 60 dagen levert −2,1 % op: 4,7 % verschil tussen gelijke prijzen.', 'À 8 % par an, une avance de 30 % coûte +2,6 % du prix au pouvoir adjudicateur, une retenue de 10 % pendant 24 mois avec paiement à 60 jours lui rapporte −2,1 % : 4,7 % d’écart entre des prix égaux.', 'Al 8 % anual, un anticipo del 30 % cuesta +2,6 % del precio al poder adjudicador y una retención del 10 % durante 24 meses con pago a 60 días le ahorra −2,1 %: 4,7 % de diferencia entre precios iguales.', 'Przy 8 % rocznie zaliczka 30 % kosztuje zamawiającego +2,6 % ceny, a zatrzymanie 10 % na 24 miesiące z płatnością po 60 dniach daje −2,1 % na jego korzyść: 4,7 % różnicy przy równych cenach.') }
+  };
+  var GROUP = {
+    public: T('Public tender (Belgium)', 'Публічна закупівля (Бельгія)', 'Öffentliche Vergabe (Belgien)', 'Overheidsopdracht (België)', 'Marché public (Belgique)', 'Licitación pública (Bélgica)', 'Zamówienie publiczne (Belgia)'),
+    private: T('Private / EPC', 'Приватна / EPC', 'Privat / EPC', 'Privaat / EPC', 'Privé / EPC', 'Privada / EPC', 'Prywatne / EPC')
+  };
+  /* preset texts in the reader's language (the engine keeps English; ids and numbers are what the bench compares) */
+  var PDESC = {
+    'be-works/01': T('Demolition of existing boilers and flue', 'Демонтаж існуючих котлів і димоходу', 'Rückbau der bestehenden Kessel und Abgasanlage', 'Afbraak bestaande ketels en rookgasafvoer', 'Démolition des chaudières et du conduit existants', 'Desmontaje de calderas y chimenea existentes', 'Demontaż istniejących kotłów i komina'),
+    'be-works/02': T('Gas condensing boiler 2 × 450 kW', 'Газовий конденсаційний котел 2 × 450 кВт', 'Gas-Brennwertkessel 2 × 450 kW', 'Gascondensatieketel 2 × 450 kW', 'Chaudière gaz à condensation 2 × 450 kW', 'Caldera de condensación a gas 2 × 450 kW', 'Gazowy kocioł kondensacyjny 2 × 450 kW'),
+    'be-works/03': T('Heat pump air/water 250 kW', 'Тепловий насос повітря/вода 250 кВт', 'Wärmepumpe Luft/Wasser 250 kW', 'Warmtepomp lucht/water 250 kW', 'Pompe à chaleur air/eau 250 kW', 'Bomba de calor aire/agua 250 kW', 'Pompa ciepła powietrze/woda 250 kW'),
+    'be-works/04': T('Steel pipework DN 65–150 (presumed quantity)', 'Сталеві трубопроводи DN 65–150 (орієнтовна кількість)', 'Stahlrohrleitungen DN 65–150 (vermutete Menge)', 'Stalen leidingen DN 65–150 (vermoedelijke hoeveelheid)', 'Tuyauteries acier DN 65–150 (quantité présumée)', 'Tubería de acero DN 65–150 (cantidad estimada)', 'Rurociągi stalowe DN 65–150 (ilość przewidywana)'),
+    'be-works/05': T('Pipe insulation (presumed quantity)', 'Ізоляція трубопроводів (орієнтовна кількість)', 'Rohrdämmung (vermutete Menge)', 'Leidingisolatie (vermoedelijke hoeveelheid)', 'Calorifugeage (quantité présumée)', 'Aislamiento de tuberías (cantidad estimada)', 'Izolacja rurociągów (ilość przewidywana)'),
+    'be-works/06': T('Pool water heat exchangers', 'Теплообмінники води басейну', 'Beckenwasser-Wärmetauscher', 'Warmtewisselaars zwembadwater', 'Échangeurs eau de piscine', 'Intercambiadores del agua de la piscina', 'Wymienniki ciepła wody basenowej'),
+    'be-works/07': T('BMS controls and commissioning', 'Автоматика BMS і пусконалагодження', 'GLT-Regelung und Inbetriebnahme', 'GBS-regeling en indienststelling', 'Régulation GTC et mise en service', 'Control BMS y puesta en marcha', 'Automatyka BMS i rozruch'),
+    'be-works/08': T('Provisional sum: utility connection', 'Резервна сума: підключення до мереж', 'Vorgegebener Betrag: Netzanschluss', 'Te verantwoorden som: nutsaansluiting', 'Somme à justifier : raccordement aux réseaux', 'Partida a justificar: acometida', 'Kwota tymczasowa: przyłącze mediów'),
+    'be-works/O1': T('Required option: 5-year full maintenance', 'Обов’язкова опція: повне обслуговування 5 років', 'Geforderte Option: 5 Jahre Vollwartung', 'Vereiste optie: 5 jaar volledig onderhoud', 'Option exigée : maintenance complète 5 ans', 'Opción exigida: mantenimiento integral 5 años', 'Opcja wymagana: pełny serwis 5 lat'),
+    'epc-equipment/T1': T('66/11 kV power transformer 40 MVA, ONAN/ONAF', 'Силовий трансформатор 66/11 кВ 40 МВА, ONAN/ONAF', 'Leistungstransformator 66/11 kV 40 MVA, ONAN/ONAF', 'Vermogenstransformator 66/11 kV 40 MVA, ONAN/ONAF', 'Transformateur de puissance 66/11 kV 40 MVA, ONAN/ONAF', 'Transformador de potencia 66/11 kV 40 MVA, ONAN/ONAF', 'Transformator mocy 66/11 kV 40 MVA, ONAN/ONAF'),
+    'epc-equipment/T2': T('Factory acceptance tests and documentation', 'Заводські приймальні випробування та документація', 'Werksabnahmeprüfungen und Dokumentation', 'Fabrieksacceptatietesten en documentatie', 'Essais de réception en usine et documentation', 'Pruebas de aceptación en fábrica y documentación', 'Próby odbiorcze w fabryce i dokumentacja'),
+    'epc-equipment/T3': T('Supervision of erection and commissioning', 'Шеф-монтаж і пусконалагодження', 'Montage- und Inbetriebnahmeüberwachung', 'Toezicht op montage en indienststelling', 'Supervision du montage et de la mise en service', 'Supervisión de montaje y puesta en marcha', 'Nadzór montażu i rozruchu'),
+    'epc-equipment/O1': T('Required option: spare bushings set', 'Обов’язкова опція: комплект запасних вводів', 'Geforderte Option: Satz Ersatzdurchführungen', 'Vereiste optie: set reservedoorvoeren', 'Option exigée : jeu de traversées de rechange', 'Opción exigida: juego de pasatapas de repuesto', 'Opcja wymagana: komplet zapasowych izolatorów przepustowych'),
+    'options-free/A1': T('Air-handling unit 12 000 m³/h with heat recovery', 'Припливно-витяжна установка 12 000 м³/год з рекуперацією', 'Lüftungsgerät 12 000 m³/h mit Wärmerückgewinnung', 'Luchtbehandelingskast 12 000 m³/h met warmteterugwinning', 'Centrale de traitement d’air 12 000 m³/h avec récupération', 'Climatizadora 12 000 m³/h con recuperación de calor', 'Centrala wentylacyjna 12 000 m³/h z odzyskiem ciepła'),
+    'options-free/A2': T('Air-handling unit 6 000 m³/h', 'Припливно-витяжна установка 6 000 м³/год', 'Lüftungsgerät 6 000 m³/h', 'Luchtbehandelingskast 6 000 m³/h', 'Centrale de traitement d’air 6 000 m³/h', 'Climatizadora 6 000 m³/h', 'Centrala wentylacyjna 6 000 m³/h'),
+    'options-free/A3': T('Delivery, hoisting, start-up', 'Доставка, підйом, запуск', 'Lieferung, Einheben, Inbetriebnahme', 'Levering, hijsen, opstart', 'Livraison, levage, mise en route', 'Entrega, izado, puesta en marcha', 'Dostawa, podnoszenie, uruchomienie'),
+    'options-free/O1': T('Required option: 5-year maintenance contract', 'Обов’язкова опція: договір обслуговування на 5 років', 'Geforderte Option: Wartungsvertrag 5 Jahre', 'Vereiste optie: onderhoudscontract 5 jaar', 'Option exigée : contrat de maintenance 5 ans', 'Opción exigida: contrato de mantenimiento 5 años', 'Opcja wymagana: umowa serwisowa na 5 lat'),
+    'options-free/O2': T('Free option: EC fans upgrade (offered by some bidders at an extra price)', 'Вільна опція: EC-вентилятори (деякі учасники пропонують з доплатою)', 'Freie Option: EC-Ventilatoren (von einigen Bietern mit Mehrpreis angeboten)', 'Vrije optie: EC-ventilatoren (door sommige inschrijvers met meerprijs aangeboden)', 'Option libre : ventilateurs EC (proposée par certains avec supplément)', 'Opción libre: ventiladores EC (algunos la ofrecen con sobreprecio)', 'Opcja dowolna: wentylatory EC (niektórzy oferują z dopłatą)'),
+    'payment-terms/P1': T('Compressor package, lump sum', 'Компресорний пакет, фіксована ціна', 'Verdichterpaket, Pauschalpreis', 'Compressorpakket, globale prijs', 'Ensemble compresseur, forfait', 'Paquete de compresor, precio global', 'Pakiet sprężarkowy, ryczałt')
+  };
+  var PNAME = {
+    'payment-terms/C1': T('Advance 30 %', 'Аванс 30 %', 'Anzahlung 30 %', 'Voorschot 30 %', 'Avance 30 %', 'Anticipo 30 %', 'Zaliczka 30 %'),
+    'payment-terms/C2': T('Net 30 days', 'Оплата за 30 днів', 'Netto 30 Tage', 'Netto 30 dagen', 'Net 30 jours', 'Neto 30 días', 'Netto 30 dni'),
+    'payment-terms/C3': T('10 % retention 24 months, 60 days', 'Утримання 10 % на 24 міс., 60 днів', '10 % Einbehalt 24 Monate, 60 Tage', '10 % inhouding 24 maanden, 60 dagen', 'Retenue 10 % 24 mois, 60 jours', 'Retención 10 % 24 meses, 60 días', 'Zatrzymanie 10 % 24 mies., 60 dni')
+  };
+  function presetState(id) {
+    var L = lib(), p = L && L.presetInput(id);
+    if (!p) return null;
+    var pcx = function (v) { return Math.round((v || 0) * 1e8) / 1e6; };
+    return {
+      cur: p.cur, rate: pcx(p.rate), T: p.T, ref: p.ref, refDays: p.refDays, arith: p.arith, missing: p.missing, priceOnly: !!p.priceOnly,
+      items: p.items.map(function (it) { var tr = PDESC[id + '/' + it.id]; return { id: it.id, desc: tr ? tr[lang()] : it.desc, unit: it.unit, qty: it.qty, kind: it.kind, up: it.up == null ? null : it.up, include: it.kind === 'free_option' ? !!it.include : true }; }),
+      bids: p.bids.map(function (b) { var y = b.payment || {}; var tn = PNAME[id + '/' + b.id]; return { id: b.id, name: tn ? tn[lang()] : b.name, currency: b.currency, fx: b.fx, readout: b.readout, rebate: pcx(b.rebate), incoterm: b.incoterm, duty: pcx(b.duty), tech: b.tech, adv: pcx(y.adv), ret: pcx(y.ret), retM: y.retM || 0, days: y.days == null ? 30 : y.days }; }),
+      lines: p.lines.filter(function (x) { return x.up != null || x.amount != null; }).map(function (x) { return { bid: x.bid, item: x.item, up: x.up, amount: x.amount, decision: x.decision || 'auto' }; }),
+      logistics: p.logistics.map(function (x) { return { bid: x.bid, el: x.el, amount: x.amount }; })
+    };
+  }
+  function buildExamples() {
+    var L = lib();
+    if (!L) return [];
+    return L.PRESETS.map(function (p) {
+      var x = EXT[p.id];
+      return { id: p.id, group: GROUP[p.group] || GROUP.public, label: x.label, note: x.aha,
+        apply: function (t) {
+          var s = presetState(p.id); if (!s) return;
+          Object.keys(s).forEach(function (k) { t[k] = s[k]; });
+        } };
+    });
+  }
+
+  /* ---- learn ---- */
+  function buildLearn() {
+    return {
+      version: 1,
+      intro: {
+        title: T('Normalise first, then score', 'Спершу нормалізуйте, потім оцінюйте', 'Erst normieren, dann werten', 'Eerst normaliseren, dan scoren', 'Normaliser d’abord, noter ensuite', 'Primero normalizar, después puntuar', 'Najpierw normalizuj, potem oceniaj'),
+        body: T('Stage 8 of the tender (commercial evaluation, client side). The amounts read out at the opening are not yet comparable: errors in the price schedule, missing prices, options, rebates, currencies, delivery terms and payment terms all move the real cost. Load an example, enter the items and each bid’s prices, decide the doubtful lines, and send the ranked normalised prices to price scoring (awardcriteria) or life-cycle costing (lccaward).',
+                'Етап 8 тендеру (комерційна оцінка, сторона замовника). Суми, оголошені при розкритті, ще не можна порівнювати: помилки в ціновій таблиці, відсутні ціни, опції, знижки, валюти, умови поставки й оплати змінюють реальну вартість. Завантажте приклад, введіть позиції та ціни кожної пропозиції, вирішіть сумнівні рядки й передайте ранжовані нормалізовані ціни в оцінку ціни (awardcriteria) або вартість життєвого циклу (lccaward).',
+                'Stufe 8 der Ausschreibung (kaufmännische Wertung, Auftraggeberseite). Die bei der Öffnung verlesenen Beträge sind noch nicht vergleichbar: Fehler im Leistungsverzeichnis, fehlende Preise, Optionen, Nachlässe, Währungen, Liefer- und Zahlungsbedingungen verschieben die wirklichen Kosten. Beispiel laden, Positionen und Preise jedes Angebots eingeben, zweifelhafte Positionen entscheiden und die gereihten normierten Preise an die Preiswertung (awardcriteria) oder die Lebenszykluskosten (lccaward) geben.',
+                'Fase 8 van de aanbesteding (commerciële beoordeling, kant van de aanbestedende overheid). De bij de opening afgelezen bedragen zijn nog niet vergelijkbaar: fouten in de inventaris, ontbrekende prijzen, opties, kortingen, munten, leverings- en betalingsvoorwaarden verschuiven de werkelijke kost. Laad een voorbeeld, voer de posten en de prijzen van elke offerte in, beslis over de twijfelachtige posten en stuur de gerangschikte genormaliseerde prijzen naar de prijsscore (awardcriteria) of de levenscycluskost (lccaward).',
+                'Étape 8 du marché (évaluation commerciale, côté pouvoir adjudicateur). Les montants lus à l’ouverture ne sont pas encore comparables : erreurs de l’inventaire, prix manquants, options, rabais, devises, conditions de livraison et de paiement modifient le coût réel. Chargez un exemple, saisissez les postes et les prix de chaque offre, tranchez les postes douteux et envoyez les prix normalisés classés vers la cotation du prix (awardcriteria) ou le coût du cycle de vie (lccaward).',
+                'Etapa 8 de la licitación (evaluación económica, lado del poder adjudicador). Los importes leídos en la apertura aún no son comparables: errores del presupuesto, precios omitidos, opciones, descuentos, divisas, condiciones de entrega y de pago cambian el coste real. Cargue un ejemplo, introduzca las partidas y los precios de cada oferta, decida las partidas dudosas y envíe los precios normalizados ordenados a la puntuación del precio (awardcriteria) o al coste del ciclo de vida (lccaward).',
+                'Etap 8 przetargu (ocena handlowa, strona zamawiającego). Kwoty odczytane przy otwarciu nie są jeszcze porównywalne: błędy w kosztorysie, brakujące ceny, opcje, rabaty, waluty, warunki dostawy i płatności zmieniają rzeczywisty koszt. Wczytaj przykład, wprowadź pozycje i ceny każdej oferty, rozstrzygnij wątpliwe pozycje i przekaż ranking cen znormalizowanych do punktacji ceny (awardcriteria) lub kosztu cyklu życia (lccaward).')
+      },
+      topics: {
+        method: { title: T('The chain of adjustments', 'Ланцюжок коригувань', 'Die Kette der Korrekturen', 'De keten van correcties', 'La chaîne des ajustements', 'La cadena de ajustes', 'Łańcuch korekt'),
+          body: T('Read-out amount → arithmetic correction → missing prices → options → rebate → exchange rate → delivery-term gap → payment terms = normalised price N. Each step is shown per bid in the ranking table, so the reader sees where a bid gained or lost.', 'Оголошена сума → арифметичне виправлення → відсутні ціни → опції → знижка → курс → різниця умов поставки → умови оплати = нормалізована ціна N. Кожен крок показано для кожної пропозиції в таблиці рейтингу, тож видно, де пропозиція виграла чи втратила.', 'Verlesener Betrag → rechnerische Korrektur → fehlende Preise → Optionen → Nachlass → Wechselkurs → Lieferlücke → Zahlungsbedingungen = normierter Preis N. Jeder Schritt steht je Angebot in der Rangliste, so sieht man, wo ein Angebot gewonnen oder verloren hat.', 'Afgelezen bedrag → rekenkundige verbetering → ontbrekende prijzen → opties → korting → wisselkoers → leveringsverschil → betalingsvoorwaarden = genormaliseerde prijs N. Elke stap staat per offerte in de rangschikking, zodat men ziet waar een offerte won of verloor.', 'Montant lu → correction arithmétique → prix manquants → options → rabais → change → écart de livraison → paiement = prix normalisé N. Chaque étape figure par offre dans le classement : on voit où une offre a gagné ou perdu.', 'Importe leído → corrección aritmética → precios omitidos → opciones → descuento → cambio → diferencia de entrega → pago = precio normalizado N. Cada paso figura por oferta en la clasificación, así se ve dónde ganó o perdió.', 'Kwota odczytana → poprawka rachunkowa → brakujące ceny → opcje → rabat → kurs → różnica dostawy → płatność = cena znormalizowana N. Każdy krok widać dla każdej oferty w rankingu, więc widać, gdzie oferta zyskała lub straciła.') },
+        arith: { title: T('Arithmetic and material errors (art. 34)', 'Арифметичні та матеріальні помилки (ст. 34)', 'Rechen- und sachliche Fehler (Art. 34)', 'Reken- en materiële fouten (art. 34)', 'Erreurs arithmétiques et matérielles (art. 34)', 'Errores aritméticos y materiales (art. 34)', 'Błędy rachunkowe i materialne (art. 34)'),
+          body: T('When quantity × unit price differs from the stated line amount, Belgian law (KB 18.04.2017 art. 34 §2) does not say which one wins. The authority must look for the real intention of the bidder — by an overall analysis of the offer and comparison with the other offers and market prices — and may ask for clarification. Only if the intention cannot be established may it apply the unit prices or treat the offer as irregular. Corrections must stay identifiable next to the original (§3). Set the decision per line; “auto” uses the fallback of the evaluation rules.', 'Якщо кількість × ціна за одиницю відрізняється від зазначеної суми рядка, бельгійське право (KB 18.04.2017, ст. 34 §2) не каже, що переважає. Замовник має з’ясувати справжній намір учасника — загальним аналізом пропозиції та порівнянням з іншими пропозиціями й ринковими цінами — і може попросити роз’яснення. Лише якщо намір встановити неможливо, він може застосувати ціни за одиницю або визнати пропозицію неправильною. Виправлення мають бути видні поруч з оригіналом (§3). Задайте рішення для кожного рядка; «авто» використовує правило за замовчуванням.', 'Weicht Menge × Einheitspreis vom angegebenen Positionsbetrag ab, sagt das belgische Recht (KB 18.04.2017 Art. 34 §2) nicht, was gilt. Der Auftraggeber muss den wirklichen Willen des Bieters ermitteln — durch Gesamtanalyse des Angebots und Vergleich mit den anderen Angeboten und Marktpreisen — und kann Aufklärung verlangen. Nur wenn der Wille nicht feststellbar ist, darf er die Einheitspreise anwenden oder das Angebot als nicht ordnungsgemäß behandeln. Korrekturen bleiben neben dem Original erkennbar (§3). Entscheidung je Position setzen; „auto“ nimmt die Ersatzregel.', 'Als hoeveelheid × eenheidsprijs verschilt van het opgegeven postbedrag, zegt het Belgische recht (KB 18.04.2017 art. 34 §2) niet welke voorgaat. De aanbestedende overheid moet de werkelijke bedoeling van de inschrijver zoeken — via een globale analyse van de offerte en vergelijking met de andere offertes en de marktprijzen — en kan verduidelijking vragen. Alleen als de bedoeling niet kan worden vastgesteld, mag ze de eenheidsprijzen toepassen of de offerte als onregelmatig beschouwen. Verbeteringen blijven herkenbaar naast het origineel (§3). Stel de beslissing per post in; “auto” gebruikt de terugvalregel.', 'Quand quantité × prix unitaire diffère du montant du poste, le droit belge (AR 18.04.2017, art. 34 §2) ne dit pas lequel prévaut. Le pouvoir adjudicateur recherche l’intention réelle du soumissionnaire — par une analyse globale de l’offre et la comparaison avec les autres offres et les prix du marché — et peut demander des précisions. Ce n’est que si l’intention ne peut être établie qu’il peut appliquer les prix unitaires ou tenir l’offre pour irrégulière. Les corrections restent identifiables à côté de l’original (§3). Fixez la décision par poste ; « auto » applique la règle par défaut.', 'Si cantidad × precio unitario difiere del importe indicado, el derecho belga (KB 18.04.2017, art. 34 §2) no dice cuál prevalece. El poder adjudicador debe buscar la intención real del licitador — con un análisis global de la oferta y la comparación con las demás ofertas y los precios de mercado — y puede pedir aclaraciones. Solo si no puede establecerla puede aplicar los precios unitarios o tratar la oferta como irregular. Las correcciones quedan identificables junto al original (§3). Fije la decisión por partida; «auto» usa la regla por defecto.', 'Gdy ilość × cena jednostkowa różni się od podanej wartości pozycji, prawo belgijskie (KB 18.04.2017 art. 34 §2) nie mówi, co ma pierwszeństwo. Zamawiający ustala rzeczywisty zamiar wykonawcy — analizą całej oferty i porównaniem z innymi ofertami i cenami rynkowymi — i może żądać wyjaśnień. Dopiero gdy zamiaru nie da się ustalić, może zastosować ceny jednostkowe albo uznać ofertę za nieprawidłową. Poprawki pozostają widoczne obok oryginału (§3). Ustal decyzję dla każdej pozycji; „auto” stosuje regułę domyślną.') },
+        missing: { title: T('Missing prices (art. 86 §2)', 'Відсутні ціни (ст. 86 §2)', 'Fehlende Preise (Art. 86 §2)', 'Ontbrekende prijzen (art. 86 §2)', 'Prix manquants (art. 86 §2)', 'Precios omitidos (art. 86 §2)', 'Brakujące ceny (art. 86 §2)'),
+          body: T('For comparing offers, an omitted price can be filled with P = L·Y/X: L is the mean price of that item in the other offers, Y the total of the omitting offer, X the mean total of the other offers without the items the omitting bidder left blank. This keeps the bidder’s own price level. Whether an omission makes the offer irregular instead is a question of the tender documents and the weight of the item — choose “irregular” to see the ranking without that bid. Y and X are totals of the whole comparison scope — base items, provisional sums and the options taken into account (our reading of “the total amount of the measurement or inventory”). An item that no ranked bid priced cannot be filled and leaves the comparison for all bids; if a bid used for L and X has blanks of its own, the page warns, because the article is silent.', 'Для порівняння пропозицій пропущену ціну можна заповнити як P = L·Y/X: L — середня ціна цієї позиції в інших пропозиціях, Y — підсумок пропозиції з пропуском, X — середній підсумок інших пропозицій без позицій, які учасник лишив порожніми. Так зберігається власний рівень цін учасника. Чи робить пропуск пропозицію неправильною — питання тендерної документації та ваги позиції; оберіть «неправильна», щоб побачити рейтинг без цієї пропозиції. Y і X — підсумки всього обсягу порівняння: основні позиції, резервні суми й опції, що враховуються (наше прочитання «загальної суми опису робіт чи інвентаря»). Позицію, яку не оцінила жодна ранжована пропозиція, заповнити неможливо, тож її вилучають з порівняння для всіх; якщо пропозиція, взята для L і X, сама має пропуски, сторінка попереджає, бо стаття про це мовчить.', 'Für den Angebotsvergleich kann ein fehlender Preis mit P = L·Y/X ergänzt werden: L ist der mittlere Preis dieser Position in den anderen Angeboten, Y die Summe des lückenhaften Angebots, X die mittlere Summe der anderen Angebote ohne die Positionen, die der Bieter leer ließ. So bleibt das Preisniveau des Bieters erhalten. Ob die Lücke das Angebot stattdessen nicht ordnungsgemäß macht, hängt von den Vergabeunterlagen und dem Gewicht der Position ab — „nicht ordnungsgemäß“ zeigt die Rangfolge ohne dieses Angebot. Y und X sind Summen des ganzen Vergleichsumfangs — Grundpositionen, vorgegebene Beträge und berücksichtigte Optionen (unsere Lesart von „Gesamtbetrag des Aufmaßes oder Inventars“). Eine Position, die kein gewertetes Angebot bepreist hat, ist nicht ergänzbar und fällt für alle Angebote aus dem Vergleich; hat ein für L und X verwendetes Angebot selbst Lücken, warnt die Seite, denn der Artikel schweigt dazu.', 'Voor de vergelijking van de offertes kan een ontbrekende prijs worden aangevuld met P = L·Y/X: L is de gemiddelde prijs van die post in de andere offertes, Y het totaal van de onvolledige offerte, X het gemiddelde totaal van de andere offertes zonder de posten die de inschrijver openliet. Zo blijft het eigen prijsniveau van de inschrijver behouden. Of de leemte de offerte onregelmatig maakt, hangt af van de opdrachtdocumenten en het gewicht van de post — kies “onregelmatig” om de rangschikking zonder die offerte te zien. Y en X zijn totalen van de hele vergelijkingsomvang — basisposten, te verantwoorden sommen en de opties die in aanmerking komen (onze lezing van “het totale bedrag van de opmeting of de inventaris”). Een post die geen enkele gerangschikte offerte prijsde, kan niet worden aangevuld en valt voor alle offertes uit de vergelijking; heeft een offerte die voor L en X dient zelf lege posten, dan waarschuwt de pagina, want het artikel zwijgt daarover.', 'Pour comparer les offres, un prix omis peut être complété par P = L·Y/X : L est le prix moyen du poste dans les autres offres, Y le total de l’offre lacunaire, X le total moyen des autres offres hors postes laissés en blanc par ce soumissionnaire. Le niveau de prix propre du soumissionnaire est ainsi conservé. Savoir si l’omission rend plutôt l’offre irrégulière dépend des documents du marché et du poids du poste — choisissez « irrégulière » pour voir le classement sans cette offre. Y et X sont des totaux de tout le périmètre comparé — postes de base, sommes à justifier et options prises en compte (notre lecture du « montant total du métré ou de l’inventaire »). Un poste qu’aucune offre classée n’a chiffré ne peut être complété et sort de la comparaison pour toutes les offres ; si une offre servant à L et X a elle-même des postes vides, la page avertit, car l’article est muet.', 'Para comparar ofertas, un precio omitido puede completarse con P = L·Y/X: L es el precio medio de la partida en las demás ofertas, Y el total de la oferta incompleta, X el total medio de las demás sin las partidas que ese licitador dejó en blanco. Así se mantiene el nivel de precios propio del licitador. Si la omisión hace la oferta irregular depende de los pliegos y del peso de la partida — elija «irregular» para ver la clasificación sin esa oferta. Y y X son totales de todo el alcance comparado — partidas base, partidas a justificar y opciones tenidas en cuenta (nuestra lectura de «importe total de la medición o inventario»). Una partida que ninguna oferta clasificada valoró no puede completarse y sale de la comparación para todas; si una oferta usada para L y X tiene sus propios huecos, la página avisa, porque el artículo no dice nada.', 'Do porównania ofert brakującą cenę można uzupełnić wzorem P = L·Y/X: L to średnia cena tej pozycji w pozostałych ofertach, Y suma oferty z luką, X średnia suma pozostałych ofert bez pozycji pominiętych przez wykonawcę. Zachowuje to własny poziom cen wykonawcy. Czy luka czyni ofertę nieprawidłową, zależy od dokumentów zamówienia i wagi pozycji — wybierz „nieprawidłowa”, aby zobaczyć ranking bez tej oferty. Y i X to sumy całego porównywanego zakresu — pozycje podstawowe, kwoty tymczasowe i uwzględniane opcje (nasze odczytanie „łącznej kwoty przedmiaru lub inwentarza”). Pozycji, której nie wyceniła żadna oceniana oferta, nie da się uzupełnić i wypada ona z porównania dla wszystkich; gdy oferta użyta do L i X sama ma luki, strona ostrzega, bo artykuł tego nie rozstrzyga.') },
+        options: { title: T('Items, provisional sums and options (art. 87)', 'Позиції, резервні суми й опції (ст. 87)', 'Positionen, vorgegebene Beträge und Optionen (Art. 87)', 'Posten, te verantwoorden sommen en opties (art. 87)', 'Postes, sommes à justifier et options (art. 87)', 'Partidas, partidas a justificar y opciones (art. 87)', 'Pozycje, kwoty tymczasowe i opcje (art. 87)'),
+          body: T('A provisional sum is the client’s own figure: every bid carries the same amount, a different figure is corrected. Required options (vereiste opties / options exigées) and permitted options are always taken into account in the comparison (KB 18.04.2017 art. 87 §1); free options only if the authority decides to include them — tick “Included”. Leaving a required option unpriced is a missing price. When the award is on price or cost only, bidders may not attach an extra price to free or permitted options (art. 48 §3): tick “Award on price only” and such an option is disregarded for that bidder (art. 87 §1 al. 4). In a multi-criteria award an option also brings economic advantages; this tool prices only its cost.', 'Резервна сума — цифра самого замовника: кожна пропозиція містить ту саму суму, інша цифра виправляється. Обов’язкові та дозволені опції завжди враховуються при порівнянні (KB 18.04.2017, ст. 87 §1); вільні — лише якщо замовник вирішить їх включити (позначте «Включено»). Неоцінена обов’язкова опція — це відсутня ціна. Якщо присудження лише за ціною чи вартістю, учасники не можуть додавати доплату до вільних чи дозволених опцій (ст. 48 §3): позначте «Присудження лише за ціною», і така опція не враховується для цього учасника (ст. 87 §1, абз. 4). При кількох критеріях опція дає ще й економічні переваги; інструмент оцінює лише її вартість.', 'Ein vorgegebener Betrag ist die Zahl des Auftraggebers: jedes Angebot enthält denselben Betrag, eine andere Zahl wird korrigiert. Geforderte und zugelassene Optionen werden beim Vergleich immer berücksichtigt (KB 18.04.2017 Art. 87 §1); freie Optionen nur, wenn der Auftraggeber sie einbezieht — „Einbezogen“ ankreuzen. Eine unbepreiste geforderte Option ist ein fehlender Preis. Wird nur nach Preis oder Kosten gewertet, dürfen Bieter an freie oder zugelassene Optionen keinen Mehrpreis knüpfen (Art. 48 §3): „Zuschlag nur nach Preis“ ankreuzen, dann bleibt eine solche Option bei diesem Bieter außer Betracht (Art. 87 §1 Abs. 4). Bei mehreren Kriterien bringt eine Option auch wirtschaftliche Vorteile; das Werkzeug bewertet nur ihre Kosten.', 'Een te verantwoorden som is het eigen bedrag van de aanbestedende overheid: elke offerte bevat hetzelfde bedrag, een ander cijfer wordt verbeterd. Vereiste en toegestane opties worden bij de vergelijking altijd in aanmerking genomen (KB 18.04.2017 art. 87 §1); vrije opties alleen als de overheid beslist ze op te nemen — vink “Opgenomen” aan. Een niet-geprijsde vereiste optie is een ontbrekende prijs. Gebeurt de gunning enkel op basis van prijs of kosten, dan mogen inschrijvers aan vrije of toegestane opties geen meerprijs verbinden (art. 48 §3): vink “Gunning enkel op basis van prijs” aan en zo’n optie wordt voor die inschrijver buiten beschouwing gelaten (art. 87 §1, 4e lid). Bij meerdere gunningscriteria brengt een optie ook economische voordelen mee; deze tool waardeert alleen de kost.', 'Une somme à justifier est le montant du pouvoir adjudicateur : chaque offre porte le même montant, un autre chiffre est corrigé. Les options exigées et autorisées sont toujours prises en compte dans la comparaison (AR 18.04.2017, art. 87 §1) ; les options libres seulement si le pouvoir adjudicateur décide de les retenir — cochez « Retenue ». Une option exigée non chiffrée est un prix manquant. Lorsque l’attribution se fait sur le seul prix ou coût, les soumissionnaires ne peuvent lier aucun supplément aux options libres ou autorisées (art. 48 §3) : cochez « Attribution sur le seul prix » et une telle option est écartée pour ce soumissionnaire (art. 87 §1, al. 4). Avec plusieurs critères, une option apporte aussi des avantages économiques ; l’outil n’en chiffre que le coût.', 'Una partida a justificar es la cifra del propio poder adjudicador: todas las ofertas llevan el mismo importe y una cifra distinta se corrige. Las opciones exigidas y permitidas se tienen en cuenta siempre en la comparación (KB 18.04.2017, art. 87 §1); las libres solo si el poder adjudicador decide incluirlas — marque «Incluida». Una opción exigida sin precio es un precio omitido. Si la adjudicación es solo por precio o coste, los licitadores no pueden ligar un sobreprecio a las opciones libres o permitidas (art. 48 §3): marque «Adjudicación solo por precio» y esa opción se descarta para ese licitador (art. 87 §1, párr. 4). Con varios criterios una opción aporta también ventajas económicas; la herramienta solo valora su coste.', 'Kwota tymczasowa to kwota samego zamawiającego: każda oferta zawiera tę samą kwotę, inna liczba jest poprawiana. Opcje wymagane i dopuszczone zawsze uwzględnia się przy porównaniu (KB 18.04.2017 art. 87 §1); opcje dowolne tylko, gdy zamawiający postanowi je włączyć — zaznacz „Włączona”. Niewyceniona opcja wymagana to brakująca cena. Gdy wybór następuje wyłącznie według ceny lub kosztu, wykonawcy nie mogą wiązać dopłaty z opcjami dowolnymi lub dopuszczonymi (art. 48 §3): zaznacz „Wybór wyłącznie według ceny”, a taka opcja zostanie pominięta dla tego wykonawcy (art. 87 §1 ust. 4). Przy kilku kryteriach opcja daje też korzyści ekonomiczne; narzędzie wycenia tylko jej koszt.') },
+        fx: { title: T('Currency and rebates', 'Валюта та знижки', 'Währung und Nachlässe', 'Munt en kortingen', 'Devise et rabais', 'Divisa y descuentos', 'Waluta i rabaty'),
+          body: T('An unconditional rebate is applied to the corrected subtotal, then the bid is converted with its exchange rate (evaluation currency per unit of the bid currency). Use the rate the tender documents fix (often the ECB reference rate of a stated date); conditional rebates (for early payment, for award of several lots) do not belong here. The rebate applies to the whole subtotal, provisional sums and art. 86 fills included; if the offer form excludes provisional sums from the discount, lower the percentage to the equivalent share.', 'Безумовна знижка застосовується до виправленого підсумку, потім пропозиція перераховується за її курсом (валюта оцінки за одиницю валюти пропозиції). Беріть курс, який визначає тендерна документація (часто довідковий курс ЄЦБ на вказану дату); умовні знижки (за дострокову оплату, за кілька лотів) сюди не належать. Знижка застосовується до всього підсумку, разом з резервними сумами й доповненнями за ст. 86; якщо форма пропозиції не поширює знижку на резервні суми, зменште відсоток до рівноцінної частки.', 'Ein unbedingter Nachlass wird auf die korrigierte Zwischensumme angewandt, dann wird das Angebot mit seinem Kurs umgerechnet (Wertungswährung je Einheit der Angebotswährung). Den Kurs der Vergabeunterlagen verwenden (oft EZB-Referenzkurs eines Stichtags); bedingte Nachlässe (Skonto, Mehr-Lose-Nachlass) gehören nicht hierher. Der Nachlass gilt für die ganze Zwischensumme einschließlich vorgegebener Beträge und Ergänzungen nach Art. 86; nimmt das Angebotsformular vorgegebene Beträge vom Nachlass aus, den Prozentsatz auf den gleichwertigen Anteil senken.', 'Een onvoorwaardelijke korting wordt op het verbeterde subtotaal toegepast, daarna wordt de offerte omgerekend met haar koers (beoordelingsmunt per eenheid offertemunt). Gebruik de koers die de opdrachtdocumenten vastleggen (vaak de ECB-referentiekoers van een bepaalde datum); voorwaardelijke kortingen (voor snelle betaling, voor gunning van meerdere percelen) horen hier niet. De korting geldt voor het hele subtotaal, te verantwoorden sommen en aanvullingen volgens art. 86 inbegrepen; sluit het offerteformulier die sommen uit van de korting, verlaag dan het percentage tot het gelijkwaardige aandeel.', 'Un rabais inconditionnel s’applique au sous-total corrigé, puis l’offre est convertie à son taux (devise d’évaluation par unité de devise de l’offre). Utilisez le taux fixé par les documents du marché (souvent le cours de référence BCE d’une date donnée) ; les rabais conditionnels (paiement anticipé, attribution de plusieurs lots) n’ont pas leur place ici. Le rabais s’applique à tout le sous-total, sommes à justifier et compléments de l’art. 86 compris ; si le formulaire d’offre exclut ces sommes du rabais, réduisez le pourcentage à la part équivalente.', 'Un descuento incondicional se aplica al subtotal corregido y luego la oferta se convierte con su tipo de cambio (divisa de evaluación por unidad de la divisa de la oferta). Use el tipo que fijen los pliegos (a menudo el de referencia del BCE de una fecha); los descuentos condicionados (pronto pago, varios lotes) no van aquí. El descuento se aplica a todo el subtotal, partidas a justificar y completados del art. 86 incluidos; si el formulario de oferta excluye esas partidas del descuento, reduzca el porcentaje a la parte equivalente.', 'Rabat bezwarunkowy stosuje się do poprawionej sumy, potem ofertę przelicza się po jej kursie (waluta oceny za jednostkę waluty oferty). Stosuj kurs wskazany w dokumentach zamówienia (często kurs referencyjny EBC z określonego dnia); rabaty warunkowe (za szybką płatność, za kilka części) tu nie należą. Rabat dotyczy całej sumy, łącznie z kwotami tymczasowymi i uzupełnieniami wg art. 86; jeśli formularz oferty wyłącza kwoty tymczasowe z rabatu, obniż procent do równoważnego udziału.') },
+        incoterms: { title: T('Delivery terms (Incoterms 2020)', 'Умови поставки (Incoterms 2020)', 'Lieferbedingungen (Incoterms 2020)', 'Leveringsvoorwaarden (Incoterms 2020)', 'Conditions de livraison (Incoterms 2020)', 'Condiciones de entrega (Incoterms 2020)', 'Warunki dostawy (Incoterms 2020)'),
+          body: T('An EXW price and a DDP price are different products. The tool splits delivery into eight stages (packing/loading, export clearance, onto the main carrier, main carriage, insurance, on-carriage, unloading, import clearance) and marks which ones each rule puts in the seller’s price — our own model of the ICC 2020 cost split. Stages the reference includes but the bid does not are added at the logistics cost you enter for that bidder; the reverse are deducted. Import duty is the rate × customs value (price up to the EU border). Only DPU includes unloading at destination.', 'Ціна EXW і ціна DDP — різні продукти. Інструмент ділить поставку на вісім етапів (пакування/навантаження, експортне оформлення, передача на основний транспорт, основне перевезення, страхування, доставка, розвантаження, імпортне оформлення) і позначає, які з них кожне правило включає в ціну продавця — наша власна модель розподілу витрат ICC 2020. Етапи, які еталон включає, а пропозиція ні, додаються за введеною логістичною вартістю учасника; зворотні віднімаються. Мито = ставка × митна вартість (ціна до кордону ЄС). Лише DPU включає розвантаження в пункті призначення.', 'Ein EXW-Preis und ein DDP-Preis sind verschiedene Produkte. Das Werkzeug teilt die Lieferung in acht Abschnitte (Verpackung/Verladung, Ausfuhrabfertigung, Übergabe an den Haupttransport, Haupttransport, Versicherung, Nachlauf, Entladen, Einfuhrabfertigung) und markiert, welche jede Klausel in den Verkäuferpreis legt — unser eigenes Modell der Kostenaufteilung ICC 2020. Abschnitte, die die Referenz enthält, das Angebot aber nicht, werden zu den eingegebenen Logistikkosten des Bieters ergänzt; umgekehrte abgezogen. Einfuhrzoll = Satz × Zollwert (Preis bis zur EU-Grenze). Nur DPU umfasst das Entladen am Bestimmungsort.', 'Een EXW-prijs en een DDP-prijs zijn verschillende producten. De tool deelt de levering op in acht stappen (verpakking/laden, uitvoerformaliteiten, aan het hoofdvervoer, hoofdvervoer, verzekering, natransport, lossen, invoerformaliteiten) en duidt aan welke elke regel in de prijs van de verkoper legt — ons eigen model van de kostenverdeling ICC 2020. Stappen die de referentie bevat maar de offerte niet, worden toegevoegd tegen de logistieke kost die u voor die inschrijver invoert; omgekeerd worden ze afgetrokken. Invoerrecht = tarief × douanewaarde (prijs tot aan de EU-grens). Alleen DPU omvat het lossen op de bestemming.', 'Un prix EXW et un prix DDP sont des produits différents. L’outil découpe la livraison en huit étapes (emballage/chargement, dédouanement export, remise au transport principal, transport principal, assurance, post-acheminement, déchargement, dédouanement import) et indique celles que chaque règle met dans le prix du vendeur — notre propre modèle de la répartition des coûts ICC 2020. Les étapes que la référence inclut mais pas l’offre sont ajoutées au coût logistique saisi pour ce soumissionnaire ; l’inverse est déduit. Droits = taux × valeur en douane (prix jusqu’à la frontière de l’UE). Seul DPU inclut le déchargement à destination.', 'Un precio EXW y uno DDP son productos distintos. La herramienta divide la entrega en ocho etapas (embalaje/carga, despacho de exportación, entrega al transporte principal, transporte principal, seguro, transporte final, descarga, despacho de importación) y marca cuáles incluye cada regla en el precio del vendedor — nuestro propio modelo del reparto de costes ICC 2020. Las etapas que la referencia incluye y la oferta no se añaden al coste logístico que introduzca para ese licitador; las inversas se restan. Arancel = tipo × valor en aduana (precio hasta la frontera de la UE). Solo DPU incluye la descarga en destino.', 'Cena EXW i cena DDP to różne produkty. Narzędzie dzieli dostawę na osiem etapów (pakowanie/załadunek, odprawa wywozowa, przekazanie do przewozu głównego, przewóz główny, ubezpieczenie, dowóz, rozładunek, odprawa przywozowa) i zaznacza, które z nich każda reguła wlicza w cenę sprzedawcy — nasz własny model podziału kosztów ICC 2020. Etapy, które obejmuje odniesienie, a oferta nie, dolicza się po kosztach logistyki wprowadzonych dla wykonawcy; odwrotne się odejmuje. Cło = stawka × wartość celna (cena do granicy UE). Tylko DPU obejmuje rozładunek w miejscu przeznaczenia.') },
+        payment: { title: T('Payment terms as present value', 'Умови оплати як приведена вартість', 'Zahlungsbedingungen als Barwert', 'Betalingsvoorwaarden als contante waarde', 'Conditions de paiement en valeur actuelle', 'Condiciones de pago como valor actual', 'Warunki płatności jako wartość bieżąca'),
+          body: T('Money paid earlier costs the client its cost of money. Each bid’s payments — advance at award, balance at delivery + payment days, retention released months later — are discounted with v(t) = (1 + i)^(−t/12) and compared with the reference “100 % at delivery + reference days”. The ratio minus one, times the price, is the payment adjustment. Use the rate the tender documents announce; an unannounced criterion cannot be applied in a public tender. Payment days are converted to months of 30 days.', 'Гроші, сплачені раніше, коштують замовнику його вартості грошей. Платежі кожної пропозиції — аванс при присудженні, залишок при поставці + дні оплати, утримання через кілька місяців — дисконтуються v(t) = (1 + i)^(−t/12) і порівнюються з еталоном «100 % при поставці + еталонні дні». Відношення мінус один, помножене на ціну, — це коригування оплати. Беріть ставку, оголошену в тендерній документації; неоголошений критерій у публічній закупівлі застосовувати не можна. Дні оплати переводяться в місяці по 30 днів.', 'Früher gezahltes Geld kostet den Auftraggeber seine Kapitalkosten. Die Zahlungen jedes Angebots — Anzahlung bei Zuschlag, Rest bei Lieferung + Zahlungsziel, Einbehalt Monate später — werden mit v(t) = (1 + i)^(−t/12) abgezinst und mit der Referenz „100 % bei Lieferung + Referenztage“ verglichen. Verhältnis minus eins mal Preis ist die Zahlungskorrektur. Den in den Vergabeunterlagen angekündigten Zins verwenden; ein nicht angekündigtes Kriterium darf in einer öffentlichen Vergabe nicht angewandt werden. Zahlungstage werden in Monate zu 30 Tagen umgerechnet.', 'Vroeger betaald geld kost de overheid haar kapitaalkost. De betalingen van elke offerte — voorschot bij gunning, saldo bij levering + betalingstermijn, inhouding maanden later vrijgegeven — worden geactualiseerd met v(t) = (1 + i)^(−t/12) en vergeleken met de referentie “100 % bij levering + referentiedagen”. De verhouding min één, maal de prijs, is de correctie voor betaling. Gebruik de voet die de opdrachtdocumenten aankondigen; een niet-aangekondigd criterium mag bij een overheidsopdracht niet worden toegepast. Betalingsdagen worden omgerekend naar maanden van 30 dagen.', 'L’argent payé plus tôt coûte au pouvoir adjudicateur son coût de l’argent. Les paiements de chaque offre — avance à l’attribution, solde à la livraison + délai, retenue libérée des mois plus tard — sont actualisés par v(t) = (1 + i)^(−t/12) et comparés à la référence « 100 % à la livraison + jours de référence ». Le rapport moins un, fois le prix, est l’ajustement de paiement. Utilisez le taux annoncé dans les documents du marché ; un critère non annoncé ne peut être appliqué dans un marché public. Les jours de paiement sont convertis en mois de 30 jours.', 'El dinero pagado antes le cuesta al poder adjudicador su coste del dinero. Los pagos de cada oferta — anticipo en la adjudicación, saldo a la entrega + plazo, retención liberada meses después — se descuentan con v(t) = (1 + i)^(−t/12) y se comparan con la referencia «100 % a la entrega + días de referencia». La razón menos uno, por el precio, es el ajuste de pago. Use la tasa anunciada en los pliegos; un criterio no anunciado no puede aplicarse en una licitación pública. Los días de pago se convierten en meses de 30 días.', 'Pieniądze zapłacone wcześniej kosztują zamawiającego jego koszt pieniądza. Płatności każdej oferty — zaliczka przy wyborze, reszta przy dostawie + termin płatności, zatrzymanie zwolnione po miesiącach — dyskontuje się v(t) = (1 + i)^(−t/12) i porównuje z odniesieniem „100 % przy dostawie + dni referencyjne”. Iloraz minus jeden razy cena to korekta płatności. Stosuj stopę ogłoszoną w dokumentach zamówienia; nieogłoszonego kryterium nie wolno stosować w zamówieniu publicznym. Dni płatności przelicza się na miesiące po 30 dni.') },
+        rank: { title: T('Ranking and what goes next', 'Рейтинг і що далі', 'Rangfolge und nächster Schritt', 'Rangschikking en volgende stap', 'Classement et étape suivante', 'Clasificación y siguiente paso', 'Ranking i następny krok'),
+          body: T('Bids are ranked by normalised price; technically non-compliant, set-aside and unfillable bids are shown but not ranked. The rank at opening (read-out × exchange rate) stands next to it, so a change of first place is visible. Save to the project: the normalised price goes into bids[].price for price scoring (awardcriteria), abnormally low checks (lowbidcheck) and life-cycle costing (lccaward).', 'Пропозиції ранжуються за нормалізованою ціною; технічно невідповідні, відхилені й незаповнювані показано без рангу. Поруч стоїть ранг при розкритті (оголошена сума × курс), тож зміну першого місця видно. Збережіть у проєкт: нормалізована ціна йде в bids[].price для оцінки ціни (awardcriteria), перевірки аномально низьких цін (lowbidcheck) і вартості життєвого циклу (lccaward).', 'Angebote werden nach normiertem Preis gereiht; technisch nicht konforme, ausgeschiedene und nicht ergänzbare werden gezeigt, aber nicht gereiht. Daneben steht der Rang bei der Öffnung (verlesener Betrag × Kurs), so wird ein Wechsel auf Platz 1 sichtbar. Im Projekt speichern: der normierte Preis geht in bids[].price für Preiswertung (awardcriteria), Prüfung ungewöhnlich niedriger Angebote (lowbidcheck) und Lebenszykluskosten (lccaward).', 'Offertes worden gerangschikt op genormaliseerde prijs; technisch niet-conforme, geweerde en niet-aanvulbare offertes worden getoond maar niet gerangschikt. De rang bij de opening (afgelezen bedrag × koers) staat ernaast, zodat een wissel op de eerste plaats zichtbaar is. Opslaan in het project: de genormaliseerde prijs gaat naar bids[].price voor de prijsscore (awardcriteria), het onderzoek naar abnormale prijzen (lowbidcheck) en de levenscycluskost (lccaward).', 'Les offres sont classées par prix normalisé ; les offres non conformes, écartées ou impossibles à compléter sont affichées mais non classées. Le rang à l’ouverture (montant lu × change) figure à côté : un changement de première place se voit. Enregistrez dans le projet : le prix normalisé va dans bids[].price pour la cotation du prix (awardcriteria), la vérification des prix anormaux (lowbidcheck) et le coût du cycle de vie (lccaward).', 'Las ofertas se ordenan por precio normalizado; las no conformes, descartadas o imposibles de completar se muestran sin clasificar. Al lado está el puesto en la apertura (importe leído × cambio), así se ve un cambio del primer puesto. Guarde en el proyecto: el precio normalizado va a bids[].price para la puntuación del precio (awardcriteria), la comprobación de ofertas anormalmente bajas (lowbidcheck) y el coste del ciclo de vida (lccaward).', 'Oferty szereguje się według ceny znormalizowanej; niezgodne technicznie, odrzucone i niemożliwe do uzupełnienia są pokazane bez rangi. Obok stoi miejsce przy otwarciu (kwota odczytana × kurs), więc zmiana lidera jest widoczna. Zapisz w projekcie: cena znormalizowana trafia do bids[].price dla punktacji ceny (awardcriteria), badania rażąco niskiej ceny (lowbidcheck) i kosztu cyklu życia (lccaward).') }
+      },
+      tour: [
+        { topic: 'method', focus: '[data-dgu-field="f-arith"]' },
+        { topic: 'options', focus: '[data-dgu-field="f-items"]' },
+        { topic: 'arith', focus: '[data-dgu-field="f-lines"]' },
+        { topic: 'missing', focus: '[data-dgu-field="f-missing"]' },
+        { topic: 'incoterms', focus: '[data-dgu-field="f-ref"]' },
+        { topic: 'payment', focus: '[data-dgu-field="f-rate"]' },
+        { topic: 'rank', focus: '.dgu-verdict' }
+      ]
+    };
+  }
+
+  /* ======================================================= 3. the data layer */
+  function buildRecord() {
+    if (!last) return null;
+    var inputs = {}, outputs = {}, units = {}, warnings = [];
+    ['tenderRef', 'evaluator', 'cur', 'rate', 'T', 'ref', 'refDays', 'arith', 'missing', 'priceOnly'].forEach(function (k) { inputs[k] = state[k]; });
+    units.rate = '%/year'; units.T = 'months'; units.refDays = 'days';
+    inputs.items = JSON.stringify(state.items); inputs.bids = JSON.stringify(state.bids);
+    inputs.lines = JSON.stringify(state.lines); inputs.logistics = JSON.stringify(state.logistics);
+    if (last.ok) {
+      var R = last;
+      outputs.best = R.best; outputs.lowest_at_opening = R.readoutBest; outputs.first_place_changed = R.winnerChanged;
+      outputs.corrections = R.nCorrections; outputs.fills_art86 = R.nFills; outputs.spread = R.spread;
+      R.bids.forEach(function (b) {
+        outputs['N_' + b.id] = b.N; units['N_' + b.id] = state.cur;
+        outputs['rank_' + b.id] = b.rank == null ? 'not ranked' : b.rank;
+      });
+      if (R.nCorrections) warnings.push('KB 18.04.2017 art. 34 par. 2: no general unit-price rule; line decisions are the evaluator\'s (fallback: ' + R.arith + ').');
+      if (R.nFills) warnings.push('Missing prices filled per KB 18.04.2017 art. 86 par. 2 (P = L*Y/X) for comparison only.');
+    } else warnings.push('invalid input: ' + (last.errors || []).join(', '));
+    return {
+      inputs: inputs, outputs: outputs, units: units,
+      model: {
+        equations: ['line: computed = qty x unit price; discrepancy if |computed - stated| > 0.005; used = decision (unit | stated), auto = tender fallback',
+                    'missing price: P = L*Y/X (KB 18.04.2017 art. 86 par. 2); L mean of the item over the other ranked bids, Y omitting bid total, X mean total of the others without the omitted items',
+                    'options: required and permitted always, free if included (art. 87 par. 1); price-only award: free/permitted options with an extra price disregarded (art. 48 par. 3, art. 87 par. 1 al. 4)',
+                    'tool rules: item priced by no eligible bid leaves the comparison; impossible inputs (fx <= 0, rebate outside [0,1), negative duty/advance/retention/days) and non-finite results are not ranked; ties within 1e-9 relative share the rank (art. 87 par. 2)',
+                    'S = (readout + arithmetic delta + fills + options) x (1 - rebate) x fx',
+                    'delivery gap: sum of stage costs in reference but not in bid minus stages in bid not in reference; duty x customs value',
+                    'payment: adj = S x (PV_bid / PV_ref - 1), v(t) = (1 + i)^(-t/12)', 'N = S + gap + adj'],
+        ranges: ['up to 200 items, 40 bids, 8 000 price lines, 400 logistics lines'],
+        notes: ['amounts in bid currency, logistics in evaluation currency, percentages in %']
+      },
+      warnings: warnings
+    };
+  }
+  /* permalink / project import: known keys only, arrays bounded, numbers finite, enums checked */
+  var ENUM = { arith: ['unit', 'stated'], missing: ['fill', 'reject'], ref: INCOTERMS };
+  function fin(v, lo, hi) { v = typeof v === 'string' && v.trim() !== '' ? +v : v; return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi ? v : undefined; }
+  function txt(v, max) { return v == null ? '' : String(v).slice(0, max || 200); }
+  function sanitize(o) {
+    var out = {};
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+    Object.keys(ENUM).forEach(function (k) { if (o[k] != null && ENUM[k].indexOf(String(o[k])) >= 0) out[k] = String(o[k]); });
+    if (typeof o.cur === 'string') out.cur = txt(o.cur, 8);
+    [['rate', 0, 50], ['T', 0, 120], ['refDays', 0, 365]].forEach(function (x) { var v = fin(o[x[0]], x[1], x[2]); if (v !== undefined) out[x[0]] = v; });
+    ['tenderRef', 'evaluator'].forEach(function (k) { if (typeof o[k] === 'string') out[k] = txt(o[k]); });
+    var BIG = 1e13, over = [];
+    if (typeof o.priceOnly === 'boolean') out.priceOnly = o.priceOnly;
+    [['items', 200], ['bids', 40], ['lines', 8000], ['logistics', 400]].forEach(function (x) { if (Array.isArray(o[x[0]]) && o[x[0]].length > x[1]) over.push(x[0] + ' ' + o[x[0]].length + ' > ' + x[1]); });
+    if (over.length) { out.__over = over; return out; }
+    if (Array.isArray(o.items)) out.items = o.items.filter(function (r) { return r && typeof r === 'object'; }).map(function (r) {
+      var kind = ['base', 'provisional', 'req_option', 'perm_option', 'free_option'].indexOf(r.kind) >= 0 ? r.kind : 'base';
+      var q = fin(r.qty, 0, BIG), u = fin(r.up, 0, BIG);
+      return { id: txt(r.id, 24), desc: txt(r.desc), unit: txt(r.unit, 12), qty: q === undefined ? 0 : q, kind: kind, up: u === undefined ? null : u, include: r.include !== false };
+    });
+    if (Array.isArray(o.bids)) out.bids = o.bids.filter(function (r) { return r && typeof r === 'object'; }).map(function (r) {
+      var g = function (k, lo, hi, d) { var v = fin(r[k], lo, hi); return v === undefined ? d : v; };
+      return { id: txt(r.id, 24), name: txt(r.name), currency: txt(r.currency || 'EUR', 8), fx: g('fx', 0, 1e6, 1), readout: g('readout', 0, BIG, null), rebate: g('rebate', 0, 100, 0),
+               incoterm: INCOTERMS.indexOf(r.incoterm) >= 0 ? r.incoterm : 'DAP', duty: g('duty', 0, 100, 0), tech: r.tech === 'fail' ? 'fail' : (r.tech === '' ? '' : 'pass'),
+               adv: g('adv', 0, 100, 0), ret: g('ret', 0, 100, 0), retM: g('retM', 0, 240, 0), days: g('days', 0, 365, 30) };
+    });
+    if (Array.isArray(o.lines)) out.lines = o.lines.filter(function (r) { return r && typeof r === 'object'; }).map(function (r) {
+      var u = fin(r.up, -BIG, BIG), a = fin(r.amount, -BIG, BIG);
+      return { bid: txt(r.bid, 24), item: txt(r.item, 24), up: u === undefined ? null : u, amount: a === undefined ? null : a, decision: ['unit', 'stated'].indexOf(r.decision) >= 0 ? r.decision : 'auto' };
+    });
+    if (Array.isArray(o.logistics)) out.logistics = o.logistics.filter(function (r) { return r && typeof r === 'object' && EL.indexOf(r.el) >= 0; }).map(function (r) {
+      var a = fin(r.amount, 0, BIG); return { bid: txt(r.bid, 24), el: r.el, amount: a === undefined ? 0 : a };
+    });
+    return out;
+  }
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: TOOL, file: 'bidnormalize.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { var c = sanitize(o); if (c.__over) return; applyClean(c); last = solve(state); if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6216 @@
+{
+ "tool": "reactorstand",
+ "file": "reactorstand.html",
+ "reference": "Independent python solution of the same plant. (1) The six-group point-kinetics equations are solved exactly as the seven-mode modal expansion n(t) = SUM a_k exp(w_k t), with w_k the roots of the inhour equation found by Brent bisection and a_k the Laplace residues; this is exact at any step size. (2) The same system is solved a second, structurally different way by eigen-decomposition of the 7x7 system matrix (numpy.linalg.eig plus a linear solve for the initial condition); routes (1) and (2) agree to 7e-14 on n(t) and 1e-14 on the growth rates. (3) The full twelve-state plant - six-group kinetics, the I-135/Xe-135 chain, the two-node fuel/coolant thermal model and the outlet transport lag, with rod, xenon and Doppler reactivity - is integrated with scipy solve_ivp (Radau, rtol 1e-10) and cross-checked against LSODA (rtol 1e-11), the two agreeing to 2e-11 wherever the power is not floored. Initial states are built here in closed form and handed to the page unchanged, so nothing in the reference is taken from the tool. The page's own built-in reference cases are run as well but are reported separately and do not count towards the benchmark.",
+ "reference_citations": [
+  "G.R. Keepin, \"Physics of Nuclear Kinetics\", Addison-Wesley (1965), Table 4-6 — six-group delayed-neutron parameters for thermal fission of U-235 (the data set the tool uses: beta_i = 2.15e-4, 1.424e-3, 1.274e-3, 2.568e-3, 7.48e-4, 2.73e-4; lambda_i = 0.0124, 0.0305, 0.111, 0.301, 1.14, 3.01 1/s).",
+  "J.J. Duderstadt and L.J. Hamilton, \"Nuclear Reactor Analysis\", Wiley (1976), Sec. 6.1 and 6.2 — point kinetics, the inhour equation, the prompt jump and the precursor balance.",
+  "J.R. Lamarsh and A.J. Baratta, \"Introduction to Nuclear Engineering\", 3rd ed., Sec. 7.3 and 8.4 — reactor period, xenon poisoning, I-135/Xe-135 chain constants.",
+  "M.E. Hosea and L.F. Shampine, \"Analysis and implementation of TR-BDF2\", Applied Numerical Mathematics 20 (1996) 21-37 — the second-order L-stable one-step scheme now used for the fast (n, C_i) block."
+ ],
+ "tolerance": "n(t) and the precursor sums from step(): 1e-3 relative. The fast block is a second-order L-stable one-step method whose sub-step is limited to |d ln n| <= RATE_TOL = 0.002, so its accumulated error over the <= 25 e-folds spanned by these cases is about (d ln n) RATE_TOL^2/3 ~ 3e-5; 1e-3 leaves a factor 30 of margin and is still far below the 1.6e-2 the first-order scheme reached on the same case. Asymptotic period: 5e-3. Full twelve-state plant vs solve_ivp: 3e-3, which also has to absorb the O(h^2) Strang splitting error between the fast block and the xenon chain. Algebraic identities (equilibrium, inhour round trip, reactivity balance, precursor equilibrium): 1e-9, they are closed forms with no discretisation in them. Refusal thresholds: exact string match on the violation code.",
+ "total": 33,
+ "passed": 33,
+ "failed": 0,
+ "page_errors": [],
+ "run_at": "2026-10-16T00:00:53.989Z",
+ "cases": [
+  {
+   "id": "kinetics_rho-1$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -1,
+    "Lambda": 0.00001,
+    "rho_pcm": -650.1999999999999
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.4991394411624131,
+     "ref": 0.49914833208866494,
+     "rel": 0.00001781219264949344,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.4905736803235181,
+     "ref": 0.490573760934248,
+     "rel": 1.6431928547394093e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.432679501905895,
+     "ref": 0.43267971336355976,
+     "rel": 4.887163835885197e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.2401721663913949,
+     "ref": 0.24017224252387626,
+     "rel": 3.1699117494562367e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.064505250206447,
+     "ref": 0.06450526376694146,
+     "rel": 2.1022306818917123e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.001416935864652108,
+     "ref": 0.001416936533097959,
+     "rel": 4.7175426376352506e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8475.313368568937,
+     "ref": 8475.313364225018,
+     "rel": 5.125379219601339e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8446.36792661379,
+     "ref": 8446.367950450782,
+     "rel": 2.8221588561305322e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 8178.036683072905,
+     "ref": 8178.036797584037,
+     "rel": 1.4002276426910985e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 6341.492623747418,
+     "ref": 6341.492915227595,
+     "rel": 4.596396795008704e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 2329.26925413499,
+     "ref": 2329.2695360968587,
+     "rel": 1.2105162761358848e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 74.31505455967141,
+     "ref": 74.31508301798021,
+     "rel": 3.829412233545728e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -71.65224025775986,
+     "ref": -71.65224292941565,
+     "rel": 3.728642235565992e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -83.9040672144296,
+     "ref": -83.9040672144296,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011918373366148491,
+     "ref": -0.011918373366148604,
+     "rel": 9.460773083242453e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.00001781219264949344,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 6.595794877552876e-14,
+    "inhour_roots_vs_eigenvalues": 1.0042974503749681e-14
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -650.1999999999999,
+     "want": -650.1999999999999,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.5$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.5,
+    "Lambda": 0.00001,
+    "rho_pcm": -325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.6659591759881323,
+     "ref": 0.6659735743530181,
+     "rel": 0.000021620024337756304,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.65830281820617,
+     "ref": 0.6583029586770552,
+     "rel": 2.133833418268883e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.6051581378208126,
+     "ref": 0.6051585311246381,
+     "rel": 6.499186663977222e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.40045028746519246,
+     "ref": 0.40045041664307673,
+     "rel": 3.2258147053790907e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.14117087260364064,
+     "ref": 0.14117089985787526,
+     "rel": 1.9305844651108969e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.004786795305080568,
+     "ref": 0.004786797633120755,
+     "rel": 4.863460637513995e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8476.367673808074,
+     "ref": 8476.36766422846,
+     "rel": 1.1301554493385969e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8457.003874557175,
+     "ref": 8457.00389513222,
+     "rel": 2.4329001103677265e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 8272.95102201969,
+     "ref": 8272.95112793557,
+     "rel": 1.2802672069750917e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 6859.524896529406,
+     "ref": 6859.525178636525,
+     "rel": 4.112633338313576e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 3028.5211781799057,
+     "ref": 3028.521503561804,
+     "rel": 1.0743919030526972e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 131.69509809094464,
+     "ref": 131.69515207427295,
+     "rel": 4.099112796782642e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -77.18384655886882,
+     "ref": -77.18385226582316,
+     "rel": 7.393974481290829e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -88.6621831674276,
+     "ref": -88.6621831674276,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011278765808322133,
+     "ref": -0.011278765808322396,
+     "rel": 2.337826432692764e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000021620024337756304,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 5.76212018598519e-14,
+    "inhour_roots_vs_eigenvalues": 1.1996740904607605e-14
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -325.09999999999997,
+     "want": -325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.1$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.1,
+    "Lambda": 0.00001,
+    "rho_pcm": -65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.9089005423702528,
+     "ref": 0.9089215654550232,
+     "rel": 0.000023129701802105187,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.9059889215838723,
+     "ref": 0.9059891285551127,
+     "rel": 2.284478189032847e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.885268806474854,
+     "ref": 0.8852705092050558,
+     "rel": 0.000001923401021643376,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.7844044195508023,
+     "ref": 0.7844048450106224,
+     "rel": 5.423982561399587e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.5417838181545226,
+     "ref": 0.5417839019313436,
+     "rel": 1.546314328228476e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.12700205330596046,
+     "ref": 0.1270020865622727,
+     "rel": 2.6185642403226586e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8477.802932396797,
+     "ref": 8477.802913285434,
+     "rel": 2.254282547017685e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8472.495911356717,
+     "ref": 8472.495920913418,
+     "rel": 1.127967626659878e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 8420.155293411195,
+     "ref": 8420.1553803206,
+     "rel": 1.0321591663814117e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 7935.402491452771,
+     "ref": 7935.402708221384,
+     "rel": 2.731664937464863e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 5831.261353665041,
+     "ref": 5831.261652994945,
+     "rel": 5.1331928118197376e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 1415.1625947643738,
+     "ref": 1415.1629425460703,
+     "rel": 2.4575381820910074e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -168.8087586814878,
+     "ref": -168.80877963605403,
+     "rel": 1.2413196914044096e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -172.0739141657606,
+     "ref": -172.0739141657606,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.005811456110870326,
+     "ref": -0.0058114561108704105,
+     "rel": 1.4477281937568307e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000023129701802105187,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 5.551023921888852e-14,
+    "inhour_roots_vs_eigenvalues": 3.3432073752735053e-14
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -65.02000000000008,
+     "want": -65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.1$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.1,
+    "Lambda": 0.00001,
+    "rho_pcm": 65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.1111641363093896,
+     "ref": 1.1111215895983275,
+     "rel": 0.000038291678840886766,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.1157332115540042,
+     "ref": 1.1157331683043374,
+     "rel": 3.8763449869098277e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.1479347204924222,
+     "ref": 1.1479331597513003,
+     "rel": 0.0000013596097548360479,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 1.3424091087477825,
+     "ref": 1.3424088265386602,
+     "rel": 2.1022591383045105e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 2.345569757130484,
+     "ref": 2.345569546582123,
+     "rel": 8.976427975671651e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 26.94220299831767,
+     "ref": 26.942190636758067,
+     "rel": 4.5881791010896234e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8478.910168101072,
+     "ref": 8478.910215373244,
+     "rel": 5.5752649911352695e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8485.42220987509,
+     "ref": 8485.42221885238,
+     "rel": 1.0579661323386532e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 8551.688753708122,
+     "ref": 8551.688831010779,
+     "rel": 9.03946089700652e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 9283.735597365894,
+     "ref": 9283.735685746211,
+     "rel": 9.519908774061028e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 15192.291786492711,
+     "ref": 15192.290727861278,
+     "rel": 6.968214681121748e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 172657.37394608182,
+     "ref": 172657.29473642784,
+     "rel": 4.5876807059739726e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 98.5492195071146,
+     "ref": 98.54923519201498,
+     "rel": 1.5915801218836985e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 98.5733183519423,
+     "ref": 98.5733183519423,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.010144733044591604,
+     "ref": 0.010144733044591634,
+     "rel": 2.9069566406508458e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000038291678840886766,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 4.3119633018362265e-14,
+    "inhour_roots_vs_eigenvalues": 1.385079340545403e-14
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 65.01999999999964,
+     "want": 65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.3$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.3,
+    "Lambda": 0.00001,
+    "rho_pcm": 195.05999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.425490562048526,
+     "ref": 1.4254721746405439,
+     "rel": 0.000012899170049986316,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.4513979938580492,
+     "ref": 1.4513978198545674,
+     "rel": 1.198868287281915e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.6214274180067318,
+     "ref": 1.6214269426846677,
+     "rel": 2.931504661973199e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 3.1243986062414173,
+     "ref": 3.124398400286552,
+     "rel": 6.591824689943329e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 52.142483577130406,
+     "ref": 52.142458842816744,
+     "rel": 4.7436032383290616e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 28340477.55327324,
+     "ref": 28340403.877686407,
+     "rel": 0.000002599666086227956,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8480.491433668121,
+     "ref": 8480.491459927469,
+     "rel": 3.0964417218322372e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8505.75741076346,
+     "ref": 8505.7574253846,
+     "rel": 1.7189698432337412e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 8776.101879832548,
+     "ref": 8776.101933238808,
+     "rel": 6.085419304392362e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 12885.905771269745,
+     "ref": 12885.905254570447,
+     "rel": 4.0098020868302506e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 185194.27658771005,
+     "ref": 185194.18896112492,
+     "rel": 4.7316055442800356e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 100442268823.20535,
+     "ref": 100442007707.51736,
+     "rel": 0.000002599666155107517,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 18.174546211166806,
+     "ref": 18.174549136965712,
+     "rel": 1.6098330056015375e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 18.174549390472198,
+     "ref": 18.174549390472198,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.05502199688781535,
+     "ref": 0.05502199688781493,
+     "rel": 7.69278746828031e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000012899170049986316,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 6.914166451007304e-14,
+    "inhour_roots_vs_eigenvalues": 4.035560639097868e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 195.05999999999977,
+     "want": 195.05999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.5$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.5,
+    "Lambda": 0.00001,
+    "rho_pcm": 325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.964884822815978,
+     "ref": 1.9648784302525963,
+     "rel": 0.0000032534141977069136,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 2.0739478928742003,
+     "ref": 2.073947804399645,
+     "rel": 4.2659971986734654e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 2.6968249029976317,
+     "ref": 2.696824646520707,
+     "rel": 9.510330043819582e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 15.343852240212028,
+     "ref": 15.343848784963408,
+     "rel": 2.2518786967844654e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 96752.28069761167,
+     "ref": 96752.12323813625,
+     "rel": 0.000001627452402596139,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(143.142256s)": {
+     "got": 195891341843.97955,
+     "ref": 195890563074.769,
+     "rel": 0.000003975532043590711,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8482.890797893473,
+     "ref": 8482.89081066343,
+     "rel": 1.5053779538274722e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 8542.397131674408,
+     "ref": 8542.397141817613,
+     "rel": 1.1873956427859175e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 9241.69079774643,
+     "ref": 9241.690787449043,
+     "rel": 1.1142320578328098e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 31188.602942227295,
+     "ref": 31188.596547578036,
+     "rel": 2.0503164512096577e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 180000651.6194369,
+     "ref": 180000358.67838433,
+     "rel": 0.0000016274470490331098,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(143.142256s)": {
+     "got": 364440541886514.2,
+     "ref": 364439093047217.6,
+     "rel": 0.000003975532055159584,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 5.725689314275993,
+     "ref": 5.725690240198866,
+     "rel": 1.6171375583402999e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 5.725690241294191,
+     "ref": 5.725690241294191,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.17465143202961092,
+     "ref": 0.17465143202961111,
+     "rel": 1.1124387991073662e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000003975532055159584,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 2.2589392560151115e-14,
+    "inhour_roots_vs_eigenvalues": 4.801152690468672e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 325.09999999999997,
+     "want": 325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.9$_L0.00001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.9,
+    "Lambda": 0.00001,
+    "rho_pcm": 585.18
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 5.321245589609214,
+     "ref": 5.321245388769899,
+     "rel": 3.77429154799892e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 12.654169539675445,
+     "ref": 12.654167572048374,
+     "rel": 1.554924146412936e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 171.43253515423547,
+     "ref": 171.43246901685305,
+     "rel": 3.8579262608748973e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(9.031851s)": {
+     "got": 778780293910.1316,
+     "ref": 778777195986.8082,
+     "rel": 0.000003977932763476466,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 8493.814296144947,
+     "ref": 8493.81429804343,
+     "rel": 2.2351358433830342e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 9028.690061716605,
+     "ref": 9028.69003778676,
+     "rel": 2.65042261351805e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 41679.4317387211,
+     "ref": 41679.41783148487,
+     "rel": 3.336715566713707e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(9.031851s)": {
+     "got": 163863422211892,
+     "ref": 163862770376801.84,
+     "rel": 0.000003977932807173696,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 0.361273967653651,
+     "ref": 0.361274026082362,
+     "rel": 1.6172962007317574e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 0.3612740260823639,
+     "ref": 0.3612740260823639,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 2.76798199650262,
+     "ref": 2.7679819965026162,
+     "rel": 1.2835031742581432e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000003977932807173696,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 4.2321455410923836e-14,
+    "inhour_roots_vs_eigenvalues": 5.699457884723661e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.00001,
+     "want": 0.00001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 585.1800000000003,
+     "want": 585.18,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      1733.8709677419354,
+      4668.8524590163925,
+      1147.7477477477476,
+      853.156146179402,
+      65.6140350877193,
+      9.069767441860465
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-1$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -1,
+    "Lambda": 0.0001,
+    "rho_pcm": -650.1999999999999
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.636056281706865,
+     "ref": 0.6360565619383952,
+     "rel": 4.4057643136179045e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.49185331428661316,
+     "ref": 0.49185374207447735,
+     "rel": 8.697460801732984e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.43341498373235754,
+     "ref": 0.43341519267496487,
+     "rel": 4.820841790005307e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.24039327751189526,
+     "ref": 0.24039335365378348,
+     "rel": 3.167387411251207e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.06454115679531913,
+     "ref": 0.06454117036455805,
+     "rel": 2.1024159984087365e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.0014175739846877808,
+     "ref": 0.001417574653455113,
+     "rel": 4.717686863716331e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.6880900283948,
+     "ref": 847.6880898880654,
+     "rel": 1.6554361187286094e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 844.8614078738887,
+     "ref": 844.8614086611836,
+     "rel": 9.318628896664967e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 818.0259872859517,
+     "ref": 818.0259983003981,
+     "rel": 1.3464665437229625e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 634.3265832704677,
+     "ref": 634.326612348871,
+     "rel": 4.5841373659120835e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 232.9934666647385,
+     "ref": 232.99349485777603,
+     "rel": 1.2100353940674923e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 7.433481820334056,
+     "ref": 7.43348466679161,
+     "rel": 3.829237136686092e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -71.64960106519376,
+     "ref": -71.64960373798768,
+     "rel": 3.7303680300912675e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -83.90471589213776,
+     "ref": -83.90471589213776,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011918281223734114,
+     "ref": -0.011918281223733986,
+     "rel": 1.0770809549840919e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 8.697460801732984e-7,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 1.6061408523848542e-14,
+    "inhour_roots_vs_eigenvalues": 2.619926647258602e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -650.1999999999999,
+     "want": -650.1999999999999,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.5$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.5,
+    "Lambda": 0.0001,
+    "rho_pcm": -325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.7922699035053544,
+     "ref": 0.7922702968302342,
+     "rel": 4.964528915836017e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.6598513093312849,
+     "ref": 0.6598552435110714,
+     "rel": 0.000005962186138839442,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.6061091267273655,
+     "ref": 0.6061095111197968,
+     "rel": 6.341963362683804e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.4008581231054288,
+     "ref": 0.40085825206718023,
+     "rel": 3.2171409913441643e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.1412851009422354,
+     "ref": 0.1412851282199258,
+     "rel": 1.9306837708733824e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.004791382833438096,
+     "ref": 0.00479138516368502,
+     "rel": 4.863409733580258e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.7529035131225,
+     "ref": 847.7529032505497,
+     "rel": 3.0972801708802635e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 845.9020708440122,
+     "ref": 845.9020687556663,
+     "rel": 2.468779779589736e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 827.5110414450802,
+     "ref": 827.5110513149009,
+     "rel": 1.1927116484409964e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 686.1848136960429,
+     "ref": 686.1848417423532,
+     "rel": 4.087282124321581e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 302.9908714195955,
+     "ref": 302.990903946704,
+     "rel": 1.0735341577540623e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 13.178016404388156,
+     "ref": 13.178021805851666,
+     "rel": 4.0988424430740356e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -77.18514066043694,
+     "ref": -77.18514637072383,
+     "rel": 7.398168110859185e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -88.66571154568238,
+     "ref": -88.66571154568238,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011278316979216585,
+     "ref": -0.011278316979216703,
+     "rel": 1.0459113410608848e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000005962186138839442,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 6.516909307196582e-15,
+    "inhour_roots_vs_eigenvalues": 2.71701003530286e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -325.09999999999997,
+     "want": -325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.1$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.1,
+    "Lambda": 0.0001,
+    "rho_pcm": -65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.9535317362095287,
+     "ref": 0.9535329838781097,
+     "rel": 0.0000013084692423868783,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.9068256542742785,
+     "ref": 0.9068464703029614,
+     "rel": 0.000022954303032038272,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.8858150196045955,
+     "ref": 0.8858166723197339,
+     "rel": 0.0000018657530277495638,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.7848061457738866,
+     "ref": 0.7848065714611921,
+     "rel": 5.424104753911935e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.5421383824907406,
+     "ref": 0.5421384664070802,
+     "rel": 1.5478765065315197e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.1271974663895467,
+     "ref": 0.12719749966929916,
+     "rel": 2.6163841695271283e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.8142492905935,
+     "ref": 847.8142481557767,
+     "rel": 1.3385205391524935e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 847.325524878466,
+     "ref": 847.3255060645015,
+     "rel": 2.2203939786337953e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 842.1066848372762,
+     "ref": 842.1066916398017,
+     "rel": 8.077985317051223e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 793.6967223256718,
+     "ref": 793.6967436331676,
+     "rel": 2.6845890393872692e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 583.382127853357,
+     "ref": 583.3821577296123,
+     "rel": 5.121215129712007e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 141.70263054720837,
+     "ref": 141.70266534059897,
+     "rel": 2.455380109714778e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -168.90988461648428,
+     "ref": -168.9099055598602,
+     "rel": 1.2399140148635175e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -172.17379883445284,
+     "ref": -172.17379883445284,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.0058080846607877785,
+     "ref": -0.005808084660788091,
+     "rel": 5.3761307541522045e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000022954303032038272,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 1.7674888505757128e-14,
+    "inhour_roots_vs_eigenvalues": 8.960217923587006e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -65.02000000000008,
+     "want": -65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.1$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.1,
+    "Lambda": 0.0001,
+    "rho_pcm": 65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.049243926587689,
+     "ref": 1.0492430178956864,
+     "rel": 8.660453174660618e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.114003292016907,
+     "ref": 1.1139759030783754,
+     "rel": 0.000024586652598064196,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.1468309321949448,
+     "ref": 1.1468293773146534,
+     "rel": 0.0000013558078665990032,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 1.3411118564498279,
+     "ref": 1.3411115748958848,
+     "rel": 2.0994073000288601e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 2.3412930727647914,
+     "ref": 2.3412928629349445,
+     "rel": 8.96213584182381e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 26.775733675266977,
+     "ref": 26.77572139973726,
+     "rel": 4.5845747843781095e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.8486440411218,
+     "ref": 847.8486450500181,
+     "rel": 1.1899486299561796e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 848.4280148358166,
+     "ref": 848.4280453425127,
+     "rel": 3.5956727623571764e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 855.0178618727213,
+     "ref": 855.0178708353104,
+     "rel": 1.048234132757829e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 927.9806479757026,
+     "ref": 927.98065707213,
+     "rel": 9.802389067494373e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 1517.0953429245858,
+     "ref": 1517.095237598906,
+     "rel": 6.942588526185645e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 17165.902413393138,
+     "ref": 17165.894544423358,
+     "rel": 4.584072073775962e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 98.72678068937947,
+     "ref": 98.7267964269626,
+     "rel": 1.5940538633899904e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 98.75103950082158,
+     "ref": 98.75103950082158,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.010126475681217603,
+     "ref": 0.010126475681217313,
+     "rel": 2.860805966536443e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000024586652598064196,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 6.84650183983109e-14,
+    "inhour_roots_vs_eigenvalues": 2.209844129839528e-14
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 65.01999999999964,
+     "want": 65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.3$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.3,
+    "Lambda": 0.0001,
+    "rho_pcm": 195.05999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.1567717727184013,
+     "ref": 1.1567715601935535,
+     "rel": 1.8372240037152578e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.4378390411505895,
+     "ref": 1.4378286546018981,
+     "rel": 0.000007223773610367555,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.6132043544040793,
+     "ref": 1.613203892185369,
+     "rel": 2.8652218881601846e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 3.103570339255841,
+     "ref": 3.1035701365596546,
+     "rel": 6.531065114794843e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 51.126903319999705,
+     "ref": 51.12687921669623,
+     "rel": 4.714409297673296e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 26066198.00290589,
+     "ref": 26066130.418531764,
+     "rel": 0.0000025928042651853555,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.8858425650543,
+     "ref": 847.885842867529,
+     "rel": 3.5673994115978936e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 850.0075997695459,
+     "ref": 850.0076146314033,
+     "rel": 1.7484381462576927e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 876.7324797508023,
+     "ref": 876.7324853214859,
+     "rel": 6.353914879420442e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 1284.0066804545304,
+     "ref": 1284.0066298315592,
+     "rel": 3.9425786482646053e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 18201.775422423187,
+     "ref": 18201.766863519435,
+     "rel": 4.7022378738654953e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 9259732815.942743,
+     "ref": 9259708807.330214,
+     "rel": 0.000002592804269476469,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 18.263049363882583,
+     "ref": 18.263052312884795,
+     "rel": 1.614736771095036e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 18.26305258226962,
+     "ref": 18.26305258226962,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.05475535896834827,
+     "ref": 0.05475535896834866,
+     "rel": 7.223346901101325e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000007223773610367555,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 2.5725040232531566e-15,
+    "inhour_roots_vs_eigenvalues": 2.0945633604157996e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 195.05999999999977,
+     "want": 195.05999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.5$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.5,
+    "Lambda": 0.0001,
+    "rho_pcm": 325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.2776662170377628,
+     "ref": 1.2776661441437458,
+     "rel": 5.705247601558734e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.9963824631479212,
+     "ref": 1.9963783586960666,
+     "rel": 0.0000020559488820019445,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 2.647680751930153,
+     "ref": 2.647680502172817,
+     "rel": 9.433061728595967e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 14.806298422238966,
+     "ref": 14.806295161022375,
+     "rel": 2.2025878557282194e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 83462.31970904324,
+     "ref": 83462.18591794294,
+     "rel": 0.0000016030145726537712,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(145.013261s)": {
+     "got": 193447455988.2573,
+     "ref": 193446688045.0015,
+     "rel": 0.000003969792729765905,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 847.9261113196621,
+     "ref": 847.9261114636879,
+     "rel": 1.698565005089187e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 852.4129196284551,
+     "ref": 852.4129277754295,
+     "rel": 9.55754430528157e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 920.3997559923773,
+     "ref": 920.3997557592095,
+     "rel": 2.5333322543335417e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 3041.9052470943825,
+     "ref": 3041.9046387959966,
+     "rel": 1.9997286508699386e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 15655524.067642756,
+     "ref": 15655498.971744772,
+     "rel": 0.000001603008503852417,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(145.013261s)": {
+     "got": 36285953824243.22,
+     "ref": 36285809777099.03,
+     "rel": 0.0000039697927391553515,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 5.800529494051048,
+     "ref": 5.800530430818751,
+     "rel": 1.6149690337671023e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 5.800530431911802,
+     "ref": 5.800530431911802,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.17239802665260867,
+     "ref": 0.17239802665260895,
+     "rel": 1.6099706101368464e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.0000039697927391553515,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 2.7922997197390236e-14,
+    "inhour_roots_vs_eigenvalues": 2.1338716023108495e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 325.09999999999997,
+     "want": 325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.9$_L0.0001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.9,
+    "Lambda": 0.0001,
+    "rho_pcm": 585.18
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.5668094527442382,
+     "ref": 1.566809449636863,
+     "rel": 1.983250258493987e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 5.485841977414207,
+     "ref": 5.485841765130388,
+     "rel": 3.869667191589451e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 53.7070831641936,
+     "ref": 53.70707099844901,
+     "rel": 2.2652035122727513e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 4574911071.853718,
+     "ref": 4574896578.753485,
+     "rel": 0.0000031679623754526307,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(12.332274s)": {
+     "got": 517276025401.9047,
+     "ref": 517273991188.7086,
+     "rel": 0.000003932564232412467,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 848.0170858850787,
+     "ref": 848.0170859052272,
+     "rel": 2.3759534106814356e-11,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 863.4270165578264,
+     "ref": 863.4270177236012,
+     "rel": 1.3501718424287194e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 2064.66468485656,
+     "ref": 2064.6643477238094,
+     "rel": 1.6328695319062507e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 127486301928.22736,
+     "ref": 127485898057.70131,
+     "rel": 0.000003167962356620474,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(12.332274s)": {
+     "got": 14414620598029.951,
+     "ref": 14414563911831.55,
+     "rel": 0.000003932564227896086,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 0.49329087222908674,
+     "ref": 0.49329095200321454,
+     "rel": 1.6171820601943273e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 0.49329095200321976,
+     "ref": 0.49329095200321976,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 2.0272011800319283,
+     "ref": 2.0272011800319274,
+     "rel": 4.3813037820259005e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000003932564232412467,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 3.3353298374796353e-15,
+    "inhour_roots_vs_eigenvalues": 9.91619430092696e-16
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.0001,
+     "want": 0.0001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 585.1800000000003,
+     "want": 585.18,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-1$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -1,
+    "Lambda": 0.001,
+    "rho_pcm": -650.1999999999999
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.939027447123468,
+     "ref": 0.9390274865630658,
+     "rel": 4.200047216315733e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.634713424628369,
+     "ref": 0.6347136985773933,
+     "rel": 4.3161038586088925e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.4410910505631807,
+     "ref": 0.44109124072371997,
+     "rel": 4.3111384154346503e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.2426279603523903,
+     "ref": 0.24262803629539859,
+     "rel": 3.130017843698265e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.0649017238902561,
+     "ref": 0.06490173753935319,
+     "rel": 2.1030403200528746e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.0014239793267040654,
+     "ref": 0.0014239799986697534,
+     "rel": 4.7189264496807976e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78108888651029,
+     "ref": 84.78108886649174,
+     "rel": 2.3612042600366677e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.64168040320133,
+     "ref": 84.64168026457679,
+     "rel": 1.637781085186975e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 82.0234295102387,
+     "ref": 82.0234301879099,
+     "rel": 8.261922161156669e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 63.61013990995858,
+     "ref": 63.61014273723125,
+     "rel": 4.444688449025044e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 23.366037992430446,
+     "ref": 23.366040806800008,
+     "rel": 1.2044700193574387e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 0.7453299409836295,
+     "ref": 0.7453302262446998,
+     "rel": 3.827311173975274e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -71.62318081618363,
+     "ref": -71.6231835014431,
+     "rel": 3.749148430505355e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -83.9112161721954,
+     "ref": -83.9112161721954,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011917357960202577,
+     "ref": -0.011917357960202673,
+     "rel": 8.005951612541964e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 4.7189264496807976e-7,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 7.613886244879417e-15,
+    "inhour_roots_vs_eigenvalues": 2.2322159030044653e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -650.1999999999999,
+     "want": -650.1999999999999,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.5$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.5,
+    "Lambda": 0.001,
+    "rho_pcm": -325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.9690236418698148,
+     "ref": 0.9690236876739997,
+     "rel": 4.726838515100287e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.7914933935894677,
+     "ref": 0.791493780908002,
+     "rel": 4.893513299773604e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.6160578112466203,
+     "ref": 0.6160582709066252,
+     "rel": 7.461307260291009e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.4049674613004791,
+     "ref": 0.4049675895704623,
+     "rel": 3.167413553431548e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.1424323748786923,
+     "ref": 0.1424324024010042,
+     "rel": 1.9323069336769887e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.004837568035897823,
+     "ref": 0.004837570388403491,
+     "rel": 4.862990052483081e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78208926753821,
+     "ref": 84.78208923659523,
+     "rel": 3.6497077792893366e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.70574876158346,
+     "ref": 84.70574850047215,
+     "rel": 3.082568951619261e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 82.96257240701613,
+     "ref": 82.9625727343229,
+     "rel": 3.945234196888136e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 68.84996792169095,
+     "ref": 68.84997059478644,
+     "rel": 3.882493298392421e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 30.438091474234053,
+     "ref": 30.438094716607733,
+     "rel": 1.0652354261842454e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 1.3263522740371942,
+     "ref": 1.326352817340254,
+     "rel": 4.096218235069117e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -77.19841128857225,
+     "ref": -77.19841703198026,
+     "rel": 7.439800233387548e-8,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -88.70114189005001,
+     "ref": -88.70114189005001,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.011273812024196314,
+     "ref": -0.011273812024196436,
+     "rel": 1.0771036722783367e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 7.461307260291009e-7,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 1.7538156790852463e-15,
+    "inhour_roots_vs_eigenvalues": 2.2930211116926937e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -325.09999999999997,
+     "want": -325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho-0.1$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": -0.1,
+    "Lambda": 0.001,
+    "rho_pcm": -65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 0.9937246754816775,
+     "ref": 0.993724797776446,
+     "rel": 1.2306703897983366e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 0.9533566360192649,
+     "ref": 0.9533578697900564,
+     "rel": 0.000001294131858168623,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 0.8914916163124588,
+     "ref": 0.891494852733667,
+     "rel": 0.00000363033078466847,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 0.7887914323106869,
+     "ref": 0.7887918523785773,
+     "rel": 5.325459296952344e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 0.5456670114070872,
+     "ref": 0.5456670966220722,
+     "rel": 1.561666180640621e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 0.12915656539582343,
+     "ref": 0.12915659889693684,
+     "rel": 2.593836760744497e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78290518948165,
+     "ref": 84.7829050777653,
+     "rel": 1.3176753768166116e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.76642638116898,
+     "ref": 84.7664252547751,
+     "rel": 1.3288207915689955e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 84.29705855831557,
+     "ref": 84.29705605440195,
+     "rel": 2.9703452737758524e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 79.52318529019892,
+     "ref": 79.52318701661088,
+     "rel": 2.1709541793170717e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 58.592408310035374,
+     "ref": 58.59241123611038,
+     "rel": 4.993948778816681e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 14.356900614692004,
+     "ref": 14.3569041078668,
+     "rel": 2.433097532926749e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": -169.92403306818304,
+     "ref": -169.92405393314087,
+     "rel": 1.2278990142743396e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": -173.17558156467976,
+     "ref": -173.17558156467976,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": -0.005774486165802549,
+     "ref": -0.005774486165802236,
+     "rel": 5.4224320298516635e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.00000363033078466847,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 9.025742283494441e-15,
+    "inhour_roots_vs_eigenvalues": 5.106999695705168e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": -65.02000000000008,
+     "want": -65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.1$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.1,
+    "Lambda": 0.001,
+    "rho_pcm": 65.02
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.0063157763560449,
+     "ref": 1.0063156915429676,
+     "rel": 8.428078578196533e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.0494301138091053,
+     "ref": 1.0494291994160623,
+     "rel": 8.713241861098082e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.1355480977283292,
+     "ref": 1.1355443047772027,
+     "rel": 0.0000033402053187678424,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 1.3285777760272803,
+     "ref": 1.3285774987936856,
+     "rel": 2.0866949425182114e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 2.3000151719195463,
+     "ref": 2.300014968044234,
+     "rel": 8.864086322072002e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 25.203743055888097,
+     "ref": 25.20373165178471,
+     "rel": 4.5247678175714026e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78331817913667,
+     "ref": 84.78331827270603,
+     "rel": 1.1036293086561163e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.8004599981266,
+     "ref": 84.80046100765036,
+     "rel": 1.1904696566955315e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 85.36405928606204,
+     "ref": 85.3640638332999,
+     "rel": 5.3268760249521475e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 92.42178586574208,
+     "ref": 92.42178703421983,
+     "rel": 1.2642882045299593e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 149.64911232227988,
+     "ref": 149.64910226446267,
+     "rel": 6.720933874276832e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 1622.140938480232,
+     "ref": 1622.1402045882612,
+     "rel": 4.524220340457819e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 100.4954722317509,
+     "ref": 100.49548830452991,
+     "rel": 1.5993532933660106e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 100.52135316406175,
+     "ref": 100.52135316406175,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.009948135082980158,
+     "ref": 0.009948135082979748,
+     "rel": 4.11529132762742e-14,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.0000033402053187678424,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 2.480892972944391e-14,
+    "inhour_roots_vs_eigenvalues": 7.846953802679403e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 65.01999999999964,
+     "want": 65.02,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.3$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.3,
+    "Lambda": 0.001,
+    "rho_pcm": 195.05999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.0190696136716015,
+     "ref": 1.019069595007382,
+     "rel": 1.8314960621620036e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.15736612396507,
+     "ref": 1.1573659048513107,
+     "rel": 1.893210768006347e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 1.533541259703932,
+     "ref": 1.533539916038773,
+     "rel": 8.761853179444455e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 2.9164503646499886,
+     "ref": 2.9164501855460205,
+     "rel": 6.141163287773233e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 42.57082535416675,
+     "ref": 42.57080638415113,
+     "rel": 4.456109063528839e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(300s)": {
+     "got": 11955572.115546525,
+     "ref": 11955542.64430308,
+     "rel": 0.000002465069493008206,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.7837350038038,
+     "ref": 84.78373502957095,
+     "rel": 3.039161955099833e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.83727766453394,
+     "ref": 84.83727796785406,
+     "rel": 3.575316515164602e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 86.93334034179146,
+     "ref": 86.9333424550654,
+     "rel": 2.430913015199746e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 124.2885648397548,
+     "ref": 124.28856058711824,
+     "rel": 3.421583239421281e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 1550.0506096851182,
+     "ref": 1550.0499211291171,
+     "rel": 4.4421537115506106e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(300s)": {
+     "got": 434197017.57029057,
+     "ref": 434195947.2471,
+     "rel": 0.000002465069509183509,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 19.131311983162764,
+     "ref": 19.131315063918976,
+     "rel": 1.6103211941374917e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 19.131315539284035,
+     "ref": 19.131315539284035,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.05227032077049869,
+     "ref": 0.05227032077049855,
+     "rel": 2.6550033753852727e-15,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000002465069509183509,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 1.698194112192131e-14,
+    "inhour_roots_vs_eigenvalues": 1.5963439649802468e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 195.05999999999977,
+     "want": 195.05999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.5$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.5,
+    "Lambda": 0.001,
+    "rho_pcm": 325.09999999999997
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.0319886367103885,
+     "ref": 1.0319886301557661,
+     "rel": 6.351448270715545e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.2787211794597177,
+     "ref": 1.2787210983419657,
+     "rel": 6.343662599777276e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 2.247343384638484,
+     "ref": 2.2473426995507064,
+     "rel": 3.0484348370888876e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 11.023184120998174,
+     "ref": 11.023182103116062,
+     "rel": 1.8305804015525233e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(60s)": {
+     "got": 24559.696457611673,
+     "ref": 24559.661769987815,
+     "rel": 0.000001412381985674517,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(162.630066s)": {
+     "got": 174550371374.17902,
+     "ref": 174549680225.4999,
+     "rel": 0.000003959610113377317,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78415537126455,
+     "ref": 84.78415538307196,
+     "rel": 1.3926441133294003e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.8771444633297,
+     "ref": 84.87714461020266,
+     "rel": 1.7304182915610486e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 89.39228651978618,
+     "ref": 89.39228781452073,
+     "rel": 1.4483738776665356e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 248.86997032012252,
+     "ref": 248.86993007891343,
+     "rel": 1.616957463656354e-7,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(60s)": {
+     "got": 494844.88344807987,
+     "ref": 494844.1845475562,
+     "rel": 0.0000014123648321597135,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(162.630066s)": {
+     "got": 3516913109365.502,
+     "ref": 3516899183816.1523,
+     "rel": 0.000003959610049014513,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 6.505201590412499,
+     "ref": 6.505202640706921,
+     "rel": 1.614545280308309e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 6.505202641769385,
+     "ref": 6.505202641769385,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.15372311287877177,
+     "ref": 0.15372311287877186,
+     "rel": 5.416669314558573e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.000003959610113377317,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 3.18201626698746e-14,
+    "inhour_roots_vs_eigenvalues": 1.2638895067303339e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 325.09999999999997,
+     "want": 325.09999999999997,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "kinetics_rho0.9$_L0.001",
+   "note": "six-group point kinetics, feedback off: step() vs the exact seven-mode modal solution; the period vs the inhour root",
+   "inputs": {
+    "rho_dollar": 0.9,
+    "Lambda": 0.001,
+    "rho_pcm": 585.18
+   },
+   "cmp": {
+    "n(0.01s)": {
+     "got": 1.0583307230954142,
+     "ref": 1.0583307222283205,
+     "rel": 8.193031837199141e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(0.1s)": {
+     "got": 1.5689686934214215,
+     "ref": 1.5689686814467492,
+     "rel": 7.632193367785253e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(1s)": {
+     "got": 6.88147353977086,
+     "ref": 6.881473087558615,
+     "rel": 6.571445369116896e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(10s)": {
+     "got": 17343.876791317653,
+     "ref": 17343.855016245387,
+     "rel": 0.000001255492060184203,
+     "ok": true,
+     "tol": 0.001
+    },
+    "n(29.206444s)": {
+     "got": 239364996455.9654,
+     "ref": 239364059547.23215,
+     "rel": 0.0000039141579358992095,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.01s)": {
+     "got": 84.78500701872001,
+     "ref": 84.7850070206411,
+     "rel": 2.2658421131072008e-11,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(0.1s)": {
+     "got": 84.96724573904552,
+     "ref": 84.96724576193319,
+     "rel": 2.693704066614015e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(1s)": {
+     "got": 101.19278558756788,
+     "ref": 101.19278391233023,
+     "rel": 1.655491222293561e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(10s)": {
+     "got": 101262.44590798912,
+     "ref": 101262.3188197476,
+     "rel": 0.0000012550398115288246,
+     "ok": true,
+     "tol": 0.001
+    },
+    "sumC(29.206444s)": {
+     "got": 1397032450392.9138,
+     "ref": 1397026982208.771,
+     "rel": 0.000003914157859840894,
+     "ok": true,
+     "tol": 0.001
+    },
+    "log_period_over_late_window": {
+     "got": 1.168257577711798,
+     "ref": 1.168257766780627,
+     "rel": 1.6183828125394877e-7,
+     "ok": true,
+     "tol": 0.005
+    },
+    "asymptotic_period_inhour": {
+     "got": 1.1682577667809595,
+     "ref": 1.1682577667809595,
+     "rel": 0,
+     "ok": true,
+     "tol": 0,
+     "note": "context: 1/omega from the inhour equation"
+    },
+    "findOmega_vs_inhour_root": {
+     "got": 0.8559754777025101,
+     "ref": 0.8559754777025106,
+     "rel": 5.18810668550955e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0.0000039141579358992095,
+   "pass": true,
+   "crosscheck": {
+    "modal_vs_eigendecomposition": 4.564299665294649e-14,
+    "inhour_roots_vs_eigenvalues": 2.5049106551121017e-15
+   },
+   "inputs_verified": {
+    "Lambda": {
+     "got": 0.001,
+     "want": 0.001,
+     "ok": true
+    },
+    "rho_pcm": {
+     "got": 585.1800000000003,
+     "want": 585.18,
+     "ok": true
+    },
+    "n0": {
+     "got": 1,
+     "want": 1,
+     "ok": true
+    },
+    "precursors_at_equilibrium": {
+     "got": [
+      17.338709677419356,
+      46.68852459016393,
+      11.477477477477477,
+      8.53156146179402,
+      0.656140350877193,
+      0.09069767441860467
+     ],
+     "ok": true
+    },
+    "feedback_off": {
+     "got": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "precursor_balance",
+   "note": "delayed-neutron precursor balance: d/dt (n + SUM C_i) = (rho/Lambda) n exactly, so the change in the total neutron+precursor inventory must equal (rho/Lambda) INT n dt, evaluated analytically from the modal solution",
+   "inputs": {
+    "rho_dollar": [
+     -0.5,
+     0.1,
+     0.3
+    ],
+    "Lambda": 0.0001
+   },
+   "cmp": {
+    "delta(n+sumC)@-0.5$,0.01s": {
+     "got": -0.28593890487809404,
+     "ref": -0.285938774125819,
+     "rel": 4.5727367847327126e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@-0.5$,0.1s": {
+     "got": -2.2691901681623676,
+     "ref": -2.269188322328628,
+     "rel": 8.134334737537442e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@-0.5$,1s": {
+     "got": -20.713961749698342,
+     "ref": -20.713951495485052,
+     "rel": 4.950389737213921e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@-0.5$,10s": {
+     "got": -162.2454405023575,
+     "ref": -162.245412327085,
+     "rel": 1.736583616516391e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@-0.5$,60s": {
+     "got": -545.6989558009682,
+     "ref": -545.698923246582,
+     "rel": 5.965631372820013e-8,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@-0.5$,300s": {
+     "got": -835.6483045342843,
+     "ref": -835.648299130491,
+     "rel": 6.466588106462919e-9,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,0.01s": {
+     "got": 0.06677564620360954,
+     "ref": 0.06677574640807343,
+     "rel": 0.0000015006116634141234,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,0.1s": {
+     "got": 0.7109058063276734,
+     "ref": 0.7109089240852952,
+     "rel": 0.000004385593591684858,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,1s": {
+     "got": 7.333580483410287,
+     "ref": 7.3335878911192935,
+     "rel": 0.0000010101070739429436,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,10s": {
+     "got": 80.49064751064657,
+     "ref": 80.49065632552183,
+     "rel": 1.0951426737680075e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,60s": {
+     "got": 670.6055236758447,
+     "ref": 670.6054181403541,
+     "rel": 1.5737345343874548e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.1$,300s": {
+     "got": 16343.847034746897,
+     "ref": 16343.83915350273,
+     "rel": 4.822149859605278e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,0.01s": {
+     "got": 0.21150201626676335,
+     "ref": 0.21150210621670398,
+     "rel": 4.252909923396395e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,0.1s": {
+     "got": 2.6143264891907165,
+     "ref": 2.6143309644995743,
+     "rel": 0.000001711837146287868,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,1s": {
+     "got": 29.51457178370049,
+     "ref": 29.514576892165515,
+     "rel": 1.7308278020995317e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,10s": {
+     "got": 438.27913847228035,
+     "ref": 438.27908764661277,
+     "rel": 1.159664447114166e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,60s": {
+     "got": 17404.07121342168,
+     "ref": 17404.06263041463,
+     "rel": 4.931611217205654e-7,
+     "ok": true,
+     "tol": 0.002
+    },
+    "delta(n+sumC)@0.3$,300s": {
+     "got": 9285798165.114538,
+     "ref": 9285774088.917667,
+     "rel": 0.000002592804502915719,
+     "ok": true,
+     "tol": 0.002
+    }
+   },
+   "worst_rel": 0.000004385593591684858,
+   "pass": true
+  },
+  {
+   "id": "critical_invariance",
+   "note": "at exactly rho = 0 (rod at mid-stroke, no feedback) the power and the whole neutron+precursor inventory must be invariant for any horizon, up to round-off",
+   "inputs": {
+    "rho_pcm": 0,
+    "horizon": "1 s .. 24 h"
+   },
+   "cmp": {
+    "n@1s": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "(n+sumC)/initial@1s": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "n@100s": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "(n+sumC)/initial@100s": {
+     "got": 0.9999999999999996,
+     "ref": 1,
+     "rel": 4.440892098500626e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "n@3600s": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "(n+sumC)/initial@3600s": {
+     "got": 0.9999999999999994,
+     "ref": 1,
+     "rel": 5.551115123125783e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "n@86400s": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "(n+sumC)/initial@86400s": {
+     "got": 0.9999999999999994,
+     "ref": 1,
+     "rel": 5.551115123125783e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 5.551115123125783e-16,
+   "pass": true
+  },
+  {
+   "id": "plant_load_drop_rod",
+   "note": "full twelve-state plant (six-group kinetics + I/Xe chain + two-node thermal + outlet lag, with rod, xenon and Doppler reactivity) vs scipy solve_ivp Radau from the same initial state",
+   "inputs": {
+    "case": "load_drop_rod",
+    "power_pct": 100,
+    "rod_step_pcm": -200,
+    "horizon_s": 300
+   },
+   "cmp": {
+    "n(75s)": {
+     "got": 0.7566290652638946,
+     "ref": 0.7565257864989777,
+     "rel": 0.00013651717728597424,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(75s)": {
+     "got": 148.71075438239015,
+     "ref": 148.7152751550105,
+     "rel": 0.00003039884514638147,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(75s)": {
+     "got": 367.6530695896961,
+     "ref": 367.6602736050122,
+     "rel": 0.000019594217361267513,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(75s)": {
+     "got": 87.12597429158106,
+     "ref": 87.12344095549558,
+     "rel": 0.00002907754856435737,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(75s)": {
+     "got": 64.6172794580593,
+     "ref": 64.61424358412384,
+     "rel": 0.00004698459297921134,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(75s)": {
+     "got": 4.965670444521857,
+     "ref": 4.965246635560259,
+     "rel": 0.00008535506747288706,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(75s)": {
+     "got": 0.686309797883566,
+     "ref": 0.6862226476236953,
+     "rel": 0.0001269999761338495,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(75s)": {
+     "got": 4033761867530988,
+     "ref": 4033717314381569.5,
+     "rel": 0.000011045183870384998,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(75s)": {
+     "got": 1219431663003703.5,
+     "ref": 1219466308465152.2,
+     "rel": 0.000028410347385780224,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(75s)": {
+     "got": 532.6349702236982,
+     "ref": 532.6310520724448,
+     "rel": 0.0000073562201042468085,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(75s)": {
+     "got": 301.3812504175051,
+     "ref": 301.3811856276788,
+     "rel": 2.1497634685435887e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(75s)": {
+     "got": 312.79793129501354,
+     "ref": 312.7979556544034,
+     "rel": 7.787579618093678e-8,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(150s)": {
+     "got": 0.7458052526791563,
+     "ref": 0.7456432842273247,
+     "rel": 0.00021721975542155498,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(150s)": {
+     "got": 137.35284464735315,
+     "ref": 137.34922795388943,
+     "rel": 0.000026332098968482692,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(150s)": {
+     "got": 351.3046760857362,
+     "ref": 351.2822117621788,
+     "rel": 0.00006394950499976768,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(150s)": {
+     "got": 85.69295326004355,
+     "ref": 85.68555618335168,
+     "rel": 0.00008632816336098677,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(150s)": {
+     "got": 63.648253050594974,
+     "ref": 63.642047960158784,
+     "rel": 0.00009749985481413447,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(150s)": {
+     "got": 4.893644228110286,
+     "ref": 4.89300379394053,
+     "rel": 0.00013088773210211062,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(150s)": {
+     "got": 0.67642014522398,
+     "ref": 0.6763091221823201,
+     "rel": 0.00016416020133165664,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(150s)": {
+     "got": 4031557856220151.5,
+     "ref": 4031512193944907.5,
+     "rel": 0.000011326339360347721,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(150s)": {
+     "got": 1221140774893774.5,
+     "ref": 1221176057646656.5,
+     "rel": 0.000028892437467201763,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(150s)": {
+     "got": 528.8233729098521,
+     "ref": 528.8067703193371,
+     "rel": 0.000031396327442837746,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(150s)": {
+     "got": 301.19761749861533,
+     "ref": 301.19692619305795,
+     "rel": 0.0000022951945961717177,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(150s)": {
+     "got": 312.4076624548926,
+     "ref": 312.4063264916385,
+     "rel": 0.000004276364275730359,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(225s)": {
+     "got": 0.7401522321698424,
+     "ref": 0.7400431161633996,
+     "rel": 0.0001474454718375063,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(225s)": {
+     "got": 132.1184490744163,
+     "ref": 132.11014249000266,
+     "rel": 0.00006287620508981147,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(225s)": {
+     "got": 346.8279310917178,
+     "ref": 346.7979816007016,
+     "rel": 0.00008636004995758213,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(225s)": {
+     "got": 85.01373686008114,
+     "ref": 85.00595470566294,
+     "rel": 0.00009154834440881794,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(225s)": {
+     "got": 63.16172122530798,
+     "ref": 63.15542491831608,
+     "rel": 0.0000996954260072326,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(225s)": {
+     "got": 4.856709330926873,
+     "ref": 4.8560882539708015,
+     "rel": 0.00012789655450838358,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(225s)": {
+     "got": 0.6713220893409727,
+     "ref": 0.6712210673984355,
+     "rel": 0.00015050472555755312,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(225s)": {
+     "got": 4029291852603818.5,
+     "ref": 4029244989693856,
+     "rel": 0.000011630692619179919,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(225s)": {
+     "got": 1222887054719143.2,
+     "ref": 1222923044687432.8,
+     "rel": 0.000029429462831570638,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(225s)": {
+     "got": 526.9651313715833,
+     "ref": 526.9463412844874,
+     "rel": 0.000035658444937876456,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(225s)": {
+     "got": 301.1095273198078,
+     "ref": 301.1087245086418,
+     "rel": 0.000002666183676082612,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(225s)": {
+     "got": 312.2269782056603,
+     "ref": 312.22538084846707,
+     "rel": 0.000005116038897628779,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(300s)": {
+     "got": 0.7357720606684481,
+     "ref": 0.7356058858632007,
+     "rel": 0.00022590195163051064,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(300s)": {
+     "got": 129.5492433456597,
+     "ref": 129.5387489283641,
+     "rel": 0.00008101373050474143,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(300s)": {
+     "got": 344.4034247366523,
+     "ref": 344.37110668082653,
+     "rel": 0.00009384659513765922,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(300s)": {
+     "got": 84.496134121917,
+     "ref": 84.48771671264565,
+     "rel": 0.00009962879337802612,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(300s)": {
+     "got": 62.78151824086264,
+     "ref": 62.77466615309686,
+     "rel": 0.00010915371097423054,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(300s)": {
+     "got": 4.827628224825436,
+     "ref": 4.8269311616012756,
+     "rel": 0.00014441126273064583,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(300s)": {
+     "got": 0.6673132690629668,
+     "ref": 0.6671943917524906,
+     "rel": 0.00017817492464822378,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(300s)": {
+     "got": 4026987529906556,
+     "ref": 4026939514871020,
+     "rel": 0.000011923455854920603,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(300s)": {
+     "got": 1224651860694649.5,
+     "ref": 1224688517813154.5,
+     "rel": 0.000029931789162566985,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(300s)": {
+     "got": 525.5304601050508,
+     "ref": 525.5096389351503,
+     "rel": 0.00003962090960441915,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(300s)": {
+     "got": 301.04203317714496,
+     "ref": 301.0411363215667,
+     "rel": 0.0000029791794876756824,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(300s)": {
+     "got": 312.09089405859527,
+     "ref": 312.0891085683501,
+     "rel": 0.000005721091175949741,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.00022590195163051064,
+   "pass": true,
+   "crosscheck": {
+    "radau_vs_lsoda_on_n": 1.2343813906387817e-11
+   },
+   "inputs_verified": {
+    "x0": {
+     "got": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "want": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "ok": true
+    },
+    "u": {
+     "got": 0.8445023608532956,
+     "want": 0.8445023608532956,
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "plant_rod_out_50pcm",
+   "note": "full twelve-state plant (six-group kinetics + I/Xe chain + two-node thermal + outlet lag, with rod, xenon and Doppler reactivity) vs scipy solve_ivp Radau from the same initial state",
+   "inputs": {
+    "case": "rod_out_50pcm",
+    "power_pct": 100,
+    "rod_step_pcm": 50,
+    "horizon_s": 600
+   },
+   "cmp": {
+    "n(150s)": {
+     "got": 1.0638968691347377,
+     "ref": 1.0639419190011805,
+     "rel": 0.00004234241140260554,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(150s)": {
+     "got": 182.542157836423,
+     "ref": 182.54292763895148,
+     "rel": 0.000004217104099500376,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(150s)": {
+     "got": 496.05417978986986,
+     "ref": 496.0607523920152,
+     "rel": 0.00001324959113104805,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(150s)": {
+     "got": 122.08986426163487,
+     "ref": 122.09215990380676,
+     "rel": 0.000018802535508390192,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(150s)": {
+     "got": 90.76325116523088,
+     "ref": 90.76523066991354,
+     "rel": 0.000021809063537231558,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(150s)": {
+     "got": 6.980623853376884,
+     "ref": 6.980839898632857,
+     "rel": 0.00003094831841289008,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(150s)": {
+     "got": 0.9649248589654057,
+     "ref": 0.9649647174579364,
+     "rel": 0.00004130564756371997,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(150s)": {
+     "got": 4036871299793514,
+     "ref": 4036887536819939,
+     "rel": 0.000004022164669415271,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(150s)": {
+     "got": 1217009829128391,
+     "ref": 1216997328693747.5,
+     "rel": 0.000010271538276026639,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(150s)": {
+     "got": 630.414701746083,
+     "ref": 630.4198164575024,
+     "rel": 0.000008113183129560534,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(150s)": {
+     "got": 305.9563649329781,
+     "ref": 305.9565888856746,
+     "rel": 7.319753998990089e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(150s)": {
+     "got": 321.9101814026972,
+     "ref": 321.9106208275031,
+     "rel": 0.0000013650522147257035,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(300s)": {
+     "got": 1.066176623917728,
+     "ref": 1.0662303541375493,
+     "rel": 0.00005039269386099837,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(300s)": {
+     "got": 184.39461190729986,
+     "ref": 184.39793264160414,
+     "rel": 0.000018008522420563106,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(300s)": {
+     "got": 497.5772569459364,
+     "ref": 497.5876805343256,
+     "rel": 0.000020948244494305525,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(300s)": {
+     "got": 122.35950047599809,
+     "ref": 122.36220518740808,
+     "rel": 0.000022104140783075736,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(300s)": {
+     "got": 90.96003713756816,
+     "ref": 90.96223558528236,
+     "rel": 0.00002416879598491817,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(300s)": {
+     "got": 6.995658711035317,
+     "ref": 6.995889265760277,
+     "rel": 0.00003295574246561605,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(300s)": {
+     "got": 0.9669985941517455,
+     "ref": 0.9670420360610753,
+     "rel": 0.000044922462219695496,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(300s)": {
+     "got": 4038017109618557.5,
+     "ref": 4038034207478006,
+     "rel": 0.000004234203716460995,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(300s)": {
+     "got": 1216134703032608.8,
+     "ref": 1216121747269660,
+     "rel": 0.000010653343695100635,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(300s)": {
+     "got": 631.1591270654742,
+     "ref": 631.1657996882835,
+     "rel": 0.000010571901729511394,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(300s)": {
+     "got": 305.9914561680583,
+     "ref": 305.99175600339123,
+     "rel": 9.798804283791132e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(300s)": {
+     "got": 321.9812651296537,
+     "ref": 321.9818673651362,
+     "rel": 0.000001870401856619918,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(450s)": {
+     "got": 1.0681742635997518,
+     "ref": 1.0682293321049479,
+     "rel": 0.00005155120117099391,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(450s)": {
+     "got": 184.98290147573294,
+     "ref": 184.98683900433855,
+     "rel": 0.000021285452666780846,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(450s)": {
+     "got": 498.5265975345932,
+     "ref": 498.537673354724,
+     "rel": 0.000022216616161215222,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(450s)": {
+     "got": 122.58926934870524,
+     "ref": 122.59211618143134,
+     "rel": 0.00002322198861368241,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(450s)": {
+     "got": 91.13059129958,
+     "ref": 91.13289705157936,
+     "rel": 0.00002530098432022362,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(450s)": {
+     "got": 7.008768171852648,
+     "ref": 7.009007646760711,
+     "rel": 0.00003416673516876948,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(450s)": {
+     "got": 0.9688104917983635,
+     "ref": 0.9688551807865844,
+     "rel": 0.000046125560462577894,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(450s)": {
+     "got": 4039194721940452.5,
+     "ref": 4039212706561622,
+     "rel": 0.000004452506583841038,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(450s)": {
+     "got": 1215249805291606.2,
+     "ref": 1215236383005299,
+     "rel": 0.000011045000376022706,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(450s)": {
+     "got": 631.799247607928,
+     "ref": 631.806371310868,
+     "rel": 0.000011275136281453814,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(450s)": {
+     "got": 306.0214750075224,
+     "ref": 306.0217957951977,
+     "rel": 0.0000010482510714221416,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(450s)": {
+     "got": 322.0413607565406,
+     "ref": 322.04200557769747,
+     "rel": 0.0000020022889737984022,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(600s)": {
+     "got": 1.0701561580280248,
+     "ref": 1.0702125262961513,
+     "rel": 0.0000526701629269624,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(600s)": {
+     "got": 185.36481308002607,
+     "ref": 185.36900816378613,
+     "rel": 0.000022630987788206575,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(600s)": {
+     "got": 499.4522252145211,
+     "ref": 499.463811009913,
+     "rel": 0.000023196466163349346,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(600s)": {
+     "got": 122.81673166017714,
+     "ref": 122.81970367591097,
+     "rel": 0.000024198199839938865,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(600s)": {
+     "got": 91.29968282721693,
+     "ref": 91.30208366696854,
+     "rel": 0.000026295563640943677,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(600s)": {
+     "got": 7.021772496414333,
+     "ref": 7.022019950985689,
+     "rel": 0.000035239798958534544,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(600s)": {
+     "got": 0.9706079902473874,
+     "ref": 0.9706538794426572,
+     "rel": 0.00004727657947050163,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(600s)": {
+     "got": 4040402256166844,
+     "ref": 4040421146819048,
+     "rel": 0.0000046754166255347605,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(600s)": {
+     "got": 1214356815119007,
+     "ref": 1214342920485790.2,
+     "rel": 0.000011442100071033921,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(600s)": {
+     "got": 632.433462148968,
+     "ref": 632.4409219577594,
+     "rel": 0.000011795265822305148,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(600s)": {
+     "got": 306.0512030799022,
+     "ref": 306.05153941113383,
+     "rel": 0.0000010989365786409118,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(600s)": {
+     "got": 322.1008133553502,
+     "ref": 322.10148935224754,
+     "rel": 0.000002098707766529357,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.0000526701629269624,
+   "pass": true,
+   "crosscheck": {
+    "radau_vs_lsoda_on_n": 6.465523857764117e-12
+   },
+   "inputs_verified": {
+    "x0": {
+     "got": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "want": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "ok": true
+    },
+    "u": {
+     "got": 0.8757523608532956,
+     "want": 0.8757523608532956,
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "plant_half_power",
+   "note": "full twelve-state plant (six-group kinetics + I/Xe chain + two-node thermal + outlet lag, with rod, xenon and Doppler reactivity) vs scipy solve_ivp Radau from the same initial state",
+   "inputs": {
+    "case": "half_power",
+    "power_pct": 50,
+    "rod_step_pcm": 100,
+    "horizon_s": 200
+   },
+   "cmp": {
+    "n(50s)": {
+     "got": 0.615422429615197,
+     "ref": 0.6153618204334566,
+     "rel": 0.00009849356870686678,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(50s)": {
+     "got": 95.5444347489492,
+     "ref": 95.53534137446366,
+     "rel": 0.0000951833568051231,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(50s)": {
+     "got": 273.99382391547016,
+     "ref": 273.95969473716025,
+     "rel": 0.00012457737019547636,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(50s)": {
+     "got": 70.31900887767375,
+     "ref": 70.31342489985816,
+     "rel": 0.00007941552873498572,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(50s)": {
+     "got": 52.43344949930965,
+     "ref": 52.43051800389454,
+     "rel": 0.000055912005578394025,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(50s)": {
+     "got": 4.036497190363986,
+     "ref": 4.036304445644934,
+     "rel": 0.000047752770299554095,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(50s)": {
+     "got": 0.5580734964021783,
+     "ref": 0.5580499063257743,
+     "rel": 0.000042272341839952305,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(50s)": {
+     "got": 2018526482087656,
+     "ref": 2018543887947417.8,
+     "rel": 0.000008622978110943811,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(50s)": {
+     "got": 1006559982892814.2,
+     "ref": 1006548876039462.2,
+     "rel": 0.000011034589195214153,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(50s)": {
+     "got": 486.39019963959026,
+     "ref": 486.3733324458201,
+     "rel": 0.000034679520123662135,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(50s)": {
+     "got": 299.19794521271064,
+     "ref": 299.1970760331973,
+     "rel": 0.0000029050401323513993,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(50s)": {
+     "got": 308.35952832157136,
+     "ref": 308.35743805903735,
+     "rel": 0.00000677869989830162,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(100s)": {
+     "got": 0.6226609408069923,
+     "ref": 0.6226803462446258,
+     "rel": 0.000031164365071888364,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(100s)": {
+     "got": 101.06543962250112,
+     "ref": 101.05844623436357,
+     "rel": 0.00006920142153508382,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(100s)": {
+     "got": 286.26607605928194,
+     "ref": 286.2506102003211,
+     "rel": 0.00005402908643593267,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(100s)": {
+     "got": 71.35717827849415,
+     "ref": 71.35606072028962,
+     "rel": 0.000015661713850875294,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(100s)": {
+     "got": 53.097348241905664,
+     "ref": 53.09683831159285,
+     "rel": 0.000009603779227375842,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(100s)": {
+     "got": 4.085155030013863,
+     "ref": 4.085120410815917,
+     "rel": 0.000008474462063349292,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(100s)": {
+     "got": 0.5647324005238944,
+     "ref": 0.5647287423447183,
+     "rel": 0.000006477763396542094,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(100s)": {
+     "got": 2019230879990005,
+     "ref": 2019248406457116.5,
+     "rel": 0.000008679698374629974,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(100s)": {
+     "got": 1006111301400215,
+     "ref": 1006100165591079.5,
+     "rel": 0.000011068290729241418,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(100s)": {
+     "got": 489.0525863053102,
+     "ref": 489.04777078157906,
+     "rel": 0.00000984673485662702,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(100s)": {
+     "got": 299.32760549431026,
+     "ref": 299.32733413807534,
+     "rel": 9.065534749773713e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(100s)": {
+     "got": 308.64166819603713,
+     "ref": 308.64102843100113,
+     "rel": 0.0000020728450758828108,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(150s)": {
+     "got": 0.6259509306049144,
+     "ref": 0.6259940476182545,
+     "rel": 0.00006887767304528344,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(150s)": {
+     "got": 104.41348329777708,
+     "ref": 104.40995781765339,
+     "rel": 0.00003376574607799054,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(150s)": {
+     "got": 290.56413177361617,
+     "ref": 290.56212699029413,
+     "rel": 0.000006899671828541461,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(150s)": {
+     "got": 71.79226890296711,
+     "ref": 71.79278948625186,
+     "rel": 0.000007251191776764356,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(150s)": {
+     "got": 53.3925260784026,
+     "ref": 53.392894957452185,
+     "rel": 0.000006908766604293559,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(150s)": {
+     "got": 4.107021846187985,
+     "ref": 4.107119344165339,
+     "rel": 0.00002373877386648592,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(150s)": {
+     "got": 0.5677212659664612,
+     "ref": 0.5677474571894404,
+     "rel": 0.000046131819081772076,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(150s)": {
+     "got": 2019963365909314.8,
+     "ref": 2019981077760036.2,
+     "rel": 0.00000876832506824308,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(150s)": {
+     "got": 1005646629381661.4,
+     "ref": 1005635423678998.8,
+     "rel": 0.00001114290765696206,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(150s)": {
+     "got": 490.2124885595387,
+     "ref": 490.2120087487725,
+     "rel": 9.787821547227223e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(150s)": {
+     "got": 299.38347672292,
+     "ref": 299.38342239031425,
+     "rel": 1.8148167769987212e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(150s)": {
+     "got": 308.7602392627894,
+     "ref": 308.76017464605303,
+     "rel": 2.0927807951661323e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(200s)": {
+     "got": 0.6279154237890731,
+     "ref": 0.6279529955908977,
+     "rel": 0.00005983218821858795,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(200s)": {
+     "got": 106.41071201811012,
+     "ref": 106.40950687806811,
+     "rel": 0.000011325492217386068,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(200s)": {
+     "got": 292.3604480705021,
+     "ref": 292.36362892827293,
+     "rel": 0.000010879799865923674,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(200s)": {
+     "got": 72.03581291462415,
+     "ref": 72.03734223579765,
+     "rel": 0.000021229561308649252,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(200s)": {
+     "got": 53.563421711404075,
+     "ref": 53.56476221335574,
+     "rel": 0.000025025817277548868,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(200s)": {
+     "got": 4.1199370020241775,
+     "ref": 4.120064263049986,
+     "rel": 0.00003088811670979796,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(200s)": {
+     "got": 0.5695055474764371,
+     "ref": 0.5695289143917065,
+     "rel": 0.00004102849684873737,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(200s)": {
+     "got": 2020709693739257.8,
+     "ref": 2020727555683395.5,
+     "rel": 0.000008839362875768386,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(200s)": {
+     "got": 1005175147624449.8,
+     "ref": 1005163895070055.8,
+     "rel": 0.000011194745900832166,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(200s)": {
+     "got": 490.8723517641137,
+     "ref": 490.87548767928075,
+     "rel": 0.000006388412633642659,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(200s)": {
+     "got": 299.41492897963,
+     "ref": 299.41505508096355,
+     "rel": 4.2115896109863454e-7,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(200s)": {
+     "got": 308.82565713036195,
+     "ref": 308.82586920394164,
+     "rel": 6.867092456859007e-7,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.00012457737019547636,
+   "pass": true,
+   "crosscheck": {
+    "radau_vs_lsoda_on_n": 1.6027977548060545e-11
+   },
+   "inputs_verified": {
+    "x0": {
+     "got": [
+      0.5,
+      86.69354838709677,
+      233.44262295081967,
+      57.387387387387385,
+      42.6578073089701,
+      3.280701754385965,
+      0.4534883720930233,
+      2017894736842105,
+      1006963986186482.4,
+      450,
+      297.5,
+      305
+     ],
+     "want": [
+      0.5,
+      86.69354838709677,
+      233.44262295081967,
+      57.387387387387385,
+      42.6578073089701,
+      3.280701754385965,
+      0.4534883720930233,
+      2017894736842105,
+      1006963986186482.4,
+      450,
+      297.5,
+      305
+     ],
+     "ok": true
+    },
+    "u": {
+     "got": 0.7853347098125917,
+     "want": 0.7853347098125917,
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "plant_scram_xenon_pit",
+   "note": "full twelve-state plant (six-group kinetics + I/Xe chain + two-node thermal + outlet lag, with rod, xenon and Doppler reactivity) vs scipy solve_ivp Radau from the same initial state",
+   "inputs": {
+    "case": "scram_xenon_pit",
+    "power_pct": 100,
+    "rod_step_pcm": -4000,
+    "horizon_s": 43200
+   },
+   "cmp": {
+    "I(10800s)": {
+     "got": 2942636045097633,
+     "ref": 2942522806635716,
+     "rel": 0.000038483461083677814,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(10800s)": {
+     "got": 1942127970047852.5,
+     "ref": 1942187389491514.2,
+     "rel": 0.00003059408375486706,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(10800s)": {
+     "got": 290.00000000032014,
+     "ref": 290,
+     "rel": 1.1039383966347267e-12,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(10800s)": {
+     "got": 290.000000000015,
+     "ref": 290,
+     "rel": 5.1747112342252816e-14,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(10800s)": {
+     "got": 290.00000000003007,
+     "ref": 290,
+     "rel": 1.0369023647368083e-13,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(21600s)": {
+     "got": 2145339454299117.2,
+     "ref": 2145256897411155.2,
+     "rel": 0.00003848345065881279,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(21600s)": {
+     "got": 2255898871248079,
+     "ref": 2255918923855707.5,
+     "rel": 0.000008888886660087523,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(21600s)": {
+     "got": 290.00000000032014,
+     "ref": 290,
+     "rel": 1.1039383966347267e-12,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(21600s)": {
+     "got": 290.000000000015,
+     "ref": 290,
+     "rel": 5.1747112342252816e-14,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(21600s)": {
+     "got": 290.00000000003007,
+     "ref": 290,
+     "rel": 1.0369023647368083e-13,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(32400s)": {
+     "got": 1564067490385352.2,
+     "ref": 1564007301964092.8,
+     "rel": 0.000038483465635943585,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(32400s)": {
+     "got": 2313771676112988,
+     "ref": 2313767761702346,
+     "rel": 0.0000016917906398349967,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(32400s)": {
+     "got": 290.00000000032014,
+     "ref": 290,
+     "rel": 1.1039383966347267e-12,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(32400s)": {
+     "got": 290.000000000015,
+     "ref": 290,
+     "rel": 5.1747112342252816e-14,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(32400s)": {
+     "got": 290.00000000003007,
+     "ref": 290,
+     "rel": 1.0369023647368083e-13,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(43200s)": {
+     "got": 1140289062217509.8,
+     "ref": 1140245181638464.8,
+     "rel": 0.000038483459304731466,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(43200s)": {
+     "got": 2219844830287855.5,
+     "ref": 2219827213029748.5,
+     "rel": 0.000007936319549373822,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(43200s)": {
+     "got": 290.00000000032014,
+     "ref": 290,
+     "rel": 1.1039383966347267e-12,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(43200s)": {
+     "got": 290.000000000015,
+     "ref": 290,
+     "rel": 5.1747112342252816e-14,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(43200s)": {
+     "got": 290.00000000003007,
+     "ref": 290,
+     "rel": 1.0369023647368083e-13,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.000038483465635943585,
+   "pass": true,
+   "crosscheck": {
+    "radau_vs_lsoda_on_n": 16543.876731175158
+   },
+   "inputs_verified": {
+    "x0": {
+     "got": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "want": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "ok": true
+    },
+    "u": {
+     "got": 0.3695023608532956,
+     "want": 0.3695023608532956,
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "plant_steady_hold",
+   "note": "full twelve-state plant (six-group kinetics + I/Xe chain + two-node thermal + outlet lag, with rod, xenon and Doppler reactivity) vs scipy solve_ivp Radau from the same initial state",
+   "inputs": {
+    "case": "steady_hold",
+    "power_pct": 100,
+    "rod_step_pcm": 0,
+    "horizon_s": 3600
+   },
+   "cmp": {
+    "n(900s)": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(900s)": {
+     "got": 173.3870967741932,
+     "ref": 173.38709677419357,
+     "rel": 2.130967237293547e-15,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(900s)": {
+     "got": 466.8852459016393,
+     "ref": 466.88524590163934,
+     "rel": 1.217503002285565e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(900s)": {
+     "got": 114.77477477477478,
+     "ref": 114.77477477477477,
+     "rel": 1.238151391983848e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(900s)": {
+     "got": 85.31561461794016,
+     "ref": 85.3156146179402,
+     "rel": 4.997041202425003e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(900s)": {
+     "got": 6.561403508771929,
+     "ref": 6.561403508771931,
+     "rel": 2.7072818140592047e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(900s)": {
+     "got": 0.9069767441860465,
+     "ref": 0.9069767441860466,
+     "rel": 1.224092052791839e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(900s)": {
+     "got": 4035789473684210,
+     "ref": 4035789473684210,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(900s)": {
+     "got": 1217849642004773,
+     "ref": 1217849642004773,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(900s)": {
+     "got": 610,
+     "ref": 610.0000000000001,
+     "rel": 1.863718651174033e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(900s)": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(900s)": {
+     "got": 320,
+     "ref": 320,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(1800s)": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(1800s)": {
+     "got": 173.3870967741932,
+     "ref": 173.38709677419354,
+     "rel": 1.9670466805786588e-15,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(1800s)": {
+     "got": 466.8852459016393,
+     "ref": 466.8852459016393,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(1800s)": {
+     "got": 114.77477477477478,
+     "ref": 114.77477477477476,
+     "rel": 2.4763027839676967e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(1800s)": {
+     "got": 85.31561461794016,
+     "ref": 85.3156146179402,
+     "rel": 4.997041202425003e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(1800s)": {
+     "got": 6.561403508771929,
+     "ref": 6.56140350877193,
+     "rel": 1.3536409070296026e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(1800s)": {
+     "got": 0.9069767441860465,
+     "ref": 0.9069767441860466,
+     "rel": 1.224092052791839e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(1800s)": {
+     "got": 4035789473684210,
+     "ref": 4035789473684210,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(1800s)": {
+     "got": 1217849642004773,
+     "ref": 1217849642004773,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(1800s)": {
+     "got": 610,
+     "ref": 610,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(1800s)": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(1800s)": {
+     "got": 320,
+     "ref": 320,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(2700s)": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(2700s)": {
+     "got": 173.3870967741932,
+     "ref": 173.38709677419354,
+     "rel": 1.9670466805786588e-15,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(2700s)": {
+     "got": 466.8852459016393,
+     "ref": 466.8852459016393,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(2700s)": {
+     "got": 114.77477477477478,
+     "ref": 114.77477477477476,
+     "rel": 2.4763027839676967e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(2700s)": {
+     "got": 85.31561461794016,
+     "ref": 85.3156146179402,
+     "rel": 4.997041202425003e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(2700s)": {
+     "got": 6.561403508771929,
+     "ref": 6.56140350877193,
+     "rel": 1.3536409070296026e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(2700s)": {
+     "got": 0.9069767441860465,
+     "ref": 0.9069767441860466,
+     "rel": 1.224092052791839e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(2700s)": {
+     "got": 4035789473684210,
+     "ref": 4035789473684210,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(2700s)": {
+     "got": 1217849642004773,
+     "ref": 1217849642004773,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(2700s)": {
+     "got": 610,
+     "ref": 610,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(2700s)": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(2700s)": {
+     "got": 320,
+     "ref": 320,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "n(3600s)": {
+     "got": 0.9999999999999998,
+     "ref": 1,
+     "rel": 2.220446049250313e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C1(3600s)": {
+     "got": 173.3870967741932,
+     "ref": 173.38709677419354,
+     "rel": 1.9670466805786588e-15,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C2(3600s)": {
+     "got": 466.8852459016393,
+     "ref": 466.8852459016393,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C3(3600s)": {
+     "got": 114.77477477477478,
+     "ref": 114.77477477477474,
+     "rel": 3.714454175951545e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C4(3600s)": {
+     "got": 85.31561461794016,
+     "ref": 85.31561461794018,
+     "rel": 3.33136080161667e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C5(3600s)": {
+     "got": 6.561403508771929,
+     "ref": 6.561403508771929,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "C6(3600s)": {
+     "got": 0.9069767441860465,
+     "ref": 0.9069767441860467,
+     "rel": 2.448184105583678e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "I(3600s)": {
+     "got": 4035789473684210,
+     "ref": 4035789473684210,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "X(3600s)": {
+     "got": 1217849642004773,
+     "ref": 1217849642004773,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tf(3600s)": {
+     "got": 610,
+     "ref": 609.9999999999999,
+     "rel": 1.8637186511740335e-16,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tc(3600s)": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    },
+    "Tout(3600s)": {
+     "got": 320,
+     "ref": 320,
+     "rel": 0,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 2.130967237293547e-15,
+   "pass": true,
+   "crosscheck": {
+    "radau_vs_lsoda_on_n": 2.220446049250313e-16
+   },
+   "inputs_verified": {
+    "x0": {
+     "got": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "want": [
+      1,
+      173.38709677419354,
+      466.88524590163934,
+      114.77477477477477,
+      85.3156146179402,
+      6.56140350877193,
+      0.9069767441860466,
+      4035789473684210,
+      1217849642004773,
+      610,
+      305,
+      320
+     ],
+     "ok": true
+    },
+    "u": {
+     "got": 0.8695023608532956,
+     "want": 0.8695023608532956,
+     "ok": true
+    },
+    "ok": true
+   }
+  },
+  {
+   "id": "equilibrium",
+   "note": "steady state and the critical rod position against the closed forms: X_eq = (g_X+g_I) S_f phi/(l_X + s_aX phi), I_eq = g_I S_f phi/l_I, C_i = beta_i n/(Lambda lambda_i), T_c = T_in + g a n/w, T_f = T_c + a n, and the reactivity balance rho_ctrl + rho_Xe + rho_D = 0",
+   "inputs": {
+    "power_pct": [
+     100,
+     50,
+     20
+    ]
+   },
+   "cmp": {
+    "Xeq@100%": {
+     "got": 1217849642004773,
+     "ref": 1217849642004773,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Ieq@100%": {
+     "got": 4035789473684210,
+     "ref": 4035789473684210,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tf@100%": {
+     "got": 610,
+     "ref": 610,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tc@100%": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tout@100%": {
+     "got": 320,
+     "ref": 320,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Xe@100%": {
+     "got": -2156.0188868263645,
+     "ref": -2156.0188868263645,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Doppler@100%": {
+     "got": -800,
+     "ref": -800,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_ctrl_balances@100%": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "u0_from_rod_curve@100%": {
+     "got": 0.8695023608532956,
+     "ref": 0.8695023608532956,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C1_precursor@100%": {
+     "got": 173.38709677419354,
+     "ref": 173.38709677419354,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C6_precursor@100%": {
+     "got": 0.9069767441860466,
+     "ref": 0.9069767441860466,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Xeq@50%": {
+     "got": 1006963986186482.4,
+     "ref": 1006963986186482.4,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Ieq@50%": {
+     "got": 2017894736842105,
+     "ref": 2017894736842105,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tf@50%": {
+     "got": 450,
+     "ref": 450,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tc@50%": {
+     "got": 297.5,
+     "ref": 297.5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tout@50%": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Xe@50%": {
+     "got": -1782.6776785007337,
+     "ref": -1782.6776785007337,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Doppler@50%": {
+     "got": -400,
+     "ref": -400,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_ctrl_balances@50%": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "u0_from_rod_curve@50%": {
+     "got": 0.7728347098125917,
+     "ref": 0.7728347098125917,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C1_precursor@50%": {
+     "got": 86.69354838709677,
+     "ref": 86.69354838709677,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C6_precursor@50%": {
+     "got": 0.4534883720930233,
+     "ref": 0.4534883720930233,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Xeq@20%": {
+     "got": 662700000000000,
+     "ref": 662700000000000,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Ieq@20%": {
+     "got": 807157894736842.1,
+     "ref": 807157894736842.1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tf@20%": {
+     "got": 354,
+     "ref": 354,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tc@20%": {
+     "got": 293,
+     "ref": 293,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "Tout@20%": {
+     "got": 296,
+     "ref": 296,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Xe@20%": {
+     "got": -1173.210277376944,
+     "ref": -1173.210277376944,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_Doppler@20%": {
+     "got": -160,
+     "ref": -160,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "rho_ctrl_balances@20%": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "u0_from_rod_curve@20%": {
+     "got": 0.666651284672118,
+     "ref": 0.666651284672118,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C1_precursor@20%": {
+     "got": 34.67741935483871,
+     "ref": 34.67741935483871,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "C6_precursor@20%": {
+     "got": 0.1813953488372093,
+     "ref": 0.1813953488372093,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 0,
+   "pass": true
+  },
+  {
+   "id": "inhour",
+   "note": "the dominant root of rho = omega Lambda + SUM beta_i omega/(omega+lambda_i), independently re-evaluated: substituting the tool omega back into the inhour equation must return the inserted reactivity",
+   "inputs": {
+    "rho_dollar": [
+     -2,
+     -1,
+     -0.5,
+     -0.1,
+     0.1,
+     0.3,
+     0.5,
+     0.9,
+     0.99
+    ],
+    "Lambda": [
+     0.00001,
+     0.0001,
+     0.001
+    ]
+   },
+   "cmp": {
+    "inhour_roundtrip(-2$,0.00001)": {
+     "got": -0.013004000000012207,
+     "ref": -0.013004,
+     "rel": 9.387303214740689e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-2$,0.00001)": {
+     "got": -0.013004000000012207,
+     "ref": -0.013004,
+     "rel": 9.387303214740689e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-2$,0.0001)": {
+     "got": -0.013004000000018544,
+     "ref": -0.013004,
+     "rel": 1.426037677498621e-12,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-2$,0.0001)": {
+     "got": -0.013004000000018544,
+     "ref": -0.013004,
+     "rel": 1.426037677498621e-12,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-2$,0.001)": {
+     "got": -0.013003999999986434,
+     "ref": -0.013004,
+     "rel": 1.0431819118839305e-12,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-2$,0.001)": {
+     "got": -0.013003999999986436,
+     "ref": -0.013004,
+     "rel": 1.0430485126624619e-12,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-1$,0.00001)": {
+     "got": -0.006501999999998691,
+     "ref": -0.006502,
+     "rel": 2.0129942519601675e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-1$,0.00001)": {
+     "got": -0.006501999999998691,
+     "ref": -0.006502,
+     "rel": 2.0129942519601675e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-1$,0.0001)": {
+     "got": -0.006502000000001496,
+     "ref": -0.006502,
+     "rel": 2.3011365703321994e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-1$,0.0001)": {
+     "got": -0.006502000000001496,
+     "ref": -0.006502,
+     "rel": 2.3011365703321994e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-1$,0.001)": {
+     "got": -0.0065019999999989,
+     "ref": -0.006502,
+     "rel": 1.6915021282210023e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-1$,0.001)": {
+     "got": -0.0065019999999989,
+     "ref": -0.006502,
+     "rel": 1.6915021282210023e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.5$,0.00001)": {
+     "got": -0.0032509999999994015,
+     "ref": -0.003251,
+     "rel": 1.8409092562657597e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.5$,0.00001)": {
+     "got": -0.0032509999999994015,
+     "ref": -0.003251,
+     "rel": 1.8409092562657597e-13,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.5$,0.0001)": {
+     "got": -0.003250999999999731,
+     "ref": -0.003251,
+     "rel": 8.270751731049065e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.5$,0.0001)": {
+     "got": -0.003250999999999731,
+     "ref": -0.003251,
+     "rel": 8.270751731049065e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.5$,0.001)": {
+     "got": -0.0032509999999997246,
+     "ref": -0.003251,
+     "rel": 8.470850563251865e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.5$,0.001)": {
+     "got": -0.0032509999999997246,
+     "ref": -0.003251,
+     "rel": 8.470850563251865e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.1$,0.00001)": {
+     "got": -0.0006501999999999871,
+     "ref": -0.0006502000000000001,
+     "rel": 2.0009883220279992e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.1$,0.00001)": {
+     "got": -0.0006501999999999871,
+     "ref": -0.0006502000000000001,
+     "rel": 2.0009883220279992e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.1$,0.0001)": {
+     "got": -0.0006501999999999515,
+     "ref": -0.0006502000000000001,
+     "rel": 7.470356402237864e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.1$,0.0001)": {
+     "got": -0.0006501999999999515,
+     "ref": -0.0006502000000000001,
+     "rel": 7.470356402237864e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(-0.1$,0.001)": {
+     "got": -0.0006502000000000487,
+     "ref": -0.0006502000000000001,
+     "rel": 7.470356402237864e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(-0.1$,0.001)": {
+     "got": -0.0006502000000000487,
+     "ref": -0.0006502000000000001,
+     "rel": 7.470356402237864e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.1$,0.00001)": {
+     "got": 0.0006501999999999986,
+     "ref": 0.0006502000000000001,
+     "rel": 2.3344863756993323e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.1$,0.00001)": {
+     "got": 0.0006501999999999986,
+     "ref": 0.0006502000000000001,
+     "rel": 2.3344863756993323e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.1$,0.0001)": {
+     "got": 0.0006502000000000144,
+     "ref": 0.0006502000000000001,
+     "rel": 2.2010871542307992e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.1$,0.0001)": {
+     "got": 0.0006502000000000143,
+     "ref": 0.0006502000000000001,
+     "rel": 2.1844122515472327e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.1$,0.001)": {
+     "got": 0.000650200000000021,
+     "ref": 0.0006502000000000001,
+     "rel": 3.2182562179283655e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.1$,0.001)": {
+     "got": 0.0006502000000000209,
+     "ref": 0.0006502000000000001,
+     "rel": 3.201581315244799e-14,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.3$,0.00001)": {
+     "got": 0.0019506000000000074,
+     "ref": 0.0019505999999999998,
+     "rel": 3.890810626165555e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.3$,0.00001)": {
+     "got": 0.0019506000000000074,
+     "ref": 0.0019505999999999998,
+     "rel": 3.890810626165555e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.3$,0.0001)": {
+     "got": 0.0019505999999999924,
+     "ref": 0.0019505999999999998,
+     "rel": 3.779644608275111e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.3$,0.0001)": {
+     "got": 0.0019505999999999922,
+     "ref": 0.0019505999999999998,
+     "rel": 3.890810626165555e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.3$,0.001)": {
+     "got": 0.001950600000000003,
+     "ref": 0.0019505999999999998,
+     "rel": 1.6674902683566664e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.3$,0.001)": {
+     "got": 0.0019506000000000029,
+     "ref": 0.0019505999999999998,
+     "rel": 1.556324250466222e-15,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.5$,0.00001)": {
+     "got": 0.003250999999999999,
+     "ref": 0.003251,
+     "rel": 2.667984429370666e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.5$,0.00001)": {
+     "got": 0.0032509999999999987,
+     "ref": 0.003251,
+     "rel": 4.001976644055999e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.5$,0.0001)": {
+     "got": 0.003250999999999998,
+     "ref": 0.003251,
+     "rel": 6.669961073426665e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.5$,0.0001)": {
+     "got": 0.003250999999999998,
+     "ref": 0.003251,
+     "rel": 6.669961073426665e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.5$,0.001)": {
+     "got": 0.003250999999999999,
+     "ref": 0.003251,
+     "rel": 2.667984429370666e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.5$,0.001)": {
+     "got": 0.003250999999999999,
+     "ref": 0.003251,
+     "rel": 2.667984429370666e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.9$,0.00001)": {
+     "got": 0.005851799999999999,
+     "ref": 0.0058518,
+     "rel": 1.4822135718725922e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.9$,0.00001)": {
+     "got": 0.0058518,
+     "ref": 0.0058518,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.9$,0.0001)": {
+     "got": 0.0058518,
+     "ref": 0.0058518,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.9$,0.0001)": {
+     "got": 0.0058518,
+     "ref": 0.0058518,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.9$,0.001)": {
+     "got": 0.005851799999999999,
+     "ref": 0.0058518,
+     "rel": 1.4822135718725922e-16,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.9$,0.001)": {
+     "got": 0.0058518,
+     "ref": 0.0058518,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.99$,0.00001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.99$,0.00001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.99$,0.0001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.99$,0.0001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "inhour_roundtrip(0.99$,0.001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    },
+    "omega_solves_inhour(0.99$,0.001)": {
+     "got": 0.00643698,
+     "ref": 0.00643698,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-10
+    }
+   },
+   "worst_rel": 1.426037677498621e-12,
+   "pass": true
+  },
+  {
+   "id": "refusal_thresholds",
+   "note": "the stand refuses rather than drawing meaningless numbers: prompt criticality exactly at rho = beta_eff, an empty core, and a coolant temperature outside the band where the linear alpha_C means anything",
+   "inputs": {},
+   "cmp": {
+    "rho = beta exactly -> refused": {
+     "got": "PROMPT_CRITICAL",
+     "ref": "PROMPT_CRITICAL",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "rho = beta + 1 pcm -> refused": {
+     "got": "PROMPT_CRITICAL",
+     "ref": "PROMPT_CRITICAL",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "rho = beta - 1 pcm -> runs": {
+     "got": null,
+     "ref": null,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "n = 0 -> refused as an empty core": {
+     "got": "SUBCRITICAL_NO_SOURCE",
+     "ref": "SUBCRITICAL_NO_SOURCE",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "coolant 119 K from TrefC (inside the 120 K band) -> runs": {
+     "got": null,
+     "ref": null,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "coolant 121 K from TrefC (outside the 120 K band) -> refused": {
+     "got": "FEEDBACK_OUT_OF_BAND",
+     "ref": "FEEDBACK_OUT_OF_BAND",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "prompt_critical_threshold_is_beta_eff": {
+     "got": 0.006502,
+     "ref": 0.006502,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0,
+   "pass": true
+  },
+  {
+   "id": "builtin_reference_cases",
+   "note": "the page's own reference cases still pass (they are the tool's self-check, NOT independent validation, and do not count towards the benchmark; they are run here only to show the fix broke nothing)",
+   "inputs": {},
+   "cmp": {
+    "builtin:prompt-jump": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:inhour-period": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:xenon-pit": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:xenon-pit-highflux": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:inverse-response": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:coolant-energy-balance": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "builtin:graphite-tip-low-power": {
+     "got": "pass",
+     "ref": "pass",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    }
+   },
+   "worst_rel": 0,
+   "pass": true
+  },
+  {
+   "id": "permalink_roundtrip",
+   "note": "the permalink restores the CONFIGURATION of the stand (preset, mode, parameters, setpoint, knob positions, speed, window). It deliberately does not restore the point on the trajectory - the stand integrates in wall time and the reopened run starts again from the equilibrium of that configuration, which the record states in its notes.",
+   "inputs": {
+    "preset": "candu",
+    "power_setpoint": 80,
+    "inlet_temperature": 296,
+    "coolant_flow": 0.9
+   },
+   "cmp": {
+    "preset": {
+     "got": "candu",
+     "ref": "candu",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "mode": {
+     "got": "manual",
+     "ref": "manual",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "power_setpoint": {
+     "got": 80,
+     "ref": 80,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "outlet_setpoint": {
+     "got": 305,
+     "ref": 305,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "speed_ordered": {
+     "got": 60,
+     "ref": 60,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "window": {
+     "got": 600,
+     "ref": 600,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "live_inputs_carried_but_not_compared": {
+     "got": "inlet_temperature, coolant_flow, rod_reg, rod_tipd",
+     "ref": "carried in the link",
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "inputs_verified": {
+    "preset": {
+     "got": "candu",
+     "want": "candu",
+     "ok": true
+    },
+    "power_setpoint": {
+     "got": 80,
+     "want": 80,
+     "ok": true
+    },
+    "speed_ordered": {
+     "got": 60,
+     "want": 60,
+     "ok": true
+    },
+    "window": {
+     "got": 600,
+     "want": 600,
+     "ok": true
+    },
+    "ok": true
+   }
+  }
+ ],
+ "build": "2026-10-16.permalink-setpoint-knob-id",
+ "manifest_revision": "2026-10-16.permalink-setpoint-knob-id",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_reactorstand_ref.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 2 010 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\"."
+}

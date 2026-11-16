@@ -1,0 +1,3912 @@
+{
+ "tool": "luchtbalans",
+ "file": "luchtbalans.html",
+ "reference": "Steady multizone air-flow network with the square-root opening law, the stack pressure term and the zone mass balance, re-implemented from ASHRAE Fundamentals ch. 16 / CIBSE Guide A and solved with scipy.optimize.root (Powell hybrid) followed by a Newton polish; the series cascade is compared against a closed form that uses no solver at all.",
+ "reference_citations": [
+  "ASHRAE Handbook - Fundamentals (2021), chapter 16 \"Ventilation and Infiltration\": orifice flow Q = Cd A sqrt(2 dp / rho) and the thermal (stack) pressure dp = g h (rho_o - rho_i).",
+  "CIBSE Guide A, \"Environmental design\", appendix 4A: flow through purpose-provided openings and discharge coefficients for doors, grilles and gaps.",
+  "G.N. Walton, \"AIRNET - a computer program for building airflow network modeling\", NISTIR 89-4072, National Institute of Standards and Technology, 1989: the node mass balance of a multizone network and its Newton solution.",
+  "scipy 1.17.1"
+ ],
+ "tolerance": "The network is a closed-form algebraic system, so the reference is exact: scipy.optimize.root followed by a Newton polish leaves a node residual below 1e-14 m3/s, and the three series-cascade cases are compared against a hand-derived closed form that uses no solver at all. The tool stops its own damped Newton at a node residual of 1e-10 m3/s (3.6e-7 m3/h), so pressures are graded at 1e-8 relative or 1e-7 Pa absolute, flows at 1e-8 relative or 1e-6 m3/h absolute, whichever is looser - both far above the solver stopping criterion and far below anything the interface prints. The bookkeeping identities (every zone balance closing on the reported flows, supply minus extract equalling the net envelope flow, velocity equalling flow over effective area, independence from the order of the blocks) are exact arithmetic and are held to 1e-9 relative.",
+ "not_benchmarked": [
+  "The 0.04 Pa regularisation of the square-root law is a declared modelling choice; the reference reproduces it and the harness records how many connections sit inside that window per case, but the size of the error it introduces against the unregularised law is not graded.",
+  "Discharge coefficients, closed-door gap areas and the default coefficient library are assumptions with their own provenance badges in the interface; they are inputs here, not graded quantities.",
+  "The heat, moisture and contaminant transport (the linear well-mixed system over the solved flows) and the capture-velocity relation are outside this benchmark, which covers the pressure and flow network only.",
+  "Wind pressure, fan curves, duct networks and every transient are outside the model.",
+  "The page shows its own built-in checks. Those re-run the same solver and are a self-check of consistency, not validation; nothing in this artifact relies on them."
+ ],
+ "run_notes": [
+  "Each network is loaded through the tool's own permalink codec and read back from Diagram.record.build().",
+  "Cross-check: on the three series cascades the reference's network solver and the hand-derived closed form agree to better than 1e-10 relative, and the tool matches both."
+ ],
+ "crosscheck": "closed-form series cascade vs. the scipy network solve: < 1e-10 relative on every room pressure and every connection flow.",
+ "total": 26,
+ "passed": 26,
+ "failed": 0,
+ "flagged": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "series_cascade_0",
+   "group": "closed_form",
+   "note": "two rooms in series to ambient with one imposed supply: the pressures follow from the orifice law alone, with no network solve at all",
+   "inputs": {
+    "nodes": [
+     {
+      "id": "AS1",
+      "type": "asup",
+      "Q": 3600,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "R1",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 1
+     },
+     {
+      "id": "R2",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 2
+     },
+     {
+      "id": "PX1",
+      "type": "psink",
+      "T": 20
+     }
+    ],
+    "links": [
+     {
+      "id": "K1",
+      "a": "AS1",
+      "b": "R1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K2",
+      "a": "R1",
+      "b": "R2",
+      "A": 0.5,
+      "gap": 0.5,
+      "cd": 0.6,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K3",
+      "a": "R2",
+      "b": "PX1",
+      "A": 0.8,
+      "gap": 0.8,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     }
+    ]
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 8.885601577906046,
+     "ref": 8.88560157790927,
+     "rel": 3.628440500333646e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "pressure_R2": {
+     "got": 2.2189349112425965,
+     "ref": 2.218934911242603,
+     "rel": 3.002043058586424e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "flow_K2": {
+     "got": 3599.9999999991305,
+     "ref": 3600,
+     "rel": 2.4152137080414427e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "flow_K3": {
+     "got": 3599.999999999994,
+     "ref": 3600,
+     "rel": 1.6421432115344537e-15,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "reference_selfcheck_solver_vs_closed_form": {
+     "got": 8.88560157790927,
+     "ref": 8.88560157790927,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-10
+    }
+   },
+   "worst_rel": 3.628440500333646e-13,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "series_cascade_1",
+   "group": "closed_form",
+   "note": "two rooms in series to ambient with one imposed supply: the pressures follow from the orifice law alone, with no network solve at all",
+   "inputs": {
+    "nodes": [
+     {
+      "id": "AS1",
+      "type": "asup",
+      "Q": 7200,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "R1",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 1
+     },
+     {
+      "id": "R2",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 2
+     },
+     {
+      "id": "PX1",
+      "type": "psink",
+      "T": 20
+     }
+    ],
+    "links": [
+     {
+      "id": "K1",
+      "a": "AS1",
+      "b": "R1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K2",
+      "a": "R1",
+      "b": "R2",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K3",
+      "a": "R2",
+      "b": "PX1",
+      "A": 0.5,
+      "gap": 0.5,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     }
+    ]
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 28.402366863259694,
+     "ref": 28.40236686390532,
+     "rel": 2.27314700396164e-11,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "pressure_R2": {
+     "got": 22.721893490480085,
+     "ref": 22.721893491124256,
+     "rel": 2.8350231421706937e-11,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "flow_K2": {
+     "got": 7199.999999999077,
+     "ref": 7200,
+     "rel": 1.2821348920826697e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "flow_K3": {
+     "got": 7199.999999897937,
+     "ref": 7200,
+     "rel": 1.4175359158091144e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "reference_selfcheck_solver_vs_closed_form": {
+     "got": 28.402366863905325,
+     "ref": 28.40236686390532,
+     "rel": 1.25085127441101e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-10
+    }
+   },
+   "worst_rel": 2.8350231421706937e-11,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "series_cascade_2",
+   "group": "closed_form",
+   "note": "two rooms in series to ambient with one imposed supply: the pressures follow from the orifice law alone, with no network solve at all",
+   "inputs": {
+    "nodes": [
+     {
+      "id": "AS1",
+      "type": "asup",
+      "Q": 1800,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "R1",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 1
+     },
+     {
+      "id": "R2",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 2
+     },
+     {
+      "id": "PX1",
+      "type": "psink",
+      "T": 20
+     }
+    ],
+    "links": [
+     {
+      "id": "K1",
+      "a": "AS1",
+      "b": "R1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K2",
+      "a": "R1",
+      "b": "R2",
+      "A": 0.2,
+      "gap": 0.2,
+      "cd": 0.6,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K3",
+      "a": "R2",
+      "b": "PX1",
+      "A": 0.2,
+      "gap": 0.2,
+      "cd": 0.6,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     }
+    ]
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 20.83333333328207,
+     "ref": 20.833333333333336,
+     "rel": 2.4607516024843785e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "pressure_R2": {
+     "got": 10.416666666641035,
+     "ref": 10.416666666666668,
+     "rel": 2.4607516024843785e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "flow_K2": {
+     "got": 1799.9999999977854,
+     "ref": 1800,
+     "rel": 1.2303442215650447e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "flow_K3": {
+     "got": 1799.9999999977854,
+     "ref": 1800,
+     "rel": 1.2303442215650447e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "reference_selfcheck_solver_vs_closed_form": {
+     "got": 20.833333333333336,
+     "ref": 20.833333333333336,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-10
+    }
+   },
+   "worst_rel": 2.4607516024843785e-12,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "default_prod",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"prod\"",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 18.15175723254511,
+     "ref": 18.15175723257287,
+     "rel": 1.5293783588252751e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 10.09947031921543,
+     "ref": 10.099470319229404,
+     "rel": 1.3836962547386387e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.313559495826118,
+     "ref": -11.313559495940662,
+     "rel": 1.0124560543138112e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3956.4688498094984,
+     "ref": 3956.4688498128853,
+     "rel": 8.560558411985388e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.1980382498941657,
+     "ref": 2.1980382498960473,
+     "rel": 8.560387801366527e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.052286913329679,
+     "ref": 8.052286913343465,
+     "rel": 1.7120981379513467e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 193.55680552333126,
+     "ref": 193.55680552391212,
+     "rel": 3.0009509304358075e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.5843852874690976,
+     "ref": 3.584385287479854,
+     "rel": 3.000872922157597e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.413029815041547,
+     "ref": 21.413029815170066,
+     "rel": 6.001925857290803e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6910.863506972474,
+     "ref": 6910.863506978437,
+     "rel": 8.627933772389468e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.3996053843654424,
+     "ref": 2.3996053843675127,
+     "rel": 8.627851520122725e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.177191953622188,
+     "ref": 8.177191953636298,
+     "rel": 1.725482592967849e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2513.041275264975,
+     "ref": -2513.0412752648863,
+     "rel": 3.528622243322035e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.9222783655932416,
+     "ref": -1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3350.7217003533,
+     "ref": 3350.721700353182,
+     "rel": 3.5286222433220345e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8300.000000001011,
+     "ref": 8299.999999999998,
+     "rel": 1.2206952985241473e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": -1.0151879337172431e-9,
+     "ref": 0,
+     "rel": 3.5999572117632735e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 6.207234726218758e-9,
+     "ref": 0,
+     "rel": 2.2011470660350205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.0124560543138112e-11,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_clean",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"clean\"",
+   "inputs": {
+    "mode": "clean",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 16.561308821045184,
+     "ref": 16.56130882106514,
+     "rel": 1.204952636861642e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 8.391206034698454,
+     "ref": 8.391206034704174,
+     "rel": 6.816504086793593e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.597136613296905,
+     "ref": 1.5971366132968543,
+     "rel": 3.169808362128971e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 7.725239805006656,
+     "ref": 7.725239805012361,
+     "rel": 7.384586283046493e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3985.3079952066487,
+     "ref": 3985.307995210121,
+     "rel": 8.713130266324519e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.214059997337027,
+     "ref": 2.214059997338956,
+     "rel": 8.713058950106389e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.17010278634673,
+     "ref": 8.170102786360966,
+     "rel": 1.742416721454042e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 935.8583950668229,
+     "ref": 935.8583950668335,
+     "rel": 1.129751676518886e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 0.6321231982889719,
+     "ref": 0.6321231982889791,
+     "rel": 1.141620759939975e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 0.6659662296917981,
+     "ref": 0.6659662296918132,
+     "rel": 2.2672370552316825e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6299.34231689426,
+     "ref": 6299.342316896936,
+     "rel": 4.24763932170942e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.187271637810507,
+     "ref": 2.1872716378114356,
+     "rel": 4.245428513513851e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 6.79406942140155,
+     "ref": 6.79406942140732,
+     "rel": 8.493429835452603e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2290.669933417104,
+     "ref": -2290.6699334170676,
+     "rel": 1.5881724180422712e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.0604953395449555,
+     "ref": 1.0604953395449388,
+     "rel": 1.5703364973318356e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.597136613296905,
+     "ref": -1.5971366132968543,
+     "rel": 3.169808362128971e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3054.226577889472,
+     "ref": 3054.2265778894234,
+     "rel": 1.5931354568486534e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.0604953395449555,
+     "ref": 1.0604953395449386,
+     "rel": 1.5912743172962604e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.597136613296905,
+     "ref": 1.5971366132968543,
+     "rel": 3.169808362128971e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999245,
+     "ref": 8299.999999999996,
+     "rel": 9.051115947764326e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.513989430663059e-10,
+     "ref": 0,
+     "rel": 2.6645352591003757e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.842126616859787e-9,
+     "ref": 0,
+     "rel": 1.3624562471133997e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.742416721454042e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_dry",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"dry\"",
+   "inputs": {
+    "mode": "dry",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 16.605784176836803,
+     "ref": 16.605784176856798,
+     "rel": 1.2040787939515352e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 8.4390629088067,
+     "ref": 8.439062908812431,
+     "rel": 6.790478073011099e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.6062454309710346,
+     "ref": 1.6062454309709904,
+     "rel": 2.7509417632005247e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 6.7569537674381515,
+     "ref": 6.756953767443903,
+     "rel": 8.512480096713587e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3984.483171636005,
+     "ref": 3984.4831716394847,
+     "rel": 8.733194693231518e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.213601762020003,
+     "ref": 2.213601762021936,
+     "rel": 8.732918285679274e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.166721268030102,
+     "ref": 8.166721268044366,
+     "rel": 1.746618373789529e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 914.1056130200682,
+     "ref": 914.1056130200624,
+     "rel": 6.3428433664756035e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 1.0046220606880627,
+     "ref": 1.0046220606880563,
+     "rel": 6.409667669865518e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 1.6821091413685494,
+     "ref": 1.682109141368528,
+     "rel": 1.2672353742433463e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6317.280037622688,
+     "ref": 6317.280037625357,
+     "rel": 4.2255004270903745e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.1935000130634332,
+     "ref": 2.19350001306436,
+     "rel": 4.2252754749807553e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 6.8328174778356665,
+     "ref": 6.8328174778414414,
+     "rel": 8.451764010407281e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2297.192740954706,
+     "ref": -2297.192740954675,
+     "rel": 1.3461134239623511e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.063515157849401,
+     "ref": 1.0635151578493867,
+     "rel": 1.3570938988131468e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.6062454309710346,
+     "ref": -1.6062454309709904,
+     "rel": 2.7509417632005247e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3062.9236546062752,
+     "ref": 3062.9236546062334,
+     "rel": 1.3659092096088564e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.063515157849401,
+     "ref": 1.0635151578493867,
+     "rel": 1.3570938988131468e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.6062454309710346,
+     "ref": 1.6062454309709904,
+     "rel": 2.7509417632005247e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999221,
+     "ref": 8299.999999999996,
+     "rel": 9.336017902536568e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.737810392427491e-10,
+     "ref": 0,
+     "rel": 2.7439043944778338e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.850020302564872e-9,
+     "ref": 0,
+     "rel": 1.365255426441444e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.746618373789529e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_defr",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"defr\"",
+   "inputs": {
+    "mode": "defr",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 16.68279572722393,
+     "ref": 16.682795727244,
+     "rel": 1.202992585875142e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 8.521917404122409,
+     "ref": 8.521917404128189,
+     "rel": 6.78282231720333e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.6220155059158892,
+     "ref": 1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 5.239187743680889,
+     "ref": 5.239187743686623,
+     "rel": 1.0944597059904458e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3983.0575516943454,
+     "ref": 3983.057551697832,
+     "rel": 8.753446049907896e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.212809750941303,
+     "ref": 2.21280975094324,
+     "rel": 8.754106097644638e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.160878323101521,
+     "ref": 8.16087832311581,
+     "rel": 1.750916243373188e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 876.5872805430708,
+     "ref": 876.587280543077,
+     "rel": 7.003397577436763e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 1.403437849092332,
+     "ref": 1.4034378490923418,
+     "rel": 6.961450144030243e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 3.28272966044152,
+     "ref": 3.282729660441566,
+     "rel": 1.4069168832560535e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6348.215735365405,
+     "ref": 6348.215735368082,
+     "rel": 4.217803101904587e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.204241574779654,
+     "ref": 2.204241574780584,
+     "rel": 4.218788067812386e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 6.89990189820652,
+     "ref": 6.89990189821234,
+     "rel": 8.435240486249311e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2308.4420855884223,
+     "ref": -2308.4420855883936,
+     "rel": 1.2410570438263751e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.0687231877724177,
+     "ref": 1.0687231877724044,
+     "rel": 1.246597477057743e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.6220155059158892,
+     "ref": -1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3077.922780784563,
+     "ref": 3077.922780784525,
+     "rel": 1.2410570438263751e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.0687231877724177,
+     "ref": 1.0687231877724044,
+     "rel": 1.246597477057743e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.6220155059158892,
+     "ref": 1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999196,
+     "ref": 8299.999999999996,
+     "rel": 9.642835392291292e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.993605777301127e-10,
+     "ref": 0,
+     "rel": 2.8346119777663572e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.858513508703254e-9,
+     "ref": 0,
+     "rel": 1.3682672016678205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.750916243373188e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_idle",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"idle\"",
+   "inputs": {
+    "mode": "idle",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 18.15175723254511,
+     "ref": 18.15175723257287,
+     "rel": 1.5293783588252751e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 10.09947031921543,
+     "ref": 10.099470319229404,
+     "rel": 1.3836962547386387e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.313559495826118,
+     "ref": -11.313559495940662,
+     "rel": 1.0124560543138112e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3956.4688498094984,
+     "ref": 3956.4688498128853,
+     "rel": 8.560558411985388e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.1980382498941657,
+     "ref": 2.1980382498960473,
+     "rel": 8.560387801366527e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.052286913329679,
+     "ref": 8.052286913343465,
+     "rel": 1.7120981379513467e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 193.55680552333126,
+     "ref": 193.55680552391212,
+     "rel": 3.0009509304358075e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.5843852874690976,
+     "ref": 3.584385287479854,
+     "rel": 3.000872922157597e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.413029815041547,
+     "ref": 21.413029815170066,
+     "rel": 6.001925857290803e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6910.863506972474,
+     "ref": 6910.863506978437,
+     "rel": 8.627933772389468e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.3996053843654424,
+     "ref": 2.3996053843675127,
+     "rel": 8.627851520122725e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.177191953622188,
+     "ref": 8.177191953636298,
+     "rel": 1.725482592967849e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2513.041275264975,
+     "ref": -2513.0412752648863,
+     "rel": 3.528622243322035e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.9222783655932416,
+     "ref": -1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3350.7217003533,
+     "ref": 3350.721700353182,
+     "rel": 3.5286222433220345e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8300.000000001011,
+     "ref": 8299.999999999998,
+     "rel": 1.2206952985241473e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": -1.0151879337172431e-9,
+     "ref": 0,
+     "rel": 3.5999572117632735e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 6.207234726218758e-9,
+     "ref": 0,
+     "rel": 2.2011470660350205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.0124560543138112e-11,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_emg",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"emg\"",
+   "inputs": {
+    "mode": "emg",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 16.68279572722393,
+     "ref": 16.682795727244,
+     "rel": 1.202992585875142e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 8.521917404122409,
+     "ref": 8.521917404128189,
+     "rel": 6.78282231720333e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.6220155059158892,
+     "ref": 1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 5.239187743680889,
+     "ref": 5.239187743686623,
+     "rel": 1.0944597059904458e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3983.0575516943454,
+     "ref": 3983.057551697832,
+     "rel": 8.753446049907896e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.212809750941303,
+     "ref": 2.21280975094324,
+     "rel": 8.754106097644638e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.160878323101521,
+     "ref": 8.16087832311581,
+     "rel": 1.750916243373188e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 876.5872805430708,
+     "ref": 876.587280543077,
+     "rel": 7.003397577436763e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 1.403437849092332,
+     "ref": 1.4034378490923418,
+     "rel": 6.961450144030243e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 3.28272966044152,
+     "ref": 3.282729660441566,
+     "rel": 1.4069168832560535e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6348.215735365405,
+     "ref": 6348.215735368082,
+     "rel": 4.217803101904587e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.204241574779654,
+     "ref": 2.204241574780584,
+     "rel": 4.218788067812386e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 6.89990189820652,
+     "ref": 6.89990189821234,
+     "rel": 8.435240486249311e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2308.4420855884223,
+     "ref": -2308.4420855883936,
+     "rel": 1.2410570438263751e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.0687231877724177,
+     "ref": 1.0687231877724044,
+     "rel": 1.246597477057743e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.6220155059158892,
+     "ref": -1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3077.922780784563,
+     "ref": 3077.922780784525,
+     "rel": 1.2410570438263751e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.0687231877724177,
+     "ref": 1.0687231877724044,
+     "rel": 1.246597477057743e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.6220155059158892,
+     "ref": 1.6220155059158488,
+     "rel": 2.491475448228687e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999196,
+     "ref": 8299.999999999996,
+     "rel": 9.642835392291292e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.993605777301127e-10,
+     "ref": 0,
+     "rel": 2.8346119777663572e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.858513508703254e-9,
+     "ref": 0,
+     "rel": 1.3682672016678205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.750916243373188e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "default_fire",
+   "group": "network",
+   "note": "the building the tool opens with, operating mode \"fire\"",
+   "inputs": {
+    "mode": "fire",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 16.535499684151926,
+     "ref": 16.535499684171874,
+     "rel": 1.2064036580376172e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 8.363432192459843,
+     "ref": 8.36343219246561,
+     "rel": 6.894363663147405e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.5918502909080068,
+     "ref": 1.5918502909079528,
+     "rel": 3.389567430113477e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 8.318237433148514,
+     "ref": 8.31823743315428,
+     "rel": 6.931822212373087e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3985.7871498424756,
+     "ref": 3985.7871498459344,
+     "rel": 8.677855140799834e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.214326194356931,
+     "ref": 2.2143261943588524,
+     "rel": 8.677917534989029e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.172067491692083,
+     "ref": 8.172067491706265,
+     "rel": 1.7354767346409196e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 948.5105101771552,
+     "ref": 948.5105101771552,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 0.16467196357242275,
+     "ref": 0.16467196357242275,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 0.04519475931132888,
+     "ref": 0.04519475931132888,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6288.908658700626,
+     "ref": 6288.90865870333,
+     "rel": 4.2995182393512794e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.1836488398266063,
+     "ref": 2.1836488398275447,
+     "rel": 4.297213376521154e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 6.771581901551836,
+     "ref": 6.771581901557656,
+     "rel": 8.595086449380611e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2286.875875892159,
+     "ref": -2286.8758758921203,
+     "rel": 1.6902327420927707e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.0587388314315551,
+     "ref": 1.0587388314315371,
+     "rel": 1.6987771171676883e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.5918502909080068,
+     "ref": -1.5918502909079528,
+     "rel": 3.389567430113477e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3049.1678345228784,
+     "ref": 3049.167834522827,
+     "rel": 1.6852614693219095e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.058738831431555,
+     "ref": 1.0587388314315371,
+     "rel": 1.677804560165618e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.5918502909080068,
+     "ref": 1.5918502909079528,
+     "rel": 3.389567430113477e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999252,
+     "ref": 8300,
+     "rel": 9.007284877799361e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.434053372890048e-10,
+     "ref": 0,
+     "rel": 2.6361891393227122e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.828537487038375e-9,
+     "ref": 0,
+     "rel": 1.3576374067511969e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.7354767346409196e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_thermal_draught",
+   "group": "network",
+   "note": "a 3 m height offset on the R1-R2 grille, with R1 at 20 C and R2 at 20 C: the stack term must be zero when the densities are equal",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 18.15175723254511,
+     "ref": 18.15175723257287,
+     "rel": 1.5293783588252751e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 10.09947031921543,
+     "ref": 10.099470319229404,
+     "rel": 1.3836962547386387e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.313559495826118,
+     "ref": -11.313559495940662,
+     "rel": 1.0124560543138112e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3956.4688498094984,
+     "ref": 3956.4688498128853,
+     "rel": 8.560558411985388e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.1980382498941657,
+     "ref": 2.1980382498960473,
+     "rel": 8.560387801366527e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.052286913329679,
+     "ref": 8.052286913343465,
+     "rel": 1.7120981379513467e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 193.55680552333126,
+     "ref": 193.55680552391212,
+     "rel": 3.0009509304358075e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.5843852874690976,
+     "ref": 3.584385287479854,
+     "rel": 3.000872922157597e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.413029815041547,
+     "ref": 21.413029815170066,
+     "rel": 6.001925857290803e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6910.863506972474,
+     "ref": 6910.863506978437,
+     "rel": 8.627933772389468e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.3996053843654424,
+     "ref": 2.3996053843675127,
+     "rel": 8.627851520122725e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.177191953622188,
+     "ref": 8.177191953636298,
+     "rel": 1.725482592967849e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2513.041275264975,
+     "ref": -2513.0412752648863,
+     "rel": 3.528622243322035e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.9222783655932416,
+     "ref": -1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3350.7217003533,
+     "ref": 3350.721700353182,
+     "rel": 3.5286222433220345e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8300.000000001011,
+     "ref": 8299.999999999998,
+     "rel": 1.2206952985241473e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": -1.0151879337172431e-9,
+     "ref": 0,
+     "rel": 3.5999572117632735e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 6.207234726218758e-9,
+     "ref": 0,
+     "rel": 2.2011470660350205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.0124560543138112e-11,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_thermal_draught_hot",
+   "group": "network",
+   "note": "the same 3 m offset with R2 at 45 C: dp_th = g h (rho_B - rho_A) must appear",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 20.656098811960614,
+     "ref": 20.656098812358454,
+     "rel": 1.9260170412305143e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 9.993095103729265,
+     "ref": 9.993095104142286,
+     "rel": 4.133061122952277e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.9020314845096609,
+     "ref": 1.9020314845058928,
+     "rel": 1.9810907318164885e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.33496914156309,
+     "ref": -11.33496914158176,
+     "rel": 1.6472287225239426e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3913.5097273822576,
+     "ref": 3913.509727378487,
+     "rel": 9.635251465380806e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.174172070767921,
+     "ref": 2.174172070765826,
+     "rel": 9.634788483530137e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 7.878373655512117,
+     "ref": 7.878373655496937,
+     "rel": 1.9268882403061144e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 193.172413153544,
+     "ref": 193.17241315549893,
+     "rel": 1.0120132620478314e-11,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.577266910250815,
+     "ref": 3.5772669102870176,
+     "rel": 1.012018319686475e-11,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.328064245292353,
+     "ref": 21.328064245724047,
+     "rel": 2.0240645698133422e-11,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6874.371958001602,
+     "ref": 6874.37195817866,
+     "rel": 2.575620014951288e-11,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.386934707639445,
+     "ref": 2.3869347077009238,
+     "rel": 2.5756390333960527e-11,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.091063619219604,
+     "ref": 8.091063619636394,
+     "rel": 5.1512406469112625e-11,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2499.7716211583524,
+     "ref": -2499.771621155877,
+     "rel": 9.903483011304808e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.1573016764622002,
+     "ref": 1.1573016764610542,
+     "rel": 9.902104432462136e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.9020314845096609,
+     "ref": -1.9020314845058928,
+     "rel": 1.9810907318164885e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3333.028828211137,
+     "ref": 3333.0288282078354,
+     "rel": 9.905302166891017e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.1573016764622002,
+     "ref": 1.157301676461054,
+     "rel": 9.904023073119464e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.9020314845096609,
+     "ref": 1.9020314845058928,
+     "rel": 1.9810907318164885e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999976848,
+     "ref": 8299.999999999996,
+     "rel": 2.7889709818704314e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 2.3147883609908604e-8,
+     "ref": 0,
+     "rel": 8.208469365215817e-13,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 2.0646584442118865e-7,
+     "ref": 0,
+     "rel": 7.321483844723002e-12,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 5.1512406469112625e-11,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_no_leakage",
+   "group": "network",
+   "note": "no envelope leakage anywhere: the whole imbalance must leave through the passive openings",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 26.531123014257922,
+     "ref": 26.531123014257926,
+     "rel": 1.3390739912861055e-16,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 15.646349351706478,
+     "ref": 15.646349351706483,
+     "rel": 3.405951380997083e-16,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 3.851409071189287,
+     "ref": 3.851409071189288,
+     "rel": 2.306112914216775e-16,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -190.11496752072162,
+     "ref": -190.11496752072173,
+     "rel": 5.979899384262033e-16,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 4600,
+     "ref": 4600,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.555555555555556,
+     "ref": 2.555555555555556,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 10.884773662551444,
+     "ref": 10.884773662551442,
+     "rel": 1.631964884590778e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 600.0000000000001,
+     "ref": 600.0000000000001,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 11.111111111111112,
+     "ref": 11.111111111111114,
+     "rel": 1.5987211554602249e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 205.7613168724281,
+     "ref": 205.7613168724282,
+     "rel": 5.525180313270533e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 8299.999999999996,
+     "ref": 8299.999999999996,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.881944444444443,
+     "ref": 2.881944444444443,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 11.79494028051719,
+     "ref": 11.794940280517196,
+     "rel": 4.518098770710417e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -3557.1428571428555,
+     "ref": -3557.1428571428555,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.646825396825396,
+     "ref": 1.6468253968253963,
+     "rel": 1.3483190467736845e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -3.851409071189287,
+     "ref": -3.851409071189288,
+     "rel": 2.306112914216775e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 4742.85714285714,
+     "ref": 4742.857142857141,
+     "rel": 1.917609310967018e-16,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.6468253968253959,
+     "ref": 1.646825396825396,
+     "rel": 1.3483190467736848e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 3.851409071189287,
+     "ref": 3.851409071189288,
+     "rel": 2.306112914216775e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999996,
+     "ref": 8299.999999999996,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 1.5987211554602254e-12,
+     "ref": 0,
+     "rel": 5.669223955532714e-17,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 1.73774038636981e-16,
+     "ref": 0,
+     "rel": 1.73774038636981e-16,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 5.979899384262033e-16,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_heavy_leakage",
+   "group": "network",
+   "note": "ten times the envelope leakage: the cascade must collapse towards zero",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 3.0528955470337773,
+     "ref": 3.05289554703382,
+     "rel": 1.3964632424790172e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 1.075075664305415,
+     "ref": 1.0750756643054105,
+     "rel": 4.130771671191922e-15,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 0.043409995277947346,
+     "ref": 0.04340999527794738,
+     "rel": 7.992276731981403e-16,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -0.20913168444624836,
+     "ref": -0.2091316844462634,
+     "rel": 7.193325116422672e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 1960.8370284202447,
+     "ref": 1960.8370284202679,
+     "rel": 1.182766061588209e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 1.0893539046779137,
+     "ref": 1.0893539046779266,
+     "rel": 1.1822225110084349e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 1.9778198827283624,
+     "ref": 1.9778198827284095,
+     "rel": 2.380067904827038e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 47.400940680285125,
+     "ref": 47.40094068028532,
+     "rel": 4.1972155648711585e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 0.8777951977830579,
+     "ref": 0.8777951977830616,
+     "rel": 4.173793603013619e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 1.2842073487516632,
+     "ref": 1.2842073487516739,
+     "rel": 8.299392653968108e-15,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 2454.707268321131,
+     "ref": 2454.707268321125,
+     "rel": 2.408317943983316e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 0.8523289126115037,
+     "ref": 0.8523289126115017,
+     "rel": 2.3446364598876035e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 1.0316656690274675,
+     "ref": 1.031665669027463,
+     "rel": 4.304584548875212e-15,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -377.64727204940465,
+     "ref": -377.6472720494048,
+     "rel": 4.515596144968706e-16,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 0.17483670002287255,
+     "ref": 0.1748367000228726,
+     "rel": 3.1750285394311213e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -0.043409995277947346,
+     "ref": -0.04340999527794738,
+     "rel": 7.992276731981403e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 503.5296960658729,
+     "ref": 503.5296960658731,
+     "rel": 4.515596144968706e-16,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 0.17483670002287252,
+     "ref": 0.1748367000228726,
+     "rel": 4.762542809146682e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 0.043409995277947346,
+     "ref": 0.04340999527794738,
+     "rel": 7.992276731981403e-16,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.999999999987,
+     "ref": 8299.99999999998,
+     "rel": 8.766213992992101e-16,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 7.993605777301127e-12,
+     "ref": 0,
+     "rel": 2.8346119777663573e-16,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 2.2382096176443156e-11,
+     "ref": 0,
+     "rel": 7.9369135377458e-16,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 1.587514269715561e-16,
+     "ref": 0,
+     "rel": 1.587514269715561e-16,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 7.193325116422672e-14,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_extract_dominant",
+   "group": "network",
+   "note": "extract raised well above supply: every room must go to under-pressure",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 6.7066672037850275,
+     "ref": 6.706667203800339,
+     "rel": 2.282997994672271e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": -2.4056088074584645,
+     "ref": -2.4056088074582025,
+     "rel": 1.0891739047479748e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": -0.45787052394748384,
+     "ref": -0.4578705239474349,
+     "rel": 1.0693161674585167e-13,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -14.245261539616838,
+     "ref": -14.245261539716099,
+     "rel": 6.968004311616508e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 4208.831734086947,
+     "ref": 4208.831734090423,
+     "rel": 8.259034738834373e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.3382398522705263,
+     "ref": 2.3382398522724572,
+     "rel": 8.257920514661895e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 9.112276011243491,
+     "ref": 9.11227601125854,
+     "rel": 1.6515407484151032e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 143.9258712677616,
+     "ref": 143.9258712683665,
+     "rel": 4.2028527357627284e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 2.665293912365956,
+     "ref": 2.665293912377158,
+     "rel": 4.202969986329465e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 11.839652732158374,
+     "ref": 11.839652732257896,
+     "rel": 8.405835081047933e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": -3372.838289661331,
+     "ref": -3372.838289661147,
+     "rel": 5.4604656758542945e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 1.1711244061324066,
+     "ref": 1.1711244061323427,
+     "rel": 5.4604656758542945e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": -1.9477382835109807,
+     "ref": -1.9477382835107675,
+     "rel": 1.0944120292373544e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": 1226.4866507859372,
+     "ref": 1226.4866507858717,
+     "rel": 5.339121994168643e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 0.5678178938823784,
+     "ref": 0.5678178938823479,
+     "rel": 5.35737094629715e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": 0.45787052394748384,
+     "ref": 0.4578705239474349,
+     "rel": 1.0693161674585167e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": -1635.3155343812498,
+     "ref": -1635.3155343811623,
+     "rel": 5.3530259576951236e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 0.5678178938823784,
+     "ref": 0.5678178938823479,
+     "rel": 5.35737094629715e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": -0.45787052394748384,
+     "ref": -0.4578705239474349,
+     "rel": 1.0693161674585167e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": -3999.9999999990728,
+     "ref": -4000.000000000005,
+     "rel": 2.330580173293126e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": -9.312550730555813e-10,
+     "ref": 0,
+     "rel": 3.302322954097806e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 3.92281207517442e-9,
+     "ref": 0,
+     "rel": 1.3910681117639788e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 8.405835081047933e-12,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_supply_dominant",
+   "group": "network",
+   "note": "supply well above extract: every room must go to over-pressure",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 89.82904634170119,
+     "ref": 89.82904634216206,
+     "rel": 5.13054794674361e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 84.66504302381277,
+     "ref": 84.6650430242696,
+     "rel": 5.395640507073664e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 16.11468476897245,
+     "ref": 16.11468476893161,
+     "rel": 2.5342378286261266e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": 102.49735790834248,
+     "ref": 102.4973579206963,
+     "rel": 1.205282077918719e-10,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3168.410082355988,
+     "ref": 3168.4100823572303,
+     "rel": 3.921114156086522e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 1.7602278235311044,
+     "ref": 1.7602278235317945,
+     "rel": 3.9205983616502693e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 5.164003317888415,
+     "ref": 5.164003317892465,
+     "rel": 7.842933756064077e-13,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": -176.63357020106105,
+     "ref": -176.63357025998243,
+     "rel": 3.3357977644883035e-10,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.27099204076039,
+     "ref": 3.270992041851527,
+     "rel": 3.335798267325006e-10,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": -17.83231488452971,
+     "ref": -17.83231489642671,
+     "rel": 6.671596361441903e-10,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 20009.44687985029,
+     "ref": 20009.44687992292,
+     "rel": 3.629897783754522e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 6.947724611059128,
+     "ref": 6.947724611084348,
+     "rel": 3.629940396190939e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 68.55035825484032,
+     "ref": 68.55035825533798,
+     "rel": 7.259832695150376e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -7276.162501799373,
+     "ref": -7276.162501790152,
+     "rel": 1.267214315830005e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 3.368593750833043,
+     "ref": 3.3685937508287744,
+     "rel": 1.2671713482899512e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -16.11468476897245,
+     "ref": -16.11468476893161,
+     "rel": 2.5342378286261266e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 9701.550002399164,
+     "ref": 9701.550002386872,
+     "rel": 1.2670893193498481e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 3.368593750833043,
+     "ref": 3.368593750828775,
+     "rel": 1.2670395160647855e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 16.11468476897245,
+     "ref": 16.11468476893161,
+     "rel": 2.5342378286261266e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 25999.999999938955,
+     "ref": 26000,
+     "rel": 2.347895553192267e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 6.104237115778233e-8,
+     "ref": 0,
+     "rel": 2.164623090701501e-12,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 1.3264569442839047e-7,
+     "ref": 0,
+     "rel": 4.703748029375549e-12,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 6.671596361441903e-10,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_closed_doors",
+   "group": "network",
+   "note": "the internal grille and opening closed down to their gaps",
+   "inputs": {
+    "mode": "prod",
+    "tout": 5
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 18.15175723254511,
+     "ref": 18.15175723257287,
+     "rel": 1.5293783588252751e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 10.09947031921543,
+     "ref": 10.099470319229404,
+     "rel": 1.3836962547386387e-12,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.313559495826118,
+     "ref": -11.313559495940662,
+     "rel": 1.0124560543138112e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3956.4688498094984,
+     "ref": 3956.4688498128853,
+     "rel": 8.560558411985388e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.1980382498941657,
+     "ref": 2.1980382498960473,
+     "rel": 8.560387801366527e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.052286913329679,
+     "ref": 8.052286913343465,
+     "rel": 1.7120981379513467e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 193.55680552333126,
+     "ref": 193.55680552391212,
+     "rel": 3.0009509304358075e-12,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.5843852874690976,
+     "ref": 3.584385287479854,
+     "rel": 3.000872922157597e-12,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.413029815041547,
+     "ref": 21.413029815170066,
+     "rel": 6.001925857290803e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6910.863506972474,
+     "ref": 6910.863506978437,
+     "rel": 8.627933772389468e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.3996053843654424,
+     "ref": 2.3996053843675127,
+     "rel": 8.627851520122725e-13,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.177191953622188,
+     "ref": 8.177191953636298,
+     "rel": 1.725482592967849e-12,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -2513.041275264975,
+     "ref": -2513.0412752648863,
+     "rel": 3.528622243322035e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -1.9222783655932416,
+     "ref": -1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 3350.7217003533,
+     "ref": 3350.721700353182,
+     "rel": 3.5286222433220345e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 1.163445034844896,
+     "ref": 1.1634450348448548,
+     "rel": 3.530742809574031e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 1.9222783655932416,
+     "ref": 1.9222783655931064,
+     "rel": 7.034629677977009e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8300.000000001011,
+     "ref": 8299.999999999998,
+     "rel": 1.2206952985241473e-13,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": -1.0151879337172431e-9,
+     "ref": 0,
+     "rel": 3.5999572117632735e-14,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 6.207234726218758e-9,
+     "ref": 0,
+     "rel": 2.2011470660350205e-13,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.0124560543138112e-11,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "variant_cold_outside",
+   "group": "network",
+   "note": "winter: -15 C outside, height offsets on both envelope openings",
+   "inputs": {
+    "mode": "prod",
+    "tout": -15
+   },
+   "cmp": {
+    "pressure_R1": {
+     "got": 18.810416563537547,
+     "ref": 18.810416563537576,
+     "rel": 1.510955875666099e-15,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R2": {
+     "got": 10.805162413779307,
+     "ref": 10.805162413779307,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R4": {
+     "got": 2.7545044850877107,
+     "ref": 2.75450448508772,
+     "rel": 3.3856809663369718e-15,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "pressure_R3": {
+     "got": -11.172785758401846,
+     "ref": -11.172785758402075,
+     "rel": 2.0509659563668677e-14,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-8
+    },
+    "flow_K6": {
+     "got": 3944.8972188296634,
+     "ref": 3944.8972188296707,
+     "rel": 1.844397258172921e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K6": {
+     "got": 2.1916095660164796,
+     "ref": 2.1916095660164836,
+     "rel": 1.8236838124024244e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K6": {
+     "got": 8.00525414975824,
+     "ref": 8.005254149758269,
+     "rel": 3.5503818990259346e-15,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K7": {
+     "got": 196.09339132680665,
+     "ref": 196.09339132680768,
+     "rel": 5.217827753253133e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K7": {
+     "got": 3.631359098644568,
+     "ref": 3.631359098644587,
+     "rel": 5.258592032575422e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K7": {
+     "got": 21.97794817218115,
+     "ref": 21.97794817218138,
+     "rel": 1.0507185989924572e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K8": {
+     "got": 6857.185627109221,
+     "ref": 6857.185627109217,
+     "rel": 5.305352669336115e-16,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K8": {
+     "got": 2.3809672316351462,
+     "ref": 2.380967231635145,
+     "rel": 5.595489143440434e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K8": {
+     "got": 8.050657928691596,
+     "ref": 8.050657928691587,
+     "rel": 1.1032370615757539e-15,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K9": {
+     "got": -4102.62828661246,
+     "ref": -4102.628286612465,
+     "rel": 1.1084293265621401e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K9": {
+     "got": 1.8993649475057688,
+     "ref": 1.8993649475057706,
+     "rel": 9.352372442868057e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K9": {
+     "got": -5.123200762812202,
+     "ref": -5.1232007628122105,
+     "rel": 1.7336396928793969e-15,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "flow_K10": {
+     "got": 1501.1218632256073,
+     "ref": 1501.1218632256257,
+     "rel": 1.2269002378878545e-14,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "velocity_K10": {
+     "got": 0.521222869175558,
+     "ref": 0.5212228691755644,
+     "rel": 1.214120027076523e-14,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "dp_K10": {
+     "got": 0.3858082073632203,
+     "ref": 0.3858082073632296,
+     "rel": 2.4172304344140656e-14,
+     "ok": true,
+     "tol_abs": 1e-8,
+     "tol_rel": 1e-8
+    },
+    "envelope_net_flow": {
+     "got": 8299.99999999997,
+     "ref": 8299.99999999999,
+     "rel": 2.4107088480728245e-15,
+     "ok": true,
+     "tol_abs": 0.000001,
+     "tol_rel": 1e-8
+    },
+    "identity_envelope_balance": {
+     "got": 2.5579538487363607e-11,
+     "ref": 0,
+     "rel": 9.070758328852342e-16,
+     "ok": true,
+     "note": "supply - extract must equal the net flow through the envelope"
+    },
+    "identity_zone_balance": {
+     "got": 2.4780177909633494e-11,
+     "ref": 0,
+     "rel": 8.787297131075707e-16,
+     "ok": true,
+     "note": "every zone balance must close on the reported flows"
+    },
+    "identity_velocity_is_flow_over_area": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 2.4172304344140656e-14,
+   "pass": true,
+   "flagged": false,
+   "discretisation": {
+    "regularised_connections": 0
+   }
+  },
+  {
+   "id": "pressure_cascade_is_monotone",
+   "group": "cascade",
+   "note": "The rooms carry a cleanliness rank. In the shipped building the cascade must fall monotonically from rank 1 to rank 4, the cleanest room must sit above ambient and the dirtiest below it, and the sign convention must hold: a room in over-pressure loses air through its envelope leakage, a room in under-pressure gains it.",
+   "inputs": {
+    "ranks": [
+     [
+      "R1",
+      1
+     ],
+     [
+      "R2",
+      2
+     ],
+     [
+      "R4",
+      3
+     ],
+     [
+      "R3",
+      4
+     ]
+    ]
+   },
+   "cmp": {
+    "cascade_monotone_by_rank": {
+     "got": [
+      18.15175723254511,
+      10.09947031921543,
+      1.9222783655932416,
+      -11.313559495826118
+     ],
+     "ref": "strictly decreasing",
+     "rel": 0,
+     "ok": true
+    },
+    "cleanest_over_dirtiest_under": {
+     "got": [
+      18.15175723254511,
+      -11.313559495826118
+     ],
+     "ref": "> 0 and < 0",
+     "rel": 0,
+     "ok": true
+    },
+    "leak_sign_follows_pressure": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "sign_convention_over_and_under_pressure",
+   "group": "cascade",
+   "note": "A single room fed by an imposed 3600 m3/h through a 0.10 m2 leak must settle at +rho/2*(Q/(Cd*A))^2 with air leaving through the leak; the same room on an imposed extract must settle at the mirror-image negative pressure with air entering. At building level, supply above extract must push air out through the envelope and extract above supply must pull it in.",
+   "inputs": {
+    "leak_area": 0.1,
+    "cd_leak": 0.65,
+    "flow_m3h": 3600
+   },
+   "cmp": {
+    "supply_room_over_pressure": {
+     "got": [
+      142.01183431797267,
+      3599.9999999803035
+     ],
+     "ref": "p > 0 and leak flow out",
+     "rel": 0,
+     "ok": true
+    },
+    "extract_room_under_pressure": {
+     "got": [
+      -142.01183431797267,
+      -3599.9999999803035
+     ],
+     "ref": "p < 0 and leak flow in",
+     "rel": 0,
+     "ok": true
+    },
+    "magnitude_matches_closed_form": {
+     "got": 142.01183431797267,
+     "ref": 142.0118343195266,
+     "rel": 1.0942246812343609e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "mirror_symmetry": {
+     "got": 142.01183431797267,
+     "ref": 142.0118343195266,
+     "rel": 1.0942246812343609e-11,
+     "ok": true,
+     "tol_abs": 1e-7,
+     "tol_rel": 1e-9
+    },
+    "envelope_flow_follows_the_balance": {
+     "got": [
+      25999.999999938955,
+      -3999.9999999990728
+     ],
+     "ref": "> 0 then < 0",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.0942246812343609e-11,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "over_constrained_sealed_room",
+   "group": "degenerate",
+   "note": "a sealed room with an imposed supply and no way out: there is no steady state, and the pressure the model would need is unbounded",
+   "inputs": {
+    "nodes": [
+     {
+      "id": "AS1",
+      "type": "asup",
+      "Q": 3600,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "R1",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 1
+     }
+    ],
+    "links": [
+     {
+      "id": "K1",
+      "a": "AS1",
+      "b": "R1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     }
+    ]
+   },
+   "cmp": {
+    "does_not_silently_return_a_non_solution": {
+     "got": {
+      "warnings": [
+       "The pressure solve did not reach its residual tolerance within 200 iterations.",
+       "No air leaves R1, so it has no steady temperature, humidity or contaminant concentration."
+      ],
+      "worst_zone_residual": 3600,
+      "pressures": {
+       "pressure_R1": 0
+      }
+     },
+     "ref": "a warning, a visible residual or a refusal",
+     "rel": 0,
+     "ok": true
+    },
+    "no_nan_reaches_the_reader": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "detail": {
+    "checks_panel": "RESULTS — CURRENT MODE\n?\nLive\nCheck the input\nLARGEST |ΔP|\n0.0\nPa\nENVELOPE IMBALANCE\n3600.000\nm³/h\nTOTAL SUPPLY AIR\n3600\nm³/h\nLOWEST AIR CHANGE RATE\n0.0\n1/h\nPRESSURE BY MODE, PA\nOPERATING MODE\tR1\nProduction ·\t0.0\nWet cleaning\t0.0\nDrying\t0.0\nDefrost\t0.0\nStandby\t0.0\nEmergency\t0.0\nFire\t0.0\nLOCAL EXHAUST — CAPTURE VELOCITY\nCapture velocity vₓ\t0.476 m/s\nDesign target\t0.50 m/s\nDistance where the target "
+   }
+  },
+  {
+   "id": "over_constrained_net_extract",
+   "group": "degenerate",
+   "note": "extract exceeds supply by 3600 m3/h in a sealed room: again no steady state exists",
+   "inputs": {
+    "nodes": [
+     {
+      "id": "AS1",
+      "type": "asup",
+      "Q": 3600,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "AX1",
+      "type": "asink",
+      "Q": 7200,
+      "T": 20,
+      "m": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "R1",
+      "type": "room",
+      "V": 500,
+      "T": 20,
+      "leak": 0,
+      "rank": 1
+     }
+    ],
+    "links": [
+     {
+      "id": "K1",
+      "a": "AS1",
+      "b": "R1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     },
+     {
+      "id": "K2",
+      "a": "R1",
+      "b": "AX1",
+      "A": 1,
+      "gap": 1,
+      "cd": 0.65,
+      "h": 0,
+      "f": {
+       "prod": 1,
+       "clean": 1,
+       "dry": 1,
+       "defr": 1,
+       "idle": 1,
+       "emg": 1,
+       "fire": 1
+      }
+     }
+    ]
+   },
+   "cmp": {
+    "does_not_silently_return_a_non_solution": {
+     "got": {
+      "warnings": [
+       "The pressure solve did not reach its residual tolerance within 200 iterations."
+      ],
+      "worst_zone_residual": 3600,
+      "pressures": {
+       "pressure_R1": 0
+      }
+     },
+     "ref": "a warning, a visible residual or a refusal",
+     "rel": 0,
+     "ok": true
+    },
+    "no_nan_reaches_the_reader": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "detail": {
+    "checks_panel": "RESULTS — CURRENT MODE\n?\nLive\nCheck the input\nLARGEST |ΔP|\n0.0\nPa\nENVELOPE IMBALANCE\n-3600.000\nm³/h\nTOTAL SUPPLY AIR\n3600\nm³/h\nLOWEST AIR CHANGE RATE\n14.4\n1/h\nPRESSURE BY MODE, PA\nOPERATING MODE\tR1\nProduction ·\t0.0\nWet cleaning\t0.0\nDrying\t0.0\nDefrost\t0.0\nStandby\t0.0\nEmergency\t0.0\nFire\t0.0\nLOCAL EXHAUST — CAPTURE VELOCITY\nCapture velocity vₓ\t0.476 m/s\nDesign target\t0.50 m/s\nDistance where the targe"
+   }
+  },
+  {
+   "id": "independent_of_block_order",
+   "group": "solver",
+   "note": "The answer must not depend on the order in which the blocks and arrows were drawn.",
+   "inputs": {},
+   "cmp": {
+    "pressures_unchanged": {
+     "got": 3.552713678800501e-15,
+     "ref": 0,
+     "rel": 3.552713678800501e-15,
+     "ok": true,
+     "tol_abs": 1e-9
+    }
+   },
+   "worst_rel": 3.552713678800501e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "permalink_round_trip",
+   "group": "framework",
+   "note": "The encoded diagram must restore identical blocks, arrows and outputs in a fresh page.",
+   "inputs": {
+    "link_chars": 1129
+   },
+   "cmp": {
+    "state_identical": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "outputs_identical": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "no_exception": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "language_selection",
+   "group": "framework",
+   "note": "The ?lang= query parameter must select the tool UI language for all six catalogue languages, and no untranslated key may leak into the record.",
+   "inputs": {
+    "languages": [
+     "en",
+     "uk",
+     "de",
+     "nl",
+     "fr",
+     "es"
+    ]
+   },
+   "cmp": {
+    "query_parameter_honoured": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "titles_translated": {
+     "got": 6,
+     "ref": 6,
+     "rel": 0,
+     "ok": true
+    },
+    "no_untranslated_keys": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "no_exception": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "detail": {
+    "en": {
+     "sel": "en",
+     "ttl": "Air Balance & Pressure Cascade",
+     "raw": false,
+     "untranslated": 0
+    },
+    "uk": {
+     "sel": "uk",
+     "ttl": "Повітряний баланс і каскад тиску",
+     "raw": false,
+     "untranslated": 0
+    },
+    "de": {
+     "sel": "de",
+     "ttl": "Luftbilanz & Druckkaskade",
+     "raw": false,
+     "untranslated": 0
+    },
+    "nl": {
+     "sel": "nl",
+     "ttl": "Luchtbalans & drukcascade",
+     "raw": false,
+     "untranslated": 0
+    },
+    "fr": {
+     "sel": "fr",
+     "ttl": "Bilan d’air & cascade de pression",
+     "raw": false,
+     "untranslated": 0
+    },
+    "es": {
+     "sel": "es",
+     "ttl": "Balance de aire y cascada de presión",
+     "raw": false,
+     "untranslated": 0
+    }
+   }
+  },
+  {
+   "id": "network_declaration",
+   "group": "network",
+   "note": "The page fetches nothing and loads no third-party asset, so network_access must be \"none\".",
+   "inputs": {},
+   "cmp": {
+    "declares_none": {
+     "got": "none",
+     "ref": "none",
+     "rel": 0,
+     "ok": true
+    },
+    "no_third_party_tags": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "detail": {
+    "na": {
+     "mode": "none"
+    },
+    "ext": []
+   }
+  }
+ ],
+ "build": "2026-10-16.luchtbalans-bench-rerun-1",
+ "manifest_revision": "2026-10-16.luchtbalans-bench-rerun-1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_luchtbalans.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 5 439 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\".",
+ "run_at": "2026-10-16T09:28:02Z"
+}

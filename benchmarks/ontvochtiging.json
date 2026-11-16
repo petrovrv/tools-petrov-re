@@ -1,0 +1,4118 @@
+{
+ "tool": "ontvochtiging",
+ "file": "ontvochtiging.html",
+ "run_at": "2026-10-15T22:21:17Z",
+ "reference": "Independent python implementation of the psychrometric mass and energy balances of all four paths (room moisture balance, wet cooling coil with the condensate/frost enthalpy, reheat, desiccant rotor with both sectors, heat-pump condenser/evaporator), using the ASHRAE Handbook-Fundamentals 2017 Ch.1 property set the tool declares, cross-checked point by point against CoolProp 8.0.0 HAPropsSI.",
+ "reference_citations": [
+  "ASHRAE Handbook - Fundamentals (2017), Chapter 1 \"Psychrometrics\": Eq.(5) and (6) saturation pressure over ice and over liquid water, Eq.(20) humidity ratio, Eq.(30) specific enthalpy, Eq.(28) moist-air density, and the cooling/dehumidifying energy balance q = m_da[(h1 - h2) - (W1 - W2) h_w] with h_w the enthalpy of the condensate leaving the coil.",
+  "Hyland, R.W. and Wexler, A. (1983), ASHRAE Transactions 89(2A), 500-519 - the saturation pressure correlations behind Eq.(5)/(6).",
+  "CoolProp 8.0.0 HumidAirProp (ASHRAE RP-1485 real-gas moist air) - used as the second, structurally different property reference (see crosscheck)."
+ ],
+ "tolerance": "display-limited: half of the last digit the tool prints (specific energy 0.005 kWh/kg, duties 0.05 kW, water 0.005 kg/h, temperatures 0.05 K). The ASHRAE ideal-gas and CoolProp real-gas property sets differ by up to 0.5 % in humidity ratio and 0.007 K in dew point (see crosscheck), so a disagreement below that level is property scatter and is flagged rather than graded.",
+ "crosscheck": {
+  "what": "ASHRAE ideal-gas moist air (the formulation the tool implements) vs CoolProp 8.0.0 HAPropsSI (ASHRAE RP-1485 real gas)",
+  "max_rel_humidity_ratio": 0.004844907105641657,
+  "max_abs_enthalpy_kJ_per_kg": 0.1855513523797896,
+  "max_abs_dewpoint_K": 0.006717417244743729,
+  "points": [
+   {
+    "t": 30,
+    "rh": 0.65,
+    "p": 101325,
+    "x_ashrae": 0.017415074648680477,
+    "x_coolprop": 0.017497226126993358,
+    "h_ashrae": 74.70686286174625,
+    "h_coolprop": 74.89241421412603,
+    "td_ashrae": 22.70066170118983,
+    "td_coolprop": 22.70372516199984
+   },
+   {
+    "t": 22,
+    "rh": 0.5,
+    "p": 101325,
+    "x_ashrae": 0.00822423934596967,
+    "x_coolprop": 0.00826080065006831,
+    "h_ashrae": 43.037358478307226,
+    "h_coolprop": 43.11938085760001,
+    "td_ashrae": 11.110092968158966,
+    "td_coolprop": 11.112428024835879
+   },
+   {
+    "t": 5,
+    "rh": 0.8,
+    "p": 101325,
+    "x_ashrae": 0.004314060080192674,
+    "x_coolprop": 0.0043321661870485756,
+    "h_ashrae": 15.859585019307673,
+    "h_coolprop": 15.898993818974814,
+    "td_ashrae": 1.841326349374043,
+    "td_coolprop": 1.8418694369613036
+   },
+   {
+    "t": -5,
+    "rh": 0.9,
+    "p": 101325,
+    "x_ashrae": 0.0022274174707381466,
+    "x_coolprop": 0.002236787769299671,
+    "h_ashrae": 0.5200561118382394,
+    "h_coolprop": 0.5430905328844072,
+    "td_ashrae": -6.22696498578901,
+    "td_coolprop": -6.227028552436025
+   },
+   {
+    "t": 20,
+    "rh": 0.6,
+    "p": 75000,
+    "x_ashrae": 0.01185874026277852,
+    "x_coolprop": 0.011901713743406817,
+    "h_ashrae": 50.219854534984435,
+    "h_coolprop": 50.378420141736655,
+    "td_ashrae": 12.00746989184151,
+    "td_coolprop": 12.009872302650479
+   },
+   {
+    "t": 35,
+    "rh": 0.4,
+    "p": 101325,
+    "x_ashrae": 0.01413165383445266,
+    "x_coolprop": 0.014200453713552788,
+    "h_ashrae": 71.47323690458897,
+    "h_coolprop": 71.6376812866743,
+    "td_ashrae": 19.38464909971421,
+    "td_coolprop": 19.391366516958954
+   }
+  ],
+  "note": "CoolProp uses a different enthalpy datum for moist air, so the enthalpy difference below is a datum offset and not an error; the humidity ratio and dew point are datum-free and agree to the values shown. Duties are computed from enthalpy DIFFERENCES, so the datum cancels. Where the two property sets differ by more than the tolerance the tool is flagged, not graded."
+ },
+ "total": 13,
+ "passed": 13,
+ "failed": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "td8-all-paths",
+   "note": "Moderate target: +8 degC supply dew point, all four paths in range",
+   "inputs": {
+    "tout": 30,
+    "rhout": 65,
+    "press": 101.3,
+    "troom": 22,
+    "tdreq": 8,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 10,
+    "gp": 70,
+    "prod": 2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 12000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 3.382,
+     "ref": 3.382490284922211,
+     "abs": 0.0004902849222108152,
+     "tol": 0.0005,
+     "rel": 0.00014494791733661716,
+     "ok": true
+    },
+    "total_load": {
+     "got": 4.91,
+     "ref": 4.910327161362603,
+     "abs": 0.0003271613626028014,
+     "tol": 0.0005,
+     "rel": 0.00006662720259804745,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 0.5,
+     "ref": 0.5323764212094204,
+     "abs": 0.032376421209420414,
+     "tol": 0.05,
+     "rel": 0.060814904491580654,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 4.67,
+     "ref": 4.6689074205182015,
+     "abs": 0.001092579481798417,
+     "tol": 0.005,
+     "rel": 0.00023401181119953577,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 76.3,
+     "ref": 76.31994129488899,
+     "abs": 0.01994129488899432,
+     "tol": 0.05,
+     "rel": 0.0002612855113704045,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 22.9,
+     "ref": 22.925862920857863,
+     "abs": 0.02586292085786468,
+     "tol": 0.05,
+     "rel": 0.0011281111183097361,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 4.18,
+     "ref": 4.180560556353809,
+     "abs": 0.0005605563538093605,
+     "tol": 0.005,
+     "rel": 0.00013408640928724285,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.21,
+     "ref": 0.21418287190817978,
+     "abs": 0.004182871908179786,
+     "tol": 0.005,
+     "rel": 0.01952944169117773,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 1.5,
+     "ref": 1.4525053894216455,
+     "abs": 0.04749461057835447,
+     "tol": 0.05,
+     "rel": 0.03269840575067728,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 4.83,
+     "ref": 4.830709192689257,
+     "abs": 0.0007091926892570655,
+     "tol": 0.005,
+     "rel": 0.0001468092284110892,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 23.7,
+     "ref": 23.720362557506,
+     "abs": 0.02036255750600091,
+     "tol": 0.05,
+     "rel": 0.0008584420856399366,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 4.3,
+     "ref": 4.30448974652337,
+     "abs": 0.004489746523369753,
+     "tol": 0.005,
+     "rel": 0.0010430380341818705,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -24.4,
+     "ref": -24.390401179006645,
+     "abs": 0.00959882099335374,
+     "tol": 0.05,
+     "rel": 0.00039354912298923797,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 4.94,
+     "ref": 4.93514633016875,
+     "abs": 0.004853669831250684,
+     "tol": 0.005,
+     "rel": 0.0009834905606709175,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 24.2,
+     "ref": 24.23318307032651,
+     "abs": 0.03318307032651191,
+     "tol": 0.05,
+     "rel": 0.0013693236348775212,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 4.4,
+     "ref": 4.39628078933896,
+     "abs": 0.0037192106610399733,
+     "tol": 0.005,
+     "rel": 0.0008459902447676019,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -23.1,
+     "ref": -23.090861269505083,
+     "abs": 0.00913873049491798,
+     "tol": 0.05,
+     "rel": 0.0003957726127343302,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 5.42,
+     "ref": 5.415991384375294,
+     "abs": 0.004008615624705669,
+     "tol": 0.005,
+     "rel": 0.0007401443872806385,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 3.8,
+     "ref": 3.7884655941878425,
+     "abs": 0.011534405812157367,
+     "tol": 0.05,
+     "rel": 0.003044611472743247,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 18.4,
+     "ref": 18.426940494680807,
+     "abs": 0.026940494680808058,
+     "tol": 0.05,
+     "rel": 0.0014620166971605953,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 26.6,
+     "ref": 26.59428960040377,
+     "abs": 0.005710399596232207,
+     "tol": 0.05,
+     "rel": 0.00021472277252126745,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 4.78,
+     "ref": 4.781316221960664,
+     "abs": 0.0013162219606641656,
+     "tol": 0.005,
+     "rel": 0.00027528444042641153,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 102.1,
+     "ref": 102.07381513971539,
+     "abs": 0.02618486028460154,
+     "tol": 0.05,
+     "rel": 0.00025652867240007183,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 3,
+     "ref": 3.4946100444143964,
+     "abs": 0.4946100444143964,
+     "tol": 0.5,
+     "rel": 0.14153511783237602,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.14153511783237602,
+   "pass": true
+  },
+  {
+   "id": "td2-cool-limit",
+   "note": "Target near the frost limit of a chilled-water coil",
+   "inputs": {
+    "tout": 28,
+    "rhout": 70,
+    "press": 101.3,
+    "troom": 20,
+    "tdreq": 2,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 1.5,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 10000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 2.568,
+     "ref": 2.5677827879188957,
+     "abs": 0.00021721208110436763,
+     "tol": 0.0005,
+     "rel": 0.00008459129881480784,
+     "ok": true
+    },
+    "total_load": {
+     "got": 4.041,
+     "ref": 4.04136987203257,
+     "abs": 0.0003698720325697735,
+     "tol": 0.0005,
+     "rel": 0.00009152145046890987,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -27.2,
+     "ref": -27.158817909490253,
+     "abs": 0.041182090509746416,
+     "tol": 0.05,
+     "rel": 0.0015163432608514208,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 1.3,
+     "ref": 1.3006700191188258,
+     "abs": 0.0006700191188258042,
+     "tol": 0.05,
+     "rel": 0.0005151338225507241,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 5.61,
+     "ref": 5.613892101101141,
+     "abs": 0.003892101101140355,
+     "tol": 0.005,
+     "rel": 0.0006932981665922892,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 3.1,
+     "ref": 3.1188607893531883,
+     "abs": 0.018860789353188245,
+     "tol": 0.05,
+     "rel": 0.006047332865119552,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 15.8,
+     "ref": 15.841274573773239,
+     "abs": 0.04127457377323829,
+     "tol": 0.05,
+     "rel": 0.0026055083876629684,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 22.7,
+     "ref": 22.687814402231748,
+     "abs": 0.012185597768251455,
+     "tol": 0.05,
+     "rel": 0.0005370987946310415,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 4.04,
+     "ref": 4.041369872032566,
+     "abs": 0.0013698720325656666,
+     "tol": 0.005,
+     "rel": 0.0003389623013833929,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 5,
+     "ref": 5.00186281034667,
+     "abs": 0.0018628103466697965,
+     "tol": 0.005,
+     "rel": 0.0003724233185317389,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 102.5,
+     "ref": 102.45198560916826,
+     "abs": 0.04801439083173875,
+     "tol": 0.05,
+     "rel": 0.0004686526136731314,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 3,
+     "ref": 3.327581312873319,
+     "abs": 0.32758131287331915,
+     "tol": 0.5,
+     "rel": 0.09844426989838374,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 0.1,
+     "ref": 0.128582262221272,
+     "abs": 0.028582262221271998,
+     "tol": 0.05,
+     "rel": 0.22228775359455055,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 1.3,
+     "ref": 1.3006700191188258,
+     "abs": 0.0006700191188258042,
+     "tol": 0.05,
+     "rel": 0.0005151338225507241,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 6.63,
+     "ref": 6.627761574027824,
+     "abs": 0.002238425972175939,
+     "tol": 0.005,
+     "rel": 0.0003377348365921381,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 63.1,
+     "ref": 63.089485300059685,
+     "abs": 0.010514699940316063,
+     "tol": 0.05,
+     "rel": 0.0001666632702788291,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 85,
+     "ref": 84.96019132982096,
+     "abs": 0.03980867017904188,
+     "tol": 0.05,
+     "rel": 0.00046855673882020875,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 26.8,
+     "ref": 26.785235944291184,
+     "abs": 0.01476405570881667,
+     "tol": 0.05,
+     "rel": 0.0005512012565251782,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 4.04,
+     "ref": 4.041369872032566,
+     "abs": 0.0013698720325656666,
+     "tol": 0.005,
+     "rel": 0.0003389623013833929,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 6,
+     "ref": 5.995371481102343,
+     "abs": 0.004628518897656697,
+     "tol": 0.005,
+     "rel": 0.0007720153642265502,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 1.2,
+     "ref": 1.2412998085693232,
+     "abs": 0.04129980856932325,
+     "tol": 0.05,
+     "rel": 0.033271421041242165,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.15,
+     "ref": 0.15088050299194453,
+     "abs": 0.0008805029919445317,
+     "tol": 0.005,
+     "rel": 0.005835763895826498,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 1.1,
+     "ref": 1.0724104848933678,
+     "abs": 0.027589515106632323,
+     "tol": 0.05,
+     "rel": 0.02572663685713182,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 1.3,
+     "ref": 1.3006700191188258,
+     "abs": 0.0006700191188258042,
+     "tol": 0.05,
+     "rel": 0.0005151338225507241,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 6.73,
+     "ref": 6.730708146687976,
+     "abs": 0.0007081466879759191,
+     "tol": 0.005,
+     "rel": 0.00010521131990017744,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 63.1,
+     "ref": 63.089485300059685,
+     "abs": 0.010514699940316063,
+     "tol": 0.05,
+     "rel": 0.0001666632702788291,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 60,
+     "ref": 59.97645764548445,
+     "abs": 0.023542354515548425,
+     "tol": 0.05,
+     "rel": 0.00039252659192887324,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 27.2,
+     "ref": 27.201281121468934,
+     "abs": 0.0012811214689349981,
+     "tol": 0.05,
+     "rel": 0.00004709783569435845,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 4.04,
+     "ref": 4.041369872032566,
+     "abs": 0.0013698720325656666,
+     "tol": 0.005,
+     "rel": 0.0003389623013833929,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 6.06,
+     "ref": 6.055803225929713,
+     "abs": 0.004196774070286402,
+     "tol": 0.005,
+     "rel": 0.0006930169151330202,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 1.2,
+     "ref": 1.2412998085693232,
+     "abs": 0.04129980856932325,
+     "tol": 0.05,
+     "rel": 0.033271421041242165,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -27.6,
+     "ref": -27.589742176376504,
+     "abs": 0.010257823623497586,
+     "tol": 0.05,
+     "rel": 0.00037179845893162296,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 1.3,
+     "ref": 1.3006700191188258,
+     "abs": 0.0006700191188258042,
+     "tol": 0.05,
+     "rel": 0.0005151338225507241,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 6.84,
+     "ref": 6.836452100070668,
+     "abs": 0.0035478999293321323,
+     "tol": 0.005,
+     "rel": 0.0005189680081712937,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 63.1,
+     "ref": 63.089485300059685,
+     "abs": 0.010514699940316063,
+     "tol": 0.05,
+     "rel": 0.0001666632702788291,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 60,
+     "ref": 59.97645764548445,
+     "abs": 0.023542354515548425,
+     "tol": 0.05,
+     "rel": 0.00039252659192887324,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 27.6,
+     "ref": 27.62863154881936,
+     "abs": 0.0286315488193587,
+     "tol": 0.05,
+     "rel": 0.0010362999256321183,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 4.04,
+     "ref": 4.041369872032566,
+     "abs": 0.0013698720325656666,
+     "tol": 0.005,
+     "rel": 0.0003389623013833929,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 6.15,
+     "ref": 6.149624813161457,
+     "abs": 0.0003751868385437618,
+     "tol": 0.005,
+     "rel": 0.00006100971196499421,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 1.2,
+     "ref": 1.2412998085693232,
+     "abs": 0.04129980856932325,
+     "tol": 0.05,
+     "rel": 0.033271421041242165,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.22228775359455055,
+   "pass": true
+  },
+  {
+   "id": "tdm5-freeze",
+   "note": "Sub-zero target: freeze-out on alternating coils and the rotor",
+   "inputs": {
+    "tout": 20,
+    "rhout": 60,
+    "press": 101.3,
+    "troom": 5,
+    "tdreq": -5,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 0.4,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 6000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 60,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.096,
+     "ref": 1.0961877907697084,
+     "abs": 0.0001877907697083181,
+     "tol": 0.0005,
+     "rel": 0.00017131259013244195,
+     "ok": true
+    },
+    "total_load": {
+     "got": 1.571,
+     "ref": 1.57086212187964,
+     "abs": 0.00013787812036003544,
+     "tol": 0.0005,
+     "rel": 0.00008777226112948423,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -31.4,
+     "ref": -31.389349539859907,
+     "abs": 0.010650460140091411,
+     "tol": 0.05,
+     "rel": 0.00033930171527023445,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": -5.7,
+     "ref": -5.699157255714766,
+     "abs": 0.0008427442852338984,
+     "tol": 0.05,
+     "rel": 0.00014787173742027314,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 8.32,
+     "ref": 8.316145327888592,
+     "abs": 0.0038546721114087745,
+     "tol": 0.005,
+     "rel": 0.00046351668464498174,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 23.3,
+     "ref": 23.28882866053719,
+     "abs": 0.011171339462809016,
+     "tol": 0.05,
+     "rel": 0.00047968661823420927,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 21.9,
+     "ref": 21.899491025297813,
+     "abs": 0.0005089747021855828,
+     "tol": 0.05,
+     "rel": 0.000023241394130924156,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 13.1,
+     "ref": 13.063517695626512,
+     "abs": 0.03648230437348765,
+     "tol": 0.05,
+     "rel": 0.0027926861067215786,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 1.57,
+     "ref": 1.5708621218796381,
+     "abs": 0.0008621218796380781,
+     "tol": 0.005,
+     "rel": 0.0005488208466103273,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 7.44,
+     "ref": 7.441911236308301,
+     "abs": 0.0019112363083007011,
+     "tol": 0.005,
+     "rel": 0.00025682062680027417,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": -5.8,
+     "ref": -5.753487305587868,
+     "abs": 0.04651269441213213,
+     "tol": 0.05,
+     "rel": 0.008084261238737478,
+     "ok": true
+    },
+    "m2.t_dry": {
+     "got": 2291.7,
+     "ref": 2291.7351878676445,
+     "abs": 0.035187867644708604,
+     "tol": 0.05,
+     "rel": 0.00001535424678688523,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -32.6,
+     "ref": -32.564195352694284,
+     "abs": 0.0358046473057172,
+     "tol": 0.05,
+     "rel": 0.0010995096583203247,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": -5.7,
+     "ref": -5.699157255714766,
+     "abs": 0.0008427442852338984,
+     "tol": 0.05,
+     "rel": 0.00014787173742027314,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 9.51,
+     "ref": 9.506694780415428,
+     "abs": 0.0033052195845719723,
+     "tol": 0.005,
+     "rel": 0.00034767284118356214,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 1.4,
+     "ref": 1.4146945515114504,
+     "abs": 0.014694551511450493,
+     "tol": 0.05,
+     "rel": 0.010387084261935504,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 10.8,
+     "ref": 10.765520190614277,
+     "abs": 0.034479809385723925,
+     "tol": 0.05,
+     "rel": 0.0032028001225416418,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 14.9,
+     "ref": 14.93370673482546,
+     "abs": 0.033706734825459606,
+     "tol": 0.05,
+     "rel": 0.0022570909837713216,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 1.57,
+     "ref": 1.5708621218796381,
+     "abs": 0.0008621218796380781,
+     "tol": 0.005,
+     "rel": 0.0005488208466103273,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 8.38,
+     "ref": 8.375759246342426,
+     "abs": 0.004240753657574814,
+     "tol": 0.005,
+     "rel": 0.0005063127452507294,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 109,
+     "ref": 109.04082980028662,
+     "abs": 0.04082980028661609,
+     "tol": 0.05,
+     "rel": 0.00037444506210561476,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 1,
+     "ref": 1.4805001169128411,
+     "abs": 0.4805001169128411,
+     "tol": 0.5,
+     "rel": 0.3245525693809376,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 5.421010862427522e-20,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": -4.7,
+     "ref": -4.708791809760413,
+     "abs": 0.008791809760412939,
+     "tol": 0.05,
+     "rel": 0.0018671052184106379,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": -5.7,
+     "ref": -5.699157255714766,
+     "abs": 0.0008427442852338984,
+     "tol": 0.05,
+     "rel": 0.00014787173742027314,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": -4.7,
+     "ref": -4.708791809760413,
+     "abs": 0.008791809760412939,
+     "tol": 0.05,
+     "rel": 0.0018671052184106379,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": -5.7,
+     "ref": -5.699157255714766,
+     "abs": 0.0008427442852338984,
+     "tol": 0.05,
+     "rel": 0.00014787173742027314,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.3245525693809376,
+   "pass": true
+  },
+  {
+   "id": "tdm25-rotor",
+   "note": "Deep drying: only the desiccant rotor can reach the required dew point",
+   "inputs": {
+    "tout": 25,
+    "rhout": 55,
+    "press": 101.3,
+    "troom": 18,
+    "tdreq": -25,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 0.2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 8000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.164,
+     "ref": 1.1640432329317578,
+     "abs": 0.00004323293175789722,
+     "tol": 0.0005,
+     "rel": 0.000037140314495889306,
+     "ok": true
+    },
+    "total_load": {
+     "got": 2.182,
+     "ref": 2.181626733826864,
+     "abs": 0.0003732661731361553,
+     "tol": 0.0005,
+     "rel": 0.00017109534245640486,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -46.5,
+     "ref": -46.465451235046075,
+     "abs": 0.034548764953925115,
+     "tol": 0.05,
+     "rel": 0.0007435366285191066,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 8.45,
+     "ref": 8.445553897008587,
+     "abs": 0.0044461029914124595,
+     "tol": 0.005,
+     "rel": 0.0005264430309286486,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 1.7,
+     "ref": 1.7256522753047838,
+     "abs": 0.025652275304783867,
+     "tol": 0.05,
+     "rel": 0.014865263223584934,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 13.1,
+     "ref": 13.122352159319435,
+     "abs": 0.02235215931943557,
+     "tol": 0.05,
+     "rel": 0.0017033652997615347,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 18.4,
+     "ref": 18.425046163689583,
+     "abs": 0.025046163689584233,
+     "tol": 0.05,
+     "rel": 0.0013593541892417589,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 2.18,
+     "ref": 2.181626733826864,
+     "abs": 0.0016267338268636244,
+     "tol": 0.005,
+     "rel": 0.00074565176601504,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 7.65,
+     "ref": 7.650171085340306,
+     "abs": 0.00017108534030541023,
+     "tol": 0.005,
+     "rel": 0.00002236359663030984,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 108.1,
+     "ref": 108.14506200703875,
+     "abs": 0.04506200703875152,
+     "tol": 0.05,
+     "rel": 0.00041668113367782436,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 2,
+     "ref": 1.8165106071248445,
+     "abs": 0.18348939287515553,
+     "tol": 0.5,
+     "rel": 0.10101201289739827,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -37.9,
+     "ref": -37.91810007964149,
+     "abs": 0.018100079641492073,
+     "tol": 0.05,
+     "rel": 0.00047734669204088474,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 38.8,
+     "ref": 38.79578734917044,
+     "abs": 0.004212650829558129,
+     "tol": 0.005,
+     "rel": 0.00010858526446810744,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 123.1,
+     "ref": 123.13719433078667,
+     "abs": 0.03719433078667578,
+     "tol": 0.05,
+     "rel": 0.00030205601961954463,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 121.4,
+     "ref": 121.43921766029185,
+     "abs": 0.03921766029183971,
+     "tol": 0.05,
+     "rel": 0.0003229406533361017,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 84.6,
+     "ref": 84.63792684081227,
+     "abs": 0.037926840812275486,
+     "tol": 0.05,
+     "rel": 0.0004481069211868647,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 2.18,
+     "ref": 2.181626733826864,
+     "abs": 0.0016267338268636244,
+     "tol": 0.005,
+     "rel": 0.00074565176601504,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 36.39,
+     "ref": 36.387163742860395,
+     "abs": 0.002836257139605891,
+     "tol": 0.005,
+     "rel": 0.00007794663963503887,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": -29.1,
+     "ref": -29.08040453926445,
+     "abs": 0.01959546073555174,
+     "tol": 0.05,
+     "rel": 0.0006738372813587889,
+     "ok": true
+    },
+    "m2.t_dry": {
+     "got": 412.5,
+     "ref": 412.5361988121956,
+     "abs": 0.03619881219560739,
+     "tol": 0.05,
+     "rel": 0.00008774699602079443,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.10101201289739827,
+   "pass": true
+  },
+  {
+   "id": "reheat-electric",
+   "note": "Electric reheat instead of condenser recovery - site energy must rise by the full reheat duty",
+   "inputs": {
+    "tout": 30,
+    "rhout": 65,
+    "press": 101.3,
+    "troom": 22,
+    "tdreq": 8,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 10,
+    "gp": 70,
+    "prod": 2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 12000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "elec",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 3.382,
+     "ref": 3.382490284922211,
+     "abs": 0.0004902849222108152,
+     "tol": 0.0005,
+     "rel": 0.00014494791733661716,
+     "ok": true
+    },
+    "total_load": {
+     "got": 4.91,
+     "ref": 4.910327161362603,
+     "abs": 0.0003271613626028014,
+     "tol": 0.0005,
+     "rel": 0.00006662720259804745,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 0.5,
+     "ref": 0.5323764212094204,
+     "abs": 0.032376421209420414,
+     "tol": 0.05,
+     "rel": 0.060814904491580654,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 4.67,
+     "ref": 4.6689074205182015,
+     "abs": 0.001092579481798417,
+     "tol": 0.005,
+     "rel": 0.00023401181119953577,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 76.3,
+     "ref": 76.31994129488899,
+     "abs": 0.01994129488899432,
+     "tol": 0.05,
+     "rel": 0.0002612855113704045,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 22.9,
+     "ref": 22.925862920857863,
+     "abs": 0.02586292085786468,
+     "tol": 0.05,
+     "rel": 0.0011281111183097361,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 4.18,
+     "ref": 4.180560556353809,
+     "abs": 0.0005605563538093605,
+     "tol": 0.005,
+     "rel": 0.00013408640928724285,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.21,
+     "ref": 0.21418287190817978,
+     "abs": 0.004182871908179786,
+     "tol": 0.005,
+     "rel": 0.01952944169117773,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -23.1,
+     "ref": -23.090861269505083,
+     "abs": 0.00913873049491798,
+     "tol": 0.05,
+     "rel": 0.0003957726127343302,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 5.42,
+     "ref": 5.415991384375294,
+     "abs": 0.004008615624705669,
+     "tol": 0.005,
+     "rel": 0.0007401443872806385,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 3.8,
+     "ref": 3.7884655941878425,
+     "abs": 0.011534405812157367,
+     "tol": 0.05,
+     "rel": 0.003044611472743247,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 18.4,
+     "ref": 18.426940494680807,
+     "abs": 0.026940494680808058,
+     "tol": 0.05,
+     "rel": 0.0014620166971605953,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 26.6,
+     "ref": 26.59428960040377,
+     "abs": 0.005710399596232207,
+     "tol": 0.05,
+     "rel": 0.00021472277252126745,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 4.78,
+     "ref": 4.781316221960664,
+     "abs": 0.0013162219606641656,
+     "tol": 0.005,
+     "rel": 0.00027528444042641153,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 102.1,
+     "ref": 102.07381513971539,
+     "abs": 0.02618486028460154,
+     "tol": 0.05,
+     "rel": 0.00025652867240007183,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 3,
+     "ref": 3.4946100444143964,
+     "abs": 0.4946100444143964,
+     "tol": 0.5,
+     "rel": 0.14153511783237602,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 1.5,
+     "ref": 1.4525053894216455,
+     "abs": 0.04749461057835447,
+     "tol": 0.05,
+     "rel": 0.03269840575067728,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 16.14,
+     "ref": 16.142678973810575,
+     "abs": 0.002678973810574803,
+     "tol": 0.005,
+     "rel": 0.00016595596151797938,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 79.3,
+     "ref": 79.26583502225881,
+     "abs": 0.03416497774118454,
+     "tol": 0.05,
+     "rel": 0.00043101769799801644,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 14.32,
+     "ref": 14.323532442807274,
+     "abs": 0.0035324428072733838,
+     "tol": 0.005,
+     "rel": 0.0002466181314824501,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -24.4,
+     "ref": -24.390401179006645,
+     "abs": 0.00959882099335374,
+     "tol": 0.05,
+     "rel": 0.00039354912298923797,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 16.25,
+     "ref": 16.247116111290065,
+     "abs": 0.0028838887099347232,
+     "tol": 0.005,
+     "rel": 0.00017750157567537287,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 79.8,
+     "ref": 79.77865553507931,
+     "abs": 0.021344464920687756,
+     "tol": 0.05,
+     "rel": 0.0002675460595008702,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 14.42,
+     "ref": 14.415323485622864,
+     "abs": 0.004676514377136343,
+     "tol": 0.005,
+     "rel": 0.0003244127252364797,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.14153511783237602,
+   "pass": true
+  },
+  {
+   "id": "reheat-gas",
+   "note": "Gas reheat at 90 % efficiency",
+   "inputs": {
+    "tout": 30,
+    "rhout": 65,
+    "press": 101.3,
+    "troom": 22,
+    "tdreq": 8,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 10,
+    "gp": 70,
+    "prod": 2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 12000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "gas",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": true,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 3.382,
+     "ref": 3.382490284922211,
+     "abs": 0.0004902849222108152,
+     "tol": 0.0005,
+     "rel": 0.00014494791733661716,
+     "ok": true
+    },
+    "total_load": {
+     "got": 4.91,
+     "ref": 4.910327161362603,
+     "abs": 0.0003271613626028014,
+     "tol": 0.0005,
+     "rel": 0.00006662720259804745,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 0.5,
+     "ref": 0.5323764212094204,
+     "abs": 0.032376421209420414,
+     "tol": 0.05,
+     "rel": 0.060814904491580654,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 4.67,
+     "ref": 4.6689074205182015,
+     "abs": 0.001092579481798417,
+     "tol": 0.005,
+     "rel": 0.00023401181119953577,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 76.3,
+     "ref": 76.31994129488899,
+     "abs": 0.01994129488899432,
+     "tol": 0.05,
+     "rel": 0.0002612855113704045,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 22.9,
+     "ref": 22.925862920857863,
+     "abs": 0.02586292085786468,
+     "tol": 0.05,
+     "rel": 0.0011281111183097361,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 4.18,
+     "ref": 4.180560556353809,
+     "abs": 0.0005605563538093605,
+     "tol": 0.005,
+     "rel": 0.00013408640928724285,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.21,
+     "ref": 0.21418287190817978,
+     "abs": 0.004182871908179786,
+     "tol": 0.005,
+     "rel": 0.01952944169117773,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -23.1,
+     "ref": -23.090861269505083,
+     "abs": 0.00913873049491798,
+     "tol": 0.05,
+     "rel": 0.0003957726127343302,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 5.42,
+     "ref": 5.415991384375294,
+     "abs": 0.004008615624705669,
+     "tol": 0.005,
+     "rel": 0.0007401443872806385,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 3.8,
+     "ref": 3.7884655941878425,
+     "abs": 0.011534405812157367,
+     "tol": 0.05,
+     "rel": 0.003044611472743247,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 18.4,
+     "ref": 18.426940494680807,
+     "abs": 0.026940494680808058,
+     "tol": 0.05,
+     "rel": 0.0014620166971605953,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 26.6,
+     "ref": 26.59428960040377,
+     "abs": 0.005710399596232207,
+     "tol": 0.05,
+     "rel": 0.00021472277252126745,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 4.78,
+     "ref": 4.781316221960664,
+     "abs": 0.0013162219606641656,
+     "tol": 0.005,
+     "rel": 0.00027528444042641153,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 102.1,
+     "ref": 102.07381513971539,
+     "abs": 0.02618486028460154,
+     "tol": 0.05,
+     "rel": 0.00025652867240007183,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 3,
+     "ref": 3.4946100444143964,
+     "abs": 0.4946100444143964,
+     "tol": 0.5,
+     "rel": 0.14153511783237602,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 1.5,
+     "ref": 1.4525053894216455,
+     "abs": 0.04749461057835447,
+     "tol": 0.05,
+     "rel": 0.03269840575067728,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 17.4,
+     "ref": 17.39956450504627,
+     "abs": 0.00043549495372730007,
+     "tol": 0.005,
+     "rel": 0.000025029072055280268,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 23.7,
+     "ref": 23.720362557506,
+     "abs": 0.02036255750600091,
+     "tol": 0.05,
+     "rel": 0.0008584420856399366,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 15.44,
+     "ref": 15.43675940906104,
+     "abs": 0.0032405909389598975,
+     "tol": 0.005,
+     "rel": 0.00020992689288515707,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -24.4,
+     "ref": -24.390401179006645,
+     "abs": 0.00959882099335374,
+     "tol": 0.05,
+     "rel": 0.00039354912298923797,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 7.5,
+     "ref": 7.4713404225284705,
+     "abs": 0.028659577471529474,
+     "tol": 0.05,
+     "rel": 0.0038359351670165798,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 17.5,
+     "ref": 17.50400164252577,
+     "abs": 0.00400164252576829,
+     "tol": 0.005,
+     "rel": 0.00022861301132686971,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 59.3,
+     "ref": 59.29151427146703,
+     "abs": 0.008485728532967585,
+     "tol": 0.05,
+     "rel": 0.0001431187689711475,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 55.5,
+     "ref": 55.545472464752805,
+     "abs": 0.04547246475280531,
+     "tol": 0.05,
+     "rel": 0.0008186529474865935,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 24.2,
+     "ref": 24.23318307032651,
+     "abs": 0.03318307032651191,
+     "tol": 0.05,
+     "rel": 0.0013693236348775212,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 4.91,
+     "ref": 4.910327161362588,
+     "abs": 0.00032716136258770234,
+     "tol": 0.005,
+     "rel": 0.0000666272025949727,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 15.53,
+     "ref": 15.52855045187663,
+     "abs": 0.001449548123369837,
+     "tol": 0.005,
+     "rel": 0.00009334729135613935,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 7.4,
+     "ref": 7.430230494977508,
+     "abs": 0.030230494977507405,
+     "tol": 0.05,
+     "rel": 0.004068581048453587,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.14153511783237602,
+   "pass": true
+  },
+  {
+   "id": "regen-gas",
+   "note": "Gas-fired rotor regeneration at 90 % efficiency",
+   "inputs": {
+    "tout": 25,
+    "rhout": 55,
+    "press": 101.3,
+    "troom": 18,
+    "tdreq": -25,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 0.2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 8000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "gas",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": true,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.164,
+     "ref": 1.1640432329317578,
+     "abs": 0.00004323293175789722,
+     "tol": 0.0005,
+     "rel": 0.000037140314495889306,
+     "ok": true
+    },
+    "total_load": {
+     "got": 2.182,
+     "ref": 2.181626733826864,
+     "abs": 0.0003732661731361553,
+     "tol": 0.0005,
+     "rel": 0.00017109534245640486,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -46.5,
+     "ref": -46.465451235046075,
+     "abs": 0.034548764953925115,
+     "tol": 0.05,
+     "rel": 0.0007435366285191066,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 9.11,
+     "ref": 9.113880474697556,
+     "abs": 0.0038804746975564797,
+     "tol": 0.005,
+     "rel": 0.0004257763428354872,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 1.7,
+     "ref": 1.7256522753047838,
+     "abs": 0.025652275304783867,
+     "tol": 0.05,
+     "rel": 0.014865263223584934,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 13.1,
+     "ref": 13.122352159319435,
+     "abs": 0.02235215931943557,
+     "tol": 0.05,
+     "rel": 0.0017033652997615347,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 5.3,
+     "ref": 5.3026940043701485,
+     "abs": 0.0026940043701486616,
+     "tol": 0.05,
+     "rel": 0.0005080444709667259,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 2.18,
+     "ref": 2.181626733826864,
+     "abs": 0.0016267338268636244,
+     "tol": 0.005,
+     "rel": 0.00074565176601504,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 8.25,
+     "ref": 8.254055182070092,
+     "abs": 0.00405518207009159,
+     "tol": 0.005,
+     "rel": 0.0004912957304793015,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 108.1,
+     "ref": 108.14506200703875,
+     "abs": 0.04506200703875152,
+     "tol": 0.05,
+     "rel": 0.00041668113367782436,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 2,
+     "ref": 1.8165106071248445,
+     "abs": 0.18348939287515553,
+     "tol": 0.5,
+     "rel": 0.10101201289739827,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -37.9,
+     "ref": -37.91810007964149,
+     "abs": 0.018100079641492073,
+     "tol": 0.05,
+     "rel": 0.00047734669204088474,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 38.8,
+     "ref": 38.79578734917044,
+     "abs": 0.004212650829558129,
+     "tol": 0.005,
+     "rel": 0.00010858526446810744,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 123.1,
+     "ref": 123.13719433078667,
+     "abs": 0.03719433078667578,
+     "tol": 0.05,
+     "rel": 0.00030205601961954463,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 121.4,
+     "ref": 121.43921766029185,
+     "abs": 0.03921766029183971,
+     "tol": 0.05,
+     "rel": 0.0003229406533361017,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 84.6,
+     "ref": 84.63792684081227,
+     "abs": 0.037926840812275486,
+     "tol": 0.05,
+     "rel": 0.0004481069211868647,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 2.18,
+     "ref": 2.181626733826864,
+     "abs": 0.0016267338268636244,
+     "tol": 0.005,
+     "rel": 0.00074565176601504,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 36.39,
+     "ref": 36.387163742860395,
+     "abs": 0.002836257139605891,
+     "tol": 0.005,
+     "rel": 0.00007794663963503887,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": -29.1,
+     "ref": -29.08040453926445,
+     "abs": 0.01959546073555174,
+     "tol": 0.05,
+     "rel": 0.0006738372813587889,
+     "ok": true
+    },
+    "m2.t_dry": {
+     "got": 412.5,
+     "ref": 412.5361988121956,
+     "abs": 0.03619881219560739,
+     "tol": 0.05,
+     "rel": 0.00008774699602079443,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.10101201289739827,
+   "pass": true
+  },
+  {
+   "id": "regen-hotwater-too-cold",
+   "note": "Hot water at 90 degC cannot supply a 120 degC regeneration - the rotor must be refused",
+   "inputs": {
+    "tout": 25,
+    "rhout": 55,
+    "press": 101.3,
+    "troom": 18,
+    "tdreq": -25,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 0.2,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 8000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "hw",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.164,
+     "ref": 1.1640432329317578,
+     "abs": 0.00004323293175789722,
+     "tol": 0.0005,
+     "rel": 0.000037140314495889306,
+     "ok": true
+    },
+    "total_load": {
+     "got": 2.182,
+     "ref": 2.181626733826864,
+     "abs": 0.0003732661731361553,
+     "tol": 0.0005,
+     "rel": 0.00017109534245640486,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -37.9,
+     "ref": -37.91810007964149,
+     "abs": 0.018100079641492073,
+     "tol": 0.05,
+     "rel": 0.00047734669204088474,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 38.8,
+     "ref": 38.79578734917044,
+     "abs": 0.004212650829558129,
+     "tol": 0.005,
+     "rel": 0.00010858526446810744,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 123.1,
+     "ref": 123.13719433078667,
+     "abs": 0.03719433078667578,
+     "tol": 0.05,
+     "rel": 0.00030205601961954463,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 121.4,
+     "ref": 121.43921766029185,
+     "abs": 0.03921766029183971,
+     "tol": 0.05,
+     "rel": 0.0003229406533361017,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 84.6,
+     "ref": 84.63792684081227,
+     "abs": 0.037926840812275486,
+     "tol": 0.05,
+     "rel": 0.0004481069211868647,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 2.18,
+     "ref": 2.181626733826864,
+     "abs": 0.0016267338268636244,
+     "tol": 0.005,
+     "rel": 0.00074565176601504,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 36.39,
+     "ref": 36.387163742860395,
+     "abs": 0.002836257139605891,
+     "tol": 0.005,
+     "rel": 0.00007794663963503887,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": -29.1,
+     "ref": -29.08040453926445,
+     "abs": 0.01959546073555174,
+     "tol": 0.05,
+     "rel": 0.0006738372813587889,
+     "ok": true
+    },
+    "m2.t_dry": {
+     "got": 412.5,
+     "ref": 412.5361988121956,
+     "abs": 0.03619881219560739,
+     "tol": 0.05,
+     "rel": 0.00008774699602079443,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -46.5,
+     "ref": -46.465451235046075,
+     "abs": 0.034548764953925115,
+     "tol": 0.05,
+     "rel": 0.0007435366285191066,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": -22.6,
+     "ref": -22.584980337526375,
+     "abs": 0.015019662473626738,
+     "tol": 0.05,
+     "rel": 0.0006650288045046742,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": -28.6,
+     "ref": -28.643062758902502,
+     "abs": 0.043062758902500775,
+     "tol": 0.05,
+     "rel": 0.0015034271741459111,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.0015034271741459111,
+   "pass": true
+  },
+  {
+   "id": "above-room",
+   "note": "Required dew point above the room temperature - every path refused",
+   "inputs": {
+    "tout": 28,
+    "rhout": 60,
+    "press": 101.3,
+    "troom": 10,
+    "tdreq": 15,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 0.1,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 20000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0,
+   "pass": true
+  },
+  {
+   "id": "high-makeup",
+   "note": "30 % outdoor make-up air with a humid outdoor state",
+   "inputs": {
+    "tout": 32,
+    "rhout": 75,
+    "press": 101.3,
+    "troom": 22,
+    "tdreq": 6,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 1,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 30,
+    "flow": 15000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 2.337,
+     "ref": 2.3369837273105927,
+     "abs": 0.000016272689407514918,
+     "tol": 0.0005,
+     "rel": 0.000006963116267070278,
+     "ok": true
+    },
+    "total_load": {
+     "got": 92.517,
+     "ref": 92.5173130573815,
+     "abs": 0.0003130573815042226,
+     "tol": 0.0005,
+     "rel": 0.00000338377079012289,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 2.1,
+     "ref": 2.1151252333675927,
+     "abs": 0.015125233367592639,
+     "tol": 0.05,
+     "rel": 0.007150987151484656,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 5.7,
+     "ref": 5.671677883803767,
+     "abs": 0.02832211619623326,
+     "tol": 0.05,
+     "rel": 0.004993604498787007,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 0.64,
+     "ref": 0.63683530408581,
+     "abs": 0.0031646959141899966,
+     "tol": 0.005,
+     "rel": 0.004969410291618462,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 160.4,
+     "ref": 160.43723340668808,
+     "abs": 0.037233406688073956,
+     "tol": 0.05,
+     "rel": 0.0002320745995020494,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 80.4,
+     "ref": 80.44943509763746,
+     "abs": 0.04943509763745624,
+     "tol": 0.05,
+     "rel": 0.0006144865725590158,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 58.9,
+     "ref": 58.91829119409964,
+     "abs": 0.018291194099639085,
+     "tol": 0.05,
+     "rel": 0.00031045017988354104,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 92.52,
+     "ref": 92.51731305738151,
+     "abs": 0.0026869426184816803,
+     "tol": 0.005,
+     "rel": 0.00002904259245850744,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 0.64,
+     "ref": 0.6370580744886205,
+     "abs": 0.002941925511379506,
+     "tol": 0.005,
+     "rel": 0.004617986380191555,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 5,
+     "ref": 4.965105543839712,
+     "abs": 0.034894456160287746,
+     "tol": 0.05,
+     "rel": 0.007027938450086296,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -20.3,
+     "ref": -20.268430430075668,
+     "abs": 0.031569569924332797,
+     "tol": 0.05,
+     "rel": 0.0015575734901252015,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 5.7,
+     "ref": 5.671677883803767,
+     "abs": 0.02832211619623326,
+     "tol": 0.05,
+     "rel": 0.004993604498787007,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 0.64,
+     "ref": 0.6437640141817038,
+     "abs": 0.003764014181703801,
+     "tol": 0.005,
+     "rel": 0.005846885036729313,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 160.4,
+     "ref": 160.43723340668808,
+     "abs": 0.037233406688073956,
+     "tol": 0.05,
+     "rel": 0.0002320745995020494,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 80.4,
+     "ref": 80.44943509763746,
+     "abs": 0.04943509763745624,
+     "tol": 0.05,
+     "rel": 0.0006144865725590158,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 59.6,
+     "ref": 59.55931683512528,
+     "abs": 0.040683164874721456,
+     "tol": 0.05,
+     "rel": 0.0006830697032227952,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 92.52,
+     "ref": 92.51731305738151,
+     "abs": 0.0026869426184816803,
+     "tol": 0.005,
+     "rel": 0.00002904259245850744,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 0.64,
+     "ref": 0.6439519567450132,
+     "abs": 0.003951956745013141,
+     "tol": 0.005,
+     "rel": 0.00613703662768433,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 5,
+     "ref": 4.965105543839712,
+     "abs": 0.034894456160287746,
+     "tol": 0.05,
+     "rel": 0.007027938450086296,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 1.2,
+     "ref": 1.2346893863329171,
+     "abs": 0.03468938633291718,
+     "tol": 0.05,
+     "rel": 0.028095638236549692,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 5.7,
+     "ref": 5.671677883803767,
+     "abs": 0.02832211619623326,
+     "tol": 0.05,
+     "rel": 0.004993604498787007,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 1.01,
+     "ref": 1.0091311534936762,
+     "abs": 0.0008688465063237949,
+     "tol": 0.005,
+     "rel": 0.0008609847226654266,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 160.4,
+     "ref": 160.43723340668808,
+     "abs": 0.037233406688073956,
+     "tol": 0.05,
+     "rel": 0.0002320745995020494,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 246.4,
+     "ref": 246.42754137862417,
+     "abs": 0.02754137862416428,
+     "tol": 0.05,
+     "rel": 0.00011176258331388482,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 93.4,
+     "ref": 93.36210284373097,
+     "abs": 0.037897156269039556,
+     "tol": 0.05,
+     "rel": 0.00040591583859750493,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 92.52,
+     "ref": 92.51731305738151,
+     "abs": 0.0026869426184816803,
+     "tol": 0.005,
+     "rel": 0.00002904259245850744,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 1.01,
+     "ref": 1.01238396462931,
+     "abs": 0.002383964629310009,
+     "tol": 0.005,
+     "rel": 0.0023548028343010263,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 5,
+     "ref": 4.965105543839712,
+     "abs": 0.034894456160287746,
+     "tol": 0.05,
+     "rel": 0.007027938450086296,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.99,
+     "ref": 0.9909514700224409,
+     "abs": 0.0009514700224408923,
+     "tol": 0.005,
+     "rel": 0.0009601580412604317,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -18.2,
+     "ref": -18.205025090002138,
+     "abs": 0.00502509000213891,
+     "tol": 0.05,
+     "rel": 0.0002760276339799496,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 5.7,
+     "ref": 5.671677883803767,
+     "abs": 0.02832211619623326,
+     "tol": 0.05,
+     "rel": 0.004993604498787007,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.028095638236549692,
+   "pass": true
+  },
+  {
+   "id": "low-pressure",
+   "note": "Reduced barometric pressure (2500 m site)",
+   "inputs": {
+    "tout": 26,
+    "rhout": 60,
+    "press": 75,
+    "troom": 20,
+    "tdreq": 5,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 1,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 10000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.75,
+     "ref": 1.7500475850688468,
+     "abs": 0.00004758506884683378,
+     "tol": 0.0005,
+     "rel": 0.00002719072855665338,
+     "ok": true
+    },
+    "total_load": {
+     "got": 2.62,
+     "ref": 2.6200407909447563,
+     "abs": 0.00004079094475617495,
+     "tol": 0.0005,
+     "rel": 0.000015568820492090967,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": 0.3,
+     "ref": 0.30536802353285,
+     "abs": 0.005368023532849986,
+     "tol": 0.05,
+     "rel": 0.017578865890234642,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": 4.6,
+     "ref": 4.610652231896978,
+     "abs": 0.010652231896978392,
+     "tol": 0.05,
+     "rel": 0.002310352497046975,
+     "ok": true
+    },
+    "m4.e": {
+     "got": 6.27,
+     "ref": 6.271195737170922,
+     "abs": 0.001195737170922584,
+     "tol": 0.005,
+     "rel": 0.0001906713202771132,
+     "ok": true
+    },
+    "m4.qc": {
+     "got": 38.5,
+     "ref": 38.51326038988626,
+     "abs": 0.013260389886262658,
+     "tol": 0.05,
+     "rel": 0.00034430712310570545,
+     "ok": true
+    },
+    "m4.qh": {
+     "got": 50,
+     "ref": 50.02951911474305,
+     "abs": 0.02951911474305291,
+     "tol": 0.05,
+     "rel": 0.0005900339492640457,
+     "ok": true
+    },
+    "m4.el": {
+     "got": 16.4,
+     "ref": 16.4307886393867,
+     "abs": 0.030788639386702954,
+     "tol": 0.05,
+     "rel": 0.001873838198666779,
+     "ok": true
+    },
+    "m4.water": {
+     "got": 2.62,
+     "ref": 2.6200407909447585,
+     "abs": 0.0000407909447583954,
+     "tol": 0.005,
+     "rel": 0.00001556882049293844,
+     "ok": true
+    },
+    "m4.e_sens": {
+     "got": 5.61,
+     "ref": 5.606480124723084,
+     "abs": 0.003519875276916551,
+     "tol": 0.005,
+     "rel": 0.000627822662100386,
+     "ok": true
+    },
+    "m4.ts": {
+     "got": 4.6,
+     "ref": 4.579560665334753,
+     "abs": 0.020439334665246278,
+     "tol": 0.05,
+     "rel": 0.004463164953783229,
+     "ok": true
+    },
+    "m4.smer": {
+     "got": 0.16,
+     "ref": 0.15945922307491595,
+     "abs": 0.0005407769250840577,
+     "tol": 0.005,
+     "rel": 0.003391317947347542,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": 1.2,
+     "ref": 1.238659997337919,
+     "abs": 0.03865999733791914,
+     "tol": 0.05,
+     "rel": 0.031211145448311668,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": 4.6,
+     "ref": 4.610652231896978,
+     "abs": 0.010652231896978392,
+     "tol": 0.05,
+     "rel": 0.002310352497046975,
+     "ok": true
+    },
+    "m1.e": {
+     "got": 6.65,
+     "ref": 6.646569382185337,
+     "abs": 0.0034306178146632504,
+     "tol": 0.005,
+     "rel": 0.0005161486501379591,
+     "ok": true
+    },
+    "m1.qc": {
+     "got": 38.5,
+     "ref": 38.51326038988626,
+     "abs": 0.013260389886262658,
+     "tol": 0.05,
+     "rel": 0.00034430712310570545,
+     "ok": true
+    },
+    "m1.qh": {
+     "got": 36.5,
+     "ref": 36.53020822962659,
+     "abs": 0.03020822962658798,
+     "tol": 0.05,
+     "rel": 0.0008269383365323556,
+     "ok": true
+    },
+    "m1.el": {
+     "got": 17.4,
+     "ref": 17.414282901170086,
+     "abs": 0.01428290117008757,
+     "tol": 0.05,
+     "rel": 0.0008201831365176619,
+     "ok": true
+    },
+    "m1.water": {
+     "got": 2.62,
+     "ref": 2.6200407909447585,
+     "abs": 0.0000407909447583954,
+     "tol": 0.005,
+     "rel": 0.00001556882049293844,
+     "ok": true
+    },
+    "m1.e_sens": {
+     "got": 5.92,
+     "ref": 5.920675003735972,
+     "abs": 0.0006750037359717354,
+     "tol": 0.005,
+     "rel": 0.00011400790206282309,
+     "ok": true
+    },
+    "m1.ts": {
+     "got": 4.6,
+     "ref": 4.579560665334753,
+     "abs": 0.020439334665246278,
+     "tol": 0.05,
+     "rel": 0.004463164953783229,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -26.1,
+     "ref": -26.061685794227785,
+     "abs": 0.03831420577221678,
+     "tol": 0.05,
+     "rel": 0.0014701353578862775,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": 4.6,
+     "ref": 4.610652231896978,
+     "abs": 0.010652231896978392,
+     "tol": 0.05,
+     "rel": 0.002310352497046975,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 6.81,
+     "ref": 6.809677692875542,
+     "abs": 0.0003223071244580211,
+     "tol": 0.005,
+     "rel": 0.00004733074588761037,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 38.5,
+     "ref": 38.51326038988626,
+     "abs": 0.013260389886262658,
+     "tol": 0.05,
+     "rel": 0.00034430712310570545,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 36.5,
+     "ref": 36.53020822962659,
+     "abs": 0.03020822962658798,
+     "tol": 0.05,
+     "rel": 0.0008269383365323556,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 17.8,
+     "ref": 17.841633328520512,
+     "abs": 0.04163332852051127,
+     "tol": 0.05,
+     "rel": 0.0023334931143304495,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 2.62,
+     "ref": 2.6200407909447585,
+     "abs": 0.0000407909447583954,
+     "tol": 0.005,
+     "rel": 0.00001556882049293844,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 6.06,
+     "ref": 6.064561599261073,
+     "abs": 0.004561599261073468,
+     "tol": 0.005,
+     "rel": 0.0007521729619547881,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": 4.6,
+     "ref": 4.579560665334753,
+     "abs": 0.020439334665246278,
+     "tol": 0.05,
+     "rel": 0.004463164953783229,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -25.2,
+     "ref": -25.17621011927939,
+     "abs": 0.023789880720610057,
+     "tol": 0.05,
+     "rel": 0.0009449349448506663,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": 4.6,
+     "ref": 4.610652231896978,
+     "abs": 0.010652231896978392,
+     "tol": 0.05,
+     "rel": 0.002310352497046975,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 7.06,
+     "ref": 7.056848365664918,
+     "abs": 0.003151634335081255,
+     "tol": 0.005,
+     "rel": 0.00044660649793972125,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 2,
+     "ref": 1.9970039072708217,
+     "abs": 0.0029960927291783346,
+     "tol": 0.05,
+     "rel": 0.0015002938743734879,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 11.9,
+     "ref": 11.937968743580562,
+     "abs": 0.03796874358056179,
+     "tol": 0.05,
+     "rel": 0.0031805028473523883,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 18.5,
+     "ref": 18.48923057355394,
+     "abs": 0.010769426446060493,
+     "tol": 0.05,
+     "rel": 0.0005824702333186615,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 2.62,
+     "ref": 2.6200407909447585,
+     "abs": 0.0000407909447583954,
+     "tol": 0.005,
+     "rel": 0.00001556882049293844,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 6.25,
+     "ref": 6.247093918344391,
+     "abs": 0.0029060816556087943,
+     "tol": 0.005,
+     "rel": 0.00046518936542240525,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 104.6,
+     "ref": 104.55324298977688,
+     "abs": 0.046757010223117845,
+     "tol": 0.05,
+     "rel": 0.00044720765120303066,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 2,
+     "ref": 2.2603069744892355,
+     "abs": 0.26030697448923545,
+     "tol": 0.5,
+     "rel": 0.1151644344892832,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 0,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.1151644344892832,
+   "pass": true
+  },
+  {
+   "id": "bypass-limited",
+   "note": "Large bypass factor: the coil cannot reach the required humidity ratio whatever the surface temperature",
+   "inputs": {
+    "tout": 28,
+    "rhout": 60,
+    "press": 101.3,
+    "troom": 18,
+    "tdreq": -2,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 1,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 8000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.35,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "internal_load": {
+     "got": 1.989,
+     "ref": 1.989371471555765,
+     "abs": 0.0003714715557650017,
+     "tol": 0.0005,
+     "rel": 0.00018672810034543052,
+     "ok": true
+    },
+    "total_load": {
+     "got": 3.056,
+     "ref": 3.0561056297780342,
+     "abs": 0.0001056297780341886,
+     "tol": 0.0005,
+     "rel": 0.00003456352326469178,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m3.td_ach": {
+     "got": -30.1,
+     "ref": -30.095800432936713,
+     "abs": 0.004199567063288612,
+     "tol": 0.05,
+     "rel": 0.0001395399691278064,
+     "ok": true
+    },
+    "m3.td_sup": {
+     "got": -2.8,
+     "ref": -2.7920020414361204,
+     "abs": 0.007997958563879415,
+     "tol": 0.05,
+     "rel": 0.0028645962449817945,
+     "ok": true
+    },
+    "m3.e": {
+     "got": 5.96,
+     "ref": 5.963641737411623,
+     "abs": 0.0036417374116233248,
+     "tol": 0.005,
+     "rel": 0.0006106566376678312,
+     "ok": true
+    },
+    "m3.qc": {
+     "got": 2.4,
+     "ref": 2.4228061615307754,
+     "abs": 0.022806161530775526,
+     "tol": 0.05,
+     "rel": 0.009413118512281706,
+     "ok": true
+    },
+    "m3.qh": {
+     "got": 12.7,
+     "ref": 12.728026576683252,
+     "abs": 0.028026576683252813,
+     "tol": 0.05,
+     "rel": 0.0022019577437554466,
+     "ok": true
+    },
+    "m3.el": {
+     "got": 18.2,
+     "ref": 18.22551908768291,
+     "abs": 0.025519087682909003,
+     "tol": 0.05,
+     "rel": 0.00140018440957082,
+     "ok": true
+    },
+    "m3.water": {
+     "got": 3.06,
+     "ref": 3.0561056297780325,
+     "abs": 0.0038943702219675913,
+     "tol": 0.005,
+     "rel": 0.0012742917600824036,
+     "ok": true
+    },
+    "m3.e_sens": {
+     "got": 5.3,
+     "ref": 5.29933247674735,
+     "abs": 0.0006675232526500707,
+     "tol": 0.005,
+     "rel": 0.00012596364836119632,
+     "ok": true
+    },
+    "m3.t_reg_ex": {
+     "got": 103.5,
+     "ref": 103.47265829111068,
+     "abs": 0.027341708889323968,
+     "tol": 0.05,
+     "rel": 0.00026424090519063133,
+     "ok": true
+    },
+    "m3.rh_ex": {
+     "got": 3,
+     "ref": 2.831032160083247,
+     "abs": 0.1689678399167529,
+     "tol": 0.5,
+     "rel": 0.05968418243323113,
+     "ok": true
+    },
+    "m3.rotor_water_balance": {
+     "got": 1.0842021724855044e-19,
+     "ref": 0,
+     "tol": 1e-12,
+     "ok": true,
+     "note": "process-side and regeneration-side moisture must match in the reference"
+    },
+    "m2.feasible": {
+     "got": true,
+     "ref": true,
+     "ok": true
+    },
+    "m2.td_ach": {
+     "got": -13.1,
+     "ref": -13.117811775208196,
+     "abs": 0.017811775208196323,
+     "tol": 0.05,
+     "rel": 0.0013578312841673343,
+     "ok": true
+    },
+    "m2.td_sup": {
+     "got": -2.8,
+     "ref": -2.7920020414361204,
+     "abs": 0.007997958563879415,
+     "tol": 0.05,
+     "rel": 0.0028645962449817945,
+     "ok": true
+    },
+    "m2.e": {
+     "got": 6.74,
+     "ref": 6.736121730852035,
+     "abs": 0.0038782691479655185,
+     "tol": 0.005,
+     "rel": 0.0005757421410902808,
+     "ok": true
+    },
+    "m2.qc": {
+     "got": 40.5,
+     "ref": 40.47613337133199,
+     "abs": 0.023866628668010037,
+     "tol": 0.05,
+     "rel": 0.00058964695192239,
+     "ok": true
+    },
+    "m2.qh": {
+     "got": 38.1,
+     "ref": 38.0835147327958,
+     "abs": 0.01648526720420307,
+     "tol": 0.05,
+     "rel": 0.00043287147522669966,
+     "ok": true
+    },
+    "m2.el": {
+     "got": 20.6,
+     "ref": 20.586299544527048,
+     "abs": 0.013700455472953621,
+     "tol": 0.05,
+     "rel": 0.0006655132673708687,
+     "ok": true
+    },
+    "m2.water": {
+     "got": 3.06,
+     "ref": 3.0561056297780325,
+     "abs": 0.0038943702219675913,
+     "tol": 0.005,
+     "rel": 0.0012742917600824036,
+     "ok": true
+    },
+    "m2.e_sens": {
+     "got": 6.09,
+     "ref": 6.090501020249945,
+     "abs": 0.0005010202499455829,
+     "tol": 0.005,
+     "rel": 0.00008226256727973124,
+     "ok": true
+    },
+    "m2.ts": {
+     "got": -3.5,
+     "ref": -3.4859439199699693,
+     "abs": 0.014056080030030671,
+     "tol": 0.05,
+     "rel": 0.0040322163387389665,
+     "ok": true
+    },
+    "m2.t_dry": {
+     "got": 294.5,
+     "ref": 294.4924387529654,
+     "abs": 0.007561247034573171,
+     "tol": 0.05,
+     "rel": 0.000025675521811668355,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m1.td_ach": {
+     "got": -1.6,
+     "ref": -1.5944198237438911,
+     "abs": 0.00558017625610896,
+     "tol": 0.05,
+     "rel": 0.003499816154446718,
+     "ok": true
+    },
+    "m1.td_sup": {
+     "got": -2.8,
+     "ref": -2.7920020414361204,
+     "abs": 0.007997958563879415,
+     "tol": 0.05,
+     "rel": 0.0028645962449817945,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.td_ach": {
+     "got": -1.6,
+     "ref": -1.5944198237438911,
+     "abs": 0.00558017625610896,
+     "tol": 0.05,
+     "rel": 0.003499816154446718,
+     "ok": true
+    },
+    "m4.td_sup": {
+     "got": -2.8,
+     "ref": -2.7920020414361204,
+     "abs": 0.007997958563879415,
+     "tol": 0.05,
+     "rel": 0.0028645962449817945,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.05968418243323113,
+   "pass": true
+  },
+  {
+   "id": "flow-too-small",
+   "note": "Treated air flow too small for the internal load: the supply humidity ratio would have to be negative, so every path is refused and the message must quote the room humidity ratio it names",
+   "inputs": {
+    "tout": 25,
+    "rhout": 60,
+    "press": 101.3,
+    "troom": 18,
+    "tdreq": -20,
+    "dtsafe": 3,
+    "tsurf": 15,
+    "np": 4,
+    "gp": 70,
+    "prod": 5,
+    "vol": 400,
+    "ach": 0.05,
+    "adoor": 2,
+    "dopen": 2,
+    "kdoor": 0.15,
+    "phi": 1,
+    "flow": 1000,
+    "dpfan": 900,
+    "etafan": 65,
+    "bf": 0.05,
+    "adpmin": 1,
+    "appr": 4,
+    "tcond": 45,
+    "etac": 50,
+    "reheat": "cond",
+    "tsfzlim": -40,
+    "mice": 15,
+    "tdef": 20,
+    "etadef": 90,
+    "etarot": 0.95,
+    "treg": 120,
+    "fregmin": 5,
+    "fregmax": 30,
+    "dxreg": 12,
+    "purge": 8,
+    "carry": 2,
+    "regsrc": "elec",
+    "tehp": 0,
+    "etachp": 45,
+    "s_el": true,
+    "s_cw": true,
+    "s_gas": false,
+    "s_hw": true,
+    "thw": 90,
+    "s_rec": false,
+    "trec": 60
+   },
+   "cmp": {
+    "cards_present": {
+     "got": 4,
+     "ref": 4,
+     "ok": true
+    },
+    "flowneg_room_x": {
+     "got": 0.635,
+     "ref": 0.6346279178213584,
+     "abs": 0.0003720821786415973,
+     "tol": 0.0005,
+     "rel": 0.0005862997327929321,
+     "ok": true
+    },
+    "m1.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m2.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m3.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    },
+    "m4.feasible": {
+     "got": false,
+     "ref": false,
+     "ok": true
+    }
+   },
+   "inputs_verified": {
+    "ok": true,
+    "fields_checked": 46,
+    "worst": 0
+   },
+   "worst_rel": 0.0005862997327929321,
+   "pass": true
+  }
+ ],
+ "build": "2026-10-15.bench-evidence-1-number-locale",
+ "manifest_revision": "2026-10-15.bench-evidence-1-number-locale",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_ontv_cases.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 1 239 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\"."
+}

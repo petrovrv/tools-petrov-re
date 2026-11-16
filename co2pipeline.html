@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CO₂ pipeline sizing</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-19.2",
+  "id": "co2pipeline",
+  "file": "co2pipeline.html",
+  "listed": true,
+  "category": "ccus",
+  "order": 30,
+  "title": {
+    "en": "CO₂ pipeline sizing",
+    "uk": "Підбір трубопроводу CO₂",
+    "de": "CO₂-Pipeline-Auslegung",
+    "nl": "Dimensionering CO₂-pijpleiding",
+    "fr": "Dimensionnement de pipeline CO₂",
+    "es": "Dimensionamiento de tuberías de CO₂",
+    "pl": "Dobór rurociągu CO₂"
+  },
+  "summary": {
+    "en": "Sizes dense-phase or gas-phase CO₂ transport pipelines, covering hydraulics, booster stations and levelised transport cost.",
+    "uk": "Підбирає трубопроводи для транспортування CO₂ у щільній або газовій фазі з урахуванням гідравліки, підсилювальних станцій і приведеної вартості транспортування.",
+    "de": "Dimensioniert CO₂-Transportleitungen in dichter oder gasförmiger Phase inkl. Hydraulik, Druckerhöhungsstationen und spezifischer Transportkosten.",
+    "nl": "Dimensioneert CO₂-transportleidingen in dichte of gasfase, inclusief hydraulica, boosterstations en genormaliseerde transportkosten.",
+    "fr": "Dimensionne les pipelines de transport de CO₂ en phase dense ou gazeuse : hydraulique, stations de recompression et coût actualisé du transport.",
+    "es": "Dimensiona tuberías de transporte de CO₂ en fase densa o gaseosa, incluyendo hidráulica, estaciones de refuerzo y coste nivelado de transporte.",
+    "pl": "Dobiera rurociągi transportowe CO₂ w fazie gęstej lub gazowej, uwzględniając hydraulikę, stacje podnoszenia ciśnienia i uśredniony koszt transportu."
+  },
+  "description": {
+    "en": "Segmented steady-state 1-D model combining Darcy–Weisbach/Colebrook friction, hydrostatic head and ground heat exchange, with Span–Wagner real-gas CO₂ properties and ASME B31.4/B31.8 wall thickness. Screens NPS 6–48, adds boosters where pressure falls below the minimum, checks the phase margin and selects the size with the lowest levelised cost (EUR/t, 2025 price base).",
+    "uk": "Сегментована стаціонарна 1-D модель: тертя за Дарсі–Вейсбахом/Колбруком, гідростатичний напір і теплообмін із ґрунтом, властивості CO₂ за рівнянням стану Спана–Вагнера, товщина стінки за ASME B31.4/B31.8. Перебирає NPS 6–48, додає підсилювальні станції, де тиск падає нижче мінімального, перевіряє запас до фазової межі та обирає розмір із найменшою приведеною вартістю (EUR/т, ціни 2025 р.).",
+    "de": "Segmentiertes stationäres 1-D-Modell mit Reibung nach Darcy–Weisbach/Colebrook, hydrostatischer Höhe und Wärmeaustausch mit dem Erdreich, Realgas-Stoffdaten nach Span–Wagner und Wanddicke nach ASME B31.4/B31.8. Prüft NPS 6–48, ergänzt Booster bei Unterschreitung des Mindestdrucks, kontrolliert den Phasenabstand und wählt die Größe mit den geringsten spezifischen Transportkosten (EUR/t, Preisbasis 2025).",
+    "nl": "Gesegmenteerd stationair 1-D-model met wrijving volgens Darcy–Weisbach/Colebrook, hydrostatische hoogte en warmte-uitwisseling met de bodem, reëelgaseigenschappen volgens Span–Wagner en wanddikte volgens ASME B31.4/B31.8. Doorloopt NPS 6–48, voegt boosters toe waar de druk onder het minimum zakt, controleert de fasemarge en kiest de maat met de laagste genormaliseerde kosten (EUR/t, prijsbasis 2025).",
+    "fr": "Modèle 1-D stationnaire segmenté : frottement Darcy–Weisbach/Colebrook, charge hydrostatique et échange thermique avec le sol, propriétés réelles du CO₂ selon Span–Wagner, épaisseur de paroi selon ASME B31.4/B31.8. Balaye les NPS 6 à 48, ajoute des stations de recompression lorsque la pression passe sous le minimum, vérifie la marge de phase et retient le diamètre au coût actualisé le plus bas (EUR/t, base de prix 2025).",
+    "es": "Modelo 1-D estacionario segmentado con fricción de Darcy–Weisbach/Colebrook, carga hidrostática e intercambio de calor con el terreno, propiedades reales del CO₂ según Span–Wagner y espesor de pared según ASME B31.4/B31.8. Evalúa NPS 6–48, añade estaciones de refuerzo donde la presión cae por debajo del mínimo, comprueba el margen de fase y elige el diámetro con menor coste nivelado (EUR/t, precios de 2025).",
+    "pl": "Segmentowy ustalony model 1-D: tarcie wg Darcy’ego–Weisbacha/Colebrooka, wysokość hydrostatyczna i wymiana ciepła z gruntem, właściwości CO₂ wg równania stanu Spana–Wagnera, grubość ścianki wg ASME B31.4/B31.8. Przegląda NPS 6–48, dodaje stacje podnoszenia ciśnienia tam, gdzie ciśnienie spada poniżej minimum, sprawdza zapas fazowy i wybiera średnicę o najniższym uśrednionym koszcie (EUR/t, ceny z 2025 r.)."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Steady state and pure CO₂ only: no transients, impurities or running-ductile-fracture check. Cost curves are screening-level (±40%); offshore lines exclude boosters by default.",
+    "uk": "Лише стаціонарний режим і чистий CO₂: без перехідних процесів, домішок і перевірки на поширення в'язкого руйнування. Криві вартості — оціночні (±40%); для морських трубопроводів підсилювальні станції за замовчуванням не передбачені.",
+    "de": "Nur stationär und reines CO₂: keine Transienten, keine Verunreinigungen, kein Nachweis gegen laufenden duktilen Bruch. Kostenkurven auf Screening-Niveau (±40 %); Offshore-Leitungen standardmäßig ohne Booster.",
+    "nl": "Alleen stationair en zuivere CO₂: geen transiënten, onzuiverheden of controle op lopende taaie breuk. Kostencurves zijn indicatief (±40%); offshoreleidingen standaard zonder boosters.",
+    "fr": "Régime permanent et CO₂ pur uniquement : ni transitoires, ni impuretés, ni vérification de propagation de rupture ductile. Courbes de coûts de niveau préliminaire (±40 %) ; pas de recompression par défaut pour les lignes offshore.",
+    "es": "Solo régimen estacionario y CO₂ puro: sin transitorios, impurezas ni verificación de propagación de fractura dúctil. Curvas de coste de nivel preliminar (±40 %); las líneas marinas no incluyen estaciones de refuerzo por defecto.",
+    "pl": "Tylko stan ustalony i czysty CO₂: bez stanów przejściowych, zanieczyszczeń i sprawdzenia propagacji pękania ciągliwego. Krzywe kosztów mają charakter szacunkowy (±40%); rurociągi morskie domyślnie bez stacji podnoszenia ciśnienia."
+  },
+  "intended_use": "education",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ccus-core.js",
+    "ccus-pipe.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "co2pipeline was compared with an independent reference combining CoolProp 8 HEOS (Span-Wagner) properties with an independent 2000-segment midpoint march (Darcy-Weisbach/Colebrook friction, ground heat exchange), Barlow wall thickness (ASME B31.4/B31.8) and the documented cost equations, over 13 cases with forced pipe size and no boosters; tolerances are 2 % on dp, 0.5 % on p_out, 0.3 K on T_out and 1 % on linepack and LCOT (benchmark driver bench-src/run_co2pipeline.mjs). Booster insertion and automatic pipe sizing are not covered by the benchmark."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "coolprop-heos-co2pipeline",
+        "reference": "Reference values generated by bench-src/ref/gen_co2pipeline.py using CoolProp 8 HEOS (Span-Wagner) and an independent 2000-segment midpoint march, written independently of the tool code.",
+        "citations": [
+          "Span R., Wagner W. (1996) J. Phys. Chem. Ref. Data 25:1509",
+          "Colebrook C.F. (1939) J. Inst. Civil Eng. 11:133",
+          "ASME B31.4 / ASME B31.8 (Barlow wall thickness)",
+          "Bell I.H. et al. (2014) CoolProp, Ind. Eng. Chem. Res. 53:2498"
+        ],
+        "cases": 13,
+        "passed": 13,
+        "tolerance": "t, ID and capex: rel 1e-9 (closed-form expressions); dp: rel 0.02 and p_out: rel 0.005 (differences in friction-factor and property integration between the two march schemes); T_out: abs 0.3 K; linepack: rel 0.01; LCOT: rel 0.01. A case fails if the page inserts boosters.",
+        "run_at": "2026-10-19T18:12:11Z",
+        "artifact": "benchmarks/co2pipeline.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "No bare-python3 standard-library export is offered because the marching solver relies on the Span-Wagner CO2 equation of state from the shared CCUS core library, whose non-analytic terms and phase/saturation solving cannot be reasonably reproduced in a standard-library-only script; to reproduce the calculation in Python, use CoolProp (HEOS backend) for the CO2 properties."
+  },
+  "handoff": {
+    "provides": [
+      "mdot",
+      "p",
+      "T",
+      "D",
+      "L",
+      "dp",
+      "Q"
+    ],
+    "accepts": [
+      "mdot",
+      "p",
+      "T"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script type="application/json" id="diagram-handoff-catalog">[{"f":"co2storage.html","t":{"en":"CO₂ storage injection"},"a":["mdot","p","T"]},{"f":"ccuscost.html","t":{"en":"CCUS cost & payback"},"a":["mdot","E","Q","x","p","D","L","dp"]},{"f":"co2props.html","t":{"en":"CO₂ properties"},"a":["T","p"]}]</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ccus-core.js?v=0f1890deb639" defer></script>
+<script src="ccus-pipe.js?v=c810b4c1810a" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+  /* co2pipeline — page glue (mechanical assembly, adapted from aminecapture shell); model: ccus-pipe.js (Claude) */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var MAN = {"summary":{"en":"Sizes dense-phase or gas-phase CO₂ transport pipelines, covering hydraulics, booster stations and levelised transport cost.","uk":"Підбирає трубопроводи для транспортування CO₂ у щільній або газовій фазі з урахуванням гідравліки, підсилювальних станцій і приведеної вартості транспортування.","de":"Dimensioniert CO₂-Transportleitungen in dichter oder gasförmiger Phase inkl. Hydraulik, Druckerhöhungsstationen und spezifischer Transportkosten.","nl":"Dimensioneert CO₂-transportleidingen in dichte of gasfase, inclusief hydraulica, boosterstations en genormaliseerde transportkosten.","fr":"Dimensionne les pipelines de transport de CO₂ en phase dense ou gazeuse : hydraulique, stations de recompression et coût actualisé du transport.","es":"Dimensiona tuberías de transporte de CO₂ en fase densa o gaseosa, incluyendo hidráulica, estaciones de refuerzo y coste nivelado de transporte.","pl":"Dobiera rurociągi transportowe CO₂ w fazie gęstej lub gazowej, uwzględniając hydraulikę, stacje podnoszenia ciśnienia i uśredniony koszt transportu."},"description":{"en":"Segmented steady-state 1-D model combining Darcy–Weisbach/Colebrook friction, hydrostatic head and ground heat exchange, with Span–Wagner real-gas CO₂ properties and ASME B31.4/B31.8 wall thickness. Screens NPS 6–48, adds boosters where pressure falls below the minimum, checks the phase margin and selects the size with the lowest levelised cost (EUR/t, 2025 price base).","uk":"Сегментована стаціонарна 1-D модель: тертя за Дарсі–Вейсбахом/Колбруком, гідростатичний напір і теплообмін із ґрунтом, властивості CO₂ за рівнянням стану Спана–Вагнера, товщина стінки за ASME B31.4/B31.8. Перебирає NPS 6–48, додає підсилювальні станції, де тиск падає нижче мінімального, перевіряє запас до фазової межі та обирає розмір із найменшою приведеною вартістю (EUR/т, ціни 2025 р.).","de":"Segmentiertes stationäres 1-D-Modell mit Reibung nach Darcy–Weisbach/Colebrook, hydrostatischer Höhe und Wärmeaustausch mit dem Erdreich, Realgas-Stoffdaten nach Span–Wagner und Wanddicke nach ASME B31.4/B31.8. Prüft NPS 6–48, ergänzt Booster bei Unterschreitung des Mindestdrucks, kontrolliert den Phasenabstand und wählt die Größe mit den geringsten spezifischen Transportkosten (EUR/t, Preisbasis 2025).","nl":"Gesegmenteerd stationair 1-D-model met wrijving volgens Darcy–Weisbach/Colebrook, hydrostatische hoogte en warmte-uitwisseling met de bodem, reëelgaseigenschappen volgens Span–Wagner en wanddikte volgens ASME B31.4/B31.8. Doorloopt NPS 6–48, voegt boosters toe waar de druk onder het minimum zakt, controleert de fasemarge en kiest de maat met de laagste genormaliseerde kosten (EUR/t, prijsbasis 2025).","fr":"Modèle 1-D stationnaire segmenté : frottement Darcy–Weisbach/Colebrook, charge hydrostatique et échange thermique avec le sol, propriétés réelles du CO₂ selon Span–Wagner, épaisseur de paroi selon ASME B31.4/B31.8. Balaye les NPS 6 à 48, ajoute des stations de recompression lorsque la pression passe sous le minimum, vérifie la marge de phase et retient le diamètre au coût actualisé le plus bas (EUR/t, base de prix 2025).","es":"Modelo 1-D estacionario segmentado con fricción de Darcy–Weisbach/Colebrook, carga hidrostática e intercambio de calor con el terreno, propiedades reales del CO₂ según Span–Wagner y espesor de pared según ASME B31.4/B31.8. Evalúa NPS 6–48, añade estaciones de refuerzo donde la presión cae por debajo del mínimo, comprueba el margen de fase y elige el diámetro con menor coste nivelado (EUR/t, precios de 2025).","pl":"Segmentowy ustalony model 1-D: tarcie wg Darcy’ego–Weisbacha/Colebrooka, wysokość hydrostatyczna i wymiana ciepła z gruntem, właściwości CO₂ wg równania stanu Spana–Wagnera, grubość ścianki wg ASME B31.4/B31.8. Przegląda NPS 6–48, dodaje stacje podnoszenia ciśnienia tam, gdzie ciśnienie spada poniżej minimum, sprawdza zapas fazowy i wybiera średnicę o najniższym uśrednionym koszcie (EUR/t, ceny z 2025 r.)."},"limitations":{"en":"Steady state and pure CO₂ only: no transients, impurities or running-ductile-fracture check. Cost curves are screening-level (±40%); offshore lines exclude boosters by default.","uk":"Лише стаціонарний режим і чистий CO₂: без перехідних процесів, домішок і перевірки на поширення в'язкого руйнування. Криві вартості — оціночні (±40%); для морських трубопроводів підсилювальні станції за замовчуванням не передбачені.","de":"Nur stationär und reines CO₂: keine Transienten, keine Verunreinigungen, kein Nachweis gegen laufenden duktilen Bruch. Kostenkurven auf Screening-Niveau (±40 %); Offshore-Leitungen standardmäßig ohne Booster.","nl":"Alleen stationair en zuivere CO₂: geen transiënten, onzuiverheden of controle op lopende taaie breuk. Kostencurves zijn indicatief (±40%); offshoreleidingen standaard zonder boosters.","fr":"Régime permanent et CO₂ pur uniquement : ni transitoires, ni impuretés, ni vérification de propagation de rupture ductile. Courbes de coûts de niveau préliminaire (±40 %) ; pas de recompression par défaut pour les lignes offshore.","es":"Solo régimen estacionario y CO₂ puro: sin transitorios, impurezas ni verificación de propagación de fractura dúctil. Curvas de coste de nivel preliminar (±40 %); las líneas marinas no incluyen estaciones de refuerzo por defecto.","pl":"Tylko stan ustalony i czysty CO₂: bez stanów przejściowych, zanieczyszczeń i sprawdzenia propagacji pękania ciągliwego. Krzywe kosztów mają charakter szacunkowy (±40%); rurociągi morskie domyślnie bez stacji podnoszenia ciśnienia."}};
+  /* page defaults hardcoded (inline script runs before the deferred module loads) */
+  var DEFAULTS = {
+    level: 'simple', phase: 'dense', mdot: 79.2, L: 100e3, p_in: 150e5, T_in: 308.15, Tg: 283.15, z1: 0,
+    p_min: 90e5, MAOP: 200e5, nps: 0, grade: 'X65', thermal: 'U', U: 2, offshore: false,
+    allowOffshoreBoosters: false, maxBoosters: 5, CA: 0.001, eps: 45e-6, elec: 90, rate: 0.08, life: 25, profile: null
+  };
+  var FULL_KEYS = ['z1', 'MAOP', 'nps', 'grade', 'thermal', 'U', 'Tg', 'CA', 'eps', 'maxBoosters', 'allowOffshoreBoosters', 'rate', 'life'];
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null, ui = null, stage = null;
+
+  function toInp(s) {
+    var full = s.level === 'full', v = {}, k, i;
+    for (k in DEFAULTS) if (k !== 'level' && k !== 'profile') v[k] = s[k];
+    if (!full) for (i = 0; i < FULL_KEYS.length; i++) v[FULL_KEYS[i]] = DEFAULTS[FULL_KEYS[i]];
+    if (!full && s.profile) v.z1 = s.z1; /* preset elevation stays in effect at simple level */
+    var o = {
+      phase: v.phase, mdot: v.mdot, L: v.L, p_in: v.p_in, T_in: v.T_in, Tg: v.Tg, z1: v.z1, p_min: v.p_min, MAOP: v.MAOP,
+      nps: v.nps ? +v.nps : null, grade: v.grade, thermal: v.thermal, U: v.U, offshore: !!v.offshore,
+      allowOffshoreBoosters: !!v.allowOffshoreBoosters, maxBoosters: v.maxBoosters, CA: v.CA, eps: v.eps,
+      cost: { elec: v.elec, rate: v.rate, life: v.life }
+    };
+    var pr = s.profile;
+    if (pr && pr.length > 1 && Math.abs(pr[pr.length - 1].x - s.L) < 1) o.profile = pr;
+    return o;
+  }
+  function run(s) {
+    try { last = CCUS.pipe.solve(toInp(s), { core: CCUS.core }); }
+    catch (e) { last = { ok: false, error: String(e && e.message || e) }; }
+    return last;
+  }
+
+function PANELS(){ var full=function(c){return c.state.level==='full';}; var fullOff=function(c){return c.state.level==='full'&&!!c.state.offshore;}; var fullU=function(c){return c.state.level==='full'&&c.state.thermal==='U';}; var same=function(s){return T(s,s,s,s,s,s,s);}; var npsOpts=[{value:0,label:T('Auto (min cost)','Авто (мін. вартість)','Auto (min. Kosten)','Auto (min. kosten)','Auto (coût min.)','Auto (coste mín.)','Auto (min. koszt)')}]; var npsList=[6,8,10,12,14,16,18,20,24,28,30,32,36,40,42,48]; for(var i=0;i<npsList.length;i++){npsOpts.push({value:npsList[i],label:same('NPS '+npsList[i])});} var gradeOpts=[]; var grades=['X52','X56','X60','X65','X70']; for(var j=0;j<grades.length;j++){gradeOpts.push({value:grades[j],label:same(grades[j])});} return [
+ { id:'mode', slot:'inputs', title:T('Mode','Режим','Modus','Modus','Mode','Modo','Tryb'), fields:[
+   { id:'f-level', key:'level', type:'segmented', label:T('Detail level','Рівень деталізації','Detailgrad','Detailniveau','Niveau de détail','Nivel de detalle','Poziom szczegółów'), options:[{value:'simple',label:T('Simple','Простий','Einfach','Eenvoudig','Simple','Simple','Prosty')},{value:'full',label:T('Full','Повний','Vollständig','Volledig','Complet','Completo','Pełny')}]} ]},
+ { id:'flow', slot:'inputs', title:T('Flow & route','Потік і траса','Durchfluss & Trasse','Debiet & tracé','Débit & tracé','Caudal y trazado','Przepływ i trasa'), collapsible:true, collapsed:false, fields:[
+   { id:'f-phase', key:'phase', type:'select', learn:'densephase', label:T('Phase','Фаза','Phase','Fase','Phase','Fase','Faza'), options:[{value:'dense',label:T('Dense phase','Щільна фаза','Dichte Phase','Dichte fase','Phase dense','Fase densa','Faza gęsta')},{value:'gas',label:T('Gas phase','Газова фаза','Gasphase','Gasfase','Phase gazeuse','Fase gaseosa','Faza gazowa')}]},
+   { id:'f-mdot', key:'mdot', type:'number', unit:'kg/s', display:'t/h', min:1, max:500, step:0.5, precision:1, learn:'sizing', label:T('Mass flow','Масова витрата','Massenstrom','Massadebiet','Débit massique','Caudal másico','Przepływ masowy') },
+   { id:'f-L', key:'L', type:'number', unit:'m', display:'km', min:1e3, max:1e6, step:1e3, precision:0, learn:'sizing', label:T('Length','Довжина','Länge','Lengte','Longueur','Longitud','Długość') },
+   { id:'f-z1', key:'z1', type:'number', unit:'m', display:'m', min:-3000, max:3000, step:10, precision:0, visible:full, label:T('End elevation','Висота кінця','Endhöhe','Eindhoogte','Altitude finale','Cota final','Wysokość końca') },
+   { id:'f-offshore', key:'offshore', type:'toggle', label:T('Offshore','Морський','Offshore','Offshore','En mer','Marino','Morski') },
+   { id:'f-allowOffshoreBoosters', key:'allowOffshoreBoosters', type:'toggle', visible:fullOff, learn:'boosters', label:T('Offshore boosters','Морські бустери','Offshore-Booster','Offshore boosters','Boosters en mer','Boosters marinos','Boostery morskie') } ]},
+ { id:'pressure', slot:'inputs', title:T('Pressure & temperature','Тиск і температура','Druck & Temperatur','Druk & temperatuur','Pression & température','Presión y temperatura','Ciśnienie i temperatura'), collapsible:true, collapsed:false, fields:[
+   { id:'f-p_in', key:'p_in', type:'number', unit:'Pa', display:'bar', min:10e5, max:250e5, step:1e5, precision:1, label:T('Inlet pressure','Тиск на вході','Eintrittsdruck','Inlaatdruk',"Pression d'entrée",'Presión de entrada','Ciśnienie wlotowe') },
+   { id:'f-p_min', key:'p_min', type:'number', unit:'Pa', display:'bar', min:5e5, max:200e5, step:1e5, precision:1, learn:'boosters', label:T('Min. pressure','Мін. тиск','Mindestdruck','Min. druk','Pression min.','Presión mín.','Ciśnienie min.') },
+   { id:'f-T_in', key:'T_in', type:'number', unit:'K', display:'degC', min:263.15, max:333.15, step:1, precision:1, label:T('Inlet temperature','Температура на вході','Eintrittstemperatur','Inlaattemperatuur',"Température d'entrée",'Temperatura de entrada','Temperatura wlotowa') },
+   { id:'f-MAOP', key:'MAOP', type:'number', unit:'Pa', display:'bar', min:20e5, max:300e5, step:1e5, precision:1, learn:'wall', visible:full, label:same('MAOP') },
+   { id:'f-thermal', key:'thermal', type:'select', learn:'thermal', visible:full, label:T('Thermal model','Теплова модель','Thermisches Modell','Thermisch model','Modèle thermique','Modelo térmico','Model cieplny'), options:[{value:'U',label:T('Heat transfer (U)','Теплопередача (U)','Wärmeübergang (U)','Warmteoverdracht (U)','Transfert thermique (U)','Transferencia de calor (U)','Wymiana ciepła (U)')},{value:'isothermal',label:T('Isothermal','Ізотермічна','Isotherm','Isotherm','Isotherme','Isotermo','Izotermiczny')}]},
+   { id:'f-U', key:'U', type:'number', unit:'W/m2K', min:0, max:20, step:0.1, precision:1, learn:'thermal', visible:fullU, label:T('U-value','Коеф. U','U-Wert','U-waarde','Coeff. U','Coef. U','Współcz. U') },
+   { id:'f-Tg', key:'Tg', type:'number', unit:'K', display:'degC', min:263.15, max:303.15, step:1, precision:1, learn:'thermal', visible:fullU, label:T('Ground temperature','Температура ґрунту','Bodentemperatur','Bodemtemperatuur','Température du sol','Temperatura del terreno','Temperatura gruntu') } ]},
+ { id:'pipe', slot:'inputs', title:T('Pipe','Труба','Rohr','Leiding','Conduite','Tubería','Rurociąg'), collapsible:true, collapsed:true, fields:[
+   { id:'f-nps', key:'nps', type:'select', learn:'sizing', visible:full, label:T('Pipe size (NPS)','Розмір труби (NPS)','Rohrgröße (NPS)','Leidingmaat (NPS)','Diamètre (NPS)','Tamaño (NPS)','Średnica (NPS)'), options:npsOpts },
+   { id:'f-grade', key:'grade', type:'select', learn:'wall', visible:full, label:T('Steel grade','Марка сталі','Stahlgüte','Staalkwaliteit',"Nuance d'acier",'Grado de acero','Gatunek stali'), options:gradeOpts },
+   { id:'f-CA', key:'CA', type:'number', unit:'m', display:'mm', min:0, max:0.006, step:0.0005, precision:1, learn:'wall', visible:full, label:T('Corrosion allowance','Припуск на корозію','Korrosionszuschlag','Corrosietoeslag','Surépaisseur corrosion','Sobreespesor corrosión','Naddatek korozyjny') },
+   { id:'f-eps', key:'eps', type:'number', unit:'m', display:'mm', min:1e-6, max:5e-4, step:1e-6, precision:3, learn:'friction', visible:full, label:T('Roughness','Шорсткість','Rauheit','Ruwheid','Rugosité','Rugosidad','Chropowatość') },
+   { id:'f-maxBoosters', key:'maxBoosters', type:'number', unit:'-', min:0, max:10, step:1, precision:0, learn:'boosters', visible:full, label:T('Max boosters','Макс. бустерів','Max. Booster','Max. boosters','Boosters max.','Boosters máx.','Maks. boosterów') } ]},
+ { id:'econ', slot:'inputs', title:T('Economics','Економіка','Wirtschaftlichkeit','Economie','Économie','Economía','Ekonomia'), collapsible:true, collapsed:true, fields:[
+   { id:'f-elec', key:'elec', type:'number', unit:'EUR/MWh', min:0, max:300, step:1, precision:0, learn:'cost', label:T('Electricity price','Ціна електроенергії','Strompreis','Elektriciteitsprijs','Prix électricité','Precio electricidad','Cena energii') },
+   { id:'f-rate', key:'rate', type:'number', unit:'-', min:0, max:0.2, step:0.005, precision:3, learn:'cost', visible:full, label:T('Discount rate','Ставка дисконту','Diskontsatz','Disconteringsvoet',"Taux d'actualisation",'Tasa de descuento','Stopa dyskontowa') },
+   { id:'f-life', key:'life', type:'number', unit:'y', min:5, max:50, step:1, precision:0, learn:'cost', visible:full, label:T('Lifetime','Термін служби','Lebensdauer','Levensduur','Durée de vie','Vida útil','Okres eksploatacji') } ]}
+ ]; }
+
+function LEARN_A1(){
+  return {
+    intro:{
+      title:T(
+        "CO2 pipeline sizing",
+        "Підбір діаметра CO2-трубопроводу",
+        "Dimensionierung von CO2-Pipelines",
+        "Dimensionering van CO2-pijpleidingen",
+        "Dimensionnement des pipelines de CO2",
+        "Dimensionamiento de tuberías de CO2",
+        "Dobór średnicy rurociągu CO2"
+      ),
+      body:T(
+        "This tool screens pipeline sizes from NPS 6 to NPS 48 and adds booster stations wherever the pressure falls below the minimum. It then checks the phase margin and selects the size with the lowest levelised transport cost (EUR/t).",
+        "Інструмент перевіряє розміри NPS 6–48, додає дожимні станції, де тиск падає нижче мінімуму, перевіряє фазовий запас і обирає розмір з найнижчою нормованою вартістю транспортування (EUR/t).",
+        "Das Tool prüft NPS 6–48, ergänzt Druckerhöhungsstationen bei Unterschreitung des Mindestdrucks, prüft den Phasenabstand und wählt die Größe mit den niedrigsten Transportgestehungskosten (EUR/t).",
+        "De tool screent NPS 6–48, voegt boosterstations toe waar de druk onder het minimum zakt, controleert de fasemarge en kiest de maat met de laagste genivelleerde transportkosten (EUR/t).",
+        "L'outil évalue les diamètres NPS 6 à 48, ajoute des stations de recompression lorsque la pression passe sous le minimum, vérifie la marge de phase et retient le diamètre au coût de transport actualisé le plus bas (EUR/t).",
+        "La herramienta evalúa tamaños NPS 6–48, añade estaciones de refuerzo donde la presión cae por debajo del mínimo, comprueba el margen de fase y elige el tamaño con el menor coste nivelado de transporte (EUR/t).",
+        "Narzędzie analizuje średnice NPS 6–48, dodaje stacje podnoszenia ciśnienia tam, gdzie ciśnienie spada poniżej minimum, sprawdza zapas fazowy i wybiera średnicę o najniższym uśrednionym koszcie transportu (EUR/t)."
+      )
+    },
+    densephase:{
+      title:T(
+        "Dense phase vs gas phase",
+        "Щільна фаза чи газова фаза",
+        "Dichtphase vs. Gasphase",
+        "Dichte fase versus gasfase",
+        "Phase dense ou phase gazeuse",
+        "Fase densa frente a fase gaseosa",
+        "Faza gęsta a faza gazowa"
+      ),
+      body:T(
+        "CO2 can be transported in gas phase at low pressure or in dense phase (liquid or supercritical) above its critical pressure; the critical point is 31.0 °C and 73.8 bar. Dense phase is preferred for large flows because its high density allows smaller pipelines and lower pressure losses per tonne transported.",
+        "CO2 транспортують у газовій фазі або в щільній фазі вище критичної точки (31,0 °C, 73,8 бар), яка є кращою для великих потоків завдяки високій густині.",
+        "CO2 wird in der Gasphase oder in der Dichtphase oberhalb des kritischen Punkts (31,0 °C, 73,8 bar) transportiert, die sich wegen ihrer hohen Dichte für große Mengen eignet.",
+        "CO2 wordt vervoerd in gasfase of in dichte fase boven het kritieke punt (31,0 °C, 73,8 bar), die door de hoge dichtheid de voorkeur heeft bij grote debieten.",
+        "Le CO2 est transporté en phase gazeuse ou en phase dense au-delà du point critique (31,0 °C, 73,8 bar), privilégiée pour les grands débits grâce à sa forte densité.",
+        "El CO2 se transporta en fase gaseosa o en fase densa por encima del punto crítico (31,0 °C, 73,8 bar), preferida para grandes caudales por su alta densidad.",
+        "CO2 transportuje się w fazie gazowej lub w fazie gęstej powyżej punktu krytycznego (31,0 °C, 73,8 bar), preferowanej przy dużych przepływach ze względu na wysoką gęstość."
+      )
+    }
+  };
+}
+
+var LEARN = LEARN_A1();
+(function (x) { for (var k in x) LEARN[k] = x[k]; })({
+friction: { title: T("Friction & elevation losses","Втрати на тертя та підйом","Reibungs- und Höhenverluste","Wrijvings- en hoogteverliezen","Pertes par frottement et dénivelé","Pérdidas por fricción y elevación","Straty tarcia i wzniesienia"), body: T("Darcy-Weisbach dp = f·(L/D)·ρv²/2 with Colebrook friction factor (roughness 45 µm), plus hydrostatic head ρg·dz. Dense CO2 (~900 kg/m³): a 100 m rise costs ≈ 9 bar. The route is marched segment by segment using real-gas properties.","Дарсі-Вейсбах dp = f·(L/D)·ρv²/2, f за Колбруком (шорсткість 45 µm), плюс гідростатика ρg·dz. Щільний CO2 ~900 kg/m³: підйом 100 m ≈ 9 bar. Розрахунок по сегментах з реальними властивостями газу.","Darcy-Weisbach dp = f·(L/D)·ρv²/2, f nach Colebrook (Rauheit 45 µm), plus hydrostatischer Anteil ρg·dz. Dichtes CO2 ~900 kg/m³: 100 m Anstieg ≈ 9 bar. Segmentweise Berechnung mit Realgaseigenschaften.","Darcy-Weisbach dp = f·(L/D)·ρv²/2, f volgens Colebrook (ruwheid 45 µm), plus hydrostatische term ρg·dz. Dicht CO2 ~900 kg/m³: 100 m stijging ≈ 9 bar. Berekening per segment met reëlegaseigenschappen.","Darcy-Weisbach dp = f·(L/D)·ρv²/2, f de Colebrook (rugosité 45 µm), plus charge hydrostatique ρg·dz. CO2 dense ~900 kg/m³ : 100 m de montée ≈ 9 bar. Calcul par segments avec propriétés de gaz réel.","Darcy-Weisbach dp = f·(L/D)·ρv²/2, f de Colebrook (rugosidad 45 µm), más carga hidrostática ρg·dz. CO2 denso ~900 kg/m³: subir 100 m ≈ 9 bar. Cálculo por segmentos con propiedades de gas real.","Darcy-Weisbach dp = f·(L/D)·ρv²/2, f wg Colebrooka (chropowatość 45 µm), plus człon hydrostatyczny ρg·dz. Gęsty CO2 ~900 kg/m³: wzniesienie 100 m ≈ 9 bar. Obliczenia odcinkami z właściwościami gazu rzeczywistego.") },
+boosters: { title: T("Booster stations","Бустерні станції","Druckerhöhungsstationen","Boosterstations","Stations de recompression","Estaciones de refuerzo","Stacje podnoszenia ciśnienia"), body: T("Boosters are placed wherever pressure falls below p_min (90 bar dense phase, 20 bar gas phase) and re-pressurise flow to inlet pressure. Dense phase uses pumps, gas phase intercooled compressors. Offshore sites only if allowed; maximum five stations.","Бустер ставиться, де тиск падає нижче p_min (90 bar щільна фаза, 20 bar газ), і відновлює тиск до вхідного. Насос для щільної фази, компресор з проміжним охолодженням для газу. Офшор лише за дозволу; максимум 5.","Booster dort, wo p unter p_min fällt (90 bar dicht, 20 bar gasförmig); Wiederverdichtung auf Eintrittsdruck. Pumpe für dichte Phase, zwischengekühlter Verdichter für Gas. Offshore nur wenn erlaubt; max. 5.","Booster waar p onder p_min daalt (90 bar dicht, 20 bar gas); herstel tot inlaatdruk. Pomp voor dichte fase, compressor met tussenkoeling voor gas. Offshore alleen indien toegestaan; max. 5.","Booster placé où p passe sous p_min (90 bar dense, 20 bar gaz) ; recompression jusqu'à la pression d'entrée. Pompe en phase dense, compresseur à refroidissement intermédiaire en gaz. Offshore seulement si autorisé ; max. 5.","Booster donde p cae bajo p_min (90 bar denso, 20 bar gas); represuriza hasta la presión de entrada. Bomba en fase densa, compresor con interenfriamiento en gas. Offshore solo si se permite; máx. 5.","Booster tam, gdzie p spada poniżej p_min (90 bar faza gęsta, 20 bar gaz); przywraca ciśnienie wlotowe. Pompa dla fazy gęstej, sprężarka z chłodzeniem międzystopniowym dla gazu. Offshore tylko jeśli dozwolone; maks. 5.") },
+phase: { title: T("Phase margin", "Фазовий запас", "Phasenabstand", "Fasemarge", "Marge de phase", "Margen de fase", "Margines fazowy"), body: T("Phase margin is checked along the route. Dense: p - psat(T) >= 10 bar, or supercritical (31.0 °C, 73.8 bar). Gas: psat(T) - p >= 5 bar. Smallest margin is reported; violating sizes are rejected.", "Запас перевіряється вздовж траси. Щільна фаза: p - psat(T) >= 10 бар або надкритичний стан (31,0 °C, 73,8 бар). Газ: psat(T) - p >= 5 бар. Показується найменший запас; невідповідні розміри відхиляються.", "Abstand wird entlang der Trasse geprüft. Dichtphase: p - psat(T) >= 10 bar oder überkritisch (31,0 °C, 73,8 bar). Gas: psat(T) - p >= 5 bar. Kleinster Abstand wird angezeigt; unzulässige Größen werden verworfen.", "Marge wordt langs het tracé gecontroleerd. Dichte fase: p - psat(T) >= 10 bar of superkritisch (31,0 °C, 73,8 bar). Gas: psat(T) - p >= 5 bar. Kleinste marge wordt gemeld; ongeldige maten worden afgewezen.", "Marge vérifiée le long du tracé. Phase dense : p - psat(T) >= 10 bar ou supercritique (31,0 °C, 73,8 bar). Gaz : psat(T) - p >= 5 bar. Marge minimale affichée ; tailles non conformes rejetées.", "Margen comprobado a lo largo del trazado. Fase densa: p - psat(T) >= 10 bar o supercrítico (31,0 °C, 73,8 bar). Gas: psat(T) - p >= 5 bar. Se informa el margen mínimo; los tamaños que no cumplen se rechazan.", "Margines sprawdzany wzdłuż trasy. Faza gęsta: p - psat(T) >= 10 bar lub stan nadkrytyczny (31,0 °C, 73,8 bar). Gaz: psat(T) - p >= 5 bar. Podawany jest najmniejszy margines; niespełniające średnice są odrzucane.") },
+thermal: { title: T("Thermal model", "Теплова модель", "Thermisches Modell", "Thermisch model", "Modèle thermique", "Modelo térmico", "Model termiczny"), body: T("Ground heat exchange uses U (default 2 W/m²K, outer surface) toward ground temperature Tg (10 °C). Real-gas enthalpy includes Joule-Thomson cooling; 'isothermal' option available. Buried lines approach Tg within tens of km; colder dense CO2 is denser.", "Теплообмін з ґрунтом через U (типово 2 Вт/м²К, зовнішня поверхня) до температури ґрунту Tg (10 °C). Ентальпія реального газу враховує охолодження Джоуля-Томсона; є опція 'isothermal'. Підземні лінії наближаються до Tg за десятки км; холодніший щільний CO2 щільніший.", "Wärmeaustausch mit dem Boden über U (Standard 2 W/m²K, Außenfläche) zur Bodentemperatur Tg (10 °C). Realgas-Enthalpie berücksichtigt Joule-Thomson-Abkühlung; Option 'isothermal'. Erdverlegte Leitungen nähern sich Tg innerhalb einiger zehn km; kälteres dichtes CO2 ist dichter.", "Warmte-uitwisseling met de bodem via U (standaard 2 W/m²K, buitenoppervlak) naar bodemtemperatuur Tg (10 °C). Reëel-gasenthalpie omvat Joule-Thomson-koeling; optie 'isothermal'. Ondergrondse leidingen naderen Tg binnen tientallen km; kouder dicht CO2 is dichter.", "Échange thermique avec le sol via U (2 W/m²K par défaut, surface extérieure) vers la température du sol Tg (10 °C). L'enthalpie gaz réel inclut le refroidissement Joule-Thomson ; option 'isothermal'. Les conduites enterrées approchent Tg en quelques dizaines de km ; le CO2 dense plus froid est plus dense.", "Intercambio térmico con el suelo mediante U (2 W/m²K por defecto, superficie exterior) hacia la temperatura del suelo Tg (10 °C). La entalpía de gas real incluye el enfriamiento Joule-Thomson; opción 'isothermal'. Las líneas enterradas se acercan a Tg en decenas de km; el CO2 denso más frío es más denso.", "Wymiana ciepła z gruntem przez U (domyślnie 2 W/m²K, powierzchnia zewnętrzna) do temperatury gruntu Tg (10 °C). Entalpia gazu rzeczywistego uwzględnia chłodzenie Joule'a-Thomsona; opcja 'isothermal'. Rurociągi podziemne zbliżają się do Tg w ciągu dziesiątek km; zimniejszy gęsty CO2 jest gęstszy.") },
+wall: { title: T("Wall thickness (Barlow)","Товщина стінки (Барлоу)","Wanddicke (Barlow)","Wanddikte (Barlow)","Épaisseur de paroi (Barlow)","Espesor de pared (Barlow)","Grubość ścianki (Barlow)"), body: T("Barlow (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. Design factor F = 0.72 onshore, 0.77 offshore. API 5L X52–X70 (SMYS 359–483 MPa); corrosion allowance default 1 mm. Inner diameter ID = OD − 2t feeds hydraulics.","Барлоу (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 на суші, 0,77 на морі. API 5L X52–X70 (SMYS 359–483 МПа); CA 1 мм. ID = OD − 2t для гідравліки.","Barlow (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 an Land, 0,77 offshore. API 5L X52–X70 (SMYS 359–483 MPa); CA 1 mm. ID = OD − 2t für Hydraulik.","Barlow (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 op land, 0,77 offshore. API 5L X52–X70 (SMYS 359–483 MPa); CA 1 mm. ID = OD − 2t voor hydraulica.","Barlow (ASME B31.4/B31.8) : t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 à terre, 0,77 en mer. API 5L X52–X70 (SMYS 359–483 MPa) ; CA 1 mm. ID = OD − 2t pour l'hydraulique.","Barlow (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 en tierra, 0,77 costa afuera. API 5L X52–X70 (SMYS 359–483 MPa); CA 1 mm. ID = OD − 2t para hidráulica.","Barlow (ASME B31.4/B31.8): t = MAOP·OD/(2·F·SMYS·Ew) + CA. F = 0,72 na lądzie, 0,77 na morzu. API 5L X52–X70 (SMYS 359–483 MPa); CA 1 mm. ID = OD − 2t do hydrauliki.") },
+cost: { title: T("Levelized cost of transport (LCOT)","Нормована вартість транспортування (LCOT)","Spezifische Transportkosten (LCOT)","Genivelleerde transportkosten (LCOT)","Coût actualisé du transport (LCOT)","Coste nivelado de transporte (LCOT)","Uśredniony koszt transportu (LCOT)"), body: T("LCOT (EUR/t) = (CAPEX·CRF + OPEX + electricity)/annual tonnes. Pipe L·(250+55·NPS) EUR, ×1.7 offshore; boosters 2500 EUR/kW, 0.65 scaling exponent. OPEX 1% (1.5% offshore) of pipe plus 4% of boosters. 8% discount, 25 years, EUR 2025; screening accuracy.","LCOT (EUR/т) = (CAPEX·CRF + OPEX + електроенергія)/річні тонни. Труба L·(250+55·NPS) EUR, ×1,7 на морі; бустери 2500 EUR/кВт, показник 0,65. OPEX 1% (1,5% на морі) труби + 4% бустерів. 8%, 25 р., EUR 2025; оціночна точність.","LCOT (EUR/t) = (CAPEX·CRF + OPEX + Strom)/Jahrestonnen. Rohr L·(250+55·NPS) EUR, ×1,7 offshore; Booster 2500 EUR/kW, Exponent 0,65. OPEX 1 % (1,5 % offshore) Rohr + 4 % Booster. 8 %, 25 J., EUR 2025; Screening-Genauigkeit.","LCOT (EUR/t) = (CAPEX·CRF + OPEX + elektriciteit)/jaartonnen. Leiding L·(250+55·NPS) EUR, ×1,7 offshore; boosters 2500 EUR/kW, exponent 0,65. OPEX 1% (1,5% offshore) leiding + 4% boosters. 8%, 25 jaar, EUR 2025; screeningnauwkeurigheid.","LCOT (EUR/t) = (CAPEX·CRF + OPEX + électricité)/tonnes annuelles. Conduite L·(250+55·NPS) EUR, ×1,7 en mer ; surpresseurs 2500 EUR/kW, exposant 0,65. OPEX 1 % (1,5 % en mer) conduite + 4 % surpresseurs. 8 %, 25 ans, EUR 2025 ; précision d'avant-projet.","LCOT (EUR/t) = (CAPEX·CRF + OPEX + electricidad)/toneladas anuales. Tubería L·(250+55·NPS) EUR, ×1,7 costa afuera; impulsores 2500 EUR/kW, exponente 0,65. OPEX 1% (1,5% costa afuera) tubería + 4% impulsores. 8%, 25 años, EUR 2025; precisión de estimación preliminar.","LCOT (EUR/t) = (CAPEX·CRF + OPEX + energia)/roczne tony. Rurociąg L·(250+55·NPS) EUR, ×1,7 na morzu; boostery 2500 EUR/kW, wykładnik 0,65. OPEX 1% (1,5% na morzu) rurociągu + 4% boosterów. 8%, 25 lat, EUR 2025; dokładność szacunkowa.") },
+sizing: { title: T("Pipe sizing","Підбір діаметра","Rohrdimensionierung","Leidingdimensionering","Dimensionnement","Dimensionamiento","Dobór średnicy"), body: T("NPS 6-48 screened coarsely, best refined. Rejected if wall too thick, too many boosters, phase margin violated. Lowest LCOT wins: small pipe = cheap steel, big dp, boosters; large pipe = costly steel. Full level can force size. Velocity 1-3 m/s.","NPS 6-48: грубий відбір, потім уточнення найкращого. Відхилення: надто товста стінка, забагато бустерів, порушено фазовий запас. Перемагає мінімальний LCOT. Розмір можна задати на повному рівні. Швидкість 1-3 м/с.","NPS 6-48 grob geprüft, Bester verfeinert. Verworfen bei zu dicker Wand, zu vielen Boostern oder verletzter Phasenmarge. Minimale LCOT gewinnt. Größe in Stufe Voll festlegbar. Geschwindigkeit 1-3 m/s.","NPS 6-48 grof gescreend, beste verfijnd. Afgewezen bij te dikke wand, te veel boosters of geschonden fasemarge. Laagste LCOT wint. Maat te forceren op volledig niveau. Snelheid 1-3 m/s.","NPS 6-48 criblés grossièrement, le meilleur affiné. Rejet si paroi trop épaisse, trop de boosters ou marge de phase violée. Le LCOT minimal l'emporte. Taille imposable en niveau complet. Vitesse 1-3 m/s.","NPS 6-48 con cribado grueso, el mejor refinado. Rechazo si pared muy gruesa, demasiados boosters o margen de fase violado. Gana el LCOT mínimo. Tamaño forzable en nivel completo. Velocidad 1-3 m/s.","NPS 6-48: wstępna selekcja, najlepszy dopracowany. Odrzucenie przy zbyt grubej ściance, zbyt wielu boosterach lub naruszonym marginesie fazowym. Wygrywa minimalny LCOT. Średnicę można wymusić na poziomie pełnym. Prędkość 1-3 m/s.") },
+linepack: { title: T("Linepack","Запас у трубопроводі","Leitungsinhalt","Linepack","Stock en conduite","Empaque de línea","Zapas w rurociągu"), body: T("Mass of CO2 held in the line, summed as rho·area·dx in kg. Dense phase holds several times more than gas, buffering capture flow swings. Matters for blowdown. Outlet pressure and temperature are passed to the storage stage.","Маса CO2 у трубі (сума rho·A·dx, кг). Щільна фаза вміщує в рази більше, ніж газ, і згладжує коливання потоку. Важливо для продувки. Тиск і температура на виході передаються до етапу зберігання.","CO2-Masse in der Leitung (Summe rho·A·dx, kg). Dichte Phase speichert ein Mehrfaches von Gas und puffert Schwankungen. Wichtig für Druckentlastung. Austrittsdruck und -temperatur gehen an die Speicherstufe.","CO2-massa in de leiding (som rho·A·dx, kg). Dichte fase bevat meermaals meer dan gas en buffert schommelingen. Belangrijk voor afblazen. Uitlaatdruk en -temperatuur gaan naar de opslagstap.","Masse de CO2 dans la conduite (somme rho·A·dx, kg). La phase dense en contient plusieurs fois plus que le gaz et amortit les variations. Important pour la décompression. P et T de sortie passent au stockage.","Masa de CO2 en la línea (suma rho·A·dx, kg). La fase densa contiene varias veces más que el gas y amortigua fluctuaciones. Importa para la despresurización. P y T de salida pasan al almacenamiento.","Masa CO2 w rurociągu (suma rho·A·dx, kg). Faza gęsta mieści kilka razy więcej niż gaz i buforuje wahania. Ważne przy zrzucie ciśnienia. Ciśnienie i temperatura wylotu trafiają do etapu składowania.") }
+});
+var TOUR = [{"topic":"densephase","focus":"[data-dgu-field=\"f-phase\"]"},{"topic":"sizing","focus":"[data-dgu-field=\"f-mdot\"]"},{"topic":"friction","focus":"[data-dgu-field=\"f-L\"]"},{"topic":"boosters","focus":"[data-dgu-field=\"f-p_min\"]"},{"topic":"phase","focus":".dgu-stage"},{"topic":"thermal","focus":"[data-dgu-field=\"f-T_in\"]"},{"topic":"cost","focus":".dgu-r-results"}].filter(function (s) { return !!LEARN[s.topic]; });
+
+/* COMPUTE (Claude); glue: F alias */
+function COMPUTE(s, r) {
+  var F = DiagramUI.fmt;
+  var e;
+  if (!r || !r.ok) {
+    e = (r && r.error) || '';
+    return { verdict: { tone: 'bad', text: T('Cannot compute: ' + e, 'Неможливо обчислити: ' + e, 'Berechnung nicht möglich: ' + e, 'Kan niet berekenen: ' + e, 'Calcul impossible : ' + e, 'No se puede calcular: ' + e, 'Nie można obliczyć: ' + e) }, notes: [e] };
+  }
+  function num(v) { return (typeof v === 'number' && isFinite(v)) ? v : 0; }
+  function tile(label, value, hint, precision, learn, headline) {
+    var o = { label: label, value: num(value), hint: hint, precision: precision };
+    if (learn) { o.learn = learn; }
+    if (headline === false) { o.headline = false; }
+    return o;
+  }
+  function cell(v, p) { return { value: num(v), precision: p }; }
+  var full = !!(s && s.level === 'full');
+  var c = r.cost || {};
+  var bs = r.boosters || [];
+  var nb = bs.length;
+  var warns = r.warnings || [];
+  var lcot = (r.lcot != null) ? r.lcot : c.lcot;
+  var capex = (r.capex != null) ? r.capex : c.capex;
+  var pm = num(r.phaseMin);
+  var sep = ' · ';
+  var head = 'NPS ' + r.nps + sep;
+  var tail = sep + F(num(lcot), { precision: 1 }) + ' EUR/t';
+  var tone = (nb === 0 && pm >= 1e6 && !warns.length) ? 'ok' : 'warn';
+  var verdict = { tone: tone, text: T(
+    head + nb + (nb === 1 ? ' booster' : ' boosters') + tail,
+    head + 'бустерів: ' + nb + tail,
+    head + nb + ' Verdichter' + tail,
+    head + nb + (nb === 1 ? ' booster' : ' boosters') + tail,
+    head + nb + (nb > 1 ? ' surpresseurs' : ' surpresseur') + tail,
+    head + nb + (nb === 1 ? ' compresor' : ' compresores') + tail,
+    head + 'tłocznie: ' + nb + tail) };
+  var tiles = [
+    tile(T('LCOT', 'LCOT', 'LCOT', 'LCOT', 'LCOT', 'LCOT', 'LCOT'), lcot, 'EUR/t', 2, 'cost'),
+    tile(T('NPS', 'NPS', 'NPS', 'NPS', 'NPS', 'NPS', 'NPS'), r.nps, 'in', 0, 'sizing'),
+    tile(T('Inner diameter', 'Внутр. діаметр', 'Innendurchm.', 'Binnendiam.', 'Diam. intérieur', 'Diám. interior', 'Średn. wewn.'), num(r.ID) * 1000, 'mm', 1),
+    tile(T('Wall thickness', 'Товщина стінки', 'Wandstärke', 'Wanddikte', 'Épaisseur', 'Espesor', 'Grubość ścianki'), num(r.t) * 1000, 'mm', 2, 'wall'),
+    tile(T('Pressure drop', 'Падіння тиску', 'Druckverlust', 'Drukval', 'Perte de charge', 'Caída de presión', 'Spadek ciśnienia'), num(r.dp) / 1e5, 'bar', 1, 'friction'),
+    tile(T('Boosters', 'Бустери', 'Verdichter', 'Boosters', 'Surpresseurs', 'Compresores', 'Tłocznie'), nb, '', 0, 'boosters'),
+    tile(T('Outlet pressure', 'Тиск на виході', 'Austrittsdruck', 'Uitlaatdruk', 'Pression sortie', 'Presión salida', 'Ciśn. wylotowe'), num(r.p_out) / 1e5, 'bar', 1),
+    tile(T('Outlet temperature', 'Темп. на виході', 'Austrittstemp.', 'Uitlaattemp.', 'Temp. sortie', 'Temp. salida', 'Temp. wylotowa'), num(r.T_out) - 273.15, '°C', 1, 'thermal'),
+    tile(T('CAPEX', 'CAPEX', 'CAPEX', 'CAPEX', 'CAPEX', 'CAPEX', 'CAPEX'), num(capex) / 1e6, 'M EUR', 1)
+  ];
+  if (full) {
+    tiles.push(
+      tile(T('Booster power', 'Потужність бустерів', 'Verdichterleistung', 'Boostervermogen', 'Puissance surpr.', 'Potencia compr.', 'Moc tłoczni'), num(r.Q) / 1e6, 'MW', 2, null, false),
+      tile(T('Max velocity', 'Макс. швидкість', 'Max. Geschw.', 'Max. snelheid', 'Vitesse max', 'Velocidad máx.', 'Prędkość maks.'), r.vmax, 'm/s', 2, null, false),
+      tile(T('Linepack', 'Лінійний запас', 'Leitungsinhalt', 'Linepack', 'Stock en conduite', 'Linepack', 'Zapas w rurociągu'), num(r.linepack) / 1e6, 'kt', 2, null, false),
+      tile(T('Min phase margin', 'Мін. запас фази', 'Min. Phasenabst.', 'Min. fasemarge', 'Marge phase min', 'Margen fase mín.', 'Min. zapas fazy'), pm / 1e5, 'bar', 1, 'phase', false),
+      tile(T('Annual cost', 'Річні витрати', 'Jahreskosten', 'Jaarkosten', 'Coût annuel', 'Coste anual', 'Koszt roczny'), num(c.annualised) / 1e6, 'M EUR/y', 2, null, false)
+    );
+  }
+  var meters = [{
+    label: T('Phase margin', 'Запас фази', 'Phasenabstand', 'Fasemarge', 'Marge de phase', 'Margen de fase', 'Zapas fazy'),
+    ratio: Math.max(0, Math.min(1, pm / 20e5)),
+    text: F(pm / 1e5, { precision: 1 }) + ' bar'
+  }];
+  var item = T('Item', 'Стаття', 'Posten', 'Post', 'Poste', 'Partida', 'Pozycja');
+  var tables = [{
+    title: T('Cost breakdown', 'Структура витрат', 'Kostenaufteilung', 'Kostenopbouw', 'Répartition des coûts', 'Desglose de costes', 'Struktura kosztów'),
+    head: [item, { label: 'M EUR', num: true }],
+    rows: [
+      { cells: [T('Pipe CAPEX', 'CAPEX труби', 'CAPEX Leitung', 'CAPEX leiding', 'CAPEX conduite', 'CAPEX tubería', 'CAPEX rurociągu'), cell(num(c.capex_pipe) / 1e6, 2)] },
+      { cells: [T('Booster CAPEX', 'CAPEX бустерів', 'CAPEX Verdichter', 'CAPEX boosters', 'CAPEX surpr.', 'CAPEX compr.', 'CAPEX tłoczni'), cell(num(c.capex_boost) / 1e6, 2)] },
+      { cells: [T('Fixed OPEX (/y)', 'Фікс. OPEX (/р)', 'Fixe OPEX (/J)', 'Vaste OPEX (/j)', 'OPEX fixe (/an)', 'OPEX fijo (/año)', 'Stały OPEX (/r)'), cell(num(c.opex_fixed) / 1e6, 2)] },
+      { cells: [T('Energy (/y)', 'Енергія (/р)', 'Energie (/J)', 'Energie (/j)', 'Énergie (/an)', 'Energía (/año)', 'Energia (/r)'), cell(num(c.energy_cost) / 1e6, 2)] },
+      { cells: [T('Annualised (/y)', 'Річний екв. (/р)', 'Annuität (/J)', 'Geannualiseerd (/j)', 'Annualisé (/an)', 'Anualizado (/año)', 'Roczny ekw. (/r)'), cell(num(c.annualised) / 1e6, 2)] }
+    ],
+    foot: [T('Total CAPEX', 'Загальний CAPEX', 'CAPEX gesamt', 'Totale CAPEX', 'CAPEX total', 'CAPEX total', 'CAPEX łącznie'), cell(num(capex) / 1e6, 2)]
+  }];
+  if (nb) {
+    var brows = [], i;
+    for (i = 0; i < nb; i++) {
+      brows.push({ cells: ['#' + (i + 1), cell(num(bs[i].x) / 1000, 1), cell(num(bs[i].p_suc) / 1e5, 1), cell(num(bs[i].p_dis) / 1e5, 1), cell(num(bs[i].P_el) / 1e6, 2)] });
+    }
+    tables.push({
+      title: T('Booster stations', 'Бустерні станції', 'Verdichterstationen', 'Boosterstations', 'Stations de surpression', 'Estaciones de compresión', 'Tłocznie'),
+      head: [T('Station', 'Станція', 'Station', 'Station', 'Station', 'Estación', 'Stacja'), { label: 'km', num: true },
+        { label: T('Suction bar', 'Всмок. бар', 'Saug bar', 'Zuig bar', 'Aspir. bar', 'Aspir. bar', 'Ssanie bar'), num: true },
+        { label: T('Discharge bar', 'Нагнiт. бар', 'Druck bar', 'Pers bar', 'Refoul. bar', 'Desc. bar', 'Tłocz. bar'), num: true },
+        { label: 'MW', num: true }],
+      rows: brows
+    });
+  }
+  if (full) {
+    var cands = r.candidates || [], crows = [], j, k;
+    for (j = 0; j < cands.length; j++) {
+      k = cands[j];
+      crows.push({ cells: [String(k.nps), cell(num(k.ID) * 1000, 1), cell(num(k.t) * 1000, 2), cell(k.nBoosters, 0),
+        (k.lcot == null || !isFinite(k.lcot)) ? '—' : cell(k.lcot, 2), k.feasible ? 'ok' : String(k.reason || '')] });
+    }
+    tables.push({
+      title: T('Candidate sizes', 'Варіанти розмірів', 'Kandidatengrößen', 'Kandidaatmaten', 'Tailles candidates', 'Tamaños candidatos', 'Rozmiary kandydackie'),
+      head: ['NPS', { label: 'ID mm', num: true }, { label: 't mm', num: true },
+        { label: T('Boosters', 'Бустери', 'Verdichter', 'Boosters', 'Surpr.', 'Compr.', 'Tłocznie'), num: true },
+        { label: 'LCOT EUR/t', num: true }, T('Status', 'Статус', 'Status', 'Status', 'Statut', 'Estado', 'Status')],
+      rows: crows
+    });
+  }
+  return { verdict: verdict, tiles: tiles, meters: meters, tables: tables, notes: warns.slice() };
+}
+
+var GROUPS = {
+  Onshore: T('Onshore', 'Наземний', 'Onshore', 'Onshore', 'Terrestre', 'Terrestre', 'Lądowy'),
+  Offshore: T('Offshore', 'Морський', 'Offshore', 'Offshore', 'En mer', 'Marino', 'Morski'),
+  Trunk: T('Trunk', 'Магістральний', 'Sammelleitung', 'Hoofdleiding', 'Collecteur', 'Troncal', 'Magistralny'),
+  'Gas phase': T('Gas phase', 'Газова фаза', 'Gasphase', 'Gasfase', 'Phase gazeuse', 'Fase gaseosa', 'Faza gazowa')
+};
+var EX_LABELS = {
+  'onshore-2mt-100km': T('Onshore 2 Mt/y, 100 km', 'Наземний 2 Мт/рік, 100 км', 'Onshore 2 Mt/a, 100 km', 'Onshore 2 Mt/j, 100 km', 'Terrestre 2 Mt/an, 100 km', 'Terrestre 2 Mt/año, 100 km', 'Lądowy 2 Mt/rok, 100 km'),
+  'onshore-5mt-300km': T('Onshore 5 Mt/y, 300 km', 'Наземний 5 Мт/рік, 300 км', 'Onshore 5 Mt/a, 300 km', 'Onshore 5 Mt/j, 300 km', 'Terrestre 5 Mt/an, 300 km', 'Terrestre 5 Mt/año, 300 km', 'Lądowy 5 Mt/rok, 300 km'),
+  'hilly-1mt-150km': T('Hilly 1 Mt/y, 150 km', 'Горбистий 1 Мт/рік, 150 км', 'Hügelig 1 Mt/a, 150 km', 'Heuvelachtig 1 Mt/j, 150 km', 'Vallonné 1 Mt/an, 150 km', 'Accidentado 1 Mt/año, 150 km', 'Pagórkowaty 1 Mt/rok, 150 km'),
+  'offshore-3mt-200km': T('Offshore 3 Mt/y, 200 km', 'Морський 3 Мт/рік, 200 км', 'Offshore 3 Mt/a, 200 km', 'Offshore 3 Mt/j, 200 km', 'En mer 3 Mt/an, 200 km', 'Marino 3 Mt/año, 200 km', 'Morski 3 Mt/rok, 200 km'),
+  'cluster-10mt-50km': T('Cluster trunk 10 Mt/y, 50 km', 'Кластерна магістраль 10 Мт/рік, 50 км', 'Cluster-Sammelleitung 10 Mt/a, 50 km', 'Clusterhoofdleiding 10 Mt/j, 50 km', 'Collecteur de cluster 10 Mt/an, 50 km', 'Troncal de clúster 10 Mt/año, 50 km', 'Magistrala klastra 10 Mt/rok, 50 km'),
+  'gas-0.5mt-50km': T('Gas phase 0.5 Mt/y, 50 km', 'Газова фаза 0,5 Мт/рік, 50 км', 'Gasphase 0,5 Mt/a, 50 km', 'Gasfase 0,5 Mt/j, 50 km', 'Phase gazeuse 0,5 Mt/an, 50 km', 'Fase gaseosa 0,5 Mt/año, 50 km', 'Faza gazowa 0,5 Mt/rok, 50 km')
+};
+function EXAMPLES() {
+  var P = CCUS.pipe.presets;
+  return Object.keys(P).map(function (id) {
+    var p = P[id];
+    return { id: id, group: GROUPS[p.group], label: EX_LABELS[id] || p.label, note: p.label, apply: function (t) {
+      var k, lvl = t.level, inp = p.inputs || {};
+      for (k in DEFAULTS) if (DEFAULTS.hasOwnProperty(k) && k !== 'level') t[k] = DEFAULTS[k];
+      t.level = lvl;
+      for (k in inp) {
+        if (!inp.hasOwnProperty(k)) continue;
+        if (k === 'profile') {
+          var pr = inp.profile || [];
+          t.profile = pr.map(function (q) { return { x: q.x, z: q.z }; });
+          if (pr.length) t.z1 = pr[pr.length - 1].z;
+        } else if (k === 'nps') t.nps = inp.nps == null ? 0 : inp.nps;
+        else t[k] = inp[k];
+      }
+      if (!inp.hasOwnProperty('p_min')) t.p_min = t.phase === 'gas' ? 20e5 : 90e5;
+    } };
+  });
+}
+function STAGE_RENDER(size, st, r) {
+  var ctx = st.canvas(), w = size.w, h = size.h;
+  ctx.clearRect(0, 0, w, h);
+  if (!r || !r.profile || !r.profile.x || r.profile.x.length < 2) return;
+  var cs = getComputedStyle(document.documentElement);
+  function cv(n, f) { var v = cs.getPropertyValue(n); v = v && v.trim(); return v || f; }
+  var muted = cv('--muted', '#888'), line = cv('--line', '#ddd'), font = cv('--font', 'sans-serif');
+  var L = 52, R = 48, Tp = 12, B = 30, pw = w - L - R, ph = h - Tp - B;
+  if (pw < 10 || ph < 10) return;
+  var pr = r.profile, n = pr.x.length, i, X = [], P = [], TC = [], S = [];
+  for (i = 0; i < n; i++) {
+    X.push(pr.x[i] / 1000); P.push(pr.p[i] / 1e5); TC.push(pr.T[i] - 273.15);
+    var s = pr.psat ? pr.psat[i] : NaN;
+    S.push(isFinite(s) && s > 0 ? s / 1e5 : NaN);
+  }
+  function mm(arrs) {
+    var lo = Infinity, hi = -Infinity, a, j, k;
+    for (k = 0; k < arrs.length; k++) for (a = arrs[k], j = 0; j < a.length; j++)
+      if (isFinite(a[j])) { if (a[j] < lo) lo = a[j]; if (a[j] > hi) hi = a[j]; }
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    var d = (hi - lo) || Math.abs(hi) || 1;
+    return [lo - 0.08 * d, hi + 0.08 * d];
+  }
+  var x0 = X[0], x1 = X[n - 1] > x0 ? X[n - 1] : x0 + 1;
+  var pr2 = mm([P, S]), pLo = 0, pHi = pr2[1] > 0 ? pr2[1] : 1;
+  var tr = mm([TC]), tLo = tr[0], tHi = tr[1];
+  function sx(v) { return L + (v - x0) / (x1 - x0) * pw; }
+  function sp(v) { return Tp + ph - (v - pLo) / (pHi - pLo) * ph; }
+  function stt(v) { return Tp + ph - (v - tLo) / (tHi - tLo) * ph; }
+  ctx.font = '11px ' + font; ctx.lineWidth = 1; ctx.strokeStyle = line; ctx.fillStyle = muted;
+  var xt = DiagramUI.ticks(x0, x1, pw, 1), yt = DiagramUI.ticks(pLo, pHi, ph, 1), v, px;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (i = 0; i < xt.length; i++) {
+    v = xt[i]; if (v < x0 || v > x1) continue; px = Math.round(sx(v)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(px, Tp); ctx.lineTo(px, Tp + ph); ctx.stroke();
+    ctx.fillText(DiagramUI.fmt(v, { precision: 0 }), px, Tp + ph + 4);
+  }
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (i = 0; i < yt.length; i++) {
+    v = yt[i]; if (v < pLo || v > pHi) continue; px = Math.round(sp(v)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(L, px); ctx.lineTo(L + pw, px); ctx.stroke();
+    ctx.fillText(DiagramUI.fmt(v, { precision: 0 }), L - 6, px);
+  }
+  ctx.textAlign = 'left';
+  for (i = 0; i < 4; i++) {
+    v = tLo + (tHi - tLo) * i / 3;
+    ctx.fillText(DiagramUI.fmt(v, { precision: (tHi - tLo) < 4 ? 1 : 0 }), L + pw + 6, stt(v));
+  }
+  ctx.strokeRect(L + 0.5, Tp + 0.5, pw, ph);
+  ctx.save(); ctx.translate(12, Tp + ph / 2); ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center'; ctx.fillText('bar', 0, 0); ctx.restore();
+  ctx.textAlign = 'right'; ctx.fillText('°C', w - 4, Tp + 6);
+  ctx.textBaseline = 'top'; ctx.fillText('km', w - 4, Tp + ph + 4);
+  ctx.save(); ctx.beginPath(); ctx.rect(L, Tp, pw, ph); ctx.clip();
+  function plot(arr, sy, col, lw, dash) {
+    var pen = false;
+    ctx.beginPath(); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.setLineDash(dash || []);
+    for (var j = 0; j < n; j++) {
+      if (!isFinite(arr[j])) { pen = false; continue; }
+      if (pen) ctx.lineTo(sx(X[j]), sy(arr[j])); else ctx.moveTo(sx(X[j]), sy(arr[j]));
+      pen = true;
+    }
+    ctx.stroke();
+  }
+  plot(S, sp, DiagramUI.series(2), 1.5, [5, 4]);
+  plot(TC, stt, DiagramUI.series(1), 1.5);
+  plot(P, sp, DiagramUI.series(0), 2);
+  var bs = r.boosters || [];
+  ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+  for (i = 0; i < bs.length; i++) {
+    px = Math.round(sx(bs[i].x / 1000)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(px, Tp); ctx.lineTo(px, Tp + ph); ctx.stroke();
+  }
+  ctx.restore();
+}
+var LEGEND = function () {
+  return [
+    { label: T('Pressure', 'Тиск', 'Druck', 'Druk', 'Pression', 'Presión', 'Ciśnienie'), series: 0 },
+    { label: T('Temperature', 'Температура', 'Temperatur', 'Temperatuur', 'Température', 'Temperatura', 'Temperatura'), series: 1 },
+    { label: T('Saturation pressure', 'Тиск насичення', 'Sättigungsdruck', 'Verzadigingsdruk', 'Pression de saturation', 'Presión de saturación', 'Ciśnienie nasycenia'), series: 2, dash: true }
+  ];
+};
+
+
+  function adoptStage(app) { stage = app.stages[0] || null; if (stage) stage.legend({ items: LEGEND() }); }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1'); h.textContent = 'CO2 pipeline sizing';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    if (window.CCUS && CCUS.pipe) run(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && window.CCUS && CCUS.pipe && CCUS.core) buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'co2pipeline', mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: DEFAULTS,
+      subtitle: MAN.summary,
+      notices: [{ id: 'genre', tone: 'warn',
+        title: T('What this number is', 'Що це за число', 'Was diese Zahl ist', 'Wat dit getal is', 'Ce que représente ce nombre', 'Qué es este número', 'Czym jest ta liczba'),
+        text: MAN.limitations }],
+      learn: {
+        version: 1,
+        intro: LEARN.intro,
+        topics: (function () { var o = {}, k; for (k in LEARN) if (k !== 'intro') o[k] = LEARN[k]; return o; })(),
+        tour: TOUR
+      },
+      panels: PANELS(),
+      footer: MAN.description,
+      on: {
+        rebuild: adoptStage,
+        compute: function (s) { run(s); if (stage) stage.schedule(); return COMPUTE(s, last); }
+      }
+    });
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end', actions: [
+      ui.importAction({
+        label: T('Open a saved case…','Відкрити збережений випадок…','Gespeicherten Fall öffnen…','Opgeslagen geval openen…','Ouvrir un cas enregistré…','Abrir un caso guardado…','Otwórz zapisany przypadek…'),
+        accept: '.json,application/json', as: 'json',
+        run: function (data) {
+          var src = (data && data.inputs) || data || {};
+          Object.keys(DEFAULTS).forEach(function (k) { if (src[k] !== undefined && src[k] !== null && typeof src[k] === typeof DEFAULTS[k]) state[k] = src[k]; });
+          ui.sync(); ui.run();
+        }
+      }),
+      ui.resetAction()
+    ]});
+    ui.examples(EXAMPLES());
+    ui.stage({
+      caption: T('Pressure and temperature along the route','Тиск і температура вздовж траси','Druck und Temperatur entlang der Trasse','Druk en temperatuur langs het tracé','Pression et température le long du tracé','Presión y temperatura a lo largo del trazado','Ciśnienie i temperatura wzdłuż trasy'),
+      minHeight: 260,
+      a11y: function () {
+        if (!last || !last.ok) return '';
+        return 'Pressure falls from ' + DiagramUI.fmt(state.p_in / 1e5, { precision: 0 }) + ' to ' +
+          DiagramUI.fmt(last.p_out / 1e5, { precision: 0 }) + ' bar over ' + DiagramUI.fmt(last.L / 1000, { precision: 0 }) +
+          ' km with ' + (last.boosters || []).length + ' booster stations.';
+      },
+      render: function (size, st) { STAGE_RENDER(size, st, last && last.ok ? last : null); }
+    });
+    adoptStage(ui);
+    ui.ready();
+    window.__co2pipeline = { ui: ui, state: state, run: run, toInp: toInp };
+  }
+
+  function q(v, u) { return { value: v, unit: u }; }
+  function installData() {
+    if (!window.Diagram) return;
+    Diagram.init({
+      id: 'co2pipeline', file: 'co2pipeline.html',
+      state: {
+        serialize: function () { return state; },
+        deserialize: function (o) { Object.assign(state, o || {}); if (window.CCUS && CCUS.pipe) run(state); if (ui) { ui.sync(); ui.run(); } }
+      },
+      record: function () {
+        if (!last || !last.ok) return null;
+        var inp = toInp(state);
+        return {
+          inputs: inp,
+          outputs: { nps: last.nps, OD: last.OD, t: last.t, ID: last.ID, dp: last.dp, Q: last.Q, p_out: last.p_out, T_out: last.T_out,
+            vmax: last.vmax, boosters: (last.boosters || []).length, linepack: last.linepack, phaseMin: last.phaseMin,
+            capex: last.capex, lcot: last.lcot },
+          units: { mdot: 'kg/s', L: 'm', p_in: 'Pa', T_in: 'K', Tg: 'K', z1: 'm', p_min: 'Pa', MAOP: 'Pa', U: 'W/m2K', CA: 'm', eps: 'm',
+            nps: 'in', OD: 'm', t: 'm', ID: 'm', dp: 'Pa', Q: 'W', p_out: 'Pa', T_out: 'K', vmax: 'm/s', boosters: '-',
+            linepack: 'kg', phaseMin: 'Pa', capex: 'EUR', lcot: 'EUR/t' },
+          model: {
+            equations: ['dp/dx = f rho v^2 / (2 ID) + rho g dz/dx (Darcy-Weisbach, Colebrook)',
+              'dh = -(U pi OD (T - Tg) / mdot) dx - g dz (real-gas enthalpy, Span-Wagner)',
+              't = MAOP OD / (2 F SMYS Ew) + CA (ASME B31.4/B31.8)',
+              'LCOT = (CAPEX CRF + OPEX + electricity) / annual tonnes'],
+            ranges: ['dense phase p - psat >= 10 bar, gas phase psat - p >= 5 bar; NPS 6-48'],
+            notes: ['screening cost correlations (EUR 2025); not independently validated']
+          },
+          warnings: last.warnings || []
+        };
+      },
+      handoff: {
+        provides: ['mdot', 'p', 'T', 'D', 'L', 'dp', 'Q'],
+        accepts: ['mdot', 'p', 'T'],
+        build: function () {
+          if (!last || !last.ok) return null;
+          return {
+            quantities: { mdot: q(state.mdot, 'kg/s'), p: q(last.p_out, 'Pa'), T: q(last.T_out, 'K'), D: q(last.ID, 'm'),
+              L: q(last.L, 'm'), dp: q(last.dp, 'Pa'), Q: q(last.Q, 'W') },
+            sets: { pipeline: [ { D: q(last.ID, 'm') }, { L: q(last.L, 'm') }, { dp: q(last.dp, 'Pa') }, { Q: q(last.Q, 'W') } ] }
+          };
+        },
+        apply: function (p) {
+          var qq = (p && p.quantities) || {};
+          if (qq.mdot && qq.mdot.value > 0) state.mdot = qq.mdot.value;
+          if (qq.p && qq.p.value > 0) state.p_in = qq.p.value;
+          if (qq.T && qq.T.value > 0) state.T_in = qq.T.value;
+          if (window.CCUS && CCUS.pipe) run(state);
+          if (ui) { ui.sync(); ui.run(); }
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

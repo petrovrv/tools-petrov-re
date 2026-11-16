@@ -1,0 +1,4655 @@
+{
+ "tool": "nuclideatlas",
+ "file": "nuclideatlas.html",
+ "reference": "Generalised Bateman solution for branching decay networks, written as a sum over simple paths and evaluated in 60-digit arithmetic (mpmath), cross-checked against mpmath.expm of the same generator - two structurally different algorithms that agree to 5e-44. The one-step activation cases use the closed-form solution of the two-species constant-flux system with target burn-up, also in 60-digit arithmetic. Equilibrium cases use the exact finite-time two-member ratio and quote the asymptotic limit lambda_d/(lambda_d - lambda_p). Nuclear data are the IAEA Live Chart / ENSDF ground-state snapshot, quoted per case.",
+ "reference_citations": [
+  "H. Bateman, 'The solution of a system of differential equations occurring in the theory of radioactive transformations', Proc. Cambridge Philos. Soc. 15 (1910) 423.",
+  "M. Pusa, 'Higher-Order Chebyshev Rational Approximation Method and Application to Burnup Equations', Nucl. Sci. Eng. 182 (2016) 297 - the method the tool implements.",
+  "IAEA Live Chart of Nuclides / ENSDF, relnsd API, ground-state snapshot (Extraction_date 2023-10-18), used both to rebuild the missing data file and as the source of every half-life and branching ratio quoted here.",
+  "K. Way and E. P. Wigner / standard secular-equilibrium algebra: A_d/A_p -> lambda_d/(lambda_d - lambda_p)."
+ ],
+ "tolerance": "1e-9 relative on the network evolution: CRAM48 is a rational approximation to the matrix exponential whose published accuracy for burnup matrices is around 1e-14, the reference is exact to 60 digits and the tool exports full double precision, so anything looser would not be testing the solver. Species holding less than 1e-12 of the network's atoms are recorded but not graded relatively, because there the float64 solver carries absolute, not relative, accuracy. 1e-12 on atom conservation and on the activity = ln(2) N / T_1/2 identity, which are exact arithmetic. 2e-4 on the activation panel, which prints five significant digits. 1e-6 on the equilibrium activity ratio.",
+ "environment": "Chromium (Playwright) against a local HTTP overlay of /root/site with the reconstructed fixture bench/fixtures/nuclide-data.FIXTURE.js in place of the missing nuclide-data.js. Node v22.22.2.",
+ "data_file_caveat": "The deployed nuclide-data.js and neutron-data/ are NOT present in this tree. Everything below was measured against a ground-state fixture rebuilt from the IAEA Live Chart API (same snapshot date, 2023-10-18, that the tool's manifest quotes), with no metastable, decay-gamma or fission-yield overlay. This benchmark therefore says nothing about the integrity, completeness or provenance of the data the deployed page actually loads; it tests the mathematics the page applies to whatever data it is given.",
+ "not_benchmarked": {
+  "deployed_data_file": "nuclide-data.js is absent, so its record count, metastable overlay, decay-gamma overlay, evaluated fission yields, decay-energy model and QA counters could not be checked at all.",
+  "fendl_cross_sections": "neutron-data/ is absent, so the FENDL-3.2c pointwise layer, the group-average calculator and the WASM cross-section kernel could not be exercised.",
+  "gamma_spectrum_and_dose": "Both are driven entirely by overlays that live in the missing data file; with the fixture they have nothing to show, so grading them would be grading the fixture.",
+  "fission_yields": "The bundled evaluated fission-yield sets live in the missing data file.",
+  "monte_carlo_uncertainty": "The uncertainty propagation samples half-lives from their ENSDF uncertainties with a seeded RNG; its output is a distribution, and the fixture does not carry the same uncertainty set as the deployed file, so it is not graded here.",
+  "xenon_dynamics": "The reactor Xe-135 panel duplicates the site's own xenon.html, which is benchmarked separately; it is out of scope for this pass."
+ },
+ "total": 77,
+ "passed": 77,
+ "failed": 0,
+ "flagged": 7,
+ "page_errors": [],
+ "run_at": "2026-08-11T23:05:23Z",
+ "cases": [
+  {
+   "id": "FIXTURE-LOADS",
+   "note": "The deployed nuclide-data.js is absent from this tree; the driver serves a fixture rebuilt from the IAEA Live Chart ground-state snapshot instead. This case records that the page comes up at all, which is the precondition for every other case.",
+   "inputs": {
+    "data_file": "bench/fixtures/nuclide-data.FIXTURE.js"
+   },
+   "cmp": {
+    "page_reports_missing_data": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "tol": 1e-12,
+     "ok": true
+    },
+    "tabs_present": {
+     "got": 8,
+     "ref": 8,
+     "rel": 0,
+     "tol": 1e-12,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t1000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 1000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 8.31e-54).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 1000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 99999924022934960000,
+     "ref": 99999924022934900000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.553604979236722e-16,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 75862982001675.14,
+     "ref": 75862982001675,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.853670872005731e-15,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 114083104213.53731,
+     "ref": 114083104213.53712,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.605018289187407e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000,
+     "ref": 1000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.853670872005731e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 8.312859633091227e-54,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-sr90-t1000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 1000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000070000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 6.5536e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.5536e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t100000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 100000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 5.22e-57).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 100000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 99992402579221900000,
+     "ref": 99992402579221790000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1469671399198075e-15,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 6561795171607728,
+     "ref": 6561795171607724,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.095892808888073e-16,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 1035625606608922.4,
+     "ref": 1035625606608922,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.620999689529783e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 100000,
+     "ref": 100000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.1469671399198075e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 5.221588515502512e-57,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-sr90-t100000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 100000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000130000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.31072e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.31072e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t2592000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 2592000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 8.24e-60).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 2592000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 99803261157503350000,
+     "ref": 99803261157503160000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.9699556679788825e-15,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 25220492603124476,
+     "ref": 25220492603124436,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5860118447902405e-15,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 171518349893712800,
+     "ref": 171518349893712540,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.4925516725099066e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 2592000.0000000005,
+     "ref": 2592000,
+     "tol": 1e-12,
+     "rel": 1.796532744242821e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.9699556679788825e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 8.235322068540928e-60,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-sr90-t2592000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 2592000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000200000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.96608e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.96608e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t315576000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 315576000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 2.69e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 315576000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 78681236733847060000,
+     "ref": 78681236733846950000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.4576283337786395e-15,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 19891146153737960,
+     "ref": 19891146153737940,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.0054724773233645e-15,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 21298872119999332000,
+     "ref": 21298872119999308000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1538639164335617e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 315576000.00000006,
+     "ref": 315576000,
+     "tol": 1e-12,
+     "rel": 1.88875721776658e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.4576283337786395e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 2.6948462235636152e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-sr90-t315576000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 315576000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000130000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.31072e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.31072e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t3155760000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 3155760000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 3.05e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 3155760000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 9093096010081822000,
+     "ref": 9093096010081814000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.009032777084132e-16,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 2298795865885304,
+     "ref": 2298795865885283.5,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 8.917712226746717e-15,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 90904605194052300000,
+     "ref": 90904605194052300000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 0,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 3155760000.0000005,
+     "ref": 3155760000,
+     "tol": 1e-12,
+     "rel": 1.511005774213264e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 8.917712226746717e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 3.047896694788005e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-sr90-t3155760000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 3155760000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000020000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.6384e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.6384e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-sr90-t31557600000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 31557600000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 2.50e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90",
+    "initial_atoms": 100000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 31557600000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 3864717612.9302917,
+     "ref": 3864717612.9302998,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.0974965059107724e-15,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 977025.9861079969,
+     "ref": 977026.6212484739,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 6.500748937317352e-07,
+     "ok": null
+    },
+    "N_Zr-90": {
+     "got": 99999999996134310000,
+     "ref": 99999999996134310000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 0,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 31557600000.000008,
+     "ref": 31557600000,
+     "tol": 1e-12,
+     "rel": 2.417609238741222e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.0974965059107724e-15,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 2.5045266139960552e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": [
+    "Y-90"
+   ]
+  },
+  {
+   "id": "CONSERV-sr90-t31557600000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "sr90",
+    "t_s": 31557600000,
+    "initial_atoms": 100000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 100000000000000000000,
+     "ref": 100000000000000000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-ba140-t10000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Ba-140 (Ba-140 -> La-140 -> Ce-140) at 10000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 4.00e-58).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "ba140",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Ba-140",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 10000,
+    "half_lives_s": [
+     1101686.4,
+     145029.312,
+     null
+    ],
+    "branches": {
+     "Ba-140": [
+      [
+       "B-",
+       "La-140",
+       1
+      ]
+     ],
+     "La-140": [
+      [
+       "B-",
+       "Ce-140",
+       1
+      ]
+     ],
+     "Ce-140": []
+    }
+   },
+   "cmp": {
+    "N_Ba-140": {
+     "got": 993728058982292100,
+     "ref": 993728058982292200,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.2880787539710691e-16,
+     "ok": true
+    },
+    "N_La-140": {
+     "got": 6124267756769505,
+     "ref": 6124267756769506,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.632848268096447e-16,
+     "ok": true
+    },
+    "N_Ce-140": {
+     "got": 147673260938283.12,
+     "ref": 147673260938283.03,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.348474964548989e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000,
+     "ref": 10000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.348474964548989e-16,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 4.000283328975961e-58,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-ba140-t10000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "ba140",
+    "t_s": 10000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 999999999999999900,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.28e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.28e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-ba140-t100000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Ba-140 (Ba-140 -> La-140 -> Ce-140) at 100000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 3.33e-60).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "ba140",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Ba-140",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 100000,
+    "half_lives_s": [
+     1101686.4,
+     145029.312,
+     null
+    ],
+    "branches": {
+     "Ba-140": [
+      [
+       "B-",
+       "La-140",
+       1
+      ]
+     ],
+     "La-140": [
+      [
+       "B-",
+       "Ce-140",
+       1
+      ]
+     ],
+     "Ce-140": []
+    }
+   },
+   "cmp": {
+    "N_Ba-140": {
+     "got": 939021481828696800,
+     "ref": 939021481828696400,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.0893633152266076e-16,
+     "ok": true
+    },
+    "N_La-140": {
+     "got": 48354300918867750,
+     "ref": 48354300918867750,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 0,
+     "ok": true
+    },
+    "N_Ce-140": {
+     "got": 12624217252435816,
+     "ref": 12624217252435816,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 0,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 100000,
+     "ref": 100000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.0893633152266076e-16,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 3.330024593931413e-60,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-ba140-t100000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "ba140",
+    "t_s": 100000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000400,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 3.84e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 3.84e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-ba140-t864000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Ba-140 (Ba-140 -> La-140 -> Ce-140) at 864000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.31e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "ba140",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Ba-140",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 864000,
+    "half_lives_s": [
+     1101686.4,
+     145029.312,
+     null
+    ],
+    "branches": {
+     "Ba-140": [
+      [
+       "B-",
+       "La-140",
+       1
+      ]
+     ],
+     "La-140": [
+      [
+       "B-",
+       "Ce-140",
+       1
+      ]
+     ],
+     "Ce-140": []
+    }
+   },
+   "cmp": {
+    "N_Ba-140": {
+     "got": 580652845923585000,
+     "ref": 580652845923584100,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5430906888518318e-15,
+     "ok": true
+    },
+    "N_La-140": {
+     "got": 85587319149388980,
+     "ref": 85587319149388850,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.4955486545452103e-15,
+     "ok": true
+    },
+    "N_Ce-140": {
+     "got": 333759834927027200,
+     "ref": 333759834927027100,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.8350929801959484e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 863999.9999999998,
+     "ref": 864000,
+     "tol": 1e-12,
+     "rel": 2.694799116364232e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.5430906888518318e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 1.3098187705857808e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-ba140-t864000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "ba140",
+    "t_s": 864000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001200,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.152e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.152e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-ba140-t8640000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Ba-140 (Ba-140 -> La-140 -> Ce-140) at 8640000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.33e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "ba140",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Ba-140",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 8640000,
+    "half_lives_s": [
+     1101686.4,
+     145029.312,
+     null
+    ],
+    "branches": {
+     "Ba-140": [
+      [
+       "B-",
+       "La-140",
+       1
+      ]
+     ],
+     "La-140": [
+      [
+       "B-",
+       "Ce-140",
+       1
+      ]
+     ],
+     "Ce-140": []
+    }
+   },
+   "cmp": {
+    "N_Ba-140": {
+     "got": 4356779591667836,
+     "ref": 4356779591667830.5,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.2624003313177775e-15,
+     "ok": true
+    },
+    "N_La-140": {
+     "got": 660488229942668,
+     "ref": 660488229942667,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.514031521934621e-15,
+     "ok": true
+    },
+    "N_Ce-140": {
+     "got": 994982732178390400,
+     "ref": 994982732178389500,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.005181406900608e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 8639999.999999998,
+     "ref": 8640000,
+     "tol": 1e-12,
+     "rel": 2.1558392930913855e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.514031521934621e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 1.3260062791414688e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-ba140-t8640000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "ba140",
+    "t_s": 8640000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000900,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 8.96e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 8.96e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-ba140-t30000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Ba-140 (Ba-140 -> La-140 -> Ce-140) at 30000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.05e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "ba140",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Ba-140",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 30000000,
+    "half_lives_s": [
+     1101686.4,
+     145029.312,
+     null
+    ],
+    "branches": {
+     "Ba-140": [
+      [
+       "B-",
+       "La-140",
+       1
+      ]
+     ],
+     "La-140": [
+      [
+       "B-",
+       "Ce-140",
+       1
+      ]
+     ],
+     "Ce-140": []
+    }
+   },
+   "cmp": {
+    "N_Ba-140": {
+     "got": 6348312504.951285,
+     "ref": 6348312504.951327,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.60989355661796e-15,
+     "ok": true
+    },
+    "N_La-140": {
+     "got": 962404822.2312905,
+     "ref": 962404822.4833595,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.619157661523478e-10,
+     "ok": true
+    },
+    "N_Ce-140": {
+     "got": 999999992689283100,
+     "ref": 999999992689282700,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.840000028073155e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 30000000.00000001,
+     "ref": 30000000,
+     "tol": 1e-12,
+     "rel": 3.725290298461914e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.619157661523478e-10,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 1.052549282981733e-61,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-ba140-t30000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "ba140",
+    "t_s": 30000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000400,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 3.84e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 3.84e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-cs137-t1000000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Cs-137 (Cs-137 -> Ba-137) at 1000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 6.61e-59).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "cs137",
+    "initial_atoms": 1e+22,
+    "initial_nuclide": "Cs-137",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 1000000,
+    "half_lives_s": [
+     949232333.3157274,
+     null
+    ],
+    "branches": {
+     "Cs-137": [
+      [
+       "B-",
+       "Ba-137",
+       1
+      ]
+     ],
+     "Ba-137": []
+    }
+   },
+   "cmp": {
+    "N_Cs-137": {
+     "got": 9.992700478657122e+21,
+     "ref": 9.992700478657116e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.296051816461016e-16,
+     "ok": true
+    },
+    "N_Ba-137": {
+     "got": 7299521342883441000,
+     "ref": 7299521342883438000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.208495126868835e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000,
+     "ref": 1000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.296051816461016e-16,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 6.605040689407748e-59,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-cs137-t1000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "cs137",
+    "t_s": 1000000,
+    "initial_atoms": 1e+22
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1.0000000000000006e+22,
+     "ref": 1e+22,
+     "tol": 1e-12,
+     "rel": 6.291456e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.291456e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-cs137-t315576000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Cs-137 (Cs-137 -> Ba-137) at 315576000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 8.92e-62).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "cs137",
+    "initial_atoms": 1e+22,
+    "initial_nuclide": "Cs-137",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 315576000,
+    "half_lives_s": [
+     949232333.3157274,
+     null
+    ],
+    "branches": {
+     "Cs-137": [
+      [
+       "B-",
+       "Ba-137",
+       1
+      ]
+     ],
+     "Ba-137": []
+    }
+   },
+   "cmp": {
+    "N_Cs-137": {
+     "got": 7.941844897592211e+21,
+     "ref": 7.941844897592205e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.601589514282163e-16,
+     "ok": true
+    },
+    "N_Ba-137": {
+     "got": 2.0581551024077951e+21,
+     "ref": 2.0581551024077944e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.821053131904243e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 315576000.00000006,
+     "ref": 315576000,
+     "tol": 1e-12,
+     "rel": 1.88875721776658e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.601589514282163e-16,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 8.924059809734914e-62,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-cs137-t315576000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "cs137",
+    "t_s": 315576000,
+    "initial_atoms": 1e+22
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1.0000000000000006e+22,
+     "ref": 1e+22,
+     "tol": 1e-12,
+     "rel": 6.291456e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.291456e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-cs137-t949230000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Cs-137 (Cs-137 -> Ba-137) at 949230000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 0.00e+0).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "cs137",
+    "initial_atoms": 1e+22,
+    "initial_nuclide": "Cs-137",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 949230000,
+    "half_lives_s": [
+     949232333.3157274,
+     null
+    ],
+    "branches": {
+     "Cs-137": [
+      [
+       "B-",
+       "Ba-137",
+       1
+      ]
+     ],
+     "Ba-137": []
+    }
+   },
+   "cmp": {
+    "N_Cs-137": {
+     "got": 5.000008519160905e+21,
+     "ref": 5.000008519160899e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.0485742134055122e-15,
+     "ok": true
+    },
+    "N_Ba-137": {
+     "got": 4.999991480839098e+21,
+     "ref": 4.999991480839101e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.291466719603456e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 949229999.9999985,
+     "ref": 949230000,
+     "tol": 1e-12,
+     "rel": 1.6326082868853241e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.6326082868853241e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 0,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-cs137-t949230000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "cs137",
+    "t_s": 949230000,
+    "initial_atoms": 1e+22
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1.0000000000000002e+22,
+     "ref": 1e+22,
+     "tol": 1e-12,
+     "rel": 2.097152e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.097152e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-cs137-t3155760000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Cs-137 (Cs-137 -> Ba-137) at 3155760000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 0.00e+0).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "cs137",
+    "initial_atoms": 1e+22,
+    "initial_nuclide": "Cs-137",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 3155760000,
+    "half_lives_s": [
+     949232333.3157274,
+     null
+    ],
+    "branches": {
+     "Cs-137": [
+      [
+       "B-",
+       "Ba-137",
+       1
+      ]
+     ],
+     "Ba-137": []
+    }
+   },
+   "cmp": {
+    "N_Cs-137": {
+     "got": 998191831057454700000,
+     "ref": 998191831057453800000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.191660074276749e-16,
+     "ok": true
+    },
+    "N_Ba-137": {
+     "got": 9.001808168942553e+21,
+     "ref": 9.001808168942546e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.989102502435425e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 3155760000.0000005,
+     "ref": 3155760000,
+     "tol": 1e-12,
+     "rel": 1.511005774213264e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 9.191660074276749e-16,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 0,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-cs137-t3155760000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "cs137",
+    "t_s": 3155760000,
+    "initial_atoms": 1e+22
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1.0000000000000008e+22,
+     "ref": 1e+22,
+     "tol": 1e-12,
+     "rel": 8.388608e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 8.388608e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-cs137-t31557600000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Cs-137 (Cs-137 -> Ba-137) at 31557600000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 8.71e-62).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "cs137",
+    "initial_atoms": 1e+22,
+    "initial_nuclide": "Cs-137",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 31557600000,
+    "half_lives_s": [
+     949232333.3157274,
+     null
+    ],
+    "branches": {
+     "Cs-137": [
+      [
+       "B-",
+       "Ba-137",
+       1
+      ]
+     ],
+     "Ba-137": []
+    }
+   },
+   "cmp": {
+    "N_Cs-137": {
+     "got": 982064729774.5104,
+     "ref": 982064729774.5157,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 5.4691850620001546e-15,
+     "ok": true
+    },
+    "N_Ba-137": {
+     "got": 9.99999999901793e+21,
+     "ref": 9.999999999017935e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.194304000411908e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 31557600000.000008,
+     "ref": 31557600000,
+     "tol": 1e-12,
+     "rel": 2.417609238741222e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 5.4691850620001546e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 8.709046168737553e-62,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-cs137-t31557600000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "cs137",
+    "t_s": 31557600000,
+    "initial_atoms": 1e+22
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 9.999999999999996e+21,
+     "ref": 1e+22,
+     "tol": 1e-12,
+     "rel": 4.194304e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.194304e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-mo99-t10000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Mo-99 (Mo-99 -> Tc-99 -> Ru-99) at 10000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 9.45e-51).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "mo99",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Mo-99",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 10000,
+    "half_lives_s": [
+     237326.4,
+     6661667073236.371,
+     null
+    ],
+    "branches": {
+     "Mo-99": [
+      [
+       "B-",
+       "Tc-99",
+       1
+      ]
+     ],
+     "Tc-99": [
+      [
+       "B-",
+       "Ru-99",
+       1
+      ]
+     ],
+     "Ru-99": []
+    }
+   },
+   "cmp": {
+    "N_Mo-99": {
+     "got": 971215894617539600,
+     "ref": 971215894617538000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5815227165375751e-15,
+     "ok": true
+    },
+    "N_Tc-99": {
+     "got": 28784105367414224,
+     "ref": 28784105367414176,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.6675870028720675e-15,
+     "ok": true
+    },
+    "N_Ru-99": {
+     "got": 15047839.650678832,
+     "ref": 15047839.650678815,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1140340894264107e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000,
+     "ref": 10000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.6675870028720675e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 9.452639951110248e-51,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-mo99-t10000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "mo99",
+    "t_s": 10000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001700,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.664e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.664e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-mo99-t100000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Mo-99 (Mo-99 -> Tc-99 -> Ru-99) at 100000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 7.27e-53).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "mo99",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Mo-99",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 100000,
+    "half_lives_s": [
+     237326.4,
+     6661667073236.371,
+     null
+    ],
+    "branches": {
+     "Mo-99": [
+      [
+       "B-",
+       "Tc-99",
+       1
+      ]
+     ],
+     "Tc-99": [
+      [
+       "B-",
+       "Ru-99",
+       1
+      ]
+     ],
+     "Ru-99": []
+    }
+   },
+   "cmp": {
+    "N_Mo-99": {
+     "got": 746720050958726800,
+     "ref": 746720050958725600,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5427468413643494e-15,
+     "ok": true
+    },
+    "N_Tc-99": {
+     "got": 253279947659533340,
+     "ref": 253279947659533200,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.317120698993392e-16,
+     "ok": true
+    },
+    "N_Ru-99": {
+     "got": 1381741150.3705003,
+     "ref": 1381741150.3704994,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.901975208240214e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 100000,
+     "ref": 100000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.5427468413643494e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 7.268482615772302e-53,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-mo99-t100000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "mo99",
+    "t_s": 100000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001300,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.28e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.28e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-mo99-t240000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Mo-99 (Mo-99 -> Tc-99 -> Ru-99) at 240000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 5.02e-54).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "mo99",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Mo-99",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 240000,
+    "half_lives_s": [
+     237326.4,
+     6661667073236.371,
+     null
+    ],
+    "branches": {
+     "Mo-99": [
+      [
+       "B-",
+       "Tc-99",
+       1
+      ]
+     ],
+     "Tc-99": [
+      [
+       "B-",
+       "Ru-99",
+       1
+      ]
+     ],
+     "Ru-99": []
+    }
+   },
+   "cmp": {
+    "N_Mo-99": {
+     "got": 496110880180591170,
+     "ref": 496110880180591300,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.5800683902236976e-16,
+     "ok": true
+    },
+    "N_Tc-99": {
+     "got": 503889112798774400,
+     "ref": 503889112798773800,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1431086430915275e-15,
+     "ok": true
+    },
+    "N_Ru-99": {
+     "got": 7020634865.624403,
+     "ref": 7020634865.624388,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.173420118629534e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 240000.00000000017,
+     "ref": 240000,
+     "tol": 1e-12,
+     "rel": 7.275957614183426e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.173420118629534e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 5.024208692051198e-54,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-mo99-t240000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "mo99",
+    "t_s": 240000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000500,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 5.12e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 5.12e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-mo99-t1000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Mo-99 (Mo-99 -> Tc-99 -> Ru-99) at 1000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.21e-54).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "mo99",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Mo-99",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 1000000,
+    "half_lives_s": [
+     237326.4,
+     6661667073236.371,
+     null
+    ],
+    "branches": {
+     "Mo-99": [
+      [
+       "B-",
+       "Tc-99",
+       1
+      ]
+     ],
+     "Tc-99": [
+      [
+       "B-",
+       "Ru-99",
+       1
+      ]
+     ],
+     "Ru-99": []
+    }
+   },
+   "cmp": {
+    "N_Mo-99": {
+     "got": 53898680312118376,
+     "ref": 53898680312118240,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.5232528739562222e-15,
+     "ok": true
+    },
+    "N_Tc-99": {
+     "got": 946101249343276500,
+     "ref": 946101249343276400,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.3529207374881863e-16,
+     "ok": true
+    },
+    "N_Ru-99": {
+     "got": 70344605307.50056,
+     "ref": 70344605307.50053,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.338296873171317e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000,
+     "ref": 1000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.5232528739562222e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": 1.2127081454612276e-54,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CONSERV-mo99-t1000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "mo99",
+    "t_s": 1000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000300,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 2.56e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.56e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-mo99-t10000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Mo-99 (Mo-99 -> Tc-99 -> Ru-99) at 10000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 8.56e-56).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "mo99",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Mo-99",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 10000000,
+    "half_lives_s": [
+     237326.4,
+     6661667073236.371,
+     null
+    ],
+    "branches": {
+     "Mo-99": [
+      [
+       "B-",
+       "Tc-99",
+       1
+      ]
+     ],
+     "Tc-99": [
+      [
+       "B-",
+       "Ru-99",
+       1
+      ]
+     ],
+     "Ru-99": []
+    }
+   },
+   "cmp": {
+    "N_Mo-99": {
+     "got": 206909.92242487596,
+     "ref": 206909.9224248753,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 3.23516674628263e-15,
+     "ok": null
+    },
+    "N_Tc-99": {
+     "got": 999998995124894000,
+     "ref": 999998995124892500,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.4080014148655731e-15,
+     "ok": true
+    },
+    "N_Ru-99": {
+     "got": 1004874900590.0098,
+     "ref": 1004874900590.009,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.288687124834752e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000000,
+     "ref": 10000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.4080014148655731e-15,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 8.561640148188297e-56,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48",
+   "species_below_grading_floor": [
+    "Mo-99"
+   ]
+  },
+  {
+   "id": "CONSERV-mo99-t10000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "mo99",
+    "t_s": 10000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001400,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.408e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.408e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-th228-t10000",
+   "note": "CRAM48 evolution of the 15-nuclide network reached from Th-228 (Th-228 -> Ra-224 -> Rn-220 -> Pb-210 -> Po-216 -> Bi-210 -> Hg-206 -> Pb-212 -> Po-210 -> Tl-206 -> Bi-212 -> Pb-206 -> Po-212 -> Tl-208 -> Pb-208) at 10000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 4.61e-44).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "th228",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Th-228",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 10000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ],
+    "branches": {
+     "Th-228": [
+      [
+       "A",
+       "Ra-224",
+       1
+      ]
+     ],
+     "Ra-224": [
+      [
+       "A",
+       "Rn-220",
+       1
+      ],
+      [
+       "14C",
+       "Pb-210",
+       4.0000000000000004e-11
+      ]
+     ],
+     "Rn-220": [
+      [
+       "A",
+       "Po-216",
+       1
+      ]
+     ],
+     "Pb-210": [
+      [
+       "B-",
+       "Bi-210",
+       1
+      ],
+      [
+       "A",
+       "Hg-206",
+       1.9e-08
+      ]
+     ],
+     "Po-216": [
+      [
+       "A",
+       "Pb-212",
+       1
+      ]
+     ],
+     "Bi-210": [
+      [
+       "B-",
+       "Po-210",
+       1
+      ],
+      [
+       "A",
+       "Tl-206",
+       1.32e-06
+      ]
+     ],
+     "Hg-206": [
+      [
+       "B-",
+       "Tl-206",
+       1
+      ]
+     ],
+     "Pb-212": [
+      [
+       "B-",
+       "Bi-212",
+       1
+      ]
+     ],
+     "Po-210": [
+      [
+       "A",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Tl-206": [
+      [
+       "B-",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Bi-212": [
+      [
+       "B-",
+       "Po-212",
+       0.6406000000000001
+      ],
+      [
+       "A",
+       "Tl-208",
+       0.3594
+      ]
+     ],
+     "Pb-206": [],
+     "Po-212": [
+      [
+       "A",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Tl-208": [
+      [
+       "B-",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Pb-208": []
+    }
+   },
+   "cmp": {
+    "N_Th-228": {
+     "got": 999885102971402600,
+     "ref": 999885102971402100,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 5.120588340384984e-16,
+     "ok": true
+    },
+    "N_Ra-224": {
+     "got": 113637208033881.3,
+     "ref": 113637208033881.19,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.624928480061707e-16,
+     "ok": true
+    },
+    "N_Rn-220": {
+     "got": 19976717870.81247,
+     "ref": 19976717870.812435,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.7186144196783782e-15,
+     "ok": true
+    },
+    "N_Pb-210": {
+     "got": 50.39265605453714,
+     "ref": 50.39265605453706,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.5510137201147582e-15,
+     "ok": null
+    },
+    "N_Po-216": {
+     "got": 52096469.00836065,
+     "ref": 52096469.00836054,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.002211096882478e-15,
+     "ok": true
+    },
+    "N_Bi-210": {
+     "got": 0.0001658395690592952,
+     "ref": 0.00016583956905929495,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.4709727611630324e-15,
+     "ok": null
+    },
+    "N_Hg-206": {
+     "got": 5.913322682001292e-13,
+     "ref": 5.913322682001285e-13,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.1952998493206073e-15,
+     "ok": null
+    },
+    "N_Pb-212": {
+     "got": 1168571688067.2532,
+     "ref": 1168571688067.2424,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.192578948893608e-15,
+     "ok": true
+    },
+    "N_Po-210": {
+     "got": 6.648244405830779e-07,
+     "ref": 6.648244405830773e-07,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 9.555525814958973e-16,
+     "ok": null
+    },
+    "N_Tl-206": {
+     "got": 3.9091360540316644e-13,
+     "ref": 3.909136054031659e-13,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.4206670466299781e-15,
+     "ok": null
+    },
+    "N_Bi-212": {
+     "got": 46938670773.97905,
+     "ref": 46938670773.9796,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1702853898336485e-14,
+     "ok": true
+    },
+    "N_Pb-206": {
+     "got": 8.024686548887386e-11,
+     "ref": 8.024686548887381e-11,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 6.442468247153185e-16,
+     "ok": null
+    },
+    "N_Po-212": {
+     "got": 2.435805380436848,
+     "ref": 2.4358053804368756,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.1303666225487024e-14,
+     "ok": null
+    },
+    "N_Tl-208": {
+     "got": 794301657.8183055,
+     "ref": 794301657.8183163,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.3657336910157135e-14,
+     "ok": true
+    },
+    "N_Pb-208": {
+     "got": 23487089133.995358,
+     "ref": 23487089133.997746,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.0167290099923879e-13,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000,
+     "ref": 10000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.0167290099923879e-13,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 4.611011992493887e-44,
+   "solver_status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)",
+   "species_below_grading_floor": [
+    "Pb-210",
+    "Bi-210",
+    "Hg-206",
+    "Po-210",
+    "Tl-206",
+    "Pb-206",
+    "Po-212"
+   ]
+  },
+  {
+   "id": "CONSERV-th228-t10000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 10000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000500,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 5.12e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 5.12e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-th228-t1000000",
+   "note": "CRAM48 evolution of the 15-nuclide network reached from Th-228 (Th-228 -> Ra-224 -> Rn-220 -> Pb-210 -> Po-216 -> Bi-210 -> Hg-206 -> Pb-212 -> Po-210 -> Tl-206 -> Bi-212 -> Pb-206 -> Po-212 -> Tl-208 -> Pb-208) at 1000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.42e-55).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "th228",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Th-228",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 1000000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ],
+    "branches": {
+     "Th-228": [
+      [
+       "A",
+       "Ra-224",
+       1
+      ]
+     ],
+     "Ra-224": [
+      [
+       "A",
+       "Rn-220",
+       1
+      ],
+      [
+       "14C",
+       "Pb-210",
+       4.0000000000000004e-11
+      ]
+     ],
+     "Rn-220": [
+      [
+       "A",
+       "Po-216",
+       1
+      ]
+     ],
+     "Pb-210": [
+      [
+       "B-",
+       "Bi-210",
+       1
+      ],
+      [
+       "A",
+       "Hg-206",
+       1.9e-08
+      ]
+     ],
+     "Po-216": [
+      [
+       "A",
+       "Pb-212",
+       1
+      ]
+     ],
+     "Bi-210": [
+      [
+       "B-",
+       "Po-210",
+       1
+      ],
+      [
+       "A",
+       "Tl-206",
+       1.32e-06
+      ]
+     ],
+     "Hg-206": [
+      [
+       "B-",
+       "Tl-206",
+       1
+      ]
+     ],
+     "Pb-212": [
+      [
+       "B-",
+       "Bi-212",
+       1
+      ]
+     ],
+     "Po-210": [
+      [
+       "A",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Tl-206": [
+      [
+       "B-",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Bi-212": [
+      [
+       "B-",
+       "Po-212",
+       0.6406000000000001
+      ],
+      [
+       "A",
+       "Tl-208",
+       0.3594
+      ]
+     ],
+     "Pb-206": [],
+     "Po-212": [
+      [
+       "A",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Tl-208": [
+      [
+       "B-",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Pb-208": []
+    }
+   },
+   "cmp": {
+    "N_Th-228": {
+     "got": 988575399126149200,
+     "ref": 988575399126149100,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.2947924873828093e-16,
+     "ok": true
+    },
+    "N_Ra-224": {
+     "got": 4594757406112958,
+     "ref": 4594757406112956,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.3527869335150547e-16,
+     "ok": true
+    },
+    "N_Rn-220": {
+     "got": 814172559601.5107,
+     "ref": 814172559601.5101,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.496587244339595e-16,
+     "ok": true
+    },
+    "N_Pb-210": {
+     "got": 273089.61950264213,
+     "ref": 273089.6195026421,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.1314490466344606e-16,
+     "ok": null
+    },
+    "N_Po-216": {
+     "got": 2123291630.2789528,
+     "ref": 2123291630.2789514,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.737235027961933e-16,
+     "ok": true
+    },
+    "N_Bi-210": {
+     "got": 70.61738515296064,
+     "ref": 70.61738515296061,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 4.0247467912952646e-16,
+     "ok": null
+    },
+    "N_Hg-206": {
+     "got": 4.940733811225746e-06,
+     "ref": 3.6933531211824114e-09,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1336.736644484184,
+     "ok": null
+    },
+    "N_Pb-212": {
+     "got": 550639273294054.1,
+     "ref": 550639273294056.3,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.97265525016741e-15,
+     "ok": true
+    },
+    "N_Po-210": {
+     "got": 33.07182683582849,
+     "ref": 33.07182683582847,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 6.44545043689874e-16,
+     "ok": null
+    },
+    "N_Tl-206": {
+     "got": 1.7854192910433193e-06,
+     "ref": 5.60913518997917e-08,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 30.830562654881376,
+     "ok": null
+    },
+    "N_Bi-212": {
+     "got": 52229622670759.28,
+     "ref": 52229622670759.53,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.786555736309409e-15,
+     "ok": true
+    },
+    "N_Pb-206": {
+     "got": 1.1153227766066132,
+     "ref": 0.4299839009931293,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.5938710124508475,
+     "ok": null
+    },
+    "N_Po-212": {
+     "got": 2710.3706567720224,
+     "ref": 2710.370656772035,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 4.697854071363621e-15,
+     "ok": null
+    },
+    "N_Tl-208": {
+     "got": 946393880112.9896,
+     "ref": 946393880112.994,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.643448507375511e-15,
+     "ok": true
+    },
+    "N_Pb-208": {
+     "got": 6225211881765914,
+     "ref": 6225211881765920,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 9.638226158332729e-16,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000,
+     "ref": 1000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.786555736309409e-15,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 1.4164239706309706e-55,
+   "solver_status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)",
+   "species_below_grading_floor": [
+    "Pb-210",
+    "Bi-210",
+    "Hg-206",
+    "Po-210",
+    "Tl-206",
+    "Pb-206",
+    "Po-212"
+   ]
+  },
+  {
+   "id": "CONSERV-th228-t1000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 1000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000100,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.28e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.28e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-th228-t10000000",
+   "note": "CRAM48 evolution of the 15-nuclide network reached from Th-228 (Th-228 -> Ra-224 -> Rn-220 -> Pb-210 -> Po-216 -> Bi-210 -> Hg-206 -> Pb-212 -> Po-210 -> Tl-206 -> Bi-212 -> Pb-206 -> Po-212 -> Tl-208 -> Pb-208) at 10000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 1.56e-57).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "th228",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Th-228",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 10000000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ],
+    "branches": {
+     "Th-228": [
+      [
+       "A",
+       "Ra-224",
+       1
+      ]
+     ],
+     "Ra-224": [
+      [
+       "A",
+       "Rn-220",
+       1
+      ],
+      [
+       "14C",
+       "Pb-210",
+       4.0000000000000004e-11
+      ]
+     ],
+     "Rn-220": [
+      [
+       "A",
+       "Po-216",
+       1
+      ]
+     ],
+     "Pb-210": [
+      [
+       "B-",
+       "Bi-210",
+       1
+      ],
+      [
+       "A",
+       "Hg-206",
+       1.9e-08
+      ]
+     ],
+     "Po-216": [
+      [
+       "A",
+       "Pb-212",
+       1
+      ]
+     ],
+     "Bi-210": [
+      [
+       "B-",
+       "Po-210",
+       1
+      ],
+      [
+       "A",
+       "Tl-206",
+       1.32e-06
+      ]
+     ],
+     "Hg-206": [
+      [
+       "B-",
+       "Tl-206",
+       1
+      ]
+     ],
+     "Pb-212": [
+      [
+       "B-",
+       "Bi-212",
+       1
+      ]
+     ],
+     "Po-210": [
+      [
+       "A",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Tl-206": [
+      [
+       "B-",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Bi-212": [
+      [
+       "B-",
+       "Po-212",
+       0.6406000000000001
+      ],
+      [
+       "A",
+       "Tl-208",
+       0.3594
+      ]
+     ],
+     "Pb-206": [],
+     "Po-212": [
+      [
+       "A",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Tl-208": [
+      [
+       "B-",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Pb-208": []
+    }
+   },
+   "cmp": {
+    "N_Th-228": {
+     "got": 891452049208976500,
+     "ref": 891452049208975000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.7230315431581104e-15,
+     "ok": true
+    },
+    "N_Ra-224": {
+     "got": 4661040300453045,
+     "ref": 4661040300453037,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.716355037570138e-15,
+     "ok": true
+    },
+    "N_Rn-220": {
+     "got": 825935817091.9761,
+     "ref": 825935817091.9745,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.9213527609050095e-15,
+     "ok": true
+    },
+    "N_Pb-210": {
+     "got": 4135510.325010329,
+     "ref": 4135510.325010328,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.2520136607642313e-16,
+     "ok": true
+    },
+    "N_Po-216": {
+     "got": 2153969312.341774,
+     "ref": 2153969312.34177,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.7710081772138647e-15,
+     "ok": true
+    },
+    "N_Bi-210": {
+     "got": 2397.549460331569,
+     "ref": 2397.5494603315688,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.8967172874238635e-16,
+     "ok": null
+    },
+    "N_Hg-206": {
+     "got": 5.5985913882716286e-08,
+     "ref": 5.598591380649707e-08,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.3613998418569857e-09,
+     "ok": null
+    },
+    "N_Pb-212": {
+     "got": 568402123099873.8,
+     "ref": 568402123099873,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.3194883859858818e-15,
+     "ok": true
+    },
+    "N_Po-210": {
+     "got": 14839.58163063423,
+     "ref": 14839.58163063422,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 6.128843281507377e-16,
+     "ok": null
+    },
+    "N_Tl-206": {
+     "got": 1.8707711320873459e-06,
+     "ref": 1.870771132049129e-06,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.0428397346944693e-11,
+     "ok": null
+    },
+    "N_Bi-212": {
+     "got": 54005556725313.89,
+     "ref": 54005556725313.83,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.157288319753671e-15,
+     "ok": true
+    },
+    "N_Pb-206": {
+     "got": 2728.963353438449,
+     "ref": 2728.9633534384475,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 4.99912192276408e-16,
+     "ok": null
+    },
+    "N_Po-212": {
+     "got": 2802.5298435268182,
+     "ref": 2802.529843526814,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.4603684479690425e-15,
+     "ok": null
+    },
+    "N_Tl-208": {
+     "got": 978656975197.2197,
+     "ref": 978656975197.218,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.7462547330801041e-15,
+     "ok": true
+    },
+    "N_Pb-208": {
+     "got": 103262696059827000,
+     "ref": 103262696059826880,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.239557021887567e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000000,
+     "ref": 10000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.9213527609050095e-15,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 1.5596048017350032e-57,
+   "solver_status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)",
+   "species_below_grading_floor": [
+    "Bi-210",
+    "Hg-206",
+    "Po-210",
+    "Tl-206",
+    "Pb-206",
+    "Po-212"
+   ]
+  },
+  {
+   "id": "CONSERV-th228-t10000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 10000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001800,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.792e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.792e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-th228-t60000000",
+   "note": "CRAM48 evolution of the 15-nuclide network reached from Th-228 (Th-228 -> Ra-224 -> Rn-220 -> Pb-210 -> Po-216 -> Bi-210 -> Hg-206 -> Pb-212 -> Po-210 -> Tl-206 -> Bi-212 -> Pb-206 -> Po-212 -> Tl-208 -> Pb-208) at 60000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 4.66e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "th228",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Th-228",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 60000000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ],
+    "branches": {
+     "Th-228": [
+      [
+       "A",
+       "Ra-224",
+       1
+      ]
+     ],
+     "Ra-224": [
+      [
+       "A",
+       "Rn-220",
+       1
+      ],
+      [
+       "14C",
+       "Pb-210",
+       4.0000000000000004e-11
+      ]
+     ],
+     "Rn-220": [
+      [
+       "A",
+       "Po-216",
+       1
+      ]
+     ],
+     "Pb-210": [
+      [
+       "B-",
+       "Bi-210",
+       1
+      ],
+      [
+       "A",
+       "Hg-206",
+       1.9e-08
+      ]
+     ],
+     "Po-216": [
+      [
+       "A",
+       "Pb-212",
+       1
+      ]
+     ],
+     "Bi-210": [
+      [
+       "B-",
+       "Po-210",
+       1
+      ],
+      [
+       "A",
+       "Tl-206",
+       1.32e-06
+      ]
+     ],
+     "Hg-206": [
+      [
+       "B-",
+       "Tl-206",
+       1
+      ]
+     ],
+     "Pb-212": [
+      [
+       "B-",
+       "Bi-212",
+       1
+      ]
+     ],
+     "Po-210": [
+      [
+       "A",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Tl-206": [
+      [
+       "B-",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Bi-212": [
+      [
+       "B-",
+       "Po-212",
+       0.6406000000000001
+      ],
+      [
+       "A",
+       "Tl-208",
+       0.3594
+      ]
+     ],
+     "Pb-206": [],
+     "Po-212": [
+      [
+       "A",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Tl-208": [
+      [
+       "B-",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Pb-208": []
+    }
+   },
+   "cmp": {
+    "N_Th-228": {
+     "got": 501866174946128400,
+     "ref": 501866174946128260,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.5504807135834544e-16,
+     "ok": true
+    },
+    "N_Ra-224": {
+     "got": 2624054170498761,
+     "ref": 2624054170498761,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 0,
+     "ok": true
+    },
+    "N_Rn-220": {
+     "got": 464982103929.44946,
+     "ref": 464982103929.4495,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.312634523656005e-16,
+     "ok": true
+    },
+    "N_Pb-210": {
+     "got": 19183667.539886627,
+     "ref": 19183667.539886612,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.767628980675992e-16,
+     "ok": true
+    },
+    "N_Po-216": {
+     "got": 1212633187.6228719,
+     "ref": 1212633187.6228764,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.7356333713822804e-15,
+     "ok": true
+    },
+    "N_Bi-210": {
+     "got": 11775.016759086233,
+     "ref": 11775.016759086224,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 7.723935518572525e-16,
+     "ok": null
+    },
+    "N_Hg-206": {
+     "got": 2.597219598295693e-07,
+     "ref": 2.5972196028740777e-07,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.762802267091655e-09,
+     "ok": null
+    },
+    "N_Pb-212": {
+     "got": 319996795898658.56,
+     "ref": 319996795898658.7,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.9062891129568323e-16,
+     "ok": true
+    },
+    "N_Po-210": {
+     "got": 249154.89665070683,
+     "ref": 249154.89665070648,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.4017222626389596e-15,
+     "ok": null
+    },
+    "N_Tl-206": {
+     "got": 9.180484445878156e-06,
+     "ref": 9.180484446109169e-06,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.5163485775357607e-11,
+     "ok": null
+    },
+    "N_Bi-212": {
+     "got": 30403836316868.625,
+     "ref": 30403836316868.676,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.6702250818205305e-15,
+     "ok": true
+    },
+    "N_Pb-206": {
+     "got": 375793.38123626093,
+     "ref": 375793.38123626023,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.8587127018143754e-15,
+     "ok": null
+    },
+    "N_Po-212": {
+     "got": 1577.7572494829915,
+     "ref": 1577.757249482992,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.8822390202008465e-16,
+     "ok": null
+    },
+    "N_Tl-208": {
+     "got": 550960462005.8806,
+     "ref": 550960462005.881,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 6.646773457513382e-16,
+     "ok": true
+    },
+    "N_Pb-208": {
+     "got": 495158353076137000,
+     "ref": 495158353076136400,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.292515810394887e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 60000000.00000003,
+     "ref": 60000000,
+     "tol": 1e-12,
+     "rel": 4.967053731282552e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 3.7356333713822804e-15,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 4.657056719364229e-61,
+   "solver_status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)",
+   "species_below_grading_floor": [
+    "Bi-210",
+    "Hg-206",
+    "Po-210",
+    "Tl-206",
+    "Pb-206",
+    "Po-212"
+   ]
+  },
+  {
+   "id": "CONSERV-th228-t60000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 60000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000000900,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 8.96e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 8.96e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-th228-t600000000",
+   "note": "CRAM48 evolution of the 15-nuclide network reached from Th-228 (Th-228 -> Ra-224 -> Rn-220 -> Pb-210 -> Po-216 -> Bi-210 -> Hg-206 -> Pb-212 -> Po-210 -> Tl-206 -> Bi-212 -> Pb-206 -> Po-212 -> Tl-208 -> Pb-208) at 600000000 s.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation 2.04e-61).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "th228",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Th-228",
+    "source_nuclide": null,
+    "source_atoms_per_s": 0,
+    "t_s": 600000000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ],
+    "branches": {
+     "Th-228": [
+      [
+       "A",
+       "Ra-224",
+       1
+      ]
+     ],
+     "Ra-224": [
+      [
+       "A",
+       "Rn-220",
+       1
+      ],
+      [
+       "14C",
+       "Pb-210",
+       4.0000000000000004e-11
+      ]
+     ],
+     "Rn-220": [
+      [
+       "A",
+       "Po-216",
+       1
+      ]
+     ],
+     "Pb-210": [
+      [
+       "B-",
+       "Bi-210",
+       1
+      ],
+      [
+       "A",
+       "Hg-206",
+       1.9e-08
+      ]
+     ],
+     "Po-216": [
+      [
+       "A",
+       "Pb-212",
+       1
+      ]
+     ],
+     "Bi-210": [
+      [
+       "B-",
+       "Po-210",
+       1
+      ],
+      [
+       "A",
+       "Tl-206",
+       1.32e-06
+      ]
+     ],
+     "Hg-206": [
+      [
+       "B-",
+       "Tl-206",
+       1
+      ]
+     ],
+     "Pb-212": [
+      [
+       "B-",
+       "Bi-212",
+       1
+      ]
+     ],
+     "Po-210": [
+      [
+       "A",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Tl-206": [
+      [
+       "B-",
+       "Pb-206",
+       1
+      ]
+     ],
+     "Bi-212": [
+      [
+       "B-",
+       "Po-212",
+       0.6406000000000001
+      ],
+      [
+       "A",
+       "Tl-208",
+       0.3594
+      ]
+     ],
+     "Pb-206": [],
+     "Po-212": [
+      [
+       "A",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Tl-208": [
+      [
+       "B-",
+       "Pb-208",
+       1
+      ]
+     ],
+     "Pb-208": []
+    }
+   },
+   "cmp": {
+    "N_Th-228": {
+     "got": 1013629539703300.9,
+     "ref": 1013629539703303.8,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.836341964581589e-15,
+     "ok": true
+    },
+    "N_Ra-224": {
+     "got": 5299856722331.553,
+     "ref": 5299856722331.817,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.99350173722358e-14,
+     "ok": true
+    },
+    "N_Rn-220": {
+     "got": 939134015.2112507,
+     "ref": 939134015.2120721,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 8.747113840924308e-13,
+     "ok": true
+    },
+    "N_Pb-210": {
+     "got": 24140155.33630585,
+     "ref": 24140155.33630579,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.469107756143877e-15,
+     "ok": true
+    },
+    "N_Po-216": {
+     "got": 2449180.441240426,
+     "ref": 2449180.441242265,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.50821128820359e-13,
+     "ok": true
+    },
+    "N_Bi-210": {
+     "got": 14930.708668775935,
+     "ref": 14930.708668775904,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.0710885562282404e-15,
+     "ok": null
+    },
+    "N_Hg-206": {
+     "got": 3.2682921972298116e-07,
+     "ref": 3.2682921257167103e-07,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.1880877998119332e-08,
+     "ok": null
+    },
+    "N_Pb-212": {
+     "got": 646304176542.3851,
+     "ref": 646304176542.894,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.874173667493304e-13,
+     "ok": true
+    },
+    "N_Po-210": {
+     "got": 419201.31376488326,
+     "ref": 419201.3137648824,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 2.082805766662543e-15,
+     "ok": null
+    },
+    "N_Tl-206": {
+     "got": 1.1639634701776918e-05,
+     "ref": 1.1639634698165603e-05,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 3.1026014989907566e-10,
+     "ok": null
+    },
+    "N_Bi-212": {
+     "got": 61407259842.43485,
+     "ref": 61407259842.50742,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1817951324871678e-12,
+     "ok": true
+    },
+    "N_Pb-206": {
+     "got": 15384955.463793218,
+     "ref": 15384955.463793194,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5739003598020382e-15,
+     "ok": true
+    },
+    "N_Po-212": {
+     "got": 3.1866290943533966,
+     "ref": 3.1866290943570066,
+     "tol": 1e-09,
+     "graded": false,
+     "rel": 1.1328589176769503e-12,
+     "ok": null
+    },
+    "N_Tl-208": {
+     "got": 1112786291.2001226,
+     "ref": 1112786291.2014112,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.1580412431686785e-12,
+     "ok": true
+    },
+    "N_Pb-208": {
+     "got": 998980360797811200,
+     "ref": 998980360797809300,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.9219597054607187e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 600000000.0000004,
+     "ref": 600000000,
+     "tol": 1e-12,
+     "rel": 5.960464477539063e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.1817951324871678e-12,
+   "pass": true,
+   "flagged": true,
+   "crosscheck_rel": 2.0394900682012583e-61,
+   "solver_status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)",
+   "species_below_grading_floor": [
+    "Bi-210",
+    "Hg-206",
+    "Po-210",
+    "Tl-206",
+    "Po-212"
+   ]
+  },
+  {
+   "id": "CONSERV-th228-t600000000",
+   "note": "Atom conservation: every branch of every member of this network ends inside the network, so the sum of all species must stay at the initial atom count for ever. This is a property of the equations, not of the data, and it is what a silent truncation of a decay branch would break.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 600000000,
+    "initial_atoms": 1000000000000000000
+   },
+   "cmp": {
+    "total_atoms": {
+     "got": 1000000000000001900,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 1.92e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.92e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "CHAIN-co60src-t100000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Co-60 (Co-60 -> Ni-60) at 100000 s, with a constant source of 1000000000000 atoms/s of Co-60.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "co60src",
+    "initial_atoms": 0,
+    "initial_nuclide": "Co-60",
+    "source_nuclide": "Co-60",
+    "source_atoms_per_s": 1000000000000,
+    "t_s": 100000,
+    "half_lives_s": [
+     166344192,
+     null
+    ],
+    "branches": {
+     "Co-60": [
+      [
+       "B-",
+       "Ni-60",
+       1
+      ]
+     ],
+     "Ni-60": []
+    }
+   },
+   "cmp": {
+    "N_Co-60": {
+     "got": 99979168166155310,
+     "ref": 99979168166156820,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.5043133760629822e-14,
+     "ok": true
+    },
+    "N_Ni-60": {
+     "got": 20831833843188.76,
+     "ref": 20831833843188.91,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.125512862542944e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 100000,
+     "ref": 100000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.5043133760629822e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-co60src-t10000000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Co-60 (Co-60 -> Ni-60) at 10000000 s, with a constant source of 1000000000000 atoms/s of Co-60.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "co60src",
+    "initial_atoms": 0,
+    "initial_nuclide": "Co-60",
+    "source_nuclide": "Co-60",
+    "source_atoms_per_s": 1000000000000,
+    "t_s": 10000000,
+    "half_lives_s": [
+     166344192,
+     null
+    ],
+    "branches": {
+     "Co-60": [
+      [
+       "B-",
+       "Ni-60",
+       1
+      ]
+     ],
+     "Ni-60": []
+    }
+   },
+   "cmp": {
+    "N_Co-60": {
+     "got": 9794516733946882000,
+     "ref": 9794516733947173000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.9691715058492905e-14,
+     "ok": true
+    },
+    "N_Ni-60": {
+     "got": 205483266052825150,
+     "ref": 205483266052827650,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.214697453445335e-14,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000000,
+     "ref": 10000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.9691715058492905e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-co60src-t166344000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Co-60 (Co-60 -> Ni-60) at 166344000 s, with a constant source of 1000000000000 atoms/s of Co-60.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "co60src",
+    "initial_atoms": 0,
+    "initial_nuclide": "Co-60",
+    "source_nuclide": "Co-60",
+    "source_atoms_per_s": 1000000000000,
+    "t_s": 166344000,
+    "half_lives_s": [
+     166344192,
+     null
+    ],
+    "branches": {
+     "Co-60": [
+      [
+       "B-",
+       "Ni-60",
+       1
+      ]
+     ],
+     "Ni-60": []
+    }
+   },
+   "cmp": {
+    "N_Co-60": {
+     "got": 119991874439501990000,
+     "ref": 119991874439502380000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 3.2770218969973006e-15,
+     "ok": true
+    },
+    "N_Ni-60": {
+     "got": 46352125560497380000,
+     "ref": 46352125560497610000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 4.9485540787255656e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 166343999.99999973,
+     "ref": 166344000,
+     "tol": 1e-12,
+     "rel": 1.6124471065337964e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.9485540787255656e-15,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-co60src-t1000000000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Co-60 (Co-60 -> Ni-60) at 1000000000 s, with a constant source of 1000000000000 atoms/s of Co-60.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "co60src",
+    "initial_atoms": 0,
+    "initial_nuclide": "Co-60",
+    "source_nuclide": "Co-60",
+    "source_atoms_per_s": 1000000000000,
+    "t_s": 1000000000,
+    "half_lives_s": [
+     166344192,
+     null
+    ],
+    "branches": {
+     "Co-60": [
+      [
+       "B-",
+       "Ni-60",
+       1
+      ]
+     ],
+     "Ni-60": []
+    }
+   },
+   "cmp": {
+    "N_Co-60": {
+     "got": 236264302258406620000,
+     "ref": 236264302258380900000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.0887332429877288e-13,
+     "ok": true
+    },
+    "N_Ni-60": {
+     "got": 763735697741639800000,
+     "ref": 763735697741619100000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.7115893706733906e-14,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000000,
+     "ref": 1000000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.0887332429877288e-13,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-co60src-t5000000000",
+   "note": "CRAM48 evolution of the 2-nuclide network reached from Co-60 (Co-60 -> Ni-60) at 5000000000 s, with a constant source of 1000000000000 atoms/s of Co-60.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "co60src",
+    "initial_atoms": 0,
+    "initial_nuclide": "Co-60",
+    "source_nuclide": "Co-60",
+    "source_atoms_per_s": 1000000000000,
+    "t_s": 5000000000,
+    "half_lives_s": [
+     166344192,
+     null
+    ],
+    "branches": {
+     "Co-60": [
+      [
+       "B-",
+       "Ni-60",
+       1
+      ]
+     ],
+     "Ni-60": []
+    }
+   },
+   "cmp": {
+    "N_Co-60": {
+     "got": 239983940664415200000,
+     "ref": 239983940664409800000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 2.2529507537175925e-14,
+     "ok": true
+    },
+    "N_Ni-60": {
+     "got": 4.760016059335628e+21,
+     "ref": 4.76001605933559e+21,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 7.930379967093855e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 4999999999.999999,
+     "ref": 5000000000,
+     "tol": 1e-12,
+     "rel": 1.9073486328125e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.2529507537175925e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 2 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-sr90src-t1000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 1000000 s, with a constant source of 10000000000 atoms/s of Sr-90.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90src",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": "Sr-90",
+    "source_atoms_per_s": 10000000000,
+    "t_s": 1000000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 1009236719720188500,
+     "ref": 1009236719720378400,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.8808669590677706e-13,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 241832544370516.25,
+     "ref": 241832544370528.94,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 5.246398921627593e-14,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 521447735251145.9,
+     "ref": 521447735251150.25,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 8.390102601352414e-15,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000,
+     "ref": 1000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.8808669590677706e-13,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-sr90src-t100000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 100000000 s, with a constant source of 10000000000 atoms/s of Sr-90.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90src",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": "Sr-90",
+    "source_atoms_per_s": 10000000000,
+    "t_s": 100000000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 1889792976038568200,
+     "ref": 1889792976038679800,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 5.90625541608085e-14,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 476911403904908.44,
+     "ref": 476911403904936.25,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 5.831795962996918e-14,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 109730112557413440,
+     "ref": 109730112557415300,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.6914226703530124e-14,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 100000000,
+     "ref": 100000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 5.90625541608085e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-sr90src-t1000000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 1000000000 s, with a constant source of 10000000000 atoms/s of Sr-90.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90src",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": "Sr-90",
+    "source_atoms_per_s": 10000000000,
+    "t_s": 1000000000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 7472864296391246000,
+     "ref": 7472864296391258000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.6443494104307544e-15,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 1888349406532349.2,
+     "ref": 1888349406532351.8,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.3239075307523969e-15,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 3525247354202171400,
+     "ref": 3525247354202210000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.0892852654502655e-14,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 1000000000,
+     "ref": 1000000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.0892852654502655e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "CHAIN-sr90src-t10000000000",
+   "note": "CRAM48 evolution of the 3-nuclide network reached from Sr-90 (Sr-90 -> Y-90 -> Zr-90) at 10000000000 s, with a constant source of 10000000000 atoms/s of Sr-90.  Reference: generalised Bateman path-sum in 60-digit arithmetic, cross-checked against mpmath.expm of the same generator (mutual deviation n/a, source case solved by expm only).  Half-lives and branching ratios are the IAEA Live Chart values in the fixture, quoted in the case inputs.",
+   "inputs": {
+    "chain": "sr90src",
+    "initial_atoms": 1000000000000000000,
+    "initial_nuclide": "Sr-90",
+    "source_nuclide": "Sr-90",
+    "source_atoms_per_s": 10000000000,
+    "t_s": 10000000000,
+    "half_lives_s": [
+     912310729.9254547,
+     230580,
+     null
+    ],
+    "branches": {
+     "Sr-90": [
+      [
+       "B-",
+       "Y-90",
+       1
+      ]
+     ],
+     "Y-90": [
+      [
+       "B-",
+       "Zr-90",
+       1
+      ]
+     ],
+     "Zr-90": []
+    }
+   },
+   "cmp": {
+    "N_Sr-90": {
+     "got": 13155761279478604000,
+     "ref": 13155761279477455000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 8.733268836310438e-14,
+     "ok": true
+    },
+    "N_Y-90": {
+     "got": 3325024008503872,
+     "ref": 3325024008503585,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 8.631516622617209e-14,
+     "ok": true
+    },
+    "N_Zr-90": {
+     "got": 87840913696515490000,
+     "ref": 87840913696514050000,
+     "tol": 1e-09,
+     "graded": true,
+     "rel": 1.6413672619359575e-14,
+     "ok": true
+    },
+    "time_point_s": {
+     "got": 10000000000,
+     "ref": 10000000000,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 8.733268836310438e-14,
+   "pass": true,
+   "flagged": false,
+   "crosscheck_rel": null,
+   "solver_status": "Solved 3 nuclides · 48 time points · CRAM48 · constant source",
+   "species_below_grading_floor": []
+  },
+  {
+   "id": "EQUIL-secular-sr90",
+   "note": "Secular equilibrium of Sr-90 (T1/2 = 912310729.9254547 s) and Y-90 (T1/2 = 230580 s).  The daughter-to-parent activity ratio must approach lambda_d/(lambda_d - lambda_p) = 1.000253; at t = 31557600000 s the exact two-member Bateman value is 1.000252807.  Graded against the exact finite-time value, with the asymptotic limit recorded.",
+   "inputs": {
+    "parent": "Sr-90",
+    "daughter": "Y-90",
+    "t_s": 31557600000,
+    "parent_half_life_s": 912310729.9254547,
+    "daughter_half_life_s": 230580
+   },
+   "cmp": {
+    "activity_ratio": {
+     "got": 1.0002521564905453,
+     "ref": 1.0002528067297802,
+     "tol": 1e-06,
+     "rel": 6.5007489159314e-07,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.5007489159314e-07,
+   "pass": true,
+   "flagged": false,
+   "asymptotic_limit": 1.0002528067297802,
+   "kind": "secular",
+   "parent_Bq": 2.9363001323922617,
+   "daughter_Bq": 2.9370405395288333
+  },
+  {
+   "id": "EQUIL-transient-ba140",
+   "note": "Transient equilibrium of Ba-140 (T1/2 = 1101686.4 s) and La-140 (T1/2 = 145029.312 s).  The daughter-to-parent activity ratio must approach lambda_d/(lambda_d - lambda_p) = 1.151600; at t = 30000000 s the exact two-member Bateman value is 1.151600102.  Graded against the exact finite-time value, with the asymptotic limit recorded.",
+   "inputs": {
+    "parent": "Ba-140",
+    "daughter": "La-140",
+    "t_s": 30000000,
+    "parent_half_life_s": 1101686.4,
+    "daughter_half_life_s": 145029.312
+   },
+   "cmp": {
+    "activity_ratio": {
+     "got": 1.1516001015731334,
+     "ref": 1.1516001018747484,
+     "tol": 1e-06,
+     "rel": 2.6190945515089546e-10,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.6190945515089546e-10,
+   "pass": true,
+   "flagged": false,
+   "asymptotic_limit": 1.1516001018747484,
+   "kind": "transient",
+   "parent_Bq": 3994.1628707774075,
+   "daughter_Bq": 4599.678367686901
+  },
+  {
+   "id": "EQUIL-secular-th228",
+   "note": "Secular equilibrium of Th-228 (T1/2 = 60324219.69303007 s) and Ra-224 (T1/2 = 313770.24 s).  The daughter-to-parent activity ratio must approach lambda_d/(lambda_d - lambda_p) = 1.005229; at t = 600000000 s the exact two-member Bateman value is 1.005228593.  Graded against the exact finite-time value, with the asymptotic limit recorded.",
+   "inputs": {
+    "parent": "Th-228",
+    "daughter": "Ra-224",
+    "t_s": 600000000,
+    "parent_half_life_s": 60324219.69303007,
+    "daughter_half_life_s": 313770.24
+   },
+   "cmp": {
+    "activity_ratio": {
+     "got": 1.0052285934009335,
+     "ref": 1.0052285934009808,
+     "tol": 1e-06,
+     "rel": 4.704949815346699e-14,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.704949815346699e-14,
+   "pass": true,
+   "flagged": false,
+   "asymptotic_limit": 1.0052285934009808,
+   "kind": "secular",
+   "parent_Bq": 11646971.33511031,
+   "daughter_Bq": 11707868.61257393
+  },
+  {
+   "id": "ACTIVATION-co59",
+   "note": "One-step neutron activation Co-59(n,g)Co-60: 1 g at 10000000000000 n/cm2/s with sigma = 37 b for 24 h, then 30 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (58.933193523999996 u) and product half-life (166344192 s) the page uses.",
+   "inputs": {
+    "target": "Co-59",
+    "product": "Co-60",
+    "mass_g": 1,
+    "flux": 10000000000000,
+    "sigma_b": 37,
+    "irradiation_h": 24,
+    "cooling_d": 30,
+    "target_atomic_mass_u": 58.933193523999996,
+    "product_half_life_s": 166344192
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 326600000000000000,
+     "ref": 326603831443903900,
+     "tol": 0.0002,
+     "rel": 1.173116643161632e-05,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 1360900000,
+     "ref": 1360940362.2906027,
+     "tol": 0.0002,
+     "rel": 2.965764828574129e-05,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 1346300000,
+     "ref": 1346320318.459562,
+     "tol": 0.0002,
+     "rel": 1.5091846482203633e-05,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.965764828574129e-05,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Co-59 → Co-60; σ = 37 b, φ = 1.0000e+13 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 1.0218588879877246e+22
+  },
+  {
+   "id": "ACTIVATION-co59-long",
+   "note": "One-step neutron activation Co-59(n,g)Co-60: 1 g at 100000000000000 n/cm2/s with sigma = 37 b for 8760 h, then 0 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (58.933193523999996 u) and product half-life (166344192 s) the page uses.",
+   "inputs": {
+    "target": "Co-59",
+    "product": "Co-60",
+    "mass_g": 1,
+    "flux": 100000000000000,
+    "sigma_b": 37,
+    "irradiation_h": 8760,
+    "cooling_d": 0,
+    "target_atomic_mass_u": 58.933193523999996,
+    "product_half_life_s": 166344192
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 1.0532e+21,
+     "ref": 1.0532481133166841e+21,
+     "tol": 0.0002,
+     "rel": 4.5680895200082136e-05,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 4388800000000,
+     "ref": 4388827475115.821,
+     "tol": 0.0002,
+     "rel": 6.260240571446868e-06,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 4388800000000,
+     "ref": 4388827475115.821,
+     "tol": 0.0002,
+     "rel": 6.260240571446868e-06,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.5680895200082136e-05,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Co-59 → Co-60; σ = 37 b, φ = 1.0000e+14 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 1.0218588879877246e+22
+  },
+  {
+   "id": "ACTIVATION-co59-sat",
+   "note": "One-step neutron activation Co-59(n,g)Co-60: 2.5 g at 500000000000000 n/cm2/s with sigma = 37 b for 87600 h, then 365 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (58.933193523999996 u) and product half-life (166344192 s) the page uses.",
+   "inputs": {
+    "target": "Co-59",
+    "product": "Co-60",
+    "mass_g": 2.5,
+    "flux": 500000000000000,
+    "sigma_b": 37,
+    "irradiation_h": 87600,
+    "cooling_d": 365,
+    "target_atomic_mass_u": 58.933193523999996,
+    "product_half_life_s": 166344192
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 8.7641e+21,
+     "ref": 8.764116472775769e+21,
+     "tol": 0.0002,
+     "rel": 1.8795706126585362e-06,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 36520000000000,
+     "ref": 36519595605739.555,
+     "tol": 0.0002,
+     "rel": 1.1073349902641211e-05,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 32023000000000,
+     "ref": 32022545111983.36,
+     "tol": 0.0002,
+     "rel": 1.4205242433100625e-05,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.4205242433100625e-05,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Co-59 → Co-60; σ = 37 b, φ = 5.0000e+14 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 2.554647219969311e+22
+  },
+  {
+   "id": "ACTIVATION-na23",
+   "note": "One-step neutron activation Na-23(n,g)Na-24: 0.5 g at 10000000000000 n/cm2/s with sigma = 0.53 b for 6 h, then 1 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (22.98976928195 u) and product half-life (53841.6 s) the page uses.",
+   "inputs": {
+    "target": "Na-23",
+    "product": "Na-24",
+    "mass_g": 0.5,
+    "flux": 10000000000000,
+    "sigma_b": 0.53,
+    "irradiation_h": 6,
+    "cooling_d": 1,
+    "target_atomic_mass_u": 22.98976928195,
+    "product_half_life_s": 53841.6
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 1309000000000000,
+     "ref": 1308974288341283.5,
+     "tol": 0.0002,
+     "rel": 1.96426002752747e-05,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 16852000000,
+     "ref": 16851502135.694733,
+     "tol": 0.0002,
+     "rel": 2.954420924961706e-05,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 5540800000,
+     "ref": 5540814823.35671,
+     "tol": 0.0002,
+     "rel": 2.6753026735251446e-06,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.954420924961706e-05,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Na-23 → Na-24; σ = 0.53 b, φ = 1.0000e+13 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 1.3097436268593123e+22
+  },
+  {
+   "id": "ACTIVATION-au197",
+   "note": "One-step neutron activation Au-197(n,g)Au-198: 0.1 g at 1000000000000 n/cm2/s with sigma = 98.7 b for 48 h, then 7 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (196.96657010299998 u) and product half-life (232770.24 s) the page uses.",
+   "inputs": {
+    "target": "Au-197",
+    "product": "Au-198",
+    "mass_g": 0.1,
+    "flux": 1000000000000,
+    "sigma_b": 98.7,
+    "irradiation_h": 48,
+    "cooling_d": 7,
+    "target_atomic_mass_u": 196.96657010299998,
+    "product_half_life_s": 232770.24
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 4076200000000000,
+     "ref": 4076235829376015.5,
+     "tol": 0.0002,
+     "rel": 8.789819214406128e-06,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 12138000000,
+     "ref": 12138284397.650728,
+     "tol": 0.0002,
+     "rel": 2.3429806174525677e-05,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 2004500000,
+     "ref": 2004472088.6035888,
+     "tol": 0.0002,
+     "rel": 1.3924562267477075e-05,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.3429806174525677e-05,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Au-197 → Au-198; σ = 98.7 b, φ = 1.0000e+12 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 305744307617827450000
+  },
+  {
+   "id": "ACTIVATION-zero-flux",
+   "note": "One-step neutron activation Co-59(n,g)Co-60: 1 g at 0 n/cm2/s with sigma = 37 b for 24 h, then 30 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (58.933193523999996 u) and product half-life (166344192 s) the page uses.",
+   "inputs": {
+    "target": "Co-59",
+    "product": "Co-60",
+    "mass_g": 1,
+    "flux": 0,
+    "sigma_b": 37,
+    "irradiation_h": 24,
+    "cooling_d": 30,
+    "target_atomic_mass_u": 58.933193523999996,
+    "product_half_life_s": 166344192
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 0,
+     "ref": 0,
+     "tol": 0.0002,
+     "rel": 0,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 0,
+     "ref": 0,
+     "tol": 0.0002,
+     "rel": 0,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 0,
+     "ref": 0,
+     "tol": 0.0002,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Co-59 → Co-60; σ = 37 b, φ = 0 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 1.0218588879877246e+22
+  },
+  {
+   "id": "ACTIVATION-mo98",
+   "note": "One-step neutron activation Mo-98(n,g)Mo-99: 1 g at 100000000000000 n/cm2/s with sigma = 0.13 b for 168 h, then 2 d of cooling.  Reference: the closed-form solution of dN_t/dt = -(sigma phi + lambda_t) N_t and dN_p/dt = sigma phi N_t - lambda_p N_p, evaluated in 60-digit arithmetic, with N0 = m N_A / M from the same atomic mass (97.905403609 u) and product half-life (237326.4 s) the page uses.",
+   "inputs": {
+    "target": "Mo-98",
+    "product": "Mo-99",
+    "mass_g": 1,
+    "flux": 100000000000000,
+    "sigma_b": 0.13,
+    "irradiation_h": 168,
+    "cooling_d": 2,
+    "target_atomic_mass_u": 97.905403609,
+    "product_half_life_s": 237326.4
+   },
+   "cmp": {
+    "atoms_at_end_of_irradiation": {
+     "got": 22698000000000000,
+     "ref": 22698069281047660,
+     "tol": 0.0002,
+     "rel": 3.0522881396722145e-06,
+     "ok": true
+    },
+    "activity_at_end_of_irradiation_Bq": {
+     "got": 66293000000,
+     "ref": 66293099825.019424,
+     "tol": 0.0002,
+     "rel": 1.5058131191319536e-06,
+     "ok": true
+    },
+    "activity_after_cooling_Bq": {
+     "got": 40021000000,
+     "ref": 40020732015.329056,
+     "tol": 0.0002,
+     "rel": 6.6961461584852636e-06,
+     "ok": true
+    }
+   },
+   "worst_rel": 6.6961461584852636e-06,
+   "pass": true,
+   "flagged": false,
+   "status": "Calculated Mo-98 → Mo-99; σ = 0.13 b, φ = 1.0000e+14 n·cm⁻²·s⁻¹.",
+   "N0_atoms": 6.150978942950205e+21
+  },
+  {
+   "id": "REFUSE-UNQUALIFIED-BRANCH",
+   "note": "A nuclide whose exclusive branching ratios are not qualified in the library (S-41: B- 100 %, B-N no %) must make the tool refuse the time evolution rather than solve it with a silently truncated branch. This is graded because silent truncation is worse than a refusal.",
+   "inputs": {
+    "nuclide": "S-41"
+   },
+   "cmp": {
+    "refused": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "tol": 1e-12,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "status": "Exclusive branching ratios are not qualified for S-41; topology is shown, but time evolution is disabled for this network."
+  },
+  {
+   "id": "REFUSE-BRANCH-SUM",
+   "note": "Evaluated decay files list sub-channels at their own 100 % (Li-8: B-A 100 %, B- 100 %, summing to 2.000). Used as exclusive branch fractions in the transition matrix that manufactures atoms out of nothing, so the tool must refuse the time evolution and say why.",
+   "inputs": {
+    "nuclide": "Li-8",
+    "branch_sum": 2
+   },
+   "cmp": {
+    "refused": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "tol": 1e-12,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "status": "Branching ratios do not add up to one for Li-8 (200.0%); the evaluated entry lists sub-channels at their own 100%, so the set cannot be used as exclusive branch fractions. Time evolution is refused rather than creating or destroying atoms."
+  },
+  {
+   "id": "DISCLOSE-RENORMALISATION",
+   "note": "The Th-228 series contains branch sets that the evaluated data give as slightly more than 100 % (Ra-224: alpha 100 % + 14C 4e-9 %, Bi-210: B- 100 % + alpha 1.32e-4 %, Pb-210: B- 100 % + alpha 1.9e-6 %). Renormalising them to one is the only way to conserve atoms, and the tool must say that it did so instead of doing it silently.",
+   "inputs": {
+    "chain": "Th-228 series",
+    "t_s": 600000000
+   },
+   "cmp": {
+    "status_mentions_renormalisation": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "tol": 1e-12,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false,
+   "status": "Solved 15 nuclides · 48 time points · CRAM48 · 3 branch sets renormalised to one (largest 0.00013%)"
+  },
+  {
+   "id": "STABLE-NO-DECAY",
+   "note": "A stable nuclide must keep every atom for ever: Fe-56, 1e18 atoms, evolved for 1e12 s.",
+   "inputs": {
+    "nuclide": "Fe-56",
+    "t_s": 1000000000000
+   },
+   "cmp": {
+    "atoms": {
+     "got": 1000000000000000500,
+     "ref": 1000000000000000000,
+     "tol": 1e-12,
+     "rel": 5.12e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 5.12e-16,
+   "pass": true,
+   "flagged": false,
+   "status": "Solved 1 nuclides · 48 time points · CRAM48"
+  },
+  {
+   "id": "ACTIVITY-IDENTITY",
+   "note": "Every activity the tool exports must be exactly ln(2)/T_1/2 times the atom count it exports for the same nuclide and the same instant, using the half-life in the library. This is an internal identity and is graded to round-off.",
+   "inputs": {
+    "chain": "th228",
+    "t_s": 60000000,
+    "half_lives_s": [
+     60324219.69303007,
+     313770.24,
+     55.6,
+     700563756.6359425,
+     0.145,
+     433036.8,
+     499.2,
+     38239.2,
+     11955686.4,
+     252.12,
+     3633,
+     null,
+     2.943e-07,
+     183.18,
+     null
+    ]
+   },
+   "cmp": {
+    "A_Th-228": {
+     "got": 5766624515.86599,
+     "ref": 5766624515.865991,
+     "tol": 1e-12,
+     "rel": 1.6537825790154364e-16,
+     "ok": true
+    },
+    "A_Ra-224": {
+     "got": 5796775850.755579,
+     "ref": 5796775850.755579,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Rn-220": {
+     "got": 5796781193.336859,
+     "ref": 5796781193.336859,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Pb-210": {
+     "got": 0.01898057805891003,
+     "ref": 0.018980578058910035,
+     "tol": 1e-12,
+     "rel": 1.8278931975546208e-16,
+     "ok": true
+    },
+    "A_Po-216": {
+     "got": 5796781207.270433,
+     "ref": 5796781207.270433,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Bi-210": {
+     "got": 0.018847866203534496,
+     "ref": 0.018847866203534496,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Hg-206": {
+     "got": 3.6062809332005074e-10,
+     "ref": 3.6062809332005074e-10,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Pb-212": {
+     "got": 5800458086.606714,
+     "ref": 5800458086.606714,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Po-210": {
+     "got": 0.014445094021213368,
+     "ref": 0.014445094021213368,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Tl-206": {
+     "got": 2.523967519369695e-08,
+     "ref": 2.5239675193696952e-08,
+     "tol": 1e-12,
+     "rel": 1.3109211686838152e-16,
+     "ok": true
+    },
+    "A_Bi-212": {
+     "got": 5800807437.721871,
+     "ref": 5800807437.721871,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Po-212": {
+     "got": 3715997244.6046543,
+     "ref": 3715997244.6046543,
+     "tol": 1e-12,
+     "rel": 0,
+     "ok": true
+    },
+    "A_Tl-208": {
+     "got": 2084816523.852937,
+     "ref": 2084816523.8529367,
+     "tol": 1e-12,
+     "rel": 1.1435950184284925e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.8278931975546208e-16,
+   "pass": true,
+   "flagged": false
+  }
+ ],
+ "reference_provenance": "recorded",
+ "provenance_note": "Reference values are derived by bench-src/ref/gen_nuclideatlas.py rather than transcribed, but that generator cannot be re-run anywhere in this programme: it reads bench-src/fixtures/nuclide-data.FIXTURE.js, which is present in no tree (the whole filesystem was searched for it on 2026-10-15). The corpus is reused as stored, which AGENTS section 5 classes as a regression reference, so reference_provenance reads recorded and not recomputed: a reused stored reference can show that a build changed a number and can never show the number was wrong to begin with."
+}

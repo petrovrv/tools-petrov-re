@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Steam Pipe Pressure Loss</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-15.steam-pipe-pressure-loss-handoff-range-guard-1-number-locale",
+  "id": "steam-pipe-pressure-loss",
+  "file": "steam_pipe_pressure_loss.html",
+  "listed": true,
+  "category": "transients",
+  "order": 14,
+  "title": {
+    "en": "Steam Pipe Pressure Loss",
+    "uk": "Втрати тиску в паропроводі",
+    "de": "Druckverlust in Dampfleitungen",
+    "nl": "Drukverlies in stoomleidingen",
+    "fr": "Perte de charge en conduite vapeur",
+    "es": "Pérdida de presión en tubería de vapor",
+    "pl": "Spadek ciśnienia w rurociągu pary"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — compressible Darcy pressure-loss screen for superheated steam with friction, local losses, Reynolds number and outlet Mach number.",
+    "uk": "Pipe / Vessel Transients — скринінг стисливих втрат тиску Darcy для перегрітої пари з тертям, місцевими втратами, Reynolds і outlet Mach.",
+    "de": "Pipe / Vessel Transients — kompressibler Darcy-Druckverlust für überhitzten Dampf mit Reibung, Einzelverlusten, Reynolds-Zahl und Austritts-Machzahl.",
+    "nl": "Pipe / Vessel Transients — compressibele Darcy-drukverliescheck voor oververhitte stoom met wrijving, lokale verliezen, Reynoldsgetal en uitlaat-Mach.",
+    "fr": "Pipe / Vessel Transients — écran de perte de charge Darcy compressible pour vapeur surchauffée avec frottement, pertes singulières, Reynolds et Mach aval.",
+    "es": "Pipe / Vessel Transients — cribado de pérdida de presión Darcy compresible para vapor sobrecalentado con fricción, pérdidas locales, Reynolds y Mach de salida.",
+    "pl": "Pipe / Vessel Transients — przesiewowy spadek ciśnienia Darcy’ego dla pary przegrzanej z tarciem, oporami miejscowymi, Reynoldsem i Machem na wylocie."
+  },
+  "description": {
+    "en": "Steady isothermal ideal-steam momentum model including streamwise acceleration, Darcy friction and lumped local losses, with laminar or Swamee–Jain friction factor.",
+    "uk": "Стаціонарна ізотермічна модель імпульсу ideal-steam з урахуванням прискорення потоку, тертя Darcy та сумарних місцевих втрат K.",
+    "de": "Stationäres isothermes Idealdampf-Impulsmodell mit Strömungsbeschleunigung, Darcy-Reibung und konzentrierten Einzelverlusten; Reibungsbeiwert laminar oder nach Swamee–Jain.",
+    "nl": "Stationair isotherm ideaal-stoom impulsmodel met stromingsversnelling, Darcy-wrijving en samengevoegde lokale verliezen; laminaire of Swamee–Jain-wrijvingsfactor.",
+    "fr": "Modèle stationnaire isotherme de quantité de mouvement pour vapeur idéale, incluant accélération, frottement Darcy et pertes singulières globales; facteur laminaire ou Swamee–Jain.",
+    "es": "Modelo estacionario isotérmico de cantidad de movimiento para vapor ideal, con aceleración, fricción Darcy y pérdidas locales globales; factor laminar o Swamee–Jain.",
+    "pl": "Stacjonarny izotermiczny model pędu pary idealnej z przyspieszeniem strugi, tarciem Darcy’ego i skupionymi stratami miejscowymi; współczynnik laminarny lub Swamee–Jain."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Superheated steam treated as an ideal gas at constant temperature, with a screening viscosity correlation. Measured against IAPWS-IF97 on the same duct, the loss is over-predicted by 5.4 % at the shipped default (20 bar, 300 °C), by 8.7 % at 100 bar/500 °C and by 41 % at 100 bar with 10 K of superheat; it holds within 5 % only below about 10 bar, or above roughly 100 K of superheat at 20 bar and 290 K at 100 bar, and from about 2 bar upwards it exceeds the printed 0.001 bar. Holding temperature constant instead of adiabatic costs under 0.01 % at the default but 2 % at 90 % of the critical resistance and 14 % at 99.999 %. Both errors are on the high side. No saturation test is applied, and no steam formulation covers the range above 100 MPa the inputs allow. Not for wet steam, flashing, condensation, heat loss, elevation or code-compliance sizing. Inputs are held to the model's own domain, typed or arriving over the SI handoff: inlet pressure 10 kPa to 200 MPa, steam temperature 300 to 1500 K, mass flow 0.001 to 100 000 kg/s, internal diameter 1 mm to 5 m, length 0.01 m to 1000 km. A typed value outside a bound is moved to it and announced; an arriving value outside it is named together with the range and is not applied.",
+    "uk": "Перегріта пара як ідеальний газ за сталої температури, з оцінковою кореляцією в’язкості. За порівнянням з IAPWS-IF97 на тій самій трубі втрата завищена на 5,4 % для типового набору (20 бар, 300 °C), на 8,7 % за 100 бар/500 °C і на 41 % за 100 бар із перегрівом 10 K; у межах 5 % вона тримається лише нижче приблизно 10 бар або за перегріву понад близько 100 K за 20 бар і 290 K за 100 бар, а вже приблизно від 2 бар перевищує надруковані 0,001 бар. Ізотермічність замість адіабатичності коштує менше ніж 0,01 % для типового набору, але 2 % за 90 % критичного опору і 14 % за 99,999 %. Обидві похибки — у бік завищення. Перевірки насичення немає, і жодна формуляція водяної пари не охоплює діапазон понад 100 МПа, який допускають поля вводу. Не для вологої пари, скипання, конденсації, тепловтрат, перепаду висот чи нормативного добору. Вхідні дані утримуються в межах області моделі — і введені вручну, і отримані через SI-передавання: тиск на вході 10 кПа – 200 МПа, температура пари 300 – 1500 K, масова витрата 0,001 – 100 000 кг/с, внутрішній діаметр 1 мм – 5 м, довжина 0,01 м – 1000 км. Введене значення поза межею зсувається до неї з повідомленням; отримане значення поза діапазоном називається разом із діапазоном і не застосовується.",
+    "de": "Überhitzter Dampf als ideales Gas bei konstanter Temperatur, mit einer Näherungskorrelation für die Viskosität. Gegen IAPWS-IF97 an derselben Leitung gemessen, wird der Verlust im Auslieferungsfall (20 bar, 300 °C) um 5,4 % überschätzt, bei 100 bar/500 °C um 8,7 % und bei 100 bar mit 10 K Überhitzung um 41 %; innerhalb von 5 % bleibt er nur unterhalb etwa 10 bar oder oberhalb rund 100 K Überhitzung bei 20 bar und 290 K bei 100 bar, und ab etwa 2 bar übersteigt er die gedruckten 0,001 bar. Isotherm statt adiabat kostet im Auslieferungsfall unter 0,01 %, aber 2 % bei 90 % des kritischen Widerstands und 14 % bei 99,999 %. Beide Fehler liegen auf der hohen Seite. Es gibt keine Sättigungsprüfung, und keine Dampfformulierung deckt den von den Eingaben zugelassenen Bereich oberhalb 100 MPa ab. Nicht für Nassdampf, Flashing, Kondensation, Wärmeverluste, Höhenunterschiede oder normgerechte Auslegung. Eingaben bleiben im Gültigkeitsbereich des Modells, getippt wie über den SI-Handoff empfangen: Eintrittsdruck 10 kPa bis 200 MPa, Dampftemperatur 300 bis 1500 K, Massenstrom 0,001 bis 100 000 kg/s, Innendurchmesser 1 mm bis 5 m, Länge 0,01 m bis 1000 km. Ein getippter Wert außerhalb einer Grenze wird auf sie gesetzt und angezeigt; ein empfangener Wert außerhalb des Bereichs wird mit dem Bereich benannt und nicht übernommen.",
+    "nl": "Oververhitte stoom als ideaal gas bij constante temperatuur, met een indicatieve viscositeitscorrelatie. Gemeten tegen IAPWS-IF97 op dezelfde leiding wordt het verlies met 5,4 % overschat bij de standaardinstelling (20 bar, 300 °C), met 8,7 % bij 100 bar/500 °C en met 41 % bij 100 bar met 10 K oververhitting; binnen 5 % blijft het alleen onder ongeveer 10 bar, of boven ruwweg 100 K oververhitting bij 20 bar en 290 K bij 100 bar, en vanaf ongeveer 2 bar overschrijdt het de afgedrukte 0,001 bar. Isotherm in plaats van adiabatisch kost minder dan 0,01 % bij de standaardinstelling, maar 2 % bij 90 % van de kritische weerstand en 14 % bij 99,999 %. Beide afwijkingen liggen aan de hoge kant. Er is geen verzadigingstoets, en geen enkele stoomformulering dekt het bereik boven 100 MPa dat de invoervelden toelaten. Niet voor natte stoom, flashing, condensatie, warmteverlies, hoogteverschil of normdimensionering. Invoer blijft binnen het geldigheidsgebied van het model, zowel getypt als via de SI-handoff ontvangen: inlaatdruk 10 kPa tot 200 MPa, stoomtemperatuur 300 tot 1500 K, massastroom 0,001 tot 100 000 kg/s, binnendiameter 1 mm tot 5 m, lengte 0,01 m tot 1000 km. Een getypte waarde buiten een grens gaat naar die grens en wordt gemeld; een ontvangen waarde buiten het bereik wordt met dat bereik benoemd en niet toegepast.",
+    "fr": "Vapeur surchauffée traitée comme gaz parfait à température constante, avec une corrélation de viscosité de dégrossissage. Comparée à l’IAPWS-IF97 sur la même conduite, la perte est surestimée de 5,4 % au cas livré par défaut (20 bar, 300 °C), de 8,7 % à 100 bar/500 °C et de 41 % à 100 bar avec 10 K de surchauffe ; elle ne reste dans les 5 % qu’en dessous d’environ 10 bar, ou au-delà d’environ 100 K de surchauffe à 20 bar et 290 K à 100 bar, et dès environ 2 bar elle dépasse les 0,001 bar affichés. L’hypothèse isotherme plutôt qu’adiabatique coûte moins de 0,01 % au cas par défaut, mais 2 % à 90 % de la résistance critique et 14 % à 99,999 %. Les deux écarts vont dans le sens de la surestimation. Aucun test de saturation n’est effectué, et aucune formulation de la vapeur ne couvre le domaine au-delà de 100 MPa que les champs de saisie autorisent. Pas pour vapeur humide, flash, condensation, pertes thermiques, dénivelé ni dimensionnement réglementaire. Les entrées restent dans le domaine du modèle, saisies comme reçues par le transfert SI : pression amont 10 kPa à 200 MPa, température vapeur 300 à 1500 K, débit massique 0,001 à 100 000 kg/s, diamètre intérieur 1 mm à 5 m, longueur 0,01 m à 1000 km. Une valeur saisie hors borne est ramenée à cette borne et signalée ; une valeur reçue hors plage est nommée avec la plage et n'est pas appliquée.",
+    "es": "Vapor sobrecalentado tratado como gas ideal a temperatura constante, con una correlación de viscosidad de cribado. Comparada con IAPWS-IF97 en el mismo conducto, la pérdida se sobrestima en un 5,4 % en el caso por defecto (20 bar, 300 °C), un 8,7 % a 100 bar/500 °C y un 41 % a 100 bar con 10 K de sobrecalentamiento; se mantiene dentro del 5 % solo por debajo de unos 10 bar, o por encima de unos 100 K de sobrecalentamiento a 20 bar y 290 K a 100 bar, y ya desde unos 2 bar supera los 0,001 bar impresos. Suponer isotermia en vez de adiabaticidad cuesta menos del 0,01 % en el caso por defecto, pero un 2 % al 90 % de la resistencia crítica y un 14 % al 99,999 %. Ambos errores van por el lado alto. No se aplica ninguna comprobación de saturación, y ninguna formulación del vapor cubre el rango por encima de 100 MPa que admiten los campos de entrada. No para vapor húmedo, flashing, condensación, pérdidas térmicas, desnivel ni dimensionado normativo. Las entradas se mantienen en el dominio del modelo, escritas o recibidas por la transferencia SI: presión de entrada 10 kPa a 200 MPa, temperatura del vapor 300 a 1500 K, caudal másico 0,001 a 100 000 kg/s, diámetro interior 1 mm a 5 m, longitud 0,01 m a 1000 km. Un valor escrito fuera de un límite se lleva a ese límite y se anuncia; un valor recibido fuera del rango se nombra junto con el rango y no se aplica.",
+    "pl": "Para przegrzana traktowana jako gaz doskonały o stałej temperaturze, z przesiewową korelacją lepkości. W porównaniu z IAPWS-IF97 na tym samym rurociągu strata jest zawyżona o 5,4 % w przypadku domyślnym (20 bar, 300 °C), o 8,7 % przy 100 bar/500 °C i o 41 % przy 100 bar z przegrzaniem 10 K; w granicach 5 % utrzymuje się tylko poniżej około 10 bar albo powyżej mniej więcej 100 K przegrzania przy 20 bar i 290 K przy 100 bar, a już od około 2 bar przekracza nadrukowane 0,001 bar. Założenie izotermiczności zamiast adiabatyczności kosztuje poniżej 0,01 % w przypadku domyślnym, ale 2 % przy 90 % oporu krytycznego i 14 % przy 99,999 %. Oba błędy idą w stronę zawyżenia. Nie ma testu nasycenia, a żadna formuła pary nie obejmuje zakresu powyżej 100 MPa, na który pozwalają pola wejściowe. Nie dla pary mokrej, flashingu, kondensacji, strat ciepła, różnicy wysokości ani doboru normowego. Dane wejściowe pozostają w obszarze ważności modelu, zarówno wpisane, jak i otrzymane przez przekazanie SI: ciśnienie wlotowe 10 kPa – 200 MPa, temperatura pary 300 – 1500 K, strumień masy 0,001 – 100 000 kg/s, średnica wewnętrzna 1 mm – 5 m, długość 0,01 m – 1000 km. Wpisana wartość poza granicą jest do niej przesuwana z komunikatem; otrzymana wartość poza zakresem jest nazwana wraz z zakresem i nie zostaje zastosowana."
+  },
+  "intended_use": [
+    "education",
+    "technical exploration",
+    "preliminary assessment"
+  ],
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "The compressible pipe-flow relation and its inversion are graded against an independent reference written in Python along four structurally different routes: a closed-form Lambert-W inversion of the isothermal duct equation, which does no root-finding at all where the tool bisects; a 50-digit root of the same relation; a Gauss-Legendre quadrature in pressure that recovers the pipe length from the reported outlet and needs no marching step; and the friction factor against the published Swamee-Jain and laminar correlations, with Colebrook-White solved to convergence beside it. 51 cases driven through the page span the whole declared input box — 0.1 to 2000 bar, 300 to 1500 K, 1 mm to 5 m bore, 10 mm to 1000 km, hydraulically smooth to 50 mm roughness, laminar flow up to 99.999 per cent of the critical resistance and beyond it into choking — and give 447 independent checks, all passing, the largest relative residual 3.3e-9. The 28 in-page checks are merged and kept, labelled as self-checks. The page's own RK4 march, graded here against the closed form rather than against itself, stays within 2.9e-6 Pa of it even at 99.999 per cent of the critical resistance, against a printed resolution of 100 Pa, so its first step of L/1000 is adequate across the range. Measured against IAPWS-IF97, the declared ideal-gas isothermal model over-predicts the loss by 5.4 per cent at the shipped default and by up to 41 per cent near saturation at 100 bar, while the isothermal-versus-adiabatic spread stays below 0.01 per cent at the default and only reaches 14 per cent close to choking. Verification used an independent reference and the author's own harness; there has been no third-party review.",
+      "uk": "Співвідношення для стисливої течії в трубі та його обернення перевірено за незалежним еталоном, написаним мовою Python чотирма структурно різними шляхами: замкнене обернення ізотермічного рівняння труби через функцію Ламберта W, яке взагалі не шукає кореня там, де інструмент застосовує бісекцію; корінь того самого співвідношення з 50 значущими цифрами; квадратура Гаусса-Лежандра за тиском, що відновлює довжину труби з наведеного виходу і не потребує кроку інтегрування; а також коефіцієнт тертя проти опублікованих кореляцій Swamee-Jain і ламінарної, поряд із рівнянням Colebrook-White, розв’язаним до збіжності. 51 випадок, проведений крізь сторінку, охоплює весь заявлений діапазон вводу — від 0,1 до 2000 бар, від 300 до 1500 K, діаметр від 1 мм до 5 м, довжину від 10 мм до 1000 км, від гідравлічно гладкої стінки до шорсткості 50 мм, від ламінарної течії до 99,999 % критичного опору і далі в режим запирання — і дає 447 незалежних перевірок, усі пройдені, з найбільшою відносною нев’язкою 3,3e-9. 28 перевірок усередині сторінки збережено й позначено як самоперевірки. Власний марш RK4 сторінки, перевірений тут проти замкненої форми, а не проти себе, відхиляється від неї не більш як на 2,9e-6 Па навіть за 99,999 % критичного опору, тоді як друкована роздільність становить 100 Па; отже, його перший крок L/1000 достатній у всьому діапазоні. За порівнянням з IAPWS-IF97 заявлена ізотермічна модель ідеального газу завищує втрату на 5,4 % для типового набору і до 41 % поблизу насичення за 100 бар, тоді як розбіжність між ізотермічним та адіабатичним випадками лишається нижчою за 0,01 % для типового набору і сягає 14 % лише поблизу запирання. Використано незалежний еталон і власний стенд автора; стороннього рецензування не було.",
+      "de": "Die Beziehung für kompressible Rohrströmung und ihre Umkehrung werden gegen eine unabhängige, in Python geschriebene Referenz mit vier strukturell verschiedenen Wegen geprüft: eine geschlossene Umkehrung der isothermen Rohrgleichung über die Lambert-W-Funktion, die dort gar keine Nullstellensuche ausführt, wo das Werkzeug bisektiert; eine 50-stellige Nullstelle derselben Beziehung; eine Gauss-Legendre-Quadratur über den Druck, die die Rohrlänge aus dem ausgegebenen Austrittsdruck zurückgewinnt und keinen Integrationsschritt braucht; und den Reibungsbeiwert gegen die veröffentlichten Korrelationen von Swamee-Jain und den laminaren Zweig, daneben die bis zur Konvergenz gelöste Colebrook-White-Gleichung. 51 durch die Seite gefahrene Fälle decken den gesamten angegebenen Eingabebereich ab — 0,1 bis 2000 bar, 300 bis 1500 K, 1 mm bis 5 m Durchmesser, 10 mm bis 1000 km Länge, hydraulisch glatt bis 50 mm Rauheit, laminare Strömung bis 99,999 Prozent des kritischen Widerstands und darüber hinaus in die Sperrung — und ergeben 447 unabhängige Prüfungen, alle bestanden, mit dem größten relativen Residuum 3,3e-9. Die 28 seiteneigenen Prüfungen sind übernommen und als Selbstprüfungen gekennzeichnet. Der seiteneigene RK4-Marsch, hier gegen die geschlossene Form und nicht gegen sich selbst geprüft, weicht selbst bei 99,999 Prozent des kritischen Widerstands um höchstens 2,9e-6 Pa ab, bei einer gedruckten Auflösung von 100 Pa; sein erster Schritt L/1000 genügt also im gesamten Bereich. Gegen IAPWS-IF97 gemessen überschätzt das angegebene isotherme Idealgasmodell den Verlust im Auslieferungsfall um 5,4 Prozent und nahe der Sättigung bei 100 bar um bis zu 41 Prozent, während der Abstand zwischen isothermer und adiabater Rechnung im Auslieferungsfall unter 0,01 Prozent bleibt und erst nahe der Sperrung 14 Prozent erreicht. Geprüft wurde mit einer unabhängigen Referenz und dem eigenen Prüfstand des Autors; eine Begutachtung durch Dritte gab es nicht.",
+      "nl": "De relatie voor compressibele leidingstroming en de inversie ervan worden getoetst aan een onafhankelijke, in Python geschreven referentie langs vier structureel verschillende routes: een gesloten inversie van de isotherme leidingvergelijking via de Lambert-W-functie, die daar in het geheel geen nulpunt zoekt waar de tool bisecteert; een 50-cijferig nulpunt van dezelfde relatie; een Gauss-Legendre-kwadratuur over de druk die de leidinglengte terugrekent uit de gerapporteerde uitlaatdruk en geen integratiestap nodig heeft; en de wrijvingsfactor tegen de gepubliceerde correlaties van Swamee-Jain en de laminaire tak, met daarnaast de tot convergentie opgeloste Colebrook-White-vergelijking. 51 door de pagina gedreven gevallen beslaan het volledige opgegeven invoerbereik — 0,1 tot 2000 bar, 300 tot 1500 K, 1 mm tot 5 m diameter, 10 mm tot 1000 km lengte, hydraulisch glad tot 50 mm ruwheid, laminaire stroming tot 99,999 procent van de kritische weerstand en daarvoorbij tot verstikking — en leveren 447 onafhankelijke controles op, alle geslaagd, met als grootste relatieve residu 3,3e-9. De 28 controles in de pagina zijn behouden en gemarkeerd als zelfcontroles. De eigen RK4-mars van de pagina, hier getoetst aan de gesloten vorm in plaats van aan zichzelf, wijkt zelfs bij 99,999 procent van de kritische weerstand hoogstens 2,9e-6 Pa af, bij een afgedrukte resolutie van 100 Pa; de eerste stap L/1000 volstaat dus over het hele bereik. Gemeten tegen IAPWS-IF97 overschat het opgegeven isotherme ideaalgasmodel het verlies met 5,4 procent bij de standaardinstelling en met tot 41 procent nabij verzadiging bij 100 bar, terwijl het verschil tussen isotherm en adiabatisch bij de standaardinstelling onder 0,01 procent blijft en pas dicht bij verstikking 14 procent bereikt. Er is gebruikgemaakt van een onafhankelijke referentie en het eigen testtuig van de auteur; beoordeling door derden heeft niet plaatsgevonden.",
+      "fr": "La relation d’écoulement compressible en conduite et son inversion sont évaluées par rapport à une référence indépendante écrite en Python suivant quatre voies structurellement différentes : une inversion en forme close de l’équation isotherme par la fonction W de Lambert, qui ne cherche aucune racine là où l’outil procède par dichotomie ; une racine de la même relation à 50 chiffres ; une quadrature de Gauss-Legendre en pression qui reconstitue la longueur de conduite à partir de la pression aval rapportée, sans aucun pas d’intégration ; et le facteur de frottement comparé aux corrélations publiées de Swamee-Jain et à la branche laminaire, avec à côté l’équation de Colebrook-White résolue jusqu’à convergence. 51 cas passés par la page couvrent tout le domaine d’entrée déclaré — de 0,1 à 2000 bar, de 300 à 1500 K, de 1 mm à 5 m de diamètre, de 10 mm à 1000 km de longueur, du lisse hydraulique à 50 mm de rugosité, de l’écoulement laminaire jusqu’à 99,999 pour cent de la résistance critique puis au-delà en régime bloqué — et donnent 447 contrôles indépendants, tous réussis, le plus grand résidu relatif valant 3,3e-9. Les 28 contrôles internes à la page sont conservés et étiquetés comme auto-contrôles. La marche RK4 propre à la page, évaluée ici par rapport à la forme close et non par rapport à elle-même, en reste à moins de 2,9e-6 Pa même à 99,999 pour cent de la résistance critique, pour une résolution affichée de 100 Pa : son premier pas L/1000 suffit donc sur tout le domaine. Comparé à l’IAPWS-IF97, le modèle isotherme de gaz parfait déclaré surestime la perte de 5,4 pour cent au cas par défaut et jusqu’à 41 pour cent près de la saturation à 100 bar, tandis que l’écart entre isotherme et adiabatique reste sous 0,01 pour cent au cas par défaut et n’atteint 14 pour cent qu’à proximité du blocage. La vérification a utilisé une référence indépendante et le banc d’essai de l’auteur ; il n’y a pas eu de revue par un tiers.",
+      "es": "La relación de flujo compresible en tubería y su inversión se evalúan frente a una referencia independiente escrita en Python por cuatro vías estructuralmente distintas: una inversión en forma cerrada de la ecuación isotérmica mediante la función W de Lambert, que no busca ninguna raíz allí donde la herramienta biseca; una raíz de la misma relación con 50 cifras; una cuadratura de Gauss-Legendre en presión que recupera la longitud de la tubería a partir de la presión de salida informada y no necesita paso de integración; y el factor de fricción frente a las correlaciones publicadas de Swamee-Jain y la rama laminar, junto con la ecuación de Colebrook-White resuelta hasta convergencia. 51 casos ejecutados a través de la página abarcan todo el dominio de entrada declarado — de 0,1 a 2000 bar, de 300 a 1500 K, de 1 mm a 5 m de diámetro, de 10 mm a 1000 km de longitud, de hidráulicamente liso a 50 mm de rugosidad, de flujo laminar hasta el 99,999 por ciento de la resistencia crítica y más allá hasta el bloqueo — y dan 447 comprobaciones independientes, todas superadas, con el mayor residuo relativo de 3,3e-9. Las 28 comprobaciones internas de la página se conservan y se etiquetan como autocomprobaciones. La propia marcha RK4 de la página, evaluada aquí frente a la forma cerrada y no frente a sí misma, se mantiene dentro de 2,9e-6 Pa incluso al 99,999 por ciento de la resistencia crítica, frente a una resolución impresa de 100 Pa, de modo que su primer paso L/1000 es suficiente en todo el rango. Medido frente a IAPWS-IF97, el modelo isotérmico de gas ideal declarado sobrestima la pérdida en un 5,4 por ciento en el caso por defecto y hasta un 41 por ciento cerca de la saturación a 100 bar, mientras que la diferencia entre isotérmico y adiabático se mantiene por debajo del 0,01 por ciento en el caso por defecto y solo alcanza el 14 por ciento cerca del bloqueo. La verificación empleó una referencia independiente y el banco de pruebas del propio autor; no ha habido revisión por terceros.",
+      "pl": "Relacja przepływu ściśliwego w rurociągu i jej odwrócenie są oceniane względem niezależnego wzorca napisanego w Pythonie czterema strukturalnie różnymi drogami: odwrócenie izotermicznego równania rury w postaci zamkniętej przez funkcję W Lamberta, które nie szuka żadnego pierwiastka tam, gdzie narzędzie stosuje bisekcję; pierwiastek tej samej relacji wyznaczony z dokładnością 50 cyfr; kwadratura Gaussa-Legendre’a po ciśnieniu, która odtwarza długość rurociągu z podanego ciśnienia wylotowego i nie wymaga kroku całkowania; oraz współczynnik tarcia porównany z opublikowanymi korelacjami Swamee-Jaina i gałęzią laminarną, obok równania Colebrooka-White’a rozwiązanego do zbieżności. 51 przypadków przepuszczonych przez stronę obejmuje cały deklarowany zakres wejściowy — od 0,1 do 2000 bar, od 300 do 1500 K, średnicę od 1 mm do 5 m, długość od 10 mm do 1000 km, od gładkości hydraulicznej do chropowatości 50 mm, od przepływu laminarnego do 99,999 procent oporu krytycznego i dalej w zadławienie — i daje 447 niezależnych sprawdzeń, wszystkie zaliczone, przy największym residuum względnym 3,3e-9. 28 sprawdzeń wewnątrz strony zachowano i oznaczono jako samosprawdzenia. Własny marsz RK4 strony, oceniony tutaj względem postaci zamkniętej, a nie względem siebie, odbiega od niej najwyżej o 2,9e-6 Pa nawet przy 99,999 procent oporu krytycznego, przy nadrukowanej rozdzielczości 100 Pa, więc jego pierwszy krok L/1000 wystarcza w całym zakresie. W porównaniu z IAPWS-IF97 deklarowany izotermiczny model gazu doskonałego zawyża stratę o 5,4 procent w przypadku domyślnym i nawet o 41 procent w pobliżu nasycenia przy 100 bar, podczas gdy rozbieżność między ujęciem izotermicznym a adiabatycznym pozostaje poniżej 0,01 procent w przypadku domyślnym i dopiero blisko zadławienia sięga 14 procent. Weryfikacja wykorzystała niezależny wzorzec i własny stend autora; nie było recenzji strony trzeciej."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "steam-pipe-pressure-loss-external-20260912",
+        "reference": "An external reference implemented in Python from a derivation carried out for this benchmark, along four structurally independent routes. The steady one-dimensional momentum balance for a constant-area duct, dp + G^2 dv + (f/D + SigmaK/L)/2 * G^2 v dx = 0, is divided through by G^2 v and integrated, which separates for ANY one-parameter state path and gives q/2 = (1/G^2) INT_{p2}^{p1} rho(p) dp + ln(rho(p2)/rho(p1)). (A) With the ideal isotherm this is the published complete isothermal pipe equation, and the substitution u = p^2/G^2RT inverts it in CLOSED FORM through the Lambert W function, p2 = sqrt(C * -W_{-1}(-exp(-(g(u1)-q)))) with g(u) = u - ln u: no root-finding and no stepping at all, against the tool's bisection. (B) The same relation driven to a root in 50-digit mpmath arithmetic, so the reference is never the limiting error. (C) The pipe length recovered from the tool's own reported outlet by 240-node Gauss-Legendre quadrature of dx/dp in PRESSURE, where the critical point is a zero of the integrand rather than a pole -- this route shows no node dependence at all at q/q* = 0.99999 and is what settles the marching question. (D) The general quadrature solved by Brent, fed the IAPWS-IF97 isotherm and an adiabatic Fanno line to measure the declared idealisation itself. The friction factor is graded separately against Swamee & Jain (1976) and the laminar f = 64/Re implemented from their published algebra, and the Colebrook-White equation is solved to convergence so the cost of the explicit correlation is measured rather than assumed. The reference was verified against IAPWS R7-97 and R12-08 verification tables and the published Fanno relations before any tool output was graded.",
+        "citations": [
+          "C. F. Colebrook, \"Turbulent flow in pipes, with particular reference to the transition region between the smooth and rough pipe laws\", Journal of the Institution of Civil Engineers 11 (1939) 133-156, eq. (2): 1/sqrt(f) = -2 log10(eps/(3.7 D) + 2.51/(Re sqrt(f))). Solved to convergence here; the residual at convergence is below 1e-12.",
+          "P. K. Swamee and A. K. Jain, \"Explicit equations for pipe-flow problems\", Journal of the Hydraulics Division, ASCE 102(HY5) (1976) 657-664: f = 0.25/[log10(eps/(3.7 D) + 5.74/Re^0.9)]^2, stated valid for 5e3 <= Re <= 1e8 and 1e-6 <= eps/D <= 1e-2. This is the correlation the tool declares above its Re = 2300 switch; it is implemented here from the published algebra, not from the page.",
+          "A. H. Shapiro, \"The Dynamics and Thermodynamics of Compressible Fluid Flow\", vol. 1, Ronald Press, New York, 1953, ch. 6: the isothermal pipe relation (sec. 6.5) and the Fanno-line length relation f L*/D = (1-M^2)/(gamma M^2) + ((gamma+1)/(2 gamma)) ln[(gamma+1)M^2/(2+(gamma-1)M^2)] with p/p* = (1/M) sqrt((gamma+1)/(2+(gamma-1)M^2)). The Fanno quadrature written here reproduces that relation to 1.8e-13 over Mach 0.02 to 0.9995 and its sonic point to 1.3e-9.",
+          "Crane Co., \"Flow of Fluids through Valves, Fittings and Pipe\", Technical Paper No. 410, and R. H. Perry and D. W. Green (eds.), \"Perry's Chemical Engineers' Handbook\", 8th ed., McGraw-Hill 2008, sec. 6 \"Fluid and Particle Dynamics\", eq. 6-114: the complete isothermal compressible pipe equation p1^2 - p2^2 + 2 G^2 R T ln(p2/p1) = (f L/D + SigmaK) G^2 R T, which the derivation above reproduces and which the tool also prints.",
+          "IAPWS R7-97 (2012), \"Revised Release on the IAPWS Industrial Formulation 1997 for the Thermodynamic Properties of Water and Steam\". Region 1 Table 5 and region 2 Table 15 verification values are reproduced by the property source used here (CoolProp 8, IF97 backend) to better than 1e-8 relative, the release's own nine-figure quantisation.",
+          "IAPWS R12-08 (2008), \"Release on the IAPWS Formulation 2008 for the Viscosity of Ordinary Water Substance\", Table 4. Reproduced by the same property source to better than 1e-6 relative."
+        ],
+        "cases": 475,
+        "passed": 475,
+        "tolerance": "Every tolerance comes from the conditioning of the problem or from the precision at which the tool prints a figure, and none from the observed difference. Friction factor against its published correlation: 1e-12 relative, two double-precision evaluations of the same closed-form algebra. Outlet pressure, loss and the 50-digit arbitration: 40 unit-roundoffs amplified by the analytic condition number kappa = |g(u1)-q|/(2(u2-1)) of the inversion, which is derived from the relation itself and grows as the outlet approaches the critical pressure; kappa is recorded on every such row. The pressure-domain quadrature route adds a 1e-6 Pa floor, two decades above Brent's own bracket. Pipe-length closure: 200 unit-roundoffs amplified by p1/(p1-p2), the representability of the reported outlet, with the amplification recorded per row; the check is not graded where the drop is below 1e-9 of the inlet pressure and p_out carries no information. State equation and Mach assembly: 1e-14 and 1e-13 relative, a few ulp. Choked clamp and the 1/sqrt(gamma) sonic Mach identity: 1e-14 and 1e-13. The page's own RK4 march is graded against the closed form at 1 Pa, one hundredth of the 100 Pa (0.001 bar) resolution at which the tool prints a pressure. Warning rows are booleans at tolerance zero. Real-steam and Fanno comparisons carry NO criterion: they measure a boundary the tool declares, and are excluded from the count.",
+        "reference_provenance": "Written independently in Python for this benchmark. The page's JavaScript was read only for input keys, units, declared minima and maxima, defaults, the declared model boundary, the names of the correlations it declares, the list of reported quantities and the precision at which each is printed. Nothing in the reference is transcribed, ported or paraphrased from it, and no reference route evaluates any expression taken from it. The reference was self-verified before any tool output was graded: the closed-form Lambert-W inversion against a 50-digit root of the same relation to 2e-16 over the declared input box; the general quadrature against that root to 4e-14; the pressure-domain length quadrature closed to 7e-11; node refinement 50 -> 800 moving the length integral by less than 1e-12 even at q/q* = 0.99999; the low-Mach limit converging on the incompressible Darcy-Weisbach loss at second order in Mach; the p^2 asymptote recovered as the mass flux vanishes; the critical limit approaching p* = G sqrt(RT); the Fanno quadrature against Shapiro's published closed form to 1.8e-13; and the IAPWS-IF97 and R12-08 property source against the releases' own verification tables. Verification used an independent reference and the author's own harness; there has been no third-party review.",
+        "run_at": "2026-10-16T09:54:01Z",
+        "artifact": "benchmarks/steam_pipe_pressure_loss.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "p",
+      "dp",
+      "rho",
+      "Re",
+      "f_darcy",
+      "D",
+      "L",
+      "mdot",
+      "T"
+    ],
+    "accepts": [
+      "T",
+      "p",
+      "mdot",
+      "D",
+      "L"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"p1":2000000.0,"T":573.15,"mdot":2.0,"D":0.1,"L":50.0,"eps":4.5e-05,"K":4.0,"R":461.526,"gamma":1.3};
+/* One table of input bounds in SI. The typed field and an incoming SI handoff
+   quantity read the same lo/hi from here, so the page cannot hold two bounds
+   for one input (AGENTS.md 2.4). */
+var LIM={p1:{lo:10000.0,hi:200000000.0,u:"Pa"},T:{lo:300,hi:1500,u:"K"},mdot:{lo:0.001,hi:100000.0,u:"kg/s"},D:{lo:0.001,hi:5,u:"m"},L:{lo:0.01,hi:1000000.0,u:"m"},eps:{lo:0,hi:0.05,u:"m"},K:{lo:0,hi:100000.0,u:""},R:{lo:100,hi:1000,u:"J/(kg\u00b7K)"},gamma:{lo:1.01,hi:1.8,u:""}};
+/* The labels of the inputs a handoff can reach, shared by the field and by the
+   refusal sentence, so a refusal names the input the reader sees. */
+var LBL={T:T("Steam temperature","Температура пари","Dampftemperatur","Stoomtemperatuur","Température vapeur","Temperatura del vapor","Temperatura pary"),p1:T("Inlet pressure","Тиск на вході","Eintrittsdruck","Inlaatdruk","Pression amont","Presión de entrada","Ciśnienie wlotowe"),mdot:T("Mass flow","Масова витрата","Massenstrom","Massastroom","Débit massique","Caudal másico","Strumień masy"),D:T("Internal diameter","Внутрішній діаметр","Innendurchmesser","Binnendiameter","Diamètre intérieur","Diámetro interior","Średnica wewnętrzna"),L:T("Length","Довжина","Länge","Lengte","Longueur","Longitud","Długość")};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  /* AGENTS §2.2.1 -- one locale map for the on-screen chart and the report figure.
+     The digits are this chart's own and are not re-rounded; only the decimal
+     separator is re-written, by the framework map that the report engine reads.
+     group:false keeps the axis label ungrouped, which is what it has always been
+     and what the English rendering must stay (NUMBER-FORMAT.md rule 2). */
+  var sepNum = function (s) {
+    try { return window.DiagramUI.num.sep(s, { digits: 'raw', group: false }); }
+    catch (e) { return s; }
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return sepNum(v.toExponential(1));
+    return sepNum(String(Math.round(v * 1000) / 1000));
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{title:"Steam pipe pressure loss — isothermal compressible flow along a line",
+ summary:"A {D} mm bore line {L} m long carries {m} kg/s of superheated steam at {T} °C from {p1} bar. Friction (f = {f}) and local losses (ΣK = {K}) bring the outlet to {p2} bar, a loss of {dp} bar. Outlet Mach is {M} against an isothermal critical pressure of {pc} bar.",
+ concOK:"Outlet pressure stays above the isothermal critical pressure, so the requested mass flow passes the line at the reported loss.",
+ concChoked:"The requested mass flow reaches the isothermal critical condition before the outlet. The reported outlet pressure is the critical pressure, and this model does not sustain the specified flow.",
+ system:"Mass flux is fixed by the requested flow and the bore. Temperature is held at the inlet value along the line, so density follows pressure alone. Friction and fitting losses are summed into one resistance term, and the integrated momentum balance keeps the streamwise acceleration that the falling density produces.",
+ figCap:"Static pressure along the pipe. Distance is measured from the inlet; the resistance term is spread uniformly over the length.",
+ ckEq:"Closed-equation residual",
+ ckEqB:"The complete steady isothermal ideal-gas relation p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, evaluated at the outlet pressure the tool reports and normalised by p₁². This is the equation printed in the tool's own footer.",
+ ckEqNA:"The requested resistance exceeds the largest value the relation admits, so the equation has no root here and a residual is not defined.",
+ ckRk4:"Outlet pressure against direct RK4 integration",
+ ckRk4B:"The same balance in differential form, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), marched from the inlet by classical fourth-order Runge-Kutta under step-doubling local error control. It shares the equation and not the root-finding, so it tests the bisection independently.",
+ ckRk4NA:"The derivative grows without bound where pressure reaches the critical value, so a march in distance does not arrive at the outlet.",
+ ckEnd:"Plotted profile against the reported outlet",
+ ckEndB:"The last sample of the plotted profile carries the full resistance fL/D + ΣK, the same value at which the reported outlet pressure is solved. Figure and table must therefore show one number.",
+ ckMono:"Monotone pressure along the pipe",
+ ckMonoB:"Each of the 81 profile samples is solved by its own bisection. The momentum balance gives a negative gradient wherever pressure is above the critical value, so no sample may sit above the sample before it.",
+ ckMach:"Outlet Mach closure",
+ ckMachB:"The reported Mach number is built from outlet density and velocity. Eliminating both gives M·p₂·√γ = G√(RT), which is the critical pressure. Recomputing that identity tests the density and velocity path against the mass flux.",
+ ckReg:"Isothermal critical regime",
+ ckRegB:"Outlet pressure against the isothermal critical pressure p* = G√(RT), the choking criterion stated in the tool's own model notes. At p* the resistance the line can absorb is at its maximum.",
+ rChoked:"at the critical pressure",rSub:"above the critical pressure",
+ riskSteamT:"Steam properties",
+ riskSteam:"The gas is ideal with constant R and γ, and viscosity comes from a screening correlation. Real superheated steam departs from the ideal density by a few per cent at high pressure, and no wetness or condensation is modelled.",
+ riskIsoT:"Isothermal assumption",
+ riskIso:"Temperature is held at the inlet value over the whole length. A line losing heat to its surroundings runs colder and denser downstream, which shifts both the friction factor and the critical pressure.",
+ riskMachT:"Compressibility range",
+ riskMach:"The relation is one-dimensional and isothermal. Above outlet Mach 0.3 the assumptions want checking, and above 0.5 the tool's own scope note directs the user to a full compressible solver.",
+ mNote:"The resistance term fL/D + ΣK is spread uniformly along the plotted profile, so fitting losses appear distributed over the length instead of stepping at each fitting.",
+ rSteps:"steps",rAtol:"local tolerance",
+ axDist:"Distance from inlet",axPress:"Static pressure",
+ rOutP:"Outlet pressure",rLoss:"Pressure loss",rLossPc:"Loss of inlet pressure",
+ rVel:"Outlet velocity",rMach:"Outlet Mach",rCritP:"Isothermal critical pressure",
+ rInP:"Inlet pressure",rTemp:"Steam temperature",rFlux:"Mass flux G",
+ rFric:"Darcy friction factor",rRe:"Reynolds number",
+ rRes:"Total resistance fL/D + ΣK",rResCrit:"Resistance at the critical condition",
+ rMargin:"Margin to the critical pressure",rDens:"Outlet density",rDensIn:"Inlet density",
+ rGrad:"Mean pressure gradient",rRelRough:"Relative roughness",
+ rRegLam:"laminar branch",rRegTurb:"turbulent branch",rOfCrit:"of the critical resistance",
+ flowInlet:"Inlet state",flowPipe:"Pipe",flowOutlet:"Outlet state",
+ dGeom:"Bore and length",dGeomWhy:"Bore sets the mass flux; with length it sets the friction resistance fL/D.",
+ dRough:"Roughness",dRoughWhy:"Relative roughness fixes the friction factor once the flow is fully turbulent.",
+ dLocal:"Local losses",dLocalWhy:"Fittings and valves enter as one summed K, added to the friction resistance.",
+ dGas:"Gas model",dGasWhy:"R and γ set the isothermal density relation and the speed of sound behind the Mach number."},
+uk:{title:"Втрата тиску в паропроводі — ізотермічна стислива течія по лінії",
+ summary:"Лінія діаметром {D} мм завдовжки {L} м пропускає {m} кг/с перегрітої пари за {T} °C від {p1} бар. Тертя (f = {f}) і місцеві втрати (ΣK = {K}) доводять вихід до {p2} бар, тобто втрата {dp} бар. Число Маха на виході {M} за ізотермічного критичного тиску {pc} бар.",
+ concOK:"Тиск на виході лишається вищим за ізотермічний критичний тиск, тож задана витрата проходить лінію із вказаною втратою.",
+ concChoked:"Задана витрата досягає ізотермічної критичної умови до виходу. Наведений тиск на виході є критичним, і ця модель не підтримує вказану витрату.",
+ system:"Масовий потік задається витратою та діаметром. Температура утримується на вхідному значенні вздовж лінії, тож густина залежить лише від тиску. Тертя та втрати на фітингах підсумовуються в один член опору, а проінтегрований баланс імпульсу зберігає поздовжнє прискорення, спричинене падінням густини.",
+ figCap:"Статичний тиск уздовж труби. Відстань відлічується від входу; член опору рівномірно розподілено по довжині.",
+ ckEq:"Нев'язка замкненого рівняння",
+ ckEqB:"Повне стаціонарне ізотермічне співвідношення для ідеального газу p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, обчислене за наведеним тиском на виході та нормоване на p₁². Це рівняння надруковане у власному підписі інструмента.",
+ ckEqNA:"Заданий опір перевищує найбільший, який допускає співвідношення, тож рівняння тут не має кореня і нев'язка не визначена.",
+ ckRk4:"Тиск на виході проти прямого інтегрування RK4",
+ ckRk4B:"Той самий баланс у диференціальній формі, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), проінтегрований від входу класичним методом Рунге-Кутти четвертого порядку з контролем локальної похибки подвоєнням кроку. Він поділяє рівняння та не поділяє пошук кореня, тож перевіряє бісекцію незалежно.",
+ ckRk4NA:"Похідна необмежено зростає там, де тиск сягає критичного значення, тож марш по довжині не доходить до виходу.",
+ ckEnd:"Побудований профіль проти наведеного виходу",
+ ckEndB:"Остання точка побудованого профілю несе повний опір fL/D + ΣK — те саме значення, за яким розв'язується наведений тиск на виході. Тому рисунок і таблиця мають показувати одне число.",
+ ckMono:"Монотонність тиску вздовж труби",
+ ckMonoB:"Кожна з 81 точки профілю розв'язується власною бісекцією. Баланс імпульсу дає від'ємний градієнт скрізь, де тиск вищий за критичний, тож жодна точка не може стояти вище за попередню.",
+ ckMach:"Замикання числа Маха на виході",
+ ckMachB:"Наведене число Маха будується з густини та швидкості на виході. Виключення обох дає M·p₂·√γ = G√(RT), тобто критичний тиск. Перерахунок цієї тотожності перевіряє шлях густини та швидкості проти масового потоку.",
+ ckReg:"Ізотермічний критичний режим",
+ ckRegB:"Тиск на виході проти ізотермічного критичного тиску p* = G√(RT) — критерій запирання, зазначений у власних примітках моделі. За p* опір, який здатна поглинути лінія, максимальний.",
+ rChoked:"на критичному тиску",rSub:"вище за критичний тиск",
+ riskSteamT:"Властивості пари",
+ riskSteam:"Газ ідеальний зі сталими R та γ, а в'язкість береться зі скринінгової кореляції. Реальна перегріта пара відхиляється від ідеальної густини на кілька відсотків за високого тиску; вологість і конденсація не моделюються.",
+ riskIsoT:"Припущення ізотермічності",
+ riskIso:"Температура утримується на вхідному значенні по всій довжині. Лінія, що втрачає тепло в довкілля, нижче за потоком холодніша й густіша, що зсуває і коефіцієнт тертя, і критичний тиск.",
+ riskMachT:"Діапазон стисливості",
+ riskMach:"Співвідношення одновимірне та ізотермічне. Понад число Маха 0,3 на виході припущення потребують перевірки, а понад 0,5 власна примітка про область застосування скеровує користувача до повного стисливого розрахунку.",
+ mNote:"Член опору fL/D + ΣK рівномірно розподілено по побудованому профілю, тож втрати на фітингах виглядають розмазаними по довжині замість сходинок біля кожного фітинга.",
+ rSteps:"кроків",rAtol:"локальний допуск",
+ axDist:"Відстань від входу",axPress:"Статичний тиск",
+ rOutP:"Тиск на виході",rLoss:"Втрата тиску",rLossPc:"Частка вхідного тиску",
+ rVel:"Швидкість на виході",rMach:"Число Маха на виході",rCritP:"Ізотермічний критичний тиск",
+ rInP:"Тиск на вході",rTemp:"Температура пари",rFlux:"Масовий потік G",
+ rFric:"Коефіцієнт тертя Дарсі",rRe:"Число Рейнольдса",
+ rRes:"Сумарний опір fL/D + ΣK",rResCrit:"Опір за критичної умови",
+ rMargin:"Запас до критичного тиску",rDens:"Густина на виході",rDensIn:"Густина на вході",
+ rGrad:"Середній градієнт тиску",rRelRough:"Відносна шорсткість",
+ rRegLam:"ламінарна гілка",rRegTurb:"турбулентна гілка",rOfCrit:"критичного опору",
+ flowInlet:"Стан на вході",flowPipe:"Труба",flowOutlet:"Стан на виході",
+ dGeom:"Діаметр і довжина",dGeomWhy:"Діаметр задає масовий потік; разом із довжиною — опір тертя fL/D.",
+ dRough:"Шорсткість",dRoughWhy:"Відносна шорсткість фіксує коефіцієнт тертя в розвиненому турбулентному режимі.",
+ dLocal:"Місцеві втрати",dLocalWhy:"Фітинги та арматура входять одним сумарним K, доданим до опору тертя.",
+ dGas:"Модель газу",dGasWhy:"R та γ задають ізотермічний зв'язок густини і швидкість звуку, що стоїть за числом Маха."},
+de:{title:"Druckverlust in der Dampfleitung — isotherme kompressible Strömung",
+ summary:"Eine Leitung mit {D} mm Innendurchmesser und {L} m Länge führt {m} kg/s Heißdampf bei {T} °C ab {p1} bar. Reibung (f = {f}) und Einzelverluste (ΣK = {K}) bringen den Austritt auf {p2} bar, ein Verlust von {dp} bar. Die Austritts-Machzahl liegt bei {M} gegenüber einem isothermen kritischen Druck von {pc} bar.",
+ concOK:"Der Austrittsdruck bleibt über dem isothermen kritischen Druck, der geforderte Massenstrom durchläuft die Leitung mit dem angegebenen Verlust.",
+ concChoked:"Der geforderte Massenstrom erreicht die isotherme kritische Bedingung vor dem Austritt. Der angegebene Austrittsdruck ist der kritische Druck, und dieses Modell trägt den geforderten Massenstrom nicht.",
+ system:"Die Massenstromdichte folgt aus Massenstrom und Querschnitt. Die Temperatur wird über die Länge auf dem Eintrittswert gehalten, die Dichte hängt damit allein vom Druck ab. Reibung und Einzelverluste werden zu einem Widerstandsterm summiert, und die integrierte Impulsbilanz behält die Beschleunigung in Strömungsrichtung, die aus der fallenden Dichte entsteht.",
+ figCap:"Statischer Druck entlang des Rohres. Die Länge zählt ab Eintritt; der Widerstandsterm ist gleichmäßig über die Länge verteilt.",
+ ckEq:"Residuum der geschlossenen Gleichung",
+ ckEqB:"Die vollständige stationäre isotherme Idealgasbeziehung p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, ausgewertet am ausgegebenen Austrittsdruck und auf p₁² normiert. Es ist die Gleichung aus der Fußzeile des Werkzeugs selbst.",
+ ckEqNA:"Der geforderte Widerstand übersteigt den größten von der Beziehung zugelassenen Wert, die Gleichung hat hier keine Wurzel und ein Residuum ist nicht definiert.",
+ ckRk4:"Austrittsdruck gegen direkte RK4-Integration",
+ ckRk4B:"Dieselbe Bilanz in Differentialform, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), vom Eintritt aus mit klassischem Runge-Kutta vierter Ordnung und Schrittverdopplung zur lokalen Fehlerkontrolle marschiert. Sie teilt die Gleichung und nicht die Nullstellensuche und prüft die Bisektion damit unabhängig.",
+ ckRk4NA:"Die Ableitung wächst unbeschränkt, wo der Druck den kritischen Wert erreicht; ein Marsch über die Länge erreicht den Austritt daher nicht.",
+ ckEnd:"Gezeichnetes Profil gegen den ausgegebenen Austritt",
+ ckEndB:"Der letzte Abtastpunkt des gezeichneten Profils trägt den vollen Widerstand fL/D + ΣK, denselben Wert, für den der ausgegebene Austrittsdruck gelöst wird. Bild und Tabelle müssen daher eine Zahl zeigen.",
+ ckMono:"Monotoner Druck entlang des Rohres",
+ ckMonoB:"Jeder der 81 Profilpunkte wird mit eigener Bisektion gelöst. Die Impulsbilanz liefert überall dort einen negativen Gradienten, wo der Druck über dem kritischen Wert liegt, kein Punkt darf also über dem vorhergehenden liegen.",
+ ckMach:"Schließung der Austritts-Machzahl",
+ ckMachB:"Die ausgegebene Machzahl entsteht aus Austrittsdichte und -geschwindigkeit. Eliminiert man beide, folgt M·p₂·√γ = G√(RT), also der kritische Druck. Die Nachrechnung dieser Identität prüft den Dichte- und Geschwindigkeitspfad gegen die Massenstromdichte.",
+ ckReg:"Isothermes kritisches Regime",
+ ckRegB:"Austrittsdruck gegen den isothermen kritischen Druck p* = G√(RT), das in den Modellhinweisen des Werkzeugs genannte Sperrkriterium. Bei p* ist der von der Leitung aufnehmbare Widerstand maximal.",
+ rChoked:"auf dem kritischen Druck",rSub:"über dem kritischen Druck",
+ riskSteamT:"Dampfeigenschaften",
+ riskSteam:"Das Gas ist ideal mit konstantem R und γ, die Viskosität stammt aus einer Screening-Korrelation. Realer Heißdampf weicht bei hohem Druck um einige Prozent von der idealen Dichte ab; Nässe und Kondensation sind nicht modelliert.",
+ riskIsoT:"Isotherme Annahme",
+ riskIso:"Die Temperatur wird über die gesamte Länge auf dem Eintrittswert gehalten. Eine Leitung mit Wärmeverlust an die Umgebung wird stromab kälter und dichter, was Reibungsbeiwert und kritischen Druck verschiebt.",
+ riskMachT:"Kompressibilitätsbereich",
+ riskMach:"Die Beziehung ist eindimensional und isotherm. Oberhalb einer Austritts-Machzahl von 0,3 gehören die Annahmen geprüft, oberhalb von 0,5 verweist der eigene Gültigkeitshinweis des Werkzeugs auf einen vollständigen kompressiblen Löser.",
+ mNote:"Der Widerstandsterm fL/D + ΣK ist über das gezeichnete Profil gleichmäßig verteilt, Einzelverluste erscheinen daher über die Länge verschmiert statt als Stufe an jedem Formstück.",
+ rSteps:"Schritte",rAtol:"lokale Toleranz",
+ axDist:"Abstand vom Eintritt",axPress:"Statischer Druck",
+ rOutP:"Austrittsdruck",rLoss:"Druckverlust",rLossPc:"Anteil am Eintrittsdruck",
+ rVel:"Austrittsgeschwindigkeit",rMach:"Austritts-Machzahl",rCritP:"Isothermer kritischer Druck",
+ rInP:"Eintrittsdruck",rTemp:"Dampftemperatur",rFlux:"Massenstromdichte G",
+ rFric:"Rohrreibungszahl nach Darcy",rRe:"Reynolds-Zahl",
+ rRes:"Gesamtwiderstand fL/D + ΣK",rResCrit:"Widerstand bei kritischer Bedingung",
+ rMargin:"Abstand zum kritischen Druck",rDens:"Austrittsdichte",rDensIn:"Eintrittsdichte",
+ rGrad:"Mittleres Druckgefälle",rRelRough:"Relative Rauheit",
+ rRegLam:"laminarer Zweig",rRegTurb:"turbulenter Zweig",rOfCrit:"des kritischen Widerstands",
+ flowInlet:"Eintrittszustand",flowPipe:"Rohr",flowOutlet:"Austrittszustand",
+ dGeom:"Durchmesser und Länge",dGeomWhy:"Der Durchmesser setzt die Massenstromdichte; mit der Länge den Reibungswiderstand fL/D.",
+ dRough:"Rauheit",dRoughWhy:"Die relative Rauheit legt den Reibungsbeiwert fest, sobald die Strömung voll turbulent ist.",
+ dLocal:"Einzelverluste",dLocalWhy:"Formstücke und Armaturen gehen als ein summiertes K ein, addiert zum Reibungswiderstand.",
+ dGas:"Gasmodell",dGasWhy:"R und γ setzen die isotherme Dichtebeziehung und die Schallgeschwindigkeit hinter der Machzahl."},
+nl:{title:"Drukverlies in stoomleiding — isotherme samendrukbare stroming",
+ summary:"Een leiding met {D} mm boring en {L} m lengte voert {m} kg/s oververhitte stoom van {T} °C vanaf {p1} bar. Wrijving (f = {f}) en lokale verliezen (ΣK = {K}) brengen de uitlaat op {p2} bar, een verlies van {dp} bar. Het uitlaat-Machgetal is {M} bij een isotherme kritische druk van {pc} bar.",
+ concOK:"De uitlaatdruk blijft boven de isotherme kritische druk, dus de gevraagde massastroom legt de leiding af met het gemelde verlies.",
+ concChoked:"De gevraagde massastroom bereikt de isotherme kritische toestand vóór de uitlaat. De gemelde uitlaatdruk is de kritische druk, en dit model draagt de gevraagde stroom niet.",
+ system:"De massaflux volgt uit de gevraagde stroom en de boring. De temperatuur wordt over de lengte op de inlaatwaarde gehouden, zodat de dichtheid alleen de druk volgt. Wrijving en fittingverliezen worden tot één weerstandsterm opgeteld, en de geïntegreerde impulsbalans behoudt de versnelling in stroomrichting die de dalende dichtheid oplevert.",
+ figCap:"Statische druk langs de leiding. De afstand telt vanaf de inlaat; de weerstandsterm is gelijkmatig over de lengte verdeeld.",
+ ckEq:"Residu van de gesloten vergelijking",
+ ckEqB:"De volledige stationaire isotherme ideaal-gasrelatie p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, geëvalueerd bij de gemelde uitlaatdruk en genormeerd op p₁². Dit is de vergelijking uit de voettekst van het gereedschap zelf.",
+ ckEqNA:"De gevraagde weerstand overschrijdt de grootste die de relatie toelaat, dus de vergelijking heeft hier geen wortel en een residu is niet gedefinieerd.",
+ ckRk4:"Uitlaatdruk tegen directe RK4-integratie",
+ ckRk4B:"Dezelfde balans in differentiaalvorm, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), vanaf de inlaat gemarcheerd met klassieke vierde-orde Runge-Kutta onder stapverdubbeling voor lokale foutbeheersing. Zij deelt de vergelijking en niet het wortelzoeken, en toetst de bisectie dus onafhankelijk.",
+ ckRk4NA:"De afgeleide groeit onbegrensd waar de druk de kritische waarde bereikt, zodat een mars over de lengte de uitlaat niet haalt.",
+ ckEnd:"Getekend profiel tegen de gemelde uitlaat",
+ ckEndB:"Het laatste monster van het getekende profiel draagt de volle weerstand fL/D + ΣK, dezelfde waarde waarbij de gemelde uitlaatdruk wordt opgelost. Figuur en tabel moeten daarom één getal tonen.",
+ ckMono:"Monotone druk langs de leiding",
+ ckMonoB:"Elk van de 81 profielpunten wordt met een eigen bisectie opgelost. De impulsbalans geeft een negatieve gradiënt overal waar de druk boven de kritische waarde ligt, dus geen punt mag boven het voorgaande liggen.",
+ ckMach:"Sluiting van het uitlaat-Machgetal",
+ ckMachB:"Het gemelde Machgetal komt uit uitlaatdichtheid en -snelheid. Eliminatie van beide geeft M·p₂·√γ = G√(RT), wat de kritische druk is. Het herberekenen van die identiteit toetst het dichtheids- en snelheidspad tegen de massaflux.",
+ ckReg:"Isotherm kritisch regime",
+ ckRegB:"Uitlaatdruk tegen de isotherme kritische druk p* = G√(RT), het smoorcriterium uit de modelnotities van het gereedschap zelf. Bij p* is de weerstand die de leiding kan opnemen maximaal.",
+ rChoked:"op de kritische druk",rSub:"boven de kritische druk",
+ riskSteamT:"Stoomeigenschappen",
+ riskSteam:"Het gas is ideaal met constante R en γ, en de viscositeit komt uit een screeningcorrelatie. Echte oververhitte stoom wijkt bij hoge druk enkele procenten van de ideale dichtheid af; natheid en condensatie zijn niet gemodelleerd.",
+ riskIsoT:"Isotherme aanname",
+ riskIso:"De temperatuur wordt over de hele lengte op de inlaatwaarde gehouden. Een leiding die warmte aan de omgeving verliest, wordt stroomafwaarts kouder en dichter, wat zowel de wrijvingsfactor als de kritische druk verschuift.",
+ riskMachT:"Samendrukbaarheidsbereik",
+ riskMach:"De relatie is eendimensionaal en isotherm. Boven uitlaat-Mach 0,3 verdienen de aannames controle, en boven 0,5 verwijst de eigen toepassingsnotitie van het gereedschap naar een volledige samendrukbare solver.",
+ mNote:"De weerstandsterm fL/D + ΣK is gelijkmatig over het getekende profiel verdeeld, zodat fittingverliezen over de lengte uitgesmeerd verschijnen in plaats van als trap bij elke fitting.",
+ rSteps:"stappen",rAtol:"lokale tolerantie",
+ axDist:"Afstand vanaf inlaat",axPress:"Statische druk",
+ rOutP:"Uitlaatdruk",rLoss:"Drukverlies",rLossPc:"Aandeel van de inlaatdruk",
+ rVel:"Uitlaatsnelheid",rMach:"Uitlaat-Machgetal",rCritP:"Isotherme kritische druk",
+ rInP:"Inlaatdruk",rTemp:"Stoomtemperatuur",rFlux:"Massaflux G",
+ rFric:"Wrijvingsfactor volgens Darcy",rRe:"Reynoldsgetal",
+ rRes:"Totale weerstand fL/D + ΣK",rResCrit:"Weerstand bij de kritische toestand",
+ rMargin:"Marge tot de kritische druk",rDens:"Uitlaatdichtheid",rDensIn:"Inlaatdichtheid",
+ rGrad:"Gemiddelde drukgradiënt",rRelRough:"Relatieve ruwheid",
+ rRegLam:"laminaire tak",rRegTurb:"turbulente tak",rOfCrit:"van de kritische weerstand",
+ flowInlet:"Inlaattoestand",flowPipe:"Leiding",flowOutlet:"Uitlaattoestand",
+ dGeom:"Boring en lengte",dGeomWhy:"De boring bepaalt de massaflux; met de lengte de wrijvingsweerstand fL/D.",
+ dRough:"Ruwheid",dRoughWhy:"De relatieve ruwheid legt de wrijvingsfactor vast zodra de stroming volledig turbulent is.",
+ dLocal:"Lokale verliezen",dLocalWhy:"Fittingen en afsluiters komen binnen als één opgetelde K, bij de wrijvingsweerstand geteld.",
+ dGas:"Gasmodel",dGasWhy:"R en γ bepalen de isotherme dichtheidsrelatie en de geluidssnelheid achter het Machgetal."},
+fr:{title:"Perte de charge vapeur — écoulement compressible isotherme en conduite",
+ summary:"Une conduite de {D} mm d'alésage et {L} m de longueur transporte {m} kg/s de vapeur surchauffée à {T} °C depuis {p1} bar. Le frottement (f = {f}) et les pertes singulières (ΣK = {K}) amènent l'aval à {p2} bar, soit une perte de {dp} bar. Le Mach aval vaut {M} pour une pression critique isotherme de {pc} bar.",
+ concOK:"La pression aval reste au-dessus de la pression critique isotherme, le débit demandé traverse donc la conduite avec la perte indiquée.",
+ concChoked:"Le débit demandé atteint la condition critique isotherme avant la sortie. La pression aval indiquée est la pression critique, et ce modèle ne soutient pas le débit demandé.",
+ system:"La vitesse massique découle du débit demandé et de l'alésage. La température est maintenue à sa valeur amont sur toute la longueur, la masse volumique ne suit donc que la pression. Frottement et pertes singulières sont sommés en un seul terme de résistance, et le bilan de quantité de mouvement intégré conserve l'accélération longitudinale née de la chute de masse volumique.",
+ figCap:"Pression statique le long de la conduite. La distance part de l'entrée; le terme de résistance est réparti uniformément sur la longueur.",
+ ckEq:"Résidu de l'équation fermée",
+ ckEqB:"La relation complète de gaz parfait isotherme permanent p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, évaluée à la pression aval indiquée et normalisée par p₁². C'est l'équation imprimée dans le pied de page de l'outil lui-même.",
+ ckEqNA:"La résistance demandée dépasse la plus grande que la relation admette, l'équation n'a donc pas de racine ici et aucun résidu n'est défini.",
+ ckRk4:"Pression aval face à une intégration RK4 directe",
+ ckRk4B:"Le même bilan sous forme différentielle, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), intégré depuis l'entrée par Runge-Kutta classique d'ordre quatre avec contrôle d'erreur locale par doublement de pas. Il partage l'équation et non la recherche de racine, ce qui teste la bissection de façon indépendante.",
+ ckRk4NA:"La dérivée croît sans borne là où la pression atteint la valeur critique; une marche en longueur n'atteint donc pas la sortie.",
+ ckEnd:"Profil tracé face à la sortie indiquée",
+ ckEndB:"Le dernier échantillon du profil tracé porte la résistance complète fL/D + ΣK, la valeur même à laquelle la pression aval indiquée est résolue. Figure et tableau doivent donc afficher un seul nombre.",
+ ckMono:"Pression monotone le long de la conduite",
+ ckMonoB:"Chacun des 81 points du profil est résolu par sa propre bissection. Le bilan de quantité de mouvement donne un gradient négatif partout où la pression dépasse la valeur critique, aucun point ne peut donc se placer au-dessus du précédent.",
+ ckMach:"Fermeture du Mach aval",
+ ckMachB:"Le Mach indiqué est construit à partir de la masse volumique et de la vitesse aval. Leur élimination donne M·p₂·√γ = G√(RT), soit la pression critique. Recalculer cette identité teste la voie masse volumique-vitesse face à la vitesse massique.",
+ ckReg:"Régime critique isotherme",
+ ckRegB:"Pression aval face à la pression critique isotherme p* = G√(RT), le critère de blocage énoncé dans les notes de modèle de l'outil. À p*, la résistance que la conduite peut absorber est maximale.",
+ rChoked:"à la pression critique",rSub:"au-dessus de la pression critique",
+ riskSteamT:"Propriétés de la vapeur",
+ riskSteam:"Le gaz est parfait à R et γ constants, et la viscosité vient d'une corrélation de dégrossissage. La vapeur surchauffée réelle s'écarte de la masse volumique idéale de quelques pour cent à haute pression; humidité et condensation ne sont pas modélisées.",
+ riskIsoT:"Hypothèse isotherme",
+ riskIso:"La température est maintenue à la valeur amont sur toute la longueur. Une conduite qui perd de la chaleur vers l'ambiance devient plus froide et plus dense vers l'aval, ce qui déplace le coefficient de frottement et la pression critique.",
+ riskMachT:"Domaine de compressibilité",
+ riskMach:"La relation est unidimensionnelle et isotherme. Au-dessus d'un Mach aval de 0,3 les hypothèses demandent vérification, et au-dessus de 0,5 la note de domaine de l'outil renvoie vers un solveur compressible complet.",
+ mNote:"Le terme de résistance fL/D + ΣK est réparti uniformément sur le profil tracé, les pertes singulières apparaissent donc étalées sur la longueur au lieu de marquer une marche à chaque accessoire.",
+ rSteps:"pas",rAtol:"tolérance locale",
+ axDist:"Distance depuis l'entrée",axPress:"Pression statique",
+ rOutP:"Pression aval",rLoss:"Perte de pression",rLossPc:"Part de la pression amont",
+ rVel:"Vitesse aval",rMach:"Mach aval",rCritP:"Pression critique isotherme",
+ rInP:"Pression amont",rTemp:"Température de la vapeur",rFlux:"Vitesse massique G",
+ rFric:"Coefficient de frottement de Darcy",rRe:"Nombre de Reynolds",
+ rRes:"Résistance totale fL/D + ΣK",rResCrit:"Résistance à la condition critique",
+ rMargin:"Marge jusqu'à la pression critique",rDens:"Masse volumique aval",rDensIn:"Masse volumique amont",
+ rGrad:"Gradient de pression moyen",rRelRough:"Rugosité relative",
+ rRegLam:"branche laminaire",rRegTurb:"branche turbulente",rOfCrit:"de la résistance critique",
+ flowInlet:"État amont",flowPipe:"Conduite",flowOutlet:"État aval",
+ dGeom:"Alésage et longueur",dGeomWhy:"L'alésage fixe la vitesse massique; avec la longueur, la résistance de frottement fL/D.",
+ dRough:"Rugosité",dRoughWhy:"La rugosité relative fixe le coefficient de frottement dès que l'écoulement est pleinement turbulent.",
+ dLocal:"Pertes singulières",dLocalWhy:"Accessoires et robinetterie entrent comme un K sommé unique, ajouté à la résistance de frottement.",
+ dGas:"Modèle de gaz",dGasWhy:"R et γ fixent la relation isotherme de masse volumique et la vitesse du son derrière le Mach."},
+es:{title:"Pérdida de presión en línea de vapor — flujo compresible isotermo",
+ summary:"Una línea de {D} mm de diámetro interior y {L} m de longitud transporta {m} kg/s de vapor sobrecalentado a {T} °C desde {p1} bar. La fricción (f = {f}) y las pérdidas locales (ΣK = {K}) llevan la salida a {p2} bar, una pérdida de {dp} bar. El Mach de salida es {M} frente a una presión crítica isoterma de {pc} bar.",
+ concOK:"La presión de salida se mantiene por encima de la presión crítica isoterma, de modo que el caudal solicitado recorre la línea con la pérdida indicada.",
+ concChoked:"El caudal solicitado alcanza la condición crítica isoterma antes de la salida. La presión de salida indicada es la presión crítica, y este modelo no sostiene el caudal solicitado.",
+ system:"La velocidad másica queda fijada por el caudal solicitado y el diámetro. La temperatura se mantiene en el valor de entrada a lo largo de la línea, por lo que la densidad depende solo de la presión. Fricción y pérdidas en accesorios se suman en un único término de resistencia, y el balance de cantidad de movimiento integrado conserva la aceleración longitudinal que produce la caída de densidad.",
+ figCap:"Presión estática a lo largo de la tubería. La distancia se mide desde la entrada; el término de resistencia se reparte uniformemente por la longitud.",
+ ckEq:"Residuo de la ecuación cerrada",
+ ckEqB:"La relación completa de gas ideal isotermo estacionario p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, evaluada en la presión de salida indicada y normalizada por p₁². Es la ecuación impresa en el pie de la propia herramienta.",
+ ckEqNA:"La resistencia solicitada supera la mayor que admite la relación, por lo que la ecuación no tiene raíz aquí y el residuo no está definido.",
+ ckRk4:"Presión de salida frente a integración RK4 directa",
+ ckRk4B:"El mismo balance en forma diferencial, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), integrado desde la entrada con Runge-Kutta clásico de cuarto orden y control de error local por duplicación de paso. Comparte la ecuación y no la búsqueda de raíz, por lo que prueba la bisección de forma independiente.",
+ ckRk4NA:"La derivada crece sin cota donde la presión alcanza el valor crítico, de modo que una marcha en longitud no llega a la salida.",
+ ckEnd:"Perfil trazado frente a la salida indicada",
+ ckEndB:"La última muestra del perfil trazado lleva la resistencia completa fL/D + ΣK, el mismo valor con el que se resuelve la presión de salida indicada. Figura y tabla deben mostrar por tanto un solo número.",
+ ckMono:"Presión monótona a lo largo de la tubería",
+ ckMonoB:"Cada uno de los 81 puntos del perfil se resuelve con su propia bisección. El balance de cantidad de movimiento da gradiente negativo dondequiera que la presión supere el valor crítico, así que ningún punto puede quedar por encima del anterior.",
+ ckMach:"Cierre del Mach de salida",
+ ckMachB:"El Mach indicado se forma con la densidad y la velocidad de salida. Al eliminar ambas resulta M·p₂·√γ = G√(RT), que es la presión crítica. Recalcular esa identidad prueba la vía densidad-velocidad frente a la velocidad másica.",
+ ckReg:"Régimen crítico isotermo",
+ ckRegB:"Presión de salida frente a la presión crítica isoterma p* = G√(RT), el criterio de bloqueo enunciado en las notas de modelo de la propia herramienta. En p* la resistencia que la línea puede absorber es máxima.",
+ rChoked:"en la presión crítica",rSub:"por encima de la presión crítica",
+ riskSteamT:"Propiedades del vapor",
+ riskSteam:"El gas es ideal con R y γ constantes, y la viscosidad procede de una correlación de cribado. El vapor sobrecalentado real se aparta de la densidad ideal en algunos por ciento a alta presión; humedad y condensación no se modelan.",
+ riskIsoT:"Hipótesis isoterma",
+ riskIso:"La temperatura se mantiene en el valor de entrada en toda la longitud. Una línea que pierde calor al ambiente queda más fría y más densa aguas abajo, lo que desplaza el factor de fricción y la presión crítica.",
+ riskMachT:"Rango de compresibilidad",
+ riskMach:"La relación es unidimensional e isoterma. Por encima de Mach 0,3 en la salida conviene revisar las hipótesis, y por encima de 0,5 la nota de alcance de la herramienta remite a un solver compresible completo.",
+ mNote:"El término de resistencia fL/D + ΣK se reparte uniformemente por el perfil trazado, de modo que las pérdidas en accesorios aparecen extendidas por la longitud en lugar de escalonarse en cada accesorio.",
+ rSteps:"pasos",rAtol:"tolerancia local",
+ axDist:"Distancia desde la entrada",axPress:"Presión estática",
+ rOutP:"Presión de salida",rLoss:"Pérdida de presión",rLossPc:"Fracción de la presión de entrada",
+ rVel:"Velocidad de salida",rMach:"Mach de salida",rCritP:"Presión crítica isoterma",
+ rInP:"Presión de entrada",rTemp:"Temperatura del vapor",rFlux:"Velocidad másica G",
+ rFric:"Factor de fricción de Darcy",rRe:"Número de Reynolds",
+ rRes:"Resistencia total fL/D + ΣK",rResCrit:"Resistencia en la condición crítica",
+ rMargin:"Margen hasta la presión crítica",rDens:"Densidad de salida",rDensIn:"Densidad de entrada",
+ rGrad:"Gradiente medio de presión",rRelRough:"Rugosidad relativa",
+ rRegLam:"rama laminar",rRegTurb:"rama turbulenta",rOfCrit:"de la resistencia crítica",
+ flowInlet:"Estado de entrada",flowPipe:"Tubería",flowOutlet:"Estado de salida",
+ dGeom:"Diámetro y longitud",dGeomWhy:"El diámetro fija la velocidad másica; con la longitud, la resistencia de fricción fL/D.",
+ dRough:"Rugosidad",dRoughWhy:"La rugosidad relativa fija el factor de fricción una vez el flujo es plenamente turbulento.",
+ dLocal:"Pérdidas locales",dLocalWhy:"Accesorios y válvulas entran como una K sumada única, añadida a la resistencia de fricción.",
+ dGas:"Modelo de gas",dGasWhy:"R y γ fijan la relación isoterma de densidad y la velocidad del sonido tras el número de Mach."},
+pl:{title:"Spadek ciśnienia w rurociągu pary — izotermiczny przepływ ściśliwy",
+ summary:"Rurociąg o średnicy {D} mm i długości {L} m prowadzi {m} kg/s pary przegrzanej o {T} °C od {p1} bar. Tarcie (f = {f}) i straty miejscowe (ΣK = {K}) sprowadzają wylot do {p2} bar, co daje stratę {dp} bar. Liczba Macha na wylocie wynosi {M} przy izotermicznym ciśnieniu krytycznym {pc} bar.",
+ concOK:"Ciśnienie wylotowe pozostaje powyżej izotermicznego ciśnienia krytycznego, więc żądany strumień masy przechodzi przez rurociąg ze wskazaną stratą.",
+ concChoked:"Żądany strumień masy osiąga izotermiczny warunek krytyczny przed wylotem. Podane ciśnienie wylotowe jest ciśnieniem krytycznym, a model ten nie przenosi zadanego strumienia.",
+ system:"Gęstość strumienia masy wynika z żądanego strumienia i średnicy. Temperaturę utrzymuje się na wartości wlotowej wzdłuż rurociągu, więc gęstość zależy wyłącznie od ciśnienia. Tarcie i straty na kształtkach sumują się w jeden człon oporu, a scałkowany bilans pędu zachowuje przyspieszenie wzdłużne wynikające ze spadku gęstości.",
+ figCap:"Ciśnienie statyczne wzdłuż rury. Odległość liczona od wlotu; człon oporu rozłożono równomiernie na długości.",
+ ckEq:"Residuum równania zamkniętego",
+ ckEqB:"Pełna ustalona izotermiczna relacja gazu doskonałego p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, obliczona przy podanym ciśnieniu wylotowym i unormowana przez p₁². To równanie wydrukowane w stopce samego narzędzia.",
+ ckEqNA:"Żądany opór przekracza największy dopuszczany przez tę relację, więc równanie nie ma tu pierwiastka i residuum nie jest zdefiniowane.",
+ ckRk4:"Ciśnienie wylotowe wobec bezpośredniego całkowania RK4",
+ ckRk4B:"Ten sam bilans w postaci różniczkowej, dp/dx = −(f/D + ΣK/L)·G²RT·p/(2(p² − G²RT)), całkowany od wlotu klasyczną metodą Runge-Kutty czwartego rzędu z kontrolą błędu lokalnego przez podwajanie kroku. Dzieli równanie i nie dzieli poszukiwania pierwiastka, więc sprawdza bisekcję niezależnie.",
+ ckRk4NA:"Pochodna rośnie nieograniczenie tam, gdzie ciśnienie osiąga wartość krytyczną, więc marsz po długości nie dociera do wylotu.",
+ ckEnd:"Wykreślony profil wobec podanego wylotu",
+ ckEndB:"Ostatnia próbka wykreślonego profilu niesie pełny opór fL/D + ΣK, tę samą wartość, dla której rozwiązywane jest podane ciśnienie wylotowe. Rysunek i tabela muszą więc pokazywać jedną liczbę.",
+ ckMono:"Monotoniczność ciśnienia wzdłuż rury",
+ ckMonoB:"Każdy z 81 punktów profilu rozwiązywany jest własną bisekcją. Bilans pędu daje ujemny gradient wszędzie tam, gdzie ciśnienie przewyższa wartość krytyczną, więc żaden punkt nie może leżeć powyżej poprzedniego.",
+ ckMach:"Domknięcie liczby Macha na wylocie",
+ ckMachB:"Podaną liczbę Macha tworzy się z gęstości i prędkości na wylocie. Eliminacja obu daje M·p₂·√γ = G√(RT), czyli ciśnienie krytyczne. Przeliczenie tej tożsamości sprawdza ścieżkę gęstości i prędkości wobec gęstości strumienia masy.",
+ ckReg:"Izotermiczny reżim krytyczny",
+ ckRegB:"Ciśnienie wylotowe wobec izotermicznego ciśnienia krytycznego p* = G√(RT), kryterium zadławienia podanego w notatkach modelu samego narzędzia. Przy p* opór, jaki rurociąg może pochłonąć, jest największy.",
+ rChoked:"na ciśnieniu krytycznym",rSub:"powyżej ciśnienia krytycznego",
+ riskSteamT:"Właściwości pary",
+ riskSteam:"Gaz jest doskonały o stałych R i γ, a lepkość pochodzi z korelacji przesiewowej. Rzeczywista para przegrzana odbiega od gęstości idealnej o kilka procent przy wysokim ciśnieniu; wilgotność i kondensacja nie są modelowane.",
+ riskIsoT:"Założenie izotermiczności",
+ riskIso:"Temperaturę utrzymuje się na wartości wlotowej na całej długości. Rurociąg tracący ciepło do otoczenia jest dalej chłodniejszy i gęstszy, co przesuwa zarówno współczynnik tarcia, jak i ciśnienie krytyczne.",
+ riskMachT:"Zakres ściśliwości",
+ riskMach:"Relacja jest jednowymiarowa i izotermiczna. Powyżej liczby Macha 0,3 na wylocie założenia wymagają sprawdzenia, a powyżej 0,5 własna nota zakresu narzędzia kieruje do pełnego solvera ściśliwego.",
+ mNote:"Człon oporu fL/D + ΣK rozłożono równomiernie na wykreślonym profilu, więc straty na kształtkach pojawiają się rozmyte po długości zamiast skokiem przy każdej kształtce.",
+ rSteps:"kroków",rAtol:"tolerancja lokalna",
+ axDist:"Odległość od wlotu",axPress:"Ciśnienie statyczne",
+ rOutP:"Ciśnienie wylotowe",rLoss:"Spadek ciśnienia",rLossPc:"Udział ciśnienia wlotowego",
+ rVel:"Prędkość na wylocie",rMach:"Liczba Macha na wylocie",rCritP:"Izotermiczne ciśnienie krytyczne",
+ rInP:"Ciśnienie wlotowe",rTemp:"Temperatura pary",rFlux:"Gęstość strumienia masy G",
+ rFric:"Współczynnik tarcia Darcy'ego",rRe:"Liczba Reynoldsa",
+ rRes:"Opór całkowity fL/D + ΣK",rResCrit:"Opór w warunku krytycznym",
+ rMargin:"Zapas do ciśnienia krytycznego",rDens:"Gęstość na wylocie",rDensIn:"Gęstość na wlocie",
+ rGrad:"Średni gradient ciśnienia",rRelRough:"Chropowatość względna",
+ rRegLam:"gałąź laminarna",rRegTurb:"gałąź turbulentna",rOfCrit:"oporu krytycznego",
+ flowInlet:"Stan wlotowy",flowPipe:"Rura",flowOutlet:"Stan wylotowy",
+ dGeom:"Średnica i długość",dGeomWhy:"Średnica ustala gęstość strumienia masy; wraz z długością opór tarcia fL/D.",
+ dRough:"Chropowatość",dRoughWhy:"Chropowatość względna ustala współczynnik tarcia, gdy przepływ jest w pełni turbulentny.",
+ dLocal:"Straty miejscowe",dLocalWhy:"Kształtki i armatura wchodzą jako jedno zsumowane K, dodane do oporu tarcia.",
+ dGas:"Model gazu",dGasWhy:"R i γ ustalają izotermiczną relację gęstości oraz prędkość dźwięku stojącą za liczbą Macha."}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '—';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+
+/* Verification computed live from the current state.
+   Two references are recomputed here. The first is the closed steady isothermal
+   ideal-gas relation the tool prints in its own footer, evaluated as a residual
+   at the reported outlet pressure. The second is a direct fourth-order
+   Runge-Kutta march of the same balance in differential form: it shares the
+   equation and not the bisection, so it tests the root-finding independently. */
+function dgcPipeTerms(s){
+  var A=Math.PI*s.D*s.D/4;
+  var mu=1.34e-5*Math.pow(s.T/373.15,0.72);
+  var Re=s.mdot*s.D/(A*mu);
+  var f=frictionFactor(Re,s.eps,s.D);
+  var G=s.mdot/A, C=G*G*s.R*s.T;
+  return {A:A,mu:mu,Re:Re,f:f,G:G,C:C,pc:Math.sqrt(C),q:f*s.L/s.D+s.K};
+}
+/* Direct RK4 on dp/dx = -(f/D + K/L) C p / (2 (p^2 - C)), which integrates to
+   the closed relation above. Step doubling controls the local error, because a
+   fixed partition cannot hold the recorded 1e-6 Pa tolerance where the gradient
+   steepens toward the critical pressure. */
+function dgcRk4Outlet(s,atol){
+  var t=dgcPipeTerms(s), c=t.f/s.D+s.K/s.L, C=t.C;
+  if(!(c>0)||!(C>0))return {p:s.p1,steps:0,ok:true};
+  var d=function(p){return -c*C*p/(2*(p*p-C));};
+  var step=function(p,h){var k1=d(p),k2=d(p+h*k1/2),k3=d(p+h*k2/2),k4=d(p+h*k3);
+    return p+h*(k1+2*k2+2*k3+k4)/6;};
+  var x=0,p=s.p1,h=s.L/1000,n=0,hmin=s.L*1e-12,ok=true;
+  while(x<s.L&&n<60000){
+    if(h>s.L-x)h=s.L-x;
+    var pa=step(p,h),pm=step(p,h/2),pb=step(pm,h/2);
+    if(!isFinite(pa)||!isFinite(pb)||pb<=t.pc){ok=false;break;}
+    var err=Math.abs(pb-pa)/15;
+    if(err<=atol||h<=hmin){p=pb+(pb-pa)/15;x+=h;n++;
+      h*=Math.min(2,Math.max(0.2,err>0?0.9*Math.pow(atol/err,0.2):2));}
+    else h*=Math.max(0.1,0.9*Math.pow(atol/err,0.25));
+  }
+  if(x<s.L)ok=false;
+  return {p:p,steps:n,ok:ok};
+}
+/* Returns one row per check: what was measured, what it was measured against,
+   the difference and the verdict. A row without a criterion is recorded as a
+   diagnostic and is excluded from the graded count. */
+function dgcVerify(s){
+  var out=[],r=solve(s),t=dgcPipeTerms(s),p2=r.p,choked=!!r.choked;
+
+  // 1. Closed-equation residual, normalised by p1^2. Only a subcritical case
+  //    has a root: above the critical resistance the relation admits none.
+  var F=s.p1*s.p1-p2*p2+2*t.C*Math.log(p2/s.p1)-t.q*t.C;
+  var relF=Math.abs(F)/(s.p1*s.p1);
+  out.push({id:'closed-equation-residual',key:'ckEq',
+    graded:!choked,
+    got:relF,ref:0,rel:relF,tol:1e-12,unit:'-',dp:6,
+    pass:relF<=1e-12,
+    status:choked?'info':(relF<=1e-12?'pass':'fail'),
+    extra:{q:t.q,qcrit:r.qcrit,choked:choked}});
+
+  // 2. Outlet pressure against the direct RK4 march of the same balance.
+  var rk=choked?null:dgcRk4Outlet(s,1e-9);
+  var dP=rk&&rk.ok?Math.abs(rk.p-p2):null;
+  out.push({id:'outlet-pressure-vs-rk4-momentum-integration',key:'ckRk4',
+    graded:!!(rk&&rk.ok),
+    got:rk&&rk.ok?rk.p:null,ref:p2,abs:dP,
+    rel:(dP!=null&&p2!==0)?dP/p2:null,tol:1e-6,unit:'Pa',dp:6,
+    pass:dP!=null&&dP<=1e-6,
+    status:(rk&&rk.ok)?(dP<=1e-6?'pass':'fail'):'info',
+    extra:rk?{steps:rk.steps,atol:1e-9}:null});
+
+  // 3. The plotted profile ends at the reported outlet pressure. The last
+  //    sample carries the full resistance, so the two must coincide.
+  var ys=(r.series&&r.series[0]&&r.series[0].y)||[];
+  var pEnd=ys.length?ys[ys.length-1]*1e5:null;
+  var relE=(pEnd!=null&&p2!==0)?Math.abs(pEnd-p2)/Math.abs(p2):null;
+  out.push({id:'profile-endpoint-vs-reported-outlet',key:'ckEnd',
+    graded:true,
+    got:pEnd,ref:p2,abs:pEnd!=null?Math.abs(pEnd-p2):null,rel:relE,
+    tol:1e-12,unit:'Pa',dp:6,
+    pass:relE!=null&&relE<=1e-12,
+    status:(relE!=null&&relE<=1e-12)?'pass':'fail'});
+
+  // 4. Every profile sample is solved by its own bisection. The differential
+  //    balance is negative above the critical pressure, so the samples must
+  //    never rise along the pipe.
+  var maxInc=-Infinity,idxInc=-1;
+  for(var i=1;i<ys.length;i++){var dI=(ys[i]-ys[i-1])*1e5;if(dI>maxInc){maxInc=dI;idxInc=i;}}
+  if(!isFinite(maxInc))maxInc=0;
+  out.push({id:'profile-monotonicity',key:'ckMono',
+    graded:true,
+    got:maxInc,ref:0,abs:maxInc,rel:null,tol:0,unit:'Pa',dp:6,
+    pass:maxInc<=0,status:maxInc<=0?'pass':'fail',
+    extra:{samples:ys.length,at:idxInc}});
+
+  // 5. Mach closure. M is built from outlet density and velocity; eliminating
+  //    both leaves M p2 sqrt(gamma) = G sqrt(R T), the critical pressure.
+  var lhs=r.M*p2*Math.sqrt(s.gamma);
+  var relM=t.pc!==0?Math.abs(lhs-t.pc)/t.pc:null;
+  out.push({id:'outlet-mach-closure',key:'ckMach',
+    graded:true,
+    got:lhs,ref:t.pc,abs:Math.abs(lhs-t.pc),rel:relM,
+    tol:1e-12,unit:'Pa',dp:6,
+    pass:relM!=null&&relM<=1e-12,
+    status:(relM!=null&&relM<=1e-12)?'pass':'fail'});
+
+  // 6. Where the outlet state sits against the isothermal critical pressure.
+  //    This reports the regime of the solved case and carries no criterion.
+  var margin=t.pc!==0?p2/t.pc:null;
+  out.push({id:'isothermal-critical-regime',key:'ckReg',
+    graded:false,
+    got:p2,ref:t.pc,rel:null,unit:'Pa',dp:0,
+    pass:!choked,status:choked?'attention':'info',
+    word:choked?'rChoked':'rSub',
+    extra:{margin:margin,q:t.q,qcrit:r.qcrit,mach:r.M}});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption, no axis title and no unit. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+/* One series: static pressure against distance from the inlet. The x axis of
+   this tool is a length, so it is labelled as one. */
+function dgcPlotSpec(){
+  if(!last||!last.series||!last.series.length)return null;
+  var s0=last.series[0];
+  if(!s0||!s0.x||!s0.x.length)return null;
+  return {x:{label:dgcRt('axDist'),unit:'m'},
+    series:[{x:s0.x,y:s0.y,label:dgcRt('axPress'),unit:'bar',color:'#1f6feb'}]};
+}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{}, o=rec.outputs||{}, u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var n=dgcNum, ex=function(v,d){return (v==null||!isFinite(v))?'—':Number(v).toExponential(d);};
+  var t=dgcPipeTerms(i);
+  var rho1=i.p1/(i.R*i.T), v2=o.rho_out>0?i.mdot/(o.rho_out*t.A):NaN;
+  var lossPct=i.p1>0?100*o.dp/i.p1:NaN;
+  var choked=!!last.choked;
+
+  var summary=dgcRt('summary')
+    .replace('{D}',n(i.D*1000,1)).replace('{L}',n(i.L,1)).replace('{m}',n(i.mdot,3))
+    .replace('{T}',n(i.T-273.15,1)).replace('{p1}',n(i.p1/1e5,3))
+    .replace('{f}',n(o.f_darcy,5)).replace('{K}',n(i.K,2))
+    .replace('{p2}',n(o.p_out/1e5,3)).replace('{dp}',n(o.dp/1e5,3))
+    .replace('{M}',n(o.M_out,3)).replace('{pc}',n(t.pc/1e5,3));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcRt('rOutP'),n(o.p_out/1e5,3),'bar'),
+    row(dgcRt('rLoss'),n(o.dp/1e5,3),'bar'),
+    row(dgcRt('rLossPc'),n(lossPct,2),'%'),
+    row(dgcRt('rVel'),n(v2,1),'m/s'),
+    row(dgcRt('rMach'),n(o.M_out,3),'-'),
+    row(dgcRt('rCritP'),n(t.pc/1e5,3),'bar')
+  ];
+  var results=tiles.concat([
+    row(dgcRt('rInP'),n(i.p1/1e5,3),'bar'),
+    row(dgcRt('rTemp'),n(i.T-273.15,1),'°C',n(i.T,2)+' K'),
+    row(dgcRt('rFlux'),n(t.G,2),'kg/(m²·s)'),
+    row(dgcRt('rRe'),n(o.Re,0),'-',o.Re<2300?dgcRt('rRegLam'):dgcRt('rRegTurb')),
+    row(dgcRt('rFric'),n(o.f_darcy,5),'-'),
+    row(dgcRt('rRelRough'),ex(i.D>0?i.eps/i.D:NaN,2),'-'),
+    row(dgcRt('rRes'),n(t.q,3),'-',n(o.f_darcy*i.L/i.D,3)+' + '+n(i.K,2)),
+    row(dgcRt('rResCrit'),n(last.qcrit,3),'-',
+        (last.qcrit>0?n(100*t.q/last.qcrit,1):'—')+' % '+dgcRt('rOfCrit')),
+    row(dgcRt('rMargin'),t.pc>0?n(o.p_out/t.pc,3):'—','-'),
+    row(dgcRt('rDens'),n(o.rho_out,3),'kg/m³',dgcRt('rDensIn')+': '+n(rho1,3)+' kg/m³'),
+    row(dgcRt('rGrad'),i.L>0?n(100*o.dp/i.L/1e5,4):'—','bar/100 m')
+  ]);
+
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'fail');
+    var actual='—',criterion='—',note='';
+    if(c.key==='ckEq'){
+      if(c.graded){actual='|F| / p₁² = '+ex(c.rel,2);criterion='≤ 1·10⁻¹²';}
+      else {actual='q = '+n(c.extra.q,3)+' ≥ q* = '+n(c.extra.qcrit,3);note=dgcRt('ckEqNA');}
+    } else if(c.key==='ckRk4'){
+      if(c.graded){actual='|Δp| = '+ex(c.abs,2)+' Pa';criterion='≤ 1·10⁻⁶ Pa';
+        note='RK4 '+n(c.got,6)+' Pa · '+c.extra.steps+' '+dgcRt('rSteps')+' · '+dgcRt('rAtol')+' 1·10⁻⁹ Pa';}
+      else {actual=n(c.ref/1e5,3)+' bar';note=dgcRt('ckRk4NA');}
+    } else if(c.key==='ckEnd'){
+      actual='|Δp| = '+ex(c.abs,2)+' Pa';criterion='≤ 1·10⁻¹² · p₂';
+    } else if(c.key==='ckMono'){
+      actual=ex(c.got,2)+' Pa';criterion='≤ 0 Pa, '+c.extra.samples+' samples';
+    } else if(c.key==='ckMach'){
+      actual='|Δ| / p* = '+ex(c.rel,2);criterion='≤ 1·10⁻¹²';
+    } else {
+      actual=n(c.got/1e5,3)+' bar ('+dgcRt(c.word)+')';
+      criterion='p* = '+n(c.ref/1e5,3)+' bar';
+      note='p₂/p* = '+(c.extra.margin!=null?n(c.extra.margin,3):'—')+
+           ' · q/q* = '+(c.extra.qcrit>0?n(c.extra.q/c.extra.qcrit,3):'—');
+    }
+    return {status:st,title:dgcRt(c.key),actual:actual,criterion:criterion,
+            basis:dgcRt(c.key+'B'),detail:note};
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckReg'),detail:w});});
+
+  var decisions=[
+    row(dgcRt('dGeom'),n(i.D*1000,1)+' mm · '+n(i.L,1)+' m','',dgcRt('dGeomWhy')),
+    row(dgcRt('dRough'),n(i.eps*1000,3)+' mm','',dgcRt('dRoughWhy')),
+    row(dgcRt('dLocal'),'ΣK = '+n(i.K,2),'',dgcRt('dLocalWhy')),
+    row(dgcRt('dGas'),n(i.R,2)+' J/(kg·K) · γ '+n(i.gamma,3),'',dgcRt('dGasWhy'))
+  ];
+
+  var gSteam='1 · '+dgcRt('flowInlet'), gPipe='2 · '+dgcRt('flowPipe');
+  var inputs=[
+    {label:ctx.label('p1',u.p1),value:n(i.p1/1e5,3),unit:'bar',group:gSteam},
+    {label:ctx.label('T',u.T),value:n(i.T-273.15,2),unit:'°C',group:gSteam},
+    {label:ctx.label('mdot',u.mdot),value:n(i.mdot,3),unit:'kg/s',group:gSteam},
+    {label:ctx.label('D',u.D),value:n(i.D*1000,2),unit:'mm',group:gPipe},
+    {label:ctx.label('L',u.L),value:n(i.L,2),unit:'m',group:gPipe},
+    {label:ctx.label('eps',u.eps),value:n(i.eps*1000,4),unit:'mm',group:gPipe},
+    {label:ctx.label('K',u.K),value:n(i.K,2),unit:'-',group:gPipe},
+    {label:ctx.label('R',u.R),value:n(i.R,2),unit:'J/(kg·K)',group:gPipe},
+    {label:ctx.label('gamma',u.gamma),value:n(i.gamma,3),unit:'-',group:gPipe}
+  ];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,
+      conclusion:choked?dgcRt('concChoked'):dgcRt('concOK')},
+    system:{text:dgcRt('system'),
+      flow:[{label:dgcRt('flowInlet'),detail:n(i.p1/1e5,2)+' bar / '+n(i.T-273.15,1)+' °C · '+n(i.mdot,3)+' kg/s'},
+            {label:dgcRt('flowPipe'),detail:'DN '+n(i.D*1000,0)+' · '+n(i.L,1)+' m · ΣK '+n(i.K,2)},
+            {label:dgcRt('flowOutlet'),detail:n(o.p_out/1e5,3)+' bar · Ma '+n(o.M_out,3)}]},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskSteamT'),detail:dgcRt('riskSteam')},
+           {status:'attention',title:dgcRt('riskIsoT'),detail:dgcRt('riskIso')},
+           {status:'attention',title:dgcRt('riskMachT'),detail:dgcRt('riskMach')}],
+    method:{
+      equations:['p₁² − p₂² + 2 G²RT ln(p₂/p₁) = (f L/D + ΣK) G²RT,  G = ṁ/A',
+        'dp/dx = −(f/D + ΣK/L) G²RT p / (2 (p² − G²RT))',
+        'p* = G √(R T)',
+        'Re = ṁ D / (A μ);  f = 64/Re (Re < 2300), Swamee-Jain otherwise',
+        'ρ = p / (R T);  M = ṁ / (ρ A √(γ R T))'],
+      ranges:['dry superheated steam treated as an ideal gas',
+        'isothermal steady one-dimensional flow',
+        'requested mass flow below the isothermal critical-flow limit'],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Scenarios the published benchmark covers. They live here rather than in a
+   separate harness so the artifact is defined by the tool it describes. */
+var DGC_BENCH_CASES=[
+ {id:'default-baseline',note:'Shipped default: 2 kg/s of 300 °C steam through DN100, 50 m, ΣK 4',
+  s:{p1:2000000,T:573.15,mdot:2,D:0.1,L:50,eps:4.5e-5,K:4,R:461.526,gamma:1.3}},
+ {id:'low-flow-square-law-limit',note:'Low flow (0.05 kg/s): loss is a small fraction of inlet pressure and the relation approaches its p² limit',
+  s:{p1:2000000,T:573.15,mdot:0.05,D:0.1,L:50,eps:4.5e-5,K:4,R:461.526,gamma:1.3}},
+ {id:'local-loss-dominated',note:'ΣK = 60 against fL/D = 15.9 on a rough DN150 line',
+  s:{p1:1200000,T:523.15,mdot:3,D:0.15,L:120,eps:1.5e-4,K:60,R:461.526,gamma:1.3}},
+ {id:'near-critical-margin',note:'Outlet at 1.27 × the isothermal critical pressure, outlet Mach 0.69',
+  s:{p1:2000000,T:573.15,mdot:7.6,D:0.1,L:50,eps:4.5e-5,K:4,R:461.526,gamma:1.3}},
+ {id:'laminar-branch-smooth-bore',note:'Re 1335: friction on the 64/Re branch, ΣK 0, smooth bore',
+  s:{p1:400000,T:473.15,mdot:0.005,D:0.3,L:20,eps:0,K:0,R:461.526,gamma:1.3}},
+ {id:'above-isothermal-critical-limit',note:'Requested flow above the critical limit: the solver clamps the outlet to p*',
+  s:{p1:2000000,T:573.15,mdot:12,D:0.1,L:50,eps:4.5e-5,K:4,R:461.526,gamma:1.3}}
+];
+/* Rebuilds the in-page self-check record. Open the tool and call
+   window.__dgcBenchmark() to reproduce the self-check half of
+   benchmarks/steam_pipe_pressure_loss.json; the independent half of that artifact
+   is produced outside the page by gen_steam_pipe_pressure_loss.py. */
+function dgcBenchmark(scenarios){
+  var list=scenarios||DGC_BENCH_CASES, cases=[], total=0, passed=0, flagged=0;
+  list.forEach(function(sc){
+    var v=dgcVerify(sc.s);
+    var cmp=v.map(function(c){
+      if(c.graded){total++; if(c.pass)passed++;}
+      else if(c.status==='attention')flagged++;
+      return {check:c.id,
+        got:(c.got===undefined?null:c.got),
+        ref:(c.ref===undefined?null:c.ref),
+        abs:(c.abs===undefined?null:c.abs),
+        rel:(c.rel===undefined?null:c.rel),
+        tol:(c.tol===undefined?null:c.tol),
+        unit:c.unit,extra:c.extra||null,
+        graded:!!c.graded,
+        status:c.status||(c.pass?'pass':'fail'),ok:c.graded?!!c.pass:null};
+    });
+    cases.push({id:sc.id,note:sc.note,inputs:sc.s,cmp:cmp,
+      pass:cmp.every(function(x){return !x.graded||x.ok;})});
+  });
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var pick=function(id,chk){var c=cases.filter(function(x){return x.id===id;})[0];
+    if(!c)return null;return c.cmp.filter(function(x){return x.check===chk;})[0]||null;};
+  var ex=function(x,n){return (x==null||!isFinite(x))?'—':Number(x).toExponential(n);};
+  var e0=pick('default-baseline','closed-equation-residual');
+  var r0=pick('default-baseline','outlet-pressure-vs-rk4-momentum-integration');
+  var rn=pick('near-critical-margin','outlet-pressure-vs-rk4-momentum-integration');
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'steam-pipe-pressure-loss',file:'steam_pipe_pressure_loss.html',manifest_revision:rev,
+    reference:'The complete steady isothermal ideal-gas pipe-flow relation p1^2 - p2^2 + 2 G^2 R T ln(p2/p1) = (f L/D + K) G^2 R T, evaluated as a residual at the reported outlet pressure, together with an independent direct RK4 integration of the same balance in differential form, dp/dx = -(f/D + K/L) G^2 R T p / (2 (p^2 - G^2 R T)). Every figure recorded here is recomputed in the page.',
+    reference_citations:[
+      'Closed relation as printed in the footer of steam_pipe_pressure_loss.html and listed in its record model.equations.',
+      'The RK4 march shares that relation but not the bisection the tool uses to invert it, so it tests the root-finding independently. Step doubling holds the local error at 1e-9 Pa.'],
+    reference_provenance:'recomputed in page',
+    tolerance:'Closed-equation relative residual <= 1e-12; outlet pressure against the independent RK4 <= 1e-6 Pa; plotted-profile endpoint and Mach closure to 1e-12 relative; no profile sample above the sample before it. Observed on the shipped default: residual '+ex(e0&&e0.rel,3)+', RK4 gap '+ex(r0&&r0.abs,3)+' Pa; on the near-critical case the RK4 gap is '+ex(rn&&rn.abs,3)+' Pa.',
+    run_at:new Date().toISOString().replace(/\.\d+Z$/,'Z'),
+    total:total,passed:passed,failed:total-passed,flagged:flagged,page_errors:[],
+    grading:'total counts checks with an acceptance criterion. The isothermal critical regime reports the state of the solved case and carries no criterion, so it is recorded with its status and excluded from the count. Above the critical limit the closed relation has no root and the RK4 march does not reach the outlet; both are recorded as diagnostics for that case.',
+    cases:cases,
+    not_benchmarked:[
+      'Real-steam thermophysical properties, wetness and condensation; the state relation is ideal-gas throughout.',
+      'Non-isothermal operation: heat loss to the surroundings and the temperature profile it produces.',
+      'The steam viscosity correlation itself, which is used only to place the friction factor.',
+      'The upstream p/rho handoff round-trip recorded in the 2026-09-04 artifact, which exercises the page handoff API rather than the solver and is not re-run here.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page.'],
+    notes:[
+      'Each case runs the shipped solver and both references inside the page. Inputs, measured value, reference value and tolerance are recorded per check, so any verdict can be reproduced by calling window.__dgcBenchmark() on the tool.',
+      'A fixed-step RK4 does not hold the 1e-6 Pa tolerance near the critical pressure: on the near-critical case a 800-step partition leaves 4.1e-3 Pa. The march therefore controls its local error by step doubling at 1e-9 Pa.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"state\"]'},{topic:'t3',focus:'[data-dgu-panel=\"pipe\"]'},{topic:'t4',focus:'[data-dgu-panel=\"io\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"D":0.15,"L":20,"K":2});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"D":0.08,"L":50,"K":4,"mdot":4});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"D":0.1,"L":200,"K":4});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"D":0.1,"L":10,"K":40});}}];
+
+
+function frictionFactor(Re,eps,D){if(Re<=0)return 0;if(Re<2300)return 64/Re;var a=eps/(3.7*D)+5.74/Math.pow(Re,0.9);return 0.25/Math.pow(Math.log10(a),2);}
+
+function pressureForResistance(p1,C,q){
+  if(C<=0||q<=0)return {p:p1,choked:false};
+  var pc=Math.sqrt(C), qcrit=(p1*p1-C+2*C*Math.log(pc/p1))/C;
+  if(!(p1>pc)||q>=qcrit)return {p:Math.min(p1,pc),choked:true,qcrit:qcrit};
+  var lo=pc,hi=p1;
+  for(var n=0;n<80;n++){
+    var mid=.5*(lo+hi),res=(p1*p1-mid*mid+2*C*Math.log(mid/p1))/C;
+    if(res>q)lo=mid;else hi=mid;
+  }
+  return {p:.5*(lo+hi),choked:false,qcrit:qcrit};
+}
+function solve(s){
+  var A=Math.PI*s.D*s.D/4,mu=1.34e-5*Math.pow(s.T/373.15,.72),Re=s.mdot*s.D/(A*mu),f=frictionFactor(Re,s.eps,s.D),G=s.mdot/A,C=G*G*s.R*s.T,q=f*s.L/s.D+s.K,pr=pressureForResistance(s.p1,C,q),p2=pr.p,dp=s.p1-p2,rho2=p2/(s.R*s.T),v2=s.mdot/(rho2*A),a=Math.sqrt(s.gamma*s.R*s.T),M=v2/a,x=[],y=[];
+  for(var i=0;i<=80;i++){var xx=s.L*i/80,qi=f*xx/s.D+s.K*i/80,pi=pressureForResistance(s.p1,C,qi).p;x.push(xx);y.push(pi/1e5);}
+  var warnings=[];
+  if(pr.choked)warnings.push('The requested mass flow reaches the isothermal critical condition before the outlet; the specified flow cannot be sustained by this model.');
+  if(M>.5)warnings.push('Outlet Mach exceeds 0.5; use a full compressible-flow or real-steam model.');else if(M>.3)warnings.push('Outlet Mach exceeds 0.3; ideal-gas/isothermal assumptions should be checked carefully.');
+  return {p:p2,dp:dp,rho:rho2,Re:Re,f:f,M:M,mdot:s.mdot,choked:pr.choked,qcrit:pr.qcrit,series:[{x:x,y:y}],a11y:'Steam pipe pressure profile.',warnings:warnings,notes:['Darcy friction factor = '+f.toPrecision(4)+', Reynolds = '+Re.toPrecision(4)+'.','Momentum equation includes the streamwise acceleration term; isothermal critical pressure is p*=G sqrt(RT).']};
+}
+
+function degrade(){
+  document.title="Steam Pipe Pressure Loss";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Steam Pipe Pressure Loss";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"steam-pipe-pressure-loss",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · compressible steam-line pressure loss","Pipe / Vessel Transients · стисливі втрати в паропроводі","Pipe / Vessel Transients · kompressibler Dampfleitungs-Druckverlust","Pipe / Vessel Transients · compressibel drukverlies in stoomleiding","Pipe / Vessel Transients · perte de charge vapeur compressible","Pipe / Vessel Transients · pérdida compresible en línea de vapor","Pipe / Vessel Transients · ściśliwy spadek ciśnienia pary"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Low-to-moderate Mach, dry superheated steam screen. If outlet Mach approaches 0.3–0.5, move to Gas Dynamics Laboratory or a real-steam solver.","Скринінг сухої перегрітої пари при малому/помірному числі Маха. Коли число Маха на виході наближається до 0,3–0,5, переходьте до Gas Dynamics Laboratory або розрахунку з властивостями реальної пари.","Screening für trockenen überhitzten Dampf bei kleiner bis mittlerer Machzahl. Bei Austritts-Mach 0,3–0,5 Gas Dynamics Laboratory oder Real-Dampf-Solver verwenden.","Screening voor droge oververhitte stoom bij lage tot matige Mach. Bij uitlaat-Mach 0,3–0,5 naar Gas Dynamics Laboratory of een echte-stoomsolver.","Écran pour vapeur sèche surchauffée à Mach faible/modéré. Si Mach aval approche 0,3–0,5, utiliser Gas Dynamics Laboratory ou un solveur vapeur réelle.","Cribado para vapor seco sobrecalentado a Mach bajo/moderado. Si Mach de salida se acerca a 0,3–0,5, use Gas Dynamics Laboratory o un solver de vapor real.","Przesiew dla suchej pary przegrzanej przy małym/umiarkowanym Machu. Gdy Mach na wylocie zbliża się do 0,3–0,5, użyj Gas Dynamics Laboratory lub solvera pary rzeczywistej.")}],
+    panels:[{id:"state",slot:'inputs',learn:'t1',title:T("Steam state","Стан пари","Dampfzustand","Stoomtoestand","État vapeur","Estado del vapor","Stan pary"),fields:[{id:'f-p1',key:'p1',label:LBL.p1,type:'number',unit:"Pa",display:"bar",min:LIM.p1.lo,max:LIM.p1.hi},{id:'f-T',key:'T',label:LBL.T,type:'number',unit:"K",display:"degC",min:LIM.T.lo,max:LIM.T.hi},{id:'f-mdot',key:'mdot',label:LBL.mdot,type:'number',unit:"kg/s",min:LIM.mdot.lo,max:LIM.mdot.hi}]},{id:"pipe",slot:'inputs',learn:'t2',title:T("Pipe","Труба","Rohr","Leiding","Conduite","Tubería","Rura"),fields:[{id:'f-D',key:'D',label:LBL.D,type:'number',unit:"m",display:"mm",min:LIM.D.lo,max:LIM.D.hi},{id:'f-L',key:'L',label:LBL.L,type:'number',unit:"m",min:LIM.L.lo,max:LIM.L.hi},{id:'f-eps',key:'eps',label:T("Absolute roughness","Абсолютна шорсткість","Absolute Rauheit","Absolute ruwheid","Rugosité absolue","Rugosidad absoluta","Chropowatość bezwzględna"),type:'number',unit:"m",display:"mm",min:LIM.eps.lo,max:LIM.eps.hi},{id:'f-K',key:'K',label:T("Sum of local K","Сума місцевих K","Summe Einzel-K","Som lokale K","Somme des K singuliers","Suma de K locales","Suma lokalnych K"),type:'number',min:LIM.K.lo,max:LIM.K.hi},{id:'f-R',key:'R',label:T("Steam gas constant R","Газова стала пари R","Dampf-Gaskonstante R","Gasconstante stoom R","Constante gaz vapeur R","Constante de gas del vapor R","Stała gazowa pary R"),type:'number',unit:"J/(kg·K)",min:LIM.R.lo,max:LIM.R.hi},{id:'f-gamma',key:'gamma',label:T("Heat-capacity ratio γ","Показник γ","Isentropenexponent γ","Verhouding γ","Rapport γ","Relación γ","Wykładnik γ"),type:'number',min:LIM.gamma.lo,max:LIM.gamma.hi,step:0.01,precision:3}]}],
+    footer:T("p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Viscosity is a simple steam screening correlation; f is Darcy.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. В’язкість задається спрощеною кореляцією для пари; f — коефіцієнт Дарсі.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Viskosität über vereinfachte Dampfkorrelation; f ist Darcy.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Viscositeit via eenvoudige stoomcorrelatie; f is Darcy.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Viscosité par corrélation vapeur simplifiée; f de Darcy.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Viscosidad por correlación simple de vapor; f de Darcy.","p₁² − p₂² + 2G²RT ln(p₂/p₁) = (fL/D + ΣK)G²RT, G=ṁ/A. Lepkość z uproszczonej korelacji pary; f Darcy’ego."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Outlet pressure","Тиск на виході","Austrittsdruck","Uitlaatdruk","Pression aval","Presión de salida","Ciśnienie wylotowe"),value:last.p/1e5,hint:"bar",precision:3},{label:T("Pressure loss","Втрата тиску","Druckverlust","Drukverlies","Perte de pression","Pérdida de presión","Spadek ciśnienia"),value:last.dp/1e5,hint:"bar",precision:3},{label:T("Darcy friction factor f","Коефіцієнт Дарсі f","Darcy-Reibungsbeiwert f","Darcy-wrijvingsfactor f","Coefficient de frottement de Darcy f","Factor de fricción de Darcy f","Współczynnik tarcia Darcy’ego f"),value:last.f,hint:"—",precision:4},{label:T("Reynolds number","Число Рейнольдса","Reynolds-Zahl","Reynoldsgetal","Nombre de Reynolds","Número de Reynolds","Liczba Reynoldsa"),value:last.Re,hint:"—",precision:0},{label:T("Outlet Mach","Mach на виході","Austritts-Mach","Uitlaat-Mach","Mach aval","Mach de salida","Mach na wylocie"),value:last.M,hint:"—",precision:3,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Pressure profile along the pipe","Профіль тиску вздовж труби","Druckprofil entlang des Rohres","Drukprofiel langs de leiding","Profil de pression le long de la conduite","Perfil de presión a lo largo de la tubería","Profil ciśnienia wzdłuż rury"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+/* ---- incoming SI handoff: one range check per accepted quantity -------------
+   A quantity that arrives over the handoff is a reading taken somewhere else. A
+   pressure named p may be a barometric reading, a pump suction pressure or a
+   contained line pressure, and the name alone does not say which (AGENTS.md
+   2.4, 2.7). Each accepted quantity is therefore applied only inside LIM, the
+   same lo/hi the typed field enforces: a typed value outside the bound is moved
+   to it and announced by the framework, an arriving value outside the bound is
+   refused and nothing is written for it.
+   The refused name is kept out of the `ignored` array, because the framework
+   renders that array as "this tool does not use them" and the tool does use
+   these quantities; the refusal sentence below carries the reason instead. */
+var HO_MAP={T:'T',p:'p1',mdot:'mdot',D:'D',L:'L'};
+var HO_OUT=T(
+ "{q} = {v} {u} from {f} is outside {lo}–{hi} {u}, the range this tool applies to “{field}”; that input is unchanged.",
+ "{q} = {v} {u} від {f} лежить поза діапазоном {lo}–{hi} {u}, який цей інструмент застосовує до «{field}»; це поле не змінено.",
+ "{q} = {v} {u} von {f} liegt außerhalb von {lo}–{hi} {u}, dem Bereich, den dieses Werkzeug auf „{field}“ anwendet; dieses Eingabefeld bleibt unverändert.",
+ "{q} = {v} {u} van {f} valt buiten {lo}–{hi} {u}, het bereik dat deze tool op „{field}” toepast; dat invoerveld blijft ongewijzigd.",
+ "{q} = {v} {u} venant de {f} se situe hors de {lo}–{hi} {u}, la plage que cet outil applique à « {field} » ; ce champ reste inchangé.",
+ "{q} = {v} {u} procedente de {f} queda fuera de {lo}–{hi} {u}, el rango que esta herramienta aplica a «{field}»; ese campo no cambia.",
+ "{q} = {v} {u} z {f} leży poza zakresem {lo}–{hi} {u}, który to narzędzie stosuje do „{field}”; to pole pozostaje bez zmian.");
+/* A figure in the reader's locale. Above 1e4 and below 1e-2 the mantissa and the
+   decimal exponent are printed, so a 200 MPa bound stays one short token. */
+function hoFig(v){
+ if(!isFinite(v))return '—';
+ if(v===0)return '0';
+ var a=Math.abs(v);
+ if(a<0.01||a>=1e4){var e=Math.floor(Math.log(a)/Math.LN10);
+  return dgcNum(v/Math.pow(10,e),2)+'e'+(e<0?'':'+')+e;}
+ return dgcNum(v,a>=100?1:(a>=1?2:4));
+}
+function hoApply(pl){
+ var q=(pl&&pl.quantities)||{},from=(pl&&pl.from&&pl.from.tool)||'—',
+     acc=[],ign=[],lang=dgcLang();
+ Object.keys(q).forEach(function(n){
+  var key=HO_MAP[n];
+  if(!key){ign.push(n);return;}
+  var lim=LIM[key],v=Number(q[n]&&q[n].value);
+  if(!isFinite(v)||v<lim.lo||v>lim.hi){
+   var msg=(HO_OUT[lang]||HO_OUT.en)
+    .split('{q}').join(n)
+    .split('{v}').join(hoFig(v))
+    .split('{lo}').join(hoFig(lim.lo))
+    .split('{hi}').join(hoFig(lim.hi))
+    .split('{u}').join(lim.u)
+    .split('{f}').join(from)
+    .split('{field}').join((LBL[key]&&(LBL[key][lang]||LBL[key].en))||key);
+   try{if(window.Diagram&&Diagram.notify)Diagram.notify(msg,'warn');}catch(e){}
+   return;
+  }
+  state[key]=v;acc.push(n);
+ });
+ last=solve(state);if(ui){ui.sync();ui.run();}
+ return {accepted:acc,ignored:ign};
+}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"steam-pipe-pressure-loss",file:"steam_pipe_pressure_loss.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"p1":state["p1"],"T":state["T"],"mdot":state["mdot"],"D":state["D"],"L":state["L"],"eps":state["eps"],"K":state["K"],"R":state["R"],"gamma":state["gamma"]},outputs:{"p_out":last.p,"dp":last.dp,"rho_out":last.rho,"Re":last.Re,"f_darcy":last.f,"M_out":last.M},units:{"p1":"Pa","T":"K","mdot":"kg/s","D":"m","L":"m","eps":"m","K":"-","R":"J/(kg K)","gamma":"-","p_out":"Pa","dp":"Pa","rho_out":"kg/m3","Re":"-","f_darcy":"-","M_out":"-"},model:{equations:["p1^2 - p2^2 + 2 G^2 R T ln(p2/p1) = (f L/D + K) G^2 R T", "G = mdot/A; p_critical = G sqrt(R T)", "Re = mdot D / (A mu)", "f = 64/Re (laminar) or Swamee-Jain (turbulent)"],ranges:["dry superheated steam treated as ideal gas", "isothermal steady one-dimensional flow", "specified mdot must remain below the isothermal critical-flow limit"],notes:["streamwise acceleration is retained in the integrated momentum equation", "steam viscosity correlation is approximate and used only for friction screening"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef friction_factor(Re, eps, D):\n    if Re<=0: return 0.0\n    if Re<2300: return 64/Re\n    a=eps/(3.7*D)+5.74/(Re**0.9)\n    return 0.25/(math.log10(a)**2)\n\ndef pressure_for_resistance(p1, C, q):\n    if C<=0 or q<=0: return p1, False\n    pc=math.sqrt(C)\n    qcrit=(p1*p1-C+2*C*math.log(pc/p1))/C\n    if p1<=pc or q>=qcrit: return min(p1,pc), True\n    lo,hi=pc,p1\n    for _ in range(80):\n        mid=0.5*(lo+hi)\n        res=(p1*p1-mid*mid+2*C*math.log(mid/p1))/C\n        if res>q: lo=mid\n        else: hi=mid\n    return 0.5*(lo+hi), False\n\ndef compute():\n    p1=INPUTS['p1']; T=INPUTS['T']; mdot=INPUTS['mdot']; D=INPUTS['D']; L=INPUTS['L']; eps=INPUTS['eps']; K=INPUTS['K']; R=INPUTS['R']; gamma=INPUTS['gamma']\n    A=math.pi*D*D/4; mu=1.34e-5*(T/373.15)**0.72; Re=mdot*D/(A*mu); f=friction_factor(Re,eps,D)\n    G=mdot/A; C=G*G*R*T; p2,choked=pressure_for_resistance(p1,C,f*L/D+K); rho=p2/(R*T); v=mdot/(rho*A); M=v/math.sqrt(gamma*R*T)\n    return {'p_out':p2,'dp':p1-p2,'rho_out':rho,'Re':Re,'f_darcy':f,'M_out':M,'choked':choked}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and exported Python evaluate the same equations and stepping order; tolerance only covers floating-point implementation differences.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["p", "dp", "rho", "Re", "f_darcy", "D", "L", "mdot", "T"],accepts:["T", "p", "mdot", "D", "L"],build:function(){if(!last)return null;var rho1=state.p1/(state.R*state.T);return {quantities:{p:{value:state.p1,unit:'Pa'},dp:{value:last.dp,unit:'Pa'},rho:{value:rho1,unit:'kg/m3'},Re:{value:last.Re,unit:'-'},f_darcy:{value:last.f,unit:'-'},D:{value:state.D,unit:'m'},L:{value:state.L,unit:'m'},mdot:{value:state.mdot,unit:'kg/s'},T:{value:state.T,unit:'K'}}};},apply:function(p){return hoApply(p);}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Levelised cost of hydrogen and RFNBO check</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-23.1",
+  "id": "lcoh_rfnbo",
+  "file": "lcoh_rfnbo.html",
+  "listed": true,
+  "category": "oil-gas-h2",
+  "order": 240,
+  "title": {
+    "en": "Levelised cost of hydrogen and RFNBO check",
+    "uk": "Нормована вартість водню та перевірка RFNBO",
+    "de": "Wasserstoffgestehungskosten und RFNBO-Prüfung",
+    "nl": "Genivelleerde waterstofkosten en RFNBO-toets",
+    "fr": "Coût actualisé de l’hydrogène et contrôle RFNBO",
+    "es": "Coste nivelado del hidrógeno y comprobación RFNBO",
+    "pl": "Uśredniony koszt wodoru i weryfikacja RFNBO"
+  },
+  "summary": {
+    "en": "Levelised cost of electrolytic hydrogen with cost breakdown, and the RFNBO check under EU delegated regulations 2023/1184 and 2023/1185.",
+    "uk": "Нормована вартість електролітичного водню зі структурою витрат і перевірка RFNBO за делегованими регламентами ЄС 2023/1184 та 2023/1185.",
+    "de": "Gestehungskosten von Elektrolysewasserstoff mit Kostenaufteilung und RFNBO-Prüfung nach den delegierten EU-Verordnungen 2023/1184 und 2023/1185.",
+    "nl": "Genivelleerde kosten van elektrolytische waterstof met kostenopbouw, en de RFNBO-toets volgens de gedelegeerde EU-verordeningen 2023/1184 en 2023/1185.",
+    "fr": "Coût actualisé de l’hydrogène électrolytique avec décomposition des coûts et contrôle RFNBO selon les règlements délégués UE 2023/1184 et 2023/1185.",
+    "es": "Coste nivelado del hidrógeno electrolítico con desglose de costes y comprobación RFNBO según los reglamentos delegados de la UE 2023/1184 y 2023/1185.",
+    "pl": "Uśredniony koszt wodoru elektrolitycznego ze strukturą kosztów i weryfikacja RFNBO według rozporządzeń delegowanych UE 2023/1184 i 2023/1185."
+  },
+  "description": {
+    "en": "Computes the levelised cost of hydrogen (LCOH) of a grid-connected or directly connected electrolyser from installed cost, fixed O&M, stack replacement, water, electricity price, full-load hours, discount rate and life, with a breakdown per kg and per MWh (LHV, EUR 2025) and a chart of LCOH versus full-load hours. It checks the electricity sourcing routes of Commission Delegated Regulation (EU) 2023/1184 (2023-02-10): direct connection, bidding zone above 90 % renewables, PPAs with additionality, temporal and geographic correlation and the 2028/2035 transition, and zones below 18 gCO₂e/MJ, and the 70 % greenhouse-gas saving of Regulation (EU) 2023/1185 (2023-02-10) against 94 gCO₂e/MJ. Results give the RFNBO share of the output and the GHG intensity, for early screening of renewable hydrogen projects.",
+    "uk": "Обчислює нормовану вартість водню (LCOH) електролізера з мережевим або прямим підключенням з вартості встановлення, постійних витрат на експлуатацію, заміни стека, води, ціни електроенергії, годин повного навантаження, ставки дисконтування та строку служби, зі структурою на кг і на МВт·год (LHV, EUR 2025) і графіком LCOH залежно від годин повного навантаження. Перевіряє шляхи постачання електроенергії Делегованого регламенту Комісії (ЄС) 2023/1184 (2023-02-10): пряме підключення, торгова зона з понад 90 % ВДЕ, PPA з додатковістю, часовою та географічною кореляцією і перехідним періодом 2028/2035, зони нижче 18 гCO₂e/МДж, а також 70 % скорочення парникових газів за Регламентом (ЄС) 2023/1185 (2023-02-10) відносно 94 гCO₂e/МДж. Результати дають частку RFNBO у продукції та інтенсивність ПГ для попередньої оцінки проєктів відновлюваного водню.",
+    "de": "Berechnet die Wasserstoffgestehungskosten (LCOH) eines netz- oder direkt angeschlossenen Elektrolyseurs aus Investition, fixen Betriebskosten, Stacktausch, Wasser, Strompreis, Volllaststunden, Kalkulationszins und Nutzungsdauer, mit Aufteilung je kg und je MWh (Hi, EUR 2025) und einem Diagramm der LCOH über den Volllaststunden. Geprüft werden die Strombezugswege der Delegierten Verordnung (EU) 2023/1184 (2023-02-10): Direktanschluss, Gebotszone über 90 % erneuerbar, PPAs mit Zusätzlichkeit, zeitlicher und geografischer Korrelation und Übergang 2028/2035, Zonen unter 18 gCO₂e/MJ, sowie die 70-%-THG-Einsparung der Verordnung (EU) 2023/1185 (2023-02-10) gegenüber 94 gCO₂e/MJ. Ergebnis sind der RFNBO-Anteil der Produktion und die THG-Intensität, zur frühen Bewertung erneuerbarer Wasserstoffprojekte.",
+    "nl": "Berekent de genivelleerde waterstofkosten (LCOH) van een net- of direct aangesloten elektrolyser uit investering, vaste O&M, stackvervanging, water, elektriciteitsprijs, vollasturen, disconteringsvoet en levensduur, met opbouw per kg en per MWh (LHV, EUR 2025) en een grafiek van LCOH tegen vollasturen. Getoetst worden de elektriciteitsroutes van Gedelegeerde Verordening (EU) 2023/1184 (2023-02-10): directe aansluiting, biedzone boven 90 % hernieuwbaar, PPA’s met additionaliteit, tijd- en geografische correlatie en de overgang 2028/2035, zones onder 18 gCO₂e/MJ, en de 70 % broeikasgasbesparing van Verordening (EU) 2023/1185 (2023-02-10) ten opzichte van 94 gCO₂e/MJ. Resultaat zijn het RFNBO-aandeel van de productie en de broeikasgasintensiteit, voor vroege screening van hernieuwbare-waterstofprojecten.",
+    "fr": "Calcule le coût actualisé de l’hydrogène (LCOH) d’un électrolyseur raccordé au réseau ou en liaison directe à partir de l’investissement, de l’exploitation fixe, du remplacement des stacks, de l’eau, du prix de l’électricité, des heures à pleine charge, du taux d’actualisation et de la durée de vie, avec décomposition par kg et par MWh (PCI, EUR 2025) et courbe du LCOH en fonction des heures. Il vérifie les voies d’approvisionnement du règlement délégué (UE) 2023/1184 (2023-02-10) : liaison directe, zone à plus de 90 % renouvelable, PPA avec additionnalité, corrélations temporelle et géographique et transition 2028/2035, zones sous 18 gCO₂e/MJ, ainsi que la réduction de 70 % des GES du règlement (UE) 2023/1185 (2023-02-10) par rapport à 94 gCO₂e/MJ. Les résultats donnent la part RFNBO de la production et l’intensité GES, pour l’évaluation préliminaire de projets d’hydrogène renouvelable.",
+    "es": "Calcula el coste nivelado del hidrógeno (LCOH) de un electrolizador conectado a la red o con conexión directa a partir de la inversión, el O&M fijo, la sustitución de stacks, el agua, el precio de la electricidad, las horas a plena carga, la tasa de descuento y la vida útil, con desglose por kg y por MWh (PCI, EUR 2025) y una curva de LCOH frente a horas. Comprueba las vías de suministro del Reglamento Delegado (UE) 2023/1184 (2023-02-10): conexión directa, zona con más del 90 % renovable, PPA con adicionalidad, correlación temporal y geográfica y transición 2028/2035, zonas por debajo de 18 gCO₂e/MJ, y el ahorro de GEI del 70 % del Reglamento (UE) 2023/1185 (2023-02-10) frente a 94 gCO₂e/MJ. Los resultados dan la cuota RFNBO de la producción y la intensidad de GEI, para el cribado temprano de proyectos de hidrógeno renovable.",
+    "pl": "Oblicza uśredniony koszt wodoru (LCOH) elektrolizera przyłączonego do sieci lub bezpośrednio do źródła na podstawie nakładów, stałych kosztów eksploatacji, wymiany stosów, wody, ceny energii, godzin pełnego obciążenia, stopy dyskontowej i okresu eksploatacji, ze strukturą na kg i na MWh (LHV, EUR 2025) oraz wykresem LCOH w funkcji godzin. Sprawdza ścieżki zakupu energii rozporządzenia delegowanego (UE) 2023/1184 (2023-02-10): przyłączenie bezpośrednie, strefa powyżej 90 % OZE, umowy PPA z dodatkowością, korelacją czasową i geograficzną oraz okresem przejściowym 2028/2035, strefy poniżej 18 gCO₂e/MJ, a także 70 % redukcji gazów cieplarnianych wg rozporządzenia (UE) 2023/1185 (2023-02-10) względem 94 gCO₂e/MJ. Wyniki podają udział RFNBO w produkcji i emisyjność, do wstępnej oceny projektów wodoru odnawialnego."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Constant yearly operation, prices and efficiency; no hourly dispatch, storage, stack degradation, oxygen or heat revenue, taxes, subsidies or inflation. Grid electricity outside a renewable route is counted at the entered grid intensity and is not credited with the bidding-zone renewable share; interconnected-zone, curtailment and imbalance provisions of 2023/1184 are not modelled. Upstream, water, compression and transport emissions are one user value. The RFNBO check is a simplified screening, not a certification audit under a voluntary scheme; cost inputs are user assumptions.",
+    "uk": "Сталі щорічні режим роботи, ціни та ККД; без погодинної диспетчеризації, накопичення, деградації стека, доходу від кисню чи тепла, податків, субсидій та інфляції. Мережева електроенергія поза відновлюваними шляхами враховується за введеною інтенсивністю мережі і без частки ВДЕ торгової зони; положення 2023/1184 щодо суміжних зон, обмеження генерації та небалансів не моделюються. Викиди попереднього ланцюга, води, компримування та транспорту задаються одним значенням. Перевірка RFNBO — спрощена попередня оцінка, а не сертифікаційний аудит; вхідні дані про вартість є припущеннями користувача.",
+    "de": "Konstanter Jahresbetrieb, konstante Preise und Wirkungsgrade; keine stündliche Fahrweise, Speicher, Stack-Degradation, Erlöse aus Sauerstoff oder Wärme, Steuern, Förderung oder Inflation. Netzstrom außerhalb eines erneuerbaren Weges wird mit der eingegebenen Netzintensität und ohne Erneuerbaren-Anteil der Gebotszone angesetzt; Regelungen der 2023/1184 zu verbundenen Zonen, Abregelung und Ausgleichsenergie werden nicht modelliert. Vorketten-, Wasser-, Verdichtungs- und Transportemissionen sind ein Benutzerwert. Die RFNBO-Prüfung ist ein vereinfachtes Screening, kein Zertifizierungsaudit; Kosteneingaben sind Annahmen des Nutzers.",
+    "nl": "Constante jaarlijkse bedrijfsvoering, prijzen en rendementen; geen uurlijkse inzet, opslag, stackdegradatie, opbrengsten uit zuurstof of warmte, belastingen, subsidies of inflatie. Netstroom buiten een hernieuwbare route wordt gerekend tegen de ingevoerde netintensiteit, zonder hernieuwbaar aandeel van de biedzone; bepalingen van 2023/1184 over verbonden zones, curtailment en onbalans worden niet gemodelleerd. Keten-, water-, compressie- en transportemissies zijn één gebruikerswaarde. De RFNBO-toets is een vereenvoudigde screening, geen certificeringsaudit; kosteninvoer zijn aannames van de gebruiker.",
+    "fr": "Fonctionnement, prix et rendements annuels constants ; pas de dispatch horaire, de stockage, de dégradation des stacks, de recettes d’oxygène ou de chaleur, d’impôts, de subventions ni d’inflation. L’électricité du réseau hors voie renouvelable est comptée à l’intensité saisie, sans part renouvelable de la zone ; les dispositions de 2023/1184 sur les zones interconnectées, l’écrêtement et les déséquilibres ne sont pas modélisées. Les émissions amont, de l’eau, de la compression et du transport sont une seule valeur. Le contrôle RFNBO est une évaluation simplifiée, pas un audit de certification ; les coûts sont des hypothèses de l’utilisateur.",
+    "es": "Operación, precios y eficiencias anuales constantes; sin despacho horario, almacenamiento, degradación de stacks, ingresos por oxígeno o calor, impuestos, subvenciones ni inflación. La electricidad de red fuera de una vía renovable se computa con la intensidad introducida y sin la cuota renovable de la zona; no se modelan las disposiciones de 2023/1184 sobre zonas interconectadas, vertidos y desvíos. Las emisiones aguas arriba, de agua, compresión y transporte son un único valor del usuario. La comprobación RFNBO es un cribado simplificado, no una auditoría de certificación; los costes son supuestos del usuario.",
+    "pl": "Stała roczna praca, ceny i sprawność; bez godzinowego dysponowania, magazynowania, degradacji stosów, przychodów z tlenu lub ciepła, podatków, dotacji i inflacji. Energia z sieci spoza ścieżek odnawialnych jest liczona według podanej emisyjności sieci, bez udziału OZE strefy cenowej; przepisy 2023/1184 dotyczące stref połączonych, ograniczeń generacji i niezbilansowania nie są modelowane. Emisje łańcucha dostaw, wody, sprężania i transportu to jedna wartość użytkownika. Weryfikacja RFNBO jest uproszczoną oceną, a nie audytem certyfikacyjnym; dane kosztowe są założeniami użytkownika."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ogh-core.js",
+    "ogh-h2use.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python implementation (bench-src/ref/gen_lcoh_rfnbo.py: discounted cash-flow table and the DA 2023/1184/1185 rules): 20 cases, worst relative deviation 1.1e-15; benchmark driver bench-src/run_lcoh_rfnbo.mjs."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "python-reimpl-lcoh_rfnbo",
+        "reference": "independent Python re-implementation (bench-src/ref/gen_lcoh_rfnbo.py): year-by-year discounted cash-flow LCOH with simulated stack hours, and the electricity-sourcing and GHG rules coded from the delegated regulations",
+        "citations": [
+          "Commission Delegated Regulation (EU) 2023/1184 of 10 February 2023 (RFNBO electricity rules)",
+          "Commission Delegated Regulation (EU) 2023/1185 of 10 February 2023 (GHG methodology, 70 % saving, 94 gCO2e/MJ)",
+          "IEA (2024) Global Hydrogen Review 2024, LCOH methodology annex",
+          "NREL H2A Production Model"
+        ],
+        "cases": 20,
+        "passed": 20,
+        "tolerance": "relative 1e-9 on record outputs; RFNBO flag exact",
+        "run_at": "2026-10-23T15:00:54Z",
+        "artifact": "benchmarks/lcoh_rfnbo.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "Not provided for this prototype."
+  },
+  "handoff": {
+    "provides": [
+      "mdot"
+    ],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ogh-core.js?v=20c5dbb58770" defer></script>
+<script src="ogh-h2use.js?v=d84cd16360d4" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  function engine(){ return (window.OGH || {}).lcoh_rfnbo || null; }
+  var DEFAULTS = { level:'simple', P_MW:100, capex_kW:2000, opex_pct:3, sec:53, flh:5000, stack_life_h:80000, stack_pct:15, elec_price:50, water_L:15, water_price:2, wacc:0.07, life:25, source:'ppa', res_share:1.0, corr:'monthly', same_zone:true, res_age_m:12, res_no_aid:true, cod_year:2027, year:2028, grid_res_share:0.95, grid_ef:70, other_kg:0.5 };
+  function solve(s){
+    var inp = {}, k, r, eng = engine();
+    for (k in s) { if (Object.prototype.hasOwnProperty.call(s, k) && k !== 'level') { inp[k] = s[k]; } }
+    if (!eng) { return { ok:false, error:'ogh-h2use.js or ogh-core.js did not load' }; }
+    try { r = eng.solve(inp); } catch (e) { return { ok:false, error:'Invalid input: ' + ((e && e.message) || String(e)) }; }
+    if (!r) { return { ok:false, error:'Invalid input: no result returned' }; }
+    return r;
+  }
+
+  function sig(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (v === 0 || !isFinite(v)) return 2;
+    var d = n - 1 - Math.floor(Math.log(Math.abs(v)) / Math.LN10 + 1e-12);
+    if (d < 0) d = 0;
+    if (d > 8) d = 8;
+    return d;
+  }
+  function sigv(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (!isFinite(v)) return NaN;
+    if (v === 0) return 0;
+    n = Math.max(1, Math.min(21, Math.round(n)));
+    return Number(v.toPrecision(n));
+  }
+  /* run 14: page-side translation of module messages (modules stay English for node tests and benches).
+     WARN (set in p05) = [[regex, T(... '$1' ...)], ...]; unmatched -> the English text in every language. */
+  var LANGS7 = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  function trMsg(w) {
+    var i, j, m, o = {}, src = null, s = String(w == null ? '' : w);
+    for (i = 0; i < WARN.length && !src; i++) { m = WARN[i][0].exec(s); if (m) src = WARN[i][1]; }
+    for (j = 0; j < 7; j++) {
+      o[LANGS7[j]] = src ? String(src[LANGS7[j]] || src.en).replace(/\$(\d)/g, function (a, n) { var g = m[+n] == null ? '' : m[+n]; return (j > 0 && /^-?\d+\.\d+$/.test(g)) ? g.replace('.', ',') : g; }) : s;
+    }
+    return o;
+  }
+  function tx(o) { var l = (ui && ui.lang) || 'en'; return (o && (o[l] || o.en)) || ''; }
+
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  var stage = null;
+  function LEGEND_ITEMS() { return [
+  { label: T('LCOH, total', 'LCOH, загалом', 'LCOH, gesamt', 'LCOH, totaal', 'LCOH global', 'LCOH en conjunto', 'LCOH, łącznie'), series: 0 },
+  { label: T('Electricity part', 'Складова електроенергії', 'Stromanteil', 'Deel elektriciteit', 'Part électricité', 'Parte de electricidad', 'Część energii'), series: 1 },
+  { label: T('Capital, stack and O&M part', 'Складова капіталу, стека та експлуатації', 'Anteil Kapital, Stack und Betrieb', 'Deel kapitaal, stack en O&M', 'Part capital, stack et exploitation', 'Parte de capital, stack y O&M', 'Część kapitału, stosu i eksploatacji'), series: 2 }
+  ]; }
+  function adoptStage(app) {
+    stage = app.stages[0] || null;
+    if (stage) stage.legend({ items: LEGEND_ITEMS() });
+  }
+
+  var ui = null;
+
+  var WARN = [
+    [/^Stack life exceeded in the last year of operation; no replacement counted$/, T('Stack life is exceeded in the last year of operation; no replacement is counted', 'Ресурс стека перевищено в останній рік роботи; заміна не врахована', 'Die Stack-Lebensdauer wird im letzten Betriebsjahr überschritten; kein Tausch angesetzt', 'De stacklevensduur wordt in het laatste bedrijfsjaar overschreden; geen vervanging meegeteld', 'La durée de vie du stack est dépassée la dernière année d’exploitation ; aucun remplacement compté', 'La vida del stack se supera en el último año de operación; no se cuenta ninguna sustitución', 'Żywotność stosu zostaje przekroczona w ostatnim roku pracy; wymiany nie uwzględniono')],
+    [/^Only ([\d.]+) % of the electricity is matched by PPAs; the rest is grid electricity, counted as non-renewable here$/, T('Only $1 % of the electricity is matched by PPAs; the rest is grid electricity, counted here as non-renewable', 'Лише $1 % електроенергії покрито PPA; решта — мережева, тут вважається невідновлюваною', 'Nur $1 % des Stroms sind durch PPAs gedeckt; der Rest ist Netzstrom und gilt hier als nicht erneuerbar', 'Slechts $1 % van de elektriciteit is door PPA’s gedekt; de rest is netstroom en telt hier als niet-hernieuwbaar', 'Seulement $1 % de l’électricité est couverte par des PPA ; le reste vient du réseau et est compté ici comme non renouvelable', 'Solo el $1 % de la electricidad está cubierto por PPA; el resto es electricidad de red, contada aquí como no renovable', 'Tylko $1 % energii jest pokryte umowami PPA; reszta to energia z sieci, liczona tu jako nieodnawialna')],
+    [/^Member States may require hourly matching from 1\.7\.2027 \(Art\. 6\)$/, T('Member States may require hourly matching from 1 July 2027 (Art. 6)', 'Держави-члени можуть вимагати погодинної відповідності з 1 липня 2027 р. (ст. 6)', 'Mitgliedstaaten können ab 1. Juli 2027 stündliche Korrelation verlangen (Art. 6)', 'Lidstaten mogen vanaf 1 juli 2027 uurcorrelatie eisen (art. 6)', 'Les États membres peuvent exiger la corrélation horaire dès le 1er juillet 2027 (art. 6)', 'Los Estados miembros pueden exigir correlación horaria desde el 1 de julio de 2027 (art. 6)', 'Państwa członkowskie mogą wymagać korelacji godzinowej od 1 lipca 2027 r. (art. 6)')],
+    [/^Other emissions alone exceed 28\.2 gCO2e\/MJ: the renewable share fails the 70 % saving$/, T('Other emissions alone exceed 28.2 gCO₂e/MJ: the renewable share fails the 70 % saving', 'Самі лише інші викиди перевищують 28,2 гCO₂e/МДж: відновлювана частка не досягає скорочення 70 %', 'Schon die übrigen Emissionen übersteigen 28,2 gCO₂e/MJ: der erneuerbare Anteil verfehlt die 70-%-Einsparung', 'Alleen de overige emissies overschrijden al 28,2 gCO₂e/MJ: het hernieuwbare deel haalt de 70 % besparing niet', 'Les autres émissions dépassent à elles seules 28,2 gCO₂e/MJ : la part renouvelable n’atteint pas la réduction de 70 %', 'Solo las demás emisiones superan 28,2 gCO₂e/MJ: la parte renovable no alcanza el ahorro del 70 %', 'Same pozostałe emisje przekraczają 28,2 gCO₂e/MJ: część odnawialna nie osiąga redukcji 70 %')],
+    [/^Fewer than 1 500 full-load hours: capital cost dominates$/, T('Fewer than 1 500 full-load hours: capital cost dominates', 'Менше 1 500 годин повного навантаження: домінують капітальні витрати', 'Weniger als 1 500 Volllaststunden: die Kapitalkosten dominieren', 'Minder dan 1 500 vollasturen: de kapitaalkosten domineren', 'Moins de 1 500 heures à pleine charge : le coût du capital domine', 'Menos de 1 500 horas a plena carga: domina el coste de capital', 'Mniej niż 1 500 godzin pełnego obciążenia: dominuje koszt kapitału')],
+    [/^source must be one of (.*)$/, T('Source must be one of $1', 'Джерело має бути одним із: $1', 'Die Quelle muss eine von $1 sein', 'De bron moet een van $1 zijn', 'La source doit être l’une de $1', 'La fuente debe ser una de $1', 'Źródło musi być jednym z: $1')],
+    [/^P_MW must be > 0$/, T('Electrolyser power must be > 0', 'Потужність електролізера має бути > 0', 'Die Elektrolyseurleistung muss > 0 sein', 'Het elektrolyservermogen moet > 0 zijn', 'La puissance de l’électrolyseur doit être > 0', 'La potencia del electrolizador debe ser > 0', 'Moc elektrolizera musi być > 0')],
+    [/^capex_kW must be >= 0$/, T('CAPEX must be ≥ 0', 'CAPEX має бути ≥ 0', 'CAPEX muss ≥ 0 sein', 'CAPEX moet ≥ 0 zijn', 'Le CAPEX doit être ≥ 0', 'El CAPEX debe ser ≥ 0', 'CAPEX musi być ≥ 0')],
+    [/^sec must be > 0$/, T('Specific energy consumption must be > 0', 'Питоме енергоспоживання має бути > 0', 'Der spezifische Energieverbrauch muss > 0 sein', 'Het specifieke energieverbruik moet > 0 zijn', 'La consommation spécifique doit être > 0', 'El consumo específico debe ser > 0', 'Jednostkowe zużycie energii musi być > 0')],
+    [/^sec below the LHV of hydrogen \(33\.3 kWh\/kg\) is impossible$/, T('A specific consumption below the LHV of hydrogen (33.3 kWh/kg) is impossible', 'Питоме споживання нижче LHV водню (33,3 кВт·год/кг) неможливе', 'Ein spezifischer Verbrauch unter dem Heizwert von Wasserstoff (33,3 kWh/kg) ist unmöglich', 'Een specifiek verbruik onder de onderwaarde van waterstof (33,3 kWh/kg) is onmogelijk', 'Une consommation spécifique inférieure au PCI de l’hydrogène (33,3 kWh/kg) est impossible', 'Un consumo específico inferior al PCI del hidrógeno (33,3 kWh/kg) es imposible', 'Jednostkowe zużycie poniżej LHV wodoru (33,3 kWh/kg) jest niemożliwe')],
+    [/^flh must be in \(0, 8760\]$/, T('Full-load hours must be in (0, 8760]', 'Години повного навантаження мають бути в (0, 8760]', 'Volllaststunden müssen in (0, 8760] liegen', 'Vollasturen moeten in (0, 8760] liggen', 'Les heures à pleine charge doivent être dans (0, 8760]', 'Las horas a plena carga deben estar en (0, 8760]', 'Godziny pełnego obciążenia muszą być w (0, 8760]')],
+    [/^life must be in \[1, 60\] years$/, T('Plant life must be 1–60 years', 'Строк служби має бути 1–60 років', 'Die Lebensdauer muss 1–60 Jahre betragen', 'De levensduur moet 1–60 jaar zijn', 'La durée de vie doit être de 1 à 60 ans', 'La vida útil debe ser de 1 a 60 años', 'Okres eksploatacji musi wynosić 1–60 lat')],
+    [/^wacc must be in \[0, 1\)$/, T('The discount rate must be in [0, 1)', 'Ставка дисконтування має бути в [0, 1)', 'Der Kalkulationszins muss in [0, 1) liegen', 'De disconteringsvoet moet in [0, 1) liggen', 'Le taux d’actualisation doit être dans [0, 1)', 'La tasa de descuento debe estar en [0, 1)', 'Stopa dyskontowa musi być w [0, 1)')],
+    [/^res_share must be in \[0, 1\]$/, T('The PPA share must be in [0, 1]', 'Частка PPA має бути в [0, 1]', 'Der PPA-Anteil muss in [0, 1] liegen', 'Het PPA-aandeel moet in [0, 1] liggen', 'La part PPA doit être dans [0, 1]', 'La cuota PPA debe estar en [0, 1]', 'Udział PPA musi być w [0, 1]')],
+    [/^grid_res_share must be in \[0, 1\]$/, T('The renewable share of the zone must be in [0, 1]', 'Частка ВДЕ зони має бути в [0, 1]', 'Der Erneuerbaren-Anteil der Zone muss in [0, 1] liegen', 'Het hernieuwbare aandeel van de zone moet in [0, 1] liggen', 'La part renouvelable de la zone doit être dans [0, 1]', 'La cuota renovable de la zona debe estar en [0, 1]', 'Udział OZE strefy musi być w [0, 1]')],
+    [/^corr must be hourly or monthly$/, T('Temporal correlation must be hourly or monthly', 'Часова кореляція має бути погодинною або щомісячною', 'Die zeitliche Korrelation muss stündlich oder monatlich sein', 'De tijdcorrelatie moet per uur of maandelijks zijn', 'La corrélation temporelle doit être horaire ou mensuelle', 'La correlación temporal debe ser horaria o mensual', 'Korelacja czasowa musi być godzinowa lub miesięczna')],
+    [/^(\w+) must be a number >= 0$/, T('$1 must be a number ≥ 0', '$1 має бути числом ≥ 0', '$1 muss eine Zahl ≥ 0 sein', '$1 moet een getal ≥ 0 zijn', '$1 doit être un nombre ≥ 0', '$1 debe ser un número ≥ 0', '$1 musi być liczbą ≥ 0')]
+  ];
+  WARN.push(
+    [/^Calculation failed: (.*)$/, T('Calculation failed: $1', 'Розрахунок не вдався: $1', 'Berechnung fehlgeschlagen: $1', 'Berekening mislukt: $1', 'Échec du calcul : $1', 'El cálculo ha fallado: $1', 'Obliczenie nie powiodło się: $1')],
+    [/^Invalid input: (.*)$/, T('Invalid input: $1', 'Неправильні вхідні дані: $1', 'Ungültige Eingabe: $1', 'Ongeldige invoer: $1', 'Entrée non valide : $1', 'Entrada no válida: $1', 'Nieprawidłowe dane: $1')],
+    [/^ogh-h2use\.js or ogh-core\.js did not load$/, T('ogh-h2use.js or ogh-core.js did not load', 'ogh-h2use.js або ogh-core.js не завантажився', 'ogh-h2use.js oder ogh-core.js wurde nicht geladen', 'ogh-h2use.js of ogh-core.js is niet geladen', 'ogh-h2use.js ou ogh-core.js n’a pas été chargé', 'ogh-h2use.js u ogh-core.js no se ha cargado', 'Nie załadowano ogh-h2use.js lub ogh-core.js')]
+  );
+
+  var CK = {
+    age: T('Renewable plant not older than 36 months (Art. 3(a) / 5(a))', 'ВДЕ-установка не старша за 36 місяців (ст. 3(a) / 5(a))', 'Erneuerbare Anlage nicht älter als 36 Monate (Art. 3(a) / 5(a))', 'Hernieuwbare installatie niet ouder dan 36 maanden (art. 3(a) / 5(a))', 'Installation renouvelable de moins de 36 mois (art. 3(a) / 5(a))', 'Planta renovable con no más de 36 meses (art. 3(a) / 5(a))', 'Instalacja OZE nie starsza niż 36 miesięcy (art. 3(a) / 5(a))'),
+    aid: T('No operating or investment aid (Art. 5(b))', 'Без операційної чи інвестиційної підтримки (ст. 5(b))', 'Keine Betriebs- oder Investitionsbeihilfe (Art. 5(b))', 'Geen exploitatie- of investeringssteun (art. 5(b))', 'Aucune aide au fonctionnement ni à l’investissement (art. 5(b))', 'Sin ayudas de funcionamiento ni de inversión (art. 5(b))', 'Brak pomocy operacyjnej i inwestycyjnej (art. 5(b))'),
+    add: T('Additionality not yet required: electrolyser before 2028, until 2035 (Art. 11)', 'Додатковість ще не потрібна: електролізер до 2028 р., до 2035 р. (ст. 11)', 'Zusätzlichkeit noch nicht gefordert: Elektrolyseur vor 2028, bis 2035 (Art. 11)', 'Additionaliteit nog niet vereist: elektrolyser vóór 2028, tot 2035 (art. 11)', 'Additionnalité pas encore exigée : électrolyseur avant 2028, jusqu’en 2035 (art. 11)', 'Adicionalidad aún no exigida: electrolizador antes de 2028, hasta 2035 (art. 11)', 'Dodatkowość jeszcze niewymagana: elektrolizer przed 2028, do 2035 (art. 11)'),
+    temporal: T('Temporal correlation: monthly until 2029, hourly from 2030 (Art. 6)', 'Часова кореляція: щомісячна до 2029, погодинна з 2030 (ст. 6)', 'Zeitliche Korrelation: monatlich bis 2029, stündlich ab 2030 (Art. 6)', 'Tijdcorrelatie: maandelijks tot 2029, per uur vanaf 2030 (art. 6)', 'Corrélation temporelle : mensuelle jusqu’en 2029, horaire dès 2030 (art. 6)', 'Correlación temporal: mensual hasta 2029, horaria desde 2030 (art. 6)', 'Korelacja czasowa: miesięczna do 2029, godzinowa od 2030 (art. 6)'),
+    zone: T('Geographic correlation: same bidding zone (Art. 7)', 'Географічна кореляція: та сама торгова зона (ст. 7)', 'Geografische Korrelation: gleiche Gebotszone (Art. 7)', 'Geografische correlatie: dezelfde biedzone (art. 7)', 'Corrélation géographique : même zone (art. 7)', 'Correlación geográfica: misma zona de oferta (art. 7)', 'Korelacja geograficzna: ta sama strefa cenowa (art. 7)'),
+    zone90: T('Bidding zone renewable share above 90 % (Art. 4(1))', 'Частка ВДЕ у торговій зоні понад 90 % (ст. 4(1))', 'Erneuerbaren-Anteil der Gebotszone über 90 % (Art. 4(1))', 'Hernieuwbaar aandeel biedzone boven 90 % (art. 4(1))', 'Part renouvelable de la zone supérieure à 90 % (art. 4(1))', 'Cuota renovable de la zona superior al 90 % (art. 4(1))', 'Udział OZE w strefie powyżej 90 % (art. 4(1))'),
+    hours: T('Full-load hours not above share × 8760 h (Art. 4(1))', 'Години повного навантаження не більше частки × 8760 год (ст. 4(1))', 'Volllaststunden nicht über Anteil × 8760 h (Art. 4(1))', 'Vollasturen niet boven aandeel × 8760 h (art. 4(1))', 'Heures à pleine charge au plus part × 8760 h (art. 4(1))', 'Horas a plena carga no superiores a cuota × 8760 h (art. 4(1))', 'Godziny pełnego obciążenia nie więcej niż udział × 8760 h (art. 4(1))'),
+    ef18: T('Zone emission intensity below 18 gCO₂e/MJ (Art. 4(3))', 'Інтенсивність викидів зони нижче 18 гCO₂e/МДж (ст. 4(3))', 'Emissionsintensität der Zone unter 18 gCO₂e/MJ (Art. 4(3))', 'Emissie-intensiteit zone onder 18 gCO₂e/MJ (art. 4(3))', 'Intensité d’émission de la zone inférieure à 18 gCO₂e/MJ (art. 4(3))', 'Intensidad de emisiones de la zona inferior a 18 gCO₂e/MJ (art. 4(3))', 'Emisyjność strefy poniżej 18 gCO₂e/MJ (art. 4(3))'),
+    grid: T('Grid electricity without renewable claim: not RFNBO', 'Мережева електроенергія без заявки на ВДЕ: не RFNBO', 'Netzstrom ohne Erneuerbaren-Nachweis: kein RFNBO', 'Netstroom zonder hernieuwbaarheidsclaim: geen RFNBO', 'Électricité du réseau sans revendication renouvelable : pas RFNBO', 'Electricidad de red sin reclamación renovable: no RFNBO', 'Energia z sieci bez deklaracji OZE: nie RFNBO'),
+    ghg: T('GHG saving ≥ 70 %: ≤ 28.2 gCO₂e/MJ (EU 2023/1185)', 'Скорочення ПГ ≥ 70 %: ≤ 28,2 гCO₂e/МДж (ЄС 2023/1185)', 'THG-Einsparung ≥ 70 %: ≤ 28,2 gCO₂e/MJ (EU 2023/1185)', 'Broeikasgasbesparing ≥ 70 %: ≤ 28,2 gCO₂e/MJ (EU 2023/1185)', 'Réduction des GES ≥ 70 % : ≤ 28,2 gCO₂e/MJ (UE 2023/1185)', 'Ahorro de GEI ≥ 70 %: ≤ 28,2 gCO₂e/MJ (UE 2023/1185)', 'Redukcja GHG ≥ 70 %: ≤ 28,2 gCO₂e/MJ (UE 2023/1185)')
+  };
+  function computeView(s){
+    last = solve(s); if (stage) stage.schedule();
+    var r = last, e, k, i, w;
+    if (!r || !r.ok) { e = (r && r.error) || 'Unknown error'; return { verdict: { tone: 'bad', text: trMsg(e) }, tiles: [], notes: [] }; }
+    function fin(v){ return typeof v === 'number' && isFinite(v); }
+    var tiles = [], notes = [], tables = [], t = [];
+    function add(label, v, unit, learn, head, tone){ if (!fin(v)) return; tiles.push({ label: label, value: sigv(v, 4), hint: unit, precision: sig(v, 4), tone: tone || null, learn: learn, headline: !!head }); }
+    var X = DiagramUI.fmt(r.lcoh, { precision: 2 }), S = DiagramUI.fmt(r.rfnbo_share_pct, { precision: 0 });
+    var A = r.rfnbo ? ['RFNBO: ', 'RFNBO: ', 'RFNBO: ', 'RFNBO: ', 'RFNBO : ', 'RFNBO: ', 'RFNBO: '] : ['Not RFNBO: ', 'Не RFNBO: ', 'Kein RFNBO: ', 'Geen RFNBO: ', 'Pas RFNBO : ', 'No RFNBO: ', 'Nie RFNBO: '];
+    var B = ['% of output qualifies; LCOH ', '% продукції відповідає; LCOH ', '% der Produktion qualifiziert; LCOH ', '% van de productie voldoet; LCOH ', '% de la production est éligible ; LCOH ', '% de la producción cumple; LCOH ', '% produkcji spełnia wymogi; LCOH '];
+    var U = [' EUR/kg (LHV)', ' EUR/кг (LHV)', ' EUR/kg (Hi)', ' EUR/kg (LHV)', ' EUR/kg (PCI)', ' EUR/kg (PCI)', ' EUR/kg (LHV)'];
+    for (k = 0; k < 7; k++) t.push(A[k] + S + ' ' + B[k] + X + U[k]);
+    var verdict = { tone: r.rfnbo ? 'ok' : 'bad', text: T.apply(null, t) };
+    add(T('LCOH · levelised cost', 'LCOH · нормована вартість', 'LCOH · Gestehungskosten', 'LCOH · genivelleerde kosten', 'LCOH · coût actualisé', 'LCOH · coste nivelado', 'LCOH · uśredniony koszt'), r.lcoh, 'EUR/kg', 'lcoh', true);
+    add(T('LCOH per energy (LHV)', 'LCOH на енергію (LHV)', 'LCOH je Energie (Hi)', 'LCOH per energie (LHV)', 'LCOH par énergie (PCI)', 'LCOH por energía (PCI)', 'LCOH na energię (LHV)'), r.lcoh_MWh, 'EUR/MWh', 'lcoh');
+    add(T('RFNBO share of output', 'Частка RFNBO у продукції', 'RFNBO-Anteil der Produktion', 'RFNBO-aandeel van de productie', 'Part RFNBO de la production', 'Cuota RFNBO de la producción', 'Udział RFNBO w produkcji'), r.rfnbo_share_pct, '%', 'routes', false, r.rfnbo ? null : 'bad');
+    add(T('GHG intensity, whole output', 'Інтенсивність ПГ, уся продукція', 'THG-Intensität, gesamte Produktion', 'Broeikasgasintensiteit, totale productie', 'Intensité GES, production totale', 'Intensidad de GEI, producción total', 'Emisyjność GHG, cała produkcja'), r.e_tot, 'gCO₂e/MJ', 'ghg', false, r.e_tot <= r.ghg_limit ? null : 'bad');
+    add(T('Hydrogen output', 'Виробництво водню', 'Wasserstoffproduktion', 'Waterstofproductie', 'Production d’hydrogène', 'Producción de hidrógeno', 'Produkcja wodoru'), r.m_t, 't/yr', 'plant');
+    add(T('Electricity share of LCOH', 'Частка електроенергії в LCOH', 'Stromanteil an LCOH', 'Aandeel elektriciteit in LCOH', 'Part de l’électricité dans le LCOH', 'Cuota de la electricidad en el LCOH', 'Udział energii w LCOH'), 100 * r.c_elec / r.lcoh, '%', 'electricity');
+    if (s && s.level === 'full') {
+      add(T('GHG saving vs 94 g/MJ', 'Скорочення ПГ відносно 94 г/МДж', 'THG-Einsparung ggü. 94 g/MJ', 'Broeikasgasbesparing t.o.v. 94 g/MJ', 'Réduction GES vs 94 g/MJ', 'Ahorro de GEI frente a 94 g/MJ', 'Redukcja GHG wobec 94 g/MJ'), r.saving_pct, '%', 'ghg');
+      add(T('GHG intensity per kg', 'Інтенсивність ПГ на кг', 'THG-Intensität je kg', 'Broeikasgasintensiteit per kg', 'Intensité GES par kg', 'Intensidad de GEI por kg', 'Emisyjność GHG na kg'), r.e_kg, 'kgCO₂e/kg', 'ghg');
+      add(T('System efficiency (LHV)', 'ККД системи (LHV)', 'Systemwirkungsgrad (Hi)', 'Systeemrendement (LHV)', 'Rendement du système (PCI)', 'Eficiencia del sistema (PCI)', 'Sprawność systemu (LHV)'), 100 * r.eff_lhv, '%', 'plant');
+      add(T('Electricity use', 'Споживання електроенергії', 'Strombedarf', 'Elektriciteitsverbruik', 'Consommation d’électricité', 'Consumo de electricidad', 'Zużycie energii'), r.E_GWh, 'GWh/yr', 'plant');
+      add(T('Stack replacements', 'Заміни стека', 'Stacktausche', 'Stackvervangingen', 'Remplacements de stack', 'Sustituciones de stack', 'Wymiany stosu'), r.stacks, '', 'stack');
+    }
+    var ROW = [
+      [T('Capital (annuity)', 'Капітал (ануїтет)', 'Kapital (Annuität)', 'Kapitaal (annuïteit)', 'Capital (annuité)', 'Capital (anualidad)', 'Kapitał (annuita)'), r.c_capex],
+      [T('Stack replacement', 'Заміна стека', 'Stacktausch', 'Stackvervanging', 'Remplacement du stack', 'Sustitución del stack', 'Wymiana stosu'), r.c_stack],
+      [T('Fixed O&M', 'Постійні витрати на експлуатацію', 'Fixe Betriebskosten', 'Vaste O&M', 'Exploitation fixe', 'O&M fijo', 'Stałe koszty eksploatacji'), r.c_opex],
+      [T('Electricity', 'Електроенергія', 'Strom', 'Elektriciteit', 'Électricité', 'Electricidad', 'Energia elektryczna'), r.c_elec],
+      [T('Water', 'Вода', 'Wasser', 'Water', 'Eau', 'Agua', 'Woda'), r.c_water]
+    ], rows = [];
+    for (i = 0; i < ROW.length; i++) { rows.push({ cells: [ROW[i][0], { value: ROW[i][1], precision: 3 }, { value: 100 * ROW[i][1] / r.lcoh, precision: 1 }] }); }
+    tables.push({
+      title: T('Cost breakdown', 'Структура вартості', 'Kostenaufteilung', 'Kostenopbouw', 'Décomposition des coûts', 'Desglose de costes', 'Struktura kosztów'),
+      head: [T('Item', 'Стаття', 'Posten', 'Post', 'Poste', 'Partida', 'Pozycja'), { label: T('EUR/kg', 'EUR/кг', 'EUR/kg', 'EUR/kg', 'EUR/kg', 'EUR/kg', 'EUR/kg'), num: true }, { label: T('%', '%', '%', '%', '%', '%', '%'), num: true }],
+      rows: rows,
+      foot: [T('Total', 'Разом', 'Summe', 'Totaal', 'Total', 'Total', 'Razem'), { value: r.lcoh, precision: 3 }, { value: 100, precision: 0 }]
+    });
+    var crow = [], OK = T('yes', 'так', 'ja', 'ja', 'oui', 'sí', 'tak'), NO = T('no', 'ні', 'nein', 'nee', 'non', 'no', 'nie');
+    for (i = 0; i < r.checks.length; i++) { crow.push({ cells: [CK[r.checks[i].id] || trMsg(r.checks[i].text), r.checks[i].ok ? OK : NO] }); }
+    crow.push({ cells: [CK.ghg, r.ghg_pass ? OK : NO] });
+    tables.push({ title: T('RFNBO checks (EU 2023/1184, 2023/1185)', 'Перевірки RFNBO (ЄС 2023/1184, 2023/1185)', 'RFNBO-Prüfungen (EU 2023/1184, 2023/1185)', 'RFNBO-toetsen (EU 2023/1184, 2023/1185)', 'Contrôles RFNBO (UE 2023/1184, 2023/1185)', 'Comprobaciones RFNBO (UE 2023/1184, 2023/1185)', 'Kontrole RFNBO (UE 2023/1184, 2023/1185)'),
+      head: [T('Condition', 'Умова', 'Bedingung', 'Voorwaarde', 'Condition', 'Condición', 'Warunek'), T('Met', 'Виконано', 'Erfüllt', 'Voldaan', 'Remplie', 'Cumple', 'Spełniony')], rows: crow });
+    notes.push(T('Basis: hydrogen LHV 120 MJ/kg (33.3 kWh/kg), EUR 2025, real discount rate; GHG per MJ of hydrogen (LHV)',
+      'Основа: LHV водню 120 МДж/кг (33,3 кВт·год/кг), EUR 2025, реальна ставка дисконтування; ПГ на МДж водню (LHV)',
+      'Grundlage: Heizwert Wasserstoff 120 MJ/kg (33,3 kWh/kg), EUR 2025, realer Zins; THG je MJ Wasserstoff (Hi)',
+      'Basis: onderwaarde waterstof 120 MJ/kg (33,3 kWh/kg), EUR 2025, reële disconteringsvoet; broeikasgassen per MJ waterstof (LHV)',
+      'Base : PCI de l’hydrogène 120 MJ/kg (33,3 kWh/kg), EUR 2025, taux réel ; GES par MJ d’hydrogène (PCI)',
+      'Base: PCI del hidrógeno 120 MJ/kg (33,3 kWh/kg), EUR 2025, tasa real; GEI por MJ de hidrógeno (PCI)',
+      'Podstawa: LHV wodoru 120 MJ/kg (33,3 kWh/kg), EUR 2025, realna stopa dyskontowa; GHG na MJ wodoru (LHV)'));
+    for (i = 0; r.warnings && i < r.warnings.length; i++) { w = r.warnings[i]; notes.push(trMsg(w)); }
+    return { verdict: verdict, tiles: tiles, meters: [], tables: tables, notes: notes };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'Levelised cost of hydrogen and RFNBO check';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record '
+                  + 'and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'lcoh_rfnbo',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      learn: {
+        version: 1,
+        intro: {
+          title: T(
+            'Levelised cost of hydrogen and RFNBO check',
+            'Нормована вартість водню та перевірка RFNBO',
+            'Wasserstoffgestehungskosten und RFNBO-Prüfung',
+            'Genivelleerde waterstofkosten en RFNBO-toets',
+            'Coût actualisé de l’hydrogène et contrôle RFNBO',
+            'Coste nivelado del hidrógeno y comprobación RFNBO',
+            'Uśredniony koszt wodoru i weryfikacja RFNBO'
+          ),
+          body: T(
+            'Computes the levelised cost of electrolytic hydrogen (LCOH) from plant cost, electricity price, full-load hours and financing, and checks whether the output counts as a renewable fuel of non-biological origin (RFNBO) under the EU delegated regulations 2023/1184 (electricity sourcing) and 2023/1185 (70 % greenhouse-gas saving).',
+            'Обчислює нормовану вартість електролітичного водню (LCOH) з вартості установки, ціни електроенергії, годин повного навантаження та фінансування і перевіряє, чи вважається продукція відновлюваним паливом небіологічного походження (RFNBO) за делегованими регламентами ЄС 2023/1184 (джерело електроенергії) та 2023/1185 (скорочення парникових газів на 70 %).',
+            'Berechnet die Gestehungskosten von Elektrolysewasserstoff (LCOH) aus Anlagenkosten, Strompreis, Volllaststunden und Finanzierung und prüft, ob die Produktion als erneuerbarer Kraftstoff nicht biogenen Ursprungs (RFNBO) nach den delegierten EU-Verordnungen 2023/1184 (Strombezug) und 2023/1185 (70 % THG-Einsparung) gilt.',
+            'Berekent de genivelleerde kosten van elektrolytische waterstof (LCOH) uit installatiekosten, elektriciteitsprijs, vollasturen en financiering, en toetst of de productie geldt als hernieuwbare brandstof van niet-biologische oorsprong (RFNBO) volgens de gedelegeerde EU-verordeningen 2023/1184 (elektriciteitsinkoop) en 2023/1185 (70 % broeikasgasbesparing).',
+            'Calcule le coût actualisé de l’hydrogène électrolytique (LCOH) à partir du coût de l’installation, du prix de l’électricité, des heures à pleine charge et du financement, et vérifie si la production est un carburant renouvelable d’origine non biologique (RFNBO) au sens des règlements délégués UE 2023/1184 (approvisionnement électrique) et 2023/1185 (réduction de 70 % des GES).',
+            'Calcula el coste nivelado del hidrógeno electrolítico (LCOH) a partir del coste de la planta, el precio de la electricidad, las horas a plena carga y la financiación, y comprueba si la producción es un combustible renovable de origen no biológico (RFNBO) según los reglamentos delegados de la UE 2023/1184 (suministro eléctrico) y 2023/1185 (ahorro de GEI del 70 %).',
+            'Oblicza uśredniony koszt wodoru elektrolitycznego (LCOH) na podstawie kosztu instalacji, ceny energii, godzin pełnego obciążenia i finansowania oraz sprawdza, czy produkcja jest odnawialnym paliwem pochodzenia niebiologicznego (RFNBO) według rozporządzeń delegowanych UE 2023/1184 (zakup energii) i 2023/1185 (70 % redukcji gazów cieplarnianych).'
+          )
+        },
+        topics: {
+          lcoh: {
+            title: T('Levelised cost', 'Нормована вартість', 'Gestehungskosten', 'Genivelleerde kosten', 'Coût actualisé', 'Coste nivelado', 'Koszt uśredniony'),
+            body: T(
+              'LCOH is the constant hydrogen price that repays all costs over the plant life at the discount rate: the investment is turned into a yearly annuity with the capital recovery factor and added to the yearly operating costs, then divided by the yearly output. It is shown per kg and per MWh of hydrogen on the LHV basis (33.3 kWh/kg).',
+              'LCOH — це стала ціна водню, яка за ставки дисконтування окуповує всі витрати за строк служби: інвестиції переводять у щорічний ануїтет за коефіцієнтом повернення капіталу, додають до щорічних експлуатаційних витрат і ділять на річне виробництво. Показано на кг і на МВт·год водню за нижчою теплотою згоряння (33,3 кВт·год/кг).',
+              'LCOH ist der konstante Wasserstoffpreis, der alle Kosten über die Lebensdauer zum Kalkulationszins deckt: Die Investition wird mit dem Kapitalwiedergewinnungsfaktor in eine jährliche Annuität umgerechnet, zu den jährlichen Betriebskosten addiert und durch die Jahresproduktion geteilt. Angegeben je kg und je MWh Wasserstoff auf Heizwertbasis (33,3 kWh/kg).',
+              'LCOH is de constante waterstofprijs die alle kosten over de levensduur terugverdient tegen de disconteringsvoet: de investering wordt met de kapitaalterugwinningsfactor omgezet in een jaarlijkse annuïteit, opgeteld bij de jaarlijkse bedrijfskosten en gedeeld door de jaarproductie. Getoond per kg en per MWh waterstof op onderwaarde (33,3 kWh/kg).',
+              'Le LCOH est le prix constant de l’hydrogène qui rembourse tous les coûts sur la durée de vie au taux d’actualisation : l’investissement est converti en annuité par le facteur de recouvrement du capital, ajouté aux coûts annuels d’exploitation, puis divisé par la production annuelle. Il est donné par kg et par MWh d’hydrogène sur base PCI (33,3 kWh/kg).',
+              'El LCOH es el precio constante del hidrógeno que recupera todos los costes durante la vida útil a la tasa de descuento: la inversión se convierte en una anualidad con el factor de recuperación del capital, se suma a los costes anuales de operación y se divide por la producción anual. Se da por kg y por MWh de hidrógeno en base PCI (33,3 kWh/kg).',
+              'LCOH to stała cena wodoru, która przy danej stopie dyskontowej zwraca wszystkie koszty w okresie eksploatacji: inwestycję przelicza się na roczną annuitę współczynnikiem odzysku kapitału, dodaje do rocznych kosztów eksploatacji i dzieli przez roczną produkcję. Podawany na kg i na MWh wodoru wg wartości opałowej (33,3 kWh/kg).'
+            )
+          },
+          plant: {
+            title: T('Plant size and efficiency', 'Розмір і ККД установки', 'Anlagengröße und Wirkungsgrad', 'Installatiegrootte en rendement', 'Taille et rendement de l’installation', 'Tamaño y eficiencia de la planta', 'Wielkość i sprawność instalacji'),
+            body: T(
+              'The rated electrical input and the system specific electricity use (stack, rectifier, balance of plant) give the hydrogen output: m = P × hours / use. 50–55 kWh/kg is typical for alkaline and PEM systems today, i.e. 60–67 % efficiency on the LHV basis; stack degradation is not modelled, so use an average value over the stack life.',
+              'Номінальна електрична потужність і питоме споживання електроенергії системою (стек, випрямляч, допоміжне обладнання) дають виробництво водню: m = P × години / споживання. Типово 50–55 кВт·год/кг для лужних і PEM-систем, тобто ККД 60–67 % за нижчою теплотою; деградація стека не моделюється, тож задавайте середнє значення за ресурс стека.',
+              'Elektrische Nennleistung und spezifischer Strombedarf des Systems (Stack, Gleichrichter, Nebenanlagen) ergeben die Wasserstoffproduktion: m = P × Stunden / Bedarf. Typisch sind heute 50–55 kWh/kg für alkalische und PEM-Systeme, also 60–67 % Wirkungsgrad bezogen auf den Heizwert; die Stack-Degradation wird nicht modelliert, daher einen Mittelwert über die Stack-Lebensdauer verwenden.',
+              'Het nominale elektrische vermogen en het specifieke elektriciteitsverbruik van het systeem (stack, gelijkrichter, hulpsystemen) bepalen de waterstofproductie: m = P × uren / verbruik. Typisch is nu 50–55 kWh/kg voor alkalische en PEM-systemen, dus 60–67 % rendement op onderwaarde; stackdegradatie wordt niet gemodelleerd, gebruik dus een gemiddelde over de stacklevensduur.',
+              'La puissance électrique nominale et la consommation spécifique du système (stack, redresseur, auxiliaires) donnent la production d’hydrogène : m = P × heures / consommation. 50–55 kWh/kg est courant pour les systèmes alcalins et PEM, soit 60–67 % de rendement sur PCI ; la dégradation du stack n’est pas modélisée, utilisez donc une valeur moyenne sur sa durée de vie.',
+              'La potencia eléctrica nominal y el consumo específico del sistema (stack, rectificador, equipos auxiliares) dan la producción de hidrógeno: m = P × horas / consumo. Hoy son típicos 50–55 kWh/kg en sistemas alcalinos y PEM, es decir, un 60–67 % de eficiencia en PCI; la degradación del stack no se modela, así que use un valor medio a lo largo de su vida.',
+              'Znamionowa moc elektryczna i jednostkowe zużycie energii systemu (stos, prostownik, urządzenia pomocnicze) dają produkcję wodoru: m = P × godziny / zużycie. Typowo 50–55 kWh/kg dla systemów alkalicznych i PEM, czyli sprawność 60–67 % wg LHV; degradacja stosu nie jest modelowana, więc podaj wartość średnią w okresie jego żywotności.'
+            )
+          },
+          capex: {
+            title: T('System cost, O&M and water', 'Вартість системи, експлуатація та вода', 'Systemkosten, Betrieb und Wasser', 'Systeemkosten, O&M en water', 'Coût du système, exploitation et eau', 'Coste del sistema, O&M y agua', 'Koszt systemu, eksploatacja i woda'),
+            body: T(
+              'The installed system cost per kW of electrical input covers stacks, power electronics, gas treatment, water treatment, engineering and construction; IEA reported 2 000–2 600 USD/kW for installed plants in 2023–2024. Fixed O&M is a yearly percentage of this cost (2–4 %), and demineralised water use is about 10–20 L/kg including treatment losses.',
+              'Вартість встановленої системи на кВт електричної потужності включає стеки, силову електроніку, очищення газу й води, проєктування та будівництво; МЕА повідомляло 2 000–2 600 дол. США/кВт для збудованих установок у 2023–2024 рр. Постійні витрати на експлуатацію — щорічний відсоток від цієї вартості (2–4 %), а споживання знесоленої води становить близько 10–20 л/кг з урахуванням втрат на підготовку.',
+              'Die installierten Systemkosten je kW elektrischer Leistung umfassen Stacks, Leistungselektronik, Gas- und Wasseraufbereitung, Planung und Bau; die IEA nennt 2 000–2 600 USD/kW für 2023–2024 errichtete Anlagen. Die fixen Betriebskosten sind ein jährlicher Prozentsatz dieser Kosten (2–4 %), der Bedarf an vollentsalztem Wasser liegt bei etwa 10–20 L/kg einschließlich Aufbereitungsverlusten.',
+              'De geïnstalleerde systeemkosten per kW elektrisch vermogen omvatten stacks, vermogenselektronica, gas- en waterbehandeling, engineering en bouw; het IEA rapporteerde 2 000–2 600 USD/kW voor installaties uit 2023–2024. Vaste O&M is een jaarlijks percentage van deze kosten (2–4 %) en het verbruik van gedemineraliseerd water is ongeveer 10–20 L/kg inclusief behandelingsverliezen.',
+              'Le coût du système installé par kW électrique couvre les stacks, l’électronique de puissance, le traitement du gaz et de l’eau, l’ingénierie et la construction ; l’AIE a relevé 2 000–2 600 USD/kW pour les installations de 2023–2024. L’exploitation fixe est un pourcentage annuel de ce coût (2–4 %) et la consommation d’eau déminéralisée est d’environ 10–20 L/kg, pertes de traitement comprises.',
+              'El coste del sistema instalado por kW eléctrico incluye stacks, electrónica de potencia, tratamiento de gas y agua, ingeniería y construcción; la AIE informó de 2 000–2 600 USD/kW para plantas de 2023–2024. El O&M fijo es un porcentaje anual de este coste (2–4 %) y el consumo de agua desmineralizada es de unos 10–20 L/kg, incluidas las pérdidas de tratamiento.',
+              'Koszt zainstalowanego systemu na kW mocy elektrycznej obejmuje stosy, energoelektronikę, uzdatnianie gazu i wody, projekt i budowę; IEA podała 2 000–2 600 USD/kW dla instalacji z lat 2023–2024. Stałe koszty eksploatacji to roczny procent tego kosztu (2–4 %), a zużycie wody demineralizowanej wynosi około 10–20 L/kg wraz ze stratami uzdatniania.'
+            )
+          },
+          stack: {
+            title: T('Stack replacement', 'Заміна стека', 'Stacktausch', 'Stackvervanging', 'Remplacement du stack', 'Sustitución del stack', 'Wymiana stosu'),
+            body: T(
+              'Stacks wear out after 60 000–90 000 operating hours. A new stack is fitted at the end of the year in which the running stack reaches its life, at the given share of the system cost; no replacement is made in the last year. Replacements are discounted to year 0 and annualised like the investment, so plants with many hours replace stacks more often.',
+              'Стеки зношуються після 60 000–90 000 годин роботи. Новий стек встановлюють наприкінці року, в якому чинний стек вичерпує ресурс, за заданою часткою вартості системи; в останній рік заміни немає. Заміни дисконтують до року 0 і перетворюють на ануїтет так само, як інвестиції, тож установки з великою кількістю годин міняють стеки частіше.',
+              'Stacks verschleißen nach 60 000–90 000 Betriebsstunden. Ein neuer Stack wird am Ende des Jahres eingebaut, in dem der laufende Stack seine Lebensdauer erreicht, zum angegebenen Anteil der Systemkosten; im letzten Jahr erfolgt kein Tausch. Die Tausche werden auf das Jahr 0 abgezinst und wie die Investition annualisiert, Anlagen mit vielen Stunden tauschen also häufiger.',
+              'Stacks slijten na 60 000–90 000 bedrijfsuren. Een nieuwe stack wordt geplaatst aan het eind van het jaar waarin de lopende stack zijn levensduur bereikt, tegen het opgegeven aandeel van de systeemkosten; in het laatste jaar wordt niet vervangen. Vervangingen worden verdisconteerd naar jaar 0 en net als de investering geannualiseerd, dus installaties met veel uren vervangen vaker.',
+              'Les stacks s’usent après 60 000 à 90 000 heures de fonctionnement. Un nouveau stack est posé à la fin de l’année où le stack en service atteint sa durée de vie, pour la part indiquée du coût du système ; aucun remplacement la dernière année. Les remplacements sont actualisés à l’année 0 et annualisés comme l’investissement : plus il y a d’heures, plus ils sont fréquents.',
+              'Los stacks se desgastan tras 60 000–90 000 horas de operación. Se instala uno nuevo al final del año en que el stack en servicio alcanza su vida útil, con la fracción indicada del coste del sistema; no hay sustitución en el último año. Las sustituciones se descuentan al año 0 y se anualizan como la inversión, así que las plantas con muchas horas las sustituyen más a menudo.',
+              'Stosy zużywają się po 60 000–90 000 godzinach pracy. Nowy stos montuje się na koniec roku, w którym pracujący stos osiąga swoją żywotność, za podany udział kosztu systemu; w ostatnim roku wymiany nie ma. Wymiany dyskontuje się na rok 0 i przelicza na annuitę jak inwestycję, więc instalacje o wielu godzinach wymieniają stosy częściej.'
+            )
+          },
+          hours: {
+            title: T('Full-load hours', 'Години повного навантаження', 'Volllaststunden', 'Vollasturen', 'Heures à pleine charge', 'Horas a plena carga', 'Godziny pełnego obciążenia'),
+            body: T(
+              'Full-load hours are the yearly electricity use divided by the rated power. Few hours spread the capital over little hydrogen, so LCOH rises steeply below about 3 000 h; above about 5 000 h electricity dominates. Solar-only plants reach 1 500–2 500 h, onshore wind 3 000–4 500 h, and grid-connected plants up to 8 000 h. The chart shows this trade-off for the current inputs.',
+              'Години повного навантаження — це річне споживання електроенергії, поділене на номінальну потужність. За малої кількості годин капітал розподіляється на мало водню, тож LCOH різко зростає нижче приблизно 3 000 год; вище приблизно 5 000 год домінує електроенергія. Суто сонячні установки досягають 1 500–2 500 год, наземні вітрові 3 000–4 500 год, а підключені до мережі — до 8 000 год. Графік показує цей компроміс для поточних даних.',
+              'Volllaststunden sind der jährliche Stromverbrauch geteilt durch die Nennleistung. Bei wenigen Stunden verteilt sich das Kapital auf wenig Wasserstoff, die LCOH steigen unter etwa 3 000 h steil an; über etwa 5 000 h dominiert der Strom. Reine PV-Anlagen erreichen 1 500–2 500 h, Wind an Land 3 000–4 500 h, netzgekoppelte Anlagen bis 8 000 h. Das Diagramm zeigt diesen Zielkonflikt für die aktuellen Eingaben.',
+              'Vollasturen zijn het jaarlijkse elektriciteitsverbruik gedeeld door het nominale vermogen. Bij weinig uren wordt het kapitaal over weinig waterstof verdeeld, zodat de LCOH onder ongeveer 3 000 h steil stijgt; boven ongeveer 5 000 h domineert de elektriciteit. Alleen-zon-installaties halen 1 500–2 500 h, wind op land 3 000–4 500 h en netgekoppelde installaties tot 8 000 h. De grafiek toont deze afweging voor de huidige invoer.',
+              'Les heures à pleine charge sont la consommation électrique annuelle divisée par la puissance nominale. Avec peu d’heures, le capital est réparti sur peu d’hydrogène et le LCOH croît fortement sous environ 3 000 h ; au-delà d’environ 5 000 h l’électricité domine. Le solaire seul atteint 1 500–2 500 h, l’éolien terrestre 3 000–4 500 h, le raccordement au réseau jusqu’à 8 000 h. Le graphique montre ce compromis pour les données saisies.',
+              'Las horas a plena carga son el consumo eléctrico anual dividido por la potencia nominal. Con pocas horas el capital se reparte sobre poco hidrógeno y el LCOH sube bruscamente por debajo de unas 3 000 h; por encima de unas 5 000 h domina la electricidad. Las plantas solo solares alcanzan 1 500–2 500 h, la eólica terrestre 3 000–4 500 h y las conectadas a la red hasta 8 000 h. El gráfico muestra este compromiso para los datos actuales.',
+              'Godziny pełnego obciążenia to roczne zużycie energii podzielone przez moc znamionową. Przy małej liczbie godzin kapitał rozkłada się na mało wodoru i LCOH gwałtownie rośnie poniżej około 3 000 h; powyżej około 5 000 h dominuje energia. Instalacje wyłącznie słoneczne osiągają 1 500–2 500 h, wiatr na lądzie 3 000–4 500 h, a przyłączone do sieci do 8 000 h. Wykres pokazuje ten kompromis dla bieżących danych.'
+            )
+          },
+          electricity: {
+            title: T('Electricity price', 'Ціна електроенергії', 'Strompreis', 'Elektriciteitsprijs', 'Prix de l’électricité', 'Precio de la electricidad', 'Cena energii elektrycznej'),
+            body: T(
+              'Enter the average price paid per MWh including grid fees, levies and balancing, as a PPA price or a wholesale average for the operating hours. At 53 kWh/kg each 10 EUR/MWh adds 0.53 EUR/kg, so electricity is usually 50–70 % of the LCOH. A constant price is assumed; price-driven operation is not optimised.',
+              'Введіть середню ціну за МВт·год з мережевими тарифами, зборами та балансуванням — як ціну PPA або середню оптову ціну за години роботи. За 53 кВт·год/кг кожні 10 EUR/МВт·год додають 0,53 EUR/кг, тож електроенергія зазвичай становить 50–70 % LCOH. Ціна вважається сталою; роботу за ціновим сигналом не оптимізовано.',
+              'Einzugeben ist der mittlere Preis je MWh einschließlich Netzentgelten, Umlagen und Ausgleichsenergie, als PPA-Preis oder Großhandelsmittel der Betriebsstunden. Bei 53 kWh/kg erhöhen je 10 EUR/MWh die Kosten um 0,53 EUR/kg, der Strom macht daher meist 50–70 % der LCOH aus. Der Preis gilt als konstant; ein preisgeführter Betrieb wird nicht optimiert.',
+              'Voer de gemiddelde prijs per MWh in, inclusief nettarieven, heffingen en onbalans, als PPA-prijs of groothandelsgemiddelde over de bedrijfsuren. Bij 53 kWh/kg voegt elke 10 EUR/MWh 0,53 EUR/kg toe, dus elektriciteit is meestal 50–70 % van de LCOH. De prijs wordt constant verondersteld; prijsgestuurd bedrijf wordt niet geoptimaliseerd.',
+              'Saisissez le prix moyen payé par MWh, y compris réseau, taxes et équilibrage, comme prix de PPA ou moyenne de gros sur les heures de fonctionnement. À 53 kWh/kg, chaque 10 EUR/MWh ajoute 0,53 EUR/kg ; l’électricité représente donc souvent 50 à 70 % du LCOH. Le prix est supposé constant ; l’exploitation pilotée par les prix n’est pas optimisée.',
+              'Introduzca el precio medio pagado por MWh, incluidos peajes, cargos y desvíos, como precio de PPA o media mayorista en las horas de operación. Con 53 kWh/kg, cada 10 EUR/MWh añade 0,53 EUR/kg, por lo que la electricidad suele suponer el 50–70 % del LCOH. Se supone un precio constante; no se optimiza la operación según el precio.',
+              'Podaj średnią cenę za MWh z opłatami sieciowymi, podatkami i bilansowaniem, jako cenę PPA lub średnią hurtową w godzinach pracy. Przy 53 kWh/kg każde 10 EUR/MWh dodaje 0,53 EUR/kg, więc energia stanowi zwykle 50–70 % LCOH. Cena jest stała; praca sterowana ceną nie jest optymalizowana.'
+            )
+          },
+          finance: {
+            title: T('Discount rate and life', 'Ставка дисконтування та строк', 'Kalkulationszins und Nutzungsdauer', 'Disconteringsvoet en levensduur', 'Taux d’actualisation et durée de vie', 'Tasa de descuento y vida útil', 'Stopa dyskontowa i okres eksploatacji'),
+            body: T(
+              'The real weighted average cost of capital (WACC) and the economic life set the capital recovery factor CRF = i(1+i)^n / ((1+i)^n − 1): 0.086 per year at 7 % over 25 years. Each extra percentage point of WACC raises the capital part of the LCOH by roughly 8–10 %. Costs are in constant EUR 2025, without inflation, taxes or subsidies.',
+              'Реальна середньозважена вартість капіталу (WACC) і економічний строк служби визначають коефіцієнт повернення капіталу CRF = i(1+i)^n / ((1+i)^n − 1): 0,086 на рік за 7 % і 25 років. Кожен додатковий відсотковий пункт WACC збільшує капітальну складову LCOH приблизно на 8–10 %. Вартість — у постійних EUR 2025, без інфляції, податків і субсидій.',
+              'Die realen gewichteten Kapitalkosten (WACC) und die Nutzungsdauer bestimmen den Kapitalwiedergewinnungsfaktor CRF = i(1+i)^n / ((1+i)^n − 1): 0,086 je Jahr bei 7 % über 25 Jahre. Jeder weitere Prozentpunkt WACC erhöht den Kapitalanteil der LCOH um etwa 8–10 %. Kosten in konstanten EUR 2025, ohne Inflation, Steuern und Förderung.',
+              'De reële gewogen gemiddelde kapitaalkosten (WACC) en de economische levensduur bepalen de kapitaalterugwinningsfactor CRF = i(1+i)^n / ((1+i)^n − 1): 0,086 per jaar bij 7 % over 25 jaar. Elk extra procentpunt WACC verhoogt het kapitaaldeel van de LCOH met ongeveer 8–10 %. Kosten in constante EUR 2025, zonder inflatie, belastingen of subsidies.',
+              'Le coût moyen pondéré du capital réel (WACC) et la durée de vie économique fixent le facteur de recouvrement du capital CRF = i(1+i)^n / ((1+i)^n − 1) : 0,086 par an à 7 % sur 25 ans. Chaque point de WACC supplémentaire augmente la part capital du LCOH d’environ 8 à 10 %. Coûts en EUR 2025 constants, hors inflation, impôts et subventions.',
+              'El coste medio ponderado del capital real (WACC) y la vida económica fijan el factor de recuperación del capital CRF = i(1+i)^n / ((1+i)^n − 1): 0,086 al año con un 7 % durante 25 años. Cada punto porcentual adicional de WACC aumenta la parte de capital del LCOH en un 8–10 % aproximadamente. Costes en EUR 2025 constantes, sin inflación, impuestos ni subvenciones.',
+              'Realny średni ważony koszt kapitału (WACC) i ekonomiczny okres eksploatacji wyznaczają współczynnik odzysku kapitału CRF = i(1+i)^n / ((1+i)^n − 1): 0,086 rocznie przy 7 % przez 25 lat. Każdy dodatkowy punkt procentowy WACC zwiększa część kapitałową LCOH o około 8–10 %. Koszty w stałych EUR 2025, bez inflacji, podatków i dotacji.'
+            )
+          },
+          routes: {
+            title: T('RFNBO electricity routes', 'Шляхи постачання електроенергії для RFNBO', 'Strombezugswege für RFNBO', 'Elektriciteitsroutes voor RFNBO', 'Voies d’approvisionnement électrique RFNBO', 'Vías de suministro eléctrico RFNBO', 'Ścieżki zakupu energii dla RFNBO'),
+            body: T(
+              'Regulation (EU) 2023/1184 lets electricity count as fully renewable by four routes: a direct line from a new renewable plant (Art. 3); grid power in a bidding zone with more than 90 % renewables, with hours capped at that share of the year (Art. 4(1)); renewable PPAs meeting additionality, temporal and geographic correlation (Art. 4(2), 5–7); or a zone below 18 gCO₂e/MJ with PPAs and correlation (Art. 4(3)). Only that share of the output is RFNBO here.',
+              'Регламент (ЄС) 2023/1184 дозволяє вважати електроенергію повністю відновлюваною чотирма шляхами: пряма лінія від нової ВДЕ-установки (ст. 3); мережева енергія в торговій зоні з часткою ВДЕ понад 90 % з обмеженням годин цією часткою року (ст. 4(1)); відновлювані PPA з додатковістю, часовою та географічною кореляцією (ст. 4(2), 5–7); або зона з інтенсивністю нижче 18 гCO₂e/МДж з PPA та кореляцією (ст. 4(3)). Тут RFNBO вважається лише відповідна частка продукції.',
+              'Die Verordnung (EU) 2023/1184 lässt Strom auf vier Wegen als vollständig erneuerbar gelten: Direktleitung von einer neuen erneuerbaren Anlage (Art. 3); Netzstrom in einer Gebotszone mit über 90 % Erneuerbaren, Stunden begrenzt auf diesen Anteil des Jahres (Art. 4(1)); erneuerbare PPAs mit Zusätzlichkeit, zeitlicher und geografischer Korrelation (Art. 4(2), 5–7); oder eine Zone unter 18 gCO₂e/MJ mit PPAs und Korrelation (Art. 4(3)). Nur dieser Anteil der Produktion gilt hier als RFNBO.',
+              'Verordening (EU) 2023/1184 laat elektriciteit langs vier routes als volledig hernieuwbaar tellen: een directe lijn van een nieuwe hernieuwbare installatie (art. 3); netstroom in een biedzone met meer dan 90 % hernieuwbaar, met uren begrensd tot dat aandeel van het jaar (art. 4(1)); hernieuwbare PPA’s met additionaliteit en tijd- en geografische correlatie (art. 4(2), 5–7); of een zone onder 18 gCO₂e/MJ met PPA’s en correlatie (art. 4(3)). Alleen dat deel van de productie is hier RFNBO.',
+              'Le règlement (UE) 2023/1184 admet quatre voies pour compter l’électricité comme entièrement renouvelable : liaison directe avec une installation renouvelable récente (art. 3) ; électricité du réseau dans une zone à plus de 90 % renouvelable, heures plafonnées à cette part de l’année (art. 4(1)) ; PPA renouvelables avec additionnalité et corrélations temporelle et géographique (art. 4(2), 5–7) ; ou zone sous 18 gCO₂e/MJ avec PPA et corrélation (art. 4(3)). Seule cette part de la production est ici RFNBO.',
+              'El Reglamento (UE) 2023/1184 permite contar la electricidad como totalmente renovable por cuatro vías: línea directa desde una planta renovable nueva (art. 3); electricidad de red en una zona de oferta con más del 90 % renovable, con horas limitadas a esa fracción del año (art. 4(1)); PPA renovables con adicionalidad y correlación temporal y geográfica (art. 4(2), 5–7); o una zona por debajo de 18 gCO₂e/MJ con PPA y correlación (art. 4(3)). Solo esa fracción de la producción es aquí RFNBO.',
+              'Rozporządzenie (UE) 2023/1184 dopuszcza cztery ścieżki uznania energii za w pełni odnawialną: bezpośrednie połączenie z nową instalacją OZE (art. 3); energia z sieci w strefie cenowej o udziale OZE powyżej 90 %, z godzinami ograniczonymi do tego udziału roku (art. 4(1)); odnawialne umowy PPA z dodatkowością oraz korelacją czasową i geograficzną (art. 4(2), 5–7); albo strefa poniżej 18 gCO₂e/MJ z PPA i korelacją (art. 4(3)). Tylko ta część produkcji jest tu RFNBO.'
+            )
+          },
+          temporal: {
+            title: T('Temporal and geographic correlation', 'Часова та географічна кореляція', 'Zeitliche und geografische Korrelation', 'Tijd- en geografische correlatie', 'Corrélations temporelle et géographique', 'Correlación temporal y geográfica', 'Korelacja czasowa i geograficzna'),
+            body: T(
+              'Under Art. 6 the hydrogen must be produced in the same calendar month as the contracted renewable electricity until 31 December 2029 and in the same hour from 1 January 2030; Member States may impose hourly matching from 1 July 2027. Under Art. 7 the renewable plant must be in the same bidding zone (or an interconnected zone under conditions not modelled here).',
+              'За ст. 6 водень має вироблятися в тому самому календарному місяці, що й контрактована відновлювана електроенергія, до 31 грудня 2029 р., а з 1 січня 2030 р. — в ту саму годину; держави-члени можуть запровадити погодинну відповідність з 1 липня 2027 р. За ст. 7 ВДЕ-установка має бути в тій самій торговій зоні (або в суміжній зоні за умов, які тут не моделюються).',
+              'Nach Art. 6 muss der Wasserstoff bis 31. Dezember 2029 im selben Kalendermonat wie der vertraglich bezogene erneuerbare Strom erzeugt werden, ab 1. Januar 2030 in derselben Stunde; Mitgliedstaaten können die stündliche Korrelation ab 1. Juli 2027 vorschreiben. Nach Art. 7 muss die erneuerbare Anlage in derselben Gebotszone liegen (oder in einer verbundenen Zone unter hier nicht modellierten Bedingungen).',
+              'Volgens art. 6 moet de waterstof tot 31 december 2029 in dezelfde kalendermaand als de gecontracteerde hernieuwbare elektriciteit worden geproduceerd en vanaf 1 januari 2030 in hetzelfde uur; lidstaten mogen uurcorrelatie vanaf 1 juli 2027 opleggen. Volgens art. 7 moet de hernieuwbare installatie in dezelfde biedzone liggen (of in een verbonden zone onder hier niet gemodelleerde voorwaarden).',
+              'Selon l’art. 6, l’hydrogène doit être produit dans le même mois civil que l’électricité renouvelable contractée jusqu’au 31 décembre 2029, puis dans la même heure à partir du 1er janvier 2030 ; les États membres peuvent imposer la corrélation horaire dès le 1er juillet 2027. Selon l’art. 7, l’installation renouvelable doit être dans la même zone de dépôt des offres (ou une zone interconnectée sous des conditions non modélisées ici).',
+              'Según el art. 6, el hidrógeno debe producirse en el mismo mes natural que la electricidad renovable contratada hasta el 31 de diciembre de 2029 y en la misma hora desde el 1 de enero de 2030; los Estados miembros pueden exigir correlación horaria desde el 1 de julio de 2027. Según el art. 7, la planta renovable debe estar en la misma zona de oferta (o en una zona interconectada en condiciones no modeladas aquí).',
+              'Zgodnie z art. 6 wodór musi być wytworzony w tym samym miesiącu kalendarzowym co zakontraktowana energia odnawialna do 31 grudnia 2029 r., a od 1 stycznia 2030 r. w tej samej godzinie; państwa członkowskie mogą wprowadzić korelację godzinową od 1 lipca 2027 r. Zgodnie z art. 7 instalacja OZE musi znajdować się w tej samej strefie cenowej (lub w strefie połączonej na warunkach, których tu nie modelowano).'
+            )
+          },
+          additionality: {
+            title: T('Additionality', 'Додатковість', 'Zusätzlichkeit', 'Additionaliteit', 'Additionnalité', 'Adicionalidad', 'Dodatkowość'),
+            body: T(
+              'Art. 5 requires the contracted renewable plant to have started operation no earlier than 36 months before the electrolyser and to have received no operating or investment aid. Under the transition of Art. 11, electrolysers in operation before 1 January 2028 are exempt from these two conditions until 31 December 2035. The 36-month rule also applies to a direct connection (Art. 3).',
+              'Ст. 5 вимагає, щоб контрактована ВДЕ-установка почала роботу не раніше ніж за 36 місяців до електролізера і не отримувала операційної чи інвестиційної підтримки. За перехідним положенням ст. 11 електролізери, що працюють до 1 січня 2028 р., звільнені від цих двох умов до 31 грудня 2035 р. Правило 36 місяців стосується і прямого підключення (ст. 3).',
+              'Art. 5 verlangt, dass die vertraglich gebundene erneuerbare Anlage frühestens 36 Monate vor dem Elektrolyseur in Betrieb ging und keine Betriebs- oder Investitionsbeihilfe erhielt. Nach der Übergangsregel des Art. 11 sind Elektrolyseure, die vor dem 1. Januar 2028 in Betrieb gehen, bis 31. Dezember 2035 von diesen beiden Bedingungen befreit. Die 36-Monats-Regel gilt auch für den Direktanschluss (Art. 3).',
+              'Art. 5 vereist dat de gecontracteerde hernieuwbare installatie niet eerder dan 36 maanden vóór de elektrolyser in bedrijf kwam en geen exploitatie- of investeringssteun kreeg. Volgens de overgangsregel van art. 11 zijn elektrolysers die vóór 1 januari 2028 in bedrijf zijn tot 31 december 2035 vrijgesteld van deze twee voorwaarden. De 36-maandenregel geldt ook voor een directe aansluiting (art. 3).',
+              'L’art. 5 exige que l’installation renouvelable contractée soit entrée en service au plus tôt 36 mois avant l’électrolyseur et n’ait reçu aucune aide au fonctionnement ni à l’investissement. Selon la transition de l’art. 11, les électrolyseurs en service avant le 1er janvier 2028 sont exemptés de ces deux conditions jusqu’au 31 décembre 2035. La règle des 36 mois s’applique aussi au raccordement direct (art. 3).',
+              'El art. 5 exige que la planta renovable contratada entrara en servicio no antes de 36 meses antes del electrolizador y no recibiera ayudas de funcionamiento ni de inversión. Según la transición del art. 11, los electrolizadores en servicio antes del 1 de enero de 2028 están exentos de estas dos condiciones hasta el 31 de diciembre de 2035. La regla de 36 meses también se aplica a la conexión directa (art. 3).',
+              'Art. 5 wymaga, aby zakontraktowana instalacja OZE rozpoczęła pracę nie wcześniej niż 36 miesięcy przed elektrolizerem i nie otrzymała pomocy operacyjnej ani inwestycyjnej. Zgodnie z przepisem przejściowym art. 11 elektrolizery pracujące przed 1 stycznia 2028 r. są zwolnione z tych dwóch warunków do 31 grudnia 2035 r. Zasada 36 miesięcy dotyczy też bezpośredniego przyłączenia (art. 3).'
+            )
+          },
+          ghg: {
+            title: T('Greenhouse-gas saving', 'Скорочення парникових газів', 'Treibhausgaseinsparung', 'Broeikasgasbesparing', 'Réduction des gaz à effet de serre', 'Ahorro de gases de efecto invernadero', 'Redukcja gazów cieplarnianych'),
+            body: T(
+              'Regulation (EU) 2023/1185 requires RFNBO to emit at least 70 % less than the fossil comparator of 94 gCO₂e/MJ, i.e. at most 28.2 gCO₂e/MJ or 3.38 kgCO₂e/kg of hydrogen. Electricity counted as fully renewable has zero emissions; other grid electricity carries the zone intensity, about 70 gCO₂e/MJ for the EU average, which alone gives over 100 gCO₂e/MJ of hydrogen. Water, compression and transport emissions are entered as one value.',
+              'Регламент (ЄС) 2023/1185 вимагає, щоб викиди RFNBO були щонайменше на 70 % нижчими за викопний еталон 94 гCO₂e/МДж, тобто не більше 28,2 гCO₂e/МДж або 3,38 кгCO₂e/кг водню. Електроенергія, визнана повністю відновлюваною, має нульові викиди; інша мережева електроенергія має інтенсивність зони, близько 70 гCO₂e/МДж для середнього по ЄС, що саме по собі дає понад 100 гCO₂e/МДж водню. Викиди від води, компримування та транспорту вводяться одним значенням.',
+              'Die Verordnung (EU) 2023/1185 verlangt für RFNBO mindestens 70 % weniger Emissionen als der fossile Vergleichswert von 94 gCO₂e/MJ, also höchstens 28,2 gCO₂e/MJ bzw. 3,38 kgCO₂e/kg Wasserstoff. Als vollständig erneuerbar geltender Strom hat null Emissionen; übriger Netzstrom trägt die Zonenintensität, im EU-Mittel etwa 70 gCO₂e/MJ, was allein über 100 gCO₂e/MJ Wasserstoff ergibt. Emissionen für Wasser, Verdichtung und Transport werden als ein Wert eingegeben.',
+              'Verordening (EU) 2023/1185 eist dat RFNBO minstens 70 % minder uitstoten dan de fossiele referentie van 94 gCO₂e/MJ, dus ten hoogste 28,2 gCO₂e/MJ of 3,38 kgCO₂e/kg waterstof. Als volledig hernieuwbaar getelde elektriciteit heeft nul emissies; overige netstroom draagt de zone-intensiteit, ongeveer 70 gCO₂e/MJ voor het EU-gemiddelde, wat alleen al meer dan 100 gCO₂e/MJ waterstof geeft. Emissies voor water, compressie en transport worden als één waarde ingevoerd.',
+              'Le règlement (UE) 2023/1185 exige que les RFNBO émettent au moins 70 % de moins que le comparateur fossile de 94 gCO₂e/MJ, soit au plus 28,2 gCO₂e/MJ ou 3,38 kgCO₂e/kg d’hydrogène. L’électricité comptée comme entièrement renouvelable a des émissions nulles ; l’autre électricité du réseau porte l’intensité de la zone, environ 70 gCO₂e/MJ en moyenne UE, ce qui donne à lui seul plus de 100 gCO₂e/MJ d’hydrogène. Les émissions de l’eau, de la compression et du transport sont saisies en une valeur.',
+              'El Reglamento (UE) 2023/1185 exige que los RFNBO emitan al menos un 70 % menos que el comparador fósil de 94 gCO₂e/MJ, es decir, como máximo 28,2 gCO₂e/MJ o 3,38 kgCO₂e/kg de hidrógeno. La electricidad contada como totalmente renovable tiene emisiones nulas; el resto de la electricidad de red lleva la intensidad de la zona, unos 70 gCO₂e/MJ en la media de la UE, lo que por sí solo da más de 100 gCO₂e/MJ de hidrógeno. Las emisiones de agua, compresión y transporte se introducen como un único valor.',
+              'Rozporządzenie (UE) 2023/1185 wymaga, aby RFNBO emitowały co najmniej o 70 % mniej niż kopalny wskaźnik porównawczy 94 gCO₂e/MJ, czyli najwyżej 28,2 gCO₂e/MJ lub 3,38 kgCO₂e/kg wodoru. Energia uznana za w pełni odnawialną ma zerowe emisje; pozostała energia z sieci ma emisyjność strefy, około 70 gCO₂e/MJ dla średniej UE, co samo daje ponad 100 gCO₂e/MJ wodoru. Emisje z wody, sprężania i transportu podaje się jedną wartością.'
+            )
+          },
+          scope: {
+            title: T('Scope and limits', 'Сфера застосування та обмеження', 'Anwendungsbereich und Grenzen', 'Toepassingsgebied en beperkingen', 'Domaine d’application et limites', 'Alcance y limitaciones', 'Zakres i ograniczenia'),
+            body: T(
+              'A screening model with constant yearly operation, prices and efficiency: no hourly profiles, storage, degradation, by-product oxygen or heat revenue, taxes or subsidies. Grid electricity outside a renewable route is not credited with the zone renewable share. The rule check is simplified and is not a certification audit under a voluntary scheme.',
+              'Модель попередньої оцінки зі сталими щорічними режимом, цінами та ККД: без погодинних профілів, накопичення, деградації, доходу від кисню чи тепла, податків і субсидій. Мережевій електроенергії поза відновлюваними шляхами не зараховується частка ВДЕ зони. Перевірка правил спрощена і не є сертифікаційним аудитом за добровільною схемою.',
+              'Ein Screening-Modell mit konstantem Jahresbetrieb, konstanten Preisen und Wirkungsgrad: keine Stundenprofile, Speicher, Degradation, Erlöse aus Sauerstoff oder Wärme, Steuern oder Förderung. Netzstrom außerhalb eines erneuerbaren Weges wird nicht mit dem Erneuerbaren-Anteil der Zone angerechnet. Die Regelprüfung ist vereinfacht und kein Zertifizierungsaudit nach einem freiwilligen System.',
+              'Een screeningsmodel met constante jaarlijkse bedrijfsvoering, prijzen en rendement: geen uurprofielen, opslag, degradatie, opbrengsten uit zuurstof of warmte, belastingen of subsidies. Netstroom buiten een hernieuwbare route krijgt het hernieuwbare aandeel van de zone niet toegerekend. De regeltoets is vereenvoudigd en geen certificeringsaudit onder een vrijwillige regeling.',
+              'Modèle d’évaluation préliminaire à fonctionnement, prix et rendement annuels constants : pas de profils horaires, de stockage, de dégradation, de recettes d’oxygène ou de chaleur, d’impôts ni de subventions. L’électricité du réseau hors voie renouvelable n’est pas créditée de la part renouvelable de la zone. Le contrôle des règles est simplifié et ne constitue pas un audit de certification au titre d’un régime volontaire.',
+              'Modelo de cribado con operación, precios y eficiencia anuales constantes: sin perfiles horarios, almacenamiento, degradación, ingresos por oxígeno o calor, impuestos ni subvenciones. La electricidad de red fuera de una vía renovable no se acredita con la cuota renovable de la zona. La comprobación de reglas es simplificada y no es una auditoría de certificación en un régimen voluntario.',
+              'Model szacunkowy ze stałą roczną pracą, cenami i sprawnością: bez profili godzinowych, magazynowania, degradacji, przychodów z tlenu lub ciepła, podatków i dotacji. Energii z sieci spoza ścieżek odnawialnych nie przypisuje się udziału OZE strefy. Weryfikacja zasad jest uproszczona i nie stanowi audytu certyfikacyjnego w ramach systemu dobrowolnego.'
+            )
+          }
+        },
+        tour: [
+          { topic: 'hours', focus: '[data-dgu-field="f-flh"]' },
+          { topic: 'electricity', focus: '[data-dgu-field="f-elec_price"]' },
+          { topic: 'routes', focus: '[data-dgu-field="f-source"]' },
+          { topic: 'ghg', focus: '.dgu-r-results' },
+          { topic: 'lcoh', focus: '.dgu-stage' }
+        ]
+      },
+      panels: [
+        { id: 'how', slot: 'inputs', title: T('Approach', 'Підхід', 'Ansatz', 'Aanpak', 'Approche', 'Enfoque', 'Podejście'),
+          fields: [ { id: 'f-level', key: 'level', type: 'segmented', label: T('Level', 'Рівень', 'Stufe', 'Niveau', 'Niveau', 'Nivel', 'Poziom'), options: function () { return [['simple', T('Simple', 'Простий', 'Einfach', 'Eenvoudig', 'Simple', 'Simple', 'Prosty')], ['full', T('Full', 'Повний', 'Vollständig', 'Volledig', 'Complet', 'Completo', 'Pełny')]]; } } ] },
+        { id: 'plant', slot: 'inputs', title: T('Electrolyser plant', 'Електролізна установка', 'Elektrolyseanlage', 'Elektrolyse-installatie', 'Installation d’électrolyse', 'Planta de electrólisis', 'Instalacja elektrolizy'), fields: [
+          { id: 'f-P_MW', key: 'P_MW', type: 'number', unit: 'MW', min: 0.1, max: 100000, precision: 1, required: true, learn: 'plant', label: T('Rated electrical input', 'Номінальна електрична потужність', 'Elektrische Nennleistung', 'Nominaal elektrisch vermogen', 'Puissance électrique nominale', 'Potencia eléctrica nominal', 'Znamionowa moc elektryczna') },
+          { id: 'f-capex_kW', key: 'capex_kW', type: 'number', unit: 'EUR/kW', min: 0, max: 20000, precision: 0, required: true, learn: 'capex', label: T('Installed system cost', 'Вартість встановленої системи', 'Systemkosten installiert', 'Geïnstalleerde systeemkosten', 'Coût du système installé', 'Coste del sistema instalado', 'Koszt zainstalowanego systemu') },
+          { id: 'f-sec', key: 'sec', type: 'number', unit: 'kWh/kg', min: 34, max: 100, precision: 1, required: true, learn: 'plant', label: T('Specific electricity use (system)', 'Питоме споживання електроенергії (система)', 'Spezifischer Strombedarf (System)', 'Specifiek elektriciteitsverbruik (systeem)', 'Consommation électrique spécifique (système)', 'Consumo eléctrico específico (sistema)', 'Jednostkowe zużycie energii elektrycznej (system)') },
+          { id: 'f-flh', key: 'flh', type: 'number', unit: 'h/yr', min: 100, max: 8760, precision: 0, required: true, learn: 'hours', label: T('Full-load hours', 'Години роботи на повній потужності', 'Volllaststunden', 'Vollasturen', 'Heures à pleine charge', 'Horas a plena carga', 'Godziny pracy z pełnym obciążeniem') },
+          { id: 'f-opex_pct', key: 'opex_pct', type: 'number', unit: '%/yr', min: 0, max: 20, precision: 1, required: true, learn: 'capex', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Fixed O&M (of system cost)', 'Постійні витрати на експлуатацію (від вартості системи)', 'Fixe Betriebskosten (von Systemkosten)', 'Vaste O&M (van systeemkosten)', 'Exploitation fixe (du coût du système)', 'O&M fijo (del coste del sistema)', 'Stałe koszty eksploatacji (od kosztu systemu)') },
+          { id: 'f-stack_life_h', key: 'stack_life_h', type: 'number', unit: 'h', min: 1000, max: 200000, precision: 0, required: true, learn: 'stack', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Stack life', 'Ресурс стека', 'Stack-Lebensdauer', 'Levensduur stack', 'Durée de vie du stack', 'Vida útil del stack', 'Żywotność stosu') },
+          { id: 'f-stack_pct', key: 'stack_pct', type: 'number', unit: '%', min: 0, max: 100, precision: 0, required: true, learn: 'stack', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Stack replacement cost (of system cost)', 'Вартість заміни стека (від вартості системи)', 'Stacktauschkosten (von Systemkosten)', 'Kosten stackvervanging (van systeemkosten)', 'Coût de remplacement du stack (du coût du système)', 'Coste de sustitución del stack (del coste del sistema)', 'Koszt wymiany stosu (od kosztu systemu)') },
+          { id: 'f-water_L', key: 'water_L', type: 'number', unit: 'L/kg', min: 0, max: 100, precision: 1, required: true, learn: 'capex', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Water use', 'Споживання води', 'Wasserbedarf', 'Waterverbruik', 'Consommation d’eau', 'Consumo de agua', 'Zużycie wody') },
+          { id: 'f-water_price', key: 'water_price', type: 'number', unit: 'EUR/m³', min: 0, max: 50, precision: 2, required: true, learn: 'capex', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Water price', 'Ціна води', 'Wasserpreis', 'Waterprijs', 'Prix de l’eau', 'Precio del agua', 'Cena wody') } ] },
+        { id: 'fin', slot: 'inputs', title: T('Electricity and finance', 'Електроенергія та фінанси', 'Strom und Finanzierung', 'Elektriciteit en financiering', 'Électricité et financement', 'Electricidad y financiación', 'Energia elektryczna i finansowanie'), fields: [
+          { id: 'f-elec_price', key: 'elec_price', type: 'number', unit: 'EUR/MWh', min: -100, max: 1000, precision: 1, required: true, learn: 'electricity', label: T('Electricity price (incl. grid fees)', 'Ціна електроенергії (з мережевими тарифами)', 'Strompreis (inkl. Netzentgelte)', 'Elektriciteitsprijs (incl. nettarieven)', 'Prix de l’électricité (y c. réseau)', 'Precio de la electricidad (incl. peajes)', 'Cena energii (z opłatami sieciowymi)') },
+          { id: 'f-wacc', key: 'wacc', type: 'number', min: 0, max: 0.3, precision: 3, required: true, learn: 'finance', label: T('Discount rate (WACC, fraction)', 'Ставка дисконтування (WACC, частка)', 'Kalkulationszins (WACC, Anteil)', 'Disconteringsvoet (WACC, fractie)', 'Taux d’actualisation (WACC, fraction)', 'Tasa de descuento (WACC, fracción)', 'Stopa dyskontowa (WACC, ułamek)') },
+          { id: 'f-life', key: 'life', type: 'number', unit: 'yr', min: 1, max: 60, precision: 0, required: true, learn: 'finance', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Economic life', 'Економічний строк служби', 'Wirtschaftliche Nutzungsdauer', 'Economische levensduur', 'Durée de vie économique', 'Vida económica', 'Ekonomiczny okres eksploatacji') } ] },
+        { id: 'rfnbo', slot: 'inputs', title: T('RFNBO electricity rules (EU 2023/1184)', 'Правила електроенергії RFNBO (ЄС 2023/1184)', 'RFNBO-Strombezugsregeln (EU 2023/1184)', 'RFNBO-elektriciteitsregels (EU 2023/1184)', 'Règles d’électricité RFNBO (UE 2023/1184)', 'Reglas de electricidad RFNBO (UE 2023/1184)', 'Zasady energii elektrycznej RFNBO (UE 2023/1184)'), fields: [
+          { id: 'f-source', key: 'source', type: 'select', learn: 'routes', label: T('Electricity sourcing route', 'Спосіб постачання електроенергії', 'Strombezugsweg', 'Route elektriciteitsinkoop', 'Mode d’approvisionnement en électricité', 'Vía de suministro eléctrico', 'Sposób zakupu energii'), options: function () { return [
+            ['ppa', T('Renewable PPA (Art. 4(2), 5)', 'Відновлювана PPA (ст. 4(2), 5)', 'Erneuerbarer PPA (Art. 4(2), 5)', 'Hernieuwbare PPA (art. 4(2), 5)', 'PPA renouvelable (art. 4(2), 5)', 'PPA renovable (art. 4(2), 5)', 'Odnawialna umowa PPA (art. 4(2), 5)')],
+            ['direct', T('Direct connection (Art. 3)', 'Пряме підключення (ст. 3)', 'Direktanschluss (Art. 3)', 'Directe aansluiting (art. 3)', 'Raccordement direct (art. 3)', 'Conexión directa (art. 3)', 'Bezpośrednie przyłączenie (art. 3)')],
+            ['grid_res', T('Grid in zone > 90 % renewable (Art. 4(1))', 'Мережа в зоні > 90 % ВДЕ (ст. 4(1))', 'Netz in Zone > 90 % erneuerbar (Art. 4(1))', 'Net in zone > 90 % hernieuwbaar (art. 4(1))', 'Réseau en zone > 90 % renouvelable (art. 4(1))', 'Red en zona > 90 % renovable (art. 4(1))', 'Sieć w strefie > 90 % OZE (art. 4(1))')],
+            ['low_ef', T('Low-carbon zone < 18 g/MJ + PPA (Art. 4(3))', 'Низьковуглецева зона < 18 г/МДж + PPA (ст. 4(3))', 'CO₂-arme Zone < 18 g/MJ + PPA (Art. 4(3))', 'Koolstofarme zone < 18 g/MJ + PPA (art. 4(3))', 'Zone bas carbone < 18 g/MJ + PPA (art. 4(3))', 'Zona baja en carbono < 18 g/MJ + PPA (art. 4(3))', 'Strefa niskoemisyjna < 18 g/MJ + PPA (art. 4(3))')],
+            ['grid', T('Grid mix, no renewable claim', 'Мережевий мікс без заявки на ВДЕ', 'Netzstrom ohne Erneuerbaren-Nachweis', 'Netmix zonder hernieuwbaarheidsclaim', 'Mix réseau sans revendication renouvelable', 'Mix de red sin reclamación renovable', 'Miks sieciowy bez deklaracji OZE')]]; } },
+          { id: 'f-res_share', key: 'res_share', type: 'number', min: 0, max: 1, precision: 2, required: true, learn: 'routes', visible: function (ctx) { return ctx.state.source === 'ppa' || ctx.state.source === 'low_ef'; }, label: T('Share of electricity covered by PPAs', 'Частка електроенергії, покрита PPA', 'Durch PPAs gedeckter Stromanteil', 'Aandeel elektriciteit gedekt door PPA’s', 'Part de l’électricité couverte par des PPA', 'Fracción de electricidad cubierta por PPA', 'Udział energii pokryty umowami PPA') },
+          { id: 'f-corr', key: 'corr', type: 'segmented', learn: 'temporal', visible: function (ctx) { return ctx.state.source === 'ppa' || ctx.state.source === 'low_ef'; }, label: T('Temporal matching', 'Часова відповідність', 'Zeitliche Korrelation', 'Tijdcorrelatie', 'Corrélation temporelle', 'Correlación temporal', 'Korelacja czasowa'), options: function () { return [['monthly', T('Monthly', 'Щомісячна', 'Monatlich', 'Maandelijks', 'Mensuelle', 'Mensual', 'Miesięczna')], ['hourly', T('Hourly', 'Погодинна', 'Stündlich', 'Per uur', 'Horaire', 'Horaria', 'Godzinowa')]]; } },
+          { id: 'f-year', key: 'year', type: 'number', min: 2024, max: 2060, precision: 0, required: true, learn: 'temporal', visible: function (ctx) { return ctx.state.source === 'ppa' || ctx.state.source === 'low_ef'; }, label: T('Year of production assessed', 'Рік виробництва, що оцінюється', 'Bewertetes Produktionsjahr', 'Beoordeeld productiejaar', 'Année de production évaluée', 'Año de producción evaluado', 'Oceniany rok produkcji') },
+          { id: 'f-same_zone', key: 'same_zone', type: 'toggle', learn: 'temporal', visible: function (ctx) { return ctx.state.source === 'ppa' || ctx.state.source === 'low_ef'; }, label: T('Renewable plant in the same bidding zone', 'ВДЕ-установка в тій самій торговій зоні', 'Erneuerbare Anlage in derselben Gebotszone', 'Hernieuwbare installatie in dezelfde biedzone', 'Installation renouvelable dans la même zone de dépôt des offres', 'Planta renovable en la misma zona de oferta', 'Instalacja OZE w tej samej strefie cenowej') },
+          { id: 'f-res_age_m', key: 'res_age_m', type: 'number', unit: 'months', min: 0, max: 600, precision: 0, required: true, learn: 'additionality', visible: function (ctx) { return ctx.state.source === 'ppa' || ctx.state.source === 'direct'; }, label: T('Renewable plant in operation before electrolyser', 'ВДЕ-установка працює до електролізера', 'Erneuerbare Anlage in Betrieb vor dem Elektrolyseur', 'Hernieuwbare installatie in bedrijf vóór de elektrolyser', 'Installation renouvelable en service avant l’électrolyseur', 'Planta renovable en servicio antes del electrolizador', 'Instalacja OZE w eksploatacji przed elektrolizerem') },
+          { id: 'f-res_no_aid', key: 'res_no_aid', type: 'toggle', learn: 'additionality', visible: function (ctx) { return ctx.state.source === 'ppa'; }, label: T('Renewable plant received no operating or investment aid', 'ВДЕ-установка не отримувала операційної чи інвестиційної підтримки', 'Erneuerbare Anlage ohne Betriebs- oder Investitionsbeihilfe', 'Hernieuwbare installatie zonder exploitatie- of investeringssteun', 'Installation renouvelable sans aide au fonctionnement ni à l’investissement', 'Planta renovable sin ayudas de funcionamiento ni de inversión', 'Instalacja OZE bez pomocy operacyjnej ani inwestycyjnej') },
+          { id: 'f-cod_year', key: 'cod_year', type: 'number', min: 2015, max: 2060, precision: 0, required: true, learn: 'additionality', visible: function (ctx) { return ctx.state.source === 'ppa'; }, label: T('Electrolyser start of operation (year)', 'Початок роботи електролізера (рік)', 'Inbetriebnahme des Elektrolyseurs (Jahr)', 'Inbedrijfstelling elektrolyser (jaar)', 'Mise en service de l’électrolyseur (année)', 'Puesta en marcha del electrolizador (año)', 'Rozpoczęcie pracy elektrolizera (rok)') },
+          { id: 'f-grid_res_share', key: 'grid_res_share', type: 'number', min: 0, max: 1, precision: 3, required: true, learn: 'routes', visible: function (ctx) { return ctx.state.source === 'grid_res'; }, label: T('Renewable share of the bidding zone (previous year)', 'Частка ВДЕ у торговій зоні (попередній рік)', 'Erneuerbaren-Anteil der Gebotszone (Vorjahr)', 'Hernieuwbaar aandeel biedzone (vorig jaar)', 'Part renouvelable de la zone (année précédente)', 'Cuota renovable de la zona de oferta (año anterior)', 'Udział OZE w strefie cenowej (poprzedni rok)') },
+          { id: 'f-grid_ef', key: 'grid_ef', type: 'number', unit: 'gCO₂e/MJ', min: 0, max: 400, precision: 1, required: true, learn: 'ghg', visible: function (ctx) { return ctx.state.level === 'full' || ctx.state.source === 'low_ef' || ctx.state.source === 'grid'; }, label: T('Grid electricity emission intensity', 'Інтенсивність викидів мережевої електроенергії', 'Emissionsintensität des Netzstroms', 'Emissie-intensiteit netstroom', 'Intensité d’émission de l’électricité du réseau', 'Intensidad de emisiones de la red', 'Emisyjność energii z sieci') },
+          { id: 'f-other_kg', key: 'other_kg', type: 'number', unit: 'kgCO₂e/kg', min: 0, max: 30, precision: 2, required: true, learn: 'ghg', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Other emissions (water, compression, transport)', 'Інші викиди (вода, компримування, транспорт)', 'Sonstige Emissionen (Wasser, Verdichtung, Transport)', 'Overige emissies (water, compressie, transport)', 'Autres émissions (eau, compression, transport)', 'Otras emisiones (agua, compresión, transporte)', 'Inne emisje (woda, sprężanie, transport)') } ] }
+      ],
+      on: {
+        rebuild: adoptStage,
+        compute: computeView
+      }
+    });
+
+    ui.panel({
+      id: 'io',
+      slot: 'inputs',
+      actionsAlign: 'end',
+      actions: [ui.resetAction()]
+    });
+
+    var EX = [
+    { id: 'typical', label: T('Typical: PPA, 5 000 h/yr, 50 EUR/MWh', 'Типовий: PPA, 5 000 год/рік, 50 EUR/МВт·год', 'Typisch: PPA, 5 000 h/a, 50 EUR/MWh', 'Typisch: PPA, 5 000 h/jr, 50 EUR/MWh', 'Typique : PPA, 5 000 h/an, 50 EUR/MWh', 'Típico: PPA, 5 000 h/año, 50 EUR/MWh', 'Typowy: PPA, 5 000 h/rok, 50 EUR/MWh'),
+      note: T('Look at the cost breakdown: at 5 000 h/yr electricity is about half of the 5.23 EUR/kg (50.7 %), capital the other big part — both levers matter.',
+              'Подивіться на структуру вартості: при 5 000 год/рік електроенергія — близько половини з 5,23 EUR/кг (50,7 %), капітал — інша велика частина; важать обидва важелі.',
+              'Achten Sie auf die Kostenaufteilung: Bei 5 000 h/a ist Strom etwa die Hälfte der 5,23 EUR/kg (50,7 %), Kapital der andere große Teil — beide Hebel zählen.',
+              'Kijk naar de kostenopbouw: bij 5 000 h/jr is elektriciteit ongeveer de helft van de 5,23 EUR/kg (50,7 %), kapitaal het andere grote deel — beide hefbomen tellen.',
+              'Regardez la décomposition des coûts : à 5 000 h/an, l’électricité représente environ la moitié des 5,23 EUR/kg (50,7 %), le capital l’autre grande part — les deux leviers comptent.',
+              'Fíjese en el desglose de costes: con 5 000 h/año la electricidad es cerca de la mitad de los 5,23 EUR/kg (50,7 %) y el capital la otra gran parte; ambas palancas cuentan.',
+              'Zwróć uwagę na strukturę kosztów: przy 5 000 h/rok energia to około połowy z 5,23 EUR/kg (50,7 %), kapitał to druga duża część — liczą się obie dźwignie.'),
+      apply: function (t) { t.source = 'ppa'; t.flh = 5000; t.elec_price = 50; t.res_share = 1; t.corr = 'monthly'; t.year = 2028; t.cod_year = 2027; t.res_age_m = 12; t.res_no_aid = true; t.level = 'simple'; } },
+    { id: 'pv_ppa', label: T('Solar PPA, 2 000 h/yr', 'Сонячна PPA, 2 000 год/рік', 'Solar-PPA, 2 000 h/a', 'Zonne-PPA, 2 000 h/jr', 'PPA solaire, 2 000 h/an', 'PPA solar, 2 000 h/año', 'PPA słoneczna, 2 000 h/rok'),
+      note: T('Look at the electricity share of LCOH: with cheap solar power (35 EUR/MWh) but only 2 000 h/yr it is just 23 % of 8.02 EUR/kg — capital (4.55 EUR/kg) dominates, so cheaper power alone barely helps.',
+              'Подивіться на частку електроенергії в LCOH: з дешевою сонячною енергією (35 EUR/МВт·год), але лише 2 000 год/рік, це тільки 23 % з 8,02 EUR/кг — домінує капітал (4,55 EUR/кг), тож дешевша енергія сама майже не допомагає.',
+              'Achten Sie auf den Stromanteil an LCOH: Mit billigem Solarstrom (35 EUR/MWh), aber nur 2 000 h/a sind es nur 23 % von 8,02 EUR/kg — das Kapital (4,55 EUR/kg) dominiert, billigerer Strom allein hilft kaum.',
+              'Kijk naar het aandeel elektriciteit in LCOH: met goedkope zonnestroom (35 EUR/MWh) maar slechts 2 000 h/jr is dat maar 23 % van 8,02 EUR/kg — kapitaal (4,55 EUR/kg) domineert, dus goedkopere stroom alleen helpt nauwelijks.',
+              'Regardez la part de l’électricité dans le LCOH : avec un solaire bon marché (35 EUR/MWh) mais seulement 2 000 h/an, elle ne fait que 23 % de 8,02 EUR/kg — le capital (4,55 EUR/kg) domine, une électricité moins chère seule aide peu.',
+              'Fíjese en la cuota de la electricidad en el LCOH: con solar barata (35 EUR/MWh) pero solo 2 000 h/año es apenas el 23 % de 8,02 EUR/kg; domina el capital (4,55 EUR/kg), así que una electricidad más barata por sí sola apenas ayuda.',
+              'Zwróć uwagę na udział energii w LCOH: przy taniej energii słonecznej (35 EUR/MWh), ale tylko 2 000 h/rok to zaledwie 23 % z 8,02 EUR/kg — dominuje kapitał (4,55 EUR/kg), więc sama tańsza energia prawie nie pomaga.'),
+      apply: function (t) { t.source = 'ppa'; t.flh = 2000; t.elec_price = 35; t.res_share = 1; t.corr = 'monthly'; t.year = 2028; t.cod_year = 2027; t.level = 'simple'; } },
+    { id: 'wind_2030', label: T('Wind PPA, hourly matching 2030', 'Вітрова PPA, погодинна відповідність 2030', 'Wind-PPA, stündliche Korrelation 2030', 'Wind-PPA, uurcorrelatie 2030', 'PPA éolien, corrélation horaire 2030', 'PPA eólico, correlación horaria 2030', 'PPA wiatrowa, korelacja godzinowa 2030'),
+      note: T('Look at the RFNBO checks: a new plant after the transition must meet additionality (plant ≤ 36 months old, no aid) and hourly matching — all met here, 100 % RFNBO at 6.10 EUR/kg.',
+              'Подивіться на перевірки RFNBO: нова установка після перехідного періоду має виконати додатковість (ВДЕ ≤ 36 місяців, без підтримки) і погодинну відповідність — тут усе виконано, 100 % RFNBO за 6,10 EUR/кг.',
+              'Achten Sie auf die RFNBO-Prüfungen: Eine neue Anlage nach der Übergangszeit muss Zusätzlichkeit (Anlage ≤ 36 Monate, keine Beihilfe) und stündliche Korrelation erfüllen — hier alles erfüllt, 100 % RFNBO bei 6,10 EUR/kg.',
+              'Kijk naar de RFNBO-toetsen: een nieuwe installatie na de overgang moet additionaliteit (installatie ≤ 36 maanden, geen steun) en uurcorrelatie halen — hier alles voldaan, 100 % RFNBO bij 6,10 EUR/kg.',
+              'Regardez les contrôles RFNBO : une installation neuve après la transition doit respecter l’additionnalité (centrale ≤ 36 mois, sans aide) et la corrélation horaire — tout est rempli ici, 100 % RFNBO à 6,10 EUR/kg.',
+              'Fíjese en las comprobaciones RFNBO: una planta nueva tras la transición debe cumplir la adicionalidad (planta ≤ 36 meses, sin ayudas) y la correlación horaria; aquí se cumple todo, 100 % RFNBO a 6,10 EUR/kg.',
+              'Zwróć uwagę na kontrole RFNBO: nowa instalacja po okresie przejściowym musi spełnić dodatkowość (instalacja ≤ 36 miesięcy, bez pomocy) i korelację godzinową — tu wszystko spełnione, 100 % RFNBO przy 6,10 EUR/kg.'),
+      apply: function (t) { t.source = 'ppa'; t.flh = 4000; t.elec_price = 55; t.res_share = 1; t.corr = 'hourly'; t.year = 2030; t.cod_year = 2029; t.res_age_m = 12; t.res_no_aid = true; t.level = 'simple'; } },
+    { id: 'wind_2030_monthly', label: T('Same wind PPA, but monthly matching', 'Та сама вітрова PPA, але щомісячна відповідність', 'Gleiche Wind-PPA, aber monatliche Korrelation', 'Zelfde wind-PPA, maar maandcorrelatie', 'Même PPA éolien, mais corrélation mensuelle', 'Mismo PPA eólico, pero correlación mensual', 'Ta sama PPA wiatrowa, ale korelacja miesięczna'),
+      note: T('Look at the verdict: only the matching period changed from hourly to monthly, the cost stays 6.10 EUR/kg, yet in 2030 the RFNBO share drops from 100 % to 0 % (Art. 6) — a contract clause, not physics, decides.',
+              'Подивіться на висновок: змінився лише період відповідності з погодинного на щомісячний, вартість лишається 6,10 EUR/кг, але у 2030 р. частка RFNBO падає зі 100 % до 0 % (ст. 6) — вирішує пункт договору, а не фізика.',
+              'Achten Sie auf das Ergebnis: Nur der Korrelationszeitraum wechselt von stündlich auf monatlich, die Kosten bleiben 6,10 EUR/kg, doch 2030 fällt der RFNBO-Anteil von 100 % auf 0 % (Art. 6) — eine Vertragsklausel entscheidet, nicht die Physik.',
+              'Kijk naar het oordeel: alleen de correlatieperiode wijzigt van uur naar maand, de kosten blijven 6,10 EUR/kg, maar in 2030 zakt het RFNBO-aandeel van 100 % naar 0 % (art. 6) — een contractclausule beslist, niet de fysica.',
+              'Regardez le verdict : seule la période de corrélation passe d’horaire à mensuelle, le coût reste 6,10 EUR/kg, mais en 2030 la part RFNBO tombe de 100 % à 0 % (art. 6) — c’est une clause contractuelle qui décide, pas la physique.',
+              'Fíjese en el veredicto: solo cambia el periodo de correlación de horario a mensual, el coste sigue en 6,10 EUR/kg, pero en 2030 la cuota RFNBO cae del 100 % al 0 % (art. 6); decide una cláusula del contrato, no la física.',
+              'Zwróć uwagę na wynik: zmienił się tylko okres korelacji z godzinowego na miesięczny, koszt zostaje 6,10 EUR/kg, a w 2030 r. udział RFNBO spada ze 100 % do 0 % (art. 6) — decyduje klauzula umowy, nie fizyka.'),
+      apply: function (t) { t.source = 'ppa'; t.flh = 4000; t.elec_price = 55; t.res_share = 1; t.corr = 'monthly'; t.year = 2030; t.cod_year = 2029; t.res_age_m = 12; t.res_no_aid = true; t.level = 'simple'; } },
+    { id: 'hydro_zone', label: T('Zone > 90 % renewable, 8 000 h/yr', 'Зона > 90 % ВДЕ, 8 000 год/рік', 'Zone > 90 % erneuerbar, 8 000 h/a', 'Zone > 90 % hernieuwbaar, 8 000 h/jr', 'Zone > 90 % renouvelable, 8 000 h/an', 'Zona > 90 % renovable, 8 000 h/año', 'Strefa > 90 % OZE, 8 000 h/rok'),
+      note: T('Look at the LCOH: in a bidding zone with 95 % renewables (Art. 4(1)) grid power counts as renewable, and 8 000 h/yr spread the capital — 4.08 EUR/kg, the cheapest RFNBO case here.',
+              'Подивіться на LCOH: у торговій зоні з 95 % ВДЕ (ст. 4(1)) мережева енергія вважається відновлюваною, а 8 000 год/рік розподіляють капітал — 4,08 EUR/кг, найдешевший випадок RFNBO тут.',
+              'Achten Sie auf LCOH: In einer Gebotszone mit 95 % Erneuerbaren (Art. 4(1)) gilt Netzstrom als erneuerbar, und 8 000 h/a verteilen das Kapital — 4,08 EUR/kg, der günstigste RFNBO-Fall hier.',
+              'Kijk naar de LCOH: in een biedzone met 95 % hernieuwbaar (art. 4(1)) telt netstroom als hernieuwbaar en 8 000 h/jr spreiden het kapitaal — 4,08 EUR/kg, het goedkoopste RFNBO-geval hier.',
+              'Regardez le LCOH : dans une zone à 95 % renouvelable (art. 4(1)), l’électricité du réseau compte comme renouvelable et 8 000 h/an répartissent le capital — 4,08 EUR/kg, le cas RFNBO le moins cher ici.',
+              'Fíjese en el LCOH: en una zona de oferta con un 95 % renovable (art. 4(1)) la electricidad de red cuenta como renovable y 8 000 h/año reparten el capital; 4,08 EUR/kg, el caso RFNBO más barato aquí.',
+              'Zwróć uwagę na LCOH: w strefie cenowej z 95 % OZE (art. 4(1)) energia z sieci liczy się jako odnawialna, a 8 000 h/rok rozkłada kapitał — 4,08 EUR/kg, najtańszy przypadek RFNBO tutaj.'),
+      apply: function (t) { t.source = 'grid_res'; t.flh = 8000; t.elec_price = 45; t.grid_res_share = 0.95; t.level = 'simple'; } },
+    { id: 'hydro_8500', label: T('Same zone, 8 500 h/yr', 'Та сама зона, 8 500 год/рік', 'Gleiche Zone, 8 500 h/a', 'Zelfde zone, 8 500 h/jr', 'Même zone, 8 500 h/an', 'Misma zona, 8 500 h/año', 'Ta sama strefa, 8 500 h/rok'),
+      note: T('Look at the hours check: 500 more hours lower the LCOH only from 4.08 to 3.98 EUR/kg, but exceed 0.95 × 8 760 = 8 322 h, so the RFNBO share falls to 0 % (Art. 4(1)).',
+              'Подивіться на перевірку годин: ще 500 годин знижують LCOH лише з 4,08 до 3,98 EUR/кг, але перевищують 0,95 × 8 760 = 8 322 год, тож частка RFNBO падає до 0 % (ст. 4(1)).',
+              'Achten Sie auf die Stundenprüfung: 500 Stunden mehr senken LCOH nur von 4,08 auf 3,98 EUR/kg, überschreiten aber 0,95 × 8 760 = 8 322 h, daher fällt der RFNBO-Anteil auf 0 % (Art. 4(1)).',
+              'Kijk naar de urentoets: 500 uur meer verlagen de LCOH maar van 4,08 naar 3,98 EUR/kg, maar overschrijden 0,95 × 8 760 = 8 322 h, dus het RFNBO-aandeel zakt naar 0 % (art. 4(1)).',
+              'Regardez le contrôle des heures : 500 heures de plus ne font baisser le LCOH que de 4,08 à 3,98 EUR/kg, mais dépassent 0,95 × 8 760 = 8 322 h, la part RFNBO tombe donc à 0 % (art. 4(1)).',
+              'Fíjese en la comprobación de horas: 500 horas más solo bajan el LCOH de 4,08 a 3,98 EUR/kg, pero superan 0,95 × 8 760 = 8 322 h, así que la cuota RFNBO cae al 0 % (art. 4(1)).',
+              'Zwróć uwagę na kontrolę godzin: 500 godzin więcej obniża LCOH tylko z 4,08 do 3,98 EUR/kg, ale przekracza 0,95 × 8 760 = 8 322 h, więc udział RFNBO spada do 0 % (art. 4(1)).'),
+      apply: function (t) { t.source = 'grid_res'; t.flh = 8500; t.elec_price = 45; t.grid_res_share = 0.95; t.level = 'simple'; } },
+    { id: 'grid_mix', label: T('Average EU grid (not RFNBO)', 'Середня мережа ЄС (не RFNBO)', 'EU-Netzmix (kein RFNBO)', 'Gemiddeld EU-net (geen RFNBO)', 'Réseau UE moyen (pas RFNBO)', 'Red media de la UE (no RFNBO)', 'Średnia sieć UE (nie RFNBO)'),
+      note: T('Look at the GHG intensity: grid power at 70 gCO₂e/MJ gives 115.5 gCO₂e/MJ of hydrogen — more than the 94 g/MJ fossil comparator (−22.8 % saving) — so grid hydrogen fails the 70 % saving by far.',
+              'Подивіться на інтенсивність ПГ: мережева енергія з 70 гCO₂e/МДж дає 115,5 гCO₂e/МДж водню — більше за викопний еталон 94 г/МДж (скорочення −22,8 %) — тож мережевий водень далеко не досягає скорочення 70 %.',
+              'Achten Sie auf die THG-Intensität: Netzstrom mit 70 gCO₂e/MJ ergibt 115,5 gCO₂e/MJ Wasserstoff — mehr als der fossile Vergleichswert 94 g/MJ (Einsparung −22,8 %) —, Netz-Wasserstoff verfehlt die 70 % also deutlich.',
+              'Kijk naar de broeikasgasintensiteit: netstroom met 70 gCO₂e/MJ geeft 115,5 gCO₂e/MJ waterstof — meer dan de fossiele referentie 94 g/MJ (besparing −22,8 %) — dus netwaterstof haalt de 70 % besparing bij lange na niet.',
+              'Regardez l’intensité GES : l’électricité du réseau à 70 gCO₂e/MJ donne 115,5 gCO₂e/MJ d’hydrogène — plus que le comparateur fossile de 94 g/MJ (réduction −22,8 %) — l’hydrogène du réseau échoue donc largement aux 70 %.',
+              'Fíjese en la intensidad de GEI: la electricidad de red a 70 gCO₂e/MJ da 115,5 gCO₂e/MJ de hidrógeno, más que el comparador fósil de 94 g/MJ (ahorro −22,8 %), así que el hidrógeno de red queda muy lejos del 70 %.',
+              'Zwróć uwagę na emisyjność GHG: energia z sieci o 70 gCO₂e/MJ daje 115,5 gCO₂e/MJ wodoru — więcej niż kopalny punkt odniesienia 94 g/MJ (redukcja −22,8 %) — więc wodór z sieci daleko nie osiąga 70 %.'),
+      apply: function (t) { t.source = 'grid'; t.flh = 8000; t.elec_price = 80; t.grid_ef = 70; t.level = 'full'; } }
+    ]; ui.examples(EX);
+
+    function curveData() {
+      if (!last || !last.ok) return null;
+      var s = {}, k, i, r, pts = [], ymx = 0, f;
+      for (k in state) if (Object.prototype.hasOwnProperty.call(state, k)) s[k] = state[k];
+      for (i = 0; i <= 35; i++) {
+        f = 500 + i * 236; s.flh = f; r = solve(s);
+        if (r && r.ok && isFinite(r.lcoh)) { pts.push({ x: f, y: r.lcoh, e: r.c_elec, c: r.c_capex + r.c_stack + r.c_opex }); ymx = Math.max(ymx, Math.min(r.lcoh, 4 * last.lcoh)); }
+      }
+      return { pts: pts, xMin: 0, xMax: 8760, yMin: 0, yMax: Math.max(ymx, last.lcoh) * 1.08, xCur: state.flh, yCur: last.lcoh };
+    }
+    ui.stage({
+      caption: T('Levelised cost of hydrogen versus full-load hours, with the electricity and the capital, stack and O&M parts (LHV, EUR 2025)', 'Нормована вартість водню залежно від годин повного навантаження, зі складовими електроенергії та капіталу, стека й експлуатації (LHV, EUR 2025)', 'Wasserstoffgestehungskosten über Volllaststunden mit Strom- sowie Kapital-, Stack- und Betriebsanteil (Hi, EUR 2025)', 'Genivelleerde waterstofkosten tegen vollasturen, met het deel elektriciteit en het deel kapitaal, stack en O&M (LHV, EUR 2025)', 'Coût actualisé de l’hydrogène en fonction des heures à pleine charge, avec les parts électricité et capital, stack et exploitation (PCI, EUR 2025)', 'Coste nivelado del hidrógeno frente a horas a plena carga, con la parte de electricidad y la de capital, stack y O&M (PCI, EUR 2025)', 'Uśredniony koszt wodoru w funkcji godzin pełnego obciążenia, z częścią energii oraz kapitału, stosu i eksploatacji (LHV, EUR 2025)'),
+      minHeight: 300,
+      a11y: function () {
+        if (!last || !last.ok) return '';
+        var a = DiagramUI.fmt(last.lcoh, { precision: 2 }), b = DiagramUI.fmt(state.flh, { precision: 0 });
+        return tx(T('Line chart: levelised cost of hydrogen in EUR/kg versus full-load hours 500–8 760 h per year, split into the electricity part and the capital, stack and O&M part; current point ' + b + ' h/yr at ' + a + ' EUR/kg.',
+          'Лінійний графік: нормована вартість водню в EUR/кг залежно від годин повного навантаження 500–8 760 год на рік, з розділенням на складову електроенергії та складову капіталу, стека й експлуатації; поточна точка ' + b + ' год/рік при ' + a + ' EUR/кг.',
+          'Liniendiagramm: Wasserstoff-Gestehungskosten in EUR/kg über den Volllaststunden 500–8 760 h pro Jahr, aufgeteilt in Stromanteil und Anteil Kapital, Stack und Betrieb; aktueller Punkt ' + b + ' h/a bei ' + a + ' EUR/kg.',
+          'Lijngrafiek: genivelleerde waterstofkosten in EUR/kg tegen vollasturen 500–8 760 h per jaar, opgesplitst in het deel elektriciteit en het deel kapitaal, stack en O&M; huidig punt ' + b + ' h/jr bij ' + a + ' EUR/kg.',
+          'Graphique linéaire : coût actualisé de l’hydrogène en EUR/kg en fonction des heures à pleine charge 500–8 760 h par an, réparti entre la part électricité et la part capital, stack et exploitation ; point actuel ' + b + ' h/an à ' + a + ' EUR/kg.',
+          'Gráfico de líneas: coste nivelado del hidrógeno en EUR/kg frente a las horas a plena carga 500–8 760 h al año, dividido en la parte de electricidad y la de capital, stack y O&M; punto actual ' + b + ' h/año a ' + a + ' EUR/kg.',
+          'Wykres liniowy: uśredniony koszt wodoru w EUR/kg w funkcji godzin pełnego obciążenia 500–8 760 h rocznie, z podziałem na część energii oraz część kapitału, stosu i eksploatacji; bieżący punkt ' + b + ' h/rok przy ' + a + ' EUR/kg.'));
+      },
+      render: function (size, st) {
+        var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+        var cs = getComputedStyle(document.documentElement);
+        var muted = cs.getPropertyValue('--muted').trim() || '#888', line = cs.getPropertyValue('--line').trim() || '#ccc', font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+        ctx.clearRect(0, 0, w, h);
+        var d = curveData(); if (!d) return;
+        var L = coarse ? 46 : 58, R = 14, TOP = 12, B = coarse ? 36 : 44, pw = w - L - R, ph = h - TOP - B, i, t;
+        function X(x) { return L + (x - d.xMin) / (d.xMax - d.xMin) * pw; }
+        function Y(y) { return TOP + ph - (y - d.yMin) / (d.yMax - d.yMin) * ph; }
+        function seg(x0, y0, x1, y1, col, lw, dash) { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); }
+        seg(L, TOP, L, TOP + ph, line, 1); seg(L, TOP + ph, L + pw, TOP + ph, line, 1);
+        ctx.fillStyle = muted; ctx.font = (coarse ? 11 : 12) + 'px ' + font;
+        var xt = DiagramUI.ticks(d.xMin, d.xMax, pw, size.density), yt = DiagramUI.ticks(d.yMin, d.yMax, ph, size.density);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        for (i = 0; i < xt.length; i++) { t = X(xt[i]); seg(t, TOP + ph, t, TOP + ph + 4, line, 1); ctx.fillText(DiagramUI.fmt(xt[i], { precision: 0 }), t, TOP + ph + 6); }
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (i = 0; i < yt.length; i++) { t = Y(yt[i]); seg(L - 4, t, L, t, line, 1); ctx.fillText(DiagramUI.fmt(yt[i], { precision: 1 }), L - 6, t); }
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('h/yr', L + pw / 2, h - 2);
+        ctx.save(); ctx.translate(12, TOP + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'middle'; ctx.fillText('EUR/kg', 0, 0); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(L, TOP, pw, ph); ctx.clip();
+        seg(X(d.xCur), TOP, X(d.xCur), TOP + ph, muted, 1, [5, 4]);
+        function poly(key, col, lw, dash) { ctx.setLineDash(dash || []); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath();
+          for (var j = 0; j < d.pts.length; j++) { if (j) ctx.lineTo(X(d.pts[j].x), Y(d.pts[j][key])); else ctx.moveTo(X(d.pts[j].x), Y(d.pts[j][key])); } ctx.stroke(); }
+        poly('e', DiagramUI.series(1), 1.5, [6, 3]); poly('c', DiagramUI.series(2), 1.5, [2, 3]);
+        ctx.setLineDash([]); ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = 2; ctx.beginPath();
+        for (i = 0; i < d.pts.length; i++) { if (i) ctx.lineTo(X(d.pts[i].x), Y(d.pts[i].y)); else ctx.moveTo(X(d.pts[i].x), Y(d.pts[i].y)); }
+        ctx.stroke();
+        if (isFinite(d.yCur)) { ctx.fillStyle = DiagramUI.series(0); ctx.beginPath(); ctx.arc(X(d.xCur), Y(d.yCur), coarse ? 3 : 4, 0, 2 * Math.PI); ctx.fill(); }
+        ctx.restore();
+      }
+    });
+    adoptStage(ui);
+
+    ui.ready();
+    window['__lcoh_rfnbo'] = { ui: ui, state: state, solve: solve, last: function () { return last; } };
+  }
+
+  /* ======================================================= 3. the data layer */
+  function buildRecord(){
+    if (!last) return null;
+    var inputs = {}, outputs = {}, units = {}, warnings, i, k;
+    var inU = [
+      ['level','-'], ['P_MW','MW (electrical)'], ['capex_kW','EUR/kW'], ['opex_pct','%/yr of capex'], ['sec','kWh/kg'], ['flh','h/yr'],
+      ['stack_life_h','h'], ['stack_pct','% of capex'], ['elec_price','EUR/MWh'], ['water_L','L/kg'], ['water_price','EUR/m3'],
+      ['wacc','-'], ['life','yr'], ['source','-'], ['res_share','-'], ['corr','-'], ['same_zone','-'], ['res_age_m','months'],
+      ['res_no_aid','-'], ['cod_year','yr'], ['year','yr'], ['grid_res_share','-'], ['grid_ef','gCO2e/MJ electricity'], ['other_kg','kgCO2e/kg H2']
+    ];
+    for (i = 0; i < inU.length; i++) { k = inU[i][0]; inputs[k] = state[k]; units[k] = inU[i][1]; }
+    if (last.ok) {
+      var outU = [
+        ['lcoh','EUR/kg'], ['lcoh_MWh','EUR/MWh (LHV)'], ['c_capex','EUR/kg'], ['c_stack','EUR/kg'], ['c_opex','EUR/kg'], ['c_elec','EUR/kg'], ['c_water','EUR/kg'],
+        ['m_t','t/yr'], ['E_GWh','GWh/yr'], ['eff_lhv','-'], ['capex_total','EUR'], ['crf','1/yr'], ['stacks','-'],
+        ['f_ren','-'], ['rfnbo_t','t/yr'], ['rfnbo','-'], ['rfnbo_share_pct','%'],
+        ['e_elec','gCO2e/MJ H2 (LHV)'], ['e_other','gCO2e/MJ H2 (LHV)'], ['e_tot','gCO2e/MJ H2 (LHV)'], ['e_kg','kgCO2e/kg H2'],
+        ['e_rfnbo','gCO2e/MJ H2 (LHV)'], ['saving_pct','%'], ['ghg_limit','gCO2e/MJ H2 (LHV)'], ['ghg_pass','-'], ['energy_basis','-']
+      ];
+      for (i = 0; i < outU.length; i++) { k = outU[i][0]; outputs[k] = last[k]; units[k] = outU[i][1]; }
+      warnings = (last.warnings || []).slice();
+      for (i = 0; i < last.checks.length; i++) { outputs['check_' + last.checks[i].id] = last.checks[i].ok; units['check_' + last.checks[i].id] = last.checks[i].text; }
+    } else {
+      warnings = [last.error];
+    }
+    return {
+      inputs: inputs,
+      outputs: outputs,
+      units: units,
+      model: {
+        equations: [
+          'm = P * flh / sec (kg/yr)',
+          'CRF = i (1+i)^n / ((1+i)^n - 1)',
+          'LCOH = (capex * CRF + PV(stack replacements) * CRF + O&M) / m + sec * price + water',
+          'Commission Delegated Regulation (EU) 2023/1184 (2023-02-10): Art. 3, 4, 5, 6, 7, 11',
+          'Commission Delegated Regulation (EU) 2023/1185 (2023-02-10): e = (1 - f_ren) * sec * 3.6 * EF_grid / 120 + e_other; RFNBO if e <= 0.3 * 94 = 28.2 gCO2e/MJ'
+        ],
+        ranges: [ 'Grid-connected or directly connected electrolysers, 100 - 8760 h/yr', 'Constant yearly operation and prices (no degradation, no price profile)' ],
+        notes: [
+          'Energy basis: hydrogen LHV 120 MJ/kg (33.3 kWh/kg)',
+          'Grid electricity not covered by a renewable route is counted at the grid intensity and not as RFNBO',
+          'Simplified rule check, not a certification audit'
+        ]
+      },
+      warnings: warnings
+    };
+  }
+
+  var HANDOFF = {
+    provides: ['mdot'],
+    accepts: [],
+    build: function(){
+      if (!(last && last.ok)) return null;
+      return {
+        quantities: {
+          mdot: { value: last.m_t * 1000 / (state.flh * 3600), unit: 'kg/s' }
+        },
+        sets: {
+          /* numeric rows only; rfnbo flag and basis stay in the record; EUR/kg has no SI unit -> '-' */
+          h2_product: [{ CI_kgCO2e_kg: { value: last.e_kg, unit: 'kg/kg' }, rfnbo_share: { value: last.rfnbo_share_pct / 100, unit: '-' }, P_el: { value: state.P_MW * 1e6, unit: 'W' } }],
+          econ: [{ lcoh_EUR_per_kg: { value: last.lcoh, unit: '-' } }]
+        }
+      };
+    },
+    apply: function(payload){
+      /* nothing is accepted: electrolyser power is neither E (J/kg) nor Q */
+      last = solve(state);
+      if (ui) { ui.sync(); ui.run(); }
+    }
+  };
+
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'lcoh_rfnbo',
+        file: 'lcoh_rfnbo.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); last = solve(state);
+                                      if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord,
+        handoff: HANDOFF
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

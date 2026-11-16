@@ -1,0 +1,4145 @@
+{
+ "tool": "safetyscenariolab",
+ "author_note": "independent reference authored without access to the tool code",
+ "reference": "Corpus for the generic barrier-based causal engine of spec 17. Synthetic scenario packs (imported as JSON, neutral graph: conditions, hazards, initiating events, barriers with condition dependencies, pathways with barriers in series order) with tri-state setup values and ordered run decisions; expected pathway statuses (open / blocked + blocked_by / no_hazard / not_initiated / review) derived by ref.py through exhaustive possible-world enumeration of unknowns, cross-checked with Kleene K3 logic; plus pack/replay refusals, and three property cases per built-in scenario (all barriers in place, all absent, all unknown). 8 randomized packs, seed 20260916. Values 'true/false/unknown' map to the README tri-states yes/no/unknown and in place/absent/unverified; setup keys H*=hazard present, E*=initiating event occurs, B*=barrier in place, C*=condition holds.",
+ "reference_citations": [
+  "tools.petrov.re spec 17 Safety Scenario Lab (MVP scope, model rules, validation, acceptance criteria) and spec 00-common section 0.5 and acceptance list",
+  "README-safetyscenariolab.txt rule statements SSL-ENG-001..009 (input vocabulary and stated engine rules only)",
+  "Kleene strong logic of indeterminacy K3 truth tables, https://en.wikipedia.org/wiki/Three-valued_logic (section Kleene and Priest logics)",
+  "M. Johnson, M. Manton, C. Cowley, M. Scanlon, 'Bow Ties in Risk Management; using the new CCPS-EI book to avoid pitfalls', IChemE Symposium Series No 163, Hazards 28, 2018, https://www.icheme.org/media/16937/hazards-28-paper-31.pdf p.3",
+  "Independent evaluator bench/safetyscenariolab/ref.py (stdlib, seed 20260916)"
+ ],
+ "tolerance": "All checks exact: statuses, blocking barrier names, counts and refusal flags are categorical/integer and the engine performs no numerical computation (all-or-nothing barriers, no probabilities), so identity is the only meaningful criterion. '_positive' means > 0; 'status_is_X: false' means any status other than X.",
+ "cases": [
+  {
+   "id": "hazard-absent-no-hazard",
+   "intent": "headline: hazard absent gives no_hazard even with no barrier in place",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "false",
+     "E1": "true",
+     "B1": "false"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-001; spec 17: debrief distinguishes blocked pathway from no hazard"
+    }
+   }
+  },
+  {
+   "id": "hazard-absent-rest-unknown",
+   "intent": "boundary: hazard false decides regardless of unknown event/barriers",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "unknown",
+     "H1": "false",
+     "E1": "unknown",
+     "B1": "unknown"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "all possible worlds give no_hazard (ref.py enumeration)"
+    }
+   }
+  },
+  {
+   "id": "blocked-vs-no-hazard-distinct",
+   "intent": "headline: blocked pathway and no-hazard pathway reported with different statuses",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P2"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "H2": "false",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P2.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-001"
+    },
+    "P1_status_differs_from_P2": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 17: debrief distinguishes 'blocked pathway' from 'no hazard'"
+    }
+   }
+  },
+  {
+   "id": "event-false-not-initiated",
+   "intent": "headline: hazard present, initiating event absent -> not_initiated",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "false",
+     "B1": "false"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-002; spec 17 causal trace hazard -> initiating event"
+    }
+   }
+  },
+  {
+   "id": "event-false-barriers-unknown",
+   "intent": "boundary: event false decides; unknown barriers cannot change it, no review",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "unknown",
+     "H1": "true",
+     "E1": "false",
+     "B1": "unknown",
+     "B2": "unknown"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "all worlds not_initiated (ref.py)"
+    }
+   }
+  },
+  {
+   "id": "all-barriers-absent-open",
+   "intent": "headline: hazard + event + every barrier absent -> open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2",
+        "B3"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "false",
+     "B2": "false",
+     "B3": "false"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005"
+    }
+   }
+  },
+  {
+   "id": "no-barrier-on-pathway-open",
+   "intent": "boundary: pathway with zero barriers and hazard+event true -> open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005"
+    }
+   }
+  },
+  {
+   "id": "single-barrier-blocks",
+   "intent": "headline: one effective barrier alone blocks the pathway",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    }
+   }
+  },
+  {
+   "id": "first-effective-barrier-named",
+   "intent": "headline: B1 absent, B2 and B3 in place -> blocked by B2",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2",
+        "B3"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "false",
+     "B2": "true",
+     "B3": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004 first effective barrier in series order"
+    },
+    "P1.blocked_by": {
+     "ref": "B2",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004 first effective barrier in series order"
+    }
+   }
+  },
+  {
+   "id": "series-order-first-wins",
+   "intent": "boundary: two effective barriers -> the earlier one is named",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2",
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "true",
+     "B2": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004; order is the pathway order, not the id order"
+    },
+    "P1.blocked_by": {
+     "ref": "B2",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004; order is the pathway order, not the id order"
+    }
+   }
+  },
+  {
+   "id": "dependency-false-disables",
+   "intent": "headline: barrier in place but its dependency false -> not effective -> open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003; K3: T AND F = F"
+    }
+   }
+  },
+  {
+   "id": "dependency-true-effective",
+   "intent": "boundary: same model with dependency true -> blocked",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "true",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003; K3: T AND T = T"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003; K3: T AND T = T"
+    }
+   }
+  },
+  {
+   "id": "dependency-unknown-review",
+   "intent": "insufficient data: only barrier's dependency unknown -> review, not blocked",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "unknown",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; K3: T AND U = U; worlds {blocked, open}"
+    }
+   }
+  },
+  {
+   "id": "barrier-unverified-review",
+   "intent": "insufficient data: only barrier unverified -> review",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "unknown"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    }
+   }
+  },
+  {
+   "id": "two-deps-false-and-unknown",
+   "intent": "boundary K3: deps false AND unknown = false -> barrier ineffective -> open (not review)",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "unknown",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "Kleene strong three-valued logic K3, https://en.wikipedia.org/wiki/Three-valued_logic (section 'Kleene and Priest logics', AND table): F AND U = F"
+    }
+   }
+  },
+  {
+   "id": "two-deps-true",
+   "intent": "boundary: both dependencies true -> blocked",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "true",
+     "C2": "true",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "Kleene strong three-valued logic K3, https://en.wikipedia.org/wiki/Three-valued_logic (section 'Kleene and Priest logics', AND table)"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "Kleene strong three-valued logic K3, https://en.wikipedia.org/wiki/Three-valued_logic (section 'Kleene and Priest logics', AND table)"
+    }
+   }
+  },
+  {
+   "id": "unknown-then-absent-review",
+   "intent": "insufficient data: unknown barrier followed by absent barrier -> review",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "unknown",
+     "B2": "false"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worlds {blocked by B1, open}"
+    }
+   }
+  },
+  {
+   "id": "absent-unknown-effective",
+   "intent": "a later effective barrier makes an earlier unknown irrelevant to safety (status blocked)",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "false",
+     "B2": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P1.blocked_by": {
+     "ref": "B2",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    }
+   }
+  },
+  {
+   "id": "common-cause-dependency",
+   "intent": "headline: one false shared condition disables two barriers -> open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true",
+     "B2": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003 dependencies; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own (barriers must be independent)"
+    }
+   }
+  },
+  {
+   "id": "hazard-unknown-open-review",
+   "intent": "insufficient data: hazard unknown, no effective barrier -> review",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "unknown",
+     "E1": "true",
+     "B1": "false"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006: worlds {no_hazard, open}"
+    }
+   }
+  },
+  {
+   "id": "event-unknown-open-review",
+   "intent": "insufficient data: event unknown, no barriers -> review",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "unknown"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006: worlds {not_initiated, open}"
+    }
+   }
+  },
+  {
+   "id": "hazard-unknown-barrier-effective",
+   "intent": "insufficient data property: hazard unknown must never be reported as no_hazard",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "unknown",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status_is_no_hazard": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5: no absence-of-risk claim from missing data; hazard presence not established"
+    },
+    "P1.status_is_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "every world is no_hazard or blocked"
+    }
+   }
+  },
+  {
+   "id": "unknown-before-effective",
+   "intent": "property: unknown barrier before an effective one -> never open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "unknown",
+     "B2": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status_is_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "B2 effective in every world"
+    },
+    "P1.status_in_blocked_or_review": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worlds all blocked (by B1 or B2); disputable whether tool reports blocked(B2) or review"
+    }
+   }
+  },
+  {
+   "id": "decision-removes-barrier",
+   "intent": "headline: run decision removes a setup barrier -> open",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": [
+     {
+      "set": "B1",
+      "value": "false"
+     }
+    ]
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-007 decisions override setup"
+    }
+   }
+  },
+  {
+   "id": "decision-resolves-unknown",
+   "intent": "decision confirms an unverified barrier -> blocked (review cleared)",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "unknown"
+    },
+    "decisions": [
+     {
+      "set": "B1",
+      "value": "true"
+     }
+    ]
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-007"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-007"
+    }
+   }
+  },
+  {
+   "id": "decision-cancels-event",
+   "intent": "decision stops the initiating event -> not_initiated",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true"
+    },
+    "decisions": [
+     {
+      "set": "E1",
+      "value": "false"
+     }
+    ]
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-007 + SSL-ENG-002"
+    }
+   }
+  },
+  {
+   "id": "decision-sequence-last-wins",
+   "intent": "decision sequence: later decision overrides earlier one",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "true",
+     "H1": "true",
+     "E1": "true",
+     "B1": "true"
+    },
+    "decisions": [
+     {
+      "set": "C1",
+      "value": "false"
+     },
+     {
+      "set": "C1",
+      "value": "true"
+     }
+    ]
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "decisions applied in sequence; spec 17 'Actions: decision sequence' (replay order)"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "decisions applied in sequence; spec 17 'Actions: decision sequence' (replay order)"
+    }
+   }
+  },
+  {
+   "id": "summary-one-of-each",
+   "intent": "headline: five pathways, one of each status; counts and no safe claim",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C1"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P4"
+      },
+      {
+       "id": "P5",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B3"
+       ],
+       "consequence": "consequence-P5"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "unknown",
+     "H1": "true",
+     "H2": "false",
+     "E1": "true",
+     "E2": "false",
+     "B1": "false",
+     "B2": "true",
+     "B3": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005"
+    },
+    "P2.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P2.blocked_by": {
+     "ref": "B2",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P3.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-001"
+    },
+    "P4.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-002"
+    },
+    "P5.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006"
+    },
+    "counts": {
+     "ref": {
+      "open": 1,
+      "blocked": 1,
+      "no_hazard": 1,
+      "not_initiated": 1,
+      "review": 1
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "summary-all-blocked-not-safe",
+   "intent": "negative claim: every pathway blocked still does not produce a 'safe' verdict",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2"
+       ],
+       "consequence": "consequence-P2"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "true",
+     "E1": "true",
+     "B1": "true",
+     "B2": "true"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P1.blocked_by": {
+     "ref": "B1",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P2.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "P2.blocked_by": {
+     "ref": "B2",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-004"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; 00-common 0.5 no automatic absence-of-risk claim"
+    },
+    "summary_scoped_to_modelled_pathways": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 17 limitation 'no hidden claim that one scenario generalizes'"
+    }
+   }
+  },
+  {
+   "id": "summary-all-review-not-safe",
+   "intent": "insufficient data: everything unknown -> all review, zero blocked, not safe",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [],
+     "hazards": [
+      "H1"
+     ],
+     "events": [
+      "E1"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2"
+       ],
+       "consequence": "consequence-P2"
+      }
+     ]
+    },
+    "setup": {
+     "H1": "unknown",
+     "E1": "unknown",
+     "B1": "unknown",
+     "B2": "unknown"
+    },
+    "decisions": []
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006"
+    },
+    "P2.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006"
+    },
+    "counts": {
+     "ref": {
+      "open": 0,
+      "blocked": 0,
+      "no_hazard": 0,
+      "not_initiated": 0,
+      "review": 2
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "neg-undefined-barrier",
+   "intent": "negative: pathway references a barrier id that does not exist",
+   "inputs": {
+    "scenario_pack_defect": "pathways[0].barriers_in_order = ['B1','B9'] with B9 undefined",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-undefined-dependency",
+   "intent": "negative: barrier depends on an undefined condition",
+   "inputs": {
+    "scenario_pack_defect": "barriers[B1].depends_on = ['C9'] with C9 undefined",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-duplicate-barrier-id",
+   "intent": "negative: two barriers share id B1",
+   "inputs": {
+    "scenario_pack_defect": "barriers = [{id:B1},{id:B1}]",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-pathway-without-hazard",
+   "intent": "negative: pathway lacks a hazard reference",
+   "inputs": {
+    "scenario_pack_defect": "pathways[0].hazard removed",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-invalid-tristate",
+   "intent": "negative: setup value outside yes/no/unknown",
+   "inputs": {
+    "scenario_pack_defect": "setup.B1 = 'maybe'",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-wrong-schema",
+   "intent": "negative: pack declares a different schema id",
+   "inputs": {
+    "scenario_pack_defect": "schema = 'tools.petrov.re/other/pack/v9'",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "neg-not-json",
+   "intent": "negative: file is not JSON",
+   "inputs": {
+    "scenario_pack_defect": "file content 'scenario: grinder' (YAML-like text)",
+    "base": "minimal valid pack of case single-barrier-blocks"
+   },
+   "checks": {
+    "pack_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-008; spec 17 'JSON schema validation'; 00-common: unsupported configuration handled explicitly"
+    },
+    "refusal_reason_listed": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: refusals listed with reasons"
+    },
+    "outcomes_produced": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a refused pack yields no pathway result"
+    }
+   }
+  },
+  {
+   "id": "replay-round-trip",
+   "intent": "headline: replay JSON reproduces identical outcomes",
+   "inputs": {
+    "base": "case summary-one-of-each",
+    "action": "export replay, reopen it"
+   },
+   "checks": {
+    "replay_outcomes_match": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 17 'JSON replay record', 'Golden replay'"
+    },
+    "replay_statuses": {
+     "ref": {
+      "P1": "open",
+      "P2": "blocked",
+      "P3": "no_hazard",
+      "P4": "not_initiated",
+      "P5": "review"
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same as summary-one-of-each"
+    }
+   }
+  },
+  {
+   "id": "replay-tampered-outcome",
+   "intent": "negative: replay whose stored outcome was edited (P1 open -> blocked) is flagged as mismatch",
+   "inputs": {
+    "base": "case summary-one-of-each",
+    "action": "export replay, edit stored P1 status to blocked, reopen"
+   },
+   "checks": {
+    "mismatch_reported": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: opening a replay recomputes and compares"
+    },
+    "recomputed_P1_status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "recomputation ignores the stored value"
+    }
+   }
+  },
+  {
+   "id": "replay-unknown-schema",
+   "intent": "negative: replay with unknown schema id is refused",
+   "inputs": {
+    "replay_schema": "tools.petrov.re/safetyscenariolab/replay/v99"
+   },
+   "checks": {
+    "replay_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 17 validation; 00-common explicit negative handling"
+    }
+   }
+  },
+  {
+   "id": "ssl-grd-all-barriers-in-place",
+   "intent": "built-in grinder sparks: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-GRD",
+    "scenario_topic": "grinder sparks",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-grd-all-barriers-absent",
+   "intent": "built-in grinder sparks: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-GRD",
+    "scenario_topic": "grinder sparks",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-grd-all-unknown",
+   "intent": "insufficient data, built-in grinder sparks: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-GRD",
+    "scenario_topic": "grinder sparks",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-hwk-all-barriers-in-place",
+   "intent": "built-in hot work combustibles: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-HWK",
+    "scenario_topic": "hot work combustibles",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-hwk-all-barriers-absent",
+   "intent": "built-in hot work combustibles: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-HWK",
+    "scenario_topic": "hot work combustibles",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-hwk-all-unknown",
+   "intent": "insufficient data, built-in hot work combustibles: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-HWK",
+    "scenario_topic": "hot work combustibles",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-scf-all-barriers-in-place",
+   "intent": "built-in mobile scaffold tower: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-SCF",
+    "scenario_topic": "mobile scaffold tower",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-scf-all-barriers-absent",
+   "intent": "built-in mobile scaffold tower: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-SCF",
+    "scenario_topic": "mobile scaffold tower",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-scf-all-unknown",
+   "intent": "insufficient data, built-in mobile scaffold tower: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-SCF",
+    "scenario_topic": "mobile scaffold tower",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-csp-all-barriers-in-place",
+   "intent": "built-in confined space / tank entry gas monitoring: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-CSP",
+    "scenario_topic": "confined space / tank entry gas monitoring",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-csp-all-barriers-absent",
+   "intent": "built-in confined space / tank entry gas monitoring: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-CSP",
+    "scenario_topic": "confined space / tank entry gas monitoring",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-csp-all-unknown",
+   "intent": "insufficient data, built-in confined space / tank entry gas monitoring: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-CSP",
+    "scenario_topic": "confined space / tank entry gas monitoring",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-cyl-all-barriers-in-place",
+   "intent": "built-in gas cylinder storage: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-CYL",
+    "scenario_topic": "gas cylinder storage",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-cyl-all-barriers-absent",
+   "intent": "built-in gas cylinder storage: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-CYL",
+    "scenario_topic": "gas cylinder storage",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-cyl-all-unknown",
+   "intent": "insufficient data, built-in gas cylinder storage: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-CYL",
+    "scenario_topic": "gas cylinder storage",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-lto-all-barriers-in-place",
+   "intent": "built-in LOTO residual pressure: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-LTO",
+    "scenario_topic": "LOTO residual pressure",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-lto-all-barriers-absent",
+   "intent": "built-in LOTO residual pressure: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-LTO",
+    "scenario_topic": "LOTO residual pressure",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-lto-all-unknown",
+   "intent": "insufficient data, built-in LOTO residual pressure: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-LTO",
+    "scenario_topic": "LOTO residual pressure",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-lft-all-barriers-in-place",
+   "intent": "built-in suspended load: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-LFT",
+    "scenario_topic": "suspended load",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-lft-all-barriers-absent",
+   "intent": "built-in suspended load: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-LFT",
+    "scenario_topic": "suspended load",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-lft-all-unknown",
+   "intent": "insufficient data, built-in suspended load: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-LFT",
+    "scenario_topic": "suspended load",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-lad-all-barriers-in-place",
+   "intent": "built-in ladder footing: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-LAD",
+    "scenario_topic": "ladder footing",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-lad-all-barriers-absent",
+   "intent": "built-in ladder footing: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-LAD",
+    "scenario_topic": "ladder footing",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-lad-all-unknown",
+   "intent": "insufficient data, built-in ladder footing: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-LAD",
+    "scenario_topic": "ladder footing",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-elc-all-barriers-in-place",
+   "intent": "built-in wet electrical cable: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-ELC",
+    "scenario_topic": "wet electrical cable",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-elc-all-barriers-absent",
+   "intent": "built-in wet electrical cable: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-ELC",
+    "scenario_topic": "wet electrical cable",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-elc-all-unknown",
+   "intent": "insufficient data, built-in wet electrical cable: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-ELC",
+    "scenario_topic": "wet electrical cable",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "ssl-noi-all-barriers-in-place",
+   "intent": "built-in noisy task: every barrier item 'in place', every dependency condition satisfied",
+   "inputs": {
+    "scenario": "SSL-NOI",
+    "scenario_topic": "noisy task",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = in place; every condition a barrier depends on = yes; hazard/event items at their scenario defaults"
+   },
+   "checks": {
+    "count_open": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-003/004: each modelled pathway either has an effective barrier or has no hazard/event; Johnson et al., Hazards 28 (2018) p.3: a barrier must be able to completely stop the threat on its own"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009"
+    }
+   }
+  },
+  {
+   "id": "ssl-noi-all-barriers-absent",
+   "intent": "built-in noisy task: hazards present, events occur, every barrier absent",
+   "inputs": {
+    "scenario": "SSL-NOI",
+    "scenario_topic": "noisy task",
+    "decisions": "none (defaults)",
+    "setup": "every barrier = absent; every hazard/event item = yes (present)"
+   },
+   "checks": {
+    "count_open_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-005; spec 17 acceptance 'all branches reachable': a teaching scenario must be able to show an open pathway"
+    },
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no barrier in place -> nothing can block"
+    }
+   }
+  },
+  {
+   "id": "ssl-noi-all-unknown",
+   "intent": "insufficient data, built-in noisy task: every setup item unknown/unverified",
+   "inputs": {
+    "scenario": "SSL-NOI",
+    "scenario_topic": "noisy task",
+    "decisions": "none (defaults)",
+    "setup": "every setup item = unknown / unverified"
+   },
+   "checks": {
+    "count_blocked": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an unverified barrier never counts (SSL-ENG-003, SSL-ENG-006)"
+    },
+    "count_review_positive": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-006; 00-common 0.5 insufficient data -> review required"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    }
+   }
+  },
+  {
+   "id": "random-01",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C1",
+        "C3"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B5",
+        "B4"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B2",
+        "B4",
+        "B1"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B6",
+        "B5"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "unknown",
+     "C2": "unknown",
+     "C3": "true",
+     "B1": "unknown",
+     "B2": "unknown",
+     "B3": "false",
+     "B4": "false",
+     "B5": "false",
+     "B6": "true",
+     "H1": "true",
+     "H2": "true",
+     "E1": "true",
+     "E2": "true"
+    },
+    "decisions": [
+     {
+      "set": "C2",
+      "value": "true"
+     },
+     {
+      "set": "B5",
+      "value": "unknown"
+     }
+    ],
+    "rng_seed": 20260916,
+    "rng_index": 1
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.blocked_by": {
+     "ref": "B6",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "first barrier in order whose in_place and all dependencies are true (SSL-ENG-003/004)"
+    },
+    "P4.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 1,
+      "blocked": 1,
+      "no_hazard": 0,
+      "not_initiated": 0,
+      "review": 2
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-02",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C3"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C2"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": []
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B6",
+        "B1",
+        "B5"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B5",
+        "B4"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B4"
+       ],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "true",
+     "C3": "false",
+     "B1": "true",
+     "B2": "true",
+     "B3": "true",
+     "B4": "false",
+     "B5": "false",
+     "B6": "false",
+     "H1": "true",
+     "H2": "false",
+     "E1": "false",
+     "E2": "false"
+    },
+    "decisions": [],
+    "rng_seed": 20260916,
+    "rng_index": 2
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 0,
+      "blocked": 0,
+      "no_hazard": 2,
+      "not_initiated": 2,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-03",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": []
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C2"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B4"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B6",
+        "B2",
+        "B1"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B4",
+        "B1",
+        "B3"
+       ],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "true",
+     "C3": "true",
+     "B1": "false",
+     "B2": "true",
+     "B3": "true",
+     "B4": "false",
+     "B5": "false",
+     "B6": "false",
+     "H1": "true",
+     "H2": "false",
+     "E1": "true",
+     "E2": "true"
+    },
+    "decisions": [],
+    "rng_seed": 20260916,
+    "rng_index": 3
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 1,
+      "blocked": 0,
+      "no_hazard": 3,
+      "not_initiated": 0,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-04",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": []
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B5",
+        "B4"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B6",
+        "B3"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2",
+        "B6",
+        "B3"
+       ],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "unknown",
+     "C3": "true",
+     "B1": "false",
+     "B2": "unknown",
+     "B3": "unknown",
+     "B4": "true",
+     "B5": "true",
+     "B6": "false",
+     "H1": "unknown",
+     "H2": "false",
+     "E1": "unknown",
+     "E2": "true"
+    },
+    "decisions": [],
+    "rng_seed": 20260916,
+    "rng_index": 4
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "review",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 0,
+      "blocked": 0,
+      "no_hazard": 0,
+      "not_initiated": 0,
+      "review": 4
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-05",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C2"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C3"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B3",
+        "B1",
+        "B2"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B3"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B6"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "true",
+     "C2": "true",
+     "C3": "true",
+     "B1": "false",
+     "B2": "unknown",
+     "B3": "false",
+     "B4": "false",
+     "B5": "false",
+     "B6": "unknown",
+     "H1": "false",
+     "H2": "true",
+     "E1": "unknown",
+     "E2": "false"
+    },
+    "decisions": [
+     {
+      "set": "B1",
+      "value": "unknown"
+     },
+     {
+      "set": "B5",
+      "value": "true"
+     }
+    ],
+    "rng_seed": 20260916,
+    "rng_index": 5
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "not_initiated",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 0,
+      "blocked": 0,
+      "no_hazard": 2,
+      "not_initiated": 2,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-06",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C1"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B2",
+        "B1",
+        "B5"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B4"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B3",
+        "B1"
+       ],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "true",
+     "C3": "false",
+     "B1": "false",
+     "B2": "false",
+     "B3": "true",
+     "B4": "false",
+     "B5": "false",
+     "B6": "true",
+     "H1": "true",
+     "H2": "true",
+     "E1": "true",
+     "E2": "true"
+    },
+    "decisions": [
+     {
+      "set": "B6",
+      "value": "unknown"
+     },
+     {
+      "set": "B3",
+      "value": "false"
+     }
+    ],
+    "rng_seed": 20260916,
+    "rng_index": 6
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 4,
+      "blocked": 0,
+      "no_hazard": 0,
+      "not_initiated": 0,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-07",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": []
+      },
+      {
+       "id": "B2",
+       "depends_on": []
+      },
+      {
+       "id": "B3",
+       "depends_on": []
+      },
+      {
+       "id": "B4",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B5",
+       "depends_on": []
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E2",
+       "barriers_in_order": [],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B4",
+        "B3"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "true",
+     "C2": "true",
+     "C3": "false",
+     "B1": "unknown",
+     "B2": "true",
+     "B3": "false",
+     "B4": "true",
+     "B5": "false",
+     "B6": "true",
+     "H1": "true",
+     "H2": "true",
+     "E1": "true",
+     "E2": "true"
+    },
+    "decisions": [
+     {
+      "set": "C1",
+      "value": "false"
+     }
+    ],
+    "rng_seed": 20260916,
+    "rng_index": 7
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P4.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 4,
+      "blocked": 0,
+      "no_hazard": 0,
+      "not_initiated": 0,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  },
+  {
+   "id": "random-08",
+   "intent": "randomized engine case (seed 20260916), decisions override setup",
+   "inputs": {
+    "scenario_pack": {
+     "conditions": [
+      "C1",
+      "C2",
+      "C3"
+     ],
+     "hazards": [
+      "H1",
+      "H2"
+     ],
+     "events": [
+      "E1",
+      "E2"
+     ],
+     "barriers": [
+      {
+       "id": "B1",
+       "depends_on": [
+        "C1",
+        "C3"
+       ]
+      },
+      {
+       "id": "B2",
+       "depends_on": [
+        "C1",
+        "C2"
+       ]
+      },
+      {
+       "id": "B3",
+       "depends_on": [
+        "C2",
+        "C3"
+       ]
+      },
+      {
+       "id": "B4",
+       "depends_on": []
+      },
+      {
+       "id": "B5",
+       "depends_on": [
+        "C2"
+       ]
+      },
+      {
+       "id": "B6",
+       "depends_on": [
+        "C2"
+       ]
+      }
+     ],
+     "pathways": [
+      {
+       "id": "P1",
+       "hazard": "H1",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B1",
+        "B5"
+       ],
+       "consequence": "consequence-P1"
+      },
+      {
+       "id": "P2",
+       "hazard": "H2",
+       "initiating_event": "E2",
+       "barriers_in_order": [
+        "B4",
+        "B5",
+        "B6"
+       ],
+       "consequence": "consequence-P2"
+      },
+      {
+       "id": "P3",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [
+        "B6",
+        "B4"
+       ],
+       "consequence": "consequence-P3"
+      },
+      {
+       "id": "P4",
+       "hazard": "H2",
+       "initiating_event": "E1",
+       "barriers_in_order": [],
+       "consequence": "consequence-P4"
+      }
+     ]
+    },
+    "setup": {
+     "C1": "false",
+     "C2": "true",
+     "C3": "false",
+     "B1": "false",
+     "B2": "true",
+     "B3": "unknown",
+     "B4": "false",
+     "B5": "false",
+     "B6": "true",
+     "H1": "false",
+     "H2": "true",
+     "E1": "true",
+     "E2": "true"
+    },
+    "decisions": [],
+    "rng_seed": 20260916,
+    "rng_index": 8
+   },
+   "checks": {
+    "P1.status": {
+     "ref": "no_hazard",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P2.blocked_by": {
+     "ref": "B6",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "first barrier in order whose in_place and all dependencies are true (SSL-ENG-003/004)"
+    },
+    "P3.status": {
+     "ref": "blocked",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "P3.blocked_by": {
+     "ref": "B6",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "first barrier in order whose in_place and all dependencies are true (SSL-ENG-003/004)"
+    },
+    "P4.status": {
+     "ref": "open",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "possible-world enumeration + K3 cross-check in ref.py (seed 20260916)"
+    },
+    "counts": {
+     "ref": {
+      "open": 1,
+      "blocked": 2,
+      "no_hazard": 1,
+      "not_initiated": 0,
+      "review": 0
+     },
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "tally of the pathway statuses above"
+    },
+    "summary_claims_safe": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "SSL-ENG-009; spec 00-common 0.5: never claim absence of risk"
+    }
+   }
+  }
+ ],
+ "not_benchmarked": [
+  "Content correctness of the 10 built-in scenarios against NFPA 51B, EN 1004-1, OSHA 1910.147/1910.253, HSE INDG455/HSG107, IEC 60364, ISO 12480-1, Directive 2003/10/EC: the tool cites them at document level without clauses or limits, and the pack item ids are not visible to an independent author; only structural properties are checked.",
+  "Which barrier is named when an earlier barrier is unknown and a later one effective (case unknown-before-effective checks only blocked-or-review).",
+  "Status when unknowns change only between non-open results (e.g. hazard unknown with an effective barrier): only 'not no_hazard' and 'not open' are asserted.",
+  "Visual gate, screenshots, no-text-in-drawing, alt text, list view completeness, keyboard operation, PDF layout, seven-language strings: UI properties, not reproducible from an independent reference.",
+  "Probabilistic branch and seed replay: not implemented (post-MVP), README states no random branch.",
+  "Exchange document scenario.outcomes field shape and localStorage behaviour: framework plumbing, no independent reference."
+ ],
+ "coverage": "Engine rules SSL-ENG-001..009 (no hazard, not initiated, dependencies with K3, first effective barrier, open, unknown->review, decision override and sequence, validation refusals, no safe claim), the blocked-vs-no-hazard debrief distinction, data-driven import of new scenarios (all synthetic cases are imports), JSON replay round trip and tamper detection, and reachability of open/review states in each of the 10 required scenarios."
+}

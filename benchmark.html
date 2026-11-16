@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmark report — tools.petrov.re</title>
+<meta name="description" content="What a tool was benchmarked against, with what tolerance, and what the run actually found.">
+<meta name="robots" content="index,follow">
+<style>
+:root{--bg:#f6f8fb;--panel:#fff;--ink:#12161d;--muted:#5b6675;--line:#e2e7ee;--accent:#3763e6;--weak:rgba(55,99,230,.10);--ok:#1f6f34;--okbg:rgba(31,111,52,.10);--warn:#9a5a00;--warnbg:rgba(154,90,0,.10);--bad:#a5261f;--badbg:rgba(165,38,31,.10);--shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161b22;--ink:#e6edf3;--muted:#9aa7b4;--line:#293240;--accent:#6f98ff;--weak:rgba(111,152,255,.12);--ok:#5fb87a;--okbg:rgba(95,184,122,.13);--warn:#d0a24a;--warnbg:rgba(208,162,74,.13);--bad:#e08a83;--badbg:rgba(224,138,131,.13);--shadow:0 1px 2px rgba(0,0,0,.28),0 10px 30px rgba(0,0,0,.36)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;overflow-wrap:break-word}
+.wrap{max-width:1120px;margin:auto;padding:26px 20px 70px}
+header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+h1{font-size:clamp(21px,2.7vw,29px);margin:0 0 4px;letter-spacing:-.02em}
+h2{font-size:15px;margin:0 0 8px;letter-spacing:-.01em}
+h3{font-size:13px;margin:16px 0 5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.dot{color:var(--accent)}
+.crumb{margin:0 0 4px;font-size:12px;color:var(--muted)}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.tag{color:var(--muted);margin:0;font-size:13px}
+.langs{display:flex;gap:5px;flex-wrap:wrap}
+button{font:inherit}
+.langs button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:6px 9px;border-radius:8px;cursor:pointer}
+.langs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.rule{border:0;border-top:1px solid var(--line);margin:18px 0 16px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.nav a{font-size:12px;text-decoration:none;color:var(--muted);border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 11px}
+.nav a:hover{border-color:var(--accent);color:var(--ink)}
+.pill{display:inline-block;font-size:11px;font-weight:650;padding:4px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.st-benchmarked{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.pill.st-prototype{background:var(--warnbg);color:var(--warn);border-color:var(--warn)} .pill.st-partial{background:var(--weak);color:var(--accent);border-color:var(--accent)}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);padding:15px 16px;margin:0 0 14px}
+.card p{margin:8px 0;color:var(--muted)}
+.card p.ink{color:var(--ink)}
+.honest{border-left:4px solid var(--warn);background:color-mix(in srgb,var(--panel) 92%,var(--warn))}
+.honest h2{color:var(--ink)}
+.honest p{color:var(--ink)}
+.quote{border-left:3px solid var(--accent);padding:2px 0 2px 11px;margin:8px 0;color:var(--ink)}
+ol.cites{margin:8px 0 0;padding-left:20px}
+ol.cites li{margin:0 0 7px;color:var(--ink);font-size:13.5px}
+.tiles{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 4px}
+.tile{border:1px solid var(--line);border-radius:11px;padding:8px 13px;min-width:96px;background:var(--bg)}
+.tile b{display:block;font-size:20px;line-height:1.25;font-variant-numeric:tabular-nums}
+.tile span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tile.ok b{color:var(--ok)}.tile.bad b{color:var(--bad)}.tile.flag b{color:var(--warn)}
+.meta{display:grid;grid-template-columns:max-content 1fr;gap:5px 14px;font-size:13px;margin:6px 0 0}
+.meta b{color:var(--muted);font-weight:600}
+.meta span{overflow-wrap:anywhere}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:11px;margin:9px 0 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;background:var(--panel);font-size:12.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td.id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;overflow-wrap:anywhere;min-width:110px}
+.res{font-weight:650;white-space:nowrap}
+.res.p{color:var(--ok)}.res.f{color:var(--bad)}.res.g{color:var(--warn)}
+.sub{background:color-mix(in srgb,var(--panel) 94%,var(--accent))}
+.small{font-size:11.5px;color:var(--muted)}
+details{margin:10px 0 0}
+details>summary{cursor:pointer;font-size:12.5px;color:var(--accent);padding:3px 0}
+pre{margin:8px 0 0;padding:10px 11px;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow-x:auto;font:11.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+a{color:var(--accent)}
+.load{padding:26px;color:var(--muted);text-align:center}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:560px){.wrap{padding:18px 14px 60px}.meta{grid-template-columns:1fr;gap:1px 0}.meta b{margin-top:6px}.tile{min-width:78px;padding:7px 10px}.tile b{font-size:17px}}
+</style>
+<!-- §21 ONE PATH TO PAPER, on a site page that is not a tool.
+     UI_FRAMEWORK_SPEC.md §21.7 item 1: six site pages carried no print sheet at
+     all, because §21 is a framework contract and the framework was not on them.
+     File -> Print gave the browser default — no A4 page box, no running header,
+     no source URL, no date, and the language switcher printed as buttons. This
+     page is one a reader prints on purpose, so it gets the same sheet every
+     tool gets, from the same code: DiagramUI.printStyles() installs the page
+     box, the white paper, the chrome suppression, the running header (this
+     page's own h1 · the name of the host that served it, plus the localised
+     words "Screen
+     printout") and the attributed running footer, in all six site languages.
+     Nothing else about this page changes: no DiagramUI.app(), no shared bar, no
+     Ctrl+P interception — this page has no calculation record to print, so §21.1
+     says its keyboard must be left alone, and it is. -->
+<style>
+/* §21.2: the framework hides the chrome the FRAMEWORK created; which of this
+   page's own regions reach paper is this page's decision. A language switcher
+   and a site nav are controls, not content: on paper they are a row of dead
+   buttons. Everything else on the page is the document. */
+@media print{ #langs, #nav, #back, .langs { display:none !important } }
+</style>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  try { if (window.DiagramUI && DiagramUI.printStyles) DiagramUI.printStyles(); } catch (e) {}
+});
+</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <p class="crumb"><a href="index.html" id="crumb">tools<span class="dot">.</span>petrov<span class="dot">.</span>re</a></p>
+  <h1 id="ttl"></h1>
+  <p class="tag" id="sub"></p>
+ </div>
+ <nav class="langs" id="langs" aria-label="Language"></nav>
+</header>
+<hr class="rule">
+<nav class="nav" id="nav"></nav>
+<main id="main"><div class="load" id="loading"></div></main>
+<footer><p id="foot"></p></footer>
+</div>
+<script>
+(()=>{
+"use strict";
+
+const L=["en","uk","de","nl","fr","es","pl"];
+
+/* Seven-language UI text: en, uk, de, nl, fr, es, pl, the site registry of
+   AGENTS §0. Before v4.17 all 60 maps stopped at `es`, so the Polish status chip
+   of a benchmarked tool opened an English evidence page (AGENTS §8). The
+   artifact's own strings (reference, citations, tolerance, case notes) are still
+   shown verbatim in the language they were written in — they are evidence, not
+   interface copy, and must not be paraphrased. */
+const U={
+ page:{en:"Benchmark report",uk:"Звіт про бенчмарк",de:"Benchmark-Bericht",nl:"Benchmarkrapport",fr:"Rapport de banc d'essai",es:"Informe del banco de pruebas",pl:"Raport z benchmarku"},
+ /* Displayed status labels. The schema enum is prototype|benchmarked|verified;
+    "verified" is reserved for a documented review by someone other than the
+    author and is never rendered without validation.review. */
+ benchmarked:{en:"Benchmark tested",uk:"Перевірено за еталоном",de:"Benchmark geprüft",nl:"Benchmark getoetst",fr:"Testé sur banc d'essai",es:"Contrastado con referencia",pl:"Sprawdzone benchmarkiem"},
+ prototype:{en:"Prototype",uk:"Прототип",de:"Prototyp",nl:"Prototype",fr:"Prototype",es:"Prototipo",pl:"Prototyp"},
+ partial:{en:"Benchmark partially passed",uk:"Бенчмарк частково пройдено",de:"Benchmark teilweise bestanden",nl:"Benchmark gedeeltelijk geslaagd",fr:"Benchmark partiellement réussi",es:"Benchmark superado parcialmente",pl:"Benchmark częściowo zaliczony"},
+ verified:{en:"Reviewed by a third party",uk:"Перевірено третьою стороною",de:"Von Dritten geprüft",nl:"Door een derde beoordeeld",fr:"Examiné par un tiers",es:"Revisado por un tercero",pl:"Zweryfikowane przez stronę trzecią"},
+ notIndep:{en:"This is not an independent validation",uk:"Це не незалежна валідація",de:"Dies ist keine unabhängige Validierung",nl:"Dit is geen onafhankelijke validatie",fr:"Ceci n'est pas une validation indépendante",es:"Esto no es una validación independiente",pl:"To nie jest walidacja niezależna"},
+ notIndepText:{
+  en:"The cases below were run by the tool's author, with the author's own test harness, against references independent of the tool's code. That is measured evidence, not an independent validation: nobody other than the author has reviewed the tool or this report.",
+  uk:"Наведені випадки виконав автор інструмента власним випробувальним стендом за еталонами, незалежними від коду інструмента. Це виміряні докази, а не незалежна валідація: ніхто, крім автора, не перевіряв ані інструмент, ані цей звіт.",
+  de:"Die folgenden Fälle wurden vom Autor des Werkzeugs mit seinem eigenen Prüfstand gegen Referenzen ausgeführt, die vom Code des Werkzeugs unabhängig sind. Das ist ein gemessener Nachweis, keine unabhängige Validierung: Niemand außer dem Autor hat das Werkzeug oder diesen Bericht geprüft.",
+  nl:"De onderstaande gevallen zijn door de auteur van de tool met zijn eigen testbank uitgevoerd, tegen referenties die onafhankelijk zijn van de code van de tool. Dat is gemeten bewijs, geen onafhankelijke validatie: niemand anders dan de auteur heeft de tool of dit rapport beoordeeld.",
+  fr:"Les cas ci-dessous ont été exécutés par l'auteur de l'outil, avec son propre banc d'essai, face à des références indépendantes du code de l'outil. C'est une preuve mesurée, pas une validation indépendante : personne d'autre que l'auteur n'a examiné l'outil ni ce rapport.",
+  es:"Los casos siguientes los ejecutó el autor de la herramienta con su propio banco de pruebas, frente a referencias independientes del código de la herramienta. Es evidencia medida, no una validación independiente: nadie salvo el autor ha revisado la herramienta ni este informe.",
+  pl:"Poniższe przypadki wykonał autor narzędzia, na własnym stanowisku testowym, względem odniesień niezależnych od kodu narzędzia. To zmierzony dowód, a nie walidacja niezależna: nikt poza autorem nie przeglądał ani narzędzia, ani tego raportu."},
+ whatTested:{en:"What was tested, and against what",uk:"Що перевірялося і за яким еталоном",de:"Was geprüft wurde – und wogegen",nl:"Wat is getoetst, en waaraan",fr:"Ce qui a été testé, et par rapport à quoi",es:"Qué se probó y contra qué referencia",pl:"Co sprawdzano i względem czego"},
+ cites:{en:"References, cited in full",uk:"Джерела, наведені повністю",de:"Referenzen, vollständig zitiert",nl:"Referenties, volledig geciteerd",fr:"Références, citées intégralement",es:"Referencias, citadas íntegramente",pl:"Źródła, cytowane w całości"},
+ tolTitle:{en:"Pass criterion, and why it is that number",uk:"Критерій проходження — і чому саме таке число",de:"Bestehenskriterium – und warum es diese Zahl ist",nl:"Slaagcriterium, en waarom het dat getal is",fr:"Critère de réussite, et pourquoi ce chiffre",es:"Criterio de aprobación y por qué es esa cifra",pl:"Kryterium zaliczenia — i dlaczego właśnie taka liczba"},
+ tolNote:{
+  en:"Quoted verbatim from the artifact. The tolerance is taken from the physics and from the number of digits the tool prints, not from what makes the tool pass.",
+  uk:"Наведено дослівно з артефакту. Допуск обрано з фізики та з кількості цифр, які друкує інструмент, а не з того, що дозволяє інструменту пройти.",
+  de:"Wörtlich aus dem Artefakt übernommen. Die Toleranz folgt aus der Physik und aus der Anzahl der vom Werkzeug ausgegebenen Stellen, nicht daraus, was das Werkzeug bestehen lässt.",
+  nl:"Letterlijk overgenomen uit het artefact. De tolerantie volgt uit de fysica en uit het aantal cijfers dat de tool toont, niet uit wat de tool laat slagen.",
+  fr:"Cité mot pour mot depuis l'artefact. La tolérance découle de la physique et du nombre de chiffres affichés par l'outil, non de ce qui ferait réussir l'outil.",
+  es:"Citado literalmente del artefacto. La tolerancia se toma de la física y del número de dígitos que imprime la herramienta, no de lo que hace que la herramienta apruebe.",
+  pl:"Zacytowane dosłownie z artefaktu. Tolerancja wynika z fizyki i z liczby cyfr, które wypisuje narzędzie, a nie z tego, co pozwala narzędziu przejść."},
+ result:{en:"Result",uk:"Результат",de:"Ergebnis",nl:"Resultaat",fr:"Résultat",es:"Resultado",pl:"Wynik"},
+ tCases:{en:"Cases run",uk:"Випадків",de:"Fälle",nl:"Gevallen",fr:"Cas exécutés",es:"Casos",pl:"Wykonane przypadki"},
+ tPassed:{en:"Passed",uk:"Пройдено",de:"Bestanden",nl:"Geslaagd",fr:"Réussis",es:"Superados",pl:"Zaliczone"},
+ tFailed:{en:"Failed",uk:"Не пройдено",de:"Fehlgeschlagen",nl:"Gezakt",fr:"Échoués",es:"Fallidos",pl:"Niezaliczone"},
+ tFlagged:{en:"Flagged",uk:"Позначено",de:"Markiert",nl:"Gemarkeerd",fr:"Signalés",es:"Señalados",pl:"Oznaczone"},
+ flagTitle:{en:"Flagged — not counted as a clean pass",uk:"Позначені — не зараховані як чисте проходження",de:"Markiert – nicht als sauberes Bestehen gewertet",nl:"Gemarkeerd — niet geteld als een schone pass",fr:"Signalés — non comptés comme une réussite nette",es:"Señalados: no contados como aprobado limpio",pl:"Oznaczone — nieliczone jako czyste zaliczenie"},
+ flagIntro:{
+  en:"In these cases the independent references disagree with each other by more than the tolerance, or the tool itself marks the region as uncertain. They are reported as flagged rather than as passed.",
+  uk:"У цих випадках незалежні еталони розходяться між собою більше за допуск, або сам інструмент позначає цю область як невизначену. Їх наведено як позначені, а не як пройдені.",
+  de:"In diesen Fällen weichen die unabhängigen Referenzen stärker voneinander ab als die Toleranz, oder das Werkzeug kennzeichnet den Bereich selbst als unsicher. Sie werden als markiert und nicht als bestanden ausgewiesen.",
+  nl:"In deze gevallen wijken de onafhankelijke referenties onderling meer af dan de tolerantie, of markeert de tool het gebied zelf als onzeker. Ze worden als gemarkeerd gerapporteerd, niet als geslaagd.",
+  fr:"Dans ces cas, les références indépendantes divergent entre elles au-delà de la tolérance, ou l'outil signale lui-même la zone comme incertaine. Ils sont rapportés comme signalés, et non comme réussis.",
+  es:"En estos casos las referencias independientes discrepan entre sí más que la tolerancia, o la propia herramienta marca la zona como incierta. Se informan como señalados, no como superados.",
+  pl:"W tych przypadkach niezależne odniesienia rozchodzą się między sobą bardziej niż tolerancja albo samo narzędzie oznacza ten obszar jako niepewny. Podano je jako oznaczone, a nie jako zaliczone."},
+ failTitle:{en:"Cases that did not pass",uk:"Випадки, які не пройшли",de:"Fälle, die nicht bestanden haben",nl:"Gevallen die niet zijn geslaagd",fr:"Cas non réussis",es:"Casos no superados",pl:"Przypadki, które nie przeszły"},
+ notBench:{en:"What was explicitly not benchmarked",uk:"Що свідомо не перевірялося",de:"Was ausdrücklich nicht geprüft wurde",nl:"Wat uitdrukkelijk niet is getoetst",fr:"Ce qui n'a explicitement pas été testé",es:"Qué no se ha probado, explícitamente",pl:"Czego świadomie nie sprawdzano"},
+ runNotes:{en:"Run notes",uk:"Нотатки про прогін",de:"Anmerkungen zum Lauf",nl:"Opmerkingen bij de run",fr:"Notes d'exécution",es:"Notas de la ejecución",pl:"Uwagi do przebiegu"},
+ pageErr:{en:"JavaScript errors captured during the run",uk:"Помилки JavaScript, зафіксовані під час прогону",de:"Während des Laufs erfasste JavaScript-Fehler",nl:"JavaScript-fouten die tijdens de run zijn vastgelegd",fr:"Erreurs JavaScript relevées pendant l'exécution",es:"Errores de JavaScript registrados durante la ejecución",pl:"Błędy JavaScriptu zarejestrowane w trakcie przebiegu"},
+ crosscheck:{en:"Cross-check between the independent references",uk:"Перехресна перевірка між незалежними еталонами",de:"Quervergleich zwischen den unabhängigen Referenzen",nl:"Kruiscontrole tussen de onafhankelijke referenties",fr:"Recoupement entre les références indépendantes",es:"Comprobación cruzada entre las referencias independientes",pl:"Kontrola krzyżowa między niezależnymi odniesieniami"},
+ environment:{en:"Run environment",uk:"Середовище прогону",de:"Laufumgebung",nl:"Uitvoeringsomgeving",fr:"Environnement d'exécution",es:"Entorno de ejecución",pl:"Środowisko przebiegu"},
+ knownIssue:{en:"Known issue during this run",uk:"Відома проблема під час цього прогону",de:"Bekanntes Problem während dieses Laufs",nl:"Bekend probleem tijdens deze run",fr:"Problème connu lors de cette exécution",es:"Problema conocido durante esta ejecución",pl:"Znany problem w tym przebiegu"},
+ allCases:{en:"All cases",uk:"Усі випадки",de:"Alle Fälle",nl:"Alle gevallen",fr:"Tous les cas",es:"Todos los casos",pl:"Wszystkie przypadki"},
+ rawTitle:{en:"Everything else the artifact records",uk:"Усе інше, що містить артефакт",de:"Alles Weitere, was das Artefakt festhält",nl:"Al het overige dat het artefact vastlegt",fr:"Tout le reste consigné dans l'artefact",es:"Todo lo demás que registra el artefacto",pl:"Wszystko pozostałe, co zapisuje artefakt"},
+ colCase:{en:"Case",uk:"Випадок",de:"Fall",nl:"Geval",fr:"Cas",es:"Caso",pl:"Przypadek"},
+ colWhat:{en:"What it is",uk:"Опис",de:"Beschreibung",nl:"Omschrijving",fr:"Description",es:"Descripción",pl:"Opis"},
+ colWorst:{en:"Worst deviation",uk:"Найбільше відхилення",de:"Größte Abweichung",nl:"Grootste afwijking",fr:"Écart maximal",es:"Desviación máxima",pl:"Największe odchylenie"},
+ colOut:{en:"Outcome",uk:"Підсумок",de:"Ausgang",nl:"Uitkomst",fr:"Issue",es:"Resultado",pl:"Rozstrzygnięcie"},
+ colQty:{en:"Quantity",uk:"Величина",de:"Größe",nl:"Grootheid",fr:"Grandeur",es:"Magnitud",pl:"Wielkość"},
+ colGot:{en:"Tool",uk:"Інструмент",de:"Werkzeug",nl:"Tool",fr:"Outil",es:"Herramienta",pl:"Narzędzie"},
+ colRef:{en:"Reference",uk:"Еталон",de:"Referenz",nl:"Referentie",fr:"Référence",es:"Referencia",pl:"Odniesienie"},
+ colDev:{en:"Deviation",uk:"Відхилення",de:"Abweichung",nl:"Afwijking",fr:"Écart",es:"Desviación",pl:"Odchylenie"},
+ colLim:{en:"Limit",uk:"Межа",de:"Grenze",nl:"Grens",fr:"Limite",es:"Límite",pl:"Granica"},
+ colWhy:{en:"Reason",uk:"Причина",de:"Grund",nl:"Reden",fr:"Motif",es:"Motivo",pl:"Powód"},
+ rPass:{en:"passed",uk:"пройдено",de:"bestanden",nl:"geslaagd",fr:"réussi",es:"superado",pl:"zaliczony"},
+ rFail:{en:"failed",uk:"не пройдено",de:"fehlgeschlagen",nl:"gezakt",fr:"échoué",es:"fallido",pl:"niezaliczony"},
+ rFlag:{en:"flagged",uk:"позначено",de:"markiert",nl:"gemarkeerd",fr:"signalé",es:"señalado",pl:"oznaczony"},
+ whyDis:{en:"the independent references disagree by %s",uk:"незалежні еталони розходяться на %s",de:"die unabhängigen Referenzen weichen um %s voneinander ab",nl:"de onafhankelijke referenties verschillen %s",fr:"les références indépendantes divergent de %s",es:"las referencias independientes discrepan en %s",pl:"niezależne odniesienia rozchodzą się o %s"},
+ whyUnc:{en:"the tool marks this region as uncertain",uk:"інструмент позначає цю область як невизначену",de:"das Werkzeug kennzeichnet diesen Bereich als unsicher",nl:"de tool markeert dit gebied als onzeker",fr:"l'outil signale cette zone comme incertaine",es:"la herramienta marca esta zona como incierta",pl:"narzędzie oznacza ten obszar jako niepewny"},
+ whyUng:{en:"reported, not graded",uk:"наведено, але не оцінено",de:"ausgewiesen, nicht bewertet",nl:"gerapporteerd, niet beoordeeld",fr:"rapporté, non noté",es:"informado, no calificado",pl:"podany, lecz nieoceniany"},
+ run:{en:"Run",uk:"Виконано",de:"Ausgeführt",nl:"Uitgevoerd",fr:"Exécuté",es:"Ejecutado",pl:"Wykonano"},
+ rev:{en:"Manifest revision",uk:"Редакція manifest",de:"Manifest-Revision",nl:"Manifestrevisie",fr:"Révision du manifeste",es:"Revisión del manifiesto",pl:"Rewizja manifestu"},
+ artifact:{en:"Raw JSON artifact",uk:"Артефакт JSON",de:"JSON-Artefakt",nl:"JSON-artefact",fr:"Artefact JSON",es:"Artefacto JSON",pl:"Artefakt JSON"},
+ status:{en:"Status",uk:"Статус",de:"Status",nl:"Status",fr:"Statut",es:"Estado",pl:"Status"},
+ /* v4.17 — "yes" and the per-case inputs label were English literals at their
+    call sites, so they read as English in the other six languages too. */
+ yes:{en:"Yes",uk:"Так",de:"Ja",nl:"Ja",fr:"Oui",es:"Sí",pl:"Tak"},
+ colInputs:{en:"Inputs",uk:"Вхідні дані",de:"Eingaben",nl:"Invoer",fr:"Entrées",es:"Entradas",pl:"Dane wejściowe"},
+ indep:{en:"Independent validation",uk:"Незалежна валідація",de:"Unabhängige Validierung",nl:"Onafhankelijke validatie",fr:"Validation indépendante",es:"Validación independiente",pl:"Walidacja niezależna"},
+ no:{en:"Not performed",uk:"Не проведено",de:"Nicht durchgeführt",nl:"Niet uitgevoerd",fr:"Non réalisée",es:"No realizada",pl:"Nie przeprowadzono"},
+ openTool:{en:"Open the tool",uk:"Відкрити інструмент",de:"Werkzeug öffnen",nl:"Tool openen",fr:"Ouvrir l'outil",es:"Abrir la herramienta",pl:"Otwórz narzędzie"},
+ tools:{en:"All tools",uk:"Усі інструменти",de:"Alle Werkzeuge",nl:"Alle tools",fr:"Tous les outils",es:"Todas las herramientas",pl:"Wszystkie narzędzia"},
+ register:{en:"Validation register",uk:"Реєстр валідації",de:"Validierungsregister",nl:"Validatieregister",fr:"Registre de validation",es:"Registro de validación",pl:"Rejestr walidacji"},
+ disclaimer:{en:"Disclaimer",uk:"Застереження",de:"Hinweis",nl:"Disclaimer",fr:"Avertissement",es:"Aviso",pl:"Zastrzeżenie"},
+ loading:{en:"Loading the benchmark report…",uk:"Завантаження звіту про бенчмарк…",de:"Benchmark-Bericht wird geladen…",nl:"Benchmarkrapport wordt geladen…",fr:"Chargement du rapport…",es:"Cargando el informe…",pl:"Wczytywanie raportu z benchmarku…"},
+ noBench:{
+  en:"No benchmark has been run for this tool yet, so there is nothing to report. It is published as a prototype and says so.",
+  uk:"Для цього інструмента ще не виконували бенчмарк, тож звітувати нема про що. Його опубліковано як прототип, і про це сказано прямо.",
+  de:"Für dieses Werkzeug wurde noch kein Benchmark ausgeführt, es gibt also nichts zu berichten. Es ist als Prototyp veröffentlicht und sagt das auch.",
+  nl:"Voor deze tool is nog geen benchmark uitgevoerd, dus er valt niets te rapporteren. De tool is als prototype gepubliceerd en zegt dat ook.",
+  fr:"Aucun banc d'essai n'a encore été exécuté pour cet outil : il n'y a donc rien à rapporter. Il est publié comme prototype et le dit.",
+  es:"Todavía no se ha ejecutado ningún banco de pruebas para esta herramienta, así que no hay nada que informar. Se publica como prototipo y así lo indica.",
+  pl:"Dla tego narzędzia nie wykonano jeszcze benchmarku, więc nie ma o czym raportować. Jest opublikowane jako prototyp i mówi o tym wprost."},
+ unknown:{
+  en:"No tool with the identifier “%s” is listed in the catalog.",
+  uk:"Інструмента з ідентифікатором «%s» немає в каталозі.",
+  de:"Kein Werkzeug mit der Kennung „%s“ ist im Katalog gelistet.",
+  nl:"Er staat geen tool met de identificatie “%s” in de catalogus.",
+  fr:"Aucun outil portant l'identifiant « %s » n'est listé dans le catalogue.",
+  es:"Ninguna herramienta con el identificador «%s» figura en el catálogo.",
+  pl:"W katalogu nie ma narzędzia o identyfikatorze „%s”."},
+ noParam:{
+  en:"This page reports one tool at a time. Open it from a tool's status chip, or pick a tool from the index.",
+  uk:"Ця сторінка показує один інструмент за раз. Відкрийте її зі значка статусу інструмента або виберіть інструмент у каталозі.",
+  de:"Diese Seite berichtet über ein Werkzeug zur Zeit. Öffnen Sie sie über den Status-Chip eines Werkzeugs oder wählen Sie eines im Katalog.",
+  nl:"Deze pagina rapporteert over één tool tegelijk. Open hem via de statuschip van een tool of kies een tool in de catalogus.",
+  fr:"Cette page rend compte d'un outil à la fois. Ouvrez-la depuis la pastille d'état d'un outil, ou choisissez un outil dans le catalogue.",
+  es:"Esta página informa de una herramienta cada vez. Ábrala desde el distintivo de estado de una herramienta o elija una en el catálogo.",
+  pl:"Ta strona opisuje jedno narzędzie naraz. Otwórz ją z etykiety statusu narzędzia albo wybierz narzędzie w katalogu."},
+ artErr:{
+  en:"The artifact %s could not be loaded, so the case detail is missing here. The summary below comes from the tool's manifest.",
+  uk:"Артефакт %s не вдалося завантажити, тому деталей за випадками тут немає. Підсумок нижче взято з manifest інструмента.",
+  de:"Das Artefakt %s konnte nicht geladen werden; die Falldetails fehlen daher hier. Die Zusammenfassung unten stammt aus dem Manifest des Werkzeugs.",
+  nl:"Het artefact %s kon niet worden geladen, dus de casusdetails ontbreken hier. De samenvatting hieronder komt uit het manifest van de tool.",
+  fr:"L'artefact %s n'a pas pu être chargé ; le détail des cas manque donc ici. Le résumé ci-dessous provient du manifeste de l'outil.",
+  es:"No se pudo cargar el artefacto %s, por lo que falta aquí el detalle de los casos. El resumen inferior procede del manifiesto de la herramienta.",
+  pl:"Nie udało się wczytać artefaktu %s, więc brakuje tu szczegółów przypadków. Podsumowanie poniżej pochodzi z manifestu narzędzia."},
+ catErr:{
+  en:"The tool catalog could not be loaded. This page reads catalog.php, so it needs a server that runs PHP; it also accepts a pre-built catalog.json beside it. Serve the tree with `php -S 127.0.0.1:8097` in the site root, or generate the fallback once with `php catalog.php > catalog.json`. A plain static server with neither will always show this message.",
+  uk:"Каталог інструментів не завантажився. Ця сторінка читає catalog.php, тож потрібен сервер із PHP; вона також приймає заздалегідь зібраний catalog.json поруч. Запустіть `php -S 127.0.0.1:8097` у корені сайту або один раз згенеруйте запасний файл: `php catalog.php > catalog.json`. Простий статичний сервер без жодного з них завжди показуватиме це повідомлення.",
+  de:"Der Werkzeugkatalog konnte nicht geladen werden. Diese Seite liest catalog.php und braucht daher einen Server mit PHP; sie akzeptiert auch eine daneben liegende, vorgebaute catalog.json. Starten Sie im Site-Verzeichnis `php -S 127.0.0.1:8097` oder erzeugen Sie den Rückfall einmalig mit `php catalog.php > catalog.json`. Ein reiner statischer Server ohne beides zeigt immer diese Meldung.",
+  nl:"De toolcatalogus kon niet worden geladen. Deze pagina leest catalog.php en heeft dus een server met PHP nodig; ze accepteert ook een vooraf gebouwde catalog.json ernaast. Draai `php -S 127.0.0.1:8097` in de siteroot of genereer de terugval eenmalig met `php catalog.php > catalog.json`. Een kale statische server zonder beide toont altijd deze melding.",
+  fr:"Le catalogue n'a pas pu être chargé. Cette page lit catalog.php et exige donc un serveur PHP ; elle accepte aussi un catalog.json pré-généré placé à côté. Lancez `php -S 127.0.0.1:8097` à la racine du site, ou générez le repli une fois avec `php catalog.php > catalog.json`. Un serveur statique sans l'un ni l'autre affichera toujours ce message.",
+  es:"No se pudo cargar el catálogo. Esta página lee catalog.php, por lo que necesita un servidor con PHP; también acepta un catalog.json pregenerado junto a ella. Ejecute `php -S 127.0.0.1:8097` en la raíz del sitio o genere el respaldo una vez con `php catalog.php > catalog.json`. Un servidor estático sin ninguno de los dos mostrará siempre este mensaje.",
+  pl:"Nie udało się wczytać katalogu narzędzi. Ta strona czyta catalog.php, więc wymaga serwera z PHP; przyjmuje też leżący obok, wcześniej zbudowany catalog.json. Uruchom `php -S 127.0.0.1:8097` w katalogu głównym serwisu albo wygeneruj plik zapasowy raz: `php catalog.php > catalog.json`. Zwykły serwer statyczny bez żadnego z nich zawsze pokaże ten komunikat."},
+ foot:{
+  en:"Every figure on this page is read from the benchmark artifact shipped with the site; nothing here is retyped by hand.",
+  uk:"Кожне число на цій сторінці зчитано з артефакту бенчмарка, що постачається із сайтом; тут нічого не переписано вручну.",
+  de:"Jede Zahl auf dieser Seite stammt aus dem mit der Website ausgelieferten Benchmark-Artefakt; nichts davon ist von Hand abgetippt.",
+  nl:"Elk getal op deze pagina komt uit het met de site meegeleverde benchmark-artefact; niets is met de hand overgetypt.",
+  fr:"Chaque chiffre de cette page est lu dans l'artefact livré avec le site ; rien n'y est recopié à la main.",
+  es:"Cada cifra de esta página se lee del artefacto publicado con el sitio; nada se ha copiado a mano.",
+  pl:"Każda liczba na tej stronie jest odczytana z artefaktu benchmarku dostarczanego razem z serwisem; nic nie zostało tu przepisane ręcznie."}
+};
+
+/* ---------- small helpers ---------- */
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const p=(x,l)=>x&&typeof x==="object"&&!Array.isArray(x)?(x[l]||x.en||""):String(x==null?"":x);
+const q=(u,l)=>u+(u.includes("?")?"&":"?")+"lang="+encodeURIComponent(l);
+function detect(){
+ let l=null;
+ try{l=(new URLSearchParams(location.search).get("lang")||"").slice(0,2).toLowerCase()}catch(e){}
+ if(!L.includes(l)){try{l=localStorage.getItem("diagram_site_lang")}catch(e){}}
+ if(!L.includes(l)){try{l=localStorage.getItem("diagram_lang")}catch(e){}}
+ if(!L.includes(l))l=((navigator.language||"en").slice(0,2)).toLowerCase();
+ return L.includes(l)?l:"en";
+}
+function param(k){try{return new URLSearchParams(location.search).get(k)||""}catch(e){return ""}}
+function num(v){
+ if(v===null||v===undefined)return "—";
+ if(typeof v==="boolean")return String(v);
+ if(typeof v!=="number")return String(v);
+ if(!isFinite(v))return String(v);
+ if(v===0)return "0";
+ const a=Math.abs(v);
+ if(a<1e-4||a>=1e7)return v.toExponential(3);
+ return String(Number(v.toPrecision(7)));
+}
+function dev(v){
+ if(typeof v!=="number"||!isFinite(v))return v==null?"—":String(v);
+ if(v===0)return "0";
+ return v.toExponential(2);
+}
+function day(s){const m=String(s||"").match(/^(\d{4}-\d{2}-\d{2})/);return m?m[1]:(s||"")}
+function txt(v){return typeof v==="string"?v:JSON.stringify(v,null,1)}
+
+/* Display status. The schema keeps prototype|benchmarked|verified, but
+   "verified" is only ever rendered when validation.review documents a review by
+   someone other than the author; without that record the tool is shown at the
+   highest tier its evidence really supports. */
+function shownStatus(t){
+ const v=t.validation||{};
+ const st=t.status||"prototype";
+ const rev=v.review;
+ const hasReview=(rev&&typeof rev==="object"&&Object.keys(rev).length>0)||(typeof rev==="string"&&rev.trim()!=="");
+ if(st==="verified")return hasReview?"verified":"benchmarked";
+ if(v.benchmark_status==="partial")return "partial";
+ return st==="benchmarked"?"benchmarked":"prototype";
+}
+
+/* Every way an artifact flags a case as "not a clean pass". */
+function flagsOf(c,topIds,l){
+ const out=[];
+ const push=(why)=>{if(why&&out.indexOf(why)<0)out.push(why)};
+ if(typeof c.reference_disagreement==="number")push(p(U.whyDis,l).replace("%s",dev(c.reference_disagreement)));
+ if(topIds&&c.id&&topIds[c.id]!==undefined){
+  const v=topIds[c.id];
+  push(typeof v==="string"?v:p(U.whyDis,l).replace("%s",dev(v)));
+ }
+ /* `flagged` comes in three shapes and this used to handle only one.
+    An ARRAY of {id|quantity, spread|deviation} — which is what
+    benchmarks/neutron_transport.json has always carried — fell into the plain
+    object branch, where Object.keys() yields the array INDEX and the value is
+    the whole entry: the evidence page printed "0: the independent references
+    disagree by <the stringified entry>" on both the flagged card and the all-cases
+    table (the literal "[object " + "Object]", spelled apart here so a text
+    scan of this file does not report the comment as the defect). Found
+    2026-08-22 by benchgate.mjs, which is the first gate ever to
+    open this page. dev() is left alone: it is right to stringify what it is
+    given, and the caller is what was handing it an object. */
+ const devOf=o=>{
+  for(const k of ["spread","deviation","rel","disagreement","value"])
+   if(typeof o[k]==="number")return dev(o[k]);
+  return null;
+ };
+ if(Array.isArray(c.flagged)){
+  c.flagged.forEach(x=>{
+   if(x==null)return;
+   if(typeof x!=="object"){push(String(x));return}
+   const name=x.id||x.quantity||x.key||"";
+   const d=devOf(x);
+   const why=x.reason?txt(x.reason)
+    :(d!==null?p(U.whyDis,l).replace("%s",d):p(U.whyDis,l).replace("%s","—"));
+   push(name?name+": "+why:why);
+  });
+ }else if(c.flagged&&typeof c.flagged==="object"){
+  Object.keys(c.flagged).forEach(k=>{
+   const v=c.flagged[k];
+   const d=(v&&typeof v==="object")?devOf(v):(typeof v==="number"?dev(v):null);
+   push(k+": "+(d!==null?p(U.whyDis,l).replace("%s",d)
+    :(v&&typeof v==="object"&&v.reason?txt(v.reason):p(U.whyDis,l).replace("%s",dev(v)))));
+  });
+ }else if(c.flagged===true)push(p(U.whyDis,l).replace("%s","—"));
+ const cmp=c.cmp&&typeof c.cmp==="object"?c.cmp:{};
+ Object.keys(cmp).forEach(k=>{
+  const e=cmp[k];
+  if(!e||typeof e!=="object")return;
+  if(typeof e.flagged_reference_disagreement==="number")
+   push(k+": "+p(U.whyDis,l).replace("%s",dev(e.flagged_reference_disagreement)));
+  else if(e.graded===false)push(k+": "+p(U.whyUng,l));
+ });
+ if(c.labelled_uncertain)push(p(U.whyUnc,l));
+ return out;
+}
+function worstOf(c){
+ if(typeof c.worst_rel==="number")return c.worst_rel;
+ let w=null;
+ const cmp=c.cmp&&typeof c.cmp==="object"?c.cmp:{};
+ Object.keys(cmp).forEach(k=>{
+  const e=cmp[k];
+  if(e&&typeof e.rel==="number"&&(w===null||e.rel>w))w=e.rel;
+ });
+ return w;
+}
+
+/* ---------- state ---------- */
+let CAT=null,TOOL=null,PACKS=[],FAIL_CAT=false;
+const WANT=param("tool").trim();
+
+/* ---------- rendering ---------- */
+function cmpTable(c,l){
+ const cmp=c.cmp&&typeof c.cmp==="object"?c.cmp:{};
+ const ks=Object.keys(cmp);
+ if(!ks.length)return "";
+ let h='<div class="table"><table><thead><tr><th>'+esc(p(U.colQty,l))+"</th><th>"+esc(p(U.colGot,l))
+  +"</th><th>"+esc(p(U.colRef,l))+"</th><th>"+esc(p(U.colDev,l))+"</th><th>"+esc(p(U.colLim,l))
+  +"</th><th>"+esc(p(U.colOut,l))+"</th></tr></thead><tbody>";
+ ks.forEach(k=>{
+  const e=cmp[k]&&typeof cmp[k]==="object"?cmp[k]:{got:cmp[k]};
+  const d=typeof e.rel==="number"?e.rel:(typeof e.abs==="number"?e.abs:null);
+  const lim=e.lim!==undefined?e.lim:(e.tol!==undefined?e.tol:null);
+  const ok=e.ok===false?"f":(e.graded===false?"g":"p");
+  h+="<tr><td class=\"id\">"+esc(k)+'</td><td class="num">'+esc(num(e.got))+'</td><td class="num">'+esc(num(e.ref))
+   +'</td><td class="num">'+esc(dev(d))+'</td><td class="num">'+esc(typeof lim==="number"?num(lim):(lim?String(lim):"—"))
+   +'</td><td class="res '+ok+'">'+esc(p(ok==="f"?U.rFail:(ok==="g"?U.rFlag:U.rPass),l))+"</td></tr>";
+ });
+ return h+"</tbody></table></div>";
+}
+function caseBlock(c,l,kind){
+ let h='<div class="table"><table><tbody>';
+ h+='<tr><td class="id">'+esc(txt(c.id||"—"))+"</td><td>"+esc(txt(c.note||""))+"</td></tr>";
+ /* a per-case `tolerance` is a string in most artifacts and an OBJECT in some
+    (debrisrunout ships {"exact":true}); txt() renders both. Same class of
+    defect as `reference` above — 2026-08-22. */
+ if(c.tolerance)h+="<tr><td>"+esc(p(U.colLim,l))+'</td><td class="small">'+esc(txt(c.tolerance))+"</td></tr>";
+ if(kind&&kind.length)h+="<tr><td>"+esc(p(U.colWhy,l))+'</td><td class="small">'+esc(kind.join(" · "))+"</td></tr>";
+ if(c.inputs&&typeof c.inputs==="object")
+  h+="<tr><td>"+esc(p(U.colInputs,l))+"</td><td class=\"small\"><code>"+esc(JSON.stringify(c.inputs))+"</code></td></tr>";
+ h+="</tbody></table></div>"+cmpTable(c,l);
+ return h;
+}
+function allCasesTable(cases,l,topIds){
+ let h='<div class="table"><table><thead><tr><th>'+esc(p(U.colCase,l))+"</th><th>"+esc(p(U.colWhat,l))
+  +"</th><th>"+esc(p(U.colWorst,l))+"</th><th>"+esc(p(U.colOut,l))+"</th></tr></thead><tbody>";
+ cases.forEach(c=>{
+  const fl=flagsOf(c,topIds,l);
+  const st=c.pass===false?"f":(fl.length?"g":"p");
+  h+='<tr><td class="id">'+esc(txt(c.id||"—"))+"</td><td>"+esc(txt(c.note||""))
+   +'</td><td class="num">'+esc(dev(worstOf(c)))+'</td><td class="res '+st+'">'
+   +esc(p(st==="f"?U.rFail:(st==="g"?U.rFlag:U.rPass),l))
+   +(fl.length?'<div class="small">'+esc(fl.join(" · "))+"</div>":"")+"</td></tr>";
+ });
+ return h+"</tbody></table></div>";
+}
+const KNOWN=["tool","file","reference","reference_citations","tolerance","total","passed","failed",
+ "cases","artifact","run_at","generated_at","page_errors","console_errors","not_benchmarked",
+ "crosscheck","environment","known_issue_during_run","flagged_reference_disagreement"];
+
+function packHTML(pack,l){
+ const b=pack.bench||{},a=pack.art;
+ let h='<section class="card">';
+ h+="<h2>"+esc(p(U.whatTested,l))+"</h2>";
+ /* An artifact's `reference` is not always a sentence: operatingpoint and
+    roomacoustics both ship an OBJECT ({language, method, solver, ...}), and
+    esc() on an object printed the stringified placeholder in the one card the
+    whole page exists for — "What was tested, and against what". txt() is
+    already the house helper for exactly this and was simply not applied here.
+    Found 2026-08-22 by benchgate.mjs. */
+ const ref=(a&&a.reference)||b.reference||"";
+ h+='<p class="ink">'+esc(ref?txt(ref):"—")+"</p>";
+ const cites=(a&&Array.isArray(a.reference_citations)&&a.reference_citations.length)
+  ?a.reference_citations:(Array.isArray(b.citations)?b.citations:[]);
+ if(cites.length){
+  h+="<h3>"+esc(p(U.cites,l))+"</h3><ol class=\"cites\">"+cites.map(c=>"<li>"+esc(txt(c))+"</li>").join("")+"</ol>";
+ }
+ h+="</section>";
+
+ h+='<section class="card"><h2>'+esc(p(U.tolTitle,l))+"</h2>";
+ /* the artifact-level `tolerance` is an object in roomacoustics (one entry per
+    quantity group) and a sentence everywhere else. 2026-08-22. */
+ const tolv=(a&&a.tolerance)||b.tolerance||"";
+ h+='<div class="quote">'+esc(tolv?txt(tolv):"—")+"</div>";
+ h+='<p class="small">'+esc(p(U.tolNote,l))+"</p></section>";
+
+ if(pack.error){
+  h+='<section class="card honest"><p class="ink">'+esc(p(U.artErr,l).replace("%s",pack.path))+"</p></section>";
+ }
+
+ const cases=a&&Array.isArray(a.cases)?a.cases:[];
+ const topIds={};
+ if(a&&Array.isArray(a.flagged_reference_disagreement))
+  /* two shapes here too: {id,spread} keyed by CASE id, and the
+     {case,quantity,reason} shape neutron_transport ships. The second used to be
+     dropped silently, so a disagreement the artifact took the trouble to record
+     never reached the page at all. */
+  a.flagged_reference_disagreement.forEach(x=>{
+   if(!x)return;
+   if(x.id!==undefined)topIds[x.id]=x.spread;
+   else if(x.case!==undefined)topIds[x.case]=(x.reason!==undefined?x.reason
+    :(x.spread!==undefined?x.spread:x.deviation));
+  });
+ const flagged=cases.filter(c=>flagsOf(c,topIds,l).length);
+ const failed=cases.filter(c=>c.pass===false);
+ const total=a&&typeof a.total==="number"?a.total:b.cases;
+ const passed=a&&typeof a.passed==="number"?a.passed:b.passed;
+ const nfail=a&&typeof a.failed==="number"?a.failed:Math.max(0,(b.cases||0)-(b.passed||0));
+
+ h+='<section class="card"><h2>'+esc(p(U.result,l))+"</h2><div class=\"tiles\">"
+  +'<div class="tile"><b>'+esc(String(total==null?"—":total))+"</b><span>"+esc(p(U.tCases,l))+"</span></div>"
+  +'<div class="tile ok"><b>'+esc(String(passed==null?"—":passed))+"</b><span>"+esc(p(U.tPassed,l))+"</span></div>"
+  +'<div class="tile'+(nfail?" bad":"")+'"><b>'+esc(String(nfail==null?"—":nfail))+"</b><span>"+esc(p(U.tFailed,l))+"</span></div>"
+  +'<div class="tile'+(flagged.length?" flag":"")+'"><b>'+esc(String(flagged.length))+"</b><span>"+esc(p(U.tFlagged,l))+"</span></div>"
+  +"</div>";
+ const meta=[];
+ const runAt=(a&&(a.run_at||a.generated_at))||b.run_at||"";
+ if(runAt)meta.push([p(U.run,l),esc(day(runAt))]);
+ if(pack.rev)meta.push([p(U.rev,l),esc(pack.rev)]);
+ if(pack.path)meta.push([p(U.artifact,l),'<a href="'+esc(pack.path)+'">'+esc(pack.path)+"</a>"]);
+ if(meta.length)h+='<div class="meta">'+meta.map(r=>"<b>"+esc(r[0])+"</b><span>"+r[1]+"</span>").join("")+"</div>";
+ h+="</section>";
+
+ if(failed.length){
+  h+='<section class="card"><h2>'+esc(p(U.failTitle,l))+"</h2>";
+  failed.forEach(c=>{h+=caseBlock(c,l,null)});
+  h+="</section>";
+ }
+ if(flagged.length){
+  h+='<section class="card honest"><h2>'+esc(p(U.flagTitle,l))+"</h2>";
+  h+='<p class="ink">'+esc(p(U.flagIntro,l))+"</p>";
+  h+='<div class="table"><table><thead><tr><th>'+esc(p(U.colCase,l))+"</th><th>"+esc(p(U.colWhat,l))
+   +"</th><th>"+esc(p(U.colWhy,l))+"</th><th>"+esc(p(U.colOut,l))+"</th></tr></thead><tbody>";
+  flagged.forEach(c=>{
+   h+='<tr><td class="id">'+esc(txt(c.id||"—"))+"</td><td>"+esc(txt(c.note||""))+"</td><td>"
+    +esc(flagsOf(c,topIds,l).join(" · "))+'</td><td class="res g">'+esc(p(U.rFlag,l))+"</td></tr>";
+  });
+  h+="</tbody></table></div></section>";
+ }
+
+ const nb=a&&a.not_benchmarked;
+ if(nb&&(typeof nb==="string"||Object.keys(nb).length)){
+  h+='<section class="card"><h2>'+esc(p(U.notBench,l))+"</h2>";
+  if(typeof nb==="string")h+='<p class="ink">'+esc(nb)+"</p>";
+  else Object.keys(nb).forEach(k=>{
+   h+="<h3>"+esc(k)+'</h3><p class="ink">'+esc(txt(nb[k]))+"</p>";
+  });
+  h+="</section>";
+ }
+
+ const notes=[];
+ if(a&&a.environment)notes.push([p(U.environment,l),txt(a.environment)]);
+ if(a&&a.known_issue_during_run)notes.push([p(U.knownIssue,l),txt(a.known_issue_during_run)]);
+ if(a&&a.crosscheck)notes.push([p(U.crosscheck,l),txt(a.crosscheck)]);
+ const pe=(a&&Array.isArray(a.page_errors)?a.page_errors:[]).concat(a&&Array.isArray(a.console_errors)?a.console_errors:[]);
+ if(notes.length||pe.length){
+  h+='<section class="card"><h2>'+esc(p(U.runNotes,l))+"</h2>";
+  notes.forEach(n=>{h+="<h3>"+esc(n[0])+'</h3><p class="ink">'+esc(n[1])+"</p>"});
+  if(pe.length){
+   h+="<h3>"+esc(p(U.pageErr,l))+" ("+pe.length+")</h3><pre>"+esc(pe.slice(0,12).map(txt).join("\n"))
+    +(pe.length>12?"\n…":"")+"</pre>";
+  }
+  h+="</section>";
+ }
+
+ if(cases.length){
+  h+='<section class="card"><h2>'+esc(p(U.allCases,l))+" ("+cases.length+")</h2>"
+   +"<details><summary>"+esc(p(U.allCases,l))+"</summary>"+allCasesTable(cases,l,topIds)+"</details></section>";
+ }
+
+ if(a){
+  const extra={};
+  Object.keys(a).forEach(k=>{if(KNOWN.indexOf(k)<0)extra[k]=a[k]});
+  if(Object.keys(extra).length){
+   h+='<section class="card"><h2>'+esc(p(U.rawTitle,l))+"</h2><details><summary>"+esc(p(U.rawTitle,l))
+    +"</summary><pre>"+esc(JSON.stringify(extra,null,1))+"</pre></details></section>";
+  }
+ }
+ return h;
+}
+
+function render(l){
+ document.documentElement.lang=l;
+ try{localStorage.setItem("diagram_site_lang",l);localStorage.setItem("diagram_lang",l)}catch(e){}
+ try{const u=new URL(location.href);u.searchParams.set("lang",l);history.replaceState(null,"",u)}catch(e){}
+ const langs=document.getElementById("langs");
+ langs.innerHTML="";
+ L.forEach(x=>{
+  const b=document.createElement("button");b.type="button";b.textContent=x==="uk"?"UA":x.toUpperCase();
+  if(x===l)b.className="on";b.onclick=()=>render(x);langs.appendChild(b);
+ });
+ const nav=document.getElementById("nav");
+ nav.innerHTML="";
+ const link=(href,label)=>{const a=document.createElement("a");a.href=href;a.textContent=label;nav.appendChild(a)};
+ if(TOOL)link(q(TOOL.file,l),p(U.openTool,l));
+ link(q("index.html",l),p(U.tools,l));
+ link(q("validation.html",l),p(U.register,l));
+ link(q("disclaimer.html",l),p(U.disclaimer,l));
+ document.getElementById("crumb").href=q("index.html",l);
+ document.getElementById("foot").textContent=p(U.foot,l);
+
+ const main=document.getElementById("main");
+ const ttl=document.getElementById("ttl"),sub=document.getElementById("sub");
+
+ if(FAIL_CAT){
+  ttl.textContent=p(U.page,l);sub.textContent="";
+  main.innerHTML='<div class="card"><p class="ink">'+esc(p(U.catErr,l))+"</p></div>";
+  return;
+ }
+ if(!CAT){
+  ttl.textContent=p(U.page,l);sub.textContent="";
+  main.innerHTML='<div class="load">'+esc(p(U.loading,l))+"</div>";
+  return;
+ }
+ if(!TOOL){
+  ttl.textContent=p(U.page,l);sub.textContent="";
+  main.innerHTML='<div class="card"><p class="ink">'
+   +esc(WANT?p(U.unknown,l).replace("%s",WANT):p(U.noParam,l))
+   +'</p><p><a href="'+esc(q("index.html",l))+'">'+esc(p(U.tools,l))+"</a></p></div>";
+  return;
+ }
+
+ const st=shownStatus(TOOL);
+ ttl.textContent=p(TOOL.title,l);
+ sub.textContent=p(U.page,l);
+ const v=TOOL.validation||{};
+ let head='<section class="card"><p style="margin:0 0 8px"><span class="pill st-'+st+'">'
+  +esc(p(U[st],l))+(st!=="prototype"&&v.cases?" · "+v.passed+"/"+v.cases:"")+"</span></p>";
+ head+='<div class="meta"><b>'+esc(p(U.status,l))+"</b><span>"+esc(p(U[st],l))+"</span>"
+  +"<b>"+esc(p(U.indep,l))+"</b><span>"+esc(v.independent_validation?p(U.yes,l):p(U.no,l))+"</span>"
+  +"<b>"+esc(p(U.rev,l))+"</b><span>"+esc(TOOL.manifest_revision||"—")+"</span>"
+  +"<b>"+esc(p(U.openTool,l))+'</b><span><a href="'+esc(q(TOOL.file,l))+'">'+esc(TOOL.file)+"</a></span></div></section>";
+
+ /* The "author's own harness" statement belongs above the evidence — but only
+    when there is evidence. A tool with no benchmark says that instead. */
+ if(!PACKS.length){
+  main.innerHTML=head+'<section class="card"><p class="ink">'+esc(p(U.noBench,l))+"</p></section>";
+  return;
+ }
+ const honest='<section class="card honest"><h2>'+esc(p(U.notIndep,l))+"</h2><p>"
+  +esc(p(U.notIndepText,l))+"</p></section>";
+ main.innerHTML=head+honest+PACKS.map(pk=>packHTML(pk,l)).join("");
+}
+
+/* ---------- boot ---------- */
+const l0=detect();
+render(l0);
+/* THE CATALOG IS SERVED BY PHP, AND THE PORT THIS PROJECT GATES ON IS NOT.
+   Under `python3 -m http.server` catalog.php comes back 200 with the PHP
+   SOURCE as the body, so r.ok is true and only r.json() rejects — which is why
+   the failure used to be one line of prose on an otherwise empty page, on the
+   very server every gate in this project runs against. Every attributed footer
+   in the tree links here, so an evidence page that renders nothing under the
+   development server is a hole in the chain of custody, not a cosmetic defect.
+   Two ways out, in order: the real thing (catalog.php under any PHP server),
+   then a pre-built catalog.json sitting beside it — the same build product
+   `check.js --all` already needs (STATUS §2 trap 3). Neither is a fallback to
+   stale data: catalog.json is regenerated from catalog.php by the one command
+   the error message now names. If both fail the reader is told exactly which
+   command to run, in all seven languages, instead of "check that PHP is
+   enabled".
+
+   ONE KNOWN COST, so nobody "fixes" it the wrong way. On a static server with
+   no catalog.json present, the fallback fetch logs a 404 in the console that
+   was not there before. That is the price of the page being able to work at all
+   under that server, and it is cheaper than the alternative: DO NOT commit a
+   catalog.json to the tree to silence it. catalog.json is a build product
+   (STATUS section 2 trap 3, AGENTS section 8) and a committed one is a second
+   source of truth that nobody regenerates - precisely the failure this page
+   exists to expose. Under any PHP server the first fetch succeeds and the
+   fallback never runs, so the 404 does not exist in the deployment that
+   matters. Note also that `check.js benchmark.html` fails both before and after
+   this change, for an unrelated and correct reason: this is a site page, not a
+   tool, so it has no `__diagramReady` and no `#dgc-bar`. It is in catalog.php's
+   SKIP list and out of `check.js --all`; `benchgate.mjs` is the gate that
+   covers it. */
+function loadCatalog(){
+ const asJSON=r=>r.ok?r.json():Promise.reject(new Error(String(r.status)));
+ return fetch("catalog.php",{cache:"no-cache"}).then(asJSON)
+  .catch(()=>fetch("catalog.json",{cache:"no-cache"}).then(asJSON));
+}
+loadCatalog()
+ .then(d=>{
+  CAT=d;
+  const want=WANT.toLowerCase();
+  const tools=Array.isArray(d.tools)?d.tools:[];
+  TOOL=tools.find(t=>String(t.id||"").toLowerCase()===want)
+     ||tools.find(t=>String(t.file||"").toLowerCase()===want)
+     ||tools.find(t=>String(t.file||"").toLowerCase().replace(/\.html?$/,"")===want)
+     ||null;
+  if(!TOOL){render(l0);return}
+  const bs=(TOOL.validation&&Array.isArray(TOOL.validation.benchmarks))?TOOL.validation.benchmarks:[];
+  const rev=TOOL.manifest_revision||"";
+  return Promise.all(bs.map(b=>{
+   const path=b.artifact||"";
+   if(!path)return Promise.resolve({bench:b,art:null,path:"",rev:rev,error:false});
+   return fetch(path,{cache:"no-cache"})
+    .then(r=>r.ok?r.json():Promise.reject(new Error(String(r.status))))
+    .then(a=>({bench:b,art:a,path:path,rev:rev,error:false}))
+    .catch(()=>({bench:b,art:null,path:path,rev:rev,error:true}));
+  })).then(packs=>{PACKS=packs;render(l0)});
+ })
+ .catch(()=>{FAIL_CAT=true;render(l0)});
+})();
+</script>
+</body>
+</html>

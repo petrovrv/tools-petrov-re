@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bid / No-Bid Decision</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-15.bidnobid-1.1",
+  "id": "bidnobid",
+  "file": "bidnobid.html",
+  "listed": true,
+  "category": "tendering",
+  "order": 40,
+  "title": {
+    "en": "Bid / No-Bid Decision",
+    "uk": "Рішення про участь у тендері (bid / no-bid)",
+    "de": "Bid/No-Bid-Entscheidung",
+    "nl": "Bid/no-bid-beslissing",
+    "fr": "Décision go / no-go",
+    "es": "Decisión de presentar oferta (bid/no-bid)",
+    "pl": "Decyzja o złożeniu oferty (bid/no-bid)"
+  },
+  "summary": {
+    "en": "Is this tender worth the bid cost? Rolls back the decision tree of one or two gates (qualification, then tender) to the expected value of bidding, gives the breakeven probability of award against the base rate 1/N and your hit rate, counts margin erosion, the opportunity cost of a fully booked team and a stated strategic value, scores the fit, checks knock-outs and shows what moves the answer.",
+    "uk": "Чи вартий тендер витрат на пропозицію? Розраховує дерево рішень з одним чи двома етапами (кваліфікація, потім пропозиція) до очікуваної вартості участі, дає беззбиткову імовірність перемоги поряд із базовою часткою 1/N і вашим відсотком перемог, враховує зниження маржі, альтернативну вартість зайнятої команди та заявлену стратегічну цінність, оцінює відповідність профілю, перевіряє відсікачі й показує, що змінює відповідь.",
+    "de": "Lohnt sich diese Ausschreibung die Angebotskosten? Rechnet den Entscheidungsbaum mit einer oder zwei Stufen (Teilnahmeantrag, dann Angebot) auf den Erwartungswert der Teilnahme zurück, nennt die Zuschlagswahrscheinlichkeit an der Gewinnschwelle neben der Basisrate 1/N und Ihrer Trefferquote, berücksichtigt Margenerosion, Opportunitätskosten eines ausgelasteten Teams und einen ausdrücklichen strategischen Wert, bewertet die Passung, prüft K.-o.-Kriterien und zeigt, was die Antwort bewegt.",
+    "nl": "Is deze aanbesteding de offertekosten waard? Rekent de beslissingsboom met één of twee fasen (selectie, dan offerte) terug tot de verwachte waarde van inschrijven, geeft de break-evenkans op gunning naast de basiskans 1/N en uw slaagkans, rekent marge-erosie, de opportuniteitskost van een volgeboekt team en een expliciete strategische waarde mee, scoort de fit, toetst knock-outs en toont wat het antwoord bepaalt.",
+    "fr": "Cet appel d’offres vaut-il le coût de l’offre ? Résout l’arbre de décision à une ou deux étapes (candidature, puis offre) jusqu’à la valeur attendue de l’offre, donne la probabilité d’attribution d’équilibre face au taux de base 1/N et à votre taux de réussite, intègre l’érosion de marge, le coût d’opportunité d’une équipe saturée et une valeur stratégique affichée, note l’adéquation, vérifie les critères éliminatoires et montre ce qui fait varier la réponse.",
+    "es": "¿Merece esta licitación el coste de la oferta? Resuelve el árbol de decisión de una o dos fases (selección, luego oferta) hasta el valor esperado de ofertar, da la probabilidad de adjudicación de equilibrio frente a la tasa base 1/N y su tasa de éxito, tiene en cuenta la erosión del margen, el coste de oportunidad de un equipo completo y un valor estratégico declarado, puntúa el encaje, revisa los eliminatorios y muestra qué mueve la respuesta.",
+    "pl": "Czy ten przetarg jest wart kosztu oferty? Rozwiązuje drzewo decyzyjne z jednym lub dwoma etapami (kwalifikacja, potem oferta) do wartości oczekiwanej udziału, podaje próg rentowności prawdopodobieństwa wygranej na tle częstości bazowej 1/N i Twojego wskaźnika wygranych, uwzględnia erozję marży, koszt alternatywny zajętego zespołu i jawną wartość strategiczną, ocenia dopasowanie, sprawdza kryteria eliminujące i pokazuje, co zmienia odpowiedź."
+  },
+  "description": {
+    "en": "For the contractor or equipment supplier deciding whether to qualify (life-cycle stage 3) and whether to tender (stage 4). Net contribution if won M = value × (margin − expected margin erosion) − opportunity cost of capacity; bid cost = hours × rate + external cost per gate. One gate: EV = p·M − B. Two gates (restricted procedure or competitive negotiation / dialogue; classic sectors, Wet 17.06.2016 art. 79 §2: if the authority limits the number, at least 5 or 3 invited; special sectors, art. 149: number set by the entity, no legal minimum): EV = p1·max(p2·M − B2, 0) − B1, compared with the misleading “all costs up front” view. Breakeven probability, strategic value needed, bid spend per contract won, return on bid spend, attractiveness score from weighted criteria (Shipley / APMP practice), knock-outs, a stated decision rule (bid, bid with conditions, strategic bid, no bid) and a tornado of the expected value. Exports CSV, JSON and the module of the tender project file.",
+    "uk": "Для підрядника чи постачальника обладнання, який вирішує, чи подавати кваліфікаційні документи (етап 3 життєвого циклу) і чи подавати пропозицію (етап 4). Чистий внесок у разі перемоги M = вартість × (маржа − очікуване зниження маржі) − альтернативна вартість ресурсів; витрати на пропозицію = години × ставка + зовнішні витрати на кожному етапі. Один етап: EV = p·M − B. Два етапи (обмежена процедура чи конкурентні переговори / діалог; класичні сектори, Закон Бельгії 17.06.2016 ст. 79 §2: якщо замовник обмежує кількість — щонайменше 5 або 3 запрошених; спеціальні сектори, ст. 149: кількість визначає замовник, без законного мінімуму): EV = p1·max(p2·M − B2, 0) − B1 порівняно з хибним підходом «усі витрати одразу». Беззбиткова імовірність, потрібна стратегічна цінність, витрати на один виграний контракт, віддача на витрати, бал привабливості за зваженими критеріями (практика Shipley / APMP), відсікачі, відкрите правило рішення (подавати, за умов, стратегічна участь, не подавати) і діаграма-торнадо очікуваної вартості. Експорт CSV, JSON і модуля файлу тендерного проєкту.",
+    "de": "Für den Auftragnehmer oder Ausrüstungslieferanten, der entscheidet, ob er sich bewirbt (Lebenszyklus-Phase 3) und ob er anbietet (Phase 4). Nettobeitrag bei Zuschlag M = Wert × (Marge − erwartete Margenerosion) − Opportunitätskosten der Kapazität; Angebotskosten = Stunden × Satz + Fremdkosten je Stufe. Eine Stufe: EW = p·M − B. Zwei Stufen (nicht offenes Verfahren oder Verhandlungsverfahren / Dialog; klassische Sektoren, belg. Gesetz 17.06.2016 Art. 79 §2: bei Begrenzung mindestens 5 bzw. 3 Eingeladene; Sektoren, Art. 149: Zahl legt der Sektorenauftraggeber fest, kein gesetzliches Minimum): EW = p1·max(p2·M − B2, 0) − B1, verglichen mit der irreführenden Sicht „alle Kosten vorab“. Schwellenwahrscheinlichkeit, nötiger strategischer Wert, Angebotskosten je gewonnenem Auftrag, Rendite der Angebotskosten, Attraktivitätspunkte aus gewichteten Kriterien (Praxis Shipley / APMP), K.-o.-Kriterien, eine offengelegte Entscheidungsregel (anbieten, mit Auflagen, strategisch, kein Angebot) und ein Tornado des Erwartungswerts. Export als CSV, JSON und als Modul der Vergabeprojektdatei.",
+    "nl": "Voor de aannemer of uitrustingsleverancier die beslist of hij zich kandidaat stelt (fase 3 van de levenscyclus) en of hij inschrijft (fase 4). Nettobijdrage bij gunning M = waarde × (marge − verwachte marge-erosie) − opportuniteitskost van de capaciteit; offertekosten = uren × tarief + externe kosten per fase. Eén fase: VW = p·M − B. Twee fasen (niet-openbare procedure of mededingingsprocedure met onderhandeling / concurrentiegerichte dialoog; klassieke sectoren, wet 17.06.2016 art. 79 §2: bij beperking minstens 5 of 3 uitgenodigd; speciale sectoren, art. 149: aantal bepaald door de entiteit, geen wettelijk minimum): VW = p1·max(p2·M − B2, 0) − B1, vergeleken met de misleidende benadering “alle kosten vooraf”. Break-evenkans, vereiste strategische waarde, offertekosten per gewonnen opdracht, rendement op offertekosten, aantrekkelijkheidsscore uit gewogen criteria (praktijk Shipley / APMP), knock-outs, een expliciete beslisregel (inschrijven, onder voorwaarden, strategisch, niet inschrijven) en een tornado van de verwachte waarde. Export naar CSV, JSON en de module van het aanbestedingsprojectbestand.",
+    "fr": "Pour l’entrepreneur ou le fournisseur d’équipements qui décide s’il se porte candidat (étape 3 du cycle de vie) et s’il remet offre (étape 4). Contribution nette en cas de gain M = montant × (marge − érosion de marge attendue) − coût d’opportunité de la capacité ; coût de l’offre = heures × taux + coûts externes par étape. Une étape : VA = p·M − B. Deux étapes (procédure restreinte ou procédure concurrentielle avec négociation / dialogue ; secteurs classiques, loi 17.06.2016 art. 79 §2 : en cas de limitation, au moins 5 ou 3 invités ; secteurs spéciaux, art. 149 : nombre fixé par l’entité, sans minimum légal) : VA = p1·max(p2·M − B2, 0) − B1, comparée à l’approche trompeuse « tous les coûts d’emblée ». Probabilité d’équilibre, valeur stratégique nécessaire, coût d’offre par marché gagné, rendement du coût d’offre, note d’attractivité par critères pondérés (pratique Shipley / APMP), critères éliminatoires, règle de décision explicite (go, go sous conditions, go stratégique, no-go) et tornade de la valeur attendue. Export CSV, JSON et module du fichier de projet de marché.",
+    "es": "Para el contratista o proveedor de equipos que decide si presentarse a la selección (etapa 3 del ciclo de vida) y si ofertar (etapa 4). Contribución neta si se gana M = importe × (margen − erosión de margen esperada) − coste de oportunidad de la capacidad; coste de la oferta = horas × tarifa + costes externos por fase. Una fase: VE = p·M − B. Dos fases (procedimiento restringido o negociación / diálogo competitivo; sectores clásicos, ley belga 17.06.2016 art. 79 §2: si se limita el número, al menos 5 o 3 invitados; sectores especiales, art. 149: número fijado por la entidad, sin mínimo legal): VE = p1·max(p2·M − B2, 0) − B1, comparado con el engañoso enfoque «todos los costes por adelantado». Probabilidad de equilibrio, valor estratégico necesario, coste de oferta por contrato ganado, retorno del coste de oferta, puntuación de atractivo con criterios ponderados (práctica Shipley / APMP), eliminatorios, una regla de decisión explícita (ofertar, con condiciones, estratégica, no ofertar) y un tornado del valor esperado. Exporta CSV, JSON y el módulo del archivo de proyecto de licitación.",
+    "pl": "Dla wykonawcy lub dostawcy urządzeń, który decyduje, czy złożyć wniosek (etap 3 cyklu życia) i czy złożyć ofertę (etap 4). Wkład netto w razie wygranej M = wartość × (marża − oczekiwana erozja marży) − koszt alternatywny zasobów; koszt oferty = godziny × stawka + koszty zewnętrzne na każdym etapie. Jeden etap: WO = p·M − B. Dwa etapy (przetarg ograniczony albo negocjacje / dialog; sektory klasyczne, ustawa belg. 17.06.2016 art. 79 §2: przy ograniczeniu co najmniej 5 lub 3 zaproszonych; sektory użyteczności publicznej, art. 149: liczbę ustala zamawiający, bez ustawowego minimum): WO = p1·max(p2·M − B2, 0) − B1, w porównaniu z mylącym ujęciem „wszystkie koszty z góry”. Próg rentowności, potrzebna wartość strategiczna, koszt ofert na wygraną umowę, zwrot z kosztu ofert, ocena atrakcyjności z ważonych kryteriów (praktyka Shipley / APMP), kryteria eliminujące, jawna reguła decyzji (składać, pod warunkami, strategicznie, nie składać) i wykres tornado wartości oczekiwanej. Eksport CSV, JSON i modułu pliku projektu przetargowego."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Engineering and commercial analysis, not legal advice. The expected value is only as good as the win probability entered; the decision rule, thresholds, weights and strategic value are a stated company policy (learning assumptions). One-at-a-time sensitivity, no correlation between inputs.",
+    "uk": "Інженерно-комерційний аналіз, не юридична консультація. Очікувана вартість не краща за введену імовірність перемоги; правило рішення, пороги, ваги й стратегічна цінність — відкрита політика компанії (навчальні припущення). Чутливість по одній величині, без кореляції між вхідними даними.",
+    "de": "Technisch-kaufmännische Analyse, keine Rechtsberatung. Der Erwartungswert ist nur so gut wie die eingegebene Zuschlagswahrscheinlichkeit; Entscheidungsregel, Schwellen, Gewichte und strategischer Wert sind eine offengelegte Firmenpolitik (Lernannahmen). Sensitivität je Eingabe einzeln, ohne Korrelation.",
+    "nl": "Technisch-commerciële analyse, geen juridisch advies. De verwachte waarde is maar zo goed als de ingevoerde kans op gunning; beslisregel, drempels, wegingen en strategische waarde zijn een expliciet bedrijfsbeleid (leeraannames). Gevoeligheid per invoer afzonderlijk, zonder correlatie.",
+    "fr": "Analyse technique et commerciale, pas un avis juridique. La valeur attendue ne vaut que par la probabilité de gain saisie ; règle de décision, seuils, poids et valeur stratégique sont une politique d’entreprise explicite (hypothèses d’apprentissage). Sensibilité donnée par donnée, sans corrélation.",
+    "es": "Análisis técnico y comercial, no asesoramiento jurídico. El valor esperado solo es tan bueno como la probabilidad de ganar introducida; regla de decisión, umbrales, pesos y valor estratégico son una política de empresa explícita (hipótesis didácticas). Sensibilidad dato a dato, sin correlación.",
+    "pl": "Analiza techniczno-handlowa, nie porada prawna. Wartość oczekiwana jest tak dobra, jak wprowadzone prawdopodobieństwo wygranej; reguła decyzji, progi, wagi i wartość strategiczna to jawna polityka firmy (założenia szkoleniowe). Wrażliwość po jednej danej, bez korelacji."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "tool_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "dependencies": ["tnd-core.js", "tnd-bnb.js"],
+  "network_access": { "mode": "none" },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python reference (bench-src/ref/gen_bidnobid.py) that rolls back an explicit tree of decision and chance nodes, reads the gate-2 policy from the decision node, finds the breakeven probability, the strategic value needed and the affordable tender cost by bisection on the tree value, and recomputes scores, decisions, flags and the tornado; hand and raw-input cases worked out by hand; preset findings checked in page and reference."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "bidnobid-decision-tree",
+        "reference": "bench-src/ref/gen_bidnobid.py — independent Python of the published method (decision tree rolled back node by node, gate-2 policy from the decision node, bisection on the tree value for breakeven, strategic value needed and affordable tender cost, own normalisation, scoring, policy, flags and tornado)",
+        "citations": [
+          "H. Raiffa, Decision Analysis, Addison-Wesley 1968",
+          "R. T. Clemen, Making Hard Decisions, 2nd ed., Duxbury 1996, ch. 3-4",
+          "Shipley Associates Proposal Guide; APMP Body of Knowledge (bid/no-bid practice)",
+          "Wet 17.06.2016 overheidsopdrachten art. 79 par. 1-2 (classic sectors) and art. 149 (special sectors)",
+          "Directive 2014/24/EU art. 65(2); Directive 2014/25/EU art. 78(2), OJ L 94, 28.3.2014"
+        ],
+        "cases": 241,
+        "passed": 241,
+        "tolerance": "money values, probabilities, scores, cost share, affordable tender cost and tornado ends relative 1e-9; decisions, reasons, knock-outs, flags, zero-crossing swings and tornado orders exact",
+        "run_at": "2026-11-15T08:23:59Z",
+        "artifact": "benchmarks/bidnobid.json"
+      }
+    ]
+  },
+  "report": { "pdf": true, "source_attribution": true },
+  "python_export": {
+    "supported": false,
+    "reason": "The decision tree, scoring and tornado are exported as the calculation record and CSV; an independent Python reference of the same method lives in bench-src/ref/gen_bidnobid.py."
+  },
+  "handoff": { "provides": [], "accepts": [] },
+  "state_codec": { "permalink": true, "record": "tools.petrov.re/calculation-record/v1" },
+  "ui": { "framework": "tools.petrov.re/ui/v1", "level": 3 }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="tnd-core.js" defer></script>
+<script src="tnd-bnb.js" defer></script>
+<style>
+/* review R-13: criteria on a phone — name on its own line, group / weight / score side by side underneath; knock-outs name + toggle on one line */
+@media(max-width:768px){.dgu-app #f-criteria-c .dgu-list-row{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) auto}
+.dgu-app #f-criteria-c .dgu-list-row>.dgu-list-c:first-child{grid-column:1/-1}
+.dgu-app #f-ko-c .dgu-list-row{grid-template-columns:minmax(0,1fr) auto auto}}
+/* review R-12: the printed record starts with the results — no project bar buttons, lifecycle strip or sibling links */
+@media print{.tnd-project-bar,.tnd-lifecycle,[data-tnd="use-msg"]{display:none!important}
+.dgu-table-wrap{overflow:visible!important}.dgu-table{width:100%!important;font-size:8pt}.dgu-table th,.dgu-table td{white-space:normal!important;overflow-wrap:break-word}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* page code of bidnobid.html (source: _tnd/bidnobid/page.js) */
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  var TOOL = 'bidnobid';
+  function lib() { return window.TndBnb || null; }
+  function core() { return window.TndCore || null; }
+  var MAXC = 12, MAXK = 6;
+
+  /* percentages are kept in percent in the state (6 = 6 %), money in euro */
+  var DEFAULTS = {
+    procedure: 'single', V: 4200000, m: 6, r: 0.5, C: 0, S: 0,
+    rate: 85, h1: 0, x1: 0, h2: 320, x2: 6000,
+    p1: 60, p2: 18, N: 7, h: 15,
+    criteria: [
+      { name: 'Relationship and knowledge of the client', group: 'client', weight: 10, score: 7 },
+      { name: 'Competitive position (incumbent, price level)', group: 'client', weight: 15, score: 5 },
+      { name: 'Technical capability and references', group: 'capability', weight: 15, score: 8 },
+      { name: 'Key staff available for bid and execution', group: 'capability', weight: 10, score: 6 },
+      { name: 'Workload and execution capacity', group: 'capacity', weight: 10, score: 6 },
+      { name: 'Contract terms and risk allocation', group: 'risk', weight: 15, score: 6 },
+      { name: 'Payment terms and client solvency', group: 'risk', weight: 10, score: 8 },
+      { name: 'Margin potential against the market', group: 'risk', weight: 5, score: 4 },
+      { name: 'Strategic fit', group: 'strategy', weight: 5, score: 6 },
+      { name: 'Follow-on work', group: 'strategy', weight: 5, score: 4 }
+    ],
+    ko: [
+      { name: 'Selection criteria met (erkenning class, turnover, references)', met: true },
+      { name: 'Bond and insurance capacity available', met: true },
+      { name: 'No exclusion ground or conflict of interest', met: true }
+    ],
+    go: 65, review: 45, dp: 10, dm: 2, dB: 30, dV: 15,
+    tenderRef: '', preparedBy: ''
+  };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null, ui = null, stage = null;
+
+  function engineInput(s) {
+    var pct = function (v) { return (+v || 0) / 100; };
+    return {
+      procedure: s.procedure === 'two' ? 'two' : 'single', V: +s.V || 0, m: pct(s.m), r: pct(s.r), C: +s.C || 0, S: +s.S || 0,
+      rate: +s.rate || 0, h1: +s.h1 || 0, x1: +s.x1 || 0, h2: +s.h2 || 0, x2: +s.x2 || 0,
+      p1: pct(s.p1), p2: pct(s.p2), N: +s.N >= 1 ? Math.round(+s.N) : null, h: +s.h > 0 ? pct(s.h) : null,
+      go: +s.go, review: +s.review, dp: pct(s.dp), dm: pct(s.dm), dB: pct(s.dB), dV: pct(s.dV),
+      criteria: (s.criteria || []).slice(0, MAXC).map(function (c, k) { return { id: 'K' + (k + 1), name: c.name, group: c.group, weight: +c.weight || 0, score: +c.score || 0 }; }),
+      ko: (s.ko || []).slice(0, MAXK).map(function (c, k) { return { id: 'KO' + (k + 1), name: c.name, met: c.met === true ? true : (c.unclear ? null : false) }; })
+    };
+  }
+  function solve(s) {
+    var B = lib();
+    if (!B) return { ok: false, errors: ['engine'] };
+    try { var inp = engineInput(s), r = B.analyse(inp); r.raw = inp; return r; }
+    catch (e) { return { ok: false, errors: ['exception'], msg: String(e && e.message || e) }; }
+  }
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var LANGS = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  function TF(fn) { var o = {}; LANGS.forEach(function (l) { o[l] = fn(l); }); return o; }
+  function lang() { try { var l = window.DiagramUI && DiagramUI.domainLang ? DiagramUI.domainLang() : 'en'; return LANGS.indexOf(l) >= 0 ? l : 'en'; } catch (e) { return 'en'; } }
+  var COMMA = { en: false, uk: true, de: true, nl: true, fr: true, es: true, pl: true };
+  function nf(v, l, d) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.fmt) return C.fmt(v, l, d == null ? 2 : d);
+    var s = v.toFixed(d == null ? 2 : d); return COMMA[l] ? s.replace('.', ',') : s;
+  }
+  function eur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.money) return C.money(v, 'EUR', l, 0);
+    return nf(v, l, 0) + ' €';
+  }
+  function keur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    if (Math.abs(v) >= 1e6) return nf(v / 1e6, l, 2) + ' M€';
+    if (Math.abs(v) >= 1e3) return nf(v / 1e3, l, 1) + ' k€';
+    return eur(v, l);
+  }
+  function pc(f, l, d) { return f == null || !isFinite(f) ? '—' : nf(100 * f, l, d == null ? 1 : d) + ' %'; }
+  function str(v, l) { return v && typeof v === 'object' ? (v[l] != null ? v[l] : v.en) : v; }
+
+  var DEC = {
+    bid: T('BID', 'ПОДАВАТИ', 'ANBIETEN', 'INSCHRIJVEN', 'GO : REMETTRE OFFRE', 'OFERTAR', 'SKŁADAĆ OFERTĘ'),
+    conditions: T('BID WITH CONDITIONS', 'ПОДАВАТИ ЗА УМОВ', 'ANBIETEN MIT AUFLAGEN', 'INSCHRIJVEN ONDER VOORWAARDEN', 'GO SOUS CONDITIONS', 'OFERTAR CON CONDICIONES', 'SKŁADAĆ POD WARUNKAMI'),
+    strategic: T('STRATEGIC BID (management sign-off)', 'СТРАТЕГІЧНА УЧАСТЬ (рішення керівництва)', 'STRATEGISCHES ANGEBOT (Freigabe der Geschäftsleitung)', 'STRATEGISCHE INSCHRIJVING (akkoord van de directie)', 'GO STRATÉGIQUE (validation de la direction)', 'OFERTA ESTRATÉGICA (aprobación de la dirección)', 'OFERTA STRATEGICZNA (zgoda zarządu)'),
+    nobid: T('NO BID', 'НЕ ПОДАВАТИ', 'KEIN ANGEBOT', 'NIET INSCHRIJVEN', 'NO-GO', 'NO OFERTAR', 'NIE SKŁADAĆ OFERTY')
+  };
+  var GRP = {
+    client: T('Client and competition', 'Замовник і конкуренція', 'Auftraggeber und Wettbewerb', 'Opdrachtgever en concurrentie', 'Client et concurrence', 'Cliente y competencia', 'Zamawiający i konkurencja'),
+    capability: T('Capability', 'Спроможність', 'Leistungsfähigkeit', 'Bekwaamheid', 'Capacités techniques', 'Capacidad técnica', 'Zdolność techniczna'),
+    capacity: T('Capacity', 'Завантаженість', 'Kapazität', 'Capaciteit', 'Charge et disponibilité', 'Disponibilidad', 'Moce przerobowe'),
+    risk: T('Commercial terms and risk', 'Комерційні умови й ризик', 'Vertragsbedingungen und Risiko', 'Contractvoorwaarden en risico', 'Conditions commerciales et risques', 'Condiciones comerciales y riesgo', 'Warunki handlowe i ryzyko'),
+    strategy: T('Strategy', 'Стратегія', 'Strategie', 'Strategie', 'Stratégie', 'Estrategia', 'Strategia')
+  };
+  /* names of the criteria and knock-outs of the presets */
+  var CK = {
+    rel: T('Relationship and knowledge of the client', 'Стосунки із замовником і знання його потреб', 'Beziehung zum und Kenntnis des Auftraggebers', 'Relatie met en kennis van de opdrachtgever', 'Relation avec le client et connaissance de ses besoins', 'Relación con el cliente y conocimiento de sus necesidades', 'Relacje z zamawiającym i znajomość jego potrzeb'),
+    comp: T('Competitive position (incumbent, price level)', 'Конкурентна позиція (чинний підрядник, рівень цін)', 'Wettbewerbsposition (Bestandsauftragnehmer, Preisniveau)', 'Concurrentiepositie (huidige opdrachtnemer, prijsniveau)', 'Position concurrentielle (titulaire sortant, niveau de prix)', 'Posición competitiva (adjudicatario actual, nivel de precios)', 'Pozycja konkurencyjna (obecny wykonawca, poziom cen)'),
+    tech: T('Technical capability and references', 'Технічна спроможність і референції', 'Technische Leistungsfähigkeit und Referenzen', 'Technische bekwaamheid en referenties', 'Capacité technique et références', 'Capacidad técnica y referencias', 'Zdolność techniczna i referencje'),
+    staff: T('Key staff available for bid and execution', 'Ключовий персонал для тендеру й виконання', 'Schlüsselpersonal für Angebot und Ausführung verfügbar', 'Sleutelpersoneel beschikbaar voor offerte en uitvoering', 'Personnel clé disponible pour l’offre et l’exécution', 'Personal clave disponible para la oferta y la ejecución', 'Kluczowy personel dostępny do oferty i realizacji'),
+    load: T('Workload and execution capacity', 'Завантаженість і виробничі потужності', 'Auslastung und Ausführungskapazität', 'Werklast en uitvoeringscapaciteit', 'Plan de charge et capacité d’exécution', 'Carga de trabajo y capacidad de ejecución', 'Obłożenie i moce wykonawcze'),
+    terms: T('Contract terms and risk allocation', 'Умови контракту й розподіл ризиків', 'Vertragsbedingungen und Risikoverteilung', 'Contractvoorwaarden en risicoverdeling', 'Conditions contractuelles et répartition des risques', 'Condiciones contractuales y reparto de riesgos', 'Warunki umowy i podział ryzyka'),
+    pay: T('Payment terms and client solvency', 'Умови оплати й платоспроможність замовника', 'Zahlungsbedingungen und Bonität des Auftraggebers', 'Betalingsvoorwaarden en solvabiliteit van de opdrachtgever', 'Conditions de paiement et solvabilité du client', 'Condiciones de pago y solvencia del cliente', 'Warunki płatności i wypłacalność zamawiającego'),
+    margin: T('Margin potential against the market', 'Потенціал маржі щодо ринку', 'Margenpotenzial gegenüber dem Markt', 'Margepotentieel ten opzichte van de markt', 'Potentiel de marge face au marché', 'Potencial de margen frente al mercado', 'Potencjał marży na tle rynku'),
+    fit: T('Strategic fit', 'Стратегічна відповідність', 'Strategische Passung', 'Strategische fit', 'Adéquation stratégique', 'Encaje estratégico', 'Zgodność ze strategią'),
+    follow: T('Follow-on work', 'Подальші замовлення', 'Folgeaufträge', 'Vervolgopdrachten', 'Travaux ultérieurs', 'Trabajos posteriores', 'Kolejne zamówienia')
+  };
+  var KOK = {
+    erkenning: T('Selection criteria met (erkenning class, turnover, references)', 'Критерії відбору виконано (клас erkenning, оборот, референції)', 'Eignungskriterien erfüllt (Anerkennungsklasse, Umsatz, Referenzen)', 'Selectiecriteria vervuld (erkenningsklasse, omzet, referenties)', 'Critères de sélection remplis (classe d’agréation, chiffre d’affaires, références)', 'Criterios de selección cumplidos (clasificación, volumen de negocios, referencias)', 'Warunki udziału spełnione (klasa uprawnień, obrót, referencje)'),
+    bond: T('Bond and insurance capacity available', 'Є ліміт на гарантії та страхування', 'Bürgschafts- und Versicherungsrahmen verfügbar', 'Ruimte voor borgtocht en verzekeringen beschikbaar', 'Capacité de cautionnement et d’assurance disponible', 'Capacidad de garantías y seguros disponible', 'Dostępny limit gwarancji i ubezpieczeń'),
+    exclusion: T('No exclusion ground or conflict of interest', 'Немає підстав для відсторонення чи конфлікту інтересів', 'Kein Ausschlussgrund und kein Interessenkonflikt', 'Geen uitsluitingsgrond of belangenconflict', 'Aucun motif d’exclusion ni conflit d’intérêts', 'Sin causa de exclusión ni conflicto de intereses', 'Brak podstaw wykluczenia i konfliktu interesów'),
+    refs: T('Reference projects of the required size and type', 'Референтні проєкти потрібного обсягу й типу', 'Referenzprojekte der geforderten Größe und Art', 'Referentieprojecten van de vereiste omvang en aard', 'Références de taille et de nature exigées', 'Referencias del tamaño y tipo exigidos', 'Referencje o wymaganej skali i rodzaju'),
+    jv: T('JV or key subcontractor secured where needed', 'Партнер СП чи ключовий субпідрядник забезпечений', 'ARGE-Partner bzw. Schlüssel-Nachunternehmer gesichert', 'Combinatiepartner of sleutelonderaannemer verzekerd', 'Partenaire de groupement ou sous-traitant clé acquis', 'Socio de UTE o subcontratista clave asegurado', 'Partner konsorcjum lub kluczowy podwykonawca zapewniony'),
+    slot: T('Test-bay slot before the required FAT date', 'Слот випробувального стенда до потрібної дати FAT', 'Prüffeld-Termin vor dem geforderten FAT-Datum', 'Plaats in het testplatform vóór de vereiste FAT-datum', 'Créneau de plateforme d’essais avant la date de FAT exigée', 'Hueco en el banco de pruebas antes de la fecha de FAT exigida', 'Termin na stacji prób przed wymaganą datą FAT'),
+    certs: T('Required certificates (EN 10204 3.1, type tests)', 'Потрібні сертифікати (EN 10204 3.1, типові випробування)', 'Geforderte Zeugnisse (EN 10204 3.1, Typprüfungen)', 'Vereiste certificaten (EN 10204 3.1, typeproeven)', 'Certificats exigés (EN 10204 3.1, essais de type)', 'Certificados exigidos (EN 10204 3.1, ensayos de tipo)', 'Wymagane świadectwa (EN 10204 3.1, badania typu)'),
+    'export': T('No export-control or sanctions issue', 'Немає обмежень експортного контролю чи санкцій', 'Keine Exportkontroll- oder Sanktionsfrage', 'Geen exportcontrole- of sanctieprobleem', 'Aucun problème de contrôle des exportations ni de sanctions', 'Sin problemas de control de exportaciones ni sanciones', 'Brak problemów z kontrolą eksportu i sankcjami')
+  };
+
+  var S = {
+    subtitle: T('Is this tender worth the bid cost?', 'Чи вартий цей тендер витрат на підготовку пропозиції?', 'Lohnt sich diese Ausschreibung die Angebotskosten?', 'Is deze aanbesteding de offertekosten waard?', 'Cet appel d’offres vaut-il le coût de l’offre ?', '¿Merece esta licitación el coste de preparar la oferta?', 'Czy ten przetarg jest wart kosztu przygotowania oferty?'),
+    pProject: T('Tender project', 'Тендерний проєкт', 'Vergabeprojekt', 'Aanbestedingsproject', 'Projet de marché', 'Proyecto de licitación', 'Projekt przetargowy'),
+    pOpp: T('Opportunity', 'Можливість', 'Gelegenheit', 'Opportuniteit', 'Opportunité', 'Oportunidad', 'Szansa'),
+    pCost: T('Bid cost', 'Витрати на пропозицію', 'Angebotskosten', 'Offertekosten', 'Coût de l’offre', 'Coste de la oferta', 'Koszt oferty'),
+    pWin: T('Win probability', 'Імовірність перемоги', 'Zuschlagswahrscheinlichkeit', 'Kans op gunning', 'Probabilité de gain', 'Probabilidad de adjudicación', 'Prawdopodobieństwo wygranej'),
+    pCrit: T('Attractiveness criteria', 'Критерії привабливості', 'Attraktivitätskriterien', 'Aantrekkelijkheidscriteria', 'Critères d’attractivité', 'Criterios de atractivo', 'Kryteria atrakcyjności'),
+    pKo: T('Knock-out criteria', 'Критерії-відсікачі', 'K.-o.-Kriterien', 'Knock-outcriteria', 'Critères éliminatoires', 'Criterios eliminatorios', 'Kryteria eliminujące'),
+    pSens: T('Sensitivity swings', 'Діапазони чутливості', 'Sensitivitätsbereiche', 'Gevoeligheidsmarges', 'Plages de sensibilité', 'Rangos de sensibilidad', 'Zakresy wrażliwości'),
+    pRec: T('Record', 'Запис', 'Protokoll', 'Verslag', 'Procès-verbal', 'Registro', 'Protokół'),
+    procedure: T('Gates', 'Етапи', 'Stufen', 'Fasen', 'Étapes', 'Fases', 'Etapy'),
+    single: T('One gate (open procedure, RFQ)', 'Один етап (відкрита процедура, запит цін)', 'Eine Stufe (offenes Verfahren, Preisanfrage)', 'Eén fase (openbare procedure, offerteaanvraag)', 'Une étape (procédure ouverte, demande de prix)', 'Una fase (procedimiento abierto, petición de oferta)', 'Jeden etap (tryb otwarty, zapytanie ofertowe)'),
+    two: T('Two gates (qualification, then tender)', 'Два етапи (кваліфікація, потім пропозиція)', 'Zwei Stufen (Teilnahmewettbewerb, dann Angebot)', 'Twee fasen (selectie, dan offerte)', 'Deux étapes (candidature, puis offre)', 'Dos fases (selección, luego oferta)', 'Dwa etapy (kwalifikacja, potem oferta)'),
+    procHint: T('Two gates: restricted procedure or competitive negotiation / dialogue. Classic sectors (Wet 17.06.2016 art. 79 §2): if the authority limits the number, at least 5 invited (restricted) or 3 (negotiation, dialogue), fewer if fewer qualify. Special sectors (utilities, art. 149): the entity sets the number, no legal minimum, only sufficient competition.', 'Два етапи: обмежена процедура або конкурентні переговори / діалог. Класичні сектори (Закон Бельгії 17.06.2016 ст. 79 §2): якщо замовник обмежує кількість — щонайменше 5 запрошених (обмежена) або 3 (переговори, діалог), менше, якщо кваліфікувалося менше. Спеціальні сектори (комунальні підприємства, ст. 149): кількість визначає замовник, законного мінімуму немає, лише достатня конкуренція.', 'Zwei Stufen: nicht offenes Verfahren oder Verhandlungsverfahren / Dialog. Klassische Sektoren (belg. Gesetz 17.06.2016 Art. 79 §2): begrenzt der Auftraggeber die Zahl, mindestens 5 Eingeladene (nicht offen) bzw. 3 (Verhandlung, Dialog), weniger, wenn weniger geeignet sind. Sektoren (Versorger, Art. 149): der Sektorenauftraggeber legt die Zahl fest, kein gesetzliches Minimum, nur ausreichender Wettbewerb.', 'Twee fasen: niet-openbare procedure of mededingingsprocedure met onderhandeling / concurrentiegerichte dialoog. Klassieke sectoren (wet 17.06.2016 art. 79 §2): als de aanbestedende overheid het aantal beperkt, minstens 5 uitgenodigd (niet-openbaar) of 3 (onderhandeling, dialoog), minder als er minder kandidaten geschikt zijn. Speciale sectoren (nutsbedrijven, art. 149): de aanbestedende entiteit bepaalt het aantal, geen wettelijk minimum, enkel voldoende mededinging.', 'Deux étapes : procédure restreinte ou procédure concurrentielle avec négociation / dialogue. Secteurs classiques (loi 17.06.2016 art. 79 §2) : si le pouvoir adjudicateur limite le nombre, au moins 5 invités (restreinte) ou 3 (négociation, dialogue), moins si moins de candidats sont qualifiés. Secteurs spéciaux (art. 149) : l’entité adjudicatrice fixe le nombre, sans minimum légal, seulement une concurrence suffisante.', 'Dos fases: procedimiento restringido o negociación / diálogo competitivo. Sectores clásicos (ley belga 17.06.2016 art. 79 §2): si el poder adjudicador limita el número, al menos 5 invitados (restringido) o 3 (negociación, diálogo), menos si se califican menos. Sectores especiales (art. 149): la entidad adjudicadora fija el número, sin mínimo legal, solo competencia suficiente.', 'Dwa etapy: przetarg ograniczony albo negocjacje / dialog konkurencyjny. Sektory klasyczne (ustawa belg. 17.06.2016 art. 79 §2): jeśli zamawiający ogranicza liczbę — co najmniej 5 zaproszonych (ograniczony) lub 3 (negocjacje, dialog), mniej, jeśli mniej się zakwalifikuje. Sektory użyteczności publicznej (art. 149): liczbę ustala zamawiający sektorowy, bez ustawowego minimum, tylko wystarczająca konkurencja.'),
+    V: T('Contract value (our price)', 'Вартість контракту (наша ціна)', 'Auftragswert (unser Preis)', 'Opdrachtwaarde (onze prijs)', 'Montant du marché (notre prix)', 'Importe del contrato (nuestro precio)', 'Wartość umowy (nasza cena)'),
+    m: T('Margin (contribution)', 'Маржа (внесок у накладні та прибуток)', 'Deckungsbeitrag', 'Marge (bijdrage)', 'Marge (contribution)', 'Margen (contribución)', 'Marża (wkład)'),
+    mHint: T('Contribution to overheads and profit, % of the price', 'Внесок у накладні витрати й прибуток, % ціни', 'Beitrag zu Gemeinkosten und Gewinn, % des Preises', 'Bijdrage in algemene kosten en winst, % van de prijs', 'Contribution aux frais généraux et au bénéfice, % du prix', 'Contribución a gastos generales y beneficio, % del precio', 'Wkład w koszty ogólne i zysk, % ceny'),
+    r: T('Expected margin erosion (risk)', 'Очікуване зниження маржі (ризик)', 'Erwartete Margenerosion (Risiko)', 'Verwachte marge-erosie (risico)', 'Érosion de marge attendue (risque)', 'Erosión de margen esperada (riesgo)', 'Oczekiwana erozja marży (ryzyko)'),
+    rHint: T('Expected cost of the contract risks you keep (LDs, warranty, claims), % of the price', 'Очікувана вартість ризиків, що лишаються на вас (неустойки, гарантія, претензії), % ціни', 'Erwartete Kosten der verbleibenden Vertragsrisiken (Vertragsstrafen, Gewährleistung, Nachträge), % des Preises', 'Verwachte kost van de risico’s die u draagt (boetes, waarborg, claims), % van de prijs', 'Coût attendu des risques conservés (pénalités, garantie, réclamations), % du prix', 'Coste esperado de los riesgos asumidos (penalidades, garantía, reclamaciones), % del precio', 'Oczekiwany koszt ryzyk po Twojej stronie (kary, gwarancja, roszczenia), % ceny'),
+    C: T('Opportunity cost of capacity', 'Альтернативна вартість ресурсів', 'Opportunitätskosten der Kapazität', 'Opportuniteitskost van de capaciteit', 'Coût d’opportunité de la capacité', 'Coste de oportunidad de la capacidad', 'Koszt alternatywny zasobów'),
+    CHint: T('Margin the same team would earn elsewhere if we win this one', 'Маржа, яку та сама команда заробила б деінде, якщо ми виграємо цей тендер', 'Marge, die dasselbe Team anderswo verdienen würde, wenn wir hier gewinnen', 'Marge die hetzelfde team elders zou verdienen als we deze winnen', 'Marge que la même équipe gagnerait ailleurs si nous remportons celui-ci', 'Margen que el mismo equipo ganaría en otro sitio si ganamos este', 'Marża, którą ten sam zespół zarobiłby gdzie indziej, jeśli wygramy ten przetarg'),
+    Sv: T('Strategic value if won', 'Стратегічна цінність у разі перемоги', 'Strategischer Wert bei Zuschlag', 'Strategische waarde bij gunning', 'Valeur stratégique en cas de gain', 'Valor estratégico si se gana', 'Wartość strategiczna w razie wygranej'),
+    SHint: T('Reference, new client, follow-on work — a stated management value, kept apart from the money', 'Референція, новий замовник, подальші замовлення — оцінка керівництва, окремо від грошей', 'Referenz, neuer Auftraggeber, Folgeaufträge — ein ausdrücklicher Wert der Geschäftsleitung, getrennt vom Geld', 'Referentie, nieuwe opdrachtgever, vervolgopdrachten — een expliciete waarde van de directie, los van het geld', 'Référence, nouveau client, travaux ultérieurs — valeur affichée par la direction, séparée de l’argent', 'Referencia, cliente nuevo, trabajos posteriores — un valor explícito de la dirección, aparte del dinero', 'Referencja, nowy klient, kolejne zamówienia — jawna wartość zarządu, oddzielona od pieniędzy'),
+    rate: T('Hourly rate of the bid team', 'Погодинна ставка тендерної команди', 'Stundensatz des Angebotsteams', 'Uurtarief van het offerteteam', 'Taux horaire de l’équipe d’offre', 'Tarifa horaria del equipo de oferta', 'Stawka godzinowa zespołu ofertowego'),
+    h1: T('Qualification hours', 'Години на кваліфікацію', 'Stunden Teilnahmeantrag', 'Uren selectiefase', 'Heures de candidature', 'Horas de selección', 'Godziny na kwalifikację'),
+    x1: T('Qualification external cost', 'Зовнішні витрати на кваліфікацію', 'Fremdkosten Teilnahmeantrag', 'Externe kosten selectiefase', 'Coûts externes de candidature', 'Costes externos de selección', 'Koszty zewnętrzne kwalifikacji'),
+    h2: T('Tender hours (estimating, design, RFQs)', 'Години на пропозицію (кошторис, проєкт, запити цін)', 'Angebotsstunden (Kalkulation, Planung, Anfragen)', 'Offerte-uren (calculatie, ontwerp, prijsaanvragen)', 'Heures d’offre (chiffrage, études, consultations)', 'Horas de oferta (presupuesto, diseño, peticiones)', 'Godziny na ofertę (kosztorys, projekt, zapytania)'),
+    x2: T('Tender external cost (consultants, models, copies)', 'Зовнішні витрати на пропозицію (консультанти, моделі, друк)', 'Fremdkosten Angebot (Planer, Modelle, Kopien)', 'Externe offertekosten (studiebureaus, modellen, kopieën)', 'Coûts externes de l’offre (bureaux d’études, maquettes, copies)', 'Costes externos de la oferta (consultores, modelos, copias)', 'Koszty zewnętrzne oferty (projektanci, modele, wydruki)'),
+    p1: T('Probability of being shortlisted', 'Імовірність потрапити до короткого списку', 'Wahrscheinlichkeit der Aufforderung zur Angebotsabgabe', 'Kans om geselecteerd te worden', 'Probabilité d’être sélectionné', 'Probabilidad de ser seleccionado', 'Prawdopodobieństwo zaproszenia do składania ofert'),
+    p2: T('Probability of award once a tender is submitted', 'Імовірність перемоги після подання пропозиції', 'Zuschlagswahrscheinlichkeit nach Angebotsabgabe', 'Kans op gunning na indiening van de offerte', 'Probabilité d’attribution une fois l’offre remise', 'Probabilidad de adjudicación una vez presentada la oferta', 'Prawdopodobieństwo wygranej po złożeniu oferty'),
+    N: T('Bidders at the tender stage (incl. us)', 'Учасників на етапі пропозицій (з нами)', 'Bieter in der Angebotsphase (mit uns)', 'Inschrijvers in de offertefase (met ons)', 'Soumissionnaires au stade de l’offre (nous compris)', 'Licitadores en la fase de oferta (incluidos nosotros)', 'Wykonawcy na etapie ofert (z nami)'),
+    h: T('Our hit rate on similar tenders (0 = unknown)', 'Наш відсоток перемог у подібних тендерах (0 = невідомо)', 'Unsere Trefferquote bei ähnlichen Ausschreibungen (0 = unbekannt)', 'Onze slaagkans bij vergelijkbare aanbestedingen (0 = onbekend)', 'Notre taux de réussite sur des appels similaires (0 = inconnu)', 'Nuestra tasa de éxito en licitaciones similares (0 = desconocida)', 'Nasz wskaźnik wygranych w podobnych przetargach (0 = nieznany)'),
+    crit: T('Criteria (max. 12, score 0–10)', 'Критерії (до 12, бал 0–10)', 'Kriterien (max. 12, Note 0–10)', 'Criteria (max. 12, score 0–10)', 'Critères (max. 12, note 0–10)', 'Criterios (máx. 12, nota 0–10)', 'Kryteria (maks. 12, ocena 0–10)'),
+    cName: T('Criterion', 'Критерій', 'Kriterium', 'Criterium', 'Critère', 'Criterio', 'Kryterium'),
+    cGroup: T('Group', 'Група', 'Gruppe', 'Groep', 'Groupe', 'Grupo', 'Grupa'),
+    cWeight: T('Weight', 'Вага', 'Gewicht', 'Weging', 'Poids', 'Peso', 'Waga'),
+    cScore: T('Score', 'Бал', 'Note', 'Score', 'Note', 'Nota', 'Ocena'),
+    addCrit: T('Add criterion', 'Додати критерій', 'Kriterium hinzufügen', 'Criterium toevoegen', 'Ajouter un critère', 'Añadir criterio', 'Dodaj kryterium'),
+    go: T('Bid threshold (score)', 'Поріг участі (бал)', 'Schwelle Anbieten (Punkte)', 'Drempel inschrijven (score)', 'Seuil go (note)', 'Umbral ofertar (nota)', 'Próg złożenia oferty (punkty)'),
+    review: T('Review threshold (score)', 'Поріг перегляду (бал)', 'Schwelle Prüfung (Punkte)', 'Drempel herbekijken (score)', 'Seuil de réexamen (note)', 'Umbral de revisión (nota)', 'Próg przeglądu (punkty)'),
+    thrHint: T('Company policy (learning assumption): at or above the bid threshold BID, between the two BID WITH CONDITIONS, below NO BID', 'Політика компанії (навчальне припущення): від порогу участі — ПОДАВАТИ, між порогами — ЗА УМОВ, нижче — НЕ ПОДАВАТИ', 'Firmenpolitik (Lernannahme): ab der Anbietschwelle ANBIETEN, dazwischen MIT AUFLAGEN, darunter KEIN ANGEBOT', 'Bedrijfsbeleid (leeraanname): vanaf de drempel INSCHRIJVEN, ertussen ONDER VOORWAARDEN, eronder NIET INSCHRIJVEN', 'Politique de l’entreprise (hypothèse d’apprentissage) : au-dessus du seuil GO, entre les deux GO SOUS CONDITIONS, en dessous NO-GO', 'Política de la empresa (hipótesis didáctica): desde el umbral OFERTAR, entre ambos CON CONDICIONES, por debajo NO OFERTAR', 'Polityka firmy (założenie szkoleniowe): od progu SKŁADAĆ, pomiędzy POD WARUNKAMI, poniżej NIE SKŁADAĆ'),
+    koList: T('Harde voorwaarden (max. 6)', 'Обов’язкові умови (до 6)', 'Muss-Kriterien (max. 6)', 'Must-haves (max. 6)', 'Conditions impératives (max. 6)', 'Requisitos imprescindibles (máx. 6)', 'Warunki konieczne (maks. 6)'),
+    koName: T('Condition', 'Умова', 'Bedingung', 'Voorwaarde', 'Condition', 'Condición', 'Warunek'),
+    koMet: T('Met', 'Викон.', 'Erfüllt', 'Vervuld', 'Rempli', 'Cumple', 'Spełn.'),
+    addKo: T('Add knock-out', 'Додати відсікач', 'K.-o.-Kriterium hinzufügen', 'Knock-outcriterium toevoegen', 'Ajouter un critère éliminatoire', 'Añadir criterio eliminatorio', 'Dodaj kryterium eliminujące'),
+    dp: T('Win probability ± (points)', 'Імовірність ± (п. п.)', 'Wahrscheinlichkeit ± (Prozentpunkte)', 'Kans ± (procentpunten)', 'Probabilité ± (points)', 'Probabilidad ± (puntos)', 'Prawdopodobieństwo ± (pkt proc.)'),
+    dm: T('Margin ± (points)', 'Маржа ± (п. п.)', 'Marge ± (Prozentpunkte)', 'Marge ± (procentpunten)', 'Marge ± (points)', 'Margen ± (puntos)', 'Marża ± (pkt proc.)'),
+    dB: T('Bid cost ±', 'Витрати на пропозицію ±', 'Angebotskosten ±', 'Offertekosten ±', 'Coût de l’offre ±', 'Coste de la oferta ±', 'Koszt oferty ±'),
+    dV: T('Contract value ±', 'Вартість контракту ±', 'Auftragswert ±', 'Opdrachtwaarde ±', 'Montant du marché ±', 'Importe del contrato ±', 'Wartość umowy ±'),
+    tenderRef: T('Tender reference', 'Номер тендеру', 'Vergabenummer', 'Referentie van de opdracht', 'Référence du marché', 'Referencia del expediente', 'Numer postępowania'),
+    preparedBy: T('Prepared by', 'Підготував', 'Erstellt von', 'Opgesteld door', 'Établi par', 'Preparado por', 'Sporządził'),
+    stageCap: T('Expected value against the probability of award (breakeven, your estimate, base rate 1/N, hit rate) and what moves it most', 'Очікувана вартість залежно від імовірності перемоги (беззбитковість, ваша оцінка, базова частка 1/N, відсоток перемог) і що впливає найбільше', 'Erwartungswert über der Zuschlagswahrscheinlichkeit (Gewinnschwelle, Ihre Schätzung, Basisrate 1/N, Trefferquote) und was ihn am stärksten bewegt', 'Verwachte waarde tegenover de kans op gunning (break-even, uw schatting, basiskans 1/N, slaagkans) en wat ze het meest beïnvloedt', 'Valeur attendue selon la probabilité d’attribution (seuil de rentabilité, votre estimation, taux de base 1/N, taux de réussite) et ce qui la fait le plus varier', 'Valor esperado frente a la probabilidad de adjudicación (equilibrio, su estimación, tasa base 1/N, tasa de éxito) y lo que más lo mueve', 'Wartość oczekiwana względem prawdopodobieństwa wygranej (próg rentowności, Twoja ocena, częstość bazowa 1/N, wskaźnik wygranych) i co ją najbardziej zmienia'),
+    axP: T('probability of award', 'імовірність перемоги', 'Zuschlagswahrscheinlichkeit', 'kans op gunning', 'probabilité d’attribution', 'probabilidad de adjudicación', 'prawdopodobieństwo wygranej'),
+    axEV: T('expected value', 'очікувана вартість', 'Erwartungswert', 'verwachte waarde', 'valeur attendue', 'valor esperado', 'wartość oczekiwana'),
+    mkYou: T('you', 'ви', 'Sie', 'u', 'vous', 'usted', 'Ty'),
+    mkBE: T('breakeven', 'беззбитк.', 'Schwelle', 'break-even', 'seuil', 'equilibrio', 'próg'),
+    mkHit: T('hit rate', 'частка перемог', 'Trefferquote', 'slaagkans', 'taux de réussite', 'tasa de éxito', 'wsk. wygranych'),
+    // tiles
+    tEV: T('Expected value of bidding', 'Очікувана вартість участі', 'Erwartungswert der Teilnahme', 'Verwachte waarde van inschrijven', 'Valeur attendue de l’offre', 'Valor esperado de ofertar', 'Wartość oczekiwana udziału'),
+    tBE: T('Breakeven probability of award', 'Беззбиткова імовірність перемоги', 'Zuschlagswahrscheinlichkeit an der Gewinnschwelle', 'Break-evenkans op gunning', 'Probabilité d’attribution d’équilibre', 'Probabilidad de adjudicación de equilibrio', 'Prawdopodobieństwo wygranej na progu rentowności'),
+    tScore: T('Attractiveness score', 'Бал привабливості', 'Attraktivitätspunkte', 'Aantrekkelijkheidsscore', 'Note d’attractivité', 'Puntuación de atractivo', 'Ocena atrakcyjności'),
+    tCost: T('Bid cost', 'Витрати на пропозицію', 'Angebotskosten', 'Offertekosten', 'Coût de l’offre', 'Coste de la oferta', 'Koszt oferty'),
+    tPerWin: T('Bid spend per contract won', 'Витрати на тендери на один виграний контракт', 'Angebotskosten je gewonnenem Auftrag', 'Offertekosten per gewonnen opdracht', 'Coût d’offre par marché gagné', 'Coste de oferta por contrato ganado', 'Koszt ofert na jedną wygraną umowę'),
+    tRoi: T('Return on bid spend', 'Віддача на витрати', 'Rendite der Angebotskosten', 'Rendement op offertekosten', 'Rendement du coût d’offre', 'Retorno del coste de oferta', 'Zwrot z kosztu ofert'),
+    tNaive: T('“All costs up front” view', 'Підхід «усі витрати одразу»', 'Sicht „alle Kosten vorab“', 'Benadering “alle kosten vooraf”', 'Approche « tous les coûts d’emblée »', 'Enfoque «todos los costes por adelantado»', 'Ujęcie „wszystkie koszty z góry”'),
+    tSneed: T('Strategic value needed', 'Потрібна стратегічна цінність', 'Nötiger strategischer Wert', 'Vereiste strategische waarde', 'Valeur stratégique nécessaire', 'Valor estratégico necesario', 'Potrzebna wartość strategiczna'),
+    ofV: T('of the contract value', 'від вартості контракту', 'des Auftragswerts', 'van de opdrachtwaarde', 'du montant du marché', 'del importe del contrato', 'wartości umowy'),
+    vsBase: T('base rate 1/N', 'базова частка 1/N', 'Basisrate 1/N', 'basiskans 1/N', 'taux de base 1/N', 'tasa base 1/N', 'częstość bazowa 1/N'),
+    yours: T('yours', 'ваша', 'Ihre', 'uw', 'la vôtre', 'la suya', 'Twoja'),
+    never: T('never pays (no margin left)', 'не окупається (маржі не лишається)', 'lohnt sich nie (keine Marge übrig)', 'loont nooit (geen marge over)', 'jamais rentable (plus de marge)', 'nunca compensa (sin margen)', 'nigdy się nie opłaca (brak marży)'),
+    over1: T('above 100 %: cannot pay', 'понад 100 %: не окупиться', 'über 100 %: kann sich nicht lohnen', 'boven 100 %: kan niet lonen', 'au-delà de 100 % : impossible', 'por encima del 100 %: no puede compensar', 'powyżej 100 %: nie może się opłacić'),
+    ifWon: T('if won', 'у разі перемоги', 'bei Zuschlag', 'bij gunning', 'en cas de gain', 'si se gana', 'w razie wygranej'),
+    // tables
+    tabTree: T('Decision tree', 'Дерево рішень', 'Entscheidungsbaum', 'Beslissingsboom', 'Arbre de décision', 'Árbol de decisión', 'Drzewo decyzyjne'),
+    tabScore: T('Attractiveness by criterion', 'Привабливість за критеріями', 'Attraktivität je Kriterium', 'Aantrekkelijkheid per criterium', 'Attractivité par critère', 'Atractivo por criterio', 'Atrakcyjność według kryteriów'),
+    tabKo: T('Knock-out criteria', 'Критерії-відсікачі', 'K.-o.-Kriterien', 'Knock-outcriteria', 'Critères éliminatoires', 'Criterios eliminatorios', 'Kryteria eliminujące'),
+    tabTor: T('What moves the expected value', 'Що впливає на очікувану вартість', 'Was den Erwartungswert bewegt', 'Wat de verwachte waarde beïnvloedt', 'Ce qui fait varier la valeur attendue', 'Qué mueve el valor esperado', 'Co zmienia wartość oczekiwaną'),
+    hItem: T('Item', 'Позиція', 'Position', 'Post', 'Poste', 'Partida', 'Pozycja'),
+    hValue: T('Value', 'Значення', 'Wert', 'Waarde', 'Valeur', 'Valor', 'Wartość'),
+    hHow: T('How', 'Як', 'Wie', 'Hoe', 'Calcul', 'Cálculo', 'Sposób'),
+    hWeighted: T('Weighted', 'Зважено', 'Gewichtet', 'Gewogen', 'Pondéré', 'Ponderado', 'Ważone'),
+    hVar: T('Input', 'Вхідна величина', 'Eingabe', 'Invoer', 'Donnée', 'Dato', 'Dana'),
+    hRange: T('Range', 'Діапазон', 'Bereich', 'Bereik', 'Plage', 'Rango', 'Zakres'),
+    hLow: T('EV at low', 'EV при мін.', 'EW bei niedrig', 'VW bij laag', 'VA au bas', 'VE en bajo', 'WO przy min.'),
+    hHigh: T('EV at high', 'EV при макс.', 'EW bei hoch', 'VW bij hoog', 'VA au haut', 'VE en alto', 'WO przy maks.'),
+    hFlip: T('EV crosses zero', 'EV перетинає нуль', 'EW kreuzt null', 'VW gaat door nul', 'La VA passe par zéro', 'El VE cruza el cero', 'WO przechodzi przez zero'),
+    yes: T('yes', 'так', 'ja', 'ja', 'oui', 'sí', 'tak'),
+    no: T('no', 'ні', 'nein', 'nee', 'non', 'no', 'nie'),
+    met: T('met', 'виконано', 'erfüllt', 'vervuld', 'rempli', 'cumple', 'spełniony'),
+    notMet: T('NOT MET', 'НЕ ВИКОНАНО', 'NICHT ERFÜLLT', 'NIET VERVULD', 'NON REMPLI', 'NO CUMPLE', 'NIESPEŁNIONY'),
+    total: T('Total', 'Разом', 'Summe', 'Totaal', 'Total', 'Total', 'Razem'),
+    vNames: { p2: T('Probability of award', 'Імовірність перемоги', 'Zuschlagswahrscheinlichkeit', 'Kans op gunning', 'Probabilité d’attribution', 'Probabilidad de adjudicación', 'Prawdopodobieństwo wygranej'),
+              p1: T('Probability of shortlisting', 'Імовірність короткого списку', 'Wahrscheinlichkeit der Aufforderung', 'Kans op selectie', 'Probabilité de sélection', 'Probabilidad de selección', 'Prawdopodobieństwo zaproszenia'),
+              m: T('Margin', 'Маржа', 'Marge', 'Marge', 'Marge', 'Margen', 'Marża'),
+              V: T('Contract value', 'Вартість контракту', 'Auftragswert', 'Opdrachtwaarde', 'Montant du marché', 'Importe del contrato', 'Wartość umowy'),
+              B: T('Bid cost', 'Витрати на пропозицію', 'Angebotskosten', 'Offertekosten', 'Coût de l’offre', 'Coste de la oferta', 'Koszt oferty') },
+    // tree rows
+    rM: T('Net contribution if won M = V·(m − r) − C', 'Чистий внесок у разі перемоги M = V·(m − r) − C', 'Nettobeitrag bei Zuschlag M = V·(m − r) − C', 'Nettobijdrage bij gunning M = V·(m − r) − C', 'Contribution nette en cas de gain M = V·(m − r) − C', 'Contribución neta si se gana M = V·(m − r) − C', 'Wkład netto w razie wygranej M = V·(m − r) − C'),
+    rB1: T('Qualification cost B1', 'Витрати на кваліфікацію B1', 'Kosten Teilnahmeantrag B1', 'Kosten selectiefase B1', 'Coût de candidature B1', 'Coste de selección B1', 'Koszt kwalifikacji B1'),
+    rB2: T('Tender cost B2', 'Витрати на пропозицію B2', 'Angebotskosten B2', 'Offertekosten B2', 'Coût de l’offre B2', 'Coste de la oferta B2', 'Koszt oferty B2'),
+    rEV2: T('Value of submitting a tender p2·M − B2', 'Вартість подання пропозиції p2·M − B2', 'Wert der Angebotsabgabe p2·M − B2', 'Waarde van indienen p2·M − B2', 'Valeur de la remise d’offre p2·M − B2', 'Valor de presentar oferta p2·M − B2', 'Wartość złożenia oferty p2·M − B2'),
+    rGate2: T('Decision at gate 2', 'Рішення на етапі 2', 'Entscheidung in Stufe 2', 'Beslissing in fase 2', 'Décision à l’étape 2', 'Decisión en la fase 2', 'Decyzja na etapie 2'),
+    rSubmit: T('submit', 'подавати', 'abgeben', 'indienen', 'remettre', 'presentar', 'składać'),
+    rWithdraw: T('withdraw', 'відмовитися', 'zurückziehen', 'terugtrekken', 'se retirer', 'retirarse', 'wycofać się'),
+    rEV: T('Expected value now', 'Очікувана вартість зараз', 'Erwartungswert jetzt', 'Verwachte waarde nu', 'Valeur attendue maintenant', 'Valor esperado ahora', 'Wartość oczekiwana teraz'),
+    rEVs: T('Expected value with strategic value', 'Очікувана вартість зі стратегічною цінністю', 'Erwartungswert mit strategischem Wert', 'Verwachte waarde met strategische waarde', 'Valeur attendue avec valeur stratégique', 'Valor esperado con valor estratégico', 'Wartość oczekiwana z wartością strategiczną'),
+    rPwin: T('Probability of winning the contract', 'Імовірність отримати контракт', 'Wahrscheinlichkeit, den Auftrag zu erhalten', 'Kans om de opdracht te winnen', 'Probabilité de remporter le marché', 'Probabilidad de ganar el contrato', 'Prawdopodobieństwo uzyskania umowy'),
+    rSpend: T('Expected bid spend', 'Очікувані витрати', 'Erwartete Angebotskosten', 'Verwachte offertekosten', 'Coût d’offre attendu', 'Coste de oferta esperado', 'Oczekiwany koszt ofert'),
+    rAfford: T('Affordable tender cost p2·M − B1/p1', 'Допустимі витрати на пропозицію p2·M − B1/p1', 'Tragbare Angebotskosten p2·M − B1/p1', 'Aanvaardbare offertekosten p2·M − B1/p1', 'Coût d’offre supportable p2·M − B1/p1', 'Coste de oferta asumible p2·M − B1/p1', 'Akceptowalny koszt oferty p2·M − B1/p1'),
+    // verdict
+    vEV: T('expected value', 'очікувана вартість', 'Erwartungswert', 'verwachte waarde', 'valeur attendue', 'valor esperado', 'wartość oczekiwana'),
+    vScore: T('score', 'бал', 'Punkte', 'score', 'note', 'nota', 'ocena'),
+    whyKo: T('knock-out not met', 'не виконано відсікач', 'K.-o.-Kriterium nicht erfüllt', 'knock-out niet vervuld', 'critère éliminatoire non rempli', 'criterio eliminatorio no cumplido', 'niespełnione kryterium eliminujące'),
+    whyMoney: T('the bid does not pay back its cost', 'участь не окупає витрат', 'das Angebot spielt seine Kosten nicht ein', 'de offerte verdient haar kosten niet terug', 'l’offre ne couvre pas son coût', 'la oferta no recupera su coste', 'oferta nie zwraca swojego kosztu'),
+    whyStrat: T('negative in money, positive only with the stated strategic value', 'негативна в грошах, позитивна лише зі стратегічною цінністю', 'in Geld negativ, nur mit dem strategischen Wert positiv', 'negatief in geld, enkel positief met de strategische waarde', 'négative en argent, positive seulement avec la valeur stratégique', 'negativo en dinero, positivo solo con el valor estratégico', 'ujemna w pieniądzu, dodatnia tylko z wartością strategiczną'),
+    whyOk: T('pays and fits', 'окупається й відповідає профілю', 'lohnt sich und passt', 'loont en past', 'rentable et adaptée', 'compensa y encaja', 'opłaca się i pasuje'),
+    whyCond: T('pays, but the fit is only fair — set conditions (team, terms, price)', 'окупається, але відповідність посередня — визначте умови (команда, умови, ціна)', 'lohnt sich, passt aber nur mäßig — Auflagen festlegen (Team, Bedingungen, Preis)', 'loont, maar past maar matig — stel voorwaarden (team, contractvoorwaarden, prijs)', 'rentable mais adéquation moyenne — fixer des conditions (équipe, clauses, prix)', 'compensa, pero el encaje es justo — fije condiciones (equipo, cláusulas, precio)', 'opłaca się, ale dopasowanie jest średnie — ustal warunki (zespół, warunki umowy, cena)'),
+    whyFit: T('pays on paper, but the fit is poor', 'окупається на папері, але погано відповідає профілю', 'lohnt sich auf dem Papier, passt aber schlecht', 'loont op papier, maar past slecht', 'rentable sur le papier, mais mal adaptée', 'compensa sobre el papel, pero encaja mal', 'opłaca się na papierze, ale słabo pasuje'),
+    errValue: T('Enter a contract value above zero.', 'Введіть вартість контракту більше нуля.', 'Einen Auftragswert über null eingeben.', 'Voer een opdrachtwaarde groter dan nul in.', 'Saisissez un montant de marché supérieur à zéro.', 'Introduzca un importe de contrato mayor que cero.', 'Wprowadź wartość umowy większą od zera.'),
+    errEngine: T('The decision engine (tnd-bnb.js) did not load.', 'Рушій рішення (tnd-bnb.js) не завантажився.', 'Die Entscheidungslogik (tnd-bnb.js) wurde nicht geladen.', 'De rekenmodule (tnd-bnb.js) is niet geladen.', 'Le moteur de décision (tnd-bnb.js) n’a pas été chargé.', 'El motor de decisión (tnd-bnb.js) no se ha cargado.', 'Moduł decyzji (tnd-bnb.js) nie został wczytany.'),
+    whyUnscored: T('pays, but the fit is not scored — score the criteria before the final decision', 'окупається, але відповідність не оцінено — оцініть критерії до остаточного рішення', 'lohnt sich, die Passung ist aber nicht bewertet — Kriterien vor der Entscheidung bewerten', 'loont, maar de fit is niet gescoord — score de criteria vóór de eindbeslissing', 'rentable, mais l’adéquation n’est pas notée — notez les critères avant la décision finale', 'compensa, pero el encaje no está puntuado — puntúe los criterios antes de decidir', 'opłaca się, ale dopasowanie nie jest ocenione — oceń kryteria przed ostateczną decyzją'),
+    nUnscored: T('No criterion carries a weight, so the fit step is skipped: a bid that pays is shown as BID WITH CONDITIONS until the criteria are scored.', 'Жоден критерій не має ваги, тому крок відповідності пропущено: участь, що окупається, показано як ПОДАВАТИ ЗА УМОВ, доки критерії не оцінено.', 'Kein Kriterium hat ein Gewicht, daher entfällt der Schritt „Passung“: ein lohnendes Angebot erscheint als ANBIETEN MIT AUFLAGEN, bis die Kriterien bewertet sind.', 'Geen enkel criterium heeft een weging, dus de stap ‘fit’ wordt overgeslagen: een offerte die loont, staat op INSCHRIJVEN ONDER VOORWAARDEN tot de criteria gescoord zijn.', 'Aucun critère n’a de poids, l’étape d’adéquation est donc sautée : une offre rentable apparaît en GO SOUS CONDITIONS tant que les critères ne sont pas notés.', 'Ningún criterio tiene peso, así que se omite el paso de encaje: una oferta que compensa aparece como OFERTAR CON CONDICIONES hasta puntuar los criterios.', 'Żadne kryterium nie ma wagi, więc krok dopasowania jest pominięty: opłacalna oferta jest pokazana jako SKŁADAĆ POD WARUNKAMI, dopóki kryteria nie zostaną ocenione.'),
+    nThresholds: T('The review threshold was above the bid threshold; the two values were swapped.', 'Поріг перегляду був вищим за поріг участі; значення поміняно місцями.', 'Die Prüfschwelle lag über der Anbietschwelle; die beiden Werte wurden getauscht.', 'De drempel herbekijken lag boven de drempel inschrijven; de twee waarden zijn omgewisseld.', 'Le seuil de réexamen dépassait le seuil go ; les deux valeurs ont été interverties.', 'El umbral de revisión superaba el de ofertar; se han intercambiado los dos valores.', 'Próg przeglądu był wyższy niż próg złożenia oferty; wartości zamieniono miejscami.'),
+    nKoUnclear: T('A knock-out in the imported data had no clear yes / no and is counted as NOT MET — check it and tick it if it is met.', 'Відсікач в імпортованих даних не мав чіткого так / ні і вважається НЕ ВИКОНАНИМ — перевірте й позначте, якщо його виконано.', 'Ein K.-o.-Kriterium in den importierten Daten hatte kein klares Ja / Nein und gilt als NICHT ERFÜLLT — prüfen und abhaken, wenn es erfüllt ist.', 'Een knock-out in de ingelezen gegevens had geen duidelijk ja / nee en telt als NIET VERVULD — controleer en vink aan als hij vervuld is.', 'Un critère éliminatoire des données importées n’avait pas de oui / non clair et compte comme NON REMPLI — vérifiez-le et cochez-le s’il est rempli.', 'Un criterio eliminatorio de los datos importados no tenía un sí / no claro y cuenta como NO CUMPLE — revíselo y márquelo si se cumple.', 'Kryterium eliminujące w zaimportowanych danych nie miało jasnego tak / nie i liczy się jako NIESPEŁNIONE — sprawdź je i zaznacz, jeśli jest spełnione.'),
+    tWdHint: T('you withdraw at gate 2: no tender, no contract', 'ви відмовляєтеся на етапі 2: без пропозиції, без контракту', 'Rückzug in Stufe 2: kein Angebot, kein Auftrag', 'u trekt zich terug in fase 2: geen offerte, geen opdracht', 'retrait à l’étape 2 : pas d’offre, pas de marché', 'se retira en la fase 2: sin oferta, sin contrato', 'wycofanie na etapie 2: bez oferty, bez umowy'),
+    rateHint: T('Use the incremental (opportunity) rate of the bid team: if their salaries are already in the overheads that the margin m covers, the full absorbed rate overstates the cost of this bid.', 'Беріть приростову (альтернативну) ставку тендерної команди: якщо її зарплати вже в накладних витратах, які покриває маржа m, повна ставка з накладними завищує вартість цієї пропозиції.', 'Den Grenz- bzw. Opportunitätssatz des Angebotsteams verwenden: sind die Gehälter schon in den Gemeinkosten, die der Deckungsbeitrag m deckt, überzeichnet der volle Verrechnungssatz die Kosten dieses Angebots.', 'Gebruik het incrementele (opportuniteits)tarief van het offerteteam: zitten hun lonen al in de algemene kosten die de marge m dekt, dan overschat het volle kostprijstarief de kost van deze offerte.', 'Utilisez le taux incrémental (d’opportunité) de l’équipe d’offre : si ses salaires sont déjà dans les frais généraux couverts par la marge m, le taux complet surestime le coût de cette offre.', 'Use la tarifa incremental (de oportunidad) del equipo de oferta: si sus salarios ya están en los gastos generales que cubre el margen m, la tarifa completa exagera el coste de esta oferta.', 'Stosuj stawkę przyrostową (alternatywną) zespołu ofertowego: jeśli pensje są już w kosztach ogólnych pokrywanych marżą m, pełna stawka z narzutami zawyża koszt tej oferty.'),
+    impWarn: T('Imported with corrections', 'Імпортовано з виправленнями', 'Mit Korrekturen übernommen', 'Ingelezen met correcties', 'Importé avec corrections', 'Importado con correcciones', 'Zaimportowano z poprawkami'),
+    // notes
+    nOptBase: T('Your probability of award is more than twice the base rate 1/N (a rule of thumb of this tool, learning assumption). Write down why you beat the average bidder (incumbent, price, technical edge), or lower the estimate.', 'Ваша імовірність перемоги більш ніж удвічі вища за базову частку 1/N (емпіричне правило цього інструмента, навчальне припущення). Запишіть, чому ви кращі за середнього учасника (чинний підрядник, ціна, технічна перевага), або знизьте оцінку.', 'Ihre Zuschlagswahrscheinlichkeit ist mehr als doppelt so hoch wie die Basisrate 1/N (Faustregel dieses Werkzeugs, Lernannahme). Schreiben Sie auf, warum Sie den durchschnittlichen Bieter schlagen (Bestandsauftragnehmer, Preis, technischer Vorsprung), oder senken Sie die Schätzung.', 'Uw kans op gunning is meer dan het dubbele van de basiskans 1/N (vuistregel van deze tool, leeraanname). Schrijf op waarom u de gemiddelde inschrijver verslaat (huidige opdrachtnemer, prijs, technische voorsprong), of verlaag de inschatting.', 'Votre probabilité d’attribution dépasse le double du taux de base 1/N (règle empirique de cet outil, hypothèse d’apprentissage). Notez pourquoi vous battez le soumissionnaire moyen (titulaire sortant, prix, avance technique), ou baissez l’estimation.', 'Su probabilidad de adjudicación supera el doble de la tasa base 1/N (regla práctica de esta herramienta, supuesto de aprendizaje). Anote por qué supera al licitador medio (adjudicatario actual, precio, ventaja técnica) o rebaje la estimación.', 'Twoje prawdopodobieństwo wygranej przekracza dwukrotność częstości bazowej 1/N (reguła kciuka tego narzędzia, założenie szkoleniowe). Zapisz, dlaczego pokonasz przeciętnego wykonawcę (obecny wykonawca, cena, przewaga techniczna), albo obniż szacunek.'),
+    nOptHit: T('Your probability of award is more than twice your own hit rate on similar tenders (a rule of thumb of this tool, learning assumption).', 'Ваша імовірність перемоги більш ніж удвічі вища за ваш власний відсоток перемог у подібних тендерах (емпіричне правило цього інструмента, навчальне припущення).', 'Ihre Zuschlagswahrscheinlichkeit ist mehr als doppelt so hoch wie Ihre eigene Trefferquote bei ähnlichen Ausschreibungen (Faustregel dieses Werkzeugs, Lernannahme).', 'Uw kans op gunning is meer dan het dubbele van uw eigen slaagkans bij vergelijkbare aanbestedingen (vuistregel van deze tool, leeraanname).', 'Votre probabilité d’attribution dépasse le double de votre propre taux de réussite sur des appels similaires (règle empirique de cet outil, hypothèse d’apprentissage).', 'Su probabilidad de adjudicación supera el doble de su propia tasa de éxito en licitaciones parecidas (regla práctica de esta herramienta, supuesto de aprendizaje).', 'Twoje prawdopodobieństwo wygranej przekracza dwukrotność Twojego własnego wskaźnika wygranych w podobnych przetargach (reguła kciuka tego narzędzia, założenie szkoleniowe).'),
+    nNoMargin: T('After margin erosion and the opportunity cost of capacity nothing is left to win: no probability of award makes this bid pay.', 'Після зниження маржі та альтернативної вартості ресурсів виграти нічого: жодна імовірність перемоги не окупить участь.', 'Nach Margenerosion und Opportunitätskosten bleibt nichts zu gewinnen: keine Zuschlagswahrscheinlichkeit macht dieses Angebot lohnend.', 'Na marge-erosie en opportuniteitskost blijft er niets te winnen: geen enkele kans op gunning maakt deze offerte rendabel.', 'Après érosion de la marge et coût d’opportunité, il n’y a plus rien à gagner : aucune probabilité d’attribution ne rend cette offre rentable.', 'Tras la erosión del margen y el coste de oportunidad no queda nada que ganar: ninguna probabilidad de adjudicación hace rentable esta oferta.', 'Po erozji marży i koszcie alternatywnym nie ma nic do wygrania: żadne prawdopodobieństwo wygranej nie sprawi, że oferta się opłaci.'),
+    nWithdraw: T('At gate 2 the tender would not pay back its cost: the tree assumes you withdraw after being shortlisted, so only the qualification cost is at stake.', 'На етапі 2 пропозиція не окупить витрат: дерево припускає, що ви відмовитеся після потрапляння до короткого списку, тож під ризиком лише витрати на кваліфікацію.', 'In Stufe 2 würde das Angebot seine Kosten nicht einspielen: der Baum nimmt an, dass Sie nach der Aufforderung zurückziehen, also stehen nur die Kosten des Teilnahmeantrags auf dem Spiel.', 'In fase 2 zou de offerte haar kosten niet terugverdienen: de boom gaat ervan uit dat u zich na de selectie terugtrekt, dus staan alleen de kosten van de selectiefase op het spel.', 'À l’étape 2, l’offre ne couvrirait pas son coût : l’arbre suppose que vous vous retirez après la sélection, seul le coût de candidature est donc en jeu.', 'En la fase 2 la oferta no recuperaría su coste: el árbol supone que se retira tras ser seleccionado, así que solo está en juego el coste de selección.', 'Na etapie 2 oferta nie zwróci kosztu: drzewo zakłada wycofanie się po zaproszeniu, więc zagrożony jest tylko koszt kwalifikacji.'),
+    nWeights: T('The criterion weights do not add up to 100; the score is normalised by their sum.', 'Сума ваг критеріїв не дорівнює 100; бал нормується на їхню суму.', 'Die Kriteriengewichte ergeben nicht 100; die Punktzahl wird auf ihre Summe normiert.', 'De wegingen tellen niet op tot 100; de score wordt genormaliseerd op hun som.', 'Les poids des critères ne totalisent pas 100 ; la note est normalisée par leur somme.', 'Los pesos de los criterios no suman 100; la nota se normaliza por su suma.', 'Wagi kryteriów nie sumują się do 100; ocena jest normalizowana ich sumą.'),
+    nNaive: T('Two gates: counting the tender cost up front would charge it even when you are not shortlisted. The tender cost is only spent after shortlisting, so the staged value is the right one.', 'Два етапи: якщо врахувати витрати на пропозицію одразу, їх буде зараховано навіть без потрапляння до короткого списку. Ці витрати виникають лише після відбору, тому правильна саме поетапна оцінка.', 'Zwei Stufen: die Angebotskosten vorab anzusetzen, würde sie auch dann berechnen, wenn Sie nicht aufgefordert werden. Sie fallen erst nach der Aufforderung an, also gilt der gestufte Wert.', 'Twee fasen: de offertekosten vooraf aanrekenen zou ze ook tellen als u niet geselecteerd wordt. Ze worden pas na de selectie gemaakt, dus de gefaseerde waarde is de juiste.', 'Deux étapes : imputer d’emblée le coût de l’offre le compterait même sans sélection. Il n’est engagé qu’après la sélection : la valeur par étapes est la bonne.', 'Dos fases: imputar por adelantado el coste de la oferta lo contaría aunque no le seleccionen. Solo se gasta tras la selección, así que el valor por fases es el correcto.', 'Dwa etapy: liczenie kosztu oferty z góry obciążałoby nim także wtedy, gdy nie zostaniesz zaproszony. Ten koszt powstaje dopiero po kwalifikacji, więc właściwa jest wartość etapowa.'),
+    nPolicy: T('Decision rule (stated policy heuristic): any knock-out not met → NO BID; expected value negative even with the strategic value → NO BID; negative in money but positive with it → STRATEGIC BID; otherwise the score decides between BID, BID WITH CONDITIONS and NO BID.', 'Правило рішення (відкрита евристика політики): невиконаний відсікач → НЕ ПОДАВАТИ; очікувана вартість від’ємна навіть зі стратегічною цінністю → НЕ ПОДАВАТИ; від’ємна в грошах, але додатна з нею → СТРАТЕГІЧНА УЧАСТЬ; інакше бал вирішує між ПОДАВАТИ, ЗА УМОВ і НЕ ПОДАВАТИ.', 'Entscheidungsregel (offengelegte Heuristik): ein K.-o.-Kriterium nicht erfüllt → KEIN ANGEBOT; Erwartungswert auch mit strategischem Wert negativ → KEIN ANGEBOT; in Geld negativ, mit ihm positiv → STRATEGISCHES ANGEBOT; sonst entscheiden die Punkte zwischen ANBIETEN, MIT AUFLAGEN und KEIN ANGEBOT.', 'Beslisregel (expliciete beleidsheuristiek): een knock-out niet vervuld → NIET INSCHRIJVEN; verwachte waarde negatief, ook met strategische waarde → NIET INSCHRIJVEN; negatief in geld maar positief ermee → STRATEGISCHE INSCHRIJVING; anders beslist de score tussen INSCHRIJVEN, ONDER VOORWAARDEN en NIET INSCHRIJVEN.', 'Règle de décision (heuristique explicite) : un critère éliminatoire non rempli → NO-GO ; valeur attendue négative même avec la valeur stratégique → NO-GO ; négative en argent mais positive avec elle → GO STRATÉGIQUE ; sinon la note départage GO, GO SOUS CONDITIONS et NO-GO.', 'Regla de decisión (heurística explícita): un criterio eliminatorio no cumplido → NO OFERTAR; valor esperado negativo incluso con el valor estratégico → NO OFERTAR; negativo en dinero pero positivo con él → OFERTA ESTRATÉGICA; si no, la nota decide entre OFERTAR, CON CONDICIONES y NO OFERTAR.', 'Reguła decyzji (jawna heurystyka): niespełnione kryterium eliminujące → NIE SKŁADAĆ; wartość oczekiwana ujemna nawet z wartością strategiczną → NIE SKŁADAĆ; ujemna w pieniądzu, ale dodatnia z nią → OFERTA STRATEGICZNA; w pozostałych przypadkach ocena rozstrzyga między SKŁADAĆ, POD WARUNKAMI i NIE SKŁADAĆ.'),
+    nAssume: T('Thresholds, criterion weights, the strategic value and the sensitivity swings are company choices (learning assumptions) — replace them with your own bid policy and track record.', 'Пороги, ваги критеріїв, стратегічна цінність і діапазони чутливості — вибір компанії (навчальні припущення); замініть їх власною тендерною політикою та статистикою.', 'Schwellen, Kriteriengewichte, strategischer Wert und Sensitivitätsbereiche sind Firmenentscheidungen (Lernannahmen) — durch Ihre eigene Angebotspolitik und Statistik ersetzen.', 'Drempels, wegingen, strategische waarde en gevoeligheidsmarges zijn bedrijfskeuzes (leeraannames) — vervang ze door uw eigen offertebeleid en historiek.', 'Seuils, poids des critères, valeur stratégique et plages de sensibilité sont des choix d’entreprise (hypothèses d’apprentissage) — remplacez-les par votre propre politique d’offre et vos statistiques.', 'Umbrales, pesos, valor estratégico y rangos de sensibilidad son decisiones de la empresa (hipótesis didácticas): sustitúyalos por su propia política de ofertas e historial.', 'Progi, wagi kryteriów, wartość strategiczna i zakresy wrażliwości to wybory firmy (założenia szkoleniowe) — zastąp je własną polityką ofertową i statystyką.'),
+    nDisclaimer: T('Engineering and commercial analysis, not legal advice.', 'Інженерно-комерційний аналіз, не юридична консультація.', 'Technisch-kaufmännische Analyse, keine Rechtsberatung.', 'Technisch-commerciële analyse, geen juridisch advies.', 'Analyse technique et commerciale, pas un avis juridique.', 'Análisis técnico y comercial, no asesoramiento jurídico.', 'Analiza techniczno-handlowa, nie porada prawna.'),
+    useTaken: T('Taken from the project', 'Взято з проєкту', 'Aus dem Projekt übernommen', 'Overgenomen uit het project', 'Repris du projet', 'Tomado del proyecto', 'Pobrano z projektu'),
+    useNone: T('The project has no tender value to take.', 'У проєкті немає вартості тендеру.', 'Das Projekt enthält keinen Auftragswert.', 'Het project bevat geen opdrachtwaarde.', 'Le projet ne contient pas de montant du marché.', 'El proyecto no contiene importe del contrato.', 'Projekt nie zawiera wartości zamówienia.'),
+    save: T('Save to project', 'Зберегти в проєкт', 'Im Projekt speichern', 'In project opslaan', 'Enregistrer dans le projet', 'Guardar en el proyecto', 'Zapisz w projekcie'),
+    useTender: T('Use project tender', 'Взяти тендер з проєкту', 'Ausschreibung aus Projekt', 'Opdracht uit project', 'Marché du projet', 'Licitación del proyecto', 'Przetarg z projektu')
+  };
+
+  function reasonText(R, l) {
+    if (R.reason === 'ko') return S.whyKo[l] + ': ' + R.failed.map(function (id) { var k = +id.slice(2) - 1, c = (state.ko || [])[k]; return c && c.name ? c.name : id; }).join('; ');
+    if (R.reason === 'money') return S.whyMoney[l];
+    if (R.reason === 'strategic') return S.whyStrat[l];
+    if (R.reason === 'ok') return S.whyOk[l];
+    if (R.reason === 'unscored') return S.whyUnscored[l];
+    if (R.decision === 'conditions') return S.whyCond[l];
+    return S.whyFit[l];
+  }
+  function rangeText(id, n, l) {
+    if (id === 'p2' || id === 'p1') return '± ' + nf(100 * n.dp, l, 0) + ' p.p.';
+    if (id === 'm') return '± ' + nf(100 * n.dm, l, 1) + ' p.p.';
+    if (id === 'V') return '± ' + nf(100 * n.dV, l, 0) + ' %';
+    return '± ' + nf(100 * n.dB, l, 0) + ' %';
+  }
+
+  function computeView(s) {
+    last = solve(s);
+    if (stage) stage.schedule();
+    var R = last;
+    if (!R || !R.ok) {
+      return { verdict: { tone: 'bad', text: R && R.errors && R.errors[0] === 'engine' ? S.errEngine : (R && R.errors && R.errors[0] === 'exception' ? TF(function () { return 'Error: ' + R.msg; }) : S.errValue) }, tiles: [], notes: [] };
+    }
+    var n = R.input, mo = R.money, sc = R.scoring, two = n.procedure === 'two';
+    var tiles = [], tables = [], notes = [];
+    var tone = R.decision === 'bid' ? 'ok' : (R.decision === 'nobid' ? 'bad' : 'warn');
+    var verdict = { tone: tone, text: TF(function (l) {
+      var c = ' ';
+      return DEC[R.decision][l] + ' — ' + reasonText(R, l) + ' · ' + S.vEV[l] + ' ' + keur(mo.EV, l) + (n.S > 0 ? ' (' + keur(mo.EVs, l) + ')' : '') + ' · ' + S.vScore[l] + c + nf(sc.score, l, 0) + '/100.';
+    }) };
+    var LG = lang();
+    function tile(label, value, hint, learn, tn, headline) { tiles.push({ label: label, value: str(value, LG), hint: str(hint || '', LG), learn: learn, tone: tn || null, headline: headline !== false }); }
+    tile(S.tEV, keur(mo.EV, LG), n.S > 0 ? S.rEVs[LG] + ': ' + keur(mo.EVs, LG) : '', 'ev', mo.EV >= 0 ? 'ok' : (mo.EVs >= 0 && n.S > 0 ? 'warn' : 'bad'));
+    var beTxt = mo.breakeven == null ? S.never[LG] : pc(mo.breakeven, LG, 1);
+    var beHint = S.yours[LG] + ' ' + pc(n.p2, LG, 0) + (mo.base != null ? ' · ' + S.vsBase[LG] + ' ' + pc(mo.base, LG, 1) : '') + (mo.breakeven != null && mo.breakeven > 1 ? ' · ' + S.over1[LG] : '');
+    tile(S.tBE, beTxt, beHint, 'pwin', mo.breakeven != null && mo.breakeven <= n.p2 ? 'ok' : 'bad');
+    tile(S.tScore, sc.score == null ? '—' : nf(sc.score, LG, 0) + ' / 100', '≥ ' + nf(n.go, LG, 0) + ' · ≥ ' + nf(n.review, LG, 0), 'scoring', sc.score == null ? null : (sc.score >= n.go ? 'ok' : (sc.score >= n.review ? 'warn' : 'bad')));
+    tile(S.tCost, keur(mo.Btot, LG), pc(mo.costPct, LG, 2) + ' ' + S.ofV[LG], 'ev', null, false);
+    var wd = two && !mo.go2;
+    tile(S.tPerWin, keur(mo.perWin, LG), wd ? S.tWdHint[LG] : '', 'pwin', null, false);
+    tile(S.tRoi, mo.roi == null ? '—' : nf(mo.roi, LG, 2) + ' ×', wd ? S.tWdHint[LG] : '', 'ev', mo.roi != null && mo.roi >= 1 ? 'ok' : 'warn', false);
+    if (two) tile(S.tNaive, keur(mo.naive, LG), '', 'gates', mo.naive < 0 && mo.EV >= 0 ? 'warn' : null, false);
+    if (mo.EV < 0 && mo.Sneed != null) tile(S.tSneed, keur(mo.Sneed, LG), S.ifWon[LG], 'capacity', null, false);
+
+    /* 1 decision tree */
+    var tr = [];
+    function row(lbl, txt, how, tn) { tr.push({ tone: tn || null, cells: [lbl, { text: txt, num: true }, how || ''] }); }
+    row(S.rM, TF(function (l) { return eur(mo.M, l); }), TF(function (l) { return eur(n.V, l) + ' · (' + pc(n.m, l, 2) + ' − ' + pc(n.r, l, 2) + ') − ' + eur(n.C, l); }), mo.M <= 0 ? 'bad' : null);
+    if (two) row(S.rB1, TF(function (l) { return eur(mo.B1, l); }), TF(function (l) { return nf(n.h1, l, 0) + ' h × ' + eur(n.rate, l) + ' + ' + eur(n.x1, l); }));
+    row(S.rB2, TF(function (l) { return eur(mo.B2, l); }), TF(function (l) { return nf(n.h2, l, 0) + ' h × ' + eur(n.rate, l) + ' + ' + eur(n.x2, l); }));
+    row(S.rEV2, TF(function (l) { return eur(mo.EV2, l); }), TF(function (l) { return pc(n.p2, l, 1) + ' × ' + eur(mo.M, l) + ' − ' + eur(mo.B2, l); }), mo.EV2 < 0 ? 'warn' : null);
+    if (two) row(S.rGate2, mo.submit ? S.rSubmit : S.rWithdraw, 'max(EV2; 0)', mo.submit ? null : 'warn');
+    row(S.rEV, TF(function (l) { return eur(mo.EV, l); }), two ? TF(function (l) { return pc(n.p1, l, 0) + ' × ' + eur(Math.max(mo.EV2, 0), l) + ' − ' + eur(mo.B1, l); }) : 'p2·M − B2', mo.EV >= 0 ? 'ok' : 'bad');
+    if (n.S > 0) row(S.rEVs, TF(function (l) { return eur(mo.EVs, l); }), 'M + S', mo.EVs >= 0 ? 'ok' : 'bad');
+    row(S.rPwin, TF(function (l) { return pc(mo.Pwin, l, 1); }), two ? (mo.go2 ? 'p1 · p2' : TF(function (l) { return '0 (' + S.rWithdraw[l] + ')'; })) : 'p2');
+    row(S.rSpend, TF(function (l) { return eur(mo.spend, l); }), two ? (mo.go2 ? 'B1 + p1·B2' : TF(function (l) { return 'B1 (' + S.rWithdraw[l] + ')'; })) : 'B2');
+    row(S.rAfford, TF(function (l) { return eur(mo.affordableB2, l); }), '', mo.affordableB2 != null && mo.affordableB2 < mo.B2 ? 'warn' : null);
+    tables.push({ title: S.tabTree, head: [S.hItem, { label: S.hValue, num: true }, { label: S.hHow, wrap: true }], rows: tr });
+
+    /* 2 scoring */
+    var srows = sc.rows.map(function (r) { return { cells: [r.name || r.id, GRP[r.group], { value: r.weight, precision: 0, num: true }, { value: r.score, precision: 1, num: true }, { value: r.weighted, precision: 1, num: true }] }; });
+    lib().GROUPS.forEach(function (g) { var x = sc.groups[g]; if (x.weight > 0) srows.push({ dim: true, cells: [GRP[g], '', { value: x.weight, precision: 0, num: true }, { text: TF(function (l) { return nf(x.score / 10, l, 1); }), num: true }, { value: x.share * x.score, precision: 1, num: true }] }); });
+    srows.push({ chosen: true, cells: [S.total, '', { value: sc.weight, precision: 0, num: true }, '', { value: sc.score, precision: 1, num: true }] });
+    if (sc.rows.length) tables.push({ title: S.tabScore, head: [S.cName, S.cGroup, { label: S.cWeight, num: true }, { label: S.cScore, num: true }, { label: S.hWeighted, num: true }], rows: srows });
+
+    /* 3 knock-outs */
+    if (n.ko.length) tables.push({ title: S.tabKo, head: [S.koName, S.koMet], rows: n.ko.map(function (k) { return { tone: k.met ? null : 'bad', cells: [k.name || k.id, k.met ? S.met : S.notMet] }; }) });
+
+    /* 4 tornado */
+    tables.push({ title: S.tabTor, head: [S.hVar, S.hRange, { label: S.hLow, num: true }, { label: S.hHigh, num: true }, S.hFlip],
+      rows: R.tornado.bars.map(function (b) { return { tone: b.flips ? 'warn' : null, cells: [S.vNames[b.id], TF(function (l) { return rangeText(b.id, n, l); }), { text: TF(function (l) { return keur(b.low, l); }), num: true }, { text: TF(function (l) { return keur(b.high, l); }), num: true }, b.flips ? S.yes : S.no] }; }) });
+
+    if (R.flags.indexOf('optimism-base') >= 0) notes.push(S.nOptBase);
+    if (R.flags.indexOf('optimism-hit') >= 0) notes.push(S.nOptHit);
+    if (R.flags.indexOf('no-margin') >= 0) notes.push(S.nNoMargin);
+    if (R.flags.indexOf('withdraw') >= 0) notes.push(S.nWithdraw);
+    if (R.flags.indexOf('weights') >= 0) notes.push(S.nWeights);
+    if (R.reason === 'unscored') notes.push(S.nUnscored);
+    if (R.flags.indexOf('thresholds') >= 0) notes.push(S.nThresholds);
+    if (R.flags.indexOf('ko-unclear') >= 0) notes.push(S.nKoUnclear);
+    if (two && mo.naive < 0 && mo.EV >= 0) notes.push(S.nNaive);
+    notes.push(S.nPolicy);
+    notes.push(S.nAssume);
+    notes.push(S.nDisclaimer);
+    return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+  }
+
+  /* ---- stage: EV against p2 (top) and the tornado (bottom) ---- */
+  function renderStage(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#888', lineC = cs.getPropertyValue('--line').trim() || '#ccc', ink = cs.getPropertyValue('--ink').trim() || '#111';
+    var okC = cs.getPropertyValue('--ok').trim() || '#1e8449', badC = cs.getPropertyValue('--bad').trim() || '#c0392b';
+    var font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+    ctx.clearRect(0, 0, w, h);
+    var R = last, B = lib();
+    if (!R || !R.ok || !B) return;
+    var l = lang(), fs = coarse ? 10 : 11, n = R.input, mo = R.money;
+    ctx.font = fs + 'px ' + font;
+    var Lm = coarse ? 46 : 60, Rm = coarse ? 8 : 14, top = 14;
+    var hTop = Math.max(150, Math.round((h - 20) * 0.55)), pw = w - Lm - Rm, ph = hTop - top - 34;
+    if (pw < 60 || ph < 40) return;
+    var pts = B.curve(n, 100), pmax = 1;
+    var ys = pts.map(function (p) { return p[1]; }), ymin = Math.min(0, Math.min.apply(null, ys)), ymax = Math.max(0, Math.max.apply(null, ys));
+    if (ymax - ymin < 1) ymax = ymin + 1;
+    var pad = (ymax - ymin) * 0.06; ymin -= pad; ymax += pad;
+    function X(p) { return Lm + p / pmax * pw; }
+    function Y(v) { return top + ph - (v - ymin) / (ymax - ymin) * ph; }
+    ctx.strokeStyle = muted; ctx.fillStyle = muted; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(Lm, top); ctx.lineTo(Lm, top + ph); ctx.lineTo(Lm + pw, top + ph); ctx.stroke();
+    ctx.strokeStyle = lineC; ctx.beginPath(); ctx.moveTo(Lm, Y(0)); ctx.lineTo(Lm + pw, Y(0)); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(function (t) { var px = X(t); ctx.strokeStyle = muted; ctx.beginPath(); ctx.moveTo(px, top + ph); ctx.lineTo(px, top + ph + 3); ctx.stroke(); ctx.fillText(nf(100 * t, l, 0) + ' %', px, top + ph + 4); });
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    var yt = DiagramUI.ticks(ymin, ymax, ph, size.density) || [ymin, 0, ymax];
+    yt.forEach(function (v) { if (v < ymin || v > ymax) return; ctx.fillText(keur(v, l), Lm - 4, Y(v)); });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(S.axP[l], Lm + pw / 2, hTop - 2);
+    ctx.save(); ctx.translate(10, top + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'; ctx.fillText(S.axEV[l], 0, -6); ctx.restore();
+    /* EV curve, green above zero, red below */
+    ctx.lineWidth = 2.5;
+    for (var i = 1; i < pts.length; i++) {
+      ctx.strokeStyle = (pts[i][1] + pts[i - 1][1]) / 2 >= 0 ? okC : badC;
+      ctx.beginPath(); ctx.moveTo(X(pts[i - 1][0]), Y(pts[i - 1][1])); ctx.lineTo(X(pts[i][0]), Y(pts[i][1])); ctx.stroke();
+    }
+    function vline(p, label, col, dash, row) {
+      if (p == null || !(p >= 0 && p <= 1)) return;
+      var px = X(p);
+      ctx.strokeStyle = col; ctx.setLineDash(dash || []); ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, top + ph); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = col; ctx.textAlign = px > Lm + pw - 60 ? 'right' : 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(label, px + (ctx.textAlign === 'left' ? 3 : -3), top + row * (fs + 2));
+    }
+    vline(mo.breakeven, S.mkBE[l] + ' ' + pc(mo.breakeven, l, 1), muted, [4, 3], 0);
+    vline(mo.base, '1/N ' + pc(mo.base, l, 1), muted, [1, 3], 1);
+    vline(n.h, S.mkHit[l] + ' ' + pc(n.h, l, 0), muted, [6, 2, 1, 2], 2);
+    vline(n.p2, S.mkYou[l] + ' ' + pc(n.p2, l, 0), ink, null, 3);
+    ctx.fillStyle = mo.EV >= 0 ? okC : badC; ctx.beginPath(); ctx.arc(X(n.p2), Y(mo.EV), 4.5, 0, 2 * Math.PI); ctx.fill();
+    /* tornado */
+    var bars = R.tornado.bars, y0 = hTop + 14, rh = Math.max(16, Math.min(28, (h - y0 - 24) / Math.max(1, bars.length)));
+    var lab = coarse ? 86 : 150, x0 = Lm + (coarse ? 40 : 90), bw = w - x0 - Rm;
+    var lo = Math.min(R.tornado.base, Math.min.apply(null, bars.map(function (b) { return Math.min(b.low, b.high); })));
+    var hi = Math.max(R.tornado.base, Math.max.apply(null, bars.map(function (b) { return Math.max(b.low, b.high); })));
+    lo = Math.min(lo, 0); hi = Math.max(hi, 0); if (hi - lo < 1) hi = lo + 1;
+    function TX(v) { return x0 + (v - lo) / (hi - lo) * bw; }
+    bars.forEach(function (b, k) {
+      var yy = y0 + k * rh;
+      ctx.fillStyle = ink; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(str(S.vNames[b.id], l)).slice(0, coarse ? 12 : 26), x0 - 6, yy + rh / 2);
+      var a = TX(Math.min(b.low, b.high)), c = TX(Math.max(b.low, b.high));
+      ctx.fillStyle = DiagramUI.series(0); ctx.globalAlpha = 0.75; ctx.fillRect(a, yy + 3, Math.max(1, c - a), rh - 6); ctx.globalAlpha = 1;
+    });
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(TX(R.tornado.base), y0 - 4); ctx.lineTo(TX(R.tornado.base), y0 + bars.length * rh + 2); ctx.stroke();
+    ctx.strokeStyle = badC; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(TX(0), y0 - 4); ctx.lineTo(TX(0), y0 + bars.length * rh + 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [lo, 0, hi].forEach(function (v, k) { if (k === 1 && (TX(0) - TX(lo) < 40 || TX(hi) - TX(0) < 40)) return; ctx.fillText(keur(v, l), TX(v), y0 + bars.length * rh + 4); });
+    void lab;
+  }
+
+  /* ---- examples (presets): numbers come from TndBnb.PRESETS, each aha is a test in _tnd/bidnobid/test.mjs and the bench ---- */
+  var EXT = {
+    'be-school': { group: 'be',
+      label: T('Belgian open procedure: school renovation 4.2 M€, 7 bidders', 'Бельгія, відкрита процедура: реконструкція школи 4,2 млн €, 7 учасників', 'Belgien, offenes Verfahren: Schulsanierung 4,2 Mio. €, 7 Bieter', 'Openbare procedure: renovatie van een school 4,2 M€, 7 inschrijvers', 'Procédure ouverte belge : rénovation d’école 4,2 M€, 7 soumissionnaires', 'Procedimiento abierto belga: reforma de un colegio 4,2 M€, 7 licitadores', 'Belgijski przetarg nieograniczony: remont szkoły 4,2 mln €, 7 wykonawców'),
+      aha: T('Expected value +8.4 k€ — but the breakeven probability (14.4 %) is the base rate 1/7 (14.3 %). At the base rate the bid is worth nothing; the whole value rests on believing you beat the average bidder.', 'Очікувана вартість +8,4 тис. € — але беззбиткова імовірність (14,4 %) дорівнює базовій частці 1/7 (14,3 %). За базової частки участь нічого не варта; уся вартість тримається на вірі, що ви кращі за середнього учасника.', 'Erwartungswert +8,4 k€ — aber die Schwelle (14,4 %) entspricht der Basisrate 1/7 (14,3 %). Bei der Basisrate ist das Angebot nichts wert; der ganze Wert beruht auf der Annahme, den durchschnittlichen Bieter zu schlagen.', 'Verwachte waarde +8,4 k€ — maar de break-evenkans (14,4 %) is de basiskans 1/7 (14,3 %). Bij de basiskans is de offerte niets waard; de hele waarde berust op de overtuiging dat u de gemiddelde inschrijver verslaat.', 'Valeur attendue +8,4 k€ — mais la probabilité d’équilibre (14,4 %) égale le taux de base 1/7 (14,3 %). Au taux de base, l’offre ne vaut rien ; toute la valeur repose sur la conviction de battre le soumissionnaire moyen.', 'Valor esperado +8,4 k€, pero la probabilidad de equilibrio (14,4 %) es la tasa base 1/7 (14,3 %). Con la tasa base la oferta no vale nada; todo el valor depende de creer que supera al licitador medio.', 'Wartość oczekiwana +8,4 tys. € — ale próg rentowności (14,4 %) to częstość bazowa 1/7 (14,3 %). Przy częstości bazowej oferta nic nie jest warta; cała wartość opiera się na przekonaniu, że pokonasz przeciętnego wykonawcę.') },
+    'utility-dnb': { group: 'be',
+      label: T('Utility (special sectors), restricted procedure: substation design & build 18 M€', 'Комунальне підприємство (спеціальні сектори), обмежена процедура: проєктування й будівництво підстанції 18 млн €', 'Sektorenauftraggeber (Netzbetreiber), nicht offenes Verfahren: Umspannwerk Planung & Bau 18 Mio. €', 'Nutsbedrijf (speciale sectoren), niet-openbare procedure: ontwerp en bouw hoogspanningspost 18 M€', 'Entité adjudicatrice (secteurs spéciaux), procédure restreinte : conception-construction d’un poste 18 M€', 'Entidad de sectores especiales, procedimiento restringido: diseño y construcción de subestación 18 M€', 'Zamawiający sektorowy, przetarg ograniczony: projekt i budowa stacji 18 mln €'),
+      aha: T('Staged expected value +35.1 k€, while “all costs up front” shows −39.9 k€: the 188 k€ tender cost is only spent if you are shortlisted (special sectors: the entity sets how many it invites — Wet 2016 art. 149, no legal minimum).', 'Поетапна очікувана вартість +35,1 тис. €, тоді як «усі витрати одразу» дає −39,9 тис. €: 188 тис. € на пропозицію витрачаються лише після потрапляння до короткого списку (спеціальні сектори: кількість запрошених визначає замовник — Закон 2016 ст. 149, без законного мінімуму).', 'Gestufter Erwartungswert +35,1 k€, „alle Kosten vorab“ ergibt −39,9 k€: die 188 k€ Angebotskosten fallen nur an, wenn Sie aufgefordert werden (Sektoren: der Auftraggeber legt die Zahl der Eingeladenen fest — Gesetz 2016 Art. 149, kein gesetzliches Minimum).', 'Gefaseerde verwachte waarde +35,1 k€, terwijl “alle kosten vooraf” −39,9 k€ geeft: de 188 k€ offertekosten worden pas gemaakt als u geselecteerd wordt (speciale sectoren: de entiteit bepaalt hoeveel kandidaten ze uitnodigt — wet 2016 art. 149, geen wettelijk minimum).', 'Valeur attendue par étapes +35,1 k€, alors que « tous les coûts d’emblée » donne −39,9 k€ : les 188 k€ de l’offre ne sont engagés que si vous êtes sélectionné (secteurs spéciaux : l’entité fixe le nombre d’invités — loi 2016 art. 149, sans minimum légal).', 'Valor esperado por fases +35,1 k€, mientras «todos los costes por adelantado» da −39,9 k€: los 188 k€ de la oferta solo se gastan si le seleccionan (sectores especiales: la entidad fija cuántos invita — ley 2016 art. 149, sin mínimo legal).', 'Wartość etapowa +35,1 tys. €, a „wszystkie koszty z góry” daje −39,9 tys. €: 188 tys. € na ofertę wydaje się tylko po zaproszeniu (sektory użyteczności publicznej: liczbę zaproszonych ustala zamawiający — ustawa 2016 art. 149, bez ustawowego minimum).') },
+    'epc-fidic': { group: 'epc',
+      label: T('Private EPC, FIDIC Yellow 65 M€, 4 invited, team fully booked', 'Приватний EPC, FIDIC Yellow 65 млн €, 4 запрошені, команда зайнята', 'Privates EPC, FIDIC Yellow 65 Mio. €, 4 Eingeladene, Team ausgelastet', 'Private EPC, FIDIC Yellow 65 M€, 4 uitgenodigd, team volgeboekt', 'EPC privé, FIDIC Yellow 65 M€, 4 invités, équipe saturée', 'EPC privado, FIDIC Yellow 65 M€, 4 invitados, equipo completo', 'Prywatne EPC, FIDIC Yellow 65 mln €, 4 zaproszonych, zespół w pełni zajęty'),
+      aha: T('Without capacity cost the bid is worth +397.5 k€; counting the 1.5 M€ the same team would earn elsewhere it drops to −52.5 k€ → NO BID. The scarce resource is the team, not the bid budget.', 'Без вартості ресурсів участь варта +397,5 тис. €; з урахуванням 1,5 млн €, які та сама команда заробила б деінде, — −52,5 тис. € → НЕ ПОДАВАТИ. Дефіцитний ресурс — команда, а не тендерний бюджет.', 'Ohne Kapazitätskosten ist das Angebot +397,5 k€ wert; mit den 1,5 Mio. €, die dasselbe Team anderswo verdienen würde, −52,5 k€ → KEIN ANGEBOT. Knapp ist das Team, nicht das Angebotsbudget.', 'Zonder capaciteitskost is de offerte +397,5 k€ waard; met de 1,5 M€ die hetzelfde team elders zou verdienen −52,5 k€ → NIET INSCHRIJVEN. Het schaarse middel is het team, niet het offertebudget.', 'Sans coût de capacité l’offre vaut +397,5 k€ ; en comptant les 1,5 M€ que la même équipe gagnerait ailleurs, −52,5 k€ → NO-GO. La ressource rare est l’équipe, pas le budget d’offre.', 'Sin coste de capacidad la oferta vale +397,5 k€; contando los 1,5 M€ que el mismo equipo ganaría en otro sitio, −52,5 k€ → NO OFERTAR. El recurso escaso es el equipo, no el presupuesto de oferta.', 'Bez kosztu zasobów oferta jest warta +397,5 tys. €; po uwzględnieniu 1,5 mln €, które ten sam zespół zarobiłby gdzie indziej, −52,5 tys. € → NIE SKŁADAĆ. Rzadkim zasobem jest zespół, nie budżet ofertowy.') },
+    'equip-rfq': { group: 'eq',
+      label: T('Supplier: transformer package 1.8 M€ for an EPC contractor', 'Постачальник: пакет трансформаторів 1,8 млн € для EPC-підрядника', 'Lieferant: Transformatorenpaket 1,8 Mio. € für einen EPC-Auftragnehmer', 'Leverancier: transformatorpakket 1,8 M€ voor een EPC-aannemer', 'Fournisseur : lot de transformateurs 1,8 M€ pour un ensemblier EPC', 'Proveedor: paquete de transformadores 1,8 M€ para un contratista EPC', 'Dostawca: pakiet transformatorów 1,8 mln € dla wykonawcy EPC'),
+      aha: T('Breakeven probability only 4.2 % against a base rate of 25 % and EV +60 k€ — yet one knock-out (no test-bay slot before the FAT date) makes it NO BID. Tick the slot as available and it becomes BID.', 'Беззбиткова імовірність лише 4,2 % при базовій частці 25 % і EV +60 тис. € — але один відсікач (немає слота стенда до дати FAT) дає НЕ ПОДАВАТИ. Позначте слот як наявний — і рішення стане ПОДАВАТИ.', 'Schwelle nur 4,2 % bei einer Basisrate von 25 % und EW +60 k€ — doch ein K.-o.-Kriterium (kein Prüffeld-Termin vor dem FAT) ergibt KEIN ANGEBOT. Termin als verfügbar markieren, und es wird ANBIETEN.', 'Break-evenkans slechts 4,2 % tegenover een basiskans van 25 % en VW +60 k€ — toch maakt één knock-out (geen testplatform vóór de FAT-datum) er NIET INSCHRIJVEN van. Vink de plaats als beschikbaar aan en het wordt INSCHRIJVEN.', 'Probabilité d’équilibre de 4,2 % seulement pour un taux de base de 25 % et VA +60 k€ — pourtant un critère éliminatoire (pas de créneau d’essais avant la FAT) donne NO-GO. Cochez le créneau comme disponible et c’est GO.', 'Probabilidad de equilibrio de solo el 4,2 % frente a una tasa base del 25 % y VE +60 k€; sin embargo, un criterio eliminatorio (sin hueco en el banco de pruebas antes de la FAT) da NO OFERTAR. Marque el hueco como disponible y pasa a OFERTAR.', 'Próg rentowności tylko 4,2 % przy częstości bazowej 25 % i WO +60 tys. € — a jednak jedno kryterium eliminujące (brak terminu na stacji prób przed FAT) daje NIE SKŁADAĆ. Zaznacz termin jako dostępny, a decyzja zmieni się na SKŁADAĆ.') },
+    'framework-entry': { group: 'epc',
+      label: T('New client: marine works framework, first call-off 6 M€, 8 bidders', 'Новий замовник: рамкова угода на морські роботи, перше замовлення 6 млн €, 8 учасників', 'Neuer Auftraggeber: Rahmenvertrag Wasserbau, erster Abruf 6 Mio. €, 8 Bieter', 'Nieuwe opdrachtgever: raamovereenkomst waterbouw, eerste bestelling 6 M€, 8 inschrijvers', 'Nouveau client : accord-cadre de travaux maritimes, premier marché subséquent 6 M€, 8 soumissionnaires', 'Cliente nuevo: acuerdo marco de obras marítimas, primer contrato basado 6 M€, 8 licitadores', 'Nowy zamawiający: umowa ramowa na roboty hydrotechniczne, pierwsze zamówienie 6 mln €, 8 wykonawców'),
+      aha: T('In money the bid is worth −77.2 k€. Bidding means management values the strategic gain at 643 k€ or more if won; with the stated 800 k€ it is a STRATEGIC BID — the exact price of the strategy is on the table.', 'У грошах участь варта −77,2 тис. €. Участь означає, що керівництво оцінює стратегічний виграш щонайменше в 643 тис. € у разі перемоги; із заявленими 800 тис. € це СТРАТЕГІЧНА УЧАСТЬ — точна ціна стратегії на столі.', 'In Geld ist das Angebot −77,2 k€ wert. Anbieten heißt, die Geschäftsleitung bewertet den strategischen Gewinn bei Zuschlag mit mindestens 643 k€; mit den angegebenen 800 k€ ist es ein STRATEGISCHES ANGEBOT — der genaue Preis der Strategie liegt auf dem Tisch.', 'In geld is de offerte −77,2 k€ waard. Inschrijven betekent dat de directie de strategische winst bij gunning op minstens 643 k€ schat; met de opgegeven 800 k€ is het een STRATEGISCHE INSCHRIJVING — de exacte prijs van de strategie ligt op tafel.', 'En argent l’offre vaut −77,2 k€. Répondre signifie que la direction valorise le gain stratégique à au moins 643 k€ en cas de gain ; avec les 800 k€ affichés, c’est un GO STRATÉGIQUE — le prix exact de la stratégie est sur la table.', 'En dinero la oferta vale −77,2 k€. Ofertar significa que la dirección valora la ganancia estratégica en al menos 643 k€ si se gana; con los 800 k€ declarados es una OFERTA ESTRATÉGICA: el precio exacto de la estrategia queda sobre la mesa.', 'W pieniądzu oferta jest warta −77,2 tys. €. Złożenie jej oznacza, że zarząd wycenia zysk strategiczny na co najmniej 643 tys. € w razie wygranej; przy deklarowanych 800 tys. € to OFERTA STRATEGICZNA — dokładna cena strategii jest na stole.') }
+  };
+  var GROUP = {
+    be: T('Belgian public tenders', 'Бельгійські публічні закупівлі', 'Belgische öffentliche Vergaben', 'Belgische overheidsopdrachten', 'Marchés publics belges', 'Licitaciones públicas belgas', 'Belgijskie zamówienia publiczne'),
+    epc: T('Private EPC and strategy', 'Приватні EPC і стратегія', 'Private EPC und Strategie', 'Private EPC en strategie', 'EPC privés et stratégie', 'EPC privados y estrategia', 'Prywatne EPC i strategia'),
+    eq: T('Equipment suppliers', 'Постачальники обладнання', 'Ausrüstungslieferanten', 'Uitrustingsleveranciers', 'Fournisseurs d’équipements', 'Proveedores de equipos', 'Dostawcy urządzeń')
+  };
+  function applyPreset(t, p) {
+    var keep = { tenderRef: t.tenderRef, preparedBy: t.preparedBy }, l = lang();
+    Object.keys(DEFAULTS).forEach(function (k) { t[k] = JSON.parse(JSON.stringify(DEFAULTS[k])); });
+    t.tenderRef = keep.tenderRef; t.preparedBy = keep.preparedBy;
+    t.procedure = p.procedure; t.V = p.V; t.m = +(100 * p.m).toFixed(6); t.r = +(100 * p.r).toFixed(6); t.C = p.C; t.S = p.S;
+    t.rate = p.rate; t.h1 = p.h1; t.x1 = p.x1; t.h2 = p.h2; t.x2 = p.x2;
+    t.p1 = +(100 * p.p1).toFixed(6); t.p2 = +(100 * p.p2).toFixed(6); t.N = p.N; t.h = p.h == null ? 0 : +(100 * p.h).toFixed(6);
+    t.criteria.length = 0;
+    p.criteria.forEach(function (c) { t.criteria.push({ name: str(CK[c.key], l) || c.key, group: c.group, weight: c.weight, score: c.score }); });
+    t.ko.length = 0;
+    p.ko.forEach(function (c) { t.ko.push({ name: str(KOK[c.key], l) || c.key, met: c.met }); });
+  }
+  function buildExamples() {
+    var B = lib();
+    if (!B) return [];
+    return B.PRESETS.map(function (p) {
+      var x = EXT[p.id];
+      return { id: p.id, group: GROUP[x.group], label: x.label, note: x.aha, apply: function (t) { applyPreset(t, p); } };
+    });
+  }
+
+  /* ---- learn ---- */
+  /* R-14: the bid team's rate is an incremental / opportunity cost — said once in the hint and once in the learn topic 'ev' */
+  function withRateNote(L) { try { LANGS.forEach(function (l) { L.topics.ev.body[l] += ' ' + S.rateHint[l]; }); } catch (e) { /* keep the topic as is */ } return L; }
+  function buildLearn() {
+    return {
+      version: 1,
+      intro: {
+        title: T('Bid / no-bid in one page', 'Bid / no-bid на одній сторінці', 'Bid/No-Bid auf einer Seite', 'Bid/no-bid op één pagina', 'Go / no-go en une page', 'Ofertar o no en una página', 'Bid/no-bid na jednej stronie'),
+        body: T('Life-cycle stage 3 (selection: bid/no-bid #1) and 4 (tender documents: bid/no-bid #2). Enter what the contract is worth to you, what the bid costs and how likely you are to win; the tool rolls back the decision tree, scores the fit, checks the knock-outs and shows what moves the answer.',
+                'Етап життєвого циклу 3 (відбір: перше рішення bid/no-bid) і 4 (тендерна документація: друге рішення). Введіть, скільки вам дає контракт, скільки коштує пропозиція і які шанси на перемогу; інструмент розраховує дерево рішень, оцінює відповідність профілю, перевіряє відсікачі й показує, що найбільше впливає на відповідь.',
+                'Lebenszyklus-Phase 3 (Eignung: Bid/No-Bid Nr. 1) und 4 (Vergabeunterlagen: Bid/No-Bid Nr. 2). Geben Sie ein, was der Auftrag Ihnen bringt, was das Angebot kostet und wie wahrscheinlich der Zuschlag ist; das Werkzeug rechnet den Entscheidungsbaum zurück, bewertet die Passung, prüft die K.-o.-Kriterien und zeigt, was die Antwort bewegt.',
+                'Fase 3 (selectie: bid/no-bid nr. 1) en 4 (opdrachtdocumenten: bid/no-bid nr. 2) van de levenscyclus. Voer in wat de opdracht u oplevert, wat de offerte kost en hoe groot de kans op gunning is; de tool rekent de beslissingsboom terug, scoort de fit, toetst de knock-outs en toont wat het antwoord bepaalt.',
+                'Étapes 3 (sélection : go/no-go n° 1) et 4 (documents du marché : go/no-go n° 2) du cycle de vie. Saisissez ce que le marché vous rapporte, ce que coûte l’offre et vos chances de gain ; l’outil résout l’arbre de décision, note l’adéquation, vérifie les critères éliminatoires et montre ce qui fait varier la réponse.',
+                'Etapas 3 (selección: primera decisión de ofertar) y 4 (pliegos: segunda decisión) del ciclo de vida. Introduzca lo que el contrato le aporta, lo que cuesta la oferta y la probabilidad de ganar; la herramienta resuelve el árbol de decisión, puntúa el encaje, revisa los criterios eliminatorios y muestra qué mueve la respuesta.',
+                'Etap 3 (kwalifikacja: decyzja bid/no-bid nr 1) i 4 (dokumenty zamówienia: decyzja nr 2) cyklu życia. Wprowadź, ile daje Ci umowa, ile kosztuje oferta i jakie są szanse wygranej; narzędzie rozwiązuje drzewo decyzyjne, ocenia dopasowanie, sprawdza kryteria eliminujące i pokazuje, co najbardziej zmienia odpowiedź.')
+      },
+      topics: {
+        ev: { title: T('Expected value of a bid', 'Очікувана вартість участі', 'Erwartungswert eines Angebots', 'Verwachte waarde van een offerte', 'Valeur attendue d’une offre', 'Valor esperado de una oferta', 'Wartość oczekiwana oferty'),
+          body: T('A bid is a bet: you pay the bid cost B for sure and receive the net contribution M only if you win, with probability p. Expected value EV = p·M − B. M is the margin after the expected cost of the risks you keep and after the margin the team would earn elsewhere. A positive EV means that over many similar tenders this kind of bid pays; it says nothing about this one tender.',
+                  'Участь у тендері — це ставка: витрати на пропозицію B ви несете напевно, а чистий внесок M отримуєте лише в разі перемоги з імовірністю p. Очікувана вартість EV = p·M − B. M — маржа після очікуваної вартості ризиків, що лишаються на вас, і після маржі, яку команда заробила б деінде. Додатна EV означає, що на багатьох подібних тендерах такі пропозиції окупаються; про один конкретний тендер вона нічого не каже.',
+                  'Ein Angebot ist eine Wette: die Angebotskosten B zahlen Sie sicher, den Nettobeitrag M erhalten Sie nur bei Zuschlag, mit Wahrscheinlichkeit p. Erwartungswert EW = p·M − B. M ist die Marge nach den erwarteten Kosten der verbleibenden Risiken und nach der Marge, die das Team anderswo verdienen würde. Ein positiver EW heißt: über viele ähnliche Ausschreibungen lohnt sich diese Art Angebot; über diese eine Ausschreibung sagt er nichts.',
+                  'Een offerte is een weddenschap: de offertekosten B betaalt u zeker, de nettobijdrage M krijgt u enkel bij gunning, met kans p. Verwachte waarde VW = p·M − B. M is de marge na de verwachte kost van de risico’s die u draagt en na de marge die het team elders zou verdienen. Een positieve VW betekent dat dit soort offertes over veel vergelijkbare aanbestedingen loont; over deze ene opdracht zegt ze niets.',
+                  'Une offre est un pari : vous payez à coup sûr le coût d’offre B et ne recevez la contribution nette M qu’en cas de gain, avec la probabilité p. Valeur attendue VA = p·M − B. M est la marge après le coût attendu des risques conservés et après la marge que l’équipe gagnerait ailleurs. Une VA positive signifie que ce type d’offre est rentable sur de nombreux appels similaires ; elle ne dit rien de ce seul appel.',
+                  'Una oferta es una apuesta: el coste de oferta B lo paga seguro y la contribución neta M solo la recibe si gana, con probabilidad p. Valor esperado VE = p·M − B. M es el margen tras el coste esperado de los riesgos asumidos y tras el margen que el equipo ganaría en otro sitio. Un VE positivo significa que, en muchas licitaciones parecidas, este tipo de oferta compensa; no dice nada de esta licitación concreta.',
+                  'Oferta to zakład: koszt oferty B ponosisz na pewno, a wkład netto M otrzymujesz tylko po wygranej, z prawdopodobieństwem p. Wartość oczekiwana WO = p·M − B. M to marża po oczekiwanym koszcie ryzyk po Twojej stronie i po marży, którą zespół zarobiłby gdzie indziej. Dodatnia WO oznacza, że w wielu podobnych przetargach taka oferta się opłaca; o tym jednym przetargu nic nie mówi.') },
+        gates: { title: T('Two gates and the option to withdraw', 'Два етапи й право відмовитися', 'Zwei Stufen und die Option zum Rückzug', 'Twee fasen en de optie om terug te trekken', 'Deux étapes et l’option de se retirer', 'Dos fases y la opción de retirarse', 'Dwa etapy i opcja wycofania się'),
+          body: T('In a restricted procedure the authority first selects candidates (classic sectors, Wet 17.06.2016 art. 79 §1–§2, Dir. 2014/24/EU art. 65: if the authority limits the number, at least 5 invited, or 3 in a competitive negotiation, dialogue or innovation partnership, and fewer if fewer qualify; special sectors — grid, rail, water and other utilities, art. 149, Dir. 2014/25/EU art. 78(2): the entity sets the number by objective rules, no legal minimum, only sufficient competition). You spend the qualification cost B1 now, and the tender cost B2 only if shortlisted — and you can still withdraw if the tender documents disappoint. So EV = p1·max(p2·M − B2, 0) − B1. Charging B1 + B2 up front understates a good opportunity.',
+                  'В обмеженій процедурі замовник спершу відбирає кандидатів (класичні сектори, Закон Бельгії 17.06.2016 ст. 79 §1–§2, Дир. 2014/24/ЄС ст. 65: якщо замовник обмежує кількість — щонайменше 5 запрошених, або 3 у конкурентних переговорах, діалозі чи інноваційному партнерстві, і менше, якщо кваліфікувалося менше; спеціальні сектори — мережі, залізниця, вода та інші комунальні послуги, ст. 149, Дир. 2014/25/ЄС ст. 78(2): кількість встановлює замовник за об’єктивними правилами, законного мінімуму немає, лише достатня конкуренція). Витрати на кваліфікацію B1 ви несете зараз, а на пропозицію B2 — лише після відбору, і ще можете відмовитися, якщо документація розчарує. Тому EV = p1·max(p2·M − B2, 0) − B1. Врахування B1 + B2 одразу занижує добру можливість.',
+                  'Im nicht offenen Verfahren wählt der Auftraggeber zuerst Bewerber aus (klassische Sektoren, belg. Gesetz 17.06.2016 Art. 79 §1–§2, RL 2014/24/EU Art. 65: begrenzt der Auftraggeber die Zahl, mindestens 5 Eingeladene bzw. 3 im Verhandlungsverfahren, wettbewerblichen Dialog oder in der Innovationspartnerschaft, weniger, wenn weniger geeignet sind; Sektoren — Netz, Bahn, Wasser und andere Versorger, Art. 149, RL 2014/25/EU Art. 78 Abs. 2: der Sektorenauftraggeber legt die Zahl nach objektiven Regeln fest, kein gesetzliches Minimum, nur ausreichender Wettbewerb). Die Kosten des Teilnahmeantrags B1 fallen jetzt an, die Angebotskosten B2 nur nach Aufforderung — und Sie können noch zurückziehen, wenn die Unterlagen enttäuschen. Also EW = p1·max(p2·M − B2, 0) − B1. B1 + B2 vorab anzusetzen unterschätzt eine gute Gelegenheit.',
+                  'In een niet-openbare procedure selecteert de aanbestedende overheid eerst kandidaten (klassieke sectoren, wet 17.06.2016 art. 79 §1–§2, richtlijn 2014/24/EU art. 65: als de aanbestedende overheid het aantal beperkt, minstens 5 uitgenodigd, of 3 bij een mededingingsprocedure met onderhandeling, concurrentiegerichte dialoog of innovatiepartnerschap, en minder als er minder geschikt zijn; speciale sectoren — net, spoor, water en andere nutsvoorzieningen, art. 149, richtlijn 2014/25/EU art. 78, lid 2: de aanbestedende entiteit bepaalt het aantal volgens objectieve regels, geen wettelijk minimum, enkel voldoende mededinging). De kosten van de selectiefase B1 maakt u nu, de offertekosten B2 enkel na selectie — en u kunt zich nog terugtrekken als de opdrachtdocumenten tegenvallen. Dus VW = p1·max(p2·M − B2, 0) − B1. B1 + B2 vooraf aanrekenen onderschat een goede opportuniteit.',
+                  'En procédure restreinte, le pouvoir adjudicateur sélectionne d’abord les candidats (secteurs classiques, loi 17.06.2016 art. 79 §1–§2, directive 2014/24/UE art. 65 : si le pouvoir adjudicateur limite le nombre, au moins 5 invités, ou 3 en procédure concurrentielle avec négociation, dialogue compétitif ou partenariat d’innovation, et moins si moins sont qualifiés ; secteurs spéciaux — réseaux, rail, eau et autres services d’utilité publique, art. 149, directive 2014/25/UE art. 78, §2 : l’entité adjudicatrice fixe le nombre selon des règles objectives, sans minimum légal, seulement une concurrence suffisante). Le coût de candidature B1 est engagé maintenant, le coût d’offre B2 seulement après sélection — et vous pouvez encore vous retirer si les documents déçoivent. D’où VA = p1·max(p2·M − B2, 0) − B1. Imputer B1 + B2 d’emblée sous-estime une bonne opportunité.',
+                  'En el procedimiento restringido el poder adjudicador selecciona primero a los candidatos (sectores clásicos, ley belga 17.06.2016 art. 79 §1–§2, Directiva 2014/24/UE art. 65: si el poder adjudicador limita el número, al menos 5 invitados, o 3 en la negociación, el diálogo competitivo o la asociación para la innovación, y menos si se califican menos; sectores especiales — red, ferrocarril, agua y otros servicios, art. 149, Directiva 2014/25/UE art. 78.2: la entidad adjudicadora fija el número con reglas objetivas, sin mínimo legal, solo competencia suficiente). El coste de selección B1 se gasta ahora y el de la oferta B2 solo si le seleccionan, y aún puede retirarse si los pliegos decepcionan. Así, VE = p1·max(p2·M − B2, 0) − B1. Imputar B1 + B2 por adelantado infravalora una buena oportunidad.',
+                  'W przetargu ograniczonym zamawiający najpierw wybiera kandydatów (sektory klasyczne, ustawa belg. 17.06.2016 art. 79 §1–§2, dyrektywa 2014/24/UE art. 65: jeśli zamawiający ogranicza liczbę — co najmniej 5 zaproszonych albo 3 w negocjacjach, dialogu konkurencyjnym lub partnerstwie innowacyjnym, a mniej, jeśli mniej się zakwalifikuje; sektory użyteczności publicznej — sieci, kolej, woda, art. 149, dyrektywa 2014/25/UE art. 78 ust. 2: liczbę ustala zamawiający sektorowy według obiektywnych zasad, bez ustawowego minimum, tylko wystarczająca konkurencja). Koszt kwalifikacji B1 ponosisz teraz, koszt oferty B2 dopiero po zaproszeniu — i nadal możesz się wycofać, jeśli dokumenty rozczarują. Stąd WO = p1·max(p2·M − B2, 0) − B1. Liczenie B1 + B2 z góry zaniża dobrą okazję.') },
+        pwin: { title: T('Win probability, base rate and breakeven', 'Імовірність перемоги, базова частка й беззбитковість', 'Zuschlagswahrscheinlichkeit, Basisrate und Schwelle', 'Kans op gunning, basiskans en break-even', 'Probabilité de gain, taux de base et seuil', 'Probabilidad de ganar, tasa base y equilibrio', 'Prawdopodobieństwo wygranej, częstość bazowa i próg'),
+          body: T('The breakeven probability p* = (B2 + B1/p1)/M is the chance of award at which the bid exactly pays back. Compare it with two anchors: the base rate 1/N (an average bidder among N) and your own hit rate on similar tenders. If p* is close to 1/N, the bid only pays if you really are better than average — write down why. A win probability more than twice the base rate is flagged as optimistic. Bid spend per contract won = expected bid spend ÷ probability of winning.',
+                  'Беззбиткова імовірність p* = (B2 + B1/p1)/M — шанс перемоги, за якого участь рівно окупається. Порівняйте її з двома орієнтирами: базовою часткою 1/N (середній учасник серед N) і власним відсотком перемог у подібних тендерах. Якщо p* близька до 1/N, участь окупається лише тоді, коли ви справді кращі за середнього, — запишіть чому. Імовірність, більш ніж удвічі вища за базову, позначається як оптимістична. Витрати на один виграний контракт = очікувані витрати ÷ імовірність перемоги.',
+                  'Die Schwellenwahrscheinlichkeit p* = (B2 + B1/p1)/M ist die Zuschlagschance, bei der sich das Angebot genau trägt. Vergleichen Sie sie mit zwei Ankern: der Basisrate 1/N (ein durchschnittlicher Bieter unter N) und Ihrer eigenen Trefferquote. Liegt p* nahe 1/N, lohnt sich das Angebot nur, wenn Sie wirklich besser als der Durchschnitt sind — schreiben Sie auf, warum. Eine Wahrscheinlichkeit über dem Doppelten der Basisrate wird als optimistisch markiert. Angebotskosten je Auftrag = erwartete Angebotskosten ÷ Zuschlagswahrscheinlichkeit.',
+                  'De break-evenkans p* = (B2 + B1/p1)/M is de kans op gunning waarbij de offerte zich precies terugverdient. Vergelijk ze met twee ankers: de basiskans 1/N (een gemiddelde inschrijver op N) en uw eigen slaagkans bij vergelijkbare opdrachten. Ligt p* dicht bij 1/N, dan loont de offerte enkel als u echt beter bent dan gemiddeld — noteer waarom. Een kans hoger dan het dubbele van de basiskans wordt als optimistisch gemarkeerd. Offertekosten per gewonnen opdracht = verwachte offertekosten ÷ kans om te winnen.',
+                  'La probabilité d’équilibre p* = (B2 + B1/p1)/M est la chance d’attribution à laquelle l’offre se rembourse exactement. Comparez-la à deux repères : le taux de base 1/N (un soumissionnaire moyen parmi N) et votre propre taux de réussite. Si p* est proche de 1/N, l’offre n’est rentable que si vous êtes vraiment meilleur que la moyenne — notez pourquoi. Une probabilité supérieure au double du taux de base est signalée comme optimiste. Coût d’offre par marché gagné = coût d’offre attendu ÷ probabilité de gain.',
+                  'La probabilidad de equilibrio p* = (B2 + B1/p1)/M es la probabilidad de adjudicación con la que la oferta se paga justo. Compárela con dos referencias: la tasa base 1/N (un licitador medio entre N) y su propia tasa de éxito. Si p* está cerca de 1/N, la oferta solo compensa si de verdad es mejor que la media: anote por qué. Una probabilidad superior al doble de la tasa base se marca como optimista. Coste de oferta por contrato ganado = coste de oferta esperado ÷ probabilidad de ganar.',
+                  'Próg rentowności p* = (B2 + B1/p1)/M to szansa wygranej, przy której oferta dokładnie się zwraca. Porównaj go z dwoma punktami odniesienia: częstością bazową 1/N (przeciętny wykonawca spośród N) i własnym wskaźnikiem wygranych. Jeśli p* jest bliskie 1/N, oferta opłaca się tylko wtedy, gdy naprawdę jesteś lepszy od przeciętnego — zapisz dlaczego. Prawdopodobieństwo ponad dwa razy wyższe od bazowego jest oznaczane jako optymistyczne. Koszt ofert na wygraną = oczekiwany koszt ofert ÷ prawdopodobieństwo wygranej.') },
+        capacity: { title: T('Capacity, risk and strategic value', 'Ресурси, ризик і стратегічна цінність', 'Kapazität, Risiko und strategischer Wert', 'Capaciteit, risico en strategische waarde', 'Capacité, risque et valeur stratégique', 'Capacidad, riesgo y valor estratégico', 'Zasoby, ryzyko i wartość strategiczna'),
+          body: T('Three adjustments turn the price margin into what winning is really worth. Margin erosion r is the expected cost of the contract risks you keep (delay damages, warranty, unrecoverable claims). The opportunity cost C is the margin the same team or factory slot would earn on other work. The strategic value S (reference, new client, follow-on work) is kept apart: the tool shows the EV with and without it and the smallest S that makes the bid pay — the price management is implicitly paying for the strategy.',
+                  'Три поправки перетворюють маржу в ціні на реальну вартість перемоги. Зниження маржі r — очікувана вартість ризиків, що лишаються на вас (неустойки за затримку, гарантія, невідшкодовані претензії). Альтернативна вартість C — маржа, яку та сама команда чи виробничий слот заробили б на іншій роботі. Стратегічна цінність S (референція, новий замовник, подальші замовлення) тримається окремо: інструмент показує EV з нею й без неї та найменше S, за якого участь окупається, — ціну, яку керівництво неявно платить за стратегію.',
+                  'Drei Korrekturen machen aus der Preismarge, was der Zuschlag wirklich wert ist. Die Margenerosion r sind die erwarteten Kosten der verbleibenden Vertragsrisiken (Verzugsstrafen, Gewährleistung, nicht durchsetzbare Nachträge). Die Opportunitätskosten C sind die Marge, die dasselbe Team oder derselbe Fertigungsslot anderswo verdienen würde. Der strategische Wert S (Referenz, neuer Kunde, Folgeaufträge) bleibt getrennt: das Werkzeug zeigt den EW mit und ohne ihn und das kleinste S, bei dem sich das Angebot lohnt — den Preis, den die Geschäftsleitung stillschweigend für die Strategie zahlt.',
+                  'Drie correcties maken van de prijsmarge wat gunning echt waard is. De marge-erosie r is de verwachte kost van de risico’s die u draagt (vertragingsboetes, waarborg, niet-recupereerbare claims). De opportuniteitskost C is de marge die hetzelfde team of dezelfde productieplaats elders zou verdienen. De strategische waarde S (referentie, nieuwe opdrachtgever, vervolgopdrachten) blijft apart: de tool toont de VW met en zonder S en de kleinste S waarbij de offerte loont — de prijs die de directie impliciet voor de strategie betaalt.',
+                  'Trois corrections transforment la marge du prix en ce que le gain vaut vraiment. L’érosion de marge r est le coût attendu des risques conservés (pénalités de retard, garantie, réclamations non récupérables). Le coût d’opportunité C est la marge que la même équipe ou le même créneau d’usine gagnerait ailleurs. La valeur stratégique S (référence, nouveau client, travaux ultérieurs) reste à part : l’outil montre la VA avec et sans elle et le plus petit S qui rend l’offre rentable — le prix que la direction paie implicitement pour la stratégie.',
+                  'Tres ajustes convierten el margen del precio en lo que ganar vale de verdad. La erosión de margen r es el coste esperado de los riesgos asumidos (penalidades por demora, garantía, reclamaciones no recuperables). El coste de oportunidad C es el margen que el mismo equipo o hueco de fábrica ganaría en otro trabajo. El valor estratégico S (referencia, cliente nuevo, trabajos posteriores) se mantiene aparte: la herramienta muestra el VE con y sin él y el menor S que hace rentable la oferta, es decir, el precio que la dirección paga implícitamente por la estrategia.',
+                  'Trzy korekty zamieniają marżę w cenie na rzeczywistą wartość wygranej. Erozja marży r to oczekiwany koszt ryzyk po Twojej stronie (kary za zwłokę, gwarancja, nieodzyskiwalne roszczenia). Koszt alternatywny C to marża, którą ten sam zespół lub ten sam termin produkcyjny zarobiłby gdzie indziej. Wartość strategiczna S (referencja, nowy klient, kolejne zamówienia) jest liczona osobno: narzędzie pokazuje WO z nią i bez niej oraz najmniejsze S, przy którym oferta się opłaca — cenę, jaką zarząd niejawnie płaci za strategię.') },
+        scoring: { title: T('Attractiveness score and knock-outs', 'Бал привабливості й відсікачі', 'Attraktivitätspunkte und K.-o.-Kriterien', 'Aantrekkelijkheidsscore en knock-outs', 'Note d’attractivité et critères éliminatoires', 'Puntuación de atractivo y criterios eliminatorios', 'Ocena atrakcyjności i kryteria eliminujące'),
+          body: T('Money is not everything: bid/no-bid practice (Shipley, APMP) also scores the fit — client relationship, competitive position, capability, key staff, workload, contract terms, payment, strategy. Score = Σ weight × score ÷ (10 × Σ weight), 0–100. Knock-outs are must-haves that no score compensates: selection criteria you cannot meet, a bond you cannot obtain, a delivery slot you do not have. One failed knock-out means no bid.',
+                  'Гроші — не все: практика bid/no-bid (Shipley, APMP) оцінює й відповідність профілю — стосунки із замовником, конкурентну позицію, спроможність, ключовий персонал, завантаженість, умови контракту, оплату, стратегію. Бал = Σ вага × бал ÷ (10 × Σ ваг), 0–100. Відсікачі — обов’язкові умови, яких жоден бал не компенсує: критерії відбору, яких ви не виконуєте, гарантія, якої не отримаєте, виробничий слот, якого немає. Один невиконаний відсікач — неучасть.',
+                  'Geld ist nicht alles: die Bid/No-Bid-Praxis (Shipley, APMP) bewertet auch die Passung — Kundenbeziehung, Wettbewerbsposition, Leistungsfähigkeit, Schlüsselpersonal, Auslastung, Vertragsbedingungen, Zahlung, Strategie. Punkte = Σ Gewicht × Note ÷ (10 × Σ Gewicht), 0–100. K.-o.-Kriterien sind Muss-Bedingungen, die keine Punktzahl ausgleicht: nicht erfüllbare Eignungskriterien, eine nicht erhältliche Bürgschaft, ein fehlender Liefertermin. Ein verfehltes K.-o.-Kriterium heißt kein Angebot.',
+                  'Geld is niet alles: de bid/no-bidpraktijk (Shipley, APMP) scoort ook de fit — relatie met de opdrachtgever, concurrentiepositie, bekwaamheid, sleutelpersoneel, werklast, contractvoorwaarden, betaling, strategie. Score = Σ weging × score ÷ (10 × Σ weging), 0–100. Knock-outs zijn must-haves die geen score compenseert: selectiecriteria die u niet haalt, een borgtocht die u niet krijgt, een leverplaats die u niet hebt. Eén gemiste knock-out betekent niet inschrijven.',
+                  'L’argent ne fait pas tout : la pratique du go/no-go (Shipley, APMP) note aussi l’adéquation — relation client, position concurrentielle, capacités, personnel clé, plan de charge, clauses du contrat, paiement, stratégie. Note = Σ poids × note ÷ (10 × Σ poids), 0–100. Les critères éliminatoires sont des impératifs qu’aucune note ne compense : critères de sélection non remplis, cautionnement impossible à obtenir, créneau de livraison indisponible. Un seul critère éliminatoire non rempli signifie no-go.',
+                  'El dinero no lo es todo: la práctica de decisión de ofertar (Shipley, APMP) puntúa también el encaje: relación con el cliente, posición competitiva, capacidad, personal clave, carga de trabajo, condiciones del contrato, pago, estrategia. Nota = Σ peso × nota ÷ (10 × Σ peso), 0–100. Los criterios eliminatorios son imprescindibles que ninguna nota compensa: criterios de selección que no cumple, una garantía que no obtendrá, un hueco de entrega que no tiene. Un solo eliminatorio no cumplido significa no ofertar.',
+                  'Pieniądze to nie wszystko: praktyka bid/no-bid (Shipley, APMP) ocenia też dopasowanie — relacje z zamawiającym, pozycję konkurencyjną, zdolności, kluczowy personel, obłożenie, warunki umowy, płatności, strategię. Ocena = Σ waga × ocena ÷ (10 × Σ wag), 0–100. Kryteria eliminujące to warunki konieczne, których żadna ocena nie zrównoważy: niespełnione warunki udziału, gwarancja niemożliwa do uzyskania, brak terminu dostawy. Jedno niespełnione kryterium eliminujące oznacza rezygnację z oferty.') },
+        policy: { title: T('How the decision is made', 'Як ухвалюється рішення', 'Wie die Entscheidung entsteht', 'Hoe de beslissing tot stand komt', 'Comment la décision est prise', 'Cómo se toma la decisión', 'Jak zapada decyzja'),
+          body: T('A stated policy heuristic, in this order: a knock-out not met → NO BID; EV negative even with the strategic value → NO BID; EV negative in money but positive with the strategic value → STRATEGIC BID, which needs management sign-off; otherwise the score decides — at or above the bid threshold BID, between the review and bid thresholds BID WITH CONDITIONS (team, terms, price limits to agree), below the review threshold NO BID. Thresholds are your company policy.',
+                  'Відкрита евристика політики, у такому порядку: невиконаний відсікач → НЕ ПОДАВАТИ; EV від’ємна навіть зі стратегічною цінністю → НЕ ПОДАВАТИ; EV від’ємна в грошах, але додатна зі стратегічною цінністю → СТРАТЕГІЧНА УЧАСТЬ, потрібне рішення керівництва; інакше вирішує бал — від порогу участі ПОДАВАТИ, між порогами перегляду й участі ПОДАВАТИ ЗА УМОВ (погодити команду, умови, межі ціни), нижче порогу перегляду НЕ ПОДАВАТИ. Пороги — політика вашої компанії.',
+                  'Eine offengelegte Heuristik in dieser Reihenfolge: K.-o.-Kriterium nicht erfüllt → KEIN ANGEBOT; EW auch mit strategischem Wert negativ → KEIN ANGEBOT; EW in Geld negativ, mit strategischem Wert positiv → STRATEGISCHES ANGEBOT mit Freigabe der Geschäftsleitung; sonst entscheiden die Punkte — ab der Anbietschwelle ANBIETEN, zwischen Prüf- und Anbietschwelle ANBIETEN MIT AUFLAGEN (Team, Bedingungen, Preisgrenzen abstimmen), unter der Prüfschwelle KEIN ANGEBOT. Die Schwellen sind Ihre Firmenpolitik.',
+                  'Een expliciete beleidsheuristiek, in deze volgorde: knock-out niet vervuld → NIET INSCHRIJVEN; VW negatief, ook met strategische waarde → NIET INSCHRIJVEN; VW negatief in geld maar positief met strategische waarde → STRATEGISCHE INSCHRIJVING, met akkoord van de directie; anders beslist de score — vanaf de drempel INSCHRIJVEN, tussen de herbekijk- en de inschrijfdrempel ONDER VOORWAARDEN (team, voorwaarden, prijsgrenzen afspreken), onder de herbekijkdrempel NIET INSCHRIJVEN. De drempels zijn uw bedrijfsbeleid.',
+                  'Une heuristique explicite, dans cet ordre : critère éliminatoire non rempli → NO-GO ; VA négative même avec la valeur stratégique → NO-GO ; VA négative en argent mais positive avec la valeur stratégique → GO STRATÉGIQUE, à valider par la direction ; sinon la note décide — au-dessus du seuil go GO, entre le seuil de réexamen et le seuil go GO SOUS CONDITIONS (équipe, clauses, limites de prix à convenir), sous le seuil de réexamen NO-GO. Les seuils sont la politique de votre entreprise.',
+                  'Una heurística explícita, en este orden: eliminatorio no cumplido → NO OFERTAR; VE negativo incluso con el valor estratégico → NO OFERTAR; VE negativo en dinero pero positivo con el valor estratégico → OFERTA ESTRATÉGICA, con aprobación de la dirección; si no, decide la nota: desde el umbral de ofertar OFERTAR, entre el umbral de revisión y el de ofertar OFERTAR CON CONDICIONES (equipo, cláusulas, límites de precio), por debajo del umbral de revisión NO OFERTAR. Los umbrales son la política de su empresa.',
+                  'Jawna heurystyka, w tej kolejności: niespełnione kryterium eliminujące → NIE SKŁADAĆ; WO ujemna nawet z wartością strategiczną → NIE SKŁADAĆ; WO ujemna w pieniądzu, ale dodatnia z wartością strategiczną → OFERTA STRATEGICZNA, wymaga zgody zarządu; w pozostałych przypadkach decyduje ocena — od progu złożenia SKŁADAĆ, między progiem przeglądu a progiem złożenia SKŁADAĆ POD WARUNKAMI (ustalić zespół, warunki, limity ceny), poniżej progu przeglądu NIE SKŁADAĆ. Progi to polityka Twojej firmy.') },
+        tornado: { title: T('What moves the answer', 'Що змінює відповідь', 'Was die Antwort bewegt', 'Wat het antwoord bepaalt', 'Ce qui fait varier la réponse', 'Qué cambia la respuesta', 'Co zmienia odpowiedź'),
+          body: T('Each input is moved alone over its swing (probabilities ± points, margin ± points, bid cost and value ± %) and the EV recomputed. The longest bar is what to firm up before the bid board; a bar crossing zero means that input alone can flip the decision. Usually it is the win probability — the least known number.',
+                  'Кожну вхідну величину змінюють окремо в її діапазоні (імовірності ± п. п., маржа ± п. п., витрати й вартість ± %) і перераховують EV. Найдовша смуга — те, що треба уточнити до тендерного комітету; смуга, що перетинає нуль, означає, що одна ця величина може змінити рішення. Зазвичай це імовірність перемоги — найменш відоме число.',
+                  'Jede Eingabe wird einzeln über ihren Bereich verschoben (Wahrscheinlichkeiten ± Punkte, Marge ± Punkte, Angebotskosten und Wert ± %) und der EW neu berechnet. Der längste Balken ist das, was vor dem Angebotsgremium zu erhärten ist; ein Balken über die Null heißt, dass diese Eingabe allein die Entscheidung kippen kann. Meist ist es die Zuschlagswahrscheinlichkeit — die am wenigsten bekannte Zahl.',
+                  'Elke invoer wordt afzonderlijk over haar marge verschoven (kansen ± punten, marge ± punten, offertekosten en waarde ± %) en de VW herberekend. De langste balk is wat u vóór het offertecomité hard moet maken; een balk over nul betekent dat die invoer alleen de beslissing kan doen kantelen. Meestal is het de kans op gunning — het minst gekende getal.',
+                  'Chaque donnée est déplacée seule sur sa plage (probabilités ± points, marge ± points, coût d’offre et montant ± %) et la VA recalculée. La barre la plus longue est ce qu’il faut consolider avant le comité d’offre ; une barre qui traverse zéro signifie que cette donnée seule peut faire basculer la décision. C’est en général la probabilité de gain — le chiffre le moins connu.',
+                  'Cada dato se mueve solo dentro de su rango (probabilidades ± puntos, margen ± puntos, coste de oferta e importe ± %) y se recalcula el VE. La barra más larga es lo que debe afinar antes del comité de ofertas; una barra que cruza cero indica que ese dato por sí solo puede cambiar la decisión. Suele ser la probabilidad de ganar, el número menos conocido.',
+                  'Każdą daną zmienia się osobno w jej zakresie (prawdopodobieństwa ± pkt, marża ± pkt, koszt oferty i wartość ± %) i przelicza WO. Najdłuższy pasek to to, co trzeba doprecyzować przed komitetem ofertowym; pasek przecinający zero oznacza, że ta jedna dana może zmienić decyzję. Zwykle jest to prawdopodobieństwo wygranej — najmniej znana liczba.') }
+      },
+      tour: [
+        { topic: 'ev', focus: '[data-dgu-field="f-V"]' },
+        { topic: 'gates', focus: '[data-dgu-field="f-procedure"]' },
+        { topic: 'pwin', focus: '[data-dgu-field="f-p2"]' },
+        { topic: 'capacity', focus: '[data-dgu-field="f-C"]' },
+        { topic: 'scoring', focus: '[data-dgu-field="f-criteria"]' },
+        { topic: 'policy', focus: '.dgu-r-results' },
+        { topic: 'tornado', focus: '.dgu-stage' }
+      ]
+    };
+  }
+
+  /* ---- project bar (tnd-core.js) ---- */
+  var bar = null, useMsg = null;
+  function projectPayload() {
+    if (!last || !last.ok) return null;
+    var mo = last.money;
+    return {
+      state: JSON.parse(JSON.stringify(state)),
+      results: { decision: last.decision, reason: last.reason, ev: mo.EV, ev_with_strategic: mo.EVs, breakeven_p2: mo.breakeven, p_win: mo.Pwin, score: last.scoring.score,
+                 bid_cost: mo.Btot, expected_bid_spend: mo.spend, knockouts_failed: last.failed, staged_vs_naive: last.input.procedure === 'two' ? { staged: mo.EV, naive: mo.naive } : null },
+      summary: { text: last.decision + ': EV ' + Math.round(mo.EV) + ' EUR, score ' + (last.scoring.score == null ? '-' : Math.round(last.scoring.score)) + '/100' }
+    };
+  }
+  function showUse(text, tone) {
+    if (!useMsg) return;
+    useMsg.textContent = text; useMsg.style.display = text ? '' : 'none';
+    useMsg.style.borderColor = tone === 'bad' ? 'var(--bad,#c0392b)' : (tone === 'warn' ? 'var(--warn,#d68910)' : 'var(--line,#e2e7ee)');
+  }
+  var TWO_STAGE = { restricted: 1, 'competitive-negotiation': 1, 'competitive-dialogue': 1, 'innovation-partnership': 1 };
+  /* "Use": restore our own module state, or take the tender value, procedure and reference from the shared tender block */
+  function useProject(doc, moduleId) {
+    var L = lang();
+    if (!doc || typeof doc !== 'object') { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    var mod = doc.modules && doc.modules[TOOL];
+    if ((moduleId === TOOL || !moduleId) && mod && mod.state && typeof mod.state === 'object') {
+      var clean = sanitize(mod.state), warn = sanitizeWarn.slice();
+      if (clean.V > 0) {
+        Object.keys(DEFAULTS).forEach(function (k) { state[k] = JSON.parse(JSON.stringify(DEFAULTS[k])); });
+        localiseDefaults(state);
+        Object.keys(clean).forEach(function (k) { state[k] = clean[k]; });
+        if (ui) { ui.sync(); ui.run(); }
+        showUse(S.useTaken[L] + ': ' + (mod.summary && mod.summary.text || TOOL) + (warn.length ? ' · ' + S.impWarn[L] + ': ' + warn.map(function (w) { return w === 'ko' ? S.nKoUnclear[L] : S.nThresholds[L]; }).join(' ') : ''), warn.length ? 'warn' : 'ok');
+        return { ok: true, from: 'module' };
+      }
+    }
+    var t = doc.tender || {};
+    if (!(typeof t.value_est === 'number' && isFinite(t.value_est) && t.value_est > 0 && t.value_est <= 1e11)) { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    state.V = t.value_est;
+    if (typeof t.procedure === 'string' && t.procedure) state.procedure = TWO_STAGE[t.procedure] ? 'two' : 'single';
+    if (typeof t.reference === 'string' && t.reference) state.tenderRef = t.reference.slice(0, 200);
+    else if (typeof t.title === 'string' && t.title) state.tenderRef = t.title.slice(0, 200);
+    var nb = (doc.parties || []).filter(function (p) { return p && p.role === 'bidder'; }).length;
+    if (nb >= 2 && nb <= 50) state.N = nb;
+    if (ui) { ui.sync(); ui.run(); }
+    showUse(S.useTaken[L] + ': ' + eur(state.V, L) + (state.tenderRef ? ' · ' + state.tenderRef : ''), 'ok');
+    return { ok: true, from: 'tender' };
+  }
+  function mountBar(box) {
+    var C = core();
+    if (!C || !C.ui || typeof C.ui.projectBar !== 'function') return;
+    try {
+      var lc = document.createElement('div'); box.appendChild(lc);
+      if (typeof C.ui.lifecycle === 'function') C.ui.lifecycle({ mount: lc, toolId: TOOL, role: 'contractor', lang: lang });
+      var bx = document.createElement('div'); box.appendChild(bx);
+      var stored = null; try { stored = C.project.load(); } catch (e) { stored = null; }
+      bar = C.ui.projectBar({ mount: bx, toolId: TOOL, lang: lang, doc: stored || C.project.empty({ role: 'contractor', lang: lang() }),
+        getDoc: function () { var p = projectPayload(), d = bar ? bar.getDoc() : C.project.empty(); return p ? C.project.withModule(d, TOOL, p) : d; },
+        onChange: function () { },
+        onUse: function (id, mod, doc) { useProject(doc, id); } });
+      if (bar && bar.element) {
+        var css = 'min-height:var(--ctl-h,32px);padding:0 10px;border:1px solid var(--line,#e2e7ee);border-radius:var(--radius-sm,8px);background:var(--panel-2,#f9fafc);color:var(--ink,#12161d);cursor:pointer;font:inherit';
+        var b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('data-tnd', 'save-module'); b.textContent = '↥ ' + S.save[lang()]; b.style.cssText = css;
+        b.addEventListener('click', function () { var p = projectPayload(); if (p && bar) bar.commit(p); });
+        var u = document.createElement('button');
+        u.type = 'button'; u.setAttribute('data-tnd', 'use-tender'); u.textContent = S.useTender[lang()]; u.style.cssText = css;
+        u.addEventListener('click', function () { if (bar) useProject(bar.getDoc(), 'tender'); });
+        var head = bar.element.firstChild; if (head) { head.appendChild(b); head.appendChild(u); }
+        useMsg = document.createElement('div');
+        useMsg.setAttribute('role', 'status'); useMsg.setAttribute('data-tnd', 'use-msg');
+        useMsg.style.cssText = 'display:none;margin-top:6px;padding:6px 8px;border:1px solid var(--line,#e2e7ee);border-left-width:4px;border-radius:var(--radius-sm,8px);font-size:0.92em';
+        bar.element.appendChild(useMsg);
+      }
+    } catch (e) { bar = null; }
+  }
+
+  function groupOptions() { return (lib() ? lib().GROUPS : ['client', 'capability', 'capacity', 'risk', 'strategy']).map(function (g) { return [g, GRP[g]]; }); }
+  function isTwo(c) { return c.state.procedure === 'two'; }
+
+  /* the default criteria and knock-outs are the be-school set: give them the names of the page language (they are English in DEFAULTS) */
+  var DEF_CK = ['rel', 'comp', 'tech', 'staff', 'load', 'terms', 'pay', 'margin', 'fit', 'follow'], DEF_KO = ['erkenning', 'bond', 'exclusion'];
+  function localiseDefaults(t) {
+    var l = lang();
+    (t.criteria || []).forEach(function (c, k) { var key = DEF_CK[k]; if (key && c && c.name === CK[key].en) c.name = CK[key][l]; });
+    (t.ko || []).forEach(function (c, k) { var key = DEF_KO[k]; if (key && c && c.name === KOK[key].en) c.name = KOK[key][l]; });
+    return t;
+  }
+  function buildInterface() {
+    localiseDefaults(DEFAULTS); localiseDefaults(state);
+    ui = DiagramUI.app({
+      id: TOOL, mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: DEFAULTS,
+      subtitle: S.subtitle,
+      notices: [{ id: 'genre', tone: 'warn', sticky: false,
+        title: T('Engineering and commercial analysis, not legal advice', 'Інженерно-комерційний аналіз, не юридична консультація', 'Technisch-kaufmännische Analyse, keine Rechtsberatung', 'Technisch-commerciële analyse, geen juridisch advies', 'Analyse technique et commerciale, pas un avis juridique', 'Análisis técnico y comercial, no asesoramiento jurídico', 'Analiza techniczno-handlowa, nie porada prawna'),
+        text: T('The decision rule, thresholds and weights are a stated company policy, not a standard. The expected value is only as good as the win probability you enter.', 'Правило рішення, пороги й ваги — відкрита політика компанії, а не стандарт. Очікувана вартість не краща за введену імовірність перемоги.', 'Entscheidungsregel, Schwellen und Gewichte sind eine offengelegte Firmenpolitik, keine Norm. Der Erwartungswert ist nur so gut wie die eingegebene Zuschlagswahrscheinlichkeit.', 'De beslisregel, drempels en wegingen zijn een expliciet bedrijfsbeleid, geen norm. De verwachte waarde is maar zo goed als de ingevoerde kans op gunning.', 'La règle de décision, les seuils et les poids sont une politique d’entreprise explicite, pas une norme. La valeur attendue ne vaut que par la probabilité de gain saisie.', 'La regla de decisión, los umbrales y los pesos son una política de empresa explícita, no una norma. El valor esperado solo es tan bueno como la probabilidad de ganar introducida.', 'Reguła decyzji, progi i wagi to jawna polityka firmy, a nie norma. Wartość oczekiwana jest tak dobra, jak wprowadzone prawdopodobieństwo wygranej.') }],
+      learn: withRateNote(buildLearn()),
+      panels: [
+        { id: 'project', slot: 'inputs', title: S.pProject, collapsible: true, collapsed: true,
+          visible: !!(core() && core().ui), render: function (box) { mountBar(box); } },
+        { id: 'opp', slot: 'inputs', title: S.pOpp, fields: [
+          { id: 'f-procedure', key: 'procedure', type: 'segmented', label: S.procedure, hint: S.procHint, learn: 'gates', options: function () { return [['single', S.single], ['two', S.two]]; } },
+          { id: 'f-V', key: 'V', type: 'number', unit: '€', min: 0, max: 1e11, step: 'any', precision: 0, label: S.V, learn: 'ev' },
+          { id: 'f-m', key: 'm', type: 'number', unit: '%', min: -50, max: 80, step: 'any', precision: 2, label: S.m, hint: S.mHint, learn: 'ev' },
+          { id: 'f-r', key: 'r', type: 'number', unit: '%', min: 0, max: 50, step: 'any', precision: 2, label: S.r, hint: S.rHint, learn: 'capacity' },
+          { id: 'f-C', key: 'C', type: 'number', unit: '€', min: 0, max: 1e10, step: 'any', precision: 0, label: S.C, hint: S.CHint, learn: 'capacity' },
+          { id: 'f-S', key: 'S', type: 'number', unit: '€', min: 0, max: 1e10, step: 'any', precision: 0, label: S.Sv, hint: S.SHint, learn: 'capacity' }
+        ] },
+        { id: 'cost', slot: 'inputs', title: S.pCost, fields: [
+          { id: 'f-rate', key: 'rate', type: 'number', unit: '€/h', min: 0, max: 1000, step: 'any', precision: 0, label: S.rate, hint: S.rateHint, learn: 'ev' },
+          { id: 'f-h1', key: 'h1', type: 'number', unit: 'h', min: 0, max: 100000, step: 'any', precision: 0, label: S.h1, learn: 'gates', visible: isTwo },
+          { id: 'f-x1', key: 'x1', type: 'number', unit: '€', min: 0, max: 1e8, step: 'any', precision: 0, label: S.x1, learn: 'gates', visible: isTwo },
+          { id: 'f-h2', key: 'h2', type: 'number', unit: 'h', min: 0, max: 200000, step: 'any', precision: 0, label: S.h2, learn: 'ev' },
+          { id: 'f-x2', key: 'x2', type: 'number', unit: '€', min: 0, max: 1e9, step: 'any', precision: 0, label: S.x2, learn: 'ev' }
+        ] },
+        { id: 'win', slot: 'inputs', title: S.pWin, fields: [
+          { id: 'f-p1', key: 'p1', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 1, label: S.p1, learn: 'gates', visible: isTwo },
+          { id: 'f-p2', key: 'p2', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 1, label: S.p2, learn: 'pwin' },
+          { id: 'f-N', key: 'N', type: 'number', unit: '–', min: 1, max: 50, step: 1, precision: 0, label: S.N, learn: 'pwin' },
+          { id: 'f-h', key: 'h', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 1, label: S.h, learn: 'pwin' }
+        ] },
+        { id: 'crit', slot: 'inputs', title: S.pCrit, fields: [
+          { id: 'f-criteria', key: 'criteria', type: 'list', label: S.crit, learn: 'scoring',
+            row: [ { key: 'name', type: 'text', label: S.cName, width: '170px' },
+                   { key: 'group', type: 'select', label: S.cGroup, options: groupOptions, width: '120px' },
+                   { key: 'weight', type: 'number', label: S.cWeight, min: 0, max: 100, width: '62px' },
+                   { key: 'score', type: 'number', label: S.cScore, min: 0, max: 10, width: '58px' } ],
+            newRow: function () { return { name: '', group: 'client', weight: 5, score: 5 }; }, minRows: 0, maxRows: MAXC, reorder: false, addLabel: S.addCrit },
+          { id: 'f-go', key: 'go', type: 'number', unit: '–', min: 0, max: 100, step: 'any', precision: 0, label: S.go, hint: S.thrHint, learn: 'policy',
+            validate: function (v, c) { return v >= c.state.review ? true : T('Must not be below the review threshold', 'Не може бути нижчим за поріг перегляду', 'Darf nicht unter der Prüfschwelle liegen', 'Mag niet onder de herbekijkdrempel liggen', 'Ne doit pas être inférieur au seuil de réexamen', 'No puede ser inferior al umbral de revisión', 'Nie może być niższy niż próg przeglądu'); } },
+          { id: 'f-review', key: 'review', type: 'number', unit: '–', min: 0, max: 100, step: 'any', precision: 0, label: S.review, learn: 'policy',
+            validate: function (v, c) { return v <= c.state.go ? true : T('Must not exceed the bid threshold', 'Не може перевищувати поріг участі', 'Darf die Anbietschwelle nicht überschreiten', 'Mag de inschrijfdrempel niet overschrijden', 'Ne doit pas dépasser le seuil go', 'No puede superar el umbral de ofertar', 'Nie może przekraczać progu złożenia oferty'); } }
+        ] },
+        { id: 'ko', slot: 'inputs', title: S.pKo, fields: [
+          { id: 'f-ko', key: 'ko', type: 'list', label: S.koList, learn: 'scoring',
+            row: [ { key: 'name', type: 'text', label: S.koName, width: '260px' },
+                   { key: 'met', type: 'toggle', label: S.koMet } ],
+            newRow: function () { return { name: '', met: true }; }, minRows: 0, maxRows: MAXK, reorder: false, addLabel: S.addKo }
+        ] },
+        { id: 'sens', slot: 'inputs', title: S.pSens, collapsible: true, collapsed: true, fields: [
+          { id: 'f-dp', key: 'dp', type: 'number', unit: '%', min: 0, max: 50, step: 'any', precision: 1, label: S.dp, learn: 'tornado' },
+          { id: 'f-dm', key: 'dm', type: 'number', unit: '%', min: 0, max: 20, step: 'any', precision: 1, label: S.dm, learn: 'tornado' },
+          { id: 'f-dB', key: 'dB', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 0, label: S.dB, learn: 'tornado' },
+          { id: 'f-dV', key: 'dV', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 0, label: S.dV, learn: 'tornado' }
+        ] },
+        { id: 'record', slot: 'inputs', title: S.pRec, collapsible: true, collapsed: true, fields: [
+          { id: 'f-ref', key: 'tenderRef', type: 'text', label: S.tenderRef },
+          { id: 'f-by', key: 'preparedBy', type: 'text', label: S.preparedBy }
+        ] }
+      ],
+      footer: T('Method: decision tree with expected value (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, ch. 3–4); bid/no-bid scoring, knock-outs and hit rate after Shipley Associates and the APMP Body of Knowledge (practice). Law: Wet 17.06.2016 art. 79 §2 and art. 149 (number of candidates invited, classic / special sectors), Dir. 2014/24/EU art. 65(2), Dir. 2014/25/EU art. 78(2).',
+                'Метод: дерево рішень з очікуваною вартістю (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, розд. 3–4); оцінювання bid/no-bid, відсікачі й відсоток перемог за практикою Shipley Associates та APMP Body of Knowledge. Право: Закон Бельгії 17.06.2016 ст. 79 §2 і ст. 149 (кількість запрошених кандидатів, класичні / спеціальні сектори), Дир. 2014/24/ЄС ст. 65(2), Дир. 2014/25/ЄС ст. 78(2).',
+                'Methode: Entscheidungsbaum mit Erwartungswert (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, Kap. 3–4); Bid/No-Bid-Bewertung, K.-o.-Kriterien und Trefferquote nach Shipley Associates und APMP Body of Knowledge (Praxis). Recht: belg. Gesetz 17.06.2016 Art. 79 §2 und Art. 149 (Zahl der eingeladenen Bewerber, klassische Sektoren / Sektoren), RL 2014/24/EU Art. 65 Abs. 2, RL 2014/25/EU Art. 78 Abs. 2.',
+                'Methode: beslissingsboom met verwachte waarde (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, hfst. 3–4); bid/no-bidscore, knock-outs en slaagkans volgens Shipley Associates en het APMP Body of Knowledge (praktijk). Recht: wet 17.06.2016 art. 79 §2 en art. 149 (aantal uitgenodigde kandidaten, klassieke / speciale sectoren), richtlijn 2014/24/EU art. 65, lid 2, richtlijn 2014/25/EU art. 78, lid 2.',
+                'Méthode : arbre de décision avec valeur attendue (H. Raiffa, Decision Analysis, 1968 ; R. T. Clemen, Making Hard Decisions, 1996, chap. 3–4) ; notation go/no-go, critères éliminatoires et taux de réussite d’après Shipley Associates et l’APMP Body of Knowledge (pratique). Droit : loi du 17.06.2016 art. 79 §2 et art. 149 (nombre de candidats invités, secteurs classiques / spéciaux), directive 2014/24/UE art. 65, §2, directive 2014/25/UE art. 78, §2.',
+                'Método: árbol de decisión con valor esperado (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, cap. 3–4); puntuación de la decisión de ofertar, eliminatorios y tasa de éxito según Shipley Associates y el APMP Body of Knowledge (práctica). Derecho: ley belga 17.06.2016 art. 79 §2 y art. 149 (número de candidatos invitados, sectores clásicos / especiales), Directiva 2014/24/UE art. 65.2, Directiva 2014/25/UE art. 78.2.',
+                'Metoda: drzewo decyzyjne z wartością oczekiwaną (H. Raiffa, Decision Analysis, 1968; R. T. Clemen, Making Hard Decisions, 1996, rozdz. 3–4); ocena bid/no-bid, kryteria eliminujące i wskaźnik wygranych wg Shipley Associates i APMP Body of Knowledge (praktyka). Prawo: ustawa belg. 17.06.2016 art. 79 §2 i art. 149 (liczba zaproszonych kandydatów, sektory klasyczne / użyteczności publicznej), dyrektywa 2014/24/UE art. 65 ust. 2, dyrektywa 2014/25/UE art. 78 ust. 2.'),
+      on: { compute: computeView }
+    });
+
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end',
+      actions: [ { label: T('CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV'), run: function () { var t = csvText(); if (t) download('bidnobid.csv', 'text/csv', t); } },
+                 { label: T('JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON'), run: function () { var r = buildRecord(); if (r) download('bidnobid.json', 'application/json', JSON.stringify(r, null, 2)); } },
+                 ui.resetAction() ] });
+    ui.examples(buildExamples());
+    stage = ui.stage({
+      caption: S.stageCap, minHeight: 440,
+      a11y: function () {
+        var l = lang();
+        if (!last || !last.ok) return '';
+        var mo = last.money;
+        return S.stageCap[l] + '. ' + DEC[last.decision][l] + '; ' + S.vEV[l] + ' ' + keur(mo.EV, l) + '; ' + S.mkBE[l] + ' ' + pc(mo.breakeven, l, 1) + '; ' +
+          last.tornado.bars.map(function (b) { return str(S.vNames[b.id], l) + ' ' + keur(b.low, l) + '…' + keur(b.high, l); }).join('; ') + '.';
+      },
+      render: renderStage
+    });
+    ui.ready();
+    window.__bidnobid = { ui: ui, state: state, solve: solve, engineInput: engineInput, last: function () { return last; }, csv: csvText, record: buildRecord,
+      projectPayload: projectPayload, useProject: useProject, sanitize: sanitize, applyPreset: function (id) {
+        var p = lib().PRESETS.filter(function (x) { return x.id === id; })[0]; if (!p) return false; applyPreset(state, p); ui.sync(); ui.run(); return true; },
+      analyse: function (inp) { return lib().analyse(inp); } };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1'); h.textContent = 'Bid / No-Bid Decision';
+    var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    last = solve(state);
+  }
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  /* ======================================================= 3. the data layer */
+  function csvText() {
+    var r = last;
+    if (!r || !r.ok) return '';
+    var mo = r.money, n = r.input, rows = [];
+    function add(sec, item, v, unit) { rows.push([sec, item, v == null ? '' : v, unit || '']); }
+    add('decision', 'decision', r.decision); add('decision', 'reason', r.reason); add('decision', 'knockouts_failed', r.failed.join(' '));
+    add('money', 'procedure', n.procedure); add('money', 'contract_value', n.V, 'EUR'); add('money', 'margin', n.m, 'fraction'); add('money', 'margin_erosion', n.r, 'fraction');
+    add('money', 'opportunity_cost', n.C, 'EUR'); add('money', 'strategic_value', n.S, 'EUR');
+    add('money', 'net_contribution_M', mo.M, 'EUR'); add('money', 'qualification_cost_B1', mo.B1, 'EUR'); add('money', 'tender_cost_B2', mo.B2, 'EUR');
+    add('money', 'p_shortlist', n.p1, 'fraction'); add('money', 'p_award', n.p2, 'fraction'); add('money', 'p_win', mo.Pwin, 'fraction');
+    add('money', 'value_of_tender_EV2', mo.EV2, 'EUR'); add('money', 'expected_value', mo.EV, 'EUR'); add('money', 'expected_value_with_strategic', mo.EVs, 'EUR');
+    if (n.procedure === 'two') add('money', 'all_costs_up_front', mo.naive, 'EUR');
+    add('money', 'breakeven_p_award', mo.breakeven, 'fraction'); add('money', 'base_rate_1_over_N', mo.base, 'fraction'); add('money', 'strategic_value_needed', mo.Sneed, 'EUR');
+    add('money', 'expected_bid_spend', mo.spend, 'EUR'); add('money', 'bid_spend_per_win', mo.perWin, 'EUR'); add('money', 'return_on_bid_spend', mo.roi, 'x');
+    r.scoring.rows.forEach(function (c) { add('criterion', c.name || c.id, c.score, 'score 0-10, weight ' + c.weight + ', group ' + c.group); });
+    add('criterion', 'attractiveness_score', r.scoring.score, '0-100');
+    n.ko.forEach(function (k) { add('knockout', k.name || k.id, k.met ? 'met' : 'NOT MET'); });
+    r.tornado.bars.forEach(function (b) { add('tornado', b.id, b.low, 'EV at low (EUR); EV at high ' + b.high + (b.flips ? '; flips' : '')); });
+    var C = core(), cols = ['section', 'item', 'value', 'unit_or_note'];
+    if (C && C.csv) return C.csv(rows, cols);
+    return cols.join(',') + '\r\n' + rows.map(function (x) { return x.map(function (v) { v = String(v); if (/^[=+\-@\t\r]/.test(v) && isNaN(+v)) v = '\'' + v; return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n') + '\r\n';
+  }
+  function download(name, type, text) {
+    var a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: type }));
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function buildRecord() {
+    if (!last) return null;
+    var inputs = {}, outputs = {}, units = {}, warnings = [];
+    inputs.tender_reference = state.tenderRef; inputs.prepared_by = state.preparedBy;
+    inputs.gates = state.procedure; inputs.contract_value = state.V; units.contract_value = 'EUR';
+    inputs.margin = state.m; inputs.margin_erosion = state.r; units.margin = units.margin_erosion = '% of price';
+    inputs.opportunity_cost = state.C; inputs.strategic_value = state.S; units.opportunity_cost = units.strategic_value = 'EUR';
+    inputs.hourly_rate = state.rate; units.hourly_rate = 'EUR/h';
+    if (state.procedure === 'two') { inputs.qualification_hours = state.h1; inputs.qualification_external = state.x1; inputs.p_shortlist = state.p1; units.p_shortlist = '%'; }
+    inputs.tender_hours = state.h2; inputs.tender_external = state.x2; inputs.p_award = state.p2; units.p_award = '%';
+    inputs.bidders = state.N; inputs.hit_rate = state.h; units.hit_rate = '%';
+    inputs.criteria = (state.criteria || []).map(function (c) { return c.name + ' [' + c.group + '] w ' + c.weight + ' s ' + c.score; }).join('; ');
+    inputs.knockouts = (state.ko || []).map(function (k) { return k.name + ': ' + (k.met === true ? 'met' : (k.unclear ? 'NOT MET (unclear in import)' : 'NOT MET')); }).join('; ');
+    inputs.thresholds = 'bid ' + state.go + ', review ' + state.review;
+    if (last.ok) {
+      var mo = last.money;
+      outputs.decision = last.decision; outputs.reason = last.reason;
+      outputs.expected_value = mo.EV; outputs.expected_value_with_strategic = mo.EVs; units.expected_value = units.expected_value_with_strategic = 'EUR';
+      if (last.input.procedure === 'two') { outputs.all_costs_up_front = mo.naive; outputs.gate2 = mo.submit ? 'submit' : 'withdraw'; }
+      outputs.net_contribution = mo.M; outputs.bid_cost = mo.Btot; outputs.expected_bid_spend = mo.spend;
+      outputs.breakeven_p_award = mo.breakeven; outputs.base_rate = mo.base; outputs.p_win = mo.Pwin;
+      outputs.strategic_value_needed = mo.Sneed; outputs.bid_spend_per_win = mo.perWin; outputs.return_on_bid_spend = mo.roi;
+      outputs.attractiveness_score = last.scoring.score; units.attractiveness_score = '0-100';
+      outputs.tornado = last.tornado.bars.map(function (b) { return b.id + ': ' + Math.round(b.low) + ' .. ' + Math.round(b.high) + (b.flips ? ' (flips)' : ''); }).join('; ');
+      if (last.flags.length) warnings.push('flags: ' + last.flags.join(', '));
+    } else warnings.push('invalid input: ' + ((last && last.errors) || []).join(', '));
+    warnings.push('Engineering and commercial analysis, not legal advice. The decision rule, thresholds and weights are a stated company policy (learning assumptions).');
+    return {
+      inputs: inputs, outputs: outputs, units: units,
+      model: {
+        equations: ['M = V (m - r) - C', 'B1 = h1 rate + x1 (two gates), B2 = h2 rate + x2', 'one gate: EV = p2 M - B2', 'two gates: EV = p1 max(p2 M - B2, 0) - B1; all costs up front = p1 p2 M - B1 - B2',
+                    'EV with strategic value: same tree with payoff M + S', 'breakeven p2 = (B2 + B1/p1)/M', 'strategic value needed = (B2 + B1/p1)/p2 - M when EV < 0',
+                    'gate-2 policy: submit if EV2 >= 0 (if only S makes the bid pay: if p2 (M + S) - B2 >= 0), else withdraw', 'expected bid spend = B1 + p1 B2 if the policy submits, else B1; p_win = p1 p2 if it submits, else 0; per win = spend/p_win; return = p_win M/spend', 'score = 100 sum(w s)/(10 sum w)',
+                    'decision: knock-out not met (or unclear) -> nobid; EV < 0 and EVs < 0 -> nobid; EV < 0 <= EVs -> strategic; no score -> conditions (unscored); score >= go -> bid; >= review -> conditions; else nobid',
+                    'tornado: one input at a time over its swing (p +- dp, m +- dm, V and bid cost +- %)'],
+        ranges: ['up to 12 criteria, up to 6 knock-outs'],
+        notes: ['Raiffa 1968; Clemen 1996 ch. 3-4; Shipley / APMP bid/no-bid practice', 'Wet 17.06.2016 art. 79 par. 1-2 (classic sectors): if the authority limits the number, restricted procedure at least 5 candidates invited, competitive negotiation / dialogue / innovation partnership at least 3, fewer if fewer qualify; art. 149 (special sectors, Dir. 2014/25/EU art. 78(2)): number set by the entity, no legal minimum, sufficient competition', 'optimism flags p2 > 2/N and p2 > 2h: rule of thumb of this tool (learning assumption)']
+      },
+      warnings: warnings
+    };
+  }
+  var LIM = { V: [0, 1e11], m: [-50, 80], r: [0, 50], C: [0, 1e10], S: [0, 1e10], rate: [0, 1000], h1: [0, 100000], x1: [0, 1e8], h2: [0, 200000], x2: [0, 1e9],
+              p1: [0, 100], p2: [0, 100], N: [1, 50], h: [0, 100], go: [0, 100], review: [0, 100], dp: [0, 50], dm: [0, 20], dB: [0, 100], dV: [0, 100] };
+  var ENUM = { procedure: ['single', 'two'] };
+  var GROUPS = ['client', 'capability', 'capacity', 'risk', 'strategy'];
+  function fin(v, lo, hi) { return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi; }
+  /* permalink / project import: known keys only, numbers within the field limits, enums checked, lists rebuilt */
+  var sanitizeWarn = [];
+  function sanitize(o) {
+    var out = {};
+    sanitizeWarn = [];
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+    Object.keys(DEFAULTS).forEach(function (k) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) return;
+      var v = o[k];
+      if (ENUM[k]) { if (ENUM[k].indexOf(String(v)) >= 0) out[k] = String(v); return; }
+      if (LIM[k]) { v = typeof v === 'string' && v.trim() !== '' ? +v : v; if (fin(v, LIM[k][0], LIM[k][1])) out[k] = v; return; }
+      if (k === 'criteria' && Array.isArray(v)) {
+        out.criteria = v.slice(0, MAXC).filter(function (c) { return c && typeof c === 'object'; }).map(function (c) {
+          return { name: String(c.name == null ? '' : c.name).slice(0, 80), group: GROUPS.indexOf(c.group) >= 0 ? c.group : 'client',
+                   weight: fin(+c.weight, 0, 100) ? +c.weight : 0, score: fin(+c.score, 0, 10) ? +c.score : 0 };
+        });
+        return;
+      }
+      if (k === 'ko' && Array.isArray(v)) {
+        out.ko = v.slice(0, MAXK).filter(function (c) { return c && typeof c === 'object'; }).map(function (c) {
+          /* fail safe: only true / 1 / "true" / "1" are met; false / 0 / "false" / "0" not met; anything else not met and marked unclear */
+          var yes = [true, 1, 'true', '1'].indexOf(c.met) >= 0, no = [false, 0, 'false', '0'].indexOf(c.met) >= 0;
+          var row = { name: String(c.name == null ? '' : c.name).slice(0, 120), met: yes };
+          if (!yes && !no) { row.unclear = true; sanitizeWarn.push('ko'); }
+          return row;
+        });
+        return;
+      }
+      if (typeof v === 'string' && (k === 'tenderRef' || k === 'preparedBy')) out[k] = v.slice(0, 200);
+    });
+    /* review must not exceed go (also against the current value of the other one) */
+    var g = out.go != null ? out.go : state.go, rv = out.review != null ? out.review : state.review;
+    if (rv > g) { out.go = rv; out.review = g; sanitizeWarn.push('thresholds'); }
+    return out;
+  }
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: TOOL, file: 'bidnobid.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { var c = sanitize(o), w = sanitizeWarn.slice(); Object.keys(c).forEach(function (k) { state[k] = c[k]; }); last = solve(state); if (ui) { ui.sync(); ui.run(); } if (w.indexOf('thresholds') >= 0) showUse(S.impWarn[lang()] + ': ' + S.nThresholds[lang()], 'warn'); }
+        },
+        record: buildRecord
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+</script>
+</body>
+</html>

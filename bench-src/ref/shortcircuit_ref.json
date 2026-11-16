@@ -1,0 +1,781 @@
+{
+ "benchmark_id": "iec60909-sequence-fault-kernel-v1",
+ "tool": "shortcircuit",
+ "file": "shortcircuit.html",
+ "generator": "bench-src/ref/gen_shortcircuit.py",
+ "reference": "Independent Python complex-arithmetic implementation of the cited IEC 60909-0:2016 sequence-fault equations, written in ohms from the published closed forms. It constructs Z1/Z2/Z0 from |Z| and X/R, applies the equivalent voltage source c Un/sqrt3 at the fault point for 3-phase, line-line, line-earth and line-line-earth faults, the Method-C peak factor and the clause 4.8 thermal factor. No JavaScript from shortcircuit.html is imported, transcribed or read; the page solves a per-unit nodal admittance system with a complex sparse LU, this reference forms no matrix.",
+ "citations": [
+  "IEC 60909-0:2016, clause 4.2 - equivalent voltage source and initial symmetrical short-circuit currents for balanced and unbalanced faults; eq. (29) three-phase, eq. (34) line-to-line, eq. (52) line-to-earth",
+  "IEC 60909-0:2016, clause 4.2 - line-to-line short circuit with earth connection: Ik2E'' = c Un |Z0 - a Z2| / |Z1 Z2 + Z1 Z0 + Z2 Z0| and the earth current IkE2E'' = sqrt3 c Un |Z2| / |Z1 Z2 + Z1 Z0 + Z2 Z0|",
+  "IEC 60909-0:2016, clause 4.3.1.2, equations (55)-(56) - ip = kappa sqrt(2) Ik'' and kappa = 1.02 + 0.98 exp(-3 R/X), read by Method C at fc = 0.4 f",
+  "IEC 60909-0:2016, clause 4.8, equations (68)-(69) - thermal equivalent short-circuit current Ith = Ik'' sqrt(m + n) and the a.c. factor m = [exp(4 f Tk ln(kappa-1)) - 1] / (2 f Tk ln(kappa-1))"
+ ],
+ "tolerance": {
+  "currents": "abs(error) <= 1e-6 A + 1e-10*|reference|",
+  "kappa": "abs(error) <= 1e-12",
+  "thermal_m": "abs(error) <= 1e-12",
+  "basis": "Both implementations evaluate closed-form analytical equations in IEEE-754 double precision; tolerance covers floating-point evaluation order only and is far tighter than the UI display resolution."
+ },
+ "not_benchmarked": [
+  "n, the d.c. factor of eq. (68): clause 4.8 reads it from Figure 23 as a function of Ik''/Ik and Tk, the page takes it as a user input, and so does this reference. What eq. (68) is graded on is the sqrt(m + n) combination with the case's own n.",
+  "The breaking current Ib (clause 4.5), the steady-state current Ik (4.6) and the near-generator a.c. decay: the page computes Ib only for a 3-phase maximum case with a source breakdown, and no case here has a machine to decay.",
+  "The transformer impedance correction K_T (6.3.3), the motor locked-rotor impedance (6.8) and the transformer zero-sequence vector-group construction: every case here is a Thevenin equivalent with gen and motor off, so the kernel's network mode is untouched by these 12 cases.",
+  "The Z_f terms of eq. (34), eq. (52) and the L-L-E form are implemented in this reference and exercised by no case: only the 3-phase case quotes a fault resistance.",
+  "IEC 60909-0:2026 is the current edition. This is the 2016 equation set; the edition delta is not verified by this benchmark.",
+  "I_res for a 3-phase or line-to-line fault is a structural zero (no earth path in the boundary conditions), not an independently computed quantity. It is graded, because a kernel that leaked a residual current into a balanced fault would be wrong, but a pass there is weaker evidence than a pass on the two earth-fault cases."
+ ],
+ "graded_quantities": [
+  "Ik_A",
+  "ip_A",
+  "Ith_A",
+  "Ires_A",
+  "kappa",
+  "m"
+ ],
+ "cases": [
+  {
+   "id": "3ph-max-xr10",
+   "note": "Three-phase maximum case, eq. (29) with c_max = 1.05 and X/R = 10: the baseline every other case is a one-assumption step away from.",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 3031.0889132455354,
+    "ip_A": 7484.423866165855,
+    "Ith_A": 3082.375294563033,
+    "Ires_A": 0.0,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z0_ohm": [
+     0.023880892565039738,
+     0.23880892565039738
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "3ph-min-xr8",
+   "note": "The same network on its minimum data set: c_min = 0.95, |Z1| min and X/R min. Checks that the min case reads the min impedance pair and the min voltage factor, and that kappa follows the min X/R.",
+   "fault_type": "3ph",
+   "case": "min",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "min",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 1828.2758524338149,
+    "ip_A": 4378.779494231471,
+    "Ith_A": 1853.0879370282082,
+    "Ires_A": 0.0,
+    "kappa": 1.6935434932151527,
+    "m": 0.027326785193412265
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.014884168150705016,
+     0.11907334520564013
+    ],
+    "Z2_ohm": [
+     0.014884168150705016,
+     0.11907334520564013
+    ],
+    "Z0_ohm": [
+     0.04465250445211505,
+     0.3572200356169204
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.6935434932151527,
+    "kappa_method_c_RX": 0.12499999999999999,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "ll-symmetric",
+   "note": "Line-to-line with Z2 = Z1, where eq. (34) must reduce to (sqrt3/2) Ik3''.",
+   "fault_type": "ll",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "ll",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2625.0,
+    "ip_A": 6481.701200790174,
+    "Ith_A": 2669.4153090891286,
+    "Ires_A": 0.0,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "eq. (34)  Ik2'' = c Un / |Z1 + Z2 + 2 Zf|",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z0_ohm": [
+     0.023880892565039738,
+     0.23880892565039738
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "ll-asymmetric",
+   "note": "Line-to-line with an explicitly quoted negative-sequence impedance unequal to Z1: the general |Z1 + Z2| form of eq. (34), which the sqrt3/2 shortcut cannot reach.",
+   "fault_type": "ll",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "ll",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": 0.11,
+    "importXR2": 4,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2216.227242535808,
+    "ip_A": 5472.351534921235,
+    "Ith_A": 2253.7260684363696,
+    "Ires_A": 0.0,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "eq. (34)  Ik2'' = c Un / |Z1 + Z2 + 2 Zf|",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.02667891875399663,
+     0.10671567501598651
+    ],
+    "Z0_ohm": [
+     0.023880892565039738,
+     0.23880892565039738
+    ],
+    "Z2_basis": "explicit |Z2|, X/R",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "lg-sequence",
+   "note": "Line-to-earth with all three sequence impedances quoted explicitly, eq. (52), and the residual current 3 I0 = Ik1''.",
+   "fault_type": "lg",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "lg",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": 0.09,
+    "importXR2": 6,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": 0.25,
+    "importXR0": 3,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 1739.7800469545355,
+    "ip_A": 4295.898826459427,
+    "Ith_A": 1769.2173302050437,
+    "Ires_A": 1739.7800469545355,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "eq. (52)  Ik1'' = sqrt3 c Un / |Z1 + Z2 + Z0 + 3 Zf|",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.014795908857482156,
+     0.08877545314489294
+    ],
+    "Z0_ohm": [
+     0.07905694150420949,
+     0.23717082451262844
+    ],
+    "Z2_basis": "explicit |Z2|, X/R",
+    "Z0_basis": "explicit |Z0|, X/R",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "llg-sequence",
+   "note": "Line-to-line-with-earth on the same sequence data: the faulted-phase current is the larger of Ik2E,L2'' and Ik2E,L3'', and the earth current IkE2E'' is separately graded and is NOT equal to the phase current.",
+   "fault_type": "llg",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "llg",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": 0.09,
+    "importXR2": 6,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": 0.25,
+    "importXR0": 3,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2664.8888191493807,
+    "ip_A": 6580.1954510677515,
+    "Ith_A": 2709.9790517553547,
+    "Ires_A": 1320.924949975939,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "clause 4.2 L-L-E  Ik2E'' = c Un |Z0' - a Z2| / |D| (and its a^2 twin), IkE2E'' = sqrt3 c Un |Z2| / |D|, D = Z1 Z2 + Z1 Z0' + Z2 Z0'",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.014795908857482156,
+     0.08877545314489294
+    ],
+    "Z0_ohm": [
+     0.07905694150420949,
+     0.23717082451262844
+    ],
+    "Z2_basis": "explicit |Z2|, X/R",
+    "Z0_basis": "explicit |Z0|, X/R",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "3ph-rf20mohm",
+   "note": "Three-phase through a 20 mOhm fault resistance: the only case that exercises Z_f, and it reduces Ik'' without touching kappa, because eq. (56) is read on the source impedance, not on Z1 + Z_f.",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0.02,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2874.068440349548,
+    "ip_A": 7096.705851796879,
+    "Ith_A": 2922.698016776761,
+    "Ires_A": 0.0,
+    "kappa": 1.7460018562680837,
+    "m": 0.034126525881093245
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z0_ohm": [
+     0.023880892565039738,
+     0.23880892565039738
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "thermal-200ms",
+   "note": "Clause 4.8 on a 200 ms fault with n = 0.7: m rises by a factor five against the 1 s case while Ik'' and i_p are unchanged, so the case isolates eq. (69) and eq. (68).",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 0.2,
+    "thermalN": 0.7,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 3031.0889132455354,
+    "ip_A": 7484.423866165855,
+    "Ith_A": 2828.2370041884433,
+    "Ires_A": 0.0,
+    "kappa": 1.7460018562680837,
+    "m": 0.17063124373995336
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z2_ohm": [
+     0.007960297521679913,
+     0.07960297521679913
+    ],
+    "Z0_ohm": [
+     0.023880892565039738,
+     0.23880892565039738
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7460018562680837,
+    "kappa_method_c_RX": 0.1,
+    "n_input": 0.7
+   }
+  },
+  {
+   "id": "pure-reactive",
+   "note": "A numerically pure reactance (X/R = 1e12). kappa must approach its ceiling of 2 and m its ceiling of 2, which is where eq. (69) is a 0/0 limit and an implementation that does not take the limit carefully loses all its digits.",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.1,
+    "importXR": 1000000000000.0,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2424.871130596428,
+    "ip_A": 6858.5712797828155,
+    "Ith_A": 4199.999999588386,
+    "Ires_A": 0.0,
+    "kappa": 1.99999999999706,
+    "m": 1.9999999994119815
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     1e-13,
+     0.1
+    ],
+    "Z2_ohm": [
+     1e-13,
+     0.1
+    ],
+    "Z0_ohm": [
+     3.0000000000000003e-13,
+     0.30000000000000004
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.99999999999706,
+    "kappa_method_c_RX": 9.999999999999998e-13,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "resistive-rich",
+   "note": "The other end: X/R = 0.5, kappa just above 1.02 and m near zero, where ln(kappa-1) is large and negative.",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.1,
+    "importXR": 0.5,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 2424.871130596428,
+    "ip_A": 3506.2016949537965,
+    "Ith_A": 2428.061842050469,
+    "Ires_A": 0.0,
+    "kappa": 1.022429177133133,
+    "m": 0.002633385853999372
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.08944271909999159,
+     0.044721359549995794
+    ],
+    "Z2_ohm": [
+     0.08944271909999159,
+     0.044721359549995794
+    ],
+    "Z0_ohm": [
+     0.2683281572999748,
+     0.1341640786499874
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.022429177133133,
+    "kappa_method_c_RX": 2.0,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "690v",
+   "note": "690 V system voltage, to check that Un enters eq. (29) linearly and that nothing in the kernel is pinned to 400 V.",
+   "fault_type": "3ph",
+   "case": "max",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 690,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "max",
+    "faultType": "3ph",
+    "importZ_Ohm": 0.06,
+    "importXR": 12,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": -1,
+    "importXR2Min": -1,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": -1,
+    "importXR0Min": -1
+   },
+   "reference": {
+    "Ik_A": 6971.504500464731,
+    "ip_A": 17581.16287681182,
+    "Ith_A": 7112.736429817306,
+    "Ires_A": 0.0,
+    "kappa": 1.7832247674099768,
+    "m": 0.04092732060337679
+   },
+   "detail": {
+    "law": "eq. (29)  Ik'' = c Un / (sqrt3 |Z1 + Zf|)",
+    "Z1_ohm": [
+     0.004982728791224398,
+     0.05979274549469278
+    ],
+    "Z2_ohm": [
+     0.004982728791224398,
+     0.05979274549469278
+    ],
+    "Z0_ohm": [
+     0.014948186373673195,
+     0.17937823648407836
+    ],
+    "Z2_basis": "Z2/Z1 ratio on Z1",
+    "Z0_basis": "Z0/Z1 ratio on Z1",
+    "kappa_method_c": 1.7832247674099768,
+    "kappa_method_c_RX": 0.08333333333333331,
+    "n_input": 1.0
+   }
+  },
+  {
+   "id": "lg-min-sequence",
+   "note": "Line-to-earth on the minimum data set with explicit minimum sequence impedances: checks that the min branch of every one of the three sequence lookups is taken, not just the primary one.",
+   "fault_type": "lg",
+   "case": "min",
+   "state": {
+    "sourceMode": "thevenin",
+    "genOn": false,
+    "motorOn": false,
+    "Rf": 0,
+    "frequency": 50,
+    "thermalTime": 1,
+    "thermalN": 1,
+    "importV_V": 400,
+    "cMax": 1.05,
+    "cMin": 0.95,
+    "caseName": "min",
+    "faultType": "lg",
+    "importZ_Ohm": 0.08,
+    "importXR": 10,
+    "importZMin_Ohm": 0.12,
+    "importXRMin": 8,
+    "importZ2": 1,
+    "importZ0": 3,
+    "importZ2_Ohm": -1,
+    "importXR2": -1,
+    "importZ2Min_Ohm": 0.14,
+    "importXR2Min": 5,
+    "importZ0_Ohm": -1,
+    "importXR0": -1,
+    "importZ0Min_Ohm": 0.3,
+    "importXR0Min": 2.5
+   },
+   "reference": {
+    "Ik_A": 1182.5887090707113,
+    "ip_A": 2832.3380098769617,
+    "Ith_A": 1198.6379781406802,
+    "Ires_A": 1182.5887090707113,
+    "kappa": 1.6935434932151527,
+    "m": 0.027326785193412265
+   },
+   "detail": {
+    "law": "eq. (52)  Ik1'' = sqrt3 c Un / |Z1 + Z2 + Z0 + 3 Zf|",
+    "Z1_ohm": [
+     0.014884168150705016,
+     0.11907334520564013
+    ],
+    "Z2_ohm": [
+     0.02745625891934577,
+     0.13728129459672886
+    ],
+    "Z0_ohm": [
+     0.11141720290623112,
+     0.2785430072655778
+    ],
+    "Z2_basis": "explicit |Z2|, X/R",
+    "Z0_basis": "explicit |Z0|, X/R",
+    "kappa_method_c": 1.6935434932151527,
+    "kappa_method_c_RX": 0.12499999999999999,
+    "n_input": 1.0
+   }
+  }
+ ]
+}

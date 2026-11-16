@@ -1,0 +1,4838 @@
+{
+ "tool": "workatheight",
+ "author_note": "independent reference authored without access to the tool code",
+ "reference": "Hand-built side-elevation scenarios for fall arrest (energy-absorbing lanyard and SRL), restraint and guardrail: anchor above / level with / below the D-ring, zero free fall, reserve and restraint boundaries at exactly zero and +/-0.01 m, obstacles under and away from the fall band, swing geometry at 0/30/60 deg and 3-4-5 triangles, user free-fall and rail-height limits, missing manufacturer data and invalid inputs, three OSHA Technical Manual worked examples, plus 28 seeded random cases. Numerical references are recomputed by ref.py with a coordinate construction of the lowest body position (pendulum settle below the anchor, then declared deployment and harness shift), not by re-summing the tool's component formula.",
+ "reference_citations": [
+  "OSHA Technical Manual Section V Chapter 4 'Fall Protection in Construction', III.B (Total fall clearance distance; Examples 1b, 2, 4; swing fall) https://www.osha.gov/otm/section-5-construction-operations/chapter-4 (read 2026-09-16)",
+  "29 CFR 1926.502 (eCFR current) https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1926/subpart-M/section-1926.502 - (b)(1), (d)(16)(iii), (d)(16)(iv)",
+  "29 CFR 1926 Subpart M Appendix C, para (k) (tie-off at or above harness connection) and (m) (swing) https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926SubpartMAppC",
+  "Directive 2009/104/EC Annex II point 4.1.1 https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32009L0104",
+  "ASSP 2013 PDC Session No. 617 'Fall Arrest Clearance Calculations Made Easy', pp. 7-14 https://aeasseincludes.assp.org/proceedings/2013/docs/617.pdf",
+  "Spec specs/05.md acceptance criteria; rigid-body plane geometry (ref.py)"
+ ],
+ "tolerance": "Numbers: relative 1e-9 (absolute 1e-9 m where the reference is 0). Every quantity is a closed-form sum/square root of the inputs with no iteration or discretisation, so any difference above floating-point rounding is a model difference, not numerical error. Categorical and boolean checks are exact.",
+ "cases": [
+  {
+   "id": "lanyard-anchor-at-dring-level",
+   "intent": "headline: lanyard, anchor level with D-ring, FF = L",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-anchor-above-dring",
+   "intent": "headline: anchor 1 m above D-ring shortens free fall",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 6.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-anchor-below-dring",
+   "intent": "headline/learn: anchor at foot level (below D-ring) lengthens free fall",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 12.0,
+    "anchor_height_m": 0.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 6.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 12.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 3.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k): tie-off should be at or above the harness connection; below D-ring must be flagged (edge loading / product limits)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-anchor-overhead-ff-zero",
+   "intent": "boundary: anchor exactly L above D-ring gives zero free fall",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 3.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 7.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.0,
+     "tol": {
+      "abs": 1e-09,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-with-allowance-and-margin",
+   "intent": "headline: every summed term visible incl. worker allowance U",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.5,
+    "worker_allowance_m": 0.5,
+    "margin_m": 0.75,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 4.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-zero-margin",
+   "intent": "boundary: zero margin accepted, sum unchanged otherwise",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 0.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 6.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "osha-otm-example-1b",
+   "intent": "source: OSHA worked example reproduced (Example 1b, 6 ft lanyard, anchor 2 ft above D-ring, FF 4 ft)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.096,
+    "anchor_height_m": 2.1336,
+    "dring_height_m": 1.524,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.8288000000000002,
+    "absorber_extension_m": 1.0668,
+    "dring_shift_m": 0.3048,
+    "worker_allowance_m": 1.524,
+    "margin_m": 0.6096,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.7244,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "source",
+     "derivation": "OSHA Technical Manual Sec. V Ch. 4, III.B.3 Example 1b, 6 ft lanyard, anchor 2 ft above D-ring, FF 4 ft: FF + 3.5 ft decel + 1 ft D-ring shift + 5 ft D-ring height + 2 ft SF = 15.5 ft. OSHA measures from the initial D-ring level, so the 5 ft D-ring height is entered here as worker allowance U; own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M) gives the same value"
+    },
+    "available_clearance_m": {
+     "ref": 6.096,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.371599999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.2192000000000003,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "osha-otm-example-2",
+   "intent": "source: OSHA worked example reproduced (Example 2, 2 ft lanyard, anchor 1 ft below D-ring, FF 3 ft)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.096,
+    "anchor_height_m": 1.2192,
+    "dring_height_m": 1.524,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 0.6096,
+    "absorber_extension_m": 1.0668,
+    "dring_shift_m": 0.3048,
+    "worker_allowance_m": 1.524,
+    "margin_m": 0.6096,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.4196,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "source",
+     "derivation": "OSHA Technical Manual Sec. V Ch. 4, III.B.3 Example 2, 2 ft lanyard, anchor 1 ft below D-ring, FF 3 ft: FF + 3.5 ft decel + 1 ft D-ring shift + 5 ft D-ring height + 2 ft SF = 14.5 ft. OSHA measures from the initial D-ring level, so the 5 ft D-ring height is entered here as worker allowance U; own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M) gives the same value"
+    },
+    "available_clearance_m": {
+     "ref": 6.096,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.6764000000000001,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.9144,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "osha-otm-example-4",
+   "intent": "source: OSHA worked example reproduced (Example 4, 6 ft lanyard, anchor 4 ft above D-ring, FF 2 ft)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.096,
+    "anchor_height_m": 2.7432,
+    "dring_height_m": 1.524,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.8288000000000002,
+    "absorber_extension_m": 1.0668,
+    "dring_shift_m": 0.3048,
+    "worker_allowance_m": 1.524,
+    "margin_m": 0.6096,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.1148,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "source",
+     "derivation": "OSHA Technical Manual Sec. V Ch. 4, III.B.3 Example 4, 6 ft lanyard, anchor 4 ft above D-ring, FF 2 ft: FF + 3.5 ft decel + 1 ft D-ring shift + 5 ft D-ring height + 2 ft SF = 13.5 ft. OSHA measures from the initial D-ring level, so the 5 ft D-ring height is entered here as worker allowance U; own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M) gives the same value"
+    },
+    "available_clearance_m": {
+     "ref": 6.096,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.9811999999999994,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.6096000000000004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "osha-1b-surface-reference",
+   "intent": "physics: OSHA 1b geometry measured from the working surface (15.5 - 5 = 10.5 ft)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.096,
+    "anchor_height_m": 2.1336,
+    "dring_height_m": 1.524,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.8288000000000002,
+    "absorber_extension_m": 1.0668,
+    "dring_shift_m": 0.3048,
+    "worker_allowance_m": 0.0,
+    "margin_m": 0.6096,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.2004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "feet end 4+3.5+1 = 8.5 ft below surface; + 2 ft margin = 10.5 ft; own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.096,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 2.8956,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.2192000000000003,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "reserve-exactly-zero",
+   "intent": "boundary: available == required is not contact (ok)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 5.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 0.0,
+     "tol": {
+      "abs": 1e-09,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "reserve-just-negative",
+   "intent": "boundary: available 0.01 m short -> clearance finding",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 4.99,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 4.99,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -0.009999999999999787,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "reserve-just-positive",
+   "intent": "boundary: available 0.01 m more -> ok",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 5.01,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 5.01,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 0.009999999999999787,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "low-platform-negative-reserve",
+   "intent": "headline: 3 m platform with 2 m lanyard is insufficient",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 3.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "obstacle-under-fall-band",
+   "intent": "headline: obstacle directly below the edge reduces available depth",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": {
+     "top_height_m": 4.0,
+     "x_from_m": 0.0,
+     "x_to_m": 3.0
+    }
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "obstacle-close-makes-contact",
+   "intent": "boundary: obstacle close to worker turns a positive reserve negative",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": {
+     "top_height_m": 6.0,
+     "x_from_m": 0.0,
+     "x_to_m": 2.0
+    }
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 4.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -1.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "obstacle-far-away-ignored",
+   "intent": "negative-control: obstacle 8-10 m out does not reduce depth",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": {
+     "top_height_m": 6.0,
+     "x_from_m": 8.0,
+     "x_to_m": 10.0
+    }
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "srl-overhead-vertical",
+   "intent": "headline: SRL directly overhead, no free fall beyond locking (dx = 0)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 3.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.5
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 1.75,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 8.25,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "srl-overhead-offset",
+   "intent": "headline: SRL overhead with 2 m offset adds pendulum drop to clearance",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 3.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 2.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.5
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.75,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 7.25,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "anchor not above the D-ring -> pendulum"
+    }
+   }
+  },
+  {
+   "id": "srl-offset-3-4-5",
+   "intent": "analytic: 3-4-5 triangle, line 5 m, drop 1 m",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 5.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 3.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 1.0
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.25,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 6.75,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "srl-anchor-level-dring",
+   "intent": "boundary: SRL anchor at D-ring level, pendulum drop = dx",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 1.5,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.75
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 6.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "swing-none-dx0",
+   "intent": "negative: anchor directly above D-ring -> no swing warning",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 3.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 3.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    }
+   }
+  },
+  {
+   "id": "swing-30deg",
+   "intent": "analytic: dx = L/2 -> 30 deg, drop L(1-cos30)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 1.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 30.000000000000004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.2679491924311228,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 1.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "swing-60deg",
+   "intent": "analytic: dx = L*sqrt3/2 -> 60 deg, drop L/2",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 1.7320508075688772,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 59.99999999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.9999999999999998,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 1.7320508075688772,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "swing-3-4-5",
+   "intent": "analytic: dx 1.2, L 2 -> taut vertical 1.6, drop 0.4",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 1.2,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 36.86989764584402,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.3999999999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 1.2,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "swing-setback-side",
+   "intent": "physics: anchor set back (negative offset); angle and drop use the offset magnitude",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": -1.2,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 36.86989764584402,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.3999999999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 1.2,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "lanyard-missing-absorber-extension",
+   "intent": "insufficient: no manufacturer extension -> incomplete, never ok",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "is_incomplete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: if manufacturer data missing the calculation is explicitly incomplete"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "an incomplete sum must not show a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "srl-missing-arrest-distance",
+   "intent": "insufficient: SRL arrest distance missing -> incomplete",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 3.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "is_incomplete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: manufacturer data missing -> incomplete"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "missing-dring-shift",
+   "intent": "insufficient: harness/D-ring shift term missing",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "is_incomplete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: all clearance terms explicit; no hidden magic constants"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "missing-working-height",
+   "intent": "insufficient: no available depth",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "is_incomplete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "available clearance cannot be computed"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "srl-anchored-below-dring",
+   "intent": "insufficient: SRL below D-ring is product-specific; not a computed pass",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 10.0,
+    "anchor_height_m": 0.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 1.0
+   },
+   "checks": {
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "SRL behaviour below the D-ring (leading-edge use) depends on product instructions (ASSP 2013 Session 617 p.14 gives a separate leading-edge value); must not be shown ok without product data"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k)"
+    }
+   }
+  },
+  {
+   "id": "lanyard-shorter-than-anchor-height",
+   "intent": "negative: L < hA - hD cannot connect",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 4.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "a 2 m connector cannot reach a D-ring 2.5 m below the anchor"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "invalid geometry must not be ok"
+    }
+   }
+  },
+  {
+   "id": "lanyard-too-short-for-offset",
+   "intent": "negative: horizontal offset larger than L (connector cannot reach)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 3.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "hypot(dx, dv) = 3 > L = 2"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "negative-connector-length",
+   "intent": "negative: negative length refused",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": -2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "lengths are non-negative SI metres"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "negative-absorber-extension",
+   "intent": "negative: negative extension refused",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": -1.0,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a negative extension would hide a clearance term"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "negative-margin",
+   "intent": "negative: negative margin refused",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": -0.5,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "margin is an explicit non-negative allowance"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "nonnumeric-working-height",
+   "intent": "negative: non-numeric height",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": "ten",
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "input must be a number"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "must not be ok"
+    }
+   }
+  },
+  {
+   "id": "freefall-over-user-limit",
+   "intent": "boundary: FF 2.5 m vs user limit 1.8 m -> finding",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 12.0,
+    "anchor_height_m": 1.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "freefall_limit_m": 1.8
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 12.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 6.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "freefall_exceeds_limit": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1926.502(d)(16)(iii): free fall not more than 6 ft (1.8 m); limit entered by the user"
+    }
+   }
+  },
+  {
+   "id": "freefall-under-user-limit",
+   "intent": "boundary: FF 1.5 m vs user limit 1.8 m -> no free-fall finding",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.0,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.0,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "freefall_limit_m": 1.8
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "freefall_exceeds_limit": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1926.502(d)(16)(iii)"
+    }
+   }
+  },
+  {
+   "id": "restraint-short-lanyard-ok",
+   "intent": "headline: restraint keeps worker 0.7 m behind edge",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.5,
+    "anchor_setback_m": 2.5,
+    "body_allowance_m": 0.3
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": 0.7,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "restraint-too-long",
+   "intent": "headline: lanyard reaches past edge -> restraint fails",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "connector_length_m": 2.5,
+    "anchor_setback_m": 2.0,
+    "body_allowance_m": 0.3
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 2.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -0.8,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "restraint-exact-boundary",
+   "intent": "boundary: reserve exactly 0 -> ok",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.5,
+    "anchor_setback_m": 2.0,
+    "body_allowance_m": 0.5
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -0.0,
+     "tol": {
+      "abs": 1e-09,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "restraint-just-over",
+   "intent": "boundary: 0.01 m over the edge -> fail",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.5,
+    "anchor_setback_m": 1.99,
+    "body_allowance_m": 0.5
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -0.010000000000000009,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "restraint-overhead-anchor-3-4-5",
+   "intent": "analytic: anchor 1.2 m above D-ring, L 2 -> reach 1.6",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.7,
+    "dring_height_m": 1.5,
+    "connector_length_m": 2.0,
+    "anchor_setback_m": 2.5,
+    "body_allowance_m": 0.3
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.5999999999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": 0.6000000000000001,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "restraint-zero-setback",
+   "intent": "boundary: anchor at the edge (zero edge offset) never restrains",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.5,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.0,
+    "anchor_setback_m": 0.0,
+    "body_allowance_m": 0.3
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -1.3,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "guardrail-above-min",
+   "intent": "headline: 1.1 m rail vs 1.0 m minimum ok",
+   "inputs": {
+    "mode": "guardrail",
+    "working_height_m": 10.0,
+    "rail_height_m": 1.1,
+    "rule_min_rail_height_m": 1.0
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "guardrail",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "collective mode"
+    },
+    "guardrail_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "rail height compared with the user rule-pack minimum; e.g. 29 CFR 1926.502(b)(1) 42 in +/- 3 in -> minimum 39 in (0.9906 m)"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no arrest clearance in guardrail mode"
+    },
+    "rescue_required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "collective protection prevents the fall; no arrest to rescue from"
+    }
+   }
+  },
+  {
+   "id": "guardrail-below-min",
+   "intent": "boundary: 0.95 m rail vs 1.0 m -> finding",
+   "inputs": {
+    "mode": "guardrail",
+    "working_height_m": 10.0,
+    "rail_height_m": 0.95,
+    "rule_min_rail_height_m": 1.0
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "guardrail",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "collective mode"
+    },
+    "guardrail_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "rail height compared with the user rule-pack minimum; e.g. 29 CFR 1926.502(b)(1) 42 in +/- 3 in -> minimum 39 in (0.9906 m)"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no arrest clearance in guardrail mode"
+    },
+    "rescue_required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "collective protection prevents the fall; no arrest to rescue from"
+    }
+   }
+  },
+  {
+   "id": "guardrail-exact-min",
+   "intent": "boundary: equal to minimum -> ok",
+   "inputs": {
+    "mode": "guardrail",
+    "working_height_m": 10.0,
+    "rail_height_m": 1.0,
+    "rule_min_rail_height_m": 1.0
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "guardrail",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "collective mode"
+    },
+    "guardrail_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "rail height compared with the user rule-pack minimum; e.g. 29 CFR 1926.502(b)(1) 42 in +/- 3 in -> minimum 39 in (0.9906 m)"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no arrest clearance in guardrail mode"
+    },
+    "rescue_required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "collective protection prevents the fall; no arrest to rescue from"
+    }
+   }
+  },
+  {
+   "id": "guardrail-osha-min",
+   "intent": "source: 0.99 m rail vs OSHA minimum 39 in = 0.9906 m -> finding",
+   "inputs": {
+    "mode": "guardrail",
+    "working_height_m": 10.0,
+    "rail_height_m": 0.99,
+    "rule_min_rail_height_m": 0.9905999999999999
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "guardrail",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "collective mode"
+    },
+    "guardrail_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "rail height compared with the user rule-pack minimum; e.g. 29 CFR 1926.502(b)(1) 42 in +/- 3 in -> minimum 39 in (0.9906 m)"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no arrest clearance in guardrail mode"
+    },
+    "rescue_required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "collective protection prevents the fall; no arrest to rescue from"
+    }
+   }
+  },
+  {
+   "id": "guardrail-osha-nominal",
+   "intent": "source: 42 in rail vs OSHA minimum 39 in -> ok",
+   "inputs": {
+    "mode": "guardrail",
+    "working_height_m": 10.0,
+    "rail_height_m": 1.0668,
+    "rule_min_rail_height_m": 0.9905999999999999
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "guardrail",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "collective mode"
+    },
+    "guardrail_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "rail height compared with the user rule-pack minimum; e.g. 29 CFR 1926.502(b)(1) 42 in +/- 3 in -> minimum 39 in (0.9906 m)"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no arrest clearance in guardrail mode"
+    },
+    "rescue_required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "collective protection prevents the fall; no arrest to rescue from"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-01",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.54,
+    "anchor_height_m": 3.283,
+    "dring_height_m": 1.541,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.994,
+    "absorber_extension_m": 1.588,
+    "dring_shift_m": 0.065,
+    "worker_allowance_m": 0.252,
+    "margin_m": 1.299,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.456,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.54,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.084,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.252,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-02",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.831,
+    "anchor_height_m": 2.533,
+    "dring_height_m": 1.502,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.993,
+    "absorber_extension_m": 1.266,
+    "dring_shift_m": 0.146,
+    "worker_allowance_m": 0.087,
+    "margin_m": 0.403,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.8640000000000003,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.831,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.967,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.9620000000000002,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-03",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 4.093,
+    "anchor_height_m": 1.84,
+    "dring_height_m": 1.518,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.197,
+    "absorber_extension_m": 1.006,
+    "dring_shift_m": 0.077,
+    "worker_allowance_m": 0.242,
+    "margin_m": 1.208,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.408,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 4.093,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -0.3150000000000004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.875,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-04",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 3.291,
+    "anchor_height_m": 2.151,
+    "dring_height_m": 1.498,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.715,
+    "absorber_extension_m": 1.62,
+    "dring_shift_m": 0.287,
+    "worker_allowance_m": 0.015,
+    "margin_m": 0.113,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.0970000000000004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.291,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 0.1939999999999995,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.0620000000000003,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-05",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 6.523,
+    "anchor_height_m": 2.226,
+    "dring_height_m": 1.362,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.037,
+    "absorber_extension_m": 0.824,
+    "dring_shift_m": 0.542,
+    "worker_allowance_m": 0.499,
+    "margin_m": 0.67,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.708,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.523,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.8149999999999995,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.17300000000000004,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-06",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 3.106,
+    "anchor_height_m": 0.185,
+    "dring_height_m": 1.506,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.053,
+    "absorber_extension_m": 1.22,
+    "dring_shift_m": 0.129,
+    "worker_allowance_m": 0.291,
+    "margin_m": 1.344,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 6.3580000000000005,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.106,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -3.2520000000000007,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 3.3739999999999997,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-07",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 8.074,
+    "anchor_height_m": 0.547,
+    "dring_height_m": 1.37,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.141,
+    "absorber_extension_m": 0.647,
+    "dring_shift_m": 0.1,
+    "worker_allowance_m": 0.332,
+    "margin_m": 1.275,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.318,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 8.074,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.7560000000000002,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.964,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-08",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 4.184,
+    "anchor_height_m": 1.199,
+    "dring_height_m": 1.229,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.493,
+    "absorber_extension_m": 0.982,
+    "dring_shift_m": 0.327,
+    "worker_allowance_m": 0.374,
+    "margin_m": 0.671,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.877,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 4.184,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -0.6929999999999996,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 2.5229999999999997,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-09",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 7.224,
+    "anchor_height_m": 1.923,
+    "dring_height_m": 1.527,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.577,
+    "absorber_extension_m": 1.076,
+    "dring_shift_m": 0.284,
+    "worker_allowance_m": 0.09,
+    "margin_m": 1.454,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.085,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 7.224,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.1390000000000002,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.1809999999999998,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-10",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 8.651,
+    "anchor_height_m": 1.526,
+    "dring_height_m": 1.257,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.937,
+    "absorber_extension_m": 1.591,
+    "dring_shift_m": 0.159,
+    "worker_allowance_m": 0.43,
+    "margin_m": 0.492,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.34,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 8.651,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 4.311,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 1.668,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-11",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 5.713,
+    "anchor_height_m": 0.625,
+    "dring_height_m": 1.561,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 2.413,
+    "absorber_extension_m": 0.645,
+    "dring_shift_m": 0.593,
+    "worker_allowance_m": 0.288,
+    "margin_m": 0.202,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 5.077,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 5.713,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 0.6360000000000001,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 3.3489999999999998,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    },
+    "anchor_below_dring_flag": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "OSHA Subpart M App. C (k)"
+    }
+   }
+  },
+  {
+   "id": "random-lanyard-12",
+   "intent": "randomized lanyard (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 7.284,
+    "anchor_height_m": 2.617,
+    "dring_height_m": 1.355,
+    "anchor_offset_m": 0.0,
+    "connector_length_m": 1.773,
+    "absorber_extension_m": 0.996,
+    "dring_shift_m": 0.491,
+    "worker_allowance_m": 0.234,
+    "margin_m": 0.59,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.8219999999999996,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 7.284,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 4.462,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    },
+    "free_fall_m": {
+     "ref": 0.5109999999999999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "D-ring drop until lanyard taut = L - (hA - hD) with dx = 0 (OSHA OTM V-4 III.B.2)"
+    }
+   }
+  },
+  {
+   "id": "random-srl-01",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 5.644,
+    "anchor_height_m": 4.227,
+    "dring_height_m": 1.57,
+    "anchor_offset_m": 1.163,
+    "dring_shift_m": 0.029,
+    "worker_allowance_m": 0.363,
+    "margin_m": 0.529,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 1.433
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.597382388582581,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 5.644,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.0466176114174193,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-02",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 3.629,
+    "anchor_height_m": 2.264,
+    "dring_height_m": 1.322,
+    "anchor_offset_m": 1.391,
+    "dring_shift_m": 0.414,
+    "worker_allowance_m": 0.115,
+    "margin_m": 0.145,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.318
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 1.7299538684142493,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.629,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.8990461315857508,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-03",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 7.678,
+    "anchor_height_m": 2.856,
+    "dring_height_m": 1.458,
+    "anchor_offset_m": 0.841,
+    "dring_shift_m": 0.469,
+    "worker_allowance_m": 0.378,
+    "margin_m": 0.956,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.339
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 2.375467131143009,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 7.678,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.302532868856991,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-04",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 8.438,
+    "anchor_height_m": 1.971,
+    "dring_height_m": 1.646,
+    "anchor_offset_m": -2.016,
+    "dring_shift_m": 0.277,
+    "worker_allowance_m": 0.201,
+    "margin_m": 1.195,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 1.053
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 4.4430286481829775,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 8.438,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 3.994971351817023,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-05",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 3.13,
+    "anchor_height_m": 3.263,
+    "dring_height_m": 1.661,
+    "anchor_offset_m": -1.295,
+    "dring_shift_m": 0.374,
+    "worker_allowance_m": 0.346,
+    "margin_m": 1.436,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.823
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.436958494727503,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.13,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": -0.30695849472750325,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-06",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 3.739,
+    "anchor_height_m": 4.018,
+    "dring_height_m": 1.434,
+    "anchor_offset_m": -0.416,
+    "dring_shift_m": 0.217,
+    "worker_allowance_m": 0.456,
+    "margin_m": 0.613,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.463
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 1.7822718620731777,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 3.739,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 1.9567281379268222,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-07",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 6.317,
+    "anchor_height_m": 2.933,
+    "dring_height_m": 1.54,
+    "anchor_offset_m": -2.057,
+    "dring_shift_m": 0.195,
+    "worker_allowance_m": 0.189,
+    "margin_m": 0.93,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 1.198
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 3.6032902406925005,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.317,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 2.7137097593074997,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-srl-08",
+   "intent": "randomized SRL (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "srl",
+    "working_height_m": 6.895,
+    "anchor_height_m": 1.938,
+    "dring_height_m": 1.528,
+    "anchor_offset_m": 1.117,
+    "dring_shift_m": 0.358,
+    "worker_allowance_m": 0.058,
+    "margin_m": 0.148,
+    "body_envelope_m": 0.5,
+    "obstacle": null,
+    "srl_arrest_distance_m": 0.533
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "fall_arrest",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec: result record carries system_mode; arrest terminology only"
+    },
+    "required_clearance_m": {
+     "ref": 1.876869320555833,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M)"
+    },
+    "available_clearance_m": {
+     "ref": 6.895,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "working height, reduced to obstacle top when the obstacle lies under the fall band"
+    },
+    "reserve_m": {
+     "ref": 5.018130679444166,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "available - required"
+    },
+    "clearance_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no contact with the lower level iff reserve >= 0 (29 CFR 1926.502(d)(16)(iii) 'nor contact any lower level')"
+    },
+    "rescue_required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "an arrested worker needs rescue; EN 365 concept / spec rescue item; any arrest mode must not be reported fully clear"
+    },
+    "collective_suggested": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2009/104/EC Annex II 4.1.1: collective protection given priority over personal protection"
+    }
+   }
+  },
+  {
+   "id": "random-swing-01",
+   "intent": "randomized lanyard swing (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.125,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 1.106,
+    "connector_length_m": 2.419,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 4.7940000000000005,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 27.2074598772384,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.26764577533126843,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 1.106,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "random-swing-02",
+   "intent": "randomized lanyard swing (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.15,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.345,
+    "connector_length_m": 1.75,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 4.1,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 11.36993060634906,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.03434414872912228,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 0.345,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "random-swing-03",
+   "intent": "randomized lanyard swing (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.828,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.877,
+    "connector_length_m": 1.559,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 4.231,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 34.23164453516624,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.2700655563606036,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 0.877,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "random-swing-04",
+   "intent": "randomized lanyard swing (seed 20260916)",
+   "inputs": {
+    "mode": "fall_arrest",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.675,
+    "dring_height_m": 1.5,
+    "anchor_offset_m": 0.341,
+    "connector_length_m": 1.903,
+    "absorber_extension_m": 1.75,
+    "dring_shift_m": 0.25,
+    "worker_allowance_m": 0.0,
+    "margin_m": 1.0,
+    "body_envelope_m": 0.5,
+    "obstacle": null
+   },
+   "checks": {
+    "swing_warning": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "any horizontal anchor offset produces a pendulum; zero offset none (spec: swing warning separate from vertical clearance)"
+    },
+    "required_clearance_m": {
+     "ref": 3.728,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "own coordinate construction in ref.py (lowest feet position after pendulum settle + deployment + shift, plus U + M); independent of dx for a lanyard (pendulum bottom is below the anchor)"
+    },
+    "swing_angle_deg": {
+     "ref": 10.322626923274141,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "atan2(dx, sqrt(L^2-dx^2)) at the instant the lanyard becomes taut"
+    },
+    "swing_drop_m": {
+     "ref": 0.03080129259739106,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "L - sqrt(L^2-dx^2): height lost from taut point to pendulum bottom"
+    },
+    "offset_m": {
+     "ref": 0.341,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal anchor offset"
+    }
+   }
+  },
+  {
+   "id": "random-restraint-01",
+   "intent": "randomized restraint (seed 20260916)",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.979,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.241,
+    "anchor_setback_m": 1.122,
+    "body_allowance_m": 0.582
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.1448318653846077,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -0.6048318653846075,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "random-restraint-02",
+   "intent": "randomized restraint (seed 20260916)",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.34,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.434,
+    "anchor_setback_m": 3.371,
+    "body_allowance_m": 0.147
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 1.1622202889297708,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": 2.0617797110702294,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "random-restraint-03",
+   "intent": "randomized restraint (seed 20260916)",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 1.634,
+    "dring_height_m": 1.5,
+    "connector_length_m": 2.061,
+    "anchor_setback_m": 0.513,
+    "body_allowance_m": 0.328
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 2.056639248871809,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": -1.8716392488718092,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  },
+  {
+   "id": "random-restraint-04",
+   "intent": "randomized restraint (seed 20260916)",
+   "inputs": {
+    "mode": "restraint",
+    "system": "lanyard",
+    "working_height_m": 10.0,
+    "anchor_height_m": 2.205,
+    "dring_height_m": 1.5,
+    "connector_length_m": 1.168,
+    "anchor_setback_m": 3.479,
+    "body_allowance_m": 0.264
+   },
+   "checks": {
+    "system_mode": {
+     "ref": "restraint",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "restraint is not reported with arrest terminology"
+    },
+    "restraint_reach_m": {
+     "ref": 0.9312352012246958,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "horizontal reach of taut connector sqrt(L^2 - (hA-hD)^2)"
+    },
+    "restraint_reserve_m": {
+     "ref": 2.2837647987753043,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "setback - reach - body allowance (positive = D-ring + body stay behind edge)"
+    },
+    "restraint_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "worker cannot reach the edge iff reserve >= 0"
+    },
+    "has_required_clearance": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "a restraint result must not carry a fall-arrest clearance"
+    }
+   }
+  }
+ ],
+ "not_benchmarked": [
+  "Horizontal lifelines, rescue access, anchor/structure capacity and arrest forces (out of MVP scope).",
+  "Manufacturer presets: no official product basis (spec QA rule).",
+  "Exact swing-warning threshold for very small offsets: no source fixes one; only dx = 0 and dx >= 0.1 m are used.",
+  "Free fall for a lanyard with horizontal offset (actual slack drop sqrt(L^2-dx^2)-dv differs from L-dv); only the final depth is checked there.",
+  "Obstacle fall-band width rules beyond clearly overlapping / clearly separate obstacles.",
+  "Diagram, drag interaction, comparison cards, PDF content and Python export.",
+  "Actual EN 363/355/360/365/795 clause values (standards not read)."
+ ],
+ "coverage": "Clearance component sum for lanyard and SRL, available depth with obstacles, reserve sign, swing warning/angle/drop separate from clearance, restraint reach and set-back, guardrail vs rule minimum, hierarchy suggestion, rescue item, incomplete manufacturer data, invalid geometry, anchor above/below D-ring, zero edge offset, obstacle close to worker."
+}

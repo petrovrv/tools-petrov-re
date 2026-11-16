@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Validation register</title><style>:root{--bg:#f6f8fb;--panel:#fff;--ink:#151a22;--muted:#5c6675;--line:#e2e7ee;--accent:#3763e6;--warn:#9a5a00;--ok:#1f6f34;--bad:#a5261f}@media(prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161b22;--ink:#e6edf3;--muted:#9aa7b4;--line:#30363d;--accent:#79a2ff;--warn:#d0a24a;--ok:#5fb87a;--bad:#e08a83}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1400px;margin:auto;padding:28px 18px 70px}header{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:16px}h1{margin:0 0 5px;font-size:30px}h2{font-size:17px;margin:26px 0 8px}.lead{color:var(--muted);max-width:78ch}nav{display:flex;gap:5px;flex-wrap:wrap;align-items:flex-start}button,.nav{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 9px;border-radius:8px;text-decoration:none;cursor:pointer}button.on{background:var(--accent);border-color:var(--accent);color:#fff}.ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:14px 0 6px}.ladder div{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px;font-size:12.5px;color:var(--muted)}.ladder b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}.tally{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.tally span{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 11px;font-size:12.5px}.table{overflow:auto;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;background:var(--panel);font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{position:sticky;top:0;background:var(--panel);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);z-index:1}td:first-child{font-weight:650;min-width:190px}.muted{color:var(--muted)}.small{font-size:11.5px;color:var(--muted)}.st{white-space:nowrap;font-weight:650}.st-prototype{color:var(--warn)}.st-partial{color:var(--accent)}.st-benchmarked{color:var(--ok)}.st-verified{color:var(--ok)}.num{white-space:nowrap;font-variant-numeric:tabular-nums}.bad{color:var(--bad)}a{color:var(--accent)}details summary{cursor:pointer;color:var(--muted);font-weight:400;font-size:11.5px;margin-top:3px}details p{margin:5px 0 0;font-weight:400;font-size:12px;color:var(--muted);max-width:60ch}.err{border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;background:var(--panel);padding:10px 12px;margin:8px 0;font-size:13px}.flag{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;background:var(--panel);padding:10px 12px;margin:8px 0;font-size:13px}.flag b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.flag .code{color:var(--muted)}.err b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}@media(max-width:680px){th,td{min-width:130px}td:first-child{min-width:160px}}</style><!-- §21 ONE PATH TO PAPER, on a site page that is not a tool.
+     UI_FRAMEWORK_SPEC.md §21.7 item 1: six site pages carried no print sheet at
+     all, because §21 is a framework contract and the framework was not on them.
+     File -> Print gave the browser default — no A4 page box, no running header,
+     no source URL, no date, and the language switcher printed as buttons. This
+     page is one a reader prints on purpose, so it gets the same sheet every
+     tool gets, from the same code: DiagramUI.printStyles() installs the page
+     box, the white paper, the chrome suppression, the running header (this
+     page's own h1 · the name of the host that served it, plus the localised
+     words "Screen
+     printout") and the attributed running footer, in all six site languages.
+     Nothing else about this page changes: no DiagramUI.app(), no shared bar, no
+     Ctrl+P interception — this page has no calculation record to print, so §21.1
+     says its keyboard must be left alone, and it is. -->
+<style>
+/* §21.2: the framework hides the chrome the FRAMEWORK created; which of this
+   page's own regions reach paper is this page's decision. A language switcher
+   and a site nav are controls, not content: on paper they are a row of dead
+   buttons. Everything else on the page is the document. */
+@media print{ #langs, #nav, #back, .langs { display:none !important } }
+</style>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  try { if (window.DiagramUI && DiagramUI.printStyles) DiagramUI.printStyles(); } catch (e) {}
+});
+</script>
+</head>
+<body><div class="wrap">
+<header><div><h1 id="ttl"></h1><div class="lead" id="intro"></div></div><nav id="nav"></nav></header>
+<div class="ladder" id="ladder"></div>
+<div class="tally" id="tally"></div>
+<div class="table" style="margin-top:14px"><table><thead><tr id="hrow"></tr></thead><tbody id="rows"></tbody></table></div>
+<div id="rejected"></div>
+<div id="flags"></div>
+<p class="small" id="foot"></p>
+</div>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script>
+(()=>{
+"use strict";
+const L=["en","uk","de","nl","fr","es","pl"];
+const U={
+ title:{en:"Validation register",uk:"Реєстр валідації",de:"Validierungsregister",nl:"Validatieregister",fr:"Registre de validation",es:"Registro de validación",pl:"Rejestr walidacji"},
+ intro:{en:"What evidence exists for each tool, taken straight from its manifest and from the benchmark artifacts shipped with the site. A tool says plainly when nothing has been measured.",
+  uk:"Які докази існують для кожного інструмента — безпосередньо з його manifest та з артефактів бенчмарків, що постачаються із сайтом. Якщо нічого не вимірювалося, це сказано прямо.",
+  de:"Welche Nachweise es je Werkzeug gibt — direkt aus dem Manifest und aus den mit der Website ausgelieferten Benchmark-Artefakten. Wo nichts gemessen wurde, steht das ausdrücklich da.",
+  nl:"Welk bewijs er per tool bestaat, rechtstreeks uit het manifest en uit de met de site meegeleverde benchmark-artefacten. Waar niets gemeten is, staat dat er onomwonden.",
+  fr:"Les preuves existantes pour chaque outil, tirées directement de son manifeste et des artefacts de banc d'essai livrés avec le site. Lorsque rien n'a été mesuré, c'est dit clairement.",
+  es:"Qué evidencia existe para cada herramienta, tomada directamente de su manifiesto y de los artefactos de banco de pruebas que se publican con el sitio. Cuando no se ha medido nada, se dice con claridad.",pl:"Jakie dowody istnieją dla każdego narzędzia — wprost z jego manifestu i z artefaktów benchmarków dostarczanych razem z serwisem. Jeśli niczego nie zmierzono, jest to powiedziane wprost."},
+ tool:{en:"Tool",uk:"Інструмент",de:"Werkzeug",nl:"Hulpmiddel",fr:"Outil",es:"Herramienta",pl:"Narzędzie"},
+ status:{en:"Status",uk:"Статус",de:"Status",nl:"Status",fr:"Statut",es:"Estado",pl:"Status"},
+ indep:{en:"Independent validation",uk:"Незалежна валідація",de:"Unabhängige Validierung",nl:"Onafhankelijke validatie",fr:"Validation indépendante",es:"Validación independiente",pl:"Walidacja niezależna"},
+ cases:{en:"Cases passed",uk:"Пройдено випадків",de:"Bestandene Fälle",nl:"Geslaagde gevallen",fr:"Cas réussis",es:"Casos superados",pl:"Zaliczone przypadki"},
+ reference:{en:"Reference and citation",uk:"Еталон і посилання",de:"Referenz und Zitat",nl:"Referentie en bronvermelding",fr:"Référence et citation",es:"Referencia y cita",pl:"Odniesienie i cytowanie"},
+ tolerance:{en:"Tolerance",uk:"Допуск",de:"Toleranz",nl:"Tolerantie",fr:"Tolérance",es:"Tolerancia",pl:"Tolerancja"},
+ run:{en:"Run",uk:"Виконано",de:"Ausgeführt",nl:"Uitgevoerd",fr:"Exécuté",es:"Ejecutado",pl:"Wykonano"},
+ artifact:{en:"Artifact",uk:"Артефакт",de:"Artefakt",nl:"Artefact",fr:"Artefact",es:"Artefacto",pl:"Artefakt"},
+ limits:{en:"Known model limitations",uk:"Відомі обмеження моделі",de:"Bekannte Modellgrenzen",nl:"Bekende modelbeperkingen",fr:"Limites connues du modèle",es:"Limitaciones conocidas del modelo",pl:"Znane ograniczenia modelu"},
+ prototype:{en:"Prototype",uk:"Прототип",de:"Prototyp",nl:"Prototype",fr:"Prototype",es:"Prototipo",pl:"Prototyp"},
+ partial:{en:"Benchmark partially passed",uk:"Бенчмарк частково пройдено",de:"Benchmark teilweise bestanden",nl:"Benchmark gedeeltelijk geslaagd",fr:"Benchmark partiellement réussi",es:"Benchmark superado parcialmente",pl:"Benchmark częściowo zaliczony"},
+ benchmarked:{en:"Benchmark tested",uk:"Перевірено за еталоном",de:"Benchmark geprüft",nl:"Benchmark getoetst",fr:"Testé sur banc d'essai",es:"Contrastado con referencia",pl:"Sprawdzone benchmarkiem"},
+ verified:{en:"Reviewed by a third party",uk:"Перевірено третьою стороною",de:"Von Dritten geprüft",nl:"Door een derde beoordeeld",fr:"Examiné par un tiers",es:"Revisado por un tercero",pl:"Zweryfikowane przez stronę trzecią"},
+ report:{en:"Benchmark report",uk:"Звіт про бенчмарк",de:"Benchmark-Bericht",nl:"Benchmarkrapport",fr:"Rapport de banc d'essai",es:"Informe del banco de pruebas",pl:"Raport z benchmarku"},
+ yes:{en:"Yes",uk:"Так",de:"Ja",nl:"Ja",fr:"Oui",es:"Sí",pl:"Tak"},
+ no:{en:"No",uk:"Ні",de:"Nein",nl:"Nee",fr:"Non",es:"No",pl:"Nie"},
+ nobench:{en:"No benchmark yet",uk:"Бенчмарку ще немає",de:"Noch kein Benchmark",nl:"Nog geen benchmark",fr:"Pas encore de banc d'essai",es:"Aún sin banco de pruebas",pl:"Jeszcze brak benchmarku"},
+ failing:{en:"Benchmark failing",uk:"Бенчмарк не проходить",de:"Benchmark schlägt fehl",nl:"Benchmark faalt",fr:"Banc d'essai en échec",es:"Banco de pruebas fallando",pl:"Benchmark nie przechodzi"},
+ none:{en:"Not performed",uk:"Не проведено",de:"Nicht durchgeführt",nl:"Niet uitgevoerd",fr:"Non réalisée",es:"No realizada",pl:"Nie przeprowadzono"},
+ open:{en:"open JSON",uk:"відкрити JSON",de:"JSON öffnen",nl:"JSON openen",fr:"ouvrir le JSON",es:"abrir JSON",pl:"otwórz JSON"},
+ details:{en:"limitations",uk:"обмеження",de:"Grenzen",nl:"beperkingen",fr:"limites",es:"limitaciones",pl:"ograniczenia"},
+ basis:{en:"basis",uk:"основа",de:"Grundlage",nl:"grondslag",fr:"fondement",es:"fundamento",pl:"podstawa"},
+ home:{en:"Tools",uk:"Інструменти",de:"Werkzeuge",nl:"Hulpmiddelen",fr:"Outils",es:"Herramientas",pl:"Narzędzia"},
+ full:{en:"Full disclaimer",uk:"Повний текст",de:"Vollständiger Hinweis",nl:"Volledige disclaimer",fr:"Avertissement complet",es:"Aviso completo",pl:"Pełne zastrzeżenie"},
+ error:{en:"The tool catalog could not be loaded. Check that PHP is enabled and catalog.php is reachable.",uk:"Каталог інструментів не завантажився. Перевірте, що PHP увімкнено і catalog.php доступний.",de:"Der Werkzeugkatalog konnte nicht geladen werden. Prüfen Sie PHP und catalog.php.",nl:"De toolcatalogus kon niet worden geladen. Controleer PHP en catalog.php.",fr:"Le catalogue n'a pas pu être chargé. Vérifiez PHP et catalog.php.",es:"No se pudo cargar el catálogo. Compruebe PHP y catalog.php.",pl:"Nie udało się wczytać katalogu narzędzi. Sprawdź, czy PHP jest włączony, a catalog.php dostępny."},
+ lProto:{en:"No benchmark, or a benchmark that does not pass. The default. Nothing here has been checked against an independent reference.",uk:"Бенчмарку немає або він не проходить. Стан за замовчуванням. Нічого не перевірено за незалежним еталоном.",de:"Kein Benchmark oder ein Benchmark, der nicht besteht. Der Standardfall. Nichts wurde gegen eine unabhängige Referenz geprüft.",nl:"Geen benchmark, of een benchmark die niet slaagt. De standaard. Er is niets tegen een onafhankelijke referentie getoetst.",fr:"Aucun banc d'essai, ou un banc d'essai qui échoue. Cas par défaut. Rien n'a été comparé à une référence indépendante.",es:"Sin banco de pruebas, o con uno que no se supera. Caso por defecto. Nada se ha comparado con una referencia independiente.",pl:"Brak benchmarku albo benchmark, który nie przechodzi. Stan domyślny. Niczego nie sprawdzono względem niezależnego odniesienia."},
+ lPartial:{en:"Some cases fail, or the artifact records a flagged case. The tool keeps the prototype label and its report shows which cases fail and which are flagged. A failing benchmark is what a reader must be able to find.",uk:"Частина випадків не проходить або артефакт містить позначений випадок. Інструмент зберігає мітку «Прототип», а його звіт показує, які випадки не проходять і які позначено. Бенчмарк, який не проходить, — саме те, що читач мусить мати змогу знайти.",de:"Einzelne Fälle schlagen fehl, oder das Artefakt verzeichnet einen markierten Fall. Das Werkzeug behält das Label „Prototyp“, und sein Bericht zeigt, welche Fälle fehlschlagen und welche markiert sind. Ein fehlschlagender Benchmark ist genau das, was ein Leser finden können muss.",nl:"Sommige gevallen falen, of het artefact bevat een gemarkeerd geval. De tool houdt het label Prototype en het rapport laat zien welke gevallen falen en welke gemarkeerd zijn. Een falende benchmark is juist wat een lezer moet kunnen vinden.",fr:"Certains cas échouent, ou l'artefact enregistre un cas signalé. L'outil conserve le libellé Prototype et son rapport indique quels cas échouent et lesquels sont signalés. Un banc d'essai en échec est précisément ce qu'un lecteur doit pouvoir trouver.",es:"Algunos casos fallan, o el artefacto registra un caso marcado. La herramienta conserva la etiqueta Prototipo y su informe muestra qué casos fallan y cuáles están marcados. Un banco de pruebas que falla es precisamente lo que un lector debe poder encontrar.",pl:"Część przypadków nie przechodzi albo artefakt zawiera oznaczony przypadek. Narzędzie zachowuje etykietę „Prototyp”, a jego raport pokazuje, które przypadki nie przechodzą i które są oznaczone. Benchmark, który nie przechodzi, to właśnie to, co czytelnik musi móc znaleźć."},
+ lBench:{en:"Every counted case passes against a reference independent of the tool's own code, cited, with a tolerance chosen from the physics. Where an artifact also carries self-checks, it labels them and states the split. Still the author's own harness, so independent validation stays No.",uk:"Усі зараховані випадки проходять за еталоном, незалежним від коду інструмента, з посиланням і допуском, обраним з фізики. Якщо артефакт містить і самоперевірки, він позначає їх і вказує розподіл. Це все ще власний стенд автора, тому незалежна валідація залишається «Ні».",de:"Jeder gezählte Fall besteht gegen eine vom Code des Werkzeugs unabhängige, zitierte Referenz mit einer aus der Physik gewählten Toleranz. Enthält ein Artefakt zusätzlich Selbstprüfungen, werden sie gekennzeichnet und die Aufteilung angegeben. Es bleibt der eigene Prüfstand des Autors, daher bleibt die unabhängige Validierung „Nein“.",nl:"Elk meegeteld geval slaagt tegen een van de eigen code onafhankelijke, geciteerde referentie, met een uit de fysica gekozen tolerantie. Bevat een artefact daarnaast zelftests, dan worden die gelabeld en wordt de verdeling vermeld. Het blijft de testbank van de auteur zelf, dus onafhankelijke validatie blijft Nee.",fr:"Chaque cas comptabilisé réussit face à une référence indépendante du code de l'outil, citée, avec une tolérance issue de la physique. Lorsqu'un artefact porte aussi des auto-tests, il les étiquette et indique la répartition. Il s'agit toujours du banc de l'auteur : la validation indépendante reste Non.",es:"Todos los casos contabilizados se superan frente a una referencia independiente del propio código, citada, con una tolerancia elegida a partir de la física. Cuando un artefacto incluye además autocomprobaciones, las etiqueta e indica el reparto. Sigue siendo el banco del autor, por lo que la validación independiente sigue siendo No.",pl:"Każdy liczony przypadek przechodzi względem odniesienia niezależnego od kodu narzędzia, z cytowaniem i tolerancją wybraną z fizyki. Jeśli artefakt zawiera także samosprawdzenia, są one oznaczone, a podział podany. To nadal własne stanowisko testowe autora, więc walidacja niezależna pozostaje „Nie”."},
+ lVer:{en:"Reserved. Benchmark tested plus a documented review by someone other than the author, recorded in the manifest. No tool holds this tier today, and the label is never shown without that record.",uk:"Зарезервовано. Перевірка за еталоном плюс задокументований огляд особою, іншою ніж автор, зафіксований у manifest. Сьогодні жоден інструмент цього рівня не має, і без такого запису мітка не показується.",de:"Reserviert. Benchmark geprüft plus eine im Manifest dokumentierte Prüfung durch jemanden außer dem Autor. Derzeit erreicht kein Werkzeug diese Stufe, und ohne diesen Nachweis wird das Label nie angezeigt.",nl:"Gereserveerd. Benchmark getoetst plus een in het manifest vastgelegde review door iemand anders dan de auteur. Geen enkele tool staat vandaag op dit niveau, en zonder dat verslag wordt het label nooit getoond.",fr:"Réservé. Testé sur banc d'essai, plus une revue documentée dans le manifeste par une personne autre que l'auteur. Aucun outil n'atteint ce niveau aujourd'hui, et le libellé n'est jamais affiché sans ce document.",es:"Reservado. Contrastado con referencia más una revisión documentada en el manifiesto por alguien distinto del autor. Hoy ninguna herramienta alcanza este nivel, y la etiqueta nunca se muestra sin ese registro.",pl:"Zarezerwowane. Sprawdzenie benchmarkiem oraz udokumentowany przegląd wykonany przez osobę inną niż autor, zapisany w manifeście. Dziś żadne narzędzie nie ma tego poziomu, a bez takiego zapisu etykieta nigdy się nie pojawia."},
+ rejTitle:{en:"Manifests rejected by the catalog",uk:"Manifest, відхилені каталогом",de:"Vom Katalog abgewiesene Manifeste",nl:"Door de catalogus geweigerde manifesten",fr:"Manifestes rejetés par le catalogue",es:"Manifiestos rechazados por el catálogo",pl:"Manifesty odrzucone przez katalog"},
+ rejIntro:{en:"These files claim a capability they do not have, so catalog.php leaves them out of the catalog until the declaration matches the file.",uk:"Ці файли заявляють можливість, якої не мають, тому catalog.php виключає їх із каталогу, доки декларація не відповідатиме файлу.",de:"Diese Dateien behaupten eine Fähigkeit, die sie nicht haben; catalog.php lässt sie aus dem Katalog, bis die Angabe zur Datei passt.",nl:"Deze bestanden claimen een eigenschap die ze niet hebben; catalog.php laat ze buiten de catalogus tot de verklaring bij het bestand past.",fr:"Ces fichiers revendiquent une capacité qu'ils n'ont pas ; catalog.php les exclut du catalogue jusqu'à ce que la déclaration corresponde au fichier.",es:"Estos archivos declaran una capacidad que no tienen, por lo que catalog.php los deja fuera del catálogo hasta que la declaración coincida con el archivo.",pl:"Te pliki deklarują możliwość, której nie mają, więc catalog.php pomija je w katalogu, dopóki deklaracja nie będzie zgodna z plikiem."},
+ flagTitle:{en:"Open flags against listed tools",uk:"Відкриті зауваження до наведених інструментів",de:"Offene Hinweise zu gelisteten Werkzeugen",nl:"Openstaande signaleringen bij vermelde tools",fr:"Signalements ouverts sur les outils listés",es:"Avisos abiertos sobre las herramientas listadas",pl:"Otwarte zastrzeżenia do wymienionych narzędzi"},
+ flagIntro:{en:"These tools work and stay in the catalog, but something in their manifest or their page does not match what they declare. The list is the site's own to-do list, kept in the open.",uk:"Ці інструменти працюють і залишаються в каталозі, але щось у їхньому manifest чи на сторінці не збігається з декларацією. Це відкритий перелік завдань сайту.",de:"Diese Werkzeuge funktionieren und bleiben im Katalog, doch etwas im Manifest oder auf der Seite passt nicht zur Deklaration. Die Liste ist die offene To-do-Liste der Website.",nl:"Deze tools werken en blijven in de catalogus, maar iets in hun manifest of pagina klopt niet met wat ze verklaren. Deze lijst is de openbare to-dolijst van de site.",fr:"Ces outils fonctionnent et restent au catalogue, mais quelque chose dans leur manifeste ou leur page ne correspond pas à ce qu'ils déclarent. Cette liste est la liste de tâches du site, tenue en public.",es:"Estas herramientas funcionan y siguen en el catálogo, pero algo en su manifiesto o en su página no coincide con lo que declaran. Esta lista es la lista de tareas del sitio, a la vista.",pl:"Te narzędzia działają i pozostają w katalogu, ale coś w ich manifeście lub na ich stronie nie zgadza się z tym, co deklarują. Ta lista to własna lista zadań serwisu, prowadzona jawnie."},
+ footnote:{en:"A self-check that re-evaluates the tool's own formula is not validation and is not counted here.",uk:"Самоперевірка, яка повторно обчислює власну формулу інструмента, не є валідацією і тут не враховується.",de:"Eine Selbstprüfung, die die eigene Formel des Werkzeugs erneut auswertet, ist keine Validierung und wird hier nicht gezählt.",nl:"Een zelftest die de eigen formule van de tool opnieuw uitrekent is geen validatie en telt hier niet mee.",fr:"Un auto-test qui réévalue la formule de l'outil n'est pas une validation et n'est pas compté ici.",es:"Una autocomprobación que vuelve a evaluar la propia fórmula de la herramienta no es validación y no se cuenta aquí.",pl:"Samosprawdzenie, które ponownie wylicza własny wzór narzędzia, nie jest walidacją i nie jest tu liczone."}
+};
+let D=null;
+const p=(x,l)=>x&&typeof x==="object"&&!Array.isArray(x)?(x[l]||x.en||""):String(x==null?"":x);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const q=(u,l)=>u+(u.includes("?")?"&":"?")+"lang="+l;
+function dl(){let l=null;try{l=(new URLSearchParams(location.search).get("lang")||"").slice(0,2).toLowerCase()}catch(e){}
+ if(!L.includes(l)){try{l=localStorage.getItem("diagram_site_lang")}catch(e){}}
+ if(!L.includes(l)){try{l=localStorage.getItem("diagram_lang")}catch(e){}}
+ if(!L.includes(l))l=(navigator.language||"en").slice(0,2).toLowerCase();
+ return L.includes(l)?l:"en"}
+function date(s){const m=String(s||"").match(/^(\d{4}-\d{2}-\d{2})/);return m?m[1]:(s||"—")}
+/* "verified" is reserved: it needs a documented review by someone other than the
+   author (validation.review). catalog.php rejects a manifest that claims it
+   without one; this keeps the register from ever printing the word anyway. */
+function shown(t){const v=t.validation||{},st=t.status||"prototype",r=v.review;
+ const has=(r&&typeof r==="object"&&Object.keys(r).length>0)||(typeof r==="string"&&r.trim()!=="");
+ if(st==="verified")return has?"verified":"benchmarked";
+ if(v.benchmark_status==="partial")return "partial";
+ return st==="benchmarked"?"benchmarked":"prototype"}
+function hasReport(t){const v=t.validation||{};return Array.isArray(v.benchmarks)&&v.benchmarks.some(b=>b&&b.artifact)}
+function reportURL(t,l){return "benchmark.html?tool="+encodeURIComponent(t.id||t.file||"")+"&lang="+l}
+function statusCell(t,l){const st=shown(t),lab=esc(p(U[st],l));
+ return hasReport(t)?`<a href="${esc(reportURL(t,l))}" title="${esc(p(U.report,l))}">${lab}</a>`:lab}
+function render(l){
+ document.documentElement.lang=l;
+ try{localStorage.setItem("diagram_site_lang",l);localStorage.setItem("diagram_lang",l)}catch(e){}
+ ttl.textContent=p(U.title,l);intro.textContent=p(U.intro,l);
+ nav.innerHTML="";
+ for(const x of L){const b=document.createElement("button");b.textContent=x==="uk"?"UA":x.toUpperCase();
+  b.className=x===l?"on":"";b.onclick=()=>render(x);nav.appendChild(b)}
+ for(const [u,k] of [["index.html","home"],["disclaimer.html","full"]]){
+  const a=document.createElement("a");a.className="nav";a.href=q(u,l);a.textContent=p(U[k],l);nav.appendChild(a)}
+ ladder.innerHTML=[["prototype","lProto"],["partial","lPartial"],["benchmarked","lBench"],["verified","lVer"]]
+  .map(([s,k])=>`<div><b class="st st-${s}">${esc(p(U[s],l))}</b>${esc(p(U[k],l))}</div>`).join("");
+ hrow.innerHTML=["tool","status","indep","cases","reference","tolerance","run","artifact"]
+  .map(k=>`<th>${esc(p(U[k],l))}</th>`).join("");
+ foot.textContent=p(U.footnote,l);
+ if(!D){rows.innerHTML="";return}
+ const tools=D.tools||[];
+ const n={prototype:0,partial:0,benchmarked:0,verified:0};
+ tools.forEach(t=>{const st=shown(t);n[st]=(n[st]||0)+1});
+ tally.innerHTML=Object.keys(n).map(s=>`<span class="st st-${s}">${esc(p(U[s],l))}: ${n[s]}</span>`).join("")
+  +`<span>${esc(p(U.tool,l))}: ${tools.length}</span>`;
+ rows.innerHTML=tools.map(t=>{
+  const st=shown(t);
+  const stc=statusCell(t,l);
+  const v=t.validation||{};
+  const bs=Array.isArray(v.benchmarks)?v.benchmarks:[];
+  const lim=p(t.limitations,l);
+  const name=`<a href="${esc(q(t.file,l))}">${esc(p(t.title,l))}</a>`
+   +(lim?`<details><summary>${esc(p(U.details,l))}</summary><p>${esc(lim)}</p></details>`:"")
+   +(v.basis?`<details><summary>${esc(p(U.basis,l))}</summary><p>${esc(p(v.basis,l))}</p></details>`:"");
+  const indep=v.independent_validation?p(U.yes,l):p(U.none,l);
+  if(!bs.length){
+   return `<tr><td>${name}</td><td class="st st-${st}">${stc}</td>`
+    +`<td class="muted">${esc(indep)}</td>`
+    +`<td class="muted" colspan="5">${esc(p(U.nobench,l))}</td></tr>`;
+  }
+  return bs.map((b,i)=>{
+   const ok=b.cases>0&&b.passed===b.cases;
+   const cit=(b.citations||[]).map(c=>`<div class="small">${esc(c)}</div>`).join("");
+   return `<tr>`
+    +(i===0?`<td rowspan="${bs.length}">${name}</td><td rowspan="${bs.length}" class="st st-${st}">${stc}`
+      +(!ok&&st==="prototype"?`<div class="small bad">${esc(p(U.failing,l))}</div>`:"")+`</td>`
+      +`<td rowspan="${bs.length}" class="muted">${esc(indep)}</td>`:"")
+    +`<td class="num${ok?"":" bad"}">${b.passed} / ${b.cases}</td>`
+    +`<td>${esc(b.reference||"—")}${cit}</td>`
+    +`<td class="small">${esc(b.tolerance||"—")}</td>`
+    +`<td class="num small">${esc(date(b.run_at))}</td>`
+    +`<td class="small">${b.artifact?`<a href="${esc(b.artifact)}">${esc(p(U.open,l))}</a>`:"—"}</td></tr>`;
+  }).join("");
+ }).join("");
+ const flagged=(D.tools||[]).map(t=>[t,(t.warnings||[])]).filter(x=>x[1].length);
+ flags.innerHTML=flagged.length
+  ?`<h2>${esc(p(U.flagTitle,l))}</h2><p class="lead">${esc(p(U.flagIntro,l))}</p>`
+   +flagged.map(([t,w])=>`<div class="flag"><b>${esc(t.file)}</b><br>`
+     +w.map(x=>`<span class="code">${esc(x.code)}</span> — ${esc(x.message)}`).join("<br>")+`</div>`).join("")
+  :"";
+ const errs=D.errors||[];
+ rejected.innerHTML=errs.length
+  ?`<h2>${esc(p(U.rejTitle,l))}</h2><p class="lead">${esc(p(U.rejIntro,l))}</p>`
+   +errs.map(e=>`<div class="err"><b>${esc(e.file)}</b> — <span class="muted">${esc(e.code)}</span><br>${esc(e.message)}</div>`).join("")
+  :"";
+}
+const l0=dl();
+render(l0);
+fetch("catalog.php",{cache:"no-cache"}).then(r=>r.ok?r.json():Promise.reject(r.status))
+ .then(d=>{D=d;render(l0)})
+ .catch(()=>{rows.innerHTML=`<tr><td colspan="8">${esc(p(U.error,l0))}</td></tr>`});
+})();
+</script>
+</body>
+</html>

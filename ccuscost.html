@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCUS Cost & Payback Calculator</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-20.1",
+  "id": "ccuscost",
+  "file": "ccuscost.html",
+  "listed": true,
+  "category": "ccus",
+  "order": 60,
+  "title": {
+    "en": "CCUS Cost & Payback Calculator",
+    "uk": "Калькулятор витрат і окупності CCUS",
+    "de": "CCUS-Kosten- und Amortisationsrechner",
+    "nl": "CCUS-kosten- en terugverdiencalculator",
+    "fr": "Calculateur de coûts et de retour sur investissement CCUS",
+    "es": "Calculadora de costes y amortización de CCUS",
+    "pl": "Kalkulator kosztów i okresu zwrotu CCUS"
+  },
+  "summary": {
+    "en": "Screening hub for full-chain CCUS costs, from capture to storage, with levelised costs, cash flow and payback across 11 countries.",
+    "uk": "Скринінговий інструмент витрат повного ланцюга CCUS, від уловлення до зберігання, з нормованою вартістю, грошовими потоками та окупністю в 11 країнах.",
+    "de": "Screening-Tool für die Kosten der gesamten CCUS-Kette von Abscheidung bis Speicherung, mit Gestehungskosten, Cashflow und Amortisation in 11 Ländern.",
+    "nl": "Screeningplatform voor CCUS-kosten over de volledige keten, van afvang tot opslag, met genivelleerde kosten, kasstromen en terugverdientijd in 11 landen.",
+    "fr": "Plateforme de présélection des coûts CCUS sur toute la chaîne, du captage au stockage, avec coûts actualisés, flux de trésorerie et délai de retour sur investissement dans 11 pays.",
+    "es": "Plataforma de evaluación preliminar de costes de CCUS en toda la cadena, desde la captura hasta el almacenamiento, con costes nivelados, flujo de caja y periodo de amortización en 11 países.",
+    "pl": "Narzędzie do wstępnej oceny kosztów pełnego łańcucha CCUS, od wychwytywania po składowanie, z kosztami uśrednionymi, przepływami pieniężnymi i okresem zwrotu dla 11 krajów."
+  },
+  "description": {
+    "en": "Models amine capture across industries, compression, pipeline or ship transport and storage, accepting companion-tool results. Gives cost per t CO₂ stored and avoided, cash flow with EU ETS, CBAM, grants, CCfD and biogenic removal credits, NPV, IRR and payback.",
+    "uk": "Моделює амінове уловлення за галузями, компримування, транспортування трубопроводом чи суднами та зберігання, приймаючи результати суміжних інструментів. Розраховує вартість на т CO₂ збереженого й запобігнутого, грошові потоки з EU ETS, CBAM, грантами, CCfD і кредитами видалення, NPV, IRR, окупність, чутливість.",
+    "de": "Modelliert Aminabscheidung nach Branche, Verdichtung, Pipeline- oder Schiffstransport und Speicherung und übernimmt Ergebnisse der Partner-Tools. Liefert Kosten je t gespeichertes und vermiedenes CO₂, Cashflow mit EU ETS, CBAM, Förderungen, CCfD und biogenen Entnahmezertifikaten, Kapitalwert, IRR, Amortisation und Sensitivität.",
+    "nl": "Modelleert aminegebaseerde afvang in diverse industrieën, compressie, transport per pijpleiding of schip en opslag, en accepteert resultaten van aanvullende tools. Geeft kosten per t opgeslagen en vermeden CO₂, kasstromen met EU ETS, CBAM, subsidies, CCfD en kredieten voor biogene verwijdering, NPV, IRR en terugverdientijd.",
+    "fr": "Modélise le captage aux amines dans diverses industries, la compression, le transport par pipeline ou par navire et le stockage, en intégrant les résultats des outils complémentaires. Fournit le coût par t de CO₂ stocké et évité, les flux de trésorerie avec EU ETS, CBAM, subventions, CCfD et crédits d'élimination biogénique, la NPV, l'IRR et le délai de retour sur investissement.",
+    "es": "Modela la captura con aminas en distintas industrias, la compresión, el transporte por tubería o barco y el almacenamiento, admitiendo resultados de herramientas complementarias. Ofrece el coste por t de CO₂ almacenado y evitado, flujo de caja con EU ETS, CBAM, subvenciones, CCfD y créditos por remoción biogénica, NPV, IRR y periodo de amortización.",
+    "pl": "Modeluje wychwytywanie aminowe w różnych branżach, sprężanie, transport rurociągiem lub statkiem oraz składowanie, uwzględniając wyniki narzędzi towarzyszących. Podaje koszt na t składowanego i unikniętego CO₂, przepływy pieniężne z uwzględnieniem EU ETS, CBAM, dotacji, CCfD i kredytów za usuwanie biogeniczne, NPV, IRR oraz okres zwrotu."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Screening-level only, in EUR 2025, with ±30–50 % cost uncertainty and cost factors partly assumed from public studies. Excludes tax, financing structure and inflation; policy price paths are indicative. The EUR/t metric applies IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 and CRCF Regulation 2024/3012 BioCCS accounting in simplified form, counting only capture, compression and transport energy emissions (no upstream biomass, embodied, storage-site or leakage emissions); not a certified MRV or CRCF quantification.",
+    "uk": "Лише попередня оцінка в EUR 2025 з невизначеністю витрат ±30–50 %; частина коефіцієнтів витрат базується на припущеннях із публічних досліджень. Податки, структура фінансування та інфляція не враховуються, а траєкторії політик є орієнтовними. Показник EUR/t застосовує спрощений облік BioCCS за IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 та Регламентом CRCF 2024/3012, враховуючи лише енергетичні викиди від уловлювання, компримування та транспортування (без викидів висхідного ланцюга постачання біомаси, вбудованих викидів, викидів на місці зберігання чи від витоків); це не сертифіковане кількісне визначення MRV або CRCF.",
+    "de": "Nur Screening-Niveau in EUR 2025 mit ±30–50 % Kostenunsicherheit; Kostenfaktoren beruhen teils auf Annahmen aus öffentlichen Studien. Steuern, Finanzierungsstruktur und Inflation sind nicht berücksichtigt, Politikpfade sind indikativ. Die EUR/t-Kennzahl wendet die BioCCS-Bilanzierung nach IEAGHG (Rubin et al. 2015), EU-ETS-MRR 2018/2066 und CRCF-Verordnung 2024/3012 vereinfacht an und berücksichtigt nur Energieemissionen aus Abscheidung, Verdichtung und Transport (keine vorgelagerten Biomasse-, grauen, Speicherstätten- oder Leckageemissionen); sie ist keine zertifizierte MRV- oder CRCF-Quantifizierung.",
+    "nl": "Uitsluitend op screeningniveau, in EUR 2025, met ±30–50 % kostenonzekerheid en kostenfactoren deels aangenomen op basis van openbare studies. Exclusief belastingen, financieringsstructuur en inflatie; beleidsprijstrajecten zijn indicatief. De EUR/t-indicator past de BioCCS-boekhouding volgens IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 en CRCF-verordening 2024/3012 vereenvoudigd toe en telt alleen energie-emissies van afvang, compressie en transport (geen upstream biomassa-, belichaamde, opslaglocatie- of lekkage-emissies); het is geen gecertificeerde MRV- of CRCF-kwantificering.",
+    "fr": "Niveau de présélection uniquement, en EUR 2025, avec une incertitude de ±30–50 % sur les coûts et des facteurs de coût en partie issus d'études publiques. Hors fiscalité, structure de financement et inflation ; les trajectoires de prix liées aux politiques publiques sont indicatives. L'indicateur EUR/t applique de manière simplifiée la comptabilisation BioCCS selon l'IEAGHG (Rubin et al. 2015), le MRR SEQE-UE 2018/2066 et le règlement CRCF 2024/3012, en ne comptant que les émissions énergétiques du captage, de la compression et du transport (hors émissions amont de la biomasse, intrinsèques, du site de stockage ou de fuites) ; il ne s'agit pas d'une quantification MRV ou CRCF certifiée.",
+    "es": "Solo a nivel de evaluación preliminar, en EUR 2025, con una incertidumbre de costes de ±30–50 % y factores de coste en parte supuestos a partir de estudios públicos. Excluye impuestos, estructura de financiación e inflación; las trayectorias de precios de las políticas son indicativas. El indicador EUR/t aplica de forma simplificada la contabilidad BioCCS según IEAGHG (Rubin et al. 2015), el MRR del RCDE UE 2018/2066 y el Reglamento CRCF 2024/3012, contando solo las emisiones energéticas de captura, compresión y transporte (sin emisiones aguas arriba de la biomasa, incorporadas, del emplazamiento de almacenamiento ni de fugas); no constituye una cuantificación MRV o CRCF certificada.",
+    "pl": "Wyłącznie na poziomie wstępnej oceny, w EUR 2025, z niepewnością kosztów ±30–50 % i współczynnikami kosztowymi częściowo przyjętymi na podstawie publicznych badań. Nie uwzględnia podatków, struktury finansowania ani inflacji; ścieżki cen wynikające z polityki są orientacyjne. Wskaźnik EUR/t stosuje w uproszczonej formie rozliczanie BioCCS według IEAGHG (Rubin et al. 2015), MRR EU ETS 2018/2066 i rozporządzenia CRCF 2024/3012, uwzględniając wyłącznie emisje energetyczne z wychwytywania, sprężania i transportu (bez emisji z łańcucha dostaw biomasy, wbudowanych, z miejsca składowania ani z wycieków); nie stanowi certyfikowanej kwantyfikacji MRV ani CRCF."
+  },
+  "intended_use": "education",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ccus-core.js",
+    "ccus-cost.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Benchmark: 27/27 cases agree within relative tolerance 1e-6 with independent stdlib-Python reference implementations. 18 economics cases cover CRF, cash flow with grant, EU ETS, two-sided CCfD, removal credits, NPV, IRR, simple/discounted payback and LCOC per tonne stored, avoided and net removed. 9 solve-level cases with the simplified in-hub stage models cover capture energy, compression work, pipeline sizing/boosters, ship chain and losses, stage cost aggregation, energy use and tonnes per methodology (IEAGHG avoided cost, EU ETS reduction, CRCF net removal with full or pro-rata allocation, incl. fallback without biogenic CO2). Literature plausibility check (repriced to 2025 NL gas 48 / power 140 EUR/MWh): capture, compression, pipeline (ZEP 2011 scale within ±20%), ship (upper end) and storage within published ranges; NGCC ~20% above repriced NETL/IEAGHG due to MEA 4.0 GJ/t and boiler steam. No constants changed. Not covered: external stage modules when loaded and the cost-basis constants themselves (plausibility-checked only)."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "econ-and-solve",
+        "reference": "Independent stdlib-Python references bench-src/ref/gen_ccuscost.py (economics) and bench-src/ref/gen_ccuscost_solve.py (solve level, simplified in-hub stage models)",
+        "citations": [
+          "IEAGHG (2013/TR4) Toward a common method of cost estimation for CO2 capture and storage at fossil fuel power plants",
+          "Brealey, Myers, Allen, Principles of Corporate Finance (NPV, IRR, payback)",
+          "Rubin et al. 2015 (IEAGHG cost of CO2 avoided)",
+          "MRR (EU) 2018/2066 Art. 38(5), 49",
+          "Reg. (EU) 2024/3012 (CRCF, BioCCS)",
+          "Literature cost check: CEMCAP (Voldsund et al. 2019), NETL 2022 industrial sources, NETL Rev4a, IEAGHG 2019-09, ZEP 2011 transport and storage costs, Roussanaly et al. 2021, Bjerketvedt et al. 2020"
+        ],
+        "cases": 27,
+        "passed": 27,
+        "tolerance": "relative 1e-6 on numeric outputs; null must match null; method string exact",
+        "run_at": "2026-10-20T11:27:18Z",
+        "artifact": "benchmarks/ccuscost.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "It chains six JS modules (Span-Wagner CO2 EOS, amine capture, compression, pipeline, ship, storage) plus handoff sets from other tools; a standalone python3 stdlib script cannot reproduce this.",
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "mdot"
+    ],
+    "accepts": [
+      "mdot",
+      "E",
+      "Q",
+      "x",
+      "p",
+      "D",
+      "L",
+      "dp"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script type="application/json" id="diagram-handoff-catalog">[{"f":"aminecapture.html","t":{"en":"Amine CO₂ capture screening"},"a":["mdot","x"]},{"f":"co2compressor.html","t":{"en":"CO₂ compression & conditioning"},"a":["mdot","p","T","Q","E"]},{"f":"co2pipeline.html","t":{"en":"CO₂ pipeline hydraulics"},"a":["mdot","p","T","D","L"]},{"f":"co2ship.html","t":{"en":"CO₂ shipping chain"},"a":["mdot","L"]},{"f":"co2storage.html","t":{"en":"CO₂ storage injection"},"a":["mdot","p"]}]</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ccus-core.js?v=0f1890deb639" defer></script>
+<script src="ccus-capture.js?v=b9b8dc75a82a" defer></script>
+<script src="ccus-compress.js?v=b8eec31bf337" defer></script>
+<script src="ccus-pipe.js?v=c810b4c1810a" defer></script>
+<script src="ccus-ship.js?v=5cd4b09340b3" defer></script>
+<script src="ccus-storage.js?v=3afc492c7481" defer></script>
+<script src="ccus-cost.js?v=e9da8dc77fc0" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+  /* ccuscost — page glue (Claude, mechanical assembly) */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var MAN = {"summary":{"en":"Screening hub for full-chain CCUS costs, from capture to storage, with levelised costs, cash flow and payback across 11 countries.","uk":"Скринінговий інструмент витрат повного ланцюга CCUS, від уловлення до зберігання, з нормованою вартістю, грошовими потоками та окупністю в 11 країнах.","de":"Screening-Tool für die Kosten der gesamten CCUS-Kette von Abscheidung bis Speicherung, mit Gestehungskosten, Cashflow und Amortisation in 11 Ländern.","nl":"Screeningplatform voor CCUS-kosten over de volledige keten, van afvang tot opslag, met genivelleerde kosten, kasstromen en terugverdientijd in 11 landen.","fr":"Plateforme de présélection des coûts CCUS sur toute la chaîne, du captage au stockage, avec coûts actualisés, flux de trésorerie et délai de retour sur investissement dans 11 pays.","es":"Plataforma de evaluación preliminar de costes de CCUS en toda la cadena, desde la captura hasta el almacenamiento, con costes nivelados, flujo de caja y periodo de amortización en 11 países.","pl":"Narzędzie do wstępnej oceny kosztów pełnego łańcucha CCUS, od wychwytywania po składowanie, z kosztami uśrednionymi, przepływami pieniężnymi i okresem zwrotu dla 11 krajów."},"description":{"en":"Models amine capture across industries, compression, pipeline or ship transport and storage, accepting companion-tool results. Gives cost per t CO₂ stored and avoided, cash flow with EU ETS, CBAM, grants, CCfD and biogenic removal credits, NPV, IRR and payback.","uk":"Моделює амінове уловлення за галузями, компримування, транспортування трубопроводом чи суднами та зберігання, приймаючи результати суміжних інструментів. Розраховує вартість на т CO₂ збереженого й запобігнутого, грошові потоки з EU ETS, CBAM, грантами, CCfD і кредитами видалення, NPV, IRR, окупність, чутливість.","de":"Modelliert Aminabscheidung nach Branche, Verdichtung, Pipeline- oder Schiffstransport und Speicherung und übernimmt Ergebnisse der Partner-Tools. Liefert Kosten je t gespeichertes und vermiedenes CO₂, Cashflow mit EU ETS, CBAM, Förderungen, CCfD und biogenen Entnahmezertifikaten, Kapitalwert, IRR, Amortisation und Sensitivität.","nl":"Modelleert aminegebaseerde afvang in diverse industrieën, compressie, transport per pijpleiding of schip en opslag, en accepteert resultaten van aanvullende tools. Geeft kosten per t opgeslagen en vermeden CO₂, kasstromen met EU ETS, CBAM, subsidies, CCfD en kredieten voor biogene verwijdering, NPV, IRR en terugverdientijd.","fr":"Modélise le captage aux amines dans diverses industries, la compression, le transport par pipeline ou par navire et le stockage, en intégrant les résultats des outils complémentaires. Fournit le coût par t de CO₂ stocké et évité, les flux de trésorerie avec EU ETS, CBAM, subventions, CCfD et crédits d'élimination biogénique, la NPV, l'IRR et le délai de retour sur investissement.","es":"Modela la captura con aminas en distintas industrias, la compresión, el transporte por tubería o barco y el almacenamiento, admitiendo resultados de herramientas complementarias. Ofrece el coste por t de CO₂ almacenado y evitado, flujo de caja con EU ETS, CBAM, subvenciones, CCfD y créditos por remoción biogénica, NPV, IRR y periodo de amortización.","pl":"Modeluje wychwytywanie aminowe w różnych branżach, sprężanie, transport rurociągiem lub statkiem oraz składowanie, uwzględniając wyniki narzędzi towarzyszących. Podaje koszt na t składowanego i unikniętego CO₂, przepływy pieniężne z uwzględnieniem EU ETS, CBAM, dotacji, CCfD i kredytów za usuwanie biogeniczne, NPV, IRR oraz okres zwrotu."},"limitations":{"en":"Screening-level only, in EUR 2025, with ±30–50 % cost uncertainty and cost factors partly assumed from public studies. Excludes tax, financing structure and inflation; policy price paths are indicative. The EUR/t metric applies IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 and CRCF Regulation 2024/3012 BioCCS accounting in simplified form, counting only capture, compression and transport energy emissions (no upstream biomass, embodied, storage-site or leakage emissions); not a certified MRV or CRCF quantification.","uk":"Лише попередня оцінка в EUR 2025 з невизначеністю витрат ±30–50 %; частина коефіцієнтів витрат базується на припущеннях із публічних досліджень. Податки, структура фінансування та інфляція не враховуються, а траєкторії політик є орієнтовними. Показник EUR/t застосовує спрощений облік BioCCS за IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 та Регламентом CRCF 2024/3012, враховуючи лише енергетичні викиди від уловлювання, компримування та транспортування (без викидів висхідного ланцюга постачання біомаси, вбудованих викидів, викидів на місці зберігання чи від витоків); це не сертифіковане кількісне визначення MRV або CRCF.","de":"Nur Screening-Niveau in EUR 2025 mit ±30–50 % Kostenunsicherheit; Kostenfaktoren beruhen teils auf Annahmen aus öffentlichen Studien. Steuern, Finanzierungsstruktur und Inflation sind nicht berücksichtigt, Politikpfade sind indikativ. Die EUR/t-Kennzahl wendet die BioCCS-Bilanzierung nach IEAGHG (Rubin et al. 2015), EU-ETS-MRR 2018/2066 und CRCF-Verordnung 2024/3012 vereinfacht an und berücksichtigt nur Energieemissionen aus Abscheidung, Verdichtung und Transport (keine vorgelagerten Biomasse-, grauen, Speicherstätten- oder Leckageemissionen); sie ist keine zertifizierte MRV- oder CRCF-Quantifizierung.","nl":"Uitsluitend op screeningniveau, in EUR 2025, met ±30–50 % kostenonzekerheid en kostenfactoren deels aangenomen op basis van openbare studies. Exclusief belastingen, financieringsstructuur en inflatie; beleidsprijstrajecten zijn indicatief. De EUR/t-indicator past de BioCCS-boekhouding volgens IEAGHG (Rubin et al. 2015), EU ETS MRR 2018/2066 en CRCF-verordening 2024/3012 vereenvoudigd toe en telt alleen energie-emissies van afvang, compressie en transport (geen upstream biomassa-, belichaamde, opslaglocatie- of lekkage-emissies); het is geen gecertificeerde MRV- of CRCF-kwantificering.","fr":"Niveau de présélection uniquement, en EUR 2025, avec une incertitude de ±30–50 % sur les coûts et des facteurs de coût en partie issus d'études publiques. Hors fiscalité, structure de financement et inflation ; les trajectoires de prix liées aux politiques publiques sont indicatives. L'indicateur EUR/t applique de manière simplifiée la comptabilisation BioCCS selon l'IEAGHG (Rubin et al. 2015), le MRR SEQE-UE 2018/2066 et le règlement CRCF 2024/3012, en ne comptant que les émissions énergétiques du captage, de la compression et du transport (hors émissions amont de la biomasse, intrinsèques, du site de stockage ou de fuites) ; il ne s'agit pas d'une quantification MRV ou CRCF certifiée.","es":"Solo a nivel de evaluación preliminar, en EUR 2025, con una incertidumbre de costes de ±30–50 % y factores de coste en parte supuestos a partir de estudios públicos. Excluye impuestos, estructura de financiación e inflación; las trayectorias de precios de las políticas son indicativas. El indicador EUR/t aplica de forma simplificada la contabilidad BioCCS según IEAGHG (Rubin et al. 2015), el MRR del RCDE UE 2018/2066 y el Reglamento CRCF 2024/3012, contando solo las emisiones energéticas de captura, compresión y transporte (sin emisiones aguas arriba de la biomasa, incorporadas, del emplazamiento de almacenamiento ni de fugas); no constituye una cuantificación MRV o CRCF certificada.","pl":"Wyłącznie na poziomie wstępnej oceny, w EUR 2025, z niepewnością kosztów ±30–50 % i współczynnikami kosztowymi częściowo przyjętymi na podstawie publicznych badań. Nie uwzględnia podatków, struktury finansowania ani inflacji; ścieżki cen wynikające z polityki są orientacyjne. Wskaźnik EUR/t stosuje w uproszczonej formie rozliczanie BioCCS według IEAGHG (Rubin et al. 2015), MRR EU ETS 2018/2066 i rozporządzenia CRCF 2024/3012, uwzględniając wyłącznie emisje energetyczne z wychwytywania, sprężania i transportu (bez emisji z łańcucha dostaw biomasy, wbudowanych, z miejsca składowania ani z wycieków); nie stanowi certyfikowanej kwantyfikacji MRV ani CRCF."}};
+  var DEFAULTS = {
+    level: 'simple', chart: 'cash', industry: 'cement', country: 'NL', mt: 1, eta: 0.9, solvent: 'MEA',
+    transport: 'pipe', L_km: 100, phase: 'dense', p_out: 110, ship_dist_km: 500, ship_mode: 'MP',
+    scenario: 'central', price_mult: 1, fa_mode: '', removal_price: 0, grant_frac: 0, useCcfd: false,
+    ccfd_strike: 150, ccfd_years: 15, method: 'auto', crcf_alloc: 'full', disc: 0.08, life: 25, cod: 2030, capex_mult: 1
+  };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null, tor = null, ui = null, stage = null, handoffSets = null;
+  var FULL_KEYS = ['eta', 'solvent', 'phase', 'p_out', 'ship_mode', 'price_mult', 'fa_mode', 'ccfd_years', 'disc', 'life', 'cod', 'capex_mult', 'crcf_alloc'];
+  function toInp(s) {
+    var o = { industry: s.industry, country: s.country, mt: s.mt, transport: s.transport, L_km: s.L_km,
+      ship_dist_km: s.ship_dist_km, scenario: s.scenario, removal_price: s.removal_price, grant_frac: s.grant_frac,
+      ccfd_strike: s.useCcfd ? s.ccfd_strike : null, method: s.method };
+    var full = s.level === 'full', i, k;
+    for (i = 0; i < FULL_KEYS.length; i++) { k = FULL_KEYS[i]; o[k] = full ? s[k] : DEFAULTS[k]; }
+    o.fa_mode = (full && s.fa_mode) ? s.fa_mode : null;
+    if (handoffSets) o.sets = handoffSets;
+    return o;
+  }
+  function run(s) {
+    var inp = toInp(s);
+    last = CCUS.cost.solve(inp);
+    tor = (s.chart === 'tornado') ? CCUS.cost.tornado(inp, { metric: 'lcoc' }) : null;
+    return last;
+  }
+function PANELS(){
+  var full=function(c){return c.state.level==='full';};
+  var ship=function(c){return c.state.transport==='ship';};
+  var pipe=function(c){return c.state.transport==='pipe';};
+  var fullPipe=function(c){return full(c)&&pipe(c);};
+  var fullShip=function(c){return full(c)&&ship(c);};
+  var ccfd=function(c){return !!c.state.useCcfd;};
+  var fullCcfd=function(c){return full(c)&&ccfd(c);};
+  var SRC=(window.CCUS&&CCUS.cost)?CCUS.cost:{};
+  var IND=SRC.INDUSTRIES||{}, CTY=SRC.COUNTRIES||{};
+  var nm=function(o,id){var n=o&&o.name;return typeof n==='string'?n:((n&&n.en)||id);};
+  var opt=function(id,n){return {value:id,label:T(n,n,n,n,n,n,n)};};
+  var indOpts=function(){var r=[],id;for(id in IND){if(IND.hasOwnProperty(id)){r.push(opt(id,nm(IND[id],id)));}}return r;};
+  var ctyOpts=function(){var k=['BE','NL','DE','FR','UK','NO','DK','PL','ES','IT','US'],r=[],i;for(i=0;i<k.length;i++){if(CTY[k[i]]){r.push(opt(k[i],nm(CTY[k[i]],k[i])));}}return r;};
+  return [
+    { id:'mode', slot:'inputs', title:T('Mode','Режим','Modus','Modus','Mode','Modo','Tryb'), fields:[
+      { id:'f-level', key:'level', type:'segmented', label:T('Level','Рівень','Ebene','Niveau','Niveau','Nivel','Poziom'), options:[{value:'simple',label:T('Simple','Простий','Einfach','Eenvoudig','Simple','Simple','Prosty')},{value:'full',label:T('Full','Повний','Voll','Volledig','Complet','Completo','Pełny')}] } ]},
+    { id:'plant', slot:'inputs', title:T('Plant','Установка','Anlage','Installatie','Usine','Planta','Instalacja'), collapsible:true, collapsed:false, fields:[
+      { id:'f-industry', key:'industry', type:'select', learn:'industries', label:T('Industry','Галузь','Branche','Sector','Secteur','Sector','Branża'), options:indOpts() },
+      { id:'f-country', key:'country', type:'select', label:T('Country','Країна','Land','Land','Pays','País','Kraj'), options:ctyOpts() },
+      { id:'f-mt', key:'mt', type:'number', unit:'-', min:0.05, max:10, step:0.05, precision:2, learn:'scale', label:T('Captured CO2 (Mt/y)','Вловлений CO2 (Мт/рік)','Abgeschiedenes CO2 (Mt/a)','Afgevangen CO2 (Mt/j)','CO2 capté (Mt/an)','CO2 capturado (Mt/año)','Wychwycony CO2 (Mt/r)') },
+      { id:'f-eta', key:'eta', type:'number', unit:'-', min:0.5, max:0.98, step:0.01, precision:2, visible:full, label:T('Capture rate','Ступінь вловлення','Abscheidegrad','Afvangstgraad','Taux de captage','Tasa de captura','Stopień wychwytu') },
+      { id:'f-solvent', key:'solvent', type:'select', visible:full, label:T('Solvent','Розчинник','Lösungsmittel','Oplosmiddel','Solvant','Solvente','Rozpuszczalnik'), options:[{value:'MEA',label:T('MEA','MEA','MEA','MEA','MEA','MEA','MEA')},{value:'ADV',label:T('Advanced','Покращений','Fortschrittlich','Geavanceerd','Avancé','Avanzado','Zaawansowany')}] } ]},
+    { id:'transport', slot:'inputs', title:T('Transport','Транспорт','Transport','Transport','Transport','Transporte','Transport'), collapsible:true, collapsed:false, fields:[
+      { id:'f-transport', key:'transport', type:'segmented', learn:'transport', label:T('Mode','Спосіб','Art','Wijze','Mode','Modo','Rodzaj'), options:[{value:'pipe',label:T('Pipeline','Трубопровід','Pipeline','Pijpleiding','Pipeline','Tubería','Rurociąg')},{value:'ship',label:T('Ship','Судно','Schiff','Schip','Navire','Barco','Statek')}] },
+      { id:'f-lkm', key:'L_km', type:'number', unit:'-', min:5, max:1500, step:5, precision:0, visible:pipe, label:T('Pipeline length (km)','Довжина труби (км)','Leitungslänge (km)','Leidinglengte (km)','Longueur pipeline (km)','Longitud tubería (km)','Długość rurociągu (km)') },
+      { id:'f-phase', key:'phase', type:'select', visible:fullPipe, label:T('Phase','Фаза','Phase','Fase','Phase','Fase','Faza'), options:[{value:'dense',label:T('Dense','Щільна','Dicht','Dicht','Dense','Densa','Gęsta')},{value:'gas',label:T('Gas','Газ','Gas','Gas','Gaz','Gas','Gaz')}] },
+      { id:'f-shipdist', key:'ship_dist_km', type:'number', unit:'-', min:50, max:3000, step:10, precision:0, visible:ship, label:T('Shipping distance (km)','Відстань перевезення (км)','Schiffsdistanz (km)','Vaarafstand (km)','Distance maritime (km)','Distancia marítima (km)','Dystans morski (km)') },
+      { id:'f-shipmode', key:'ship_mode', type:'select', visible:fullShip, label:T('Ship pressure','Тиск судна','Schiffsdruck','Scheepsdruk','Pression navire','Presión buque','Ciśnienie statku'), options:[{value:'MP',label:T('Medium pressure','Середній тиск','Mitteldruck','Middendruk','Moyenne pression','Media presión','Średnie ciśnienie')},{value:'LP',label:T('Low pressure','Низький тиск','Niederdruck','Lage druk','Basse pression','Baja presión','Niskie ciśnienie')}] },
+      { id:'f-pout', key:'p_out', type:'number', unit:'-', min:40, max:200, step:5, precision:0, visible:fullPipe, label:T('Compressor outlet (bar)','Вихід компресора (бар)','Verdichteraustritt (bar)','Compressoruitlaat (bar)','Sortie compresseur (bar)','Salida compresor (bar)','Wylot sprężarki (bar)') } ]},
+    { id:'policy', slot:'inputs', title:T('Policy','Політика','Politik','Beleid','Politique','Política','Polityka'), collapsible:true, collapsed:false, fields:[
+      { id:'f-scenario', key:'scenario', type:'select', learn:'ets', label:T('ETS scenario','Сценарій ETS','ETS-Szenario','ETS-scenario','Scénario ETS','Escenario ETS','Scenariusz ETS'), options:[{value:'low',label:T('Low','Низький','Niedrig','Laag','Bas','Bajo','Niski')},{value:'central',label:T('Central','Центральний','Zentral','Centraal','Central','Central','Centralny')},{value:'high',label:T('High','Високий','Hoch','Hoog','Haut','Alto','Wysoki')}] },
+      { id:'f-pricemult', key:'price_mult', type:'number', unit:'-', min:0.5, max:2, step:0.05, precision:2, visible:full, label:T('Price multiplier','Множник ціни','Preisfaktor','Prijsfactor','Multiplicateur prix','Multiplicador precio','Mnożnik ceny') },
+      { id:'f-famode', key:'fa_mode', type:'select', learn:'cbam', visible:full, label:T('Free allocation','Безкоштовні квоти','Gratiszuteilung','Gratis toewijzing','Allocation gratuite','Asignación gratuita','Darmowe przydziały'), options:[{value:'',label:T('Industry default','За галуззю','Branchenstandard','Sectorstandaard','Défaut secteur','Por defecto sector','Domyślne branży')},{value:'cbam',label:T('CBAM sector','Сектор CBAM','CBAM-Sektor','CBAM-sector','Secteur MACF','Sector CBAM','Sektor CBAM')},{value:'noncbam',label:T('Non-CBAM','Поза CBAM','Nicht-CBAM','Niet-CBAM','Hors MACF','No CBAM','Poza CBAM')},{value:'none',label:T('None','Немає','Keine','Geen','Aucune','Ninguna','Brak')}] },
+      { id:'f-removal', key:'removal_price', type:'number', unit:'-', min:0, max:400, step:5, precision:0, learn:'removal', label:T('Removal credit (EUR/t)','Кредит видалення (EUR/т)','Entnahmegutschrift (EUR/t)','Verwijderingskrediet (EUR/t)','Crédit retrait (EUR/t)','Crédito remoción (EUR/t)','Kredyt usunięcia (EUR/t)') },
+      { id:'f-method', key:'method', type:'select', learn:'method', label:T('EUR/t metric basis','Базис метрики EUR/t','Bezugsbasis EUR/t','Basis EUR/t-maatstaf','Base de la métrique EUR/t','Base de la métrica EUR/t','Podstawa wskaźnika EUR/t'), options:[
+        { value:'auto', label:T('Auto (IEAGHG fossil / CRCF biogenic)','Авто (IEAGHG викопний / CRCF біогенний)','Auto (IEAGHG fossil / CRCF biogen)','Auto (IEAGHG fossiel / CRCF biogeen)','Auto (IEAGHG fossile / CRCF biogénique)','Auto (IEAGHG fósil / CRCF biogénico)','Auto (IEAGHG kopalny / CRCF biogeniczny)') },
+        { value:'ieaghg', label:T('IEAGHG cost of CO2 avoided','IEAGHG вартість уникнутого CO2','IEAGHG Kosten des vermiedenen CO2','IEAGHG kosten vermeden CO2','IEAGHG coût du CO2 évité','IEAGHG coste del CO2 evitado','IEAGHG koszt unikniętego CO2') },
+        { value:'ets', label:T('EU ETS allowance saved','Заощаджена квота EU ETS','Eingespartes EU-ETS-Zertifikat','Bespaard EU ETS-emissierecht','Quota EU ETS économisé','Derecho de emisión EU ETS ahorrado','Zaoszczędzone uprawnienie EU ETS') },
+        { value:'crcf', label:T('CRCF net removal (BioCCS)','Чисте видалення CRCF (BioCCS)','CRCF-Nettoentnahme (BioCCS)','CRCF netto-verwijdering (BioCCS)','Retrait net CRCF (BioCCS)','Absorción neta CRCF (BioCCS)','Pochłanianie netto CRCF (BioCCS)') } ] },
+      { id:'f-crcfalloc', key:'crcf_alloc', type:'select', learn:'method', visible:function(c){ return c.state.level==='full' && (c.state.method==='auto' || c.state.method==='crcf'); }, label:T('CRCF emission allocation','Розподіл викидів CRCF','CRCF-Emissionszuordnung','CRCF-emissietoewijzing','Allocation des émissions CRCF','Asignación de emisiones CRCF','Alokacja emisji CRCF'), options:[
+        { value:'full', label:T('Full to removal (default)','Повністю на видалення (типово)','Vollständig der Entnahme (Standard)','Volledig aan verwijdering (standaard)','Totalité au retrait (défaut)','Total a la absorción (por defecto)','W całości na pochłanianie (domyślnie)') },
+        { value:'prorata', label:T('Pro rata biogenic share (if eligible)','Пропорційно біогенній частці (якщо допустимо)','Anteilig nach biogenem Anteil (falls zulässig)','Pro rata biogeen aandeel (indien toegestaan)','Au prorata de la part biogénique (si éligible)','Prorrata de la fracción biogénica (si procede)','Proporcjonalnie do udziału biogenicznego (jeśli dozwolone)') } ] } ]},
+    { id:'support', slot:'inputs', title:T('Support','Підтримка','Förderung','Steun','Soutien','Apoyo','Wsparcie'), collapsible:true, collapsed:false, fields:[
+      { id:'f-grant', key:'grant_frac', type:'number', unit:'-', min:0, max:0.8, step:0.05, precision:2, learn:'grants', label:T('Capex grant share','Частка гранту','Zuschussanteil','Subsidieaandeel','Part subvention','Cuota subvención','Udział dotacji') },
+      { id:'f-useccfd', key:'useCcfd', type:'toggle', learn:'ccfd', label:T('Use CCfD','Застосувати CCfD','CCfD nutzen','CCfD gebruiken','Utiliser CCfD','Usar CCfD','Użyj CCfD') },
+      { id:'f-strike', key:'ccfd_strike', type:'number', unit:'-', min:50, max:400, step:5, precision:0, visible:ccfd, label:T('CCfD strike (EUR/t)','Страйк CCfD (EUR/т)','CCfD-Basispreis (EUR/t)','CCfD-strike (EUR/t)','Prix CCfD (EUR/t)','Precio CCfD (EUR/t)','Cena CCfD (EUR/t)') },
+      { id:'f-ccfdyears', key:'ccfd_years', type:'number', unit:'-', min:5, max:20, step:1, precision:0, visible:fullCcfd, label:T('CCfD term (years)','Термін CCfD (роки)','CCfD-Laufzeit (Jahre)','CCfD-looptijd (jaren)','Durée CCfD (ans)','Plazo CCfD (años)','Okres CCfD (lata)') } ]},
+    { id:'finance', slot:'inputs', title:T('Finance','Фінанси','Finanzen','Financiën','Finance','Finanzas','Finanse'), collapsible:true, collapsed:false, visible:full, fields:[
+      { id:'f-disc', key:'disc', type:'number', unit:'-', min:0.02, max:0.15, step:0.005, precision:3, visible:full, label:T('Discount rate','Ставка дисконту','Diskontsatz','Disconteringsvoet','Taux d\'actualisation','Tasa de descuento','Stopa dyskontowa') },
+      { id:'f-life', key:'life', type:'number', unit:'-', min:10, max:40, step:1, precision:0, visible:full, label:T('Lifetime (years)','Термін служби (роки)','Lebensdauer (Jahre)','Levensduur (jaren)','Durée de vie (ans)','Vida útil (años)','Żywotność (lata)') },
+      { id:'f-cod', key:'cod', type:'number', unit:'-', min:2026, max:2040, step:1, precision:0, visible:full, label:T('Start year (COD)','Рік запуску (COD)','Inbetriebnahme (COD)','Startjaar (COD)','Année MES (COD)','Año inicio (COD)','Rok uruchomienia (COD)') },
+      { id:'f-capexmult', key:'capex_mult', type:'number', unit:'-', min:0.5, max:2, step:0.05, precision:2, visible:full, label:T('Capex multiplier','Множник CAPEX','Capex-Faktor','Capex-factor','Multiplicateur capex','Multiplicador capex','Mnożnik capex') } ]}
+  ];
+}
+
+var LEARN = {
+intro: { title: T("About this tool", "Про інструмент", "Über dieses Tool", "Over deze tool", "À propos de cet outil", "Acerca de esta herramienta", "O narzędziu"), body: T("Screening calculator for European industrial CCUS covering capture, pipeline or ship transport, and storage. It reports LCOC (EUR/t), payback, NPV and yearly cash flow under EU ETS price scenarios, CBAM-linked free-allocation phase-out, CCfD and grants. Pick industry, country, scale and transport, read the verdict, then switch to Full level for finance details and charts.", "Скринінговий калькулятор для промислового CCUS у Європі: уловлювання, транспорт трубопроводом або судном і зберігання з розрахунком LCOC (EUR/t), окупності, NPV та грошових потоків за сценаріями цін EU ETS, CBAM і CCfD. Оберіть галузь, країну, масштаб і транспорт, прочитайте висновок, а для фінансових деталей і графіків перейдіть на рівень Full.", "Screening-Rechner für industrielles CCUS in Europa: Abscheidung, Transport per Pipeline oder Schiff und Speicherung, mit LCOC (EUR/t), Amortisation, NPV und jährlichem Cashflow unter EU-ETS-Preisszenarien, CBAM und CCfD. Wählen Sie Branche, Land, Größe und Transport, lesen Sie das Ergebnis und wechseln Sie für Finanzdetails und Diagramme zur Stufe Full.", "Screeningcalculator voor industriële CCUS in Europa: afvang, transport per pijpleiding of schip en opslag, met LCOC (EUR/t), terugverdientijd, NPV en jaarlijkse kasstroom onder EU ETS-prijsscenario's, CBAM en CCfD. Kies sector, land, schaal en transport, lees het oordeel en schakel naar niveau Full voor financiële details en grafieken.", "Calculateur de présélection pour le CCUS industriel en Europe : captage, transport par pipeline ou navire et stockage, avec LCOC (EUR/t), temps de retour, VAN et flux de trésorerie annuels selon des scénarios de prix EU ETS, le CBAM et les CCfD. Choisissez l'industrie, le pays, l'échelle et le transport, lisez le verdict, puis passez au niveau Full pour les détails financiers et les graphiques.", "Calculadora de cribado para CCUS industrial en Europa: captura, transporte por tubería o barco y almacenamiento, con LCOC (EUR/t), plazo de recuperación, VAN y flujo de caja anual según escenarios de precio del EU ETS, CBAM y CCfD. Elija industria, país, escala y transporte, lea el veredicto y cambie al nivel Full para ver detalles financieros y gráficos.", "Kalkulator wstępnej oceny przemysłowego CCUS w Europie: wychwytywanie, transport rurociągiem lub statkiem i składowanie, z LCOC (EUR/t), okresem zwrotu, NPV i rocznymi przepływami pieniężnymi w scenariuszach cen EU ETS, CBAM i CCfD. Wybierz branżę, kraj, skalę i transport, odczytaj werdykt, a szczegóły finansowe i wykresy znajdziesz na poziomie Full.") },
+industries: { title: T("Why industry matters", "Чому важлива галузь", "Warum die Branche zählt", "Waarom de sector ertoe doet", "Pourquoi le secteur compte", "Por qué importa la industria", "Dlaczego branża ma znaczenie"), body: T("Flue-gas CO2 concentration drives capture cost: cement ~20-25 %, NGCC ~4 %, while ammonia and ethanol streams are ~100 % CO2 and need only compression, no amine unit. Plant size, available waste heat and biogenic share (WtE, pulp, eligible for removal credits) also shift costs and revenues. CBAM exposure sets how fast free allocation phases out.", "Концентрація CO2 у димових газах визначає вартість уловлювання: цемент ~20-25 %, NGCC ~4 %, а потоки аміаку й етанолу майже чисті (~100 %) і потребують лише компресії без амінової установки. Також важать масштаб, відпрацьоване тепло, біогенна частка (WtE, целюлоза) для кредитів на видалення та охоплення CBAM, що прискорює скасування безкоштовних квот.", "Die CO2-Konzentration im Abgas bestimmt die Abscheidekosten: Zement ~20-25 %, GuD (NGCC) ~4 %, während Ammoniak- und Ethanolströme mit ~100 % nur verdichtet werden müssen und keine Aminanlage brauchen. Zudem zählen Anlagengröße, Abwärme, biogener Anteil (WtE, Zellstoff) für Entnahmezertifikate und die CBAM-Abdeckung, die den Wegfall der kostenlosen Zuteilung bestimmt.", "De CO2-concentratie in rookgas bepaalt de afvangkosten: cement ~20-25 %, NGCC ~4 %, terwijl ammoniak- en ethanolstromen van ~100 % alleen compressie nodig hebben, zonder amine-installatie. Ook schaal, restwarmte, biogeen aandeel (WtE, pulp) voor verwijderingscredits en CBAM-blootstelling, die de afbouw van gratis toewijzing bepaalt, spelen mee.", "La concentration de CO2 dans les fumées détermine le coût du captage : ciment ~20-25 %, CCGT ~4 %, tandis que les flux d'ammoniac et d'éthanol à ~100 % ne demandent qu'une compression, sans unité aux amines. La taille, la chaleur fatale, la part biogénique (UVE, pâte à papier) ouvrant droit aux crédits d'absorption et l'exposition au CBAM, qui fixe la suppression des quotas gratuits, comptent aussi.", "La concentración de CO2 en los gases de combustión determina el coste de captura: cemento ~20-25 %, NGCC ~4 %, mientras que las corrientes de amoníaco y etanol (~100 %) solo requieren compresión, sin unidad de aminas. También influyen la escala, el calor residual, la fracción biogénica (valorización energética de residuos, celulosa) para créditos de remoción y la exposición al CBAM, que marca la eliminación de la asignación gratuita.", "Stężenie CO2 w spalinach decyduje o koszcie wychwytu: cement ~20-25 %, NGCC ~4 %, a strumienie z produkcji amoniaku i etanolu (~100 %) wymagają tylko sprężania, bez instalacji aminowej. Liczą się też skala, ciepło odpadowe, udział biogeniczny (WtE, celuloza) dający kredyty za usuwanie oraz objęcie CBAM, od którego zależy wygaszanie bezpłatnych uprawnień.") },
+
+scale: { title: T("Capture scale", "Масштаб уловлювання", "Abscheidungsmaßstab", "Afvangschaal", "Échelle de captage", "Escala de captura", "Skala wychwytu"), body: T("Captured CO2 in Mt/y is a major driver of unit cost. Capture CAPEX scales roughly with size^0.6-0.7, and pipeline cost per tonne falls sharply at high flow, so large sources are cheaper per tonne. Below about 0.1-0.2 Mt/y costs rise steeply, but clusters with shared transport and storage help small emitters.", "Вартість за тонну суттєво знижується зі зростанням обсягу: CAPEX уловлювання ~ розмір^0,6-0,7, трубопроводи дешевші при великих потоках. Нижче ~0,1-0,2 Мт/рік витрати різко зростають, а кластери допомагають малим джерелам.", "Die Kosten pro Tonne sinken stark mit der Größe: Abscheidungs-CAPEX ~ Größe^0,6-0,7, Pipelines sind bei hohem Durchfluss günstiger. Unter ~0,1-0,2 Mt/a steigen die Kosten steil, und Cluster helfen kleinen Emittenten.", "Kosten per ton dalen sterk met de schaal: afvang-CAPEX ~ omvang^0,6-0,7, pijpleidingen zijn goedkoper bij grote stromen. Onder ~0,1-0,2 Mt/j stijgen de kosten sterk, en clusters helpen kleine uitstoters.", "Le coût par tonne baisse fortement avec la taille : CAPEX de captage ~ taille^0,6-0,7, pipelines moins chers à fort débit. Sous ~0,1-0,2 Mt/an, les coûts grimpent, et les clusters aident les petits émetteurs.", "El coste por tonelada cae mucho con la escala: CAPEX de captura ~ tamaño^0,6-0,7 y las tuberías son más baratas con grandes caudales. Por debajo de ~0,1-0,2 Mt/año los costes suben bruscamente, y los clústeres ayudan a pequeños emisores.", "Koszt na tonę wyraźnie spada wraz ze skalą: CAPEX wychwytu ~ wielkość^0,6-0,7, rurociągi są tańsze przy dużych przepływach. Poniżej ~0,1-0,2 Mt/rok koszty gwałtownie rosną, a klastry pomagają małym emitentom.") },
+transport: { title: T("Transport mode", "Вид транспорту", "Transportart", "Transportwijze", "Mode de transport", "Modo de transporte", "Rodzaj transportu"), body: T("Pipelines are CAPEX-heavy, with cost rising with distance and favouring large, steady flows. Ships need liquefaction (low pressure ~7-15 bar or medium pressure 15-18 bar) and terminals, but their cost is less distance-sensitive and suits small, remote emitters or long offshore routes. Break-even is typically several hundred km, depending on volume.", "Трубопровід — переважно CAPEX, його вартість зростає з відстанню, він вигідний для великих стабільних потоків. Судна потребують зрідження (~7-15 або 15-18 бар) і терміналів, але менш чутливі до відстані; точка беззбитковості — кілька сотень км.", "Pipelines sind CAPEX-lastig, ihre Kosten steigen mit der Distanz, und sie eignen sich für große, stetige Mengen. Schiffe brauchen Verflüssigung (~7-15 oder 15-18 bar) und Terminals, sind aber weniger distanzabhängig; der Break-even liegt bei einigen hundert km.", "Pijpleidingen zijn vooral CAPEX, hun kosten stijgen met de afstand en ze passen bij grote, constante stromen. Schepen vereisen vloeibaarmaking (~7-15 of 15-18 bar) en terminals, maar zijn minder afstandsgevoelig; het break-evenpunt ligt rond enkele honderden km.", "Le pipeline est surtout du CAPEX, son coût croît avec la distance et il favorise les gros débits stables. Le navire exige liquéfaction (~7-15 ou 15-18 bar) et terminaux, mais dépend moins de la distance ; le seuil de rentabilité se situe vers quelques centaines de km.", "La tubería es sobre todo CAPEX, su coste crece con la distancia y favorece flujos grandes y estables. El barco requiere licuefacción (~7-15 o 15-18 bar) y terminales, pero depende menos de la distancia; el punto de equilibrio ronda varios cientos de km.", "Rurociąg to głównie CAPEX, jego koszt rośnie z odległością i opłaca się przy dużych, stałych przepływach. Statek wymaga skraplania (~7-15 lub 15-18 bar) i terminali, ale mniej zależy od odległości; próg opłacalności to kilkaset km.") },
+
+ets: { title: T("EU ETS price scenarios", "Сценарії цін EU ETS", "EU-ETS-Preisszenarien", "EU ETS-prijsscenario's", "Scénarios de prix EU ETS", "Escenarios de precio del EU ETS", "Scenariusze cen EU ETS"), body: T("Low, central and high EU ETS price paths are applied; the central path reaches about 145 EUR/t in 2030, 220 in 2040 and 300 in 2050 (a tool assumption, not a forecast). Stored fossil CO2 requires no allowance surrender, so avoided allowance cost is the main revenue. The Full level adds a price multiplier.", "Застосовуються низький, центральний і високий цінові сценарії; центральний сягає ~145 EUR/т у 2030, 220 у 2040 і 300 у 2050 (припущення інструмента, не прогноз). За збережений викопний CO2 квоти не здаються, тож уникнута вартість квот є основним доходом; рівень Full додає ціновий множник.", "Es gelten niedrige, zentrale und hohe Preispfade; zentral ca. 145 EUR/t 2030, 220 2040 und 300 2050 (Annahme des Tools, keine Prognose). Für gespeichertes fossiles CO2 werden keine Zertifikate abgegeben, daher sind vermiedene Zertifikatskosten der Haupterlös; die Stufe Full ergänzt einen Preismultiplikator.", "Er worden lage, centrale en hoge prijspaden gebruikt; centraal ca. 145 EUR/t in 2030, 220 in 2040 en 300 in 2050 (aanname van de tool, geen prognose). Voor opgeslagen fossiele CO2 hoeven geen rechten te worden ingeleverd, dus vermeden rechtenkosten zijn de belangrijkste opbrengst; het niveau Full voegt een prijsvermenigvuldiger toe.", "Trois trajectoires de prix sont utilisées (basse, centrale, haute) ; la centrale atteint ~145 EUR/t en 2030, 220 en 2040 et 300 en 2050 (hypothèse de l'outil, pas une prévision). Le CO2 fossile stocké ne donne pas lieu à restitution de quotas, le coût évité des quotas est donc le principal revenu ; le niveau Full ajoute un multiplicateur de prix.", "Se usan trayectorias de precio baja, central y alta; la central alcanza ~145 EUR/t en 2030, 220 en 2040 y 300 en 2050 (supuesto de la herramienta, no una previsión). El CO2 fósil almacenado no requiere entregar derechos, por lo que el coste evitado de derechos es el ingreso principal; el nivel Full añade un multiplicador de precio.", "Stosowane są niska, centralna i wysoka ścieżka cen; centralna osiąga ok. 145 EUR/t w 2030, 220 w 2040 i 300 w 2050 (założenie narzędzia, nie prognoza). Za składowany kopalny CO2 nie umarza się uprawnień, więc uniknięty koszt uprawnień jest głównym przychodem; poziom Full dodaje mnożnik ceny.") },
+cbam: { title: T("CBAM and free allocation", "CBAM і безкоштовні квоти", "CBAM und kostenlose Zuteilung", "CBAM en gratis toewijzing", "CBAM et allocation gratuite", "CBAM y asignación gratuita", "CBAM i bezpłatne przydziały"), body: T("In CBAM sectors (cement, steel, aluminium, fertiliser/ammonia, hydrogen), free allocation phases out gradually from 2026 to 2034, so avoiding emissions becomes more valuable over time. Other sectors keep benchmark-based free allocation, assumed to decline. Free allocation does not change the marginal value of an avoided tonne, but it changes the site's cash position.", "У секторах CBAM (цемент, сталь, алюміній, добрива/аміак, водень) безкоштовні квоти поступово скасовуються у 2026-2034 рр., тож цінність уникнення викидів зростає. Інші сектори зберігають бенчмаркові квоти (з припущенням зниження); вони не змінюють граничну цінність уникнутої тонни, але впливають на грошову позицію об'єкта.", "In CBAM-Sektoren (Zement, Stahl, Aluminium, Dünger/Ammoniak, Wasserstoff) entfällt die kostenlose Zuteilung schrittweise 2026-2034, wodurch vermiedene Emissionen wertvoller werden. Andere Sektoren behalten eine benchmarkbasierte, als sinkend angenommene Zuteilung; sie ändert nicht den Grenzwert einer vermiedenen Tonne, wohl aber die Liquiditätslage des Standorts.", "In CBAM-sectoren (cement, staal, aluminium, kunstmest/ammoniak, waterstof) verdwijnt de gratis toewijzing geleidelijk in 2026-2034, waardoor vermeden emissies meer waard worden. Andere sectoren behouden benchmarkgebaseerde toewijzing (verondersteld dalend); die verandert de marginale waarde van een vermeden ton niet, maar wel de kaspositie van de locatie.", "Dans les secteurs CBAM (ciment, acier, aluminium, engrais/ammoniac, hydrogène), l'allocation gratuite disparaît progressivement entre 2026 et 2034, ce qui accroît la valeur des émissions évitées. Les autres secteurs conservent une allocation fondée sur des référentiels, supposée décroissante ; elle ne modifie pas la valeur marginale d'une tonne évitée, mais affecte la trésorerie du site.", "En los sectores CBAM (cemento, acero, aluminio, fertilizantes/amoníaco, hidrógeno), la asignación gratuita se elimina gradualmente entre 2026 y 2034, por lo que evitar emisiones vale cada vez más. Los demás sectores mantienen una asignación basada en referencias, supuestamente decreciente; no cambia el valor marginal de una tonelada evitada, pero sí la posición de caja de la planta.", "W sektorach CBAM (cement, stal, aluminium, nawozy/amoniak, wodór) bezpłatne przydziały są stopniowo wycofywane w latach 2026-2034, więc wartość unikniętych emisji rośnie. Pozostałe sektory zachowują przydziały oparte na wskaźnikach (zakładany spadek); nie zmieniają one krańcowej wartości unikniętej tony, ale wpływają na pozycję gotówkową zakładu.") },
+
+ccfd: { title: T("Carbon Contract for Difference (CCfD)","Вуглецевий контракт на різницю (CCfD)","Carbon Contract for Difference (CCfD)","Carbon Contract for Difference (CCfD)","Contrat carbone pour différence (CCfD)","Contrato de carbono por diferencia (CCfD)","Kontrakt różnicowy na emisje (CCfD)"), body: T("The state pays strike price minus ETS price per tonne avoided, for a set term (default 15 years) and covered volume share. Here it is two-sided: the operator pays back if ETS exceeds the strike. This removes ETS price risk (e.g. Dutch SDE++, German Klimaschutzverträge, Danish CCUS tenders).","Держава сплачує різницю між страйк-ціною та ціною ETS за тонну уникнених викидів протягом заданого строку (типово 15 років) для покритої частки обсягу. Контракт двосторонній: якщо ціна ETS перевищує страйк-ціну, оператор повертає різницю.","Der Staat zahlt Strike-Preis minus ETS-Preis je vermiedener Tonne für eine feste Laufzeit (Standard 15 Jahre) und einen gedeckten Mengenanteil. Zweiseitig: Liegt der ETS-Preis über dem Strike, zahlt der Betreiber zurück.","De overheid betaalt de strikeprijs min de ETS-prijs per vermeden ton, voor een vaste looptijd (standaard 15 jaar) en een gedekt volumeaandeel. Tweezijdig: ligt de ETS-prijs boven de strikeprijs, dan betaalt de exploitant terug.","L'État verse le prix d'exercice moins le prix ETS par tonne évitée, sur une durée fixée (15 ans par défaut) et une part de volume couverte. Contrat bilatéral : si l'ETS dépasse le prix d'exercice, l'exploitant rembourse la différence.","El Estado paga el precio de ejercicio menos el precio ETS por tonelada evitada, durante un plazo fijo (15 años por defecto) y una cuota de volumen cubierta. Es bidireccional: si el ETS supera el precio de ejercicio, el operador devuelve la diferencia.","Państwo wypłaca różnicę między ceną wykonania a ceną ETS za tonę unikniętej emisji przez określony okres (domyślnie 15 lat) dla objętej części wolumenu. Kontrakt dwustronny: gdy cena ETS przekracza cenę wykonania, operator zwraca różnicę.") },
+grants: { title: T("CAPEX grants","Гранти на CAPEX","CAPEX-Zuschüsse","CAPEX-subsidies","Subventions CAPEX","Subvenciones al CAPEX","Dotacje CAPEX"), body: T("Grants such as the EU Innovation Fund, CEF or national schemes are entered as a share of CAPEX paid during construction. They cut the upfront outlay and shorten payback but do not cover running costs. Grants and CCfD may be combined, subject to state-aid rules.","Гранти (Інноваційний фонд ЄС, CEF, національні програми) задаються як частка CAPEX, що виплачується під час будівництва. Вони зменшують початкові витрати й скорочують строк окупності, але не покривають операційні витрати.","Zuschüsse (EU-Innovationsfonds, CEF, nationale Programme) werden als Anteil des CAPEX erfasst, ausgezahlt während der Bauphase. Sie senken die Anfangsinvestition und verkürzen die Amortisation, decken aber keine Betriebskosten.","Subsidies (EU-Innovatiefonds, CEF, nationale regelingen) worden ingevoerd als aandeel van de CAPEX, uitbetaald tijdens de bouw. Ze verlagen de initiële investering en verkorten de terugverdientijd, maar dekken geen operationele kosten.","Les subventions (Fonds pour l'innovation de l'UE, MIE/CEF, dispositifs nationaux) sont saisies en part du CAPEX versée pendant la construction. Elles réduisent l'investissement initial et le délai de retour, sans couvrir les coûts d'exploitation.","Las subvenciones (Fondo de Innovación de la UE, CEF, programas nacionales) se introducen como porcentaje del CAPEX pagado durante la construcción. Reducen la inversión inicial y acortan el plazo de recuperación, pero no cubren los costes operativos.","Dotacje (Fundusz Innowacyjny UE, CEF, programy krajowe) wprowadza się jako udział CAPEX wypłacany w trakcie budowy. Zmniejszają nakłady początkowe i skracają okres zwrotu, ale nie pokrywają kosztów operacyjnych.") },
+
+removal: { title: T("Carbon removal credits","Кредити за вилучення вуглецю","Zertifikate für CO2-Entnahme","Koolstofverwijderingscredits","Crédits de retrait de carbone","Créditos de remoción de carbono","Jednostki usuwania CO2"), body: T("Biogenic CO2 from waste-to-energy, pulp or bioethanol is outside ETS surrender, so storing it avoids no allowances. It can instead earn carbon removal credits via EU CRCF certification, voluntary markets or Nordic state purchase schemes. Enter a removal credit price per tonne of biogenic CO2 stored; prices remain uncertain.","Біогенний CO2 не підпадає під здачу квот ETS, тому його зберігання не дає цінності уникнених квот. Натомість він може генерувати кредити за вилучення (EU CRCF, добровільний ринок, північні державні програми); введіть ціну за тонну, ціни невизначені.","Biogenes CO2 unterliegt nicht der ETS-Abgabepflicht, daher bringt seine Speicherung keinen Zertifikatswert. Stattdessen sind Entnahmezertifikate möglich (EU CRCF, freiwilliger Markt, nordische Ankaufprogramme); Preis pro Tonne eingeben, Preise sind unsicher.","Biogene CO2 valt niet onder de ETS-inleverplicht, dus opslag levert geen vermeden emissierechten op. Wel kan het verwijderingscredits opleveren (EU CRCF, vrijwillige markt, Noordse staatsaankoop); voer een prijs per ton in, prijzen zijn onzeker.","Le CO2 biogénique n'est pas soumis à la restitution de quotas ETS : son stockage n'évite aucun quota. Il peut générer des crédits de retrait (certification EU CRCF, marché volontaire, achats publics nordiques) ; saisissez un prix par tonne, encore incertain.","El CO2 biogénico no está sujeto a la entrega de derechos del ETS, por lo que almacenarlo no evita derechos. Puede generar créditos de remoción (EU CRCF, mercado voluntario, compras estatales nórdicas); introduzca un precio por tonelada, aún incierto.","Biogeniczny CO2 nie podlega umarzaniu uprawnień EU ETS, więc jego składowanie nie daje wartości unikniętych uprawnień. Może natomiast generować jednostki usunięć (EU CRCF, rynek dobrowolny, nordyckie programy zakupu); podaj cenę za tonę, ceny są niepewne.") },
+lcoc: { title: T("Levelised cost of CO2 (LCOC)","Нормована вартість CO2 (LCOC)","Gestehungskosten pro Tonne CO2 (LCOC)","Genivelleerde CO2-kosten (LCOC)","Coût actualisé du CO2 (LCOC)","Coste nivelado del CO2 (LCOC)","Uśredniony koszt CO2 (LCOC)"), body: T("Annualised CAPEX (via capital recovery factor) plus fixed O&M, energy and transport and storage fees, divided by annual tonnes. Cost per tonne avoided exceeds cost per tonne stored, because capture energy itself emits CO2 and fewer tonnes are avoided. Compare with the ETS price to judge viability.","Річний CAPEX (через коефіцієнт повернення капіталу) плюс фіксовані O&M, енергія та плата за транспорт і зберігання, поділені на тонни. Вартість за уникнену тонну вища, ніж за збережену; порівняйте з ціною ETS.","Annualisierter CAPEX (Kapitalwiedergewinnungsfaktor) plus fixe O&M-, Energie- sowie Transport- und Speicherkosten, geteilt durch Tonnen. Kosten pro vermiedener Tonne liegen über denen pro gespeicherter Tonne; mit dem ETS-Preis vergleichen.","Geannualiseerde CAPEX (kapitaalterugwinningsfactor) plus vaste O&M, energie en transport- en opslagkosten, gedeeld door tonnen. Kosten per vermeden ton liggen hoger dan per opgeslagen ton; vergelijk met de ETS-prijs.","CAPEX annualisé (facteur de recouvrement du capital) plus O&M fixes, énergie et frais de transport et stockage, divisés par les tonnes. Le coût par tonne évitée dépasse celui par tonne stockée ; comparez au prix ETS.","CAPEX anualizado (factor de recuperación de capital) más O&M fijo, energía y tarifas de transporte y almacenamiento, dividido por las toneladas. El coste por tonelada evitada supera al de tonelada almacenada; compárelo con el precio ETS.","Zannualizowany CAPEX (współczynnik odzysku kapitału) plus stałe O&M, energia oraz opłaty za transport i składowanie, podzielone przez tony. Koszt na tonę unikniętą jest wyższy niż na tonę składowaną; porównaj z ceną ETS.") },
+
+payback: { title: T("Payback period", "Термін окупності", "Amortisationszeit", "Terugverdientijd", "Temps de retour", "Periodo de retorno", "Okres zwrotu"), body: T("Simple payback is the first year cumulative undiscounted cash flow from construction start turns positive; discounted payback applies the discount rate. No payback: avoided ETS costs, CCfD and removal credits never recover CAPEX and running costs within the lifetime.", "Проста окупність — перший рік, коли накопичений недисконтований грошовий потік від початку будівництва стає додатним; дисконтована окупність враховує ставку дисконтування. Відсутність окупності означає, що доходи (уникнуті витрати ETS, CCfD, кредити за видалення) не покривають CAPEX і операційні витрати за строк служби.", "Einfache Amortisation: erstes Jahr, in dem der kumulierte undiskontierte Cashflow ab Baubeginn positiv wird; die diskontierte Variante nutzt den Diskontsatz. Keine Amortisation heißt, dass Erlöse (vermiedene ETS-Kosten, CCfD, Entnahmezertifikate) CAPEX und Betriebskosten innerhalb der Laufzeit nie decken.", "Eenvoudige terugverdientijd: eerste jaar waarin de cumulatieve ongedisconteerde kasstroom vanaf de start van de bouw positief wordt; de verdisconteerde variant gebruikt de disconteringsvoet. Geen terugverdientijd betekent dat opbrengsten (vermeden ETS-kosten, CCfD, verwijderingscredits) CAPEX en bedrijfskosten binnen de levensduur nooit terugverdienen.", "Retour simple : première année où le flux de trésorerie cumulé non actualisé, depuis le début de la construction, devient positif ; le retour actualisé applique le taux d'actualisation. Pas de retour signifie que les revenus (coûts ETS évités, CCfD, crédits de retrait) ne couvrent jamais le CAPEX et les coûts d'exploitation sur la durée de vie.", "Retorno simple: primer año en que el flujo de caja acumulado sin descontar, desde el inicio de la construcción, se vuelve positivo; el retorno descontado aplica la tasa de descuento. Sin retorno significa que los ingresos (costes ETS evitados, CCfD, créditos de remoción) nunca recuperan el CAPEX y los costes operativos durante la vida útil.", "Prosty okres zwrotu to pierwszy rok, w którym skumulowany niezdyskontowany przepływ pieniężny od początku budowy staje się dodatni; zdyskontowany okres zwrotu uwzględnia stopę dyskontową. Brak zwrotu oznacza, że przychody (uniknięte koszty ETS, CCfD, kredyty za usuwanie) nie pokrywają CAPEX i kosztów operacyjnych w okresie eksploatacji.") },
+npv: { title: T("Net present value (NPV) and IRR", "Чиста приведена вартість (NPV) та IRR", "Kapitalwert (NPV) und IRR", "Netto contante waarde (NPV) en IRR", "Valeur actuelle nette (VAN) et TRI", "Valor actual neto (VAN) y TIR", "Wartość bieżąca netto (NPV) i IRR"), body: T("NPV discounts yearly cash flows over construction plus economic life at the discount rate (default 8 %); a positive value means the project beats the required return. IRR is the discount rate at which NPV equals zero.", "NPV — сума щорічних грошових потоків за період будівництва та економічного життя, дисконтованих за ставкою (типово 8 %); додатна NPV означає, що проєкт перевищує необхідну дохідність. IRR — ставка, за якої NPV = 0.", "Der NPV diskontiert jährliche Cashflows über Bau- und Nutzungsdauer mit dem Diskontsatz (Standard 8 %); ein positiver Wert bedeutet, dass das Projekt die geforderte Rendite übertrifft. Der IRR ist der Zinssatz, bei dem NPV = 0.", "De NPV verdisconteert jaarlijkse kasstromen over bouw- en economische levensduur tegen de disconteringsvoet (standaard 8 %); positief betekent dat het project het vereiste rendement overtreft. De IRR is de voet waarbij NPV = 0.", "La VAN actualise les flux annuels sur la construction et la durée de vie économique au taux d'actualisation (8 % par défaut) ; une VAN positive signifie que le projet dépasse le rendement exigé. Le TRI est le taux pour lequel VAN = 0.", "El VAN descuenta los flujos anuales durante la construcción y la vida económica a la tasa de descuento (8 % por defecto); un VAN positivo indica que el proyecto supera la rentabilidad exigida. La TIR es la tasa a la que VAN = 0.", "NPV dyskontuje roczne przepływy pieniężne w okresie budowy i życia ekonomicznego według stopy dyskontowej (domyślnie 8 %); dodatnia NPV oznacza, że projekt przekracza wymaganą stopę zwrotu. IRR to stopa, przy której NPV = 0.") },
+avoided: { title: T("Captured vs stored vs avoided CO2","Уловлений, захоронений та уникнутий CO2","Abgeschiedenes vs. gespeichertes vs. vermiedenes CO2","Afgevangen vs opgeslagen vs vermeden CO2","CO2 capté, stocké et évité","CO2 capturado, almacenado y evitado","CO2 wychwycony, składowany i uniknięty"), body: T("Stored = captured minus transport losses (ship boil-off/venting). Climate tonnes are smaller: capture, compression and transport use energy, and on-site gas combustion and purchased grid electricity emit CO2 (country grid factor). Three bases are reported (see topic EUR/t metric basis): IEAGHG avoided (stored minus all energy CO2), EU ETS reduction (fossil stored minus on-site gas CO2), CRCF net removal (biogenic stored minus associated emissions). For mixed fossil/biogenic sources such as waste-to-energy they differ strongly: compare EUR/t only on the same basis. LCOC per t stored is always lowest and not a climate metric.","Захоронений = уловлений мінус втрати при транспортуванні (випаровування/скидання на суднах). Кліматичні тонни менші: уловлення, компримування та транспортування споживають енергію, а спалювання газу на майданчику й закуплена електроенергія з мережі викидають CO2 (коефіцієнт мережі країни). Інструмент показує три бази (див. тему База метрики EUR/т): IEAGHG уникнутий (захоронений мінус увесь енергетичний CO2), скорочення за EU ETS (викопний захоронений мінус CO2 від газу на майданчику), чисте видалення за CRCF (біогенний захоронений мінус пов’язані викиди). Для змішаних викопно-біогенних джерел, як-от сміттєспалювальні ТЕС, вони суттєво різняться: порівнюйте EUR/т лише на одній базі. LCOC на т захороненого завжди найнижчий і не є кліматичним показником.","Gespeichert = abgeschieden minus Transportverluste (Boil-off/Venting beim Schiff). Die klimawirksamen Tonnen sind kleiner: Abscheidung, Verdichtung und Transport verbrauchen Energie, und Gasverbrennung vor Ort sowie zugekaufter Netzstrom emittieren CO2 (länderspezifischer Netzfaktor). Das Tool weist drei Bezugsbasen aus (siehe Thema EUR/t-Bezugsbasis): IEAGHG vermieden (gespeichert minus gesamtes Energie-CO2), EU-ETS-Minderung (fossil gespeichert minus CO2 aus Gas vor Ort), CRCF-Nettoentnahme (biogen gespeichert minus zugehörige Emissionen). Bei gemischt fossil/biogenen Quellen wie Müllverbrennung weichen sie stark ab: EUR/t nur auf gleicher Basis vergleichen. LCOC je t gespeichert ist immer der niedrigste Wert und keine Klimakennzahl.","Opgeslagen = afgevangen min transportverliezen (boil-off/venting bij scheepstransport). De klimaattonnen zijn kleiner: afvang, compressie en transport verbruiken energie, en gasverbranding ter plaatse en ingekochte netstroom stoten CO2 uit (netfactor per land). De tool rapporteert drie grondslagen (zie onderwerp EUR/t-grondslag): IEAGHG vermeden (opgeslagen min alle energie-CO2), EU ETS-reductie (fossiel opgeslagen min CO2 van gas ter plaatse), CRCF netto verwijdering (biogeen opgeslagen min bijbehorende emissies). Bij gemengde fossiel/biogene bronnen zoals afvalverbranding verschillen ze sterk: vergelijk EUR/t alleen op dezelfde grondslag. LCOC per t opgeslagen is altijd het laagste cijfer en geen klimaatmaatstaf.","Stocké = capté moins les pertes de transport (boil-off/dégazage des navires). Les tonnes climatiques sont plus faibles : captage, compression et transport consomment de l’énergie, et la combustion de gaz sur site et l’électricité achetée au réseau émettent du CO2 (facteur réseau du pays). L’outil présente trois bases (voir le sujet Base de la métrique EUR/t) : IEAGHG évité (stocké moins tout le CO2 énergétique), réduction EU ETS (fossile stocké moins le CO2 du gaz sur site), absorption nette CRCF (biogénique stocké moins les émissions associées). Pour les sources mixtes fossiles/biogéniques comme l’incinération des déchets, elles diffèrent fortement : comparez les EUR/t uniquement sur la même base. Le LCOC par t stockée est toujours le chiffre le plus bas et n’est pas un indicateur climatique.","Almacenado = capturado menos las pérdidas de transporte (boil-off/venteo en buques). Las toneladas climáticas son menores: la captura, la compresión y el transporte consumen energía, y la combustión de gas in situ y la electricidad comprada a la red emiten CO2 (factor de red del país). La herramienta ofrece tres bases (ver tema Base de la métrica EUR/t): IEAGHG evitado (almacenado menos todo el CO2 energético), reducción EU ETS (fósil almacenado menos el CO2 del gas in situ), absorción neta CRCF (biogénico almacenado menos las emisiones asociadas). En fuentes mixtas fósil/biogénicas como la valorización energética de residuos difieren mucho: compare EUR/t solo sobre la misma base. El LCOC por t almacenada es siempre la cifra más baja y no es una métrica climática.","Składowany = wychwycony minus straty w transporcie (odparowanie/odpowietrzanie na statkach). Tony klimatyczne są mniejsze: wychwyt, sprężanie i transport zużywają energię, a spalanie gazu na miejscu i zakupiona energia z sieci emitują CO2 (krajowy wskaźnik sieci). Narzędzie podaje trzy podstawy (zob. temat Podstawa metryki EUR/t): IEAGHG uniknięty (składowany minus całe CO2 z energii), redukcja EU ETS (kopalny składowany minus CO2 z gazu na miejscu), usunięcie netto CRCF (biogeniczny składowany minus emisje powiązane). Dla mieszanych źródeł kopalno-biogenicznych, takich jak spalarnie odpadów, różnią się one znacznie: porównuj EUR/t tylko na tej samej podstawie. LCOC na t składowanego jest zawsze najniższy i nie jest wskaźnikiem klimatycznym.") },
+
+method: { title: T("EUR/t metric basis","Основа метрики EUR/t","Bezugsbasis der EUR/t-Kennzahl","Basis van de EUR/t-maatstaf","Base de la métrique EUR/t","Base de la métrica EUR/t","Podstawa wskaźnika EUR/t"), body: T("Indirect = on-site gas CO2 + purchased grid electricity CO2 for capture, compression, transport. IEAGHG (Rubin et al. 2015): avoided = stored - indirect, fossil and biogenic; compares technologies and literature. EU ETS (MRR 2018/2066, Art. 38(5) biomass EF zero, Art. 49): reduction = fossil stored - on-site gas CO2, electricity outside ETS; EUR/t = break-even allowance price for ETS and CCfD cash. CRCF (Reg. 2024/3012, BioCCS): net removal = biogenic stored - associated emissions, by default all indirect, pro rata only where allowed; for removal credits. Auto: CRCF if biogenic CO2, else IEAGHG; CRCF without biogenic CO2 falls back to IEAGHG with warning. Full: all three side by side.","Непрямі = CO2 від спалювання газу на майданчику + CO2 закупленої мережевої електроенергії для уловлювання, стиснення, транспортування. IEAGHG (Rubin et al. 2015): уникнуто = збережено - непрямі, викопний і біогенний; для порівняння технологій і літератури. EU ETS (MRR 2018/2066, ст. 38(5) нульовий EF біомаси, ст. 49): скорочення = збережений викопний - CO2 газу на майданчику, електроенергія поза ETS; EUR/t = беззбиткова ціна квоти для ETS і CCfD. CRCF (Reg. 2024/3012, BioCCS): чисте вилучення = збережений біогенний - пов’язані викиди, типово всі непрямі, пропорційно лише де дозволено; для кредитів вилучення. Auto: CRCF за наявності біогенного CO2, інакше IEAGHG; CRCF без біогенного CO2 переходить на IEAGHG з попередженням. Full: усі три поруч.","Indirekt = CO2 aus Gasverbrennung vor Ort + CO2 aus zugekauftem Netzstrom für Abscheidung, Verdichtung, Transport. IEAGHG (Rubin et al. 2015): vermieden = gespeichert - indirekt, fossil und biogen; zum Vergleich von Technologien und Literatur. EU ETS (MRR 2018/2066, Art. 38(5) Biomasse-EF null, Art. 49): Minderung = fossil gespeichert - Gas-CO2 vor Ort, Strom außerhalb des ETS; EUR/t = Break-even-Zertifikatspreis für ETS- und CCfD-Zahlungen. CRCF (VO 2024/3012, BioCCS): Nettoentnahme = biogen gespeichert - zugehörige Emissionen, standardmäßig alle indirekten, anteilig nur wo zulässig; für Entnahmezertifikate. Auto: CRCF bei biogenem CO2, sonst IEAGHG; CRCF ohne biogenes CO2 fällt mit Warnung auf IEAGHG zurück. Full: alle drei nebeneinander.","Indirect = CO2 uit gasverbranding ter plaatse + CO2 van ingekochte netstroom voor afvang, compressie, transport. IEAGHG (Rubin et al. 2015): vermeden = opgeslagen - indirect, fossiel en biogeen; voor vergelijking van technologieën en literatuur. EU ETS (MRR 2018/2066, art. 38(5) biomassa-EF nul, art. 49): reductie = fossiel opgeslagen - gas-CO2 ter plaatse, stroom buiten ETS; EUR/t = break-even emissierechtenprijs voor ETS- en CCfD-geld. CRCF (Vo. 2024/3012, BioCCS): netto verwijdering = biogeen opgeslagen - bijbehorende emissies, standaard alle indirecte, pro rata alleen waar toegestaan; voor verwijderingscertificaten. Auto: CRCF bij biogeen CO2, anders IEAGHG; CRCF zonder biogeen CO2 valt met waarschuwing terug op IEAGHG. Full: alle drie naast elkaar.","Indirectes = CO2 de combustion de gaz sur site + CO2 de l’électricité réseau achetée pour captage, compression, transport. IEAGHG (Rubin et al. 2015) : évité = stocké - indirectes, fossile et biogénique ; pour comparer technologies et littérature. EU ETS (MRR 2018/2066, art. 38(5) FE biomasse nul, art. 49) : réduction = fossile stocké - CO2 du gaz sur site, électricité hors ETS ; EUR/t = prix de quota d’équilibre pour flux ETS et CCfD. CRCF (Règl. 2024/3012, BioCCS) : absorption nette = biogénique stocké - émissions associées, par défaut toutes les indirectes, au prorata seulement si autorisé ; pour les crédits d’absorption. Auto : CRCF si CO2 biogénique, sinon IEAGHG ; CRCF sans CO2 biogénique bascule vers IEAGHG avec avertissement. Full : les trois côte à côte.","Indirectas = CO2 de combustión de gas in situ + CO2 de electricidad de red comprada para captura, compresión, transporte. IEAGHG (Rubin et al. 2015): evitado = almacenado - indirectas, fósil y biogénico; para comparar tecnologías y literatura. EU ETS (MRR 2018/2066, art. 38(5) FE de biomasa cero, art. 49): reducción = fósil almacenado - CO2 del gas in situ, electricidad fuera del ETS; EUR/t = precio de equilibrio del derecho para flujos ETS y CCfD. CRCF (Regl. 2024/3012, BioCCS): absorción neta = biogénico almacenado - emisiones asociadas, por defecto todas las indirectas, a prorrata solo donde se permita; para créditos de absorción. Auto: CRCF si hay CO2 biogénico, si no IEAGHG; CRCF sin CO2 biogénico recurre a IEAGHG con aviso. Full: los tres en paralelo.","Pośrednie = CO2 ze spalania gazu na miejscu + CO2 z zakupionej energii sieciowej dla wychwytu, sprężania, transportu. IEAGHG (Rubin et al. 2015): uniknięte = składowane - pośrednie, kopalne i biogeniczne; do porównań technologii i literatury. EU ETS (MRR 2018/2066, art. 38(5) zerowy EF biomasy, art. 49): redukcja = składowane kopalne - CO2 z gazu na miejscu, energia elektryczna poza ETS; EUR/t = progowa cena uprawnienia dla przepływów ETS i CCfD. CRCF (Rozp. 2024/3012, BioCCS): usunięcie netto = składowane biogeniczne - emisje powiązane, domyślnie wszystkie pośrednie, proporcjonalnie tylko gdzie dozwolone; dla jednostek usunięć. Auto: CRCF przy biogenicznym CO2, inaczej IEAGHG; CRCF bez biogenicznego CO2 wraca do IEAGHG z ostrzeżeniem. Full: wszystkie trzy obok siebie.") }
+};
+
+/* MLAB (Claude): headline label/unit per EUR/t methodology */
+function MLAB(m) {
+  if (m === 'ets') {
+    return {
+      tile: T('Cost per EUA saved', 'Вартість на заощ. EUA', 'Kosten je eingesp. EUA', 'Kosten per bespaarde EUA', 'Coût par EUA économisé', 'Coste por EUA ahorrado', 'Koszt na zaoszcz. EUA'),
+      unit: T('EUR/t EUA', 'EUR/t EUA', 'EUR/t EUA', 'EUR/t EUA', 'EUR/t EUA', 'EUR/t EUA', 'EUR/t EUA')
+    };
+  }
+  if (m === 'crcf') {
+    return {
+      tile: T('LCOC net removal (CRCF)', 'LCOC чисте видал. (CRCF)', 'LCOC Nettoentnahme (CRCF)', 'LCOC netto-verwijd. (CRCF)', 'LCOC retrait net (CRCF)', 'LCOC absorción neta (CRCF)', 'LCOC pochł. netto (CRCF)'),
+      unit: T('EUR/t net removed', 'EUR/t чисто видалено', 'EUR/t netto entnommen', 'EUR/t netto verwijderd', 'EUR/t nette retirée', 'EUR/t neta absorbida', 'EUR/t netto pochłonięta')
+    };
+  }
+  return {
+    tile: T('LCOC avoided (IEAGHG)', 'LCOC уникнутий (IEAGHG)', 'LCOC vermieden (IEAGHG)', 'LCOC vermeden (IEAGHG)', 'LCOC évité (IEAGHG)', 'LCOC evitado (IEAGHG)', 'LCOC uniknięty (IEAGHG)'),
+    unit: T('EUR/t avoided', 'EUR/t уникнуто', 'EUR/t vermieden', 'EUR/t vermeden', 'EUR/t évitée', 'EUR/t evitada', 'EUR/t uniknięta')
+  };
+}
+/* COMPUTE (Claude) */
+function COMPUTE(s, r){
+  if(!r||!r.ok){var e=(r&&r.warnings||[]).join('; ');return {verdict:{tone:'bad',text:T('Cannot compute: '+e,'Неможливо розрахувати: '+e,'Berechnung nicht möglich: '+e,'Kan niet berekenen: '+e,'Calcul impossible : '+e,'No se puede calcular : '+e,'Nie można obliczyć: '+e)},notes:[e]};}
+  var c=r.cash||{},t=r.t||{},en=r.energy||{},full=!!(s&&s.level==='full'),M=1e6,i;
+  function f(v,p){return DiagramUI.fmt(v,{precision:p});}
+  function nn(v){return (v==null||isNaN(v))?null:v;}
+  var npvM=nn(c.npv)!=null?c.npv/M:null,pb=nn(c.payback),okN=npvM!=null&&npvM>0;
+  var l=f(c.lcoc_avoided,0),n=(okN?'+':'')+f(npvM,1),y=pb!=null?f(pb,1):'';
+  var PB=['Pays back in ','Окупність за ','Amortisiert in ','Terugverdiend in ','Retour en ','Se recupera en ','Zwrot w '];
+  var YR=[' years',' р.',' Jahren',' jaar',' ans',' años',' lat'];
+  var CON=[' but ',', але ',', aber ',', maar ',', mais ',', pero ',', ale '];
+  var NPV=['NPV','NPV','KW','NCW','VAN','VAN','NPV'];
+  var MU=['M EUR','млн EUR','Mio. EUR','mln EUR','M EUR','M EUR','mln EUR'];
+  var AV = (function (u) { return [u.en, u.uk, u.de, u.nl, u.fr, u.es, u.pl]; })(MLAB(c.method).unit);
+  var BAD=['Does not pay back: ','Не окупається: ','Keine Amortisation: ','Verdient zich niet terug: ','Pas de retour : ','No se recupera: ','Brak zwrotu: '];
+  var a=[];
+  for(i=0;i<7;i++){a.push(pb!=null?PB[i]+y+YR[i]+(okN?', ':CON[i])+NPV[i]+' '+n+' '+MU[i]+'; LCOC '+l+' '+AV[i]:BAD[i]+'LCOC '+l+' '+AV[i]+', '+NPV[i]+' '+n+' '+MU[i]);}
+  var verdict={tone:pb==null?'bad':(okN?'ok':'warn'),text:T.apply(null,a)};
+  var tiles=[
+    {label:MLAB(c.method).tile,value:nn(c.lcoc_avoided),hint:'EUR/t',precision:0,learn:'lcoc'},
+    {label:T('Payback','Окупність','Amortisation','Terugverdientijd','Retour','Recuperación','Zwrot'),value:pb,hint:'y',precision:1,learn:'payback'},
+    {label:T('NPV','NPV','Kapitalwert','NCW','VAN','VAN','NPV'),value:npvM,hint:'M EUR',precision:1,learn:'npv'},
+    {label:T('IRR','IRR','IZF','IRR','TRI','TIR','IRR'),value:nn(c.irr)!=null?c.irr*100:null,hint:'%',precision:1},
+    {label:T('CAPEX','CAPEX','CAPEX','CAPEX','CAPEX','CAPEX','CAPEX'),value:nn(r.capex)!=null?r.capex/M:null,hint:'M EUR',precision:1},
+    {label:T('Captured','Уловлено','Abgeschieden','Afgevangen','Capté','Capturado','Wychwycone'),value:nn(t.captured)!=null?t.captured/M:null,hint:'Mt/y',precision:2},
+    {label:T('Avoided','Уникнуто','Vermieden','Vermeden','Évité','Evitado','Uniknięte'),value:nn(t.avoided)!=null?t.avoided/M:null,hint:'Mt/y',precision:2,learn:'avoided'}
+  ];
+  if(full){
+    tiles.push({label:T('LCOC stored','LCOC зберіг.','LCOC gespeichert','LCOC opgeslagen','LCOC stockée','LCOC almacenada','LCOC zmagaz.'),value:nn(c.lcoc_stored),hint:'EUR/t',precision:0,headline:false});
+    tiles.push({ label: T('IEAGHG avoided cost', 'Вартість уникнення IEAGHG', 'IEAGHG Vermeidungskosten', 'IEAGHG vermijdingskosten', 'Coût d\'évitement IEAGHG', 'Coste evitado IEAGHG', 'Koszt unikniętej emisji IEAGHG'), value: nn(c.lcoc_ieaghg), hint: 'EUR/t', precision: 0, headline: false, learn: 'method' });
+    tiles.push({ label: T('ETS allowance cost', 'Вартість квоти ETS', 'ETS-Zertifikatskosten', 'ETS-emissierechtkosten', 'Coût par quota ETS', 'Coste por derecho ETS', 'Koszt uprawnienia ETS'), value: nn(c.lcoc_ets), hint: 'EUR/t', precision: 0, headline: false, learn: 'method' });
+    if (c.lcoc_removed != null) {
+      tiles.push({ label: T('CRCF net removal cost', 'Вартість чистого видалення CRCF', 'CRCF-Nettoentnahmekosten', 'CRCF netto-verwijderingskosten', 'Coût du retrait net CRCF', 'Coste absorción neta CRCF', 'Koszt pochłaniania netto CRCF'), value: nn(c.lcoc_removed), hint: 'EUR/t', precision: 0, headline: false, learn: 'method' });
+    }
+    tiles.push({ label: T('ETS reduction', 'Скорочення ETS', 'ETS-Minderung', 'ETS-reductie', 'Réduction ETS', 'Reducción ETS', 'Redukcja ETS'), value: nn(t.ets != null ? t.ets / M : null), hint: 'Mt/y', precision: 2, headline: false, learn: 'method' });
+    if (t.removed_net > 0) {
+      tiles.push({ label: T('CRCF net removal', 'Чисте видалення CRCF', 'CRCF-Nettoentnahme', 'CRCF netto-verwijdering', 'Retrait net CRCF', 'Absorción neta CRCF', 'Pochłanianie netto CRCF'), value: nn(t.removed_net / M), hint: 'Mt/y', precision: 2, headline: false, learn: 'method' });
+    }
+    tiles.push({label:T('Disc. payback','Диск. окупність','Disk. Amortisation','Verdisc. terugverd.','Retour actualisé','Recup. descontada','Zdysk. zwrot'),value:nn(c.disc_payback),hint:'y',precision:1,headline:false});
+    tiles.push({label:T('Electricity','Електроенергія','Strom','Elektriciteit','Électricité','Electricidad','Energia el.'),value:nn(en.elec_MWh_y)!=null?en.elec_MWh_y/1e3:null,hint:'GWh/y',precision:1,headline:false});
+    tiles.push({label:T('Gas','Газ','Gas','Gas','Gaz','Gas','Gaz'),value:nn(en.gas_MWh_y)!=null?en.gas_MWh_y/1e3:null,hint:'GWh/y',precision:1,headline:false});
+    tiles.push({label:T('Biogenic','Біогенний','Biogen','Biogeen','Biogénique','Biogénico','Biogeniczne'),value:nn(t.bio)!=null?t.bio/M:null,hint:'Mt/y',precision:2,headline:false});
+  }
+  var SN={capture:T('Capture','Уловлювання','Abscheidung','Afvang','Captage','Captura','Wychwyt'),compression:T('Compression','Компресія','Verdichtung','Compressie','Compression','Compresión','Sprężanie'),transport:T('Transport','Транспорт','Transport','Transport','Transport','Transporte','Transport'),storage:T('Storage','Зберігання','Speicherung','Opslag','Stockage','Almacenamiento','Składowanie')};
+  var stageH=T('Stage','Етап','Stufe','Stap','Étape','Etapa','Etap');
+  var K=['capex_eur_t','fom_eur_t','energy_eur_t','other_eur_t','total_eur_t'],sum=[0,0,0,0,0],rows=[],b=r.breakdown||[],j;
+  for(i=0;i<b.length;i++){var cells=[SN[b[i].stage]||String(b[i].stage)];for(j=0;j<5;j++){var v=+b[i][K[j]]||0;sum[j]+=v;cells.push({value:v,precision:1});}rows.push({cells:cells});}
+  var foot=[T('Total','Разом','Summe','Totaal','Total','Total','Suma')];
+  for(j=0;j<5;j++){foot.push({value:sum[j],precision:1});}
+  var tables=[{title:T('Cost breakdown, EUR/t stored','Структура витрат, EUR/т зберіг.','Kostenaufteilung, EUR/t gespeichert','Kostenopbouw, EUR/t opgeslagen','Répartition des coûts, EUR/t stockée','Desglose de costes, EUR/t almacenada','Struktura kosztów, EUR/t zmagaz.'),
+    head:[stageH,{label:T('Capital','Капітал','Kapital','Kapitaal','Capital','Capital','Kapitał'),num:true},{label:T('Fixed O&M','Пост. O&M','Fixe B&W','Vaste O&M','O&M fixe','O&M fijo','Stałe O&M'),num:true},{label:T('Energy','Енергія','Energie','Energie','Énergie','Energía','Energia'),num:true},{label:T('Other','Інше','Sonstiges','Overig','Autre','Otros','Inne'),num:true},{label:T('Total','Разом','Summe','Totaal','Total','Total','Suma'),num:true}],
+    rows:rows,foot:foot}];
+  if(full){
+    var SRC={handoff:T('From linked tool','З пов\'язаного інструмента','Aus verknüpftem Tool','Uit gekoppelde tool','Outil lié','Herramienta vinculada','Z powiązanego narzędzia'),module:T('Stage model','Модель етапу','Stufenmodell','Stapmodel','Modèle d\'étape','Modelo de etapa','Model etapu'),simplified:T('Simplified correlation','Спрощена кореляція','Vereinfachte Korrelation','Vereenvoudigde correlatie','Corrélation simplifiée','Correlación simplificada','Uproszczona korelacja')};
+    var st=['capture','compression','transport','storage'],sr=[];
+    for(i=0;i<4;i++){var so=r.stages&&r.stages[st[i]]&&r.stages[st[i]].source;sr.push({cells:[SN[st[i]],SRC[so]||String(so||'-')]});}
+    tables.push({title:T('Data source per stage','Джерело даних за етапом','Datenquelle je Stufe','Gegevensbron per stap','Source par étape','Fuente por etapa','Źródło danych wg etapu'),head:[stageH,T('Source','Джерело','Quelle','Bron','Source','Fuente','Źródło')],rows:sr});
+  }
+  var notes=(r.warnings||[]).slice();
+  notes.push(T('Screening estimate (±30-50 %); not an investment decision.','Оцінка (±30-50 %); не інвестиційне рішення.','Grobschätzung (±30-50 %); keine Investitionsentscheidung.','Indicatieve raming (±30-50 %); geen investeringsbesluit.','Estimation préliminaire (±30-50 %) ; pas une décision d\'investissement.','Estimación preliminar (±30-50 %); no es una decisión de inversión.','Szacunek wstępny (±30-50 %); nie decyzja inwestycyjna.'));
+  return {verdict:verdict,tiles:tiles,tables:tables,notes:notes};
+}
+
+var GROUPS={Industry:T('Industry','Промисловість','Industrie','Industrie','Industrie','Industria','Przemysł'),Transport:T('Transport','Транспорт','Transport','Transport','Transport','Transporte','Transport'),Policy:T('Policy','Політика','Politik','Beleid','Politique','Política','Polityka')};
+var EX_LABELS={
+cement_1mt_ship:T('Cement 1 Mt/y, ship 800 km','Цемент 1 Мт/рік, судно 800 км','Zement 1 Mt/a, Schiff 800 km','Cement 1 Mt/j, schip 800 km','Ciment 1 Mt/an, navire 800 km','Cemento 1 Mt/a, barco 800 km','Cement 1 Mt/r, statek 800 km'),
+ngcc_05mt_pipe:T('NGCC 0.5 Mt/y, pipe 150 km','ПГУ 0,5 Мт/рік, трубопровід 150 км','GuD 0,5 Mt/a, Pipeline 150 km','STEG 0,5 Mt/j, pijpleiding 150 km','CCGT 0,5 Mt/an, pipeline 150 km','CCGT 0,5 Mt/a, tubería 150 km','CCGT 0,5 Mt/r, rurociąg 150 km'),
+ammonia_highpurity:T('Ammonia high-purity 0.4 Mt/y','Аміак високої чистоти 0,4 Мт/рік','Ammoniak hochrein 0,4 Mt/a','Ammoniak hoge zuiverheid 0,4 Mt/j','Ammoniac haute pureté 0,4 Mt/an','Amoníaco alta pureza 0,4 Mt/a','Amoniak wysoka czystość 0,4 Mt/r'),
+wte_biogenic:T('WtE biogenic 0.3 Mt/y, DK','Спалювання відходів, біогенне 0,3 Мт/рік, DK','MVA biogen 0,3 Mt/a, DK','AVI biogeen 0,3 Mt/j, DK','UVE biogénique 0,3 Mt/an, DK','Valorización biogénica 0,3 Mt/a, DK','Spalarnia biogeniczna 0,3 Mt/r, DK'),
+refinery_fcc:T('Refinery FCC 0.6 Mt/y, BE','НПЗ FCC 0,6 Мт/рік, BE','Raffinerie FCC 0,6 Mt/a, BE','Raffinaderij FCC 0,6 Mt/j, BE','Raffinerie FCC 0,6 Mt/an, BE','Refinería FCC 0,6 Mt/a, BE','Rafineria FCC 0,6 Mt/r, BE'),
+steel_bf:T('Steel BF 2 Mt/y','Сталь, доменна піч 2 Мт/рік','Stahl Hochofen 2 Mt/a','Staal hoogoven 2 Mt/j','Acier haut fourneau 2 Mt/an','Acero alto horno 2 Mt/a','Stal wielki piec 2 Mt/r'),
+co2pilot_default:T('Reference: cement 1 Mt/y, NL','Еталон: цемент 1 Мт/рік, NL','Referenz: Zement 1 Mt/a, NL','Referentie: cement 1 Mt/j, NL','Référence : ciment 1 Mt/an, NL','Referencia: cemento 1 Mt/a, NL','Referencja: cement 1 Mt/r, NL'),
+ccfd_supported:T('Cement, CCfD 180 EUR/t + 30 % grant','Цемент, CCfD 180 EUR/т + 30 % гранту','Zement, CCfD 180 EUR/t + 30 % Zuschuss','Cement, CCfD 180 EUR/t + 30 % subsidie','Ciment, CCfD 180 EUR/t + 30 % de subvention','Cemento, CCfD 180 EUR/t + 30 % de subvención','Cement, CCfD 180 EUR/t + 30 % dotacji'),
+offshore_long:T('NGCC 1 Mt/y, offshore 250 km','ПГУ 1 Мт/рік, офшор 250 км','GuD 1 Mt/a, offshore 250 km','STEG 1 Mt/j, offshore 250 km','CCGT 1 Mt/an, offshore 250 km','CCGT 1 Mt/a, offshore 250 km','CCGT 1 Mt/r, offshore 250 km'),
+high_price:T('Cement, high price scenario','Цемент, сценарій високих цін','Zement, Hochpreisszenario','Cement, hoge-prijsscenario','Ciment, scénario prix élevé','Cemento, escenario de precio alto','Cement, scenariusz wysokich cen')};
+function EXAMPLES(){var presets=CCUS.cost.presets;return Object.keys(presets).map(function(id){var p=presets[id],inp=p.inp||{};
+return {id:id,group:GROUPS[p.group]||p.group,label:EX_LABELS[id]||p.label,note:p.label,apply:function(t){var k;
+for(k in DEFAULTS)if(DEFAULTS.hasOwnProperty(k))t[k]=DEFAULTS[k];
+for(k in inp)if(inp.hasOwnProperty(k)&&inp[k]!=null)t[k]=inp[k];
+t.useCcfd=inp.ccfd_strike!=null;if(!t.useCcfd)t.ccfd_strike=DEFAULTS.ccfd_strike;}};});}
+function DRAW_CASH(ctx,box,r,pal){var c=r&&r.cash,yrs=(c&&c.years)||[],n=yrs.length;if(!n||!c.net||!c.cum)return;
+var net=[],cum=[],i,v,mn=0,mx=0;
+for(i=0;i<n;i++){net[i]=(+c.net[i]||0)/1e6;cum[i]=(+c.cum[i]||0)/1e6;mn=Math.min(mn,net[i],cum[i]);mx=Math.max(mx,net[i],cum[i]);}
+if(mx===mn){mx+=1;mn-=1;}
+var L=52,B=24,px=box.x+L,py=box.y+8,pw=box.w-L-8,ph=box.h-B-8;if(pw<=0||ph<=0)return;
+var tk=DiagramUI.ticks(mn,mx,ph,pal.density)||[];if(tk.length){mn=Math.min(mn,tk[0]);mx=Math.max(mx,tk[tk.length-1]);}
+var st=tk.length>1?Math.abs(tk[1]-tk[0]):1,prec=st>=1?0:Math.ceil(-Math.log(st)/Math.LN10);
+function Y(v){return py+ph-(v-mn)/(mx-mn)*ph;}
+ctx.save();ctx.font=pal.font;ctx.lineWidth=1;ctx.textAlign='right';ctx.textBaseline='middle';
+for(i=0;i<tk.length;i++){v=Math.round(Y(tk[i]))+0.5;ctx.strokeStyle=pal.line;ctx.beginPath();ctx.moveTo(px,v);ctx.lineTo(px+pw,v);ctx.stroke();
+ctx.fillStyle=pal.muted;ctx.fillText(DiagramUI.fmt(tk[i],{precision:prec}),px-6,v);}
+var y0=Y(0),slot=pw/n,bw=Math.max(1,slot*0.7);
+for(i=0;i<n;i++){v=Y(net[i]);ctx.fillStyle=net[i]>=0?DiagramUI.series(0):DiagramUI.series(3);
+ctx.fillRect(px+i*slot+(slot-bw)/2,Math.min(y0,v),bw,Math.max(1,Math.abs(v-y0)));}
+ctx.strokeStyle=pal.muted;ctx.beginPath();ctx.moveTo(px,Math.round(y0)+0.5);ctx.lineTo(px+pw,Math.round(y0)+0.5);ctx.stroke();
+ctx.strokeStyle=DiagramUI.series(1);ctx.lineWidth=2;ctx.beginPath();
+for(i=0;i<n;i++){v=px+(i+0.5)*slot;if(i)ctx.lineTo(v,Y(cum[i]));else ctx.moveTo(v,Y(cum[i]));}
+ctx.stroke();
+var N=Math.max(1,Math.ceil(n*28/pw));ctx.fillStyle=pal.muted;ctx.textAlign='center';ctx.textBaseline='top';
+for(i=0;i<n;i+=N)ctx.fillText(String(yrs[i]),px+(i+0.5)*slot,py+ph+6);
+ctx.translate(box.x+10,py+ph/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='middle';ctx.fillText('M EUR',0,0);
+ctx.restore();}
+var LEGEND=function(view){
+if(view==='cash')return [{label:T('Net cash flow per year','Чистий грошовий потік за рік','Netto-Cashflow pro Jahr','Netto kasstroom per jaar','Flux de trésorerie net par an','Flujo de caja neto por año','Przepływy pieniężne netto na rok'),series:0},
+{label:T('Cumulative','Кумулятивно','Kumuliert','Cumulatief','Cumulé','Acumulado','Skumulowane'),series:1}];
+if(view==='stack')return [{label:T('Capture','Уловлювання','Abscheidung','Afvang','Captage','Captura','Wychwyt'),series:0},
+{label:T('Compression','Компримування','Verdichtung','Compressie','Compression','Compresión','Sprężanie'),series:1},
+{label:T('Transport','Транспорт','Transport','Transport','Transport','Transporte','Transport'),series:2},
+{label:T('Storage','Зберігання','Speicherung','Opslag','Stockage','Almacenamiento','Składowanie'),series:3}];
+if(view==='tornado')return [{label:T('Low input value','Низьке значення параметра','Niedriger Eingabewert','Lage invoerwaarde','Valeur d’entrée basse','Valor de entrada bajo','Niska wartość wejściowa'),series:0},
+{label:T('High input value','Високе значення параметра','Hoher Eingabewert','Hoge invoerwaarde','Valeur d’entrée haute','Valor de entrada alto','Wysoka wartość wejściowa'),series:1}];
+return [];};
+
+function DRAW_STACK(ctx,box,r,pal){var b=r&&r.breakdown;if(!b||!b.length)return;ctx.save();ctx.font=pal.font;var L=box.x+16,W=box.w-32,sum=0,i,v,w;
+for(i=0;i<b.length;i++)sum+=Math.max(0,+b[i].total_eur_t||0);if(!(sum>0)||W<=0){ctx.restore();return;}
+var h=Math.min(48,box.h*0.35),y=box.y+(box.h-h)/2,x=L;ctx.textAlign='center';ctx.textBaseline='middle';
+for(i=0;i<b.length;i++){v=Math.max(0,+b[i].total_eur_t||0);w=v/sum*W;ctx.fillStyle=DiagramUI.series(i);ctx.fillRect(x,y,w,h);
+if(w>40){ctx.fillStyle='#fff';ctx.fillText(DiagramUI.fmt(v,{precision:0}),x+w/2,y+h/2);}x+=w;}
+var ay=y+h+6,tk=DiagramUI.ticks(0,sum,W,pal.density)||[];ctx.strokeStyle=pal.line;ctx.beginPath();ctx.moveTo(L,ay);ctx.lineTo(L+W,ay);ctx.stroke();
+ctx.fillStyle=pal.muted;ctx.textBaseline='top';for(i=0;i<tk.length;i++){v=typeof tk[i]==='object'?tk[i].value:tk[i];if(v<0||v>sum)continue;x=L+v/sum*W;
+ctx.beginPath();ctx.moveTo(x,ay);ctx.lineTo(x,ay+4);ctx.stroke();ctx.fillText(DiagramUI.fmt(v,{precision:0}),x,ay+6);}
+ctx.textAlign='right';ctx.fillText('EUR/t',L+W,ay+20);ctx.restore();}
+function DRAW_TORNADO(ctx,box,tor,pal){if(!tor||!tor.ok||!tor.items||!tor.items.length)return;ctx.save();ctx.font=pal.font;
+var it=tor.items,n=it.length,base=+tor.base||0,mn=base,mx=base,i,j,s,t,v,x;
+for(i=0;i<n;i++){mn=Math.min(mn,it[i].lo,it[i].hi);mx=Math.max(mx,it[i].lo,it[i].hi);}
+var pad=(mx-mn)*0.05||Math.abs(base)*0.05||1;mn-=pad;mx+=pad;
+var lab=Math.min(150,box.w*0.38),px=box.x+lab+8,pw=box.w-lab-24,top=box.y+18,plotH=box.h-40;if(pw<=0||plotH<=0){ctx.restore();return;}
+var rowH=Math.min(26,plotH/n),bh=rowH*0.6,X=function(q){return px+(q-mn)/(mx-mn)*pw;},bx=X(base),y0=top+n*rowH;
+ctx.textBaseline='middle';
+for(i=0;i<n;i++){var cy=top+i*rowH+rowH/2,lo=X(it[i].lo),hi=X(it[i].hi);
+ctx.fillStyle=DiagramUI.series(0);ctx.fillRect(Math.min(bx,lo),cy-bh/2,Math.abs(lo-bx),bh);
+ctx.fillStyle=DiagramUI.series(1);ctx.fillRect(Math.min(bx,hi),cy-bh/2,Math.abs(hi-bx),bh);
+s=String(it[i].label||'');if(ctx.measureText(s).width>lab-4){for(j=s.length;j>0&&ctx.measureText(s.slice(0,j)+'…').width>lab-4;j--);s=s.slice(0,j)+'…';}
+ctx.fillStyle=pal.muted;ctx.textAlign='right';ctx.fillText(s,box.x+lab,cy);}
+ctx.strokeStyle=pal.line;ctx.beginPath();ctx.moveTo(px,y0);ctx.lineTo(px+pw,y0);ctx.stroke();
+var tk=DiagramUI.ticks(mn,mx,pw,pal.density)||[];ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle=pal.muted;
+for(i=0;i<tk.length;i++){t=tk[i];v=typeof t==='object'?t.value:t;if(v<mn||v>mx)continue;x=X(v);
+ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y0+4);ctx.stroke();ctx.fillText(DiagramUI.fmt(v,{precision:0}),x,y0+6);}
+ctx.strokeStyle=pal.muted;ctx.beginPath();ctx.moveTo(bx,top-4);ctx.lineTo(bx,y0);ctx.stroke();
+ctx.textBaseline='bottom';ctx.fillText('base '+DiagramUI.fmt(base,{precision:0})+' EUR/t',bx,top-4);ctx.restore();}
+function STAGE_RENDER(size,st,r,view,tor){var ctx=st.canvas();ctx.clearRect(0,0,size.w,size.h);if(!r||!r.ok)return;
+var cs=getComputedStyle(document.documentElement),g=function(k,f){return (cs.getPropertyValue(k)||'').trim()||f;};
+var pal={muted:g('--muted','#888'),line:g('--line','#ccc'),font:'11px '+g('--font','sans-serif'),density:size.density},box={x:0,y:0,w:size.w,h:size.h};
+ctx.save();ctx.font=pal.font;
+switch(view){case 'stack':DRAW_STACK(ctx,box,r,pal);break;case 'tornado':DRAW_TORNADO(ctx,box,tor,pal);break;default:DRAW_CASH(ctx,box,r,pal);}
+ctx.restore();}
+
+  function adoptStage(app) { stage = app.stages[0] || null; if (stage) stage.legend({ items: LEGEND(state.chart) }); }
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var h = document.createElement('h1'), p = document.createElement('p');
+    h.textContent = 'CCUS cost & payback';
+    p.textContent = 'The interface could not load because diagram-ui.js v1 or the CCUS cost module is missing. The calculation can still run from the console.';
+    document.body.appendChild(h); document.body.appendChild(p);
+    if (window.CCUS && CCUS.cost) { try { run(state); } catch (e) { /* ignore */ } }
+  }
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && window.CCUS && CCUS.cost) buildInterface(); else degrade();
+    installData();
+  }
+  function buildInterface() {
+    var topics = {}, k;
+    for (k in LEARN) { if (LEARN.hasOwnProperty(k) && k !== 'intro') topics[k] = LEARN[k]; }
+    ui = DiagramUI.app({
+      id: 'ccuscost', mount: '#app', layout: 'calculator', compute: 'live', state: state, defaults: DEFAULTS, subtitle: MAN.summary,
+      notices: [{ id: 'genre', tone: 'warn', sticky: true, text: MAN.limitations,
+        title: T('What this number is', 'Що означає це число', 'Was diese Zahl ist', 'Wat dit getal is', 'Ce que représente ce chiffre', 'Qué es esta cifra', 'Czym jest ta liczba') }],
+      learn: { version: 1, intro: LEARN.intro, topics: topics, tour: [
+        { topic: 'industries', focus: '[data-dgu-field="f-industry"]' }, { topic: 'scale', focus: '[data-dgu-field="f-mt"]' },
+        { topic: 'transport', focus: '[data-dgu-field="f-transport"]' }, { topic: 'ets', focus: '[data-dgu-field="f-scenario"]' },
+        { topic: 'ccfd', focus: '[data-dgu-field="f-useccfd"]' }, { topic: 'lcoc', focus: '.dgu-r-results' }, { topic: 'payback', focus: '.dgu-stage' }] },
+      panels: PANELS().concat([{ id: 'chart', slot: 'inputs', title: T('Chart', 'Графік', 'Diagramm', 'Grafiek', 'Graphique', 'Gráfico', 'Wykres'),
+        fields: [{ id: 'f-chart', key: 'chart', type: 'segmented', label: T('Show', 'Показати', 'Anzeigen', 'Toon', 'Afficher', 'Mostrar', 'Pokaż'), options: [
+          { value: 'cash', label: T('Cash flow', 'Грошовий потік', 'Cashflow', 'Kasstroom', 'Trésorerie', 'Flujo de caja', 'Przepływy') },
+          { value: 'stack', label: T('Cost stack', 'Структура витрат', 'Kostenaufbau', 'Kostenopbouw', 'Coûts', 'Desglose', 'Koszty') },
+          { value: 'tornado', label: T('Sensitivity', 'Чутливість', 'Sensitivität', 'Gevoeligheid', 'Sensibilité', 'Sensibilidad', 'Wrażliwość') }] }] }]),
+      footer: MAN.description,
+      on: { rebuild: adoptStage, compute: function (s) {
+        run(s);
+        if (stage) { stage.legend({ items: LEGEND(s.chart) }); stage.schedule(); }
+        return COMPUTE(s, last);
+      } }
+    });
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end', actions: [
+      ui.importAction({ label: T('Open a saved case…', 'Відкрити збережений випадок…', 'Gespeicherten Fall öffnen…', 'Opgeslagen case openen…', 'Ouvrir un cas enregistré…', 'Abrir un caso guardado…', 'Otwórz zapisany przypadek…'),
+        accept: '.json,application/json', as: 'json', run: function (data) {
+          var src = (data && data.inputs) || data || {}, key;
+          for (key in DEFAULTS) { if (DEFAULTS.hasOwnProperty(key) && src.hasOwnProperty(key) && typeof src[key] === typeof DEFAULTS[key]) state[key] = src[key]; }
+          ui.sync(); ui.run();
+        } }),
+      ui.resetAction()] });
+    ui.examples(EXAMPLES());
+    ui.stage({ caption: T('Cash flow, cost stack and sensitivity', 'Грошовий потік, витрати і чутливість', 'Cashflow, Kosten und Sensitivität', 'Kasstroom, kosten en gevoeligheid', 'Trésorerie, coûts et sensibilité', 'Flujo de caja, costes y sensibilidad', 'Przepływy, koszty i wrażliwość'),
+      minHeight: 280,
+      a11y: function () {
+        if (!last || !last.ok) return '';
+        return 'Levelised cost ' + DiagramUI.fmt(last.cash.lcoc_avoided, { precision: 0 }) + ' EUR per tonne avoided; net present value ' + DiagramUI.fmt(last.cash.npv / 1e6, { precision: 0 }) + ' million EUR.';
+      },
+      render: function (size, st) { STAGE_RENDER(size, st, last && last.ok ? last : null, state.chart, tor); } });
+    adoptStage(ui);
+    ui.ready();
+    window.__ccuscost = { ui: ui, state: state, run: run, toInp: toInp, setSets: function (x) { handoffSets = x; }, get last() { return last; } };
+  }
+
+function q(v,u){return {value:v,unit:u};}
+function setQ(arr,key){ if(!Array.isArray(arr)) return null; for(var i=0;i<arr.length;i++){ var e=arr[i]; if(e&&e[key]&&isFinite(e[key].value)) return +e[key].value; } return null; }
+function installData(){
+  if(!window.Diagram) return;
+  Diagram.init({ id:'ccuscost', file:'ccuscost.html',
+    state:{
+      serialize:function(){ return {state:state, sets:handoffSets}; },
+      deserialize:function(o){
+        o=o||{}; var src=o.state||o;
+        for(var k in src){ if(Object.prototype.hasOwnProperty.call(src,k)) state[k]=src[k]; }
+        handoffSets=o.sets||null;
+        if(window.CCUS&&CCUS.cost) run(state);
+        if(ui){ ui.sync(); ui.run(); }
+      }
+    },
+    record:function(){
+      if(!last||!last.ok) return null;
+      return { inputs:toInp(state),
+        outputs:{ lcoc_avoided:last.cash.lcoc_avoided, lcoc_stored:last.cash.lcoc_stored, npv:last.cash.npv, irr:last.cash.irr, payback:last.cash.payback, disc_payback:last.cash.disc_payback, capex:last.capex, opex_fixed:last.opex_fixed, opex_var:last.opex_var, t_captured:last.t.captured, t_stored:last.t.stored, t_avoided:last.t.avoided, lcoc_ieaghg:last.cash.lcoc_ieaghg, lcoc_ets:last.cash.lcoc_ets, lcoc_removed:last.cash.lcoc_removed, method:last.cash.method },
+        units:{ mt:'Mt/y', L_km:'km', ship_dist_km:'km', p_out:'bar', removal_price:'EUR/t', ccfd_strike:'EUR/t', disc:'-', grant_frac:'-', lcoc_avoided:'EUR/t', lcoc_stored:'EUR/t', npv:'EUR', irr:'-', payback:'y', disc_payback:'y', capex:'EUR', opex_fixed:'EUR/y', opex_var:'EUR/y', t_captured:'t/y', t_stored:'t/y', t_avoided:'t/y', lcoc_ieaghg:'EUR/t', lcoc_ets:'EUR/t', lcoc_removed:'EUR/t' },
+        model:{ equations:['LCOC = sum(CAPEX x CRF + fixed O&M + energy + T&S) / t stored','CRF = r(1+r)^n / ((1+r)^n - 1)','net cash(y) = ETS cost avoided + CCfD + removal credits + grant - CAPEX - O&M - energy - T&S','NPV = sum net(y)/(1+r)^(y-y0); payback = first year cumulative >= 0'],
+          ranges:['0.05-10 Mt/y captured; pipeline 5-1500 km; ship 50-3000 km'],
+          notes:['screening cost basis (IEAGHG, ZEP, NETL, CATF); stage physics from linked tools when handed off; several cost constants are assumptions'] },
+        warnings:last.warnings||[] };
+    },
+    handoff:{ provides:['mdot','Q','E'], accepts:['mdot','p','D','L','dp','Q','E','x','T'],
+      build:function(){
+        if(!last||!last.ok||!last.t) return null;
+        var mdot=last.t.captured*1000/31.536e6;
+        return { quantities:{ mdot:q(mdot,'kg/s') } };
+      },
+      apply:function(p){
+        p=p||{}; var qq=p.quantities||{}, S=p.sets||{}, keep={}, any=false, names=['capture','compression','pipeline','ship','storage'], i, L;
+        for(i=0;i<names.length;i++){ if(Array.isArray(S[names[i]])&&S[names[i]].length){ keep[names[i]]=S[names[i]]; any=true; } }
+        handoffSets=any?keep:null;
+        if(qq.mdot&&qq.mdot.value>0){
+          var mt=Math.round(qq.mdot.value*31.536e6/1e9*100)/100;
+          state.mt=Math.max(0.05,Math.min(10,mt));
+        }
+        if(S.pipeline&&!S.ship) state.transport='pipe';
+        if(S.ship&&!S.pipeline) state.transport='ship';
+        L=setQ(S.pipeline,'L'); if(L!==null&&L>0) state.L_km=Math.round(L/1000);
+        L=setQ(S.ship,'L'); if(L!==null&&L>0) state.ship_dist_km=Math.round(L/1000);
+        if(window.CCUS&&CCUS.cost) run(state);
+        if(ui){ ui.sync(); ui.run(); }
+      }
+    }
+  });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

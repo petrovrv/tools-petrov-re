@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Condition Monitoring Advisor — P–F interval, inspection interval, cost-benefit</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-05.4",
+  "id": "mepmonitoring",
+  "file": "mepmonitoring.html",
+  "listed": true,
+  "category": "mep-maintenance",
+  "order": 30,
+  "title": {"en":"Condition Monitoring Advisor","uk":"Порадник з моніторингу технічного стану","de":"Berater Zustandsüberwachung","nl":"Adviseur conditiebewaking","fr":"Conseiller en surveillance d’état","es":"Asesor de monitorización de condición","pl":"Doradca monitorowania stanu technicznego"},
+  "summary": {"en":"What to measure, how often, and does it pay? Usable P–F interval per technique, inspection interval, probability of catching the failure and cost-benefit ranges with the break-even downtime cost.","uk":"Що вимірювати, як часто і чи це окупиться? Корисний інтервал P–F для кожного методу, інтервал оглядів, імовірність виявити відмову та діапазони витрат і вигод з беззбитковою вартістю простою.","de":"Was messen, wie oft, und lohnt es sich? Nutzbares P–F-Intervall je Verfahren, Prüfintervall, Wahrscheinlichkeit, den Ausfall rechtzeitig zu erkennen, und Kosten-Nutzen-Bandbreiten mit der Break-even-Stillstandskostenrate.","nl":"Wat meten, hoe vaak, en loont het? Bruikbaar P–F-interval per techniek, inspectie-interval, kans om de storing op tijd te zien en kosten-batenbandbreedtes met de break-even stilstandskosten.","fr":"Quoi mesurer, à quelle fréquence, et est-ce rentable ? Intervalle P–F exploitable par technique, périodicité d’inspection, probabilité de détecter la défaillance et fourchettes coûts-bénéfices avec le coût d’arrêt d’équilibre.","es":"¿Qué medir, con qué frecuencia y compensa? Intervalo P–F aprovechable por técnica, intervalo de inspección, probabilidad de detectar el fallo y rangos de coste-beneficio con el coste de parada de equilibrio.","pl":"Co mierzyć, jak często i czy to się opłaca? Użyteczny interwał P–F dla każdej techniki, interwał inspekcji, prawdopodobieństwo wykrycia uszkodzenia oraz przedziały kosztów i korzyści z progowym kosztem przestoju."},
+  "description": {"en":"For one failure mode of one MEP asset the tool compares condition-monitoring options — a manual route at a chosen interval, an online sensor or a BMS trend. It takes the share of the P–F interval each technique can use, subtracts the time needed to act, sets the inspection interval at half the remaining window, computes the probability that an inspection falls inside the window and detects the defect, and turns that into an annual net benefit with low, mid and high values. The break-even downtime cost says how expensive an hour of outage must be before the monitoring pays.","uk":"Для одного виду відмови одного інженерного об’єкта інструмент порівнює варіанти моніторингу стану — обхід із вибраним інтервалом, стаціонарний датчик або тренд у BMS. Він бере частку інтервалу P–F, доступну методу, віднімає час на реагування, задає інтервал оглядів як половину вікна, що лишається, обчислює ймовірність, що огляд потрапить у вікно й виявить дефект, і переводить це в річну чисту вигоду з низьким, середнім і високим значеннями. Беззбиткова вартість простою показує, наскільки дорогою має бути година простою, щоб моніторинг окупився.","de":"Für eine Ausfallart einer TGA-Anlage vergleicht das Werkzeug Optionen der Zustandsüberwachung — Rundgang mit gewähltem Intervall, Online-Sensor oder GLT-Trend. Es nimmt den Anteil des P–F-Intervalls, den das Verfahren nutzen kann, zieht die Reaktionszeit ab, setzt das Prüfintervall auf die Hälfte des Restfensters, berechnet die Wahrscheinlichkeit, dass eine Prüfung ins Fenster fällt und den Schaden erkennt, und macht daraus einen jährlichen Nettonutzen mit niedrigem, mittlerem und hohem Wert. Die Break-even-Stillstandskosten sagen, wie teuer eine Ausfallstunde sein muss, damit sich die Überwachung lohnt.","nl":"Voor één faalwijze van één installatiedeel vergelijkt de tool opties voor conditiebewaking — een ronde met gekozen interval, een online sensor of een GBS-trend. Hij neemt het deel van het P–F-interval dat de techniek kan benutten, trekt de reactietijd af, zet het inspectie-interval op de helft van het resterende venster, berekent de kans dat een inspectie in het venster valt en het defect ziet, en maakt daar een jaarlijks nettovoordeel van met lage, middelste en hoge waarde. De break-even stilstandskosten zeggen hoe duur een uur uitval moet zijn voordat de bewaking loont.","fr":"Pour un mode de défaillance d’un équipement technique, l’outil compare des options de surveillance d’état — ronde à périodicité choisie, capteur en ligne ou tendance GTB. Il prend la part de l’intervalle P–F exploitable par la technique, retranche le délai d’intervention, fixe la périodicité à la moitié de la fenêtre restante, calcule la probabilité qu’une inspection tombe dans la fenêtre et détecte le défaut, puis en déduit un bénéfice net annuel bas, médian et haut. Le coût d’arrêt d’équilibre indique combien doit coûter une heure d’arrêt pour que la surveillance soit rentable.","es":"Para un modo de fallo de un equipo de instalaciones, la herramienta compara opciones de monitorización — ronda con intervalo elegido, sensor en línea o tendencia del BMS. Toma la parte del intervalo P–F que la técnica puede aprovechar, resta el tiempo de respuesta, fija el intervalo en la mitad de la ventana restante, calcula la probabilidad de que una inspección caiga en la ventana y detecte el defecto, y lo convierte en un beneficio neto anual bajo, medio y alto. El coste de parada de equilibrio indica cuánto debe costar una hora de parada para que la monitorización compense.","pl":"Dla jednego rodzaju uszkodzenia jednego urządzenia instalacyjnego narzędzie porównuje warianty monitorowania stanu — obchód z wybranym interwałem, czujnik online lub trend w BMS. Bierze część interwału P–F dostępną dla techniki, odejmuje czas reakcji, ustala interwał inspekcji na połowę pozostałego okna, liczy prawdopodobieństwo, że inspekcja wypadnie w oknie i wykryje defekt, i przelicza to na roczną korzyść netto w wariancie niskim, średnim i wysokim. Progowy koszt przestoju mówi, ile musi kosztować godzina przestoju, aby monitorowanie się opłaciło."},
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {"en":"One failure mode at a time; the P–F interval, MTBF and costs are inputs with ranges, and the preset values are learning assumptions, not manufacturer or statistical data. Detection uses a uniform random phase and independent looks for routes (one effective look for online and BMS); it ignores trending skill, sensor drift and the chance that a found defect is repaired badly. Economics are undiscounted annual expected values per measurement point; capital for online systems must be entered as an annualised fixed cost. Statutory inspections are retained regardless of this result (EU baseline, national rules may be stricter). Planning aid, not a substitute for manufacturer instructions and national regulations.","uk":"Один вид відмови за раз; інтервал P–F, напрацювання на відмову та витрати — вхідні дані з діапазонами, а значення в прикладах — навчальні припущення, а не дані виробника чи статистика. Виявлення рахується з рівномірно випадковою фазою та незалежними оглядами для обходів (один ефективний огляд для онлайн і BMS); не враховано майстерність аналізу трендів, дрейф датчиків і ризик неякісного ремонту знайденого дефекту. Економіка — недисконтовані річні очікувані значення на одну точку вимірювання; капітальні витрати онлайн-систем треба вводити як річну постійну складову. Обов’язкові за законом огляди зберігаються незалежно від результату (базовий рівень ЄС, національні правила можуть бути суворішими). Засіб планування, а не заміна інструкцій виробника й національних норм.","de":"Eine Ausfallart je Rechnung; P–F-Intervall, MTBF und Kosten sind Eingaben mit Bandbreiten, die Beispielwerte sind Lernannahmen, keine Hersteller- oder Statistikdaten. Die Erkennung nimmt eine gleichverteilte Phase und unabhängige Prüfungen für Rundgänge an (eine wirksame Prüfung bei Online und GLT); Trendauswertung, Sensordrift und schlecht ausgeführte Reparaturen bleiben unberücksichtigt. Die Wirtschaftlichkeit sind nicht abgezinste jährliche Erwartungswerte je Messstelle; Investitionen in Online-Systeme sind als annuisierte Fixkosten einzugeben. Gesetzliche Prüfungen bleiben unabhängig vom Ergebnis bestehen (EU-Mindeststand, nationale Regeln können strenger sein). Planungshilfe, kein Ersatz für Herstellerangaben und nationale Vorschriften.","nl":"Eén faalwijze per keer; P–F-interval, MTBF en kosten zijn invoer met bandbreedtes, de voorbeeldwaarden zijn leeraannames, geen fabrikant- of statistische gegevens. Detectie gaat uit van een uniform willekeurige fase en onafhankelijke inspecties bij rondes (één effectieve blik bij online en GBS); trendvaardigheid, sensordrift en slecht uitgevoerd herstel blijven buiten beschouwing. De economie bestaat uit niet-verdisconteerde jaarlijkse verwachtingswaarden per meetpunt; investeringen in online systemen worden als geannualiseerde vaste kosten ingevoerd. Wettelijke keuringen blijven staan, wat de uitkomst ook is (EU-basis, nationale regels kunnen strenger zijn). Planningshulpmiddel, geen vervanging van fabrieksvoorschriften en nationale regelgeving.","fr":"Un mode de défaillance à la fois ; intervalle P–F, MTBF et coûts sont des saisies avec fourchettes, et les valeurs des exemples sont des hypothèses pédagogiques, pas des données de constructeur ni des statistiques. La détection suppose une phase aléatoire uniforme et des contrôles indépendants pour les rondes (un seul contrôle effectif en ligne et en GTB) ; elle ignore la compétence d’analyse de tendance, la dérive des capteurs et le risque d’une réparation mal faite. L’économie est faite de valeurs annuelles espérées non actualisées par point de mesure ; l’investissement d’un système en ligne se saisit en coût fixe annualisé. Les contrôles réglementaires sont maintenus quel que soit le résultat (socle UE, les règles nationales peuvent être plus strictes). Aide à la planification, ne remplace ni les instructions du constructeur ni la réglementation nationale.","es":"Un modo de fallo cada vez; el intervalo P–F, el MTBF y los costes son entradas con rangos, y los valores de los ejemplos son supuestos didácticos, no datos de fabricante ni estadísticas. La detección supone una fase aleatoria uniforme e inspecciones independientes en rondas (una sola inspección efectiva en línea y BMS); no considera la pericia en tendencias, la deriva de sensores ni la reparación defectuosa. La economía son valores esperados anuales sin descontar por punto de medida; la inversión de un sistema en línea se introduce como coste fijo anualizado. Las inspecciones reglamentarias se mantienen sea cual sea el resultado (base UE, las normas nacionales pueden ser más estrictas). Ayuda a la planificación, no sustituye las instrucciones del fabricante ni la normativa nacional.","pl":"Jeden rodzaj uszkodzenia naraz; interwał P–F, MTBF i koszty to dane wejściowe z przedziałami, a wartości w przykładach są założeniami dydaktycznymi, nie danymi producenta ani statystyką. Wykrywanie zakłada równomiernie losową fazę i niezależne pomiary w obchodach (jeden skuteczny pomiar dla online i BMS); pomija umiejętność analizy trendu, dryf czujników i ryzyko złej naprawy. Ekonomia to niezdyskontowane roczne wartości oczekiwane na punkt pomiarowy; nakłady na system online wpisuje się jako roczny koszt stały. Przeglądy ustawowe pozostają niezależnie od wyniku (minimum UE, przepisy krajowe mogą być surowsze). Pomoc w planowaniu, nie zastępuje instrukcji producenta ani przepisów krajowych."},
+  "intended_use": "preliminary assessment",
+  "catalog_languages": ["en","uk","de","nl","fr","es","pl"],
+  "tool_languages": ["en","uk","de","nl","fr","es","pl"],
+  "dependencies": ["mep-core.js","mep-monitoring.js"],
+  "network_access": {"mode":"none"},
+  "validation": {"basis": {"en": "P–F interval and the half-window on-condition task interval after Moubray, RCM II (1997) and the NASA RCM Guide for Facilities and Collateral Equipment (2008); detection probability for periodic inspection with a random onset phase; annual expected-value economics. Evidence: an independent Python reference (bench-src/ref/gen_mepmonitoring.py) that averages the detection probability numerically over the inspection phase, cross-checks it by Monte Carlo and finds the break-even downtime cost by bisection, compared with the page's engine over 65 cases.", "uk": "Інтервал P–F і інтервал завдань за станом як половина вікна — за Moubray, RCM II (1997) та NASA RCM Guide for Facilities and Collateral Equipment (2008); імовірність виявлення при періодичних оглядах із випадковою фазою початку дефекту; річна економіка в очікуваних значеннях. Докази: незалежний еталон на Python, що усереднює ймовірність виявлення чисельно за фазою оглядів, перевіряє її методом Монте-Карло та знаходить беззбиткову вартість простою бісекцією, порівняний з рушієм сторінки на 65 випадках.", "de": "P–F-Intervall und zustandsabhängiges Prüfintervall als halbes Fenster nach Moubray, RCM II (1997) und NASA RCM Guide for Facilities and Collateral Equipment (2008); Erkennungswahrscheinlichkeit periodischer Prüfungen bei zufälliger Phase des Schadensbeginns; jährliche Erwartungswert-Wirtschaftlichkeit. Nachweis: eine unabhängige Python-Referenz, die die Erkennungswahrscheinlichkeit numerisch über die Prüfphase mittelt, per Monte-Carlo gegenprüft und die Break-even-Stillstandskosten per Bisektion bestimmt, in 65 Fällen mit der Engine der Seite verglichen.", "nl": "P–F-interval en het conditiegebonden inspectie-interval als halve venster volgens Moubray, RCM II (1997) en de NASA RCM Guide for Facilities and Collateral Equipment (2008); detectiekans bij periodieke inspectie met willekeurige fase van het ontstaan; jaarlijkse economie in verwachtingswaarden. Bewijs: een onafhankelijke Python-referentie die de detectiekans numeriek over de inspectiefase middelt, met Monte Carlo controleert en de break-even stilstandskosten met bisectie vindt, in 65 gevallen vergeleken met de engine van de pagina.", "fr": "Intervalle P–F et périodicité de tâche conditionnelle égale à la demi-fenêtre d’après Moubray, RCM II (1997) et le NASA RCM Guide for Facilities and Collateral Equipment (2008) ; probabilité de détection d’inspections périodiques avec une phase d’apparition aléatoire ; économie annuelle en valeurs espérées. Preuve : une référence Python indépendante qui moyenne numériquement la probabilité de détection sur la phase, la vérifie par Monte-Carlo et trouve le coût d’arrêt d’équilibre par dichotomie, comparée au moteur de la page sur 65 cas.", "es": "Intervalo P–F e intervalo de tarea a condición igual a media ventana según Moubray, RCM II (1997) y la NASA RCM Guide for Facilities and Collateral Equipment (2008); probabilidad de detección con inspección periódica y fase de inicio aleatoria; economía anual en valores esperados. Evidencia: una referencia Python independiente que promedia numéricamente la probabilidad de detección sobre la fase, la contrasta por Monte Carlo y halla el coste de parada de equilibrio por bisección, comparada con el motor de la página en 65 casos.", "pl": "Interwał P–F i interwał zadania według stanu równy połowie okna wg Moubray, RCM II (1997) oraz NASA RCM Guide for Facilities and Collateral Equipment (2008); prawdopodobieństwo wykrycia przy inspekcjach okresowych z losową fazą początku defektu; roczna ekonomia w wartościach oczekiwanych. Dowód: niezależna referencja w Pythonie, która uśrednia prawdopodobieństwo wykrycia numerycznie po fazie inspekcji, sprawdza je metodą Monte Carlo i wyznacza progowy koszt przestoju bisekcją, porównana z silnikiem strony w 65 przypadkach."}, "independent_validation": false, "benchmarks": [{"id": "mepmonitoring-ref-2026-11-05", "reference": {"en": "bench-src/ref/gen_mepmonitoring.py: numerical phase average of the detection probability (Monte Carlo cross-check), annual expected economics from the stated formulas, break-even downtime cost by bisection; 17 preset options and 48 grid cases.", "uk": "bench-src/ref/gen_mepmonitoring.py: чисельне усереднення ймовірності виявлення за фазою (перевірка Монте-Карло), річна економіка за наведеними формулами, беззбиткова вартість простою бісекцією; 17 варіантів із прикладів і 48 випадків сітки.", "de": "bench-src/ref/gen_mepmonitoring.py: numerische Phasenmittelung der Erkennungswahrscheinlichkeit (Monte-Carlo-Gegenprobe), jährliche Erwartungswerte nach den angegebenen Formeln, Break-even per Bisektion; 17 Beispieloptionen und 48 Gitterfälle.", "nl": "bench-src/ref/gen_mepmonitoring.py: numerieke fasemiddeling van de detectiekans (Monte Carlo-controle), jaarlijkse verwachtingswaarden volgens de gegeven formules, break-even met bisectie; 17 voorbeeldopties en 48 rastergevallen.", "fr": "bench-src/ref/gen_mepmonitoring.py : moyenne numérique sur la phase de la probabilité de détection (contrôle Monte-Carlo), économie annuelle selon les formules indiquées, équilibre par dichotomie ; 17 options d’exemples et 48 cas de grille.", "es": "bench-src/ref/gen_mepmonitoring.py: promedio numérico sobre la fase de la probabilidad de detección (contraste Monte Carlo), economía anual según las fórmulas indicadas, equilibrio por bisección; 17 opciones de ejemplo y 48 casos de rejilla.", "pl": "bench-src/ref/gen_mepmonitoring.py: numeryczne uśrednienie po fazie prawdopodobieństwa wykrycia (kontrola Monte Carlo), roczna ekonomia wg podanych wzorów, próg bisekcją; 17 wariantów z przykładów i 48 przypadków siatki."}, "citations": ["Moubray J. (1997) Reliability-centred Maintenance, 2nd ed., Butterworth-Heinemann, ch. 7 (P–F interval, on-condition task interval)", "NASA (2008) Reliability Centered Maintenance Guide for Facilities and Collateral Equipment, §5 (P–F curve, PT&I techniques)", "US DOE FEMP (2010) Operations & Maintenance Best Practices Guide, Release 3.0, ch. 5–6"], "cases": 65, "passed": 65, "tolerance": "intervals exact; detection probability within 2e-4 absolute; net benefit within max(0.5 EUR, 0.1 %); cost within max(0.01 EUR, 1e-6 rel); break-even kind exact, value within max(0.5 EUR/h, 0.2 %)", "run_at": "2026-11-06T23:30:27Z", "artifact": "benchmarks/mepmonitoring.json"}]},  "report": {"pdf": true, "source_attribution": true},
+  "python_export": {"supported": false, "reason": "The engine is mep-monitoring.js; every input, option, probability and cost is in the calculation record and the CSV."},
+  "handoff": {"provides":[],"accepts":[]},
+  "state_codec": {"permalink": true, "record": "tools.petrov.re/calculation-record/v1"},
+  "ui": {"framework": "tools.petrov.re/ui/v1", "level": 3}
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="mep-core.js?v=a361b1796169" defer></script>
+<script src="mep-monitoring.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* Condition Monitoring Advisor — tools.petrov.re UI framework v3, level 3.
+ * Model: mep-monitoring.js (MEPCM). Shared register: mep-core.js (MEPCore), optional —
+ * the page works without it and says so. */
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  var CM = null;             /* resolved in boot(): the engine is a deferred script */
+  var CORE = function () { return window.MEPCore || null; };
+
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  function L(o) { return (window.DiagramUI && DiagramUI.pick) ? DiagramUI.pick(o, DiagramUI.lang()) : (o && o.en) || ''; }
+  /* one number convention for the package (D-MEP-11): MEPCore.fmt = Intl.NumberFormat(lang); DiagramUI.fmt as fallback */
+  function F(v, p) {
+    var core = window.MEPCore, d = p == null ? 0 : p;
+    if (core && typeof core.fmt === 'function' && window.DiagramUI) { try { return core.fmt(v, DiagramUI.lang(), d); } catch (e) { /* fall through */ } }
+    return (window.DiagramUI ? DiagramUI.fmt(v, { precision: d }) : String(Math.round(v)));
+  }
+  /* compose a label per language: TF(T('a {0} b',…), [x]) */
+  function TF(t, vals) {
+    var o = {};
+    Object.keys(t).forEach(function (l) {
+      o[l] = String(t[l]).replace(/\{(\d+)\}/g, function (_, n) { var v = vals[+n]; return v == null ? '' : (typeof v === 'object' ? (v[l] || v.en) : String(v)); });
+    });
+    return o;
+  }
+
+  var TECH_NAMES = {
+    vibration: T('Vibration analysis', 'Вібродіагностика', 'Schwingungsanalyse', 'Trillingsanalyse', 'Analyse vibratoire', 'Análisis de vibraciones', 'Analiza drgań'),
+    ir_thermography: T('Infrared thermography', 'Інфрачервона термографія', 'Infrarot-Thermografie', 'Infraroodthermografie', 'Thermographie infrarouge', 'Termografía infrarroja', 'Termowizja w podczerwieni'),
+    oil_analysis: T('Oil analysis', 'Аналіз оливи', 'Ölanalyse', 'Olieanalyse', 'Analyse d’huile', 'Análisis de aceite', 'Analiza oleju'),
+    ultrasound_airborne: T('Airborne ultrasound', 'Ультразвук (повітряний)', 'Luftschall-Ultraschall', 'Luchtultrasoon', 'Ultrasons aériens', 'Ultrasonidos aéreos', 'Ultradźwięki w powietrzu'),
+    motor_current: T('Motor current analysis', 'Аналіз струму двигуна', 'Motorstromanalyse', 'Motorstroomanalyse', 'Analyse du courant moteur', 'Análisis de corriente del motor', 'Analiza prądu silnika'),
+    dp_trend: T('Differential pressure trend', 'Тренд перепаду тиску', 'Differenzdruck-Trend', 'Drukverschiltrend', 'Tendance de pression différentielle', 'Tendencia de presión diferencial', 'Trend różnicy ciśnień'),
+    bms_trend: T('BMS performance trend', 'Тренд параметрів у BMS', 'GLT-Leistungstrend', 'GBS-prestatietrend', 'Tendance de performance GTB', 'Tendencia de rendimiento en BMS', 'Trend parametrów w BMS'),
+    battery_impedance: T('Battery impedance (ohmic) test', 'Вимірювання імпедансу батареї', 'Batterie-Impedanzmessung', 'Batterij-impedantiemeting', 'Mesure d’impédance batterie', 'Medida de impedancia de batería', 'Pomiar impedancji baterii'),
+    water_sampling: T('Water sampling', 'Відбір проб води', 'Wasserprobenahme', 'Watermonsters', 'Prélèvement d’eau', 'Muestreo de agua', 'Pobór próbek wody'),
+    insulation_resistance: T('Insulation resistance test', 'Вимірювання опору ізоляції', 'Isolationswiderstandsmessung', 'Isolatieweerstandsmeting', 'Mesure d’isolement', 'Medida de resistencia de aislamiento', 'Pomiar rezystancji izolacji'),
+    visual_inspection: T('Visual inspection', 'Візуальний огляд', 'Sichtprüfung', 'Visuele inspectie', 'Inspection visuelle', 'Inspección visual', 'Oględziny'),
+    performance_test: T('Performance / discharge test', 'Функціональне / розрядне випробування', 'Leistungs- / Entladeprüfung', 'Prestatie- / ontlaadtest', 'Essai de performance / décharge', 'Prueba de rendimiento / descarga', 'Próba wydajności / rozładowania')
+  };
+  var MODE_NAMES = {
+    route: T('Route (manual)', 'Обхід (вручну)', 'Rundgang (manuell)', 'Ronde (handmatig)', 'Ronde (manuelle)', 'Ronda (manual)', 'Obchód (ręcznie)'),
+    online: T('Online sensor', 'Стаціонарний датчик', 'Online-Sensor', 'Online sensor', 'Capteur en ligne', 'Sensor en línea', 'Czujnik online'),
+    bms: T('BMS trend', 'Тренд у BMS', 'GLT-Trend', 'GBS-trend', 'Tendance GTB', 'Tendencia BMS', 'Trend w BMS')
+  };
+  function techName(id) {
+    var core = CORE();
+    if (core && core.TECHNIQUES && core.TECHNIQUES[id] && core.TECHNIQUES[id].name) return core.TECHNIQUES[id].name;
+    return TECH_NAMES[id] || { en: id, uk: id, de: id, nl: id, fr: id, es: id, pl: id };
+  }
+
+  var S = {
+    days: T('days', 'діб', 'Tage', 'dagen', 'jours', 'días', 'dni'),
+    pctCaught: T('caught', 'виявлено', 'erkannt', 'gezien', 'détectées', 'detectados', 'wykrytych'),
+    best: T('Best option (automatic)', 'Найкращий варіант (автоматично)', 'Beste Option (automatisch)', 'Beste optie (automatisch)', 'Meilleure option (automatique)', 'Mejor opción (automática)', 'Najlepszy wariant (automatycznie)'),
+    auto: T('auto', 'авто', 'auto', 'auto', 'auto', 'auto', 'auto'),
+    continuous: T('continuous', 'безперервно', 'kontinuierlich', 'continu', 'continu', 'continuo', 'ciągły'),
+    always: T('pays even at 0 EUR/h', 'окупається навіть за 0 EUR/год', 'lohnt sich schon bei 0 EUR/h', 'loont al bij 0 EUR/h', 'rentable même à 0 EUR/h', 'compensa incluso con 0 EUR/h', 'opłaca się nawet przy 0 EUR/h'),
+    never: T('never (no detection)', 'ніколи (немає виявлення)', 'nie (keine Erkennung)', 'nooit (geen detectie)', 'jamais (aucune détection)', 'nunca (sin detección)', 'nigdy (brak wykrycia)'),
+    yes: T('yes', 'так', 'ja', 'ja', 'oui', 'sí', 'tak'),
+    no: T('no', 'ні', 'nein', 'nee', 'non', 'no', 'nie')
+  };
+
+  var REASONS = {
+    route_too_slow: T('the conservative window needs a route more often than weekly — use an online sensor or a BMS trend', 'консервативне вікно потребує обходу частіше ніж щотижня — потрібен стаціонарний датчик або тренд у BMS', 'das vorsichtige Fenster verlangt öfter als wöchentlich — Online-Sensor oder GLT-Trend nötig', 'het voorzichtige venster vraagt vaker dan wekelijks — gebruik een online sensor of GBS-trend', 'la fenêtre prudente exige plus d’une ronde par semaine — capteur en ligne ou tendance GTB', 'la ventana prudente exige rondas más que semanales — sensor en línea o tendencia BMS', 'ostrożne okno wymaga obchodu częściej niż co tydzień — potrzebny czujnik online lub trend BMS'),
+    no_window_lo: T('at the short P–F the technique sees the defect too late to act', 'за короткого P–F метод бачить дефект надто пізно для реагування', 'beim kurzen P–F sieht das Verfahren den Schaden zu spät zum Handeln', 'bij de korte P–F ziet de techniek het defect te laat om te handelen', 'avec le P–F court, la technique voit le défaut trop tard pour agir', 'con el P–F corto la técnica ve el defecto demasiado tarde para actuar', 'przy krótkim P–F technika widzi defekt zbyt późno, by zareagować'),
+    no_window_mid: T('no detection window even at the mid P–F', 'немає вікна виявлення навіть за середнього P–F', 'auch beim mittleren P–F kein Erkennungsfenster', 'zelfs bij de middelste P–F geen detectievenster', 'aucune fenêtre de détection même au P–F médian', 'sin ventana de detección ni con el P–F medio', 'brak okna wykrycia nawet przy średnim P–F'),
+    low_detection: T('catches fewer than half of the failures', 'виявляє менше половини відмов', 'erkennt weniger als die Hälfte der Ausfälle', 'ziet minder dan de helft van de storingen', 'détecte moins de la moitié des défaillances', 'detecta menos de la mitad de los fallos', 'wykrywa mniej niż połowę uszkodzeń'),
+    pays_mid_not_lo: T('pays at mid values, loses money in the pessimistic case', 'окупається за середніх значень, збиткове в песимістичному випадку', 'lohnt sich bei Mittelwerten, verliert im ungünstigen Fall', 'loont bij middelste waarden, verliest in het ongunstige geval', 'rentable aux valeurs médianes, perd de l’argent dans le cas pessimiste', 'compensa con valores medios, pierde en el caso pesimista', 'opłaca się przy wartościach średnich, traci w wariancie pesymistycznym'),
+    pays_robust: T('pays even in the pessimistic case', 'окупається навіть у песимістичному випадку', 'lohnt sich auch im ungünstigen Fall', 'loont ook in het ongunstige geval', 'rentable même dans le cas pessimiste', 'compensa incluso en el caso pesimista', 'opłaca się nawet w wariancie pesymistycznym'),
+    never_pays: T('does not pay even in the optimistic case', 'не окупається навіть в оптимістичному випадку', 'lohnt sich auch im günstigen Fall nicht', 'loont zelfs in het gunstige geval niet', 'pas rentable même dans le cas optimiste', 'no compensa ni en el caso optimista', 'nie opłaca się nawet w wariancie optymistycznym'),
+    interval_longer_than_recommended: T('interval longer than the half-window rule', 'інтервал довший за правило половини вікна', 'Intervall länger als die Halbfenster-Regel', 'interval langer dan de halve-vensterregel', 'périodicité plus longue que la règle de la demi-fenêtre', 'intervalo más largo que la regla de media ventana', 'interwał dłuższy niż reguła połowy okna')
+  };
+
+  var VERDICTS = {
+    monitor: T('Monitor with: {0}, {1}. It catches about {2} % of these failures; mid net benefit {3} EUR/a.',
+               'Моніторити методом: {0}, {1}. Виявляє близько {2} % таких відмов; середня чиста вигода {3} EUR/рік.',
+               'Überwachen mit: {0}, {1}. Erkennt etwa {2} % dieser Ausfälle; mittlerer Nettonutzen {3} EUR/a.',
+               'Bewaken met: {0}, {1}. Ziet ongeveer {2} % van deze storingen; middelste nettovoordeel {3} EUR/j.',
+               'Surveiller par : {0}, {1}. Détecte environ {2} % de ces défaillances ; bénéfice net médian {3} EUR/an.',
+               'Monitorizar con: {0}, {1}. Detecta alrededor del {2} % de estos fallos; beneficio neto medio {3} EUR/año.',
+               'Monitorować: {0}, {1}. Wykrywa około {2} % takich uszkodzeń; średnia korzyść netto {3} EUR/rok.'),
+    fragile: T(' The answer is fragile: in the pessimistic case it loses money.', ' Висновок нестійкий: у песимістичному випадку збиток.', ' Das Ergebnis ist knapp: im ungünstigen Fall ein Verlust.', ' De uitkomst is wankel: in het ongunstige geval verlies.', ' Résultat fragile : perte dans le cas pessimiste.', ' Resultado frágil: en el caso pesimista hay pérdida.', ' Wynik jest kruchy: w wariancie pesymistycznym strata.'),
+    rtf: T('No option pays at this downtime cost: run to failure (keep the spare and the repair plan ready), or check whether a time-based task is cheaper.',
+           'Жоден варіант не окупається за цієї вартості простою: експлуатація до відмови (тримати запчастину та план ремонту), або перевірити, чи дешевше планове обслуговування за часом.',
+           'Keine Option lohnt sich bei diesen Stillstandskosten: bis zum Ausfall betreiben (Ersatzteil und Reparaturplan bereithalten) oder prüfen, ob eine zeitbasierte Maßnahme billiger ist.',
+           'Geen optie loont bij deze stilstandskosten: laten draaien tot storing (reservedeel en herstelplan klaar), of nagaan of een tijdgebonden taak goedkoper is.',
+           'Aucune option n’est rentable à ce coût d’arrêt : fonctionnement jusqu’à défaillance (pièce de rechange et plan de réparation prêts), ou vérifier si une tâche systématique coûte moins.',
+           'Ninguna opción compensa con este coste de parada: funcionar hasta el fallo (repuesto y plan de reparación listos), o comprobar si una tarea por tiempo es más barata.',
+           'Żaden wariant nie opłaca się przy tym koszcie przestoju: eksploatacja do uszkodzenia (część zapasowa i plan naprawy w gotowości) albo sprawdzić, czy tańsze jest zadanie okresowe.'),
+    safety: T('No monitoring option both works and pays, and the failure mode is safety-related: it may not run to failure. Take it to the RCM strategy tool for a time-based task, a failure-finding task or a redesign.',
+              'Жоден варіант моніторингу не є одночасно дієвим і вигідним, а вид відмови пов’язаний з безпекою: доводити до відмови не можна. Перейдіть до інструмента стратегії RCM — планове завдання, пошук прихованих відмов або зміна конструкції.',
+              'Keine Überwachung wirkt und lohnt sich zugleich, und die Ausfallart ist sicherheitsrelevant: kein Betrieb bis zum Ausfall. Im RCM-Strategie-Werkzeug zeitbasierte Maßnahme, Funktionsprüfung oder Umkonstruktion festlegen.',
+              'Geen bewakingsoptie werkt én loont, en de faalwijze is veiligheidsrelevant: niet laten draaien tot storing. Kies in de RCM-strategietool een tijdgebonden taak, een functietest of een herontwerp.',
+              'Aucune option de surveillance n’est à la fois efficace et rentable, et le mode est lié à la sécurité : pas de fonctionnement jusqu’à défaillance. Passez à l’outil de stratégie MBF pour une tâche systématique, une recherche de panne cachée ou une modification.',
+              'Ninguna opción de monitorización funciona y compensa a la vez, y el modo de fallo afecta a la seguridad: no puede funcionar hasta el fallo. Use la herramienta de estrategia RCM para una tarea por tiempo, una búsqueda de fallos ocultos o un rediseño.',
+              'Żaden wariant monitorowania nie jest jednocześnie skuteczny i opłacalny, a uszkodzenie dotyczy bezpieczeństwa: nie wolno eksploatować do uszkodzenia. Przejdź do narzędzia strategii RCM — zadanie okresowe, test wykrywający uszkodzenie ukryte albo zmiana konstrukcji.')
+  };
+
+  /* --- presets: label, group, aha note ------------------------------------------------------- */
+  var PRESET_TEXT = {
+    pump_vibration: {
+      group: T('Rotating machines', 'Обертові машини', 'Rotierende Maschinen', 'Roterende machines', 'Machines tournantes', 'Máquinas rotativas', 'Maszyny wirujące'),
+      label: T('2-pole pump bearing — monthly route vs online', 'Підшипник 2-полюсного насоса — щомісячний обхід чи онлайн', 'Lager einer 2-poligen Pumpe — Monatsrundgang oder online', 'Lager van een 2-polige pomp — maandronde of online', 'Roulement de pompe bipolaire — ronde mensuelle ou en ligne', 'Rodamiento de bomba de 2 polos — ronda mensual o en línea', 'Łożysko pompy 2-biegunowej — obchód miesięczny czy online'),
+      note: T('Aha: a 2-week P–F at 2 950 rpm leaves about 9 usable days. A monthly vibration route lands in that window only about one time in four, so it misses three failures out of four; an online sensor catches about 90 %.',
+              'Ага: P–F 2 тижні при 2 950 об/хв лишає близько 9 корисних діб. Щомісячний обхід потрапляє у вікно приблизно раз із чотирьох і пропускає три відмови з чотирьох; стаціонарний датчик ловить близько 90 %.',
+              'Aha: 2 Wochen P–F bei 2 950 1/min lassen etwa 9 nutzbare Tage. Ein monatlicher Rundgang trifft das Fenster nur etwa jedes vierte Mal und verpasst drei von vier Ausfällen; ein Online-Sensor erkennt etwa 90 %.',
+              'Aha: 2 weken P–F bij 2 950 tpm laat ongeveer 9 bruikbare dagen. Een maandelijkse ronde valt maar ongeveer één op de vier keer in dat venster en mist drie van de vier storingen; een online sensor ziet er ongeveer 90 %.',
+              'Déclic : un P–F de 2 semaines à 2 950 tr/min laisse environ 9 jours utiles. Une ronde mensuelle ne tombe dans la fenêtre qu’environ une fois sur quatre et manque trois défaillances sur quatre ; un capteur en ligne en détecte environ 90 %.',
+              'Clave: un P–F de 2 semanas a 2 950 rpm deja unos 9 días útiles. Una ronda mensual cae en esa ventana solo una de cada cuatro veces y pierde tres de cada cuatro fallos; un sensor en línea detecta alrededor del 90 %.',
+              'Aha: P–F 2 tygodnie przy 2 950 obr/min zostawia około 9 użytecznych dni. Obchód miesięczny trafia w okno tylko mniej więcej raz na cztery razy i przepuszcza trzy uszkodzenia z czterech; czujnik online wykrywa około 90 %.')
+    },
+    lv_thermography: {
+      group: T('Electrical', 'Електрика', 'Elektro', 'Elektrisch', 'Électricité', 'Electricidad', 'Elektryka'),
+      label: T('LV switchboard thermography — office downtime cost', 'Термографія щита НН — вартість простою офісу', 'Thermografie NS-Hauptverteilung — Stillstandskosten Büro', 'Thermografie LS-verdeler — stilstandskosten kantoor', 'Thermographie TGBT — coût d’arrêt bureau', 'Termografía del cuadro BT — coste de parada de oficina', 'Termowizja rozdzielnicy nn — koszt przestoju biura'),
+      note: T('Aha: at 200 EUR/h an annual survey of one board does not pay on economics alone; it breaks even near 1 200 EUR/h, so it is clearly worth it in a data centre. Insurers and NFPA 70B (US) may require it anyway — then it is not an economic choice.',
+              'Ага: за 200 EUR/год щорічна зйомка одного щита не окупається лише економічно; беззбитковість близько 1 200 EUR/год, тож у ЦОД вона явно доцільна. Страховики та NFPA 70B (США) можуть вимагати її в будь-якому разі — тоді це не економічний вибір.',
+              'Aha: bei 200 EUR/h lohnt sich die Jahresaufnahme einer Verteilung rein wirtschaftlich nicht; Break-even liegt bei etwa 1 200 EUR/h, im Rechenzentrum also klar lohnend. Versicherer und NFPA 70B (USA) können sie trotzdem verlangen — dann ist es keine Wirtschaftlichkeitsfrage.',
+              'Aha: bij 200 EUR/h loont een jaarlijkse opname van één verdeler economisch niet; break-even ligt rond 1 200 EUR/h, in een datacenter dus duidelijk zinvol. Verzekeraars en NFPA 70B (VS) kunnen haar toch eisen — dan is het geen economische keuze.',
+              'Déclic : à 200 EUR/h, la thermographie annuelle d’un tableau n’est pas rentable sur le seul plan économique ; l’équilibre est vers 1 200 EUR/h, donc nettement rentable en centre de données. Les assureurs et la NFPA 70B (É.-U.) peuvent l’exiger de toute façon — ce n’est alors plus un choix économique.',
+              'Clave: a 200 EUR/h la termografía anual de un cuadro no compensa solo por economía; el equilibrio está cerca de 1 200 EUR/h, así que en un centro de datos compensa con claridad. Las aseguradoras y NFPA 70B (EE. UU.) pueden exigirla de todos modos — entonces no es una decisión económica.',
+              'Aha: przy 200 EUR/h coroczne badanie jednej rozdzielnicy nie opłaca się czysto ekonomicznie; próg to około 1 200 EUR/h, więc w centrum danych wyraźnie się opłaca. Ubezpieczyciele i NFPA 70B (USA) mogą go wymagać niezależnie — wtedy nie jest to wybór ekonomiczny.')
+    },
+    ahu_dp_bms: {
+      group: T('HVAC', 'ОВК', 'RLT / HLK', 'HVAC', 'CVC', 'Climatización', 'HVAC'),
+      label: T('AHU filter ΔP trend from the BMS', 'Тренд ΔP фільтра AHU з BMS', 'Filter-ΔP-Trend des RLT-Geräts aus der GLT', 'Filter-ΔP-trend van de LBK uit het GBS', 'Tendance ΔP filtre CTA depuis la GTB', 'Tendencia de ΔP de filtro de UTA desde el BMS', 'Trend ΔP filtra centrali z BMS'),
+      note: T('Aha: the sensor and the BMS point already exist, so a reading costs nothing; the trend pays even if an hour of downtime were free, and beats a monthly gauge round.',
+              'Ага: датчик і точка BMS уже є, тож вимірювання нічого не коштує; тренд окупається навіть за нульової вартості простою і кращий за щомісячний обхід з манометром.',
+              'Aha: Sensor und GLT-Datenpunkt sind schon da, eine Messung kostet nichts; der Trend lohnt sich selbst bei kostenlosem Stillstand und schlägt den monatlichen Manometer-Rundgang.',
+              'Aha: sensor en GBS-punt bestaan al, een meting kost niets; de trend loont zelfs als stilstand gratis zou zijn en verslaat de maandelijkse manometerronde.',
+              'Déclic : le capteur et le point GTB existent déjà, une mesure ne coûte rien ; la tendance est rentable même si l’arrêt ne coûtait rien et bat la ronde mensuelle au manomètre.',
+              'Clave: el sensor y el punto del BMS ya existen, una lectura no cuesta nada; la tendencia compensa aunque la parada fuera gratis y supera a la ronda mensual con manómetro.',
+              'Aha: czujnik i punkt w BMS już są, więc odczyt nic nie kosztuje; trend opłaca się nawet przy darmowym przestoju i wygrywa z comiesięcznym obchodem z manometrem.')
+    },
+    ups_battery: {
+      group: T('Electrical', 'Електрика', 'Elektro', 'Elektrisch', 'Électricité', 'Electricidad', 'Elektryka'),
+      label: T('UPS battery — impedance vs annual discharge test', 'Батарея ДБЖ — імпеданс чи щорічний розрядний тест', 'USV-Batterie — Impedanz oder jährliche Entladeprüfung', 'UPS-batterij — impedantie of jaarlijkse ontlaadtest', 'Batterie ASI — impédance ou essai de décharge annuel', 'Batería del SAI — impedancia o prueba de descarga anual', 'Bateria UPS — impedancja czy coroczny test rozładowania'),
+      note: T('Aha: a quarterly ohmic reading sees a degrading string in about 72 % of cases at a tenth of the cost of an annual discharge test, which sees only about 29 % because a cell can fail between tests. Keep the capacity test where the manufacturer or IEEE 1188 practice asks for it — it is the only proof of autonomy.',
+              'Ага: щоквартальне вимірювання імпедансу бачить деградацію ланцюжка приблизно у 72 % випадків за десяту частину вартості щорічного розрядного тесту, який бачить лише близько 29 %, бо елемент може відмовити між тестами. Тест ємності залишайте там, де його вимагає виробник або практика IEEE 1188, — це єдиний доказ автономії.',
+              'Aha: eine vierteljährliche Impedanzmessung erkennt einen alternden Strang in etwa 72 % der Fälle zu einem Zehntel der Kosten der jährlichen Entladeprüfung, die nur etwa 29 % erkennt, weil eine Zelle zwischen zwei Prüfungen ausfallen kann. Die Kapazitätsprüfung bleibt, wo Hersteller oder IEEE-1188-Praxis sie fordern — sie ist der einzige Nachweis der Autonomie.',
+              'Aha: een driemaandelijkse impedantiemeting ziet een verouderende streng in ongeveer 72 % van de gevallen voor een tiende van de kosten van de jaarlijkse ontlaadtest, die maar ongeveer 29 % ziet omdat een cel tussen twee tests kan uitvallen. Houd de capaciteitstest waar de fabrikant of de IEEE 1188-praktijk hem vraagt — het is het enige bewijs van autonomie.',
+              'Déclic : une mesure ohmique trimestrielle voit une chaîne qui se dégrade dans environ 72 % des cas pour un dixième du coût d’un essai de décharge annuel, qui n’en voit qu’environ 29 % car un élément peut lâcher entre deux essais. Gardez l’essai de capacité là où le constructeur ou la pratique IEEE 1188 l’exige — c’est la seule preuve d’autonomie.',
+              'Clave: una medida óhmica trimestral ve una cadena que se degrada en cerca del 72 % de los casos por una décima parte del coste de la prueba de descarga anual, que solo ve un 29 % porque un elemento puede fallar entre pruebas. Mantenga la prueba de capacidad donde la pida el fabricante o la práctica IEEE 1188: es la única prueba de autonomía.',
+              'Aha: kwartalny pomiar rezystancji wewnętrznej wykrywa starzejący się łańcuch w około 72 % przypadków za dziesiątą część kosztu corocznego testu rozładowania, który wykrywa tylko około 29 %, bo ogniwo może paść między testami. Test pojemności zostaw tam, gdzie wymaga go producent lub praktyka IEEE 1188 — to jedyny dowód autonomii.')
+    },
+    chiller_oil: {
+      group: T('HVAC', 'ОВК', 'RLT / HLK', 'HVAC', 'CVC', 'Climatización', 'HVAC'),
+      label: T('Chiller compressor oil analysis — annual vs quarterly', 'Аналіз оливи компресора чилера — щорічно чи щокварталу', 'Ölanalyse Kaltwassersatz-Verdichter — jährlich oder vierteljährlich', 'Olieanalyse compressor koelmachine — jaarlijks of per kwartaal', 'Analyse d’huile du compresseur de groupe froid — annuelle ou trimestrielle', 'Análisis de aceite del compresor de la enfriadora — anual o trimestral', 'Analiza oleju sprężarki agregatu wody lodowej — rocznie czy kwartalnie'),
+      note: T('Aha: the interval comes from the P–F, not from habit. The usual annual sample catches about one failure in five; quarterly catches three in four for a few hundred euros a year, and both pay even at zero downtime cost because a compressor rebuild is expensive.',
+              'Ага: інтервал визначає P–F, а не звичка. Звична щорічна проба ловить приблизно одну відмову з п’яти; щоквартальна — три з чотирьох за кілька сотень євро на рік, і обидві окупаються навіть за нульової вартості простою, бо ремонт компресора дорогий.',
+              'Aha: das Intervall folgt aus dem P–F, nicht aus der Gewohnheit. Die übliche Jahresprobe erkennt etwa einen von fünf Ausfällen, die vierteljährliche drei von vier für einige hundert Euro im Jahr; beide lohnen sich selbst ohne Stillstandskosten, weil eine Verdichterüberholung teuer ist.',
+              'Aha: het interval volgt uit de P–F, niet uit gewoonte. Het gebruikelijke jaarmonster ziet ongeveer één op de vijf storingen, per kwartaal drie op de vier voor enkele honderden euro per jaar; beide lonen zelfs zonder stilstandskosten, omdat een compressorrevisie duur is.',
+              'Déclic : la périodicité découle du P–F, pas de l’habitude. L’échantillon annuel habituel détecte environ une défaillance sur cinq, le trimestriel trois sur quatre pour quelques centaines d’euros par an ; les deux sont rentables même sans coût d’arrêt, car une réfection de compresseur coûte cher.',
+              'Clave: el intervalo sale del P–F, no de la costumbre. La muestra anual habitual detecta uno de cada cinco fallos; la trimestral, tres de cada cuatro por unos cientos de euros al año, y ambas compensan incluso sin coste de parada porque reconstruir un compresor es caro.',
+              'Aha: interwał wynika z P–F, a nie z przyzwyczajenia. Zwykła roczna próbka wykrywa mniej więcej jedno uszkodzenie na pięć, kwartalna trzy na cztery za kilkaset euro rocznie; obie opłacają się nawet przy zerowym koszcie przestoju, bo remont sprężarki jest drogi.')
+    },
+    fcu_rtf: {
+      group: T('HVAC', 'ОВК', 'RLT / HLK', 'HVAC', 'CVC', 'Climatización', 'HVAC'),
+      label: T('Fan-coil fan — when nothing pays', 'Вентилятор фанкойла — коли ніщо не окупається', 'Ventilator eines Gebläsekonvektors — wenn sich nichts lohnt', 'Ventilator van een ventilatorconvector — als niets loont', 'Ventilateur de ventilo-convecteur — quand rien n’est rentable', 'Ventilador de fancoil — cuando nada compensa', 'Wentylator klimakonwektora — gdy nic się nie opłaca')
+      , note: T('Aha: for a fan-coil the break-even downtime cost is in the thousands of euros per hour — no office reaches that. Run it to failure, keep a spare fan deck, and spend the monitoring budget on the pumps and the switchboard.',
+              'Ага: для фанкойла беззбиткова вартість простою — тисячі євро на годину, жоден офіс до цього не доходить. Експлуатувати до відмови, тримати запасний вентиляторний блок, а бюджет моніторингу спрямувати на насоси та щит.',
+              'Aha: beim Gebläsekonvektor liegen die Break-even-Stillstandskosten bei Tausenden Euro pro Stunde — das erreicht kein Büro. Bis zum Ausfall betreiben, ein Ersatz-Lüftereinschub bereithalten und das Überwachungsbudget für Pumpen und Verteilung ausgeben.',
+              'Aha: bij een ventilatorconvector liggen de break-even stilstandskosten in de duizenden euro per uur — geen kantoor haalt dat. Laat hem draaien tot storing, houd een reserveventilatorunit klaar en besteed het bewakingsbudget aan pompen en verdeler.',
+              'Déclic : pour un ventilo-convecteur, le coût d’arrêt d’équilibre se chiffre en milliers d’euros par heure — aucun bureau n’y arrive. Fonctionnement jusqu’à défaillance, un groupe moto-ventilateur en stock, et le budget de surveillance pour les pompes et le tableau.',
+              'Clave: para un fancoil, el coste de parada de equilibrio está en miles de euros por hora — ninguna oficina llega ahí. Funcionar hasta el fallo, tener un grupo motoventilador de repuesto y gastar el presupuesto de monitorización en bombas y cuadro.',
+              'Aha: dla klimakonwektora progowy koszt przestoju to tysiące euro na godzinę — żadne biuro do tego nie dochodzi. Eksploatować do uszkodzenia, trzymać zapasowy zespół wentylatora, a budżet monitorowania wydać na pompy i rozdzielnicę.')
+    }
+  };
+
+  var DEFAULT_PRESET = 'pump_vibration';
+
+  function presetById(id) {
+    if (!CM) return null;
+    for (var i = 0; i < CM.PRESETS.length; i++) if (CM.PRESETS[i].id === id) return CM.PRESETS[i];
+    return null;
+  }
+
+  /* page state <-> engine case/options */
+  function stateFromPreset(p) {
+    var c = p.case;
+    return {
+      preset: p.id, asset_id: null, fm_id: p.fm_id, asset_class: p.asset_class,
+      pf_lo: c.pf_days[0], pf_mid: c.pf_days[1], pf_hi: c.pf_days[2],
+      mtbf_lo: c.mtbf_y[0], mtbf_mid: c.mtbf_y[1], mtbf_hi: c.mtbf_y[2],
+      response_days: c.response_days, safety: !!c.safety,
+      corrective: c.corrective_cost_eur, planned: c.planned_repair_cost_eur,
+      downtime: c.downtime_cost_eur_h, mttr: c.mttr_h, planned_dt: c.planned_downtime_h,
+      cons_p: c.consequence_probability, units: c.units, fa_y: c.false_alarms_y, fa_cost: c.false_alarm_cost_eur,
+      options: p.options.map(function (o) {
+        var cost = o.mode === 'route' ? o.cost_per_reading_eur : o.fixed_eur_y;
+        return { id: o.id, technique: o.technique, mode: o.mode,
+                 interval: o.mode === 'route' ? (o.interval_days || 0) : 0,
+                 pod: o.pod, pf_fraction: o.pf_fraction, c_lo: cost[0], c_mid: cost[1], c_hi: cost[2] };
+      }),
+      pick: 'best'
+    };
+  }
+  function caseOf(s) {
+    return { pf_days: [s.pf_lo, s.pf_mid, s.pf_hi], mtbf_y: [s.mtbf_lo, s.mtbf_mid, s.mtbf_hi],
+             response_days: s.response_days, corrective_cost_eur: s.corrective, planned_repair_cost_eur: s.planned,
+             downtime_cost_eur_h: s.downtime, mttr_h: s.mttr, planned_downtime_h: s.planned_dt,
+             consequence_probability: s.cons_p, units: s.units, false_alarms_y: s.fa_y,
+             false_alarm_cost_eur: s.fa_cost, safety: s.safety };
+  }
+  function optionsOf(s) {
+    return (s.options || []).map(function (o, i) {
+      var cost = [o.c_lo, o.c_mid, o.c_hi];
+      var r = { id: o.id || ('opt' + (i + 1)), technique: o.technique, mode: o.mode,
+                interval_days: o.mode === 'route' && o.interval > 0 ? o.interval : null,
+                pod: o.pod, pf_fraction: o.pf_fraction };
+      if (o.mode === 'route') r.cost_per_reading_eur = cost; else r.fixed_eur_y = cost;
+      return r;
+    });
+  }
+
+  var DEFAULTS = {};
+  var state = {};
+  function initModel() {
+    CM = window.MEPCM || null;
+    DEFAULTS = CM ? stateFromPreset(presetById(DEFAULT_PRESET)) : {};
+    state = JSON.parse(JSON.stringify(DEFAULTS));
+  }
+  var last = null;          /* {cmp, pick, tornado, curve} */
+
+  function solve(s) {
+    if (!CM || !s.options || !s.options.length) return null;
+    var cs = caseOf(s), ops = optionsOf(s);
+    var cmp = CM.compare(cs, ops);
+    var pick = null;
+    if (s.pick && s.pick !== 'best') {
+      var idx = parseInt(String(s.pick).split(':')[0], 10);
+      if (idx >= 0 && idx < cmp.rows.length) pick = cmp.rows[idx];
+    }
+    if (!pick) pick = cmp.best;
+    var pickOpt = ops[cmp.rows.indexOf(pick)];
+    var be = pick.mid.breakeven_downtime_eur_h;
+    var dMax = Math.max(100, 2.5 * Math.max(s.downtime || 0, be || 0));
+    return { cmp: cmp, pick: pick, tornado: CM.tornado(cs, pickOpt), curve: CM.netVsDowntime(cs, pickOpt, dMax, 48), dMax: dMax };
+  }
+
+  /* bare: technique and mode only (the verdict adds the cadence itself, QA-22) */
+  function optLabel(r, bare) {
+    var o = r.option;
+    var every = o.mode === 'route' && !bare ? TF(T(', every {0} d', ', кожні {0} діб', ', alle {0} d', ', elke {0} d', ', tous les {0} j', ', cada {0} d', ', co {0} d'), [F(r.interval_days, 0)]) : T('', '', '', '', '', '', '');
+    return TF(T('{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}'), [techName(o.technique), MODE_NAMES[o.mode], every]);
+  }
+  function intervalText(r) {
+    return r.option.mode === 'route' ? TF(T('{0} days', '{0} діб', '{0} Tage', '{0} dagen', '{0} jours', '{0} días', '{0} dni'), [F(r.interval_days, 0)]) : S.continuous;
+  }
+  function cadenceText(r) {
+    return r.option.mode === 'route'
+      ? TF(T('every {0} days', 'кожні {0} діб', 'alle {0} Tage', 'elke {0} dagen', 'tous les {0} jours', 'cada {0} días', 'co {0} dni'), [F(r.interval_days, 0)])
+      : T('continuously', 'безперервно', 'kontinuierlich', 'continu', 'en continu', 'de forma continua', 'w sposób ciągły');
+  }
+  var MODE_SHORT = {
+    route: T('route', 'обхід', 'Rundgang', 'ronde', 'ronde', 'ronda', 'obchód'),
+    online: T('online', 'онлайн', 'online', 'online', 'en ligne', 'en línea', 'online'),
+    bms: T('BMS', 'BMS', 'GLT', 'GBS', 'GTB', 'BMS', 'BMS')
+  };
+  /* chart label: cadence first, so a truncated label still tells two routes apart */
+  function optShort(r) {
+    var o = r.option;
+    var head = o.mode === 'route' ? TF(T('{0} {1} d', '{0} {1} діб', '{0} {1} d', '{0} {1} d', '{0} {1} j', '{0} {1} d', '{0} {1} d'), [MODE_SHORT.route, F(r.interval_days, 0)]) : MODE_SHORT[o.mode];
+    return TF(T('{0} · {1}', '{0} · {1}', '{0} · {1}', '{0} · {1}', '{0} · {1}', '{0} · {1}', '{0} · {1}'), [head, techName(o.technique)]);
+  }
+  function beText(m) {
+    if (m.breakeven_kind === 'always') return S.always;
+    if (m.breakeven_kind === 'never') return S.never;
+    return F(m.breakeven_downtime_eur_h, 0) + ' EUR/h';
+  }
+
+  /* ======================================================== 2. the interface */
+  var stagePF = null, stageEco = null, stageBE = null, ui = null;
+
+  function techOptions() {
+    var ids = Object.keys(CM ? CM.TECH_FALLBACK : TECH_NAMES);
+    return ids.map(function (id) { return [id, techName(id)]; });
+  }
+  function modeOptions() { return [['route', MODE_NAMES.route], ['online', MODE_NAMES.online], ['bms', MODE_NAMES.bms]]; }
+
+  function adoptStages(app) {
+    stagePF = app.stages[0] || null; stageEco = app.stages[1] || null; stageBE = app.stages[2] || null;
+    if (stagePF) stagePF.legend({ items: [
+      { label: T('Condition of the asset', 'Стан об’єкта', 'Zustand der Anlage', 'Conditie van het object', 'État de l’équipement', 'Estado del equipo', 'Stan urządzenia'), series: 0 },
+      { label: T('Detection window', 'Вікно виявлення', 'Erkennungsfenster', 'Detectievenster', 'Fenêtre de détection', 'Ventana de detección', 'Okno wykrycia'), series: 2 },
+      { label: T('Inspections', 'Огляди', 'Prüfungen', 'Inspecties', 'Inspections', 'Inspecciones', 'Inspekcje'), series: 1 }
+    ] });
+    if (stageEco) stageEco.legend({ items: [
+      { label: T('Net benefit, low–high', 'Чиста вигода, низька–висока', 'Nettonutzen, niedrig–hoch', 'Nettovoordeel, laag–hoog', 'Bénéfice net, bas–haut', 'Beneficio neto, bajo–alto', 'Korzyść netto, niska–wysoka'), series: 0 },
+      { label: T('Tornado: input at its low end', 'Торнадо: вхід на нижній межі', 'Tornado: Eingabe am unteren Ende', 'Tornado: invoer aan de lage kant', 'Tornade : entrée au bas', 'Tornado: entrada en el extremo bajo', 'Tornado: wejście na dolnej granicy'), series: 3 },
+      { label: T('Tornado: input at its high end', 'Торнадо: вхід на верхній межі', 'Tornado: Eingabe am oberen Ende', 'Tornado: invoer aan de hoge kant', 'Tornade : entrée au haut', 'Tornado: entrada en el extremo alto', 'Tornado: wejście na górnej granicy'), series: 2 }
+    ] });
+    if (stageBE) stageBE.legend({ items: [
+      { label: T('Net benefit, mid', 'Чиста вигода, середня', 'Nettonutzen, Mitte', 'Nettovoordeel, midden', 'Bénéfice net, médian', 'Beneficio neto, medio', 'Korzyść netto, średnia'), series: 0 },
+      { label: T('Low and high', 'Низька та висока', 'Niedrig und hoch', 'Laag en hoog', 'Bas et haut', 'Bajo y alto', 'Niska i wysoka'), series: 0, dash: true },
+      { label: T('Your downtime cost', 'Ваша вартість простою', 'Ihre Stillstandskosten', 'Uw stilstandskosten', 'Votre coût d’arrêt', 'Su coste de parada', 'Twój koszt przestoju'), series: 1 }
+    ] });
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'Condition Monitoring Advisor';
+    var p = document.createElement('p');
+    p.textContent = CM ? 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.'
+                       : 'mep-monitoring.js could not load; nothing can be computed.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    initModel();
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && CM) buildInterface();
+    else degrade();
+    installData();
+  }
+
+  /* --- register (MEPCore) ------------------------------------------------------------------ */
+  var bar = null;            /* MEPCore register bar handle: the bar owns the in-memory register (QA-4) */
+  function regDoc() {
+    var core = CORE();
+    if (!core || !core.register) return null;
+    if (bar && typeof bar.getDoc === 'function') { try { return bar.getDoc(); } catch (e) { /* fall through */ } }
+    try { return core.register.load(); } catch (e) { return null; }
+  }
+  function regAssets() { var d = regDoc(); return d && Array.isArray(d.assets) ? d.assets : []; }
+  function classOf(id) { var core = CORE(); return core && core.CLASSES ? (Array.isArray(core.CLASSES) ? core.CLASSES.filter(function (c) { return c.id === id; })[0] : core.CLASSES[id]) : null; }
+  function loadFromLibrary() {
+    var a = regAssets().filter(function (x) { return x.id === state.asset_id; })[0];
+    if (!a) return false;
+    var cls = classOf(a.class);
+    if (!cls || !Array.isArray(cls.failure_modes)) return false;
+    var fm = cls.failure_modes.filter(function (f) { return f.id === state.fm_id; })[0] ||
+             cls.failure_modes.filter(function (f) { return f.pf_days; })[0];
+    if (!fm || !fm.pf_days) return false;
+    var core = CORE(), tech = core.TECHNIQUES || {};
+    state.fm_id = fm.id; state.asset_class = a.class; state.preset = null;
+    state.pf_lo = fm.pf_days[0]; state.pf_mid = fm.pf_days[1]; state.pf_hi = fm.pf_days[2];
+    if (fm.mtbf_y) { state.mtbf_lo = fm.mtbf_y[0]; state.mtbf_mid = fm.mtbf_y[1]; state.mtbf_hi = fm.mtbf_y[2]; }
+    state.safety = !!fm.safety;
+    var typ = cls.typical || {};
+    if (a.downtime_cost_eur_h != null) state.downtime = a.downtime_cost_eur_h;
+    if (a.mttr_h != null) state.mttr = a.mttr_h; else if (typ.mttr_h) state.mttr = typ.mttr_h[1];
+    state.options = [];
+    (fm.techniques || []).forEach(function (tid) {
+      var t = tech[tid] || {}, fb = CM.TECH_FALLBACK[tid] || {};
+      (fb.modes || ['route']).forEach(function (mode) {
+        var cost = mode === 'route' ? (t.cost_per_reading_eur || fb.cost_per_reading_eur || [0, 0, 0])
+                                    : (t.online_fixed_eur_y || fb.online_fixed_eur_y || [0, 0, 0]);
+        state.options.push({ id: tid + '_' + mode, technique: tid, mode: mode, interval: 0,
+          pod: t.pod != null ? t.pod : (fb.pod != null ? fb.pod : 0.8),
+          pf_fraction: t.pf_fraction != null ? t.pf_fraction : (fb.pf_fraction != null ? fb.pf_fraction : 0.7),
+          c_lo: cost[0], c_mid: cost[1], c_hi: cost[2] });
+      });
+    });
+    state.pick = 'best';
+    return state.options.length > 0;
+  }
+  function writeToRegister() {
+    var core = CORE();
+    if (!core || !core.register || !last) return false;
+    var doc = regDoc() || core.register.empty();
+    var prev = (doc.modules && doc.modules.mepmonitoring) || {};
+    var prevState = prev.state && typeof prev.state === 'object' ? prev.state : {};
+    var res = CM.toModuleResult(last.cmp, { fm_id: state.fm_id });
+    /* PLAN §1.5: results only under register asset ids, one entry per failure mode inside (by_fm);
+       the top level repeats the latest failure mode. Presets and manual cases go to state.cases (QA-9). */
+    var results = {};
+    Object.keys(prev.results || {}).forEach(function (k) { if (k.indexOf('case:') !== 0) results[k] = prev.results[k]; });
+    var cases = Object.assign({}, prevState.cases || {});
+    Object.keys(prev.results || {}).forEach(function (k) { if (k.indexOf('case:') === 0 && !cases[k.slice(5)]) cases[k.slice(5)] = prev.results[k]; });
+    var isAsset = !!state.asset_id && (doc.assets || []).some(function (a) { return a.id === state.asset_id; });
+    var key;
+    if (isAsset) {
+      key = state.asset_id;
+      var byFm = Object.assign({}, (results[key] && results[key].by_fm) || {});
+      byFm[res.fm_id || 'manual'] = res;
+      results[key] = Object.assign({}, res, { by_fm: byFm });
+    } else {
+      key = state.preset || state.fm_id || 'manual';
+      cases[key] = Object.assign({ asset_class: state.asset_class || null }, res);
+    }
+    var used = state.used && (state.used.crit || state.used.strat) ? JSON.parse(JSON.stringify(state.used)) : null;
+    var payload = { state: { last_case: key, cases: cases, used: used }, results: results,
+                    summary: { assets: Object.keys(results).length, cases: Object.keys(cases).length, engine: 'MEPCM ' + CM.VERSION },
+                    updatedAt: new Date().toISOString() };
+    try {
+      var next = core.register.withModule(doc, 'mepmonitoring', payload);
+      if (bar && typeof bar.setDoc === 'function') { bar.setDoc(next); return true; }
+      var r = core.register.save(next); return !r || r.ok !== false;
+    } catch (e) { return false; }
+  }
+
+  /* --- Use results of other tools (D-MEP-13: only through the bar's Use button, with a source label) --- */
+  var RESPONSE_DAYS_LOCAL = { A: 3, B: 7, C: 21 };   /* same learning assumption as MEPStrat.RESPONSE_DAYS */
+  var USE_TX = {
+    crit: T('Response time {0} d from criticality class {1} of {2} (modules.mepcriticality, {3}).',
+            'Час реагування {0} діб за класом критичності {1} об’єкта {2} (modules.mepcriticality, {3}).',
+            'Reaktionszeit {0} d aus Kritikalitätsklasse {1} von {2} (modules.mepcriticality, {3}).',
+            'Reactietijd {0} d uit kritikaliteitsklasse {1} van {2} (modules.mepcriticality, {3}).',
+            'Délai d’intervention {0} j d’après la classe de criticité {1} de {2} (modules.mepcriticality, {3}).',
+            'Tiempo de respuesta {0} d según la clase de criticidad {1} de {2} (modules.mepcriticality, {3}).',
+            'Czas reakcji {0} d z klasy krytyczności {1} urządzenia {2} (modules.mepcriticality, {3}).'),
+    strat: T('Strategy for {0} / {1}: {2}, every {3} d (modules.mepstrategy, {4}); routes of this technique use that interval.',
+             'Стратегія для {0} / {1}: {2}, кожні {3} діб (modules.mepstrategy, {4}); обходи цим методом беруть цей інтервал.',
+             'Strategie für {0} / {1}: {2}, alle {3} d (modules.mepstrategy, {4}); Rundgänge mit diesem Verfahren nutzen dieses Intervall.',
+             'Strategie voor {0} / {1}: {2}, elke {3} d (modules.mepstrategy, {4}); rondes met deze techniek gebruiken dat interval.',
+             'Stratégie pour {0} / {1} : {2}, tous les {3} j (modules.mepstrategy, {4}) ; les rondes de cette technique prennent cette périodicité.',
+             'Estrategia para {0} / {1}: {2}, cada {3} d (modules.mepstrategy, {4}); las rondas con esta técnica usan ese intervalo.',
+             'Strategia dla {0} / {1}: {2}, co {3} d (modules.mepstrategy, {4}); obchody tą techniką przyjmują ten interwał.'),
+    stratCont: T('Strategy for {0} / {1}: {2}, continuous (modules.mepstrategy, {3}).',
+                 'Стратегія для {0} / {1}: {2}, безперервно (modules.mepstrategy, {3}).',
+                 'Strategie für {0} / {1}: {2}, kontinuierlich (modules.mepstrategy, {3}).',
+                 'Strategie voor {0} / {1}: {2}, continu (modules.mepstrategy, {3}).',
+                 'Stratégie pour {0} / {1} : {2}, en continu (modules.mepstrategy, {3}).',
+                 'Estrategia para {0} / {1}: {2}, continua (modules.mepstrategy, {3}).',
+                 'Strategia dla {0} / {1}: {2}, w sposób ciągły (modules.mepstrategy, {3}).'),
+    stratOther: T('The strategy chose a {2} task for {0} / {1}, not condition monitoring (modules.mepstrategy, {3}); the comparison here is for reference.',
+                  'Стратегія для {0} / {1} обрала завдання типу {2}, а не моніторинг стану (modules.mepstrategy, {3}); порівняння тут — довідкове.',
+                  'Die Strategie wählte für {0} / {1} eine Aufgabe vom Typ {2}, keine Zustandsüberwachung (modules.mepstrategy, {3}); der Vergleich hier dient zur Orientierung.',
+                  'De strategie koos voor {0} / {1} een taak van het type {2}, geen conditiebewaking (modules.mepstrategy, {3}); de vergelijking hier is ter informatie.',
+                  'La stratégie a retenu pour {0} / {1} une tâche de type {2}, pas une surveillance d’état (modules.mepstrategy, {3}) ; la comparaison ici est indicative.',
+                  'La estrategia eligió para {0} / {1} una tarea de tipo {2}, no monitorización (modules.mepstrategy, {3}); la comparación aquí es orientativa.',
+                  'Strategia wybrała dla {0} / {1} zadanie typu {2}, a nie monitorowanie stanu (modules.mepstrategy, {3}); porównanie tutaj jest poglądowe.'),
+    noAsset: T('Pick an asset of the register first (Asset field below).', 'Спершу виберіть об’єкт реєстру (поле «Об’єкт» нижче).', 'Zuerst eine Anlage des Registers wählen (Feld Anlage unten).', 'Kies eerst een object uit het register (veld Object hieronder).', 'Choisissez d’abord un équipement du registre (champ Équipement ci-dessous).', 'Elija primero un equipo del registro (campo Equipo abajo).', 'Najpierw wybierz urządzenie z rejestru (pole Urządzenie poniżej).'),
+    noData: T('This module has nothing for the selected asset and failure mode.', 'У цьому модулі немає даних для вибраного об’єкта й виду відмови.', 'Dieses Modul enthält nichts zur gewählten Anlage und Ausfallart.', 'Deze module bevat niets voor het gekozen object en de faalwijze.', 'Ce module ne contient rien pour l’équipement et le mode choisis.', 'Este módulo no contiene nada para el equipo y el modo elegidos.', 'Ten moduł nie zawiera danych dla wybranego urządzenia i rodzaju uszkodzenia.'),
+    notUsed: T('This tool does not use results of {0}.', 'Цей інструмент не використовує результати {0}.', 'Dieses Werkzeug nutzt keine Ergebnisse von {0}.', 'Deze tool gebruikt geen resultaten van {0}.', 'Cet outil n’utilise pas les résultats de {0}.', 'Esta herramienta no usa resultados de {0}.', 'To narzędzie nie korzysta z wyników {0}.')
+  };
+  var useMsg = null;        /* one-off message of the last Use click (T object, rendered in the current language) */
+  var useNoteEl = null;
+  function techOfTask(task, fmTechs) {
+    if (task && typeof task.technique === 'string') return task.technique;
+    var core = CORE(), lib = (core && core.TECHNIQUES) || {}, en = task && task.task ? String(task.task.en || task.task) : '';
+    var hit = (fmTechs || Object.keys(lib)).filter(function (id) { var n = lib[id] && lib[id].name; return n && n.en && en.indexOf(n.en) === 0; });
+    return hit[0] || null;
+  }
+  function useModule(k, mod, doc) {
+    useMsg = null;
+    state.used = state.used || {};
+    var date = mod && mod.updatedAt ? String(mod.updatedAt).slice(0, 10) : '—';
+    var results = (mod && mod.results) || {};
+    if (k === 'mepcriticality') {
+      if (!state.asset_id) { useMsg = USE_TX.noAsset; return; }
+      var rc = results[state.asset_id], cls = rc && (rc['class'] || rc.cls);
+      if (!cls || !(cls in RESPONSE_DAYS_LOCAL)) { useMsg = USE_TX.noData; return; }
+      var rd = (window.MEPStrat && MEPStrat.RESPONSE_DAYS && MEPStrat.RESPONSE_DAYS[cls]) || RESPONSE_DAYS_LOCAL[cls];
+      state.response_days = rd;
+      state.used.crit = { asset_id: state.asset_id, 'class': cls, response_days: rd, source: 'modules.mepcriticality', updatedAt: date };
+    } else if (k === 'mepstrategy') {
+      var tasks = Array.isArray(mod && mod.tasks) ? mod.tasks : [];
+      var inReg = function (id) { return (doc.assets || []).some(function (a) { return a.id === id; }); };
+      var aid = state.asset_id, fm = state.fm_id;
+      var dec = function (a, f) { var r = results[a]; return r && Array.isArray(r.decisions) ? r.decisions.filter(function (d) { return d.fm_id === f; })[0] : null; };
+      if (!aid || !dec(aid, fm)) {
+        /* no asset picked (or nothing for it): take the first condition-based task of the register */
+        var first = tasks.filter(function (t) { return t.kind === 'cbm' && inReg(t.asset_id) && (!aid || t.asset_id === aid); })[0];
+        if (!first) { useMsg = aid ? USE_TX.noData : USE_TX.noAsset; return; }
+        aid = first.asset_id; fm = first.fm_id;
+      }
+      var d = dec(aid, fm) || {}, task = tasks.filter(function (t) { return t.asset_id === aid && t.fm_id === fm; })[0] || {};
+      var kind = d.kind || task.kind || null, iv = d.interval_days != null ? d.interval_days : task.interval_days;
+      var a = (doc.assets || []).filter(function (x) { return x.id === aid; })[0];
+      var cl = a ? classOf(a['class']) : null, fmo = cl && cl.failure_modes ? cl.failure_modes.filter(function (f) { return f.id === fm; })[0] : null;
+      var foreign = !fmo || state.options.some(function (o) { return (fmo.techniques || []).indexOf(o.technique) < 0; });
+      if (state.asset_id !== aid || state.fm_id !== fm || !state.options.length || state.preset || foreign) {
+        state.asset_id = aid; state.fm_id = fm; loadFromLibrary();
+      }
+      var tech = kind === 'cbm' ? techOfTask(task, fmo && fmo.techniques) : null;
+      if (kind === 'cbm' && iv >= 1) state.options.forEach(function (o) { if (o.mode === 'route' && (!tech || o.technique === tech)) o.interval = Math.round(iv); });
+      state.used.strat = { asset_id: aid, fm_id: fm, kind: kind, technique: tech, interval_days: iv, source: 'modules.mepstrategy', updatedAt: date };
+    } else {
+      var tool = ((CORE() && CORE().TOOLS) || []).filter(function (x) { return x.id === k; })[0];
+      useMsg = TF(USE_TX.notUsed, [tool ? L(tool.name) : k]);
+    }
+  }
+  function useNoteText() {
+    var u = state.used || {}, parts = [];
+    if (useMsg) parts.push(L(useMsg));
+    if (u.crit && (u.crit.asset_id !== state.asset_id || u.crit.response_days !== state.response_days)) u = Object.assign({}, u, { crit: null });
+    if (u.strat && (u.strat.asset_id !== state.asset_id || u.strat.fm_id !== state.fm_id)) u = Object.assign({}, u, { strat: null });
+    if (u.crit) parts.push(L(TF(USE_TX.crit, [F(u.crit.response_days, 0), u.crit['class'], u.crit.asset_id, u.crit.updatedAt])));
+    if (u.strat) {
+      var tn = u.strat.technique ? L(techName(u.strat.technique)) : '—';
+      if (u.strat.kind === 'cbm' && u.strat.interval_days >= 1) parts.push(L(TF(USE_TX.strat, [u.strat.asset_id, u.strat.fm_id, tn, F(u.strat.interval_days, 0), u.strat.updatedAt])));
+      else if (u.strat.kind === 'cbm') parts.push(L(TF(USE_TX.stratCont, [u.strat.asset_id, u.strat.fm_id, tn, u.strat.updatedAt])));
+      else parts.push(L(TF(USE_TX.stratOther, [u.strat.asset_id, u.strat.fm_id, u.strat.kind || '—', u.strat.updatedAt])));
+    }
+    return parts.join(' ');
+  }
+  function renderUseNote() { if (useNoteEl) useNoteEl.textContent = useNoteText(); }
+
+  /* --- CSV ----------------------------------------------------------------------------------- */
+  var CSV_HEAD = ['option_id', 'technique', 'mode', 'interval_days', 'recommended_interval_days', 'readings_per_year',
+                  'feasible', 'p_detect_mid', 'cost_eur_y_mid', 'benefit_eur_y_mid', 'net_eur_y_lo', 'net_eur_y_mid',
+                  'net_eur_y_hi', 'breakeven_downtime_eur_h_mid', 'breakeven_kind', 'reasons'];
+  function csvText() {
+    if (!last) return CSV_HEAD.join(',');
+    var rows = last.cmp.rows.map(function (r) {
+      return [r.option.id, r.option.technique, r.option.mode, +r.interval_days.toFixed(4), +r.recommended_interval_days.toFixed(3),
+              +r.readings_per_year.toFixed(2), r.feasible, +r.mid.p_detect.toFixed(4), +r.mid.cost_eur_y.toFixed(2),
+              +r.mid.benefit_eur_y.toFixed(2), +r.lo.net_eur_y.toFixed(2), +r.mid.net_eur_y.toFixed(2), +r.hi.net_eur_y.toFixed(2),
+              r.mid.breakeven_downtime_eur_h == null ? '' : +r.mid.breakeven_downtime_eur_h.toFixed(2), r.mid.breakeven_kind,
+              r.reasons.join(' ')];
+    });
+    var core = CORE();
+    if (core && typeof core.csv === 'function') {
+      try { return core.csv(rows.map(function (r) { var o = {}; CSV_HEAD.forEach(function (h, i) { o[h] = r[i]; }); return o; }), CSV_HEAD); } catch (e) { /* fall through */ }
+    }
+    var cell = function (v) {
+      var s = v === null || v === undefined ? '' : String(v);
+      if (/^[=+\-@\t\r]/.test(s) && !/^-?\d/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    return [CSV_HEAD.join(',')].concat(rows.map(function (r) { return r.map(cell).join(','); })).join('\r\n');
+  }
+  function download(text, name, type) {
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  function buildInterface() {
+    var NUM = function (id, key, label, unit, min, max, step, precision, extra) {
+      var f = { id: id, key: key, type: 'number', label: label, unit: unit, min: min, max: max };
+      if (step != null) f.step = step;
+      if (precision != null) f.precision = precision;
+      return Object.assign(f, extra || {});
+    };
+    var hasCore = !!(CORE() && CORE().register);
+    /* the inspector edits the option picked in the chart select (or the best one) */
+    var selIndex = function () {
+      if (state.pick && state.pick !== 'best') { var i = parseInt(String(state.pick).split(':')[0], 10); if (i >= 0 && i < state.options.length) return i; }
+      var cmp = CM.compare(caseOf(state), optionsOf(state));
+      return cmp.best ? cmp.rows.indexOf(cmp.best) : 0;
+    };
+    var selOpt = function () { return state.options[selIndex()] || null; };
+    var costUnit = function () { var o = selOpt(); return o && o.mode !== 'route' ? 'EUR/a' : 'EUR'; };
+    var costLabel = function (which) {
+      return function () {
+        var o = selOpt(), route = !o || o.mode === 'route';
+        return TF(route ? T('Cost per reading, {0}', 'Ціна одного вимірювання, {0}', 'Kosten je Messung, {0}', 'Kosten per meting, {0}', 'Coût par mesure, {0}', 'Coste por lectura, {0}', 'Koszt odczytu, {0}')
+                        : T('Cost per point and year, {0}', 'Витрати на точку на рік, {0}', 'Kosten je Messstelle und Jahr, {0}', 'Kosten per punt per jaar, {0}', 'Coût par point et par an, {0}', 'Coste por punto y año, {0}', 'Koszt na punkt i rok, {0}'), [which]);
+      };
+    };
+    var SEL_NUM = function (id, key, label, unit, min, max, step, precision, learn) {
+      var f = { id: id, type: 'number', label: label, min: min, max: max, step: step, precision: precision,
+                get: function () { var o = selOpt(); return o ? o[key] : null; },
+                set: function (v) { var o = selOpt(); if (o && typeof v === 'number' && isFinite(v)) o[key] = v; } };
+      if (unit) f.unit = unit;
+      if (learn) f.learn = learn;
+      return f;
+    };
+
+    ui = DiagramUI.app({
+      id: 'mepmonitoring',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      subtitle: T('P–F interval → inspection interval → probability of detection → does it pay?',
+                  'Інтервал P–F → інтервал оглядів → імовірність виявлення → чи окупається?',
+                  'P–F-Intervall → Prüfintervall → Erkennungswahrscheinlichkeit → lohnt es sich?',
+                  'P–F-interval → inspectie-interval → detectiekans → loont het?',
+                  'Intervalle P–F → périodicité → probabilité de détection → est-ce rentable ?',
+                  'Intervalo P–F → intervalo de inspección → probabilidad de detección → ¿compensa?',
+                  'Interwał P–F → interwał inspekcji → prawdopodobieństwo wykrycia → czy się opłaca?'),
+      notices: [{
+        id: 'genre', tone: 'warn', sticky: true,
+        title: T('Planning aid', 'Засіб планування', 'Planungshilfe', 'Planningshulpmiddel', 'Aide à la planification', 'Ayuda a la planificación', 'Pomoc w planowaniu'),
+        text: T('A planning aid, not a substitute for manufacturer instructions and national regulations. Preset numbers are learning assumptions, not manufacturer data. Statutory inspections stay in the plan whatever this tool says (EU baseline; national rules may be stricter).',
+                'Засіб планування, а не заміна інструкцій виробника та національних норм. Числа в прикладах — навчальні припущення, а не дані виробника. Обов’язкові огляди лишаються в плані незалежно від результату (базовий рівень ЄС; національні правила можуть бути суворішими).',
+                'Eine Planungshilfe, kein Ersatz für Herstellerangaben und nationale Vorschriften. Beispielwerte sind Lernannahmen, keine Herstellerdaten. Gesetzliche Prüfungen bleiben im Plan, was immer dieses Werkzeug sagt (EU-Mindeststand; nationale Regeln können strenger sein).',
+                'Een planningshulpmiddel, geen vervanging van fabrieksvoorschriften en nationale regelgeving. Voorbeeldwaarden zijn leeraannames, geen fabrikantgegevens. Wettelijke keuringen blijven in het plan, wat deze tool ook zegt (EU-basis; nationale regels kunnen strenger zijn).',
+                'Une aide à la planification, qui ne remplace ni les instructions du constructeur ni la réglementation nationale. Les valeurs des exemples sont des hypothèses pédagogiques, pas des données constructeur. Les contrôles réglementaires restent au plan quoi que dise cet outil (socle UE ; les règles nationales peuvent être plus strictes).',
+                'Una ayuda a la planificación, no sustituye las instrucciones del fabricante ni la normativa nacional. Los valores de los ejemplos son supuestos didácticos, no datos de fabricante. Las inspecciones reglamentarias siguen en el plan diga lo que diga esta herramienta (base UE; las normas nacionales pueden ser más estrictas).',
+                'Pomoc w planowaniu, nie zastępuje instrukcji producenta ani przepisów krajowych. Liczby w przykładach to założenia dydaktyczne, nie dane producenta. Przeglądy ustawowe zostają w planie niezależnie od wyniku (minimum UE; przepisy krajowe mogą być surowsze).')
+      }],
+
+      learn: {
+        version: 1,
+        intro: {
+          title: T('What this tool does', 'Що робить цей інструмент', 'Was dieses Werkzeug tut', 'Wat deze tool doet', 'Ce que fait cet outil', 'Qué hace esta herramienta', 'Co robi to narzędzie'),
+          body: T('Pick one failure mode of one asset. For each way of watching it — a manual route, an online sensor, a BMS trend — the tool asks three questions: does the technique see the defect early enough to act, how often must it look, and do the failures it catches save more than the readings cost? Every answer comes as a low–mid–high range.',
+                  'Виберіть один вид відмови одного об’єкта. Для кожного способу спостереження — обхід, стаціонарний датчик, тренд у BMS — інструмент ставить три питання: чи бачить метод дефект досить рано, щоб устигнути зреагувати; як часто треба дивитися; і чи заощаджують виявлені відмови більше, ніж коштують вимірювання? Кожна відповідь — діапазон «низьке–середнє–високе».',
+                  'Wählen Sie eine Ausfallart einer Anlage. Für jede Art der Beobachtung — Rundgang, Online-Sensor, GLT-Trend — stellt das Werkzeug drei Fragen: Sieht das Verfahren den Schaden früh genug zum Handeln, wie oft muss es hinsehen, und sparen die erkannten Ausfälle mehr, als die Messungen kosten? Jede Antwort ist eine Bandbreite niedrig–mittel–hoch.',
+                  'Kies één faalwijze van één object. Voor elke manier van kijken — ronde, online sensor, GBS-trend — stelt de tool drie vragen: ziet de techniek het defect vroeg genoeg om te handelen, hoe vaak moet hij kijken, en besparen de geziene storingen meer dan de metingen kosten? Elk antwoord is een bandbreedte laag–midden–hoog.',
+                  'Choisissez un mode de défaillance d’un équipement. Pour chaque façon de le surveiller — ronde, capteur en ligne, tendance GTB — l’outil pose trois questions : la technique voit-elle le défaut assez tôt pour agir, à quelle fréquence doit-elle regarder, et les défaillances détectées font-elles économiser plus que le coût des mesures ? Chaque réponse est une fourchette bas–médian–haut.',
+                  'Elija un modo de fallo de un equipo. Para cada forma de vigilarlo — ronda, sensor en línea, tendencia del BMS — la herramienta hace tres preguntas: ¿ve la técnica el defecto a tiempo para actuar?, ¿con qué frecuencia debe mirar?, y ¿ahorran los fallos detectados más de lo que cuestan las lecturas? Cada respuesta es un rango bajo–medio–alto.',
+                  'Wybierz jeden rodzaj uszkodzenia jednego urządzenia. Dla każdego sposobu obserwacji — obchód, czujnik online, trend w BMS — narzędzie zadaje trzy pytania: czy technika widzi defekt dość wcześnie, by zdążyć zareagować; jak często musi patrzeć; i czy wykryte uszkodzenia oszczędzają więcej, niż kosztują pomiary? Każda odpowiedź to przedział niski–średni–wysoki.')
+        },
+        topics: {
+          pf: {
+            title: T('P–F interval', 'Інтервал P–F', 'P–F-Intervall', 'P–F-interval', 'Intervalle P–F', 'Intervalo P–F', 'Interwał P–F'),
+            body: T('The time from P, the point where a developing failure can first be detected, to F, the functional failure. It belongs to the failure mode and is uncertain, so it is entered as low, mid and high. A short P–F is the reason fast machines need continuous monitoring.',
+                    'Час від P — моменту, коли відмову, що розвивається, уже можна виявити, — до F, функціональної відмови. Він належить виду відмови й невизначений, тому вводиться як низьке, середнє та високе значення. Короткий P–F — причина, чому швидкохідним машинам потрібен безперервний моніторинг.',
+                    'Die Zeit von P, dem Punkt, an dem ein entstehender Ausfall erstmals erkennbar ist, bis F, dem Funktionsausfall. Sie gehört zur Ausfallart und ist unsicher, daher niedrig, mittel und hoch. Ein kurzes P–F ist der Grund, warum schnelllaufende Maschinen kontinuierliche Überwachung brauchen.',
+                    'De tijd van P, het punt waarop een ontstaande storing voor het eerst te zien is, tot F, het functieverlies. Hij hoort bij de faalwijze en is onzeker, dus laag, midden en hoog. Een korte P–F is de reden dat snellopende machines continue bewaking nodig hebben.',
+                    'Le temps entre P, le point où une défaillance naissante devient détectable, et F, la défaillance fonctionnelle. Il appartient au mode de défaillance et il est incertain, d’où les valeurs basse, médiane et haute. Un P–F court explique pourquoi les machines rapides demandent une surveillance continue.',
+                    'El tiempo desde P, el punto en que un fallo en desarrollo se puede detectar por primera vez, hasta F, el fallo funcional. Pertenece al modo de fallo y es incierto, por eso se introduce como bajo, medio y alto. Un P–F corto es la razón por la que las máquinas rápidas necesitan monitorización continua.',
+                    'Czas od P, punktu, w którym rozwijające się uszkodzenie można po raz pierwszy wykryć, do F, utraty funkcji. Należy do rodzaju uszkodzenia i jest niepewny, więc podaje się go jako niski, średni i wysoki. Krótki P–F to powód, dla którego szybkie maszyny wymagają ciągłego monitorowania.')
+          },
+          usable: {
+            title: T('Usable share and response time', 'Корисна частка та час реагування', 'Nutzbarer Anteil und Reaktionszeit', 'Bruikbaar deel en reactietijd', 'Part exploitable et délai d’intervention', 'Parte aprovechable y tiempo de respuesta', 'Część użyteczna i czas reakcji'),
+            body: T('A technique sees the defect only once it has grown past its detection threshold, so only a share of the P–F is usable — vibration and ultrasound see a bearing early, a visual check sees it late. The last days before F are spent ordering parts and doing the repair; a detection after that is too late.',
+                    'Метод бачить дефект лише тоді, коли той перевищив поріг чутливості, тож корисна тільки частка P–F: вібрація та ультразвук бачать підшипник рано, візуальний огляд — пізно. Останні дні перед F ідуть на замовлення запчастин і ремонт; виявлення після цього запізно.',
+                    'Ein Verfahren sieht den Schaden erst, wenn er seine Erkennungsschwelle überschritten hat; nutzbar ist also nur ein Anteil des P–F — Schwingung und Ultraschall sehen ein Lager früh, die Sichtprüfung spät. Die letzten Tage vor F gehen für Teilebeschaffung und Reparatur drauf; eine Erkennung danach kommt zu spät.',
+                    'Een techniek ziet het defect pas als het zijn detectiedrempel voorbij is, dus is maar een deel van de P–F bruikbaar — trilling en ultrasoon zien een lager vroeg, een visuele controle laat. De laatste dagen voor F gaan op aan onderdelen bestellen en herstellen; een detectie daarna is te laat.',
+                    'Une technique ne voit le défaut qu’une fois son seuil de détection franchi : seule une part du P–F est exploitable — vibrations et ultrasons voient un roulement tôt, l’inspection visuelle tard. Les derniers jours avant F servent à commander les pièces et à réparer ; une détection après cela arrive trop tard.',
+                    'Una técnica solo ve el defecto cuando supera su umbral de detección, así que solo una parte del P–F es aprovechable — vibraciones y ultrasonidos ven un rodamiento pronto, la inspección visual tarde. Los últimos días antes de F se van en pedir piezas y reparar; una detección posterior llega tarde.',
+                    'Technika widzi defekt dopiero, gdy przekroczy on jej próg wykrywalności, więc użyteczna jest tylko część P–F — drgania i ultradźwięki widzą łożysko wcześnie, oględziny późno. Ostatnie dni przed F zajmuje zamówienie części i naprawa; wykrycie później jest za późne.')
+          },
+          interval: {
+            title: T('Inspection interval', 'Інтервал оглядів', 'Prüfintervall', 'Inspectie-interval', 'Périodicité d’inspection', 'Intervalo de inspección', 'Interwał inspekcji'),
+            body: T('The RCM rule: inspect at half the detection window (usable P–F minus response time), so that at least one look always falls inside it. The tool applies the rule to the short (low) P–F. Leave the route interval at 0 for this automatic value, or type the interval you actually run to see what it catches.',
+                    'Правило RCM: оглядати з інтервалом у половину вікна виявлення (корисний P–F мінус час реагування), щоб у вікно завжди потрапляв хоча б один огляд. Інструмент застосовує правило до короткого (низького) P–F. Залиште 0 для автоматичного значення або введіть фактичний інтервал, щоб побачити, що він виявляє.',
+                    'Die RCM-Regel: Prüfintervall = halbes Erkennungsfenster (nutzbares P–F minus Reaktionszeit), damit immer mindestens eine Prüfung hineinfällt. Das Werkzeug wendet sie auf das kurze (niedrige) P–F an. 0 lässt den automatischen Wert, oder geben Sie Ihr tatsächliches Intervall ein und sehen Sie, was es erkennt.',
+                    'De RCM-regel: inspecteer op de helft van het detectievenster (bruikbare P–F min reactietijd), zodat er altijd minstens één blik in valt. De tool past de regel toe op de korte (lage) P–F. Laat 0 staan voor de automatische waarde, of vul uw werkelijke interval in om te zien wat het ziet.',
+                    'La règle MBF : inspecter à la moitié de la fenêtre de détection (P–F exploitable moins délai d’intervention), pour qu’au moins un contrôle y tombe toujours. L’outil l’applique au P–F court (bas). Laissez 0 pour la valeur automatique, ou saisissez votre périodicité réelle pour voir ce qu’elle détecte.',
+                    'La regla RCM: inspeccionar a la mitad de la ventana de detección (P–F aprovechable menos tiempo de respuesta), para que al menos una inspección caiga siempre dentro. La herramienta la aplica al P–F corto (bajo). Deje 0 para el valor automático o escriba su intervalo real para ver qué detecta.',
+                    'Reguła RCM: badać co połowę okna wykrycia (użyteczny P–F minus czas reakcji), żeby zawsze trafił w nie co najmniej jeden pomiar. Narzędzie stosuje regułę do krótkiego (niskiego) P–F. Zostaw 0 dla wartości automatycznej albo wpisz faktyczny interwał, by zobaczyć, co wykrywa.')
+          },
+          pdetect: {
+            title: T('Probability of detection', 'Імовірність виявлення', 'Erkennungswahrscheinlichkeit', 'Detectiekans', 'Probabilité de détection', 'Probabilidad de detección', 'Prawdopodobieństwo wykrycia'),
+            body: T('The defect starts at a random moment relative to your calendar. If the window is shorter than the interval, a look falls inside it only in a fraction window/interval of cases; each look then finds the defect with the technique’s probability per reading. A route’s readings are counted as independent; an online sensor or a BMS point counts as one look, because a sensor that misses a defect tends to keep missing it.',
+                    'Дефект виникає у випадковий момент відносно вашого графіка. Якщо вікно коротше за інтервал, огляд потрапляє в нього лише в частці «вікно/інтервал» випадків; кожен огляд знаходить дефект з імовірністю методу на одне вимірювання. Вимірювання обходу вважаються незалежними; стаціонарний датчик або точка BMS рахуються як один огляд, бо датчик, що пропустив дефект, зазвичай пропускає його й далі.',
+                    'Der Schaden beginnt zu einem zufälligen Zeitpunkt relativ zu Ihrem Kalender. Ist das Fenster kürzer als das Intervall, fällt eine Prüfung nur im Anteil Fenster/Intervall der Fälle hinein; jede Prüfung findet den Schaden dann mit der Einzelwahrscheinlichkeit des Verfahrens. Rundgangsmessungen zählen als unabhängig; ein Online-Sensor oder GLT-Punkt als eine Prüfung, weil ein Sensor, der einen Schaden übersieht, ihn meist weiter übersieht.',
+                    'Het defect begint op een willekeurig moment ten opzichte van uw kalender. Is het venster korter dan het interval, dan valt een blik er maar in de fractie venster/interval van de gevallen in; elke blik vindt het defect dan met de kans per meting van de techniek. Metingen van een ronde tellen als onafhankelijk; een online sensor of GBS-punt telt als één blik, omdat een sensor die een defect mist het meestal blijft missen.',
+                    'Le défaut naît à un instant aléatoire par rapport à votre calendrier. Si la fenêtre est plus courte que la périodicité, un contrôle n’y tombe que dans la fraction fenêtre/périodicité des cas ; chaque contrôle trouve alors le défaut avec la probabilité par mesure de la technique. Les mesures d’une ronde sont comptées indépendantes ; un capteur en ligne ou un point GTB compte pour un seul contrôle, car un capteur qui rate un défaut tend à continuer à le rater.',
+                    'El defecto empieza en un momento aleatorio respecto a su calendario. Si la ventana es más corta que el intervalo, una inspección cae dentro solo en la fracción ventana/intervalo de los casos; cada inspección encuentra el defecto con la probabilidad por lectura de la técnica. Las lecturas de una ronda se cuentan como independientes; un sensor en línea o un punto del BMS cuenta como una sola inspección, porque un sensor que no ve un defecto suele seguir sin verlo.',
+                    'Defekt zaczyna się w losowej chwili względem Twojego harmonogramu. Jeśli okno jest krótsze niż interwał, pomiar trafia w nie tylko w ułamku okno/interwał przypadków; każdy pomiar znajduje defekt z prawdopodobieństwem techniki na jeden odczyt. Odczyty z obchodu liczone są jako niezależne; czujnik online lub punkt BMS liczy się jako jeden pomiar, bo czujnik, który przeoczył defekt, zwykle przeocza go dalej.')
+          },
+          economics: {
+            title: T('Net benefit', 'Чиста вигода', 'Nettonutzen', 'Nettovoordeel', 'Bénéfice net', 'Beneficio neto', 'Korzyść netto'),
+            body: T('Each failure caught in time saves the difference between the run-to-failure repair and the planned repair, plus the downtime cost for the hours of outage avoided. Benefit = failures per year × probability of detection × saving × consequence probability; net = benefit − readings × cost per reading − annual fixed cost − false alarms. Undiscounted, per measurement point.',
+                    'Кожна вчасно виявлена відмова заощаджує різницю між аварійним і плановим ремонтом плюс вартість простою за уникнуті години. Вигода = відмов на рік × імовірність виявлення × заощадження × імовірність наслідку; чиста = вигода − вимірювання × ціна вимірювання − річні постійні витрати − хибні тривоги. Без дисконтування, на одну точку вимірювання.',
+                    'Jeder rechtzeitig erkannte Ausfall spart die Differenz zwischen Schadensreparatur und geplanter Reparatur plus die Stillstandskosten der vermiedenen Ausfallstunden. Nutzen = Ausfälle pro Jahr × Erkennungswahrscheinlichkeit × Ersparnis × Folgewahrscheinlichkeit; netto = Nutzen − Messungen × Kosten je Messung − jährliche Fixkosten − Fehlalarme. Nicht abgezinst, je Messstelle.',
+                    'Elke op tijd geziene storing bespaart het verschil tussen herstel na storing en gepland herstel, plus de stilstandskosten van de vermeden uren. Voordeel = storingen per jaar × detectiekans × besparing × gevolgkans; netto = voordeel − metingen × kosten per meting − jaarlijkse vaste kosten − valse alarmen. Niet verdisconteerd, per meetpunt.',
+                    'Chaque défaillance détectée à temps économise l’écart entre la réparation après panne et la réparation planifiée, plus le coût d’arrêt des heures évitées. Bénéfice = défaillances par an × probabilité de détection × économie × probabilité de conséquence ; net = bénéfice − mesures × coût par mesure − coût fixe annuel − fausses alarmes. Non actualisé, par point de mesure.',
+                    'Cada fallo detectado a tiempo ahorra la diferencia entre la reparación tras avería y la planificada, más el coste de parada de las horas evitadas. Beneficio = fallos al año × probabilidad de detección × ahorro × probabilidad de consecuencia; neto = beneficio − lecturas × coste por lectura − coste fijo anual − falsas alarmas. Sin descontar, por punto de medida.',
+                    'Każde uszkodzenie wykryte na czas oszczędza różnicę między naprawą awaryjną a planową oraz koszt przestoju za uniknięte godziny. Korzyść = uszkodzenia na rok × prawdopodobieństwo wykrycia × oszczędność × prawdopodobieństwo skutku; netto = korzyść − odczyty × koszt odczytu − roczny koszt stały − fałszywe alarmy. Bez dyskontowania, na punkt pomiarowy.')
+          },
+          breakeven: {
+            title: T('Break-even downtime cost', 'Беззбиткова вартість простою', 'Break-even-Stillstandskosten', 'Break-even stilstandskosten', 'Coût d’arrêt d’équilibre', 'Coste de parada de equilibrio', 'Progowy koszt przestoju'),
+            body: T('The cost of one hour of outage at which the net benefit is exactly zero. It is the number to argue with: if nobody in the building would pay that much to avoid an hour without this asset, the monitoring is not worth it on economics alone.',
+                    'Вартість години простою, за якої чиста вигода дорівнює нулю. Саме з цим числом варто сперечатися: якщо ніхто в будівлі не заплатив би стільки, щоб уникнути години без цього об’єкта, моніторинг економічно не виправданий.',
+                    'Die Kosten einer Ausfallstunde, bei denen der Nettonutzen genau null ist. Über diese Zahl sollte man reden: Würde niemand im Gebäude so viel zahlen, um eine Stunde ohne diese Anlage zu vermeiden, lohnt sich die Überwachung rein wirtschaftlich nicht.',
+                    'De kosten van één uur uitval waarbij het nettovoordeel precies nul is. Dat is het getal om over te praten: als niemand in het gebouw zoveel zou betalen om een uur zonder dit object te vermijden, loont de bewaking economisch niet.',
+                    'Le coût d’une heure d’arrêt pour lequel le bénéfice net est exactement nul. C’est le chiffre à discuter : si personne dans le bâtiment ne paierait autant pour éviter une heure sans cet équipement, la surveillance ne se justifie pas économiquement.',
+                    'El coste de una hora de parada con el que el beneficio neto es exactamente cero. Es la cifra que hay que discutir: si nadie en el edificio pagaría tanto por evitar una hora sin este equipo, la monitorización no compensa solo por economía.',
+                    'Koszt godziny przestoju, przy którym korzyść netto wynosi dokładnie zero. To liczba do dyskusji: jeśli nikt w budynku nie zapłaciłby tyle, by uniknąć godziny bez tego urządzenia, monitorowanie nie opłaca się czysto ekonomicznie.')
+          },
+          ranges: {
+            title: T('Low, mid, high and the tornado', 'Низьке, середнє, високе та торнадо', 'Niedrig, mittel, hoch und das Tornado-Diagramm', 'Laag, midden, hoog en de tornado', 'Bas, médian, haut et la tornade', 'Bajo, medio, alto y el tornado', 'Niski, średni, wysoki i tornado'),
+            body: T('Low is the pessimistic combination for the net (short P–F, long MTBF, high cost), high the optimistic one; the inspection calendar is the same in all three. The tornado swings one input at a time over its range with the others at mid, so the longest bar is the number worth measuring better before deciding.',
+                    'Низьке — песимістична комбінація для чистої вигоди (короткий P–F, довге напрацювання, висока ціна), високе — оптимістична; графік оглядів однаковий в усіх трьох. Торнадо змінює один вхід у його діапазоні, решта — середні, тож найдовша смуга — те число, яке варто уточнити перед рішенням.',
+                    'Niedrig ist die ungünstige Kombination für den Nettonutzen (kurzes P–F, lange MTBF, hohe Kosten), hoch die günstige; der Prüfkalender ist in allen drei gleich. Das Tornado-Diagramm variiert je eine Eingabe über ihre Bandbreite bei Mittelwerten der übrigen — der längste Balken ist die Zahl, die man vor der Entscheidung genauer ermitteln sollte.',
+                    'Laag is de ongunstige combinatie voor het netto (korte P–F, lange MTBF, hoge kosten), hoog de gunstige; de inspectiekalender is in alle drie gelijk. De tornado zwaait één invoer tegelijk over zijn bereik met de rest op midden; de langste balk is het getal dat u eerst beter moet meten.',
+                    'Bas est la combinaison pessimiste pour le net (P–F court, MTBF long, coût élevé), haut l’optimiste ; le calendrier d’inspection est le même dans les trois. La tornade fait varier une entrée à la fois sur sa plage, les autres au médian : la barre la plus longue est le chiffre à mieux connaître avant de décider.',
+                    'Bajo es la combinación pesimista para el neto (P–F corto, MTBF largo, coste alto), alto la optimista; el calendario de inspección es el mismo en los tres. El tornado mueve una entrada cada vez sobre su rango con las demás en el medio: la barra más larga es la cifra que conviene medir mejor antes de decidir.',
+                    'Niski to pesymistyczne zestawienie dla wyniku netto (krótki P–F, długi MTBF, wysoki koszt), wysoki — optymistyczne; harmonogram inspekcji jest w trzech ten sam. Tornado zmienia jedno wejście naraz w jego zakresie, pozostałe średnie; najdłuższy pasek to liczba, którą warto lepiej poznać przed decyzją.')
+          },
+          consequence: {
+            title: T('Consequence probability', 'Імовірність наслідку', 'Folgewahrscheinlichkeit', 'Gevolgkans', 'Probabilité de conséquence', 'Probabilidad de consecuencia', 'Prawdopodobieństwo skutku'),
+            body: T('For an evident failure leave it at 1. For a hidden function — a battery, a standby pump — the failure costs something only if the demand comes while it is failed; enter the chance of that demand before the defect would be found anyway.',
+                    'Для явної відмови залиште 1. Для прихованої функції — батарея, резервний насос — відмова щось коштує лише тоді, коли потреба виникає під час несправного стану; введіть імовірність такої потреби до того, як дефект знайшли б іншим шляхом.',
+                    'Bei einem offensichtlichen Ausfall 1 lassen. Bei einer verdeckten Funktion — Batterie, Reservepumpe — kostet der Ausfall nur, wenn die Anforderung im ausgefallenen Zustand kommt; geben Sie die Wahrscheinlichkeit dieser Anforderung ein, bevor der Schaden ohnehin gefunden würde.',
+                    'Bij een zichtbare storing 1 laten. Bij een verborgen functie — een batterij, een reservepomp — kost de storing alleen iets als de vraag komt terwijl hij defect is; vul de kans op die vraag in voordat het defect toch gevonden zou worden.',
+                    'Pour une défaillance évidente, laissez 1. Pour une fonction cachée — batterie, pompe de secours — la défaillance ne coûte que si la sollicitation survient pendant la panne ; saisissez la probabilité de cette sollicitation avant que le défaut soit trouvé autrement.',
+                    'Para un fallo evidente deje 1. Para una función oculta — una batería, una bomba de reserva — el fallo solo cuesta si la demanda llega mientras está averiado; introduzca la probabilidad de esa demanda antes de que el defecto se encontrara de otro modo.',
+                    'Dla uszkodzenia jawnego zostaw 1. Dla funkcji ukrytej — bateria, pompa rezerwowa — uszkodzenie kosztuje tylko wtedy, gdy zapotrzebowanie przyjdzie w stanie uszkodzenia; wpisz prawdopodobieństwo takiego zapotrzebowania, zanim defekt zostałby znaleziony inaczej.')
+          }
+        },
+        tour: [
+          { topic: 'pf', focus: '[data-dgu-field="f-pf-mid"]' },
+          { topic: 'interval', focus: '[data-dgu-field="f-options"]' },
+          { topic: 'pdetect', focus: '.dgu-stage' },
+          { topic: 'breakeven', focus: '.dgu-r-results' },
+          { topic: 'ranges', focus: '.dgu-r-results' }
+        ]
+      },
+
+      panels: [{
+        id: 'failure', slot: 'inputs',
+        title: T('Failure mode', 'Вид відмови', 'Ausfallart', 'Faalwijze', 'Mode de défaillance', 'Modo de fallo', 'Rodzaj uszkodzenia'),
+        learn: 'pf',
+        fields: [
+          NUM('f-pf-lo', 'pf_lo', T('P–F interval, low', 'Інтервал P–F, низький', 'P–F-Intervall, niedrig', 'P–F-interval, laag', 'Intervalle P–F, bas', 'Intervalo P–F, bajo', 'Interwał P–F, niski'), 'd', 0.5, 3650, 1, 0),
+          NUM('f-pf-mid', 'pf_mid', T('P–F interval, mid', 'Інтервал P–F, середній', 'P–F-Intervall, mittel', 'P–F-interval, midden', 'Intervalle P–F, médian', 'Intervalo P–F, medio', 'Interwał P–F, średni'), 'd', 0.5, 3650, 1, 0, { learn: 'pf' }),
+          NUM('f-pf-hi', 'pf_hi', T('P–F interval, high', 'Інтервал P–F, високий', 'P–F-Intervall, hoch', 'P–F-interval, hoog', 'Intervalle P–F, haut', 'Intervalo P–F, alto', 'Interwał P–F, wysoki'), 'd', 0.5, 3650, 1, 0),
+          NUM('f-mtbf-lo', 'mtbf_lo', T('Mean time between these failures, low', 'Середнє напрацювання між такими відмовами, низьке', 'Mittlere Zeit zwischen diesen Ausfällen, niedrig', 'Gemiddelde tijd tussen deze storingen, laag', 'Temps moyen entre ces défaillances, bas', 'Tiempo medio entre estos fallos, bajo', 'Średni czas między tymi uszkodzeniami, niski'), 'a', 0.1, 200, 0.1, 1),
+          NUM('f-mtbf-mid', 'mtbf_mid', T('Mean time between these failures, mid', 'Середнє напрацювання між такими відмовами, середнє', 'Mittlere Zeit zwischen diesen Ausfällen, mittel', 'Gemiddelde tijd tussen deze storingen, midden', 'Temps moyen entre ces défaillances, médian', 'Tiempo medio entre estos fallos, medio', 'Średni czas między tymi uszkodzeniami, średni'), 'a', 0.1, 200, 0.1, 1),
+          NUM('f-mtbf-hi', 'mtbf_hi', T('Mean time between these failures, high', 'Середнє напрацювання між такими відмовами, високе', 'Mittlere Zeit zwischen diesen Ausfällen, hoch', 'Gemiddelde tijd tussen deze storingen, hoog', 'Temps moyen entre ces défaillances, haut', 'Tiempo medio entre estos fallos, alto', 'Średni czas między tymi uszkodzeniami, wysoki'), 'a', 0.1, 200, 0.1, 1),
+          NUM('f-resp', 'response_days', T('Response time: plan, parts, repair', 'Час реагування: план, запчастини, ремонт', 'Reaktionszeit: Planung, Teile, Reparatur', 'Reactietijd: plannen, onderdelen, herstel', 'Délai d’intervention : planification, pièces, réparation', 'Tiempo de respuesta: plan, piezas, reparación', 'Czas reakcji: plan, części, naprawa'), 'd', 0, 365, 0.5, 1, { learn: 'usable' }),
+          { id: 'f-safety', key: 'safety', type: 'toggle',
+            label: T('Safety or environmental consequence', 'Наслідок для безпеки чи довкілля', 'Folge für Sicherheit oder Umwelt', 'Gevolg voor veiligheid of milieu', 'Conséquence sécurité ou environnement', 'Consecuencia de seguridad o medio ambiente', 'Skutek dla bezpieczeństwa lub środowiska') }
+        ]
+      }, {
+        id: 'consequence', slot: 'inputs',
+        title: T('What a failure costs', 'Скільки коштує відмова', 'Was ein Ausfall kostet', 'Wat een storing kost', 'Ce que coûte une défaillance', 'Lo que cuesta un fallo', 'Ile kosztuje uszkodzenie'),
+        learn: 'economics',
+        fields: [
+          NUM('f-dt', 'downtime', T('Downtime cost', 'Вартість простою', 'Stillstandskosten', 'Stilstandskosten', 'Coût d’arrêt', 'Coste de parada', 'Koszt przestoju'), 'EUR/h', 0, 1e6, 10, 0, { learn: 'breakeven' }),
+          NUM('f-corr', 'corrective', T('Repair after failure (incl. secondary damage)', 'Ремонт після відмови (з вторинними пошкодженнями)', 'Reparatur nach Ausfall (inkl. Folgeschäden)', 'Herstel na storing (incl. gevolgschade)', 'Réparation après panne (dommages induits compris)', 'Reparación tras fallo (con daños secundarios)', 'Naprawa po uszkodzeniu (z uszkodzeniami wtórnymi)'), 'EUR', 0, 1e7, 50, 0),
+          NUM('f-plan', 'planned', T('Planned repair when caught early', 'Плановий ремонт при ранньому виявленні', 'Geplante Reparatur bei früher Erkennung', 'Gepland herstel bij vroege detectie', 'Réparation planifiée si détection précoce', 'Reparación planificada si se detecta pronto', 'Naprawa planowa przy wczesnym wykryciu'), 'EUR', 0, 1e7, 50, 0),
+          NUM('f-mttr', 'mttr', T('Outage after failure', 'Простій після відмови', 'Ausfalldauer nach Schaden', 'Uitval na storing', 'Arrêt après panne', 'Parada tras fallo', 'Przestój po uszkodzeniu'), 'h', 0, 20000, 1, 0),
+          NUM('f-pdt', 'planned_dt', T('Outage of the planned repair', 'Простій планового ремонту', 'Ausfalldauer der geplanten Reparatur', 'Uitval van het geplande herstel', 'Arrêt de la réparation planifiée', 'Parada de la reparación planificada', 'Przestój naprawy planowej'), 'h', 0, 20000, 1, 0),
+          NUM('f-cp', 'cons_p', T('Consequence probability', 'Імовірність наслідку', 'Folgewahrscheinlichkeit', 'Gevolgkans', 'Probabilité de conséquence', 'Probabilidad de consecuencia', 'Prawdopodobieństwo skutku'), null, 0, 1, 0.05, 2, { learn: 'consequence' }),
+          NUM('f-units', 'units', T('Identical measurement points', 'Однакових точок вимірювання', 'Gleiche Messstellen', 'Gelijke meetpunten', 'Points de mesure identiques', 'Puntos de medida idénticos', 'Identycznych punktów pomiarowych'), null, 1, 10000, 1, 0),
+          NUM('f-fa', 'fa_y', T('False alarms per point and year', 'Хибних тривог на точку на рік', 'Fehlalarme je Messstelle und Jahr', 'Valse alarmen per punt per jaar', 'Fausses alarmes par point et par an', 'Falsas alarmas por punto y año', 'Fałszywe alarmy na punkt na rok'), null, 0, 50, 0.1, 1),
+          NUM('f-fac', 'fa_cost', T('Cost of one false alarm', 'Вартість однієї хибної тривоги', 'Kosten eines Fehlalarms', 'Kosten van één vals alarm', 'Coût d’une fausse alarme', 'Coste de una falsa alarma', 'Koszt jednego fałszywego alarmu'), 'EUR', 0, 1e5, 10, 0)
+        ]
+      }, {
+        id: 'options', slot: 'inputs',
+        title: T('Monitoring options to compare', 'Варіанти моніторингу для порівняння', 'Zu vergleichende Überwachungsoptionen', 'Te vergelijken bewakingsopties', 'Options de surveillance à comparer', 'Opciones de monitorización a comparar', 'Warianty monitorowania do porównania'),
+        learn: 'interval',
+        fields: [{
+          id: 'f-options', key: 'options', type: 'list',
+          label: T('Options', 'Варіанти', 'Optionen', 'Opties', 'Options', 'Opciones', 'Warianty'),
+          addLabel: T('Add option', 'Додати варіант', 'Option hinzufügen', 'Optie toevoegen', 'Ajouter une option', 'Añadir opción', 'Dodaj wariant'),
+          minRows: 1, maxRows: 12,
+          row: [
+            { key: 'technique', type: 'select', label: T('Technique', 'Метод', 'Verfahren', 'Techniek', 'Technique', 'Técnica', 'Technika'), options: techOptions },
+            { key: 'mode', type: 'select', label: T('Mode', 'Спосіб', 'Art', 'Wijze', 'Mode', 'Modo', 'Sposób'), options: modeOptions },
+            { key: 'interval', type: 'number', label: T('Interval (0 = auto)', 'Інтервал (0 = авто)', 'Intervall (0 = auto)', 'Interval (0 = auto)', 'Périodicité (0 = auto)', 'Intervalo (0 = auto)', 'Interwał (0 = auto)'), unit: 'd', min: 0, max: 730, step: 1 },
+            { type: 'derived', label: T('Caught, mid', 'Виявлено, сер.', 'Erkannt, Mitte', 'Gezien, midden', 'Détecté, médian', 'Detectado, medio', 'Wykryto, śr.'), unit: '%', precision: 0,
+              value: function (row, i) { var r = last && last.cmp.rows[i]; return r ? 100 * r.mid.p_detect : null; },
+              tone: function (row, i) { var r = last && last.cmp.rows[i]; return !r ? '' : (r.mid.p_detect < 0.5 ? 'bad' : (r.mid.p_detect < 0.8 ? 'warn' : 'ok')); } },
+            { type: 'derived', label: T('Net, mid', 'Чиста, сер.', 'Netto, Mitte', 'Netto, midden', 'Net, médian', 'Neto, medio', 'Netto, śr.'), unit: 'EUR/a', precision: 0,
+              value: function (row, i) { var r = last && last.cmp.rows[i]; return r ? r.mid.net_eur_y : null; },
+              tone: function (row, i) { var r = last && last.cmp.rows[i]; return !r ? '' : (r.mid.net_eur_y < 0 ? 'bad' : 'ok'); } }
+          ],
+          newRow: function () { return { id: 'opt' + Date.now().toString(36), technique: 'vibration', mode: 'route', interval: 0, pod: 0.9, pf_fraction: 0.8, c_lo: 25, c_mid: 40, c_hi: 70 }; },
+          hint: T('Cost is per reading for a route and per point and year for an online sensor or a BMS trend (annualised hardware, licence, review time).',
+                  'Ціна — за одне вимірювання для обходу та за точку на рік для датчика чи тренду BMS (обладнання в перерахунку на рік, ліцензія, час аналізу).',
+                  'Kosten je Messung beim Rundgang, je Messstelle und Jahr bei Online-Sensor oder GLT-Trend (annuisierte Hardware, Lizenz, Auswertezeit).',
+                  'Kosten per meting bij een ronde, per punt per jaar bij een online sensor of GBS-trend (geannualiseerde hardware, licentie, analysetijd).',
+                  'Coût par mesure pour une ronde, par point et par an pour un capteur en ligne ou une tendance GTB (matériel annualisé, licence, temps d’analyse).',
+                  'Coste por lectura en una ronda; por punto y año para un sensor en línea o una tendencia BMS (hardware anualizado, licencia, tiempo de análisis).',
+                  'Koszt za odczyt dla obchodu, za punkt i rok dla czujnika online lub trendu BMS (sprzęt w ujęciu rocznym, licencja, czas analizy).')
+        }]
+      }, {
+        id: 'view', slot: 'inputs',
+        title: T('Selected option', 'Вибраний варіант', 'Gewählte Option', 'Gekozen optie', 'Option choisie', 'Opción elegida', 'Wybrany wariant'),
+        fields: [{
+          id: 'f-pick', key: 'pick', type: 'select',
+          label: T('Option drawn in the charts and edited below', 'Варіант на графіках і для редагування нижче', 'Option in den Diagrammen und unten bearbeitet', 'Optie in de grafieken en hieronder bewerkt', 'Option tracée et modifiée ci-dessous', 'Opción en los gráficos y editada abajo', 'Wariant na wykresach i edytowany poniżej'),
+          options: function () {
+            var out = [['best', S.best]];
+            (state.options || []).forEach(function (o, i) {
+              var v = i + ':' + o.technique + ':' + o.mode + ':' + (o.interval || 0);
+              var every = o.mode === 'route' ? (o.interval > 0 ? ' · ' + o.interval + ' d' : ' · auto') : '';
+              out.push([v, TF(T('{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}', '{0} — {1}{2}'), [techName(o.technique), MODE_NAMES[o.mode] || o.mode, every])]);
+            });
+            return out;
+          }
+        },
+          SEL_NUM('f-pod', 'pod', T('Detection per look', 'Виявлення за один огляд', 'Erkennung je Prüfung', 'Detectie per blik', 'Détection par contrôle', 'Detección por inspección', 'Wykrycie na jeden pomiar'), null, 0, 1, 0.05, 2, 'pdetect'),
+          SEL_NUM('f-frac', 'pf_fraction', T('Usable share of the P–F', 'Корисна частка P–F', 'Nutzbarer Anteil des P–F', 'Bruikbaar deel van de P–F', 'Part exploitable du P–F', 'Parte aprovechable del P–F', 'Użyteczna część P–F'), null, 0.01, 1, 0.05, 2, 'usable'),
+          SEL_NUM('f-clo', 'c_lo', costLabel(T('low', 'низька', 'niedrig', 'laag', 'bas', 'bajo', 'niski')), costUnit, 0, 1e6, 1, 0),
+          SEL_NUM('f-cmid', 'c_mid', costLabel(T('mid', 'середня', 'mittel', 'midden', 'médian', 'medio', 'średni')), costUnit, 0, 1e6, 1, 0),
+          SEL_NUM('f-chi', 'c_hi', costLabel(T('high', 'висока', 'hoch', 'hoog', 'haut', 'alto', 'wysoki')), costUnit, 0, 1e6, 1, 0)
+        ]
+      }],
+
+      footer: T('P(det) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_response; I_rec = W(P–F_low)/2. Net = n·λ·P(det)·c_cons·[(C_fail − C_plan) + D·(MTTR − t_plan)] − n·(N·C_read + C_fixed + FA·C_FA). Sources: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Preset numbers: learning assumptions.',
+                  'P(det) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_реаг; I_рек = W(P–F_низ)/2. Чиста = n·λ·P(det)·c·[(C_відм − C_план) + D·(MTTR − t_план)] − n·(N·C_вим + C_пост + FA·C_FA). Джерела: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Числа прикладів — навчальні припущення.',
+                  'P(det) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_Reaktion; I_empf = W(P–F_niedrig)/2. Netto = n·λ·P(det)·c·[(C_Ausfall − C_plan) + D·(MTTR − t_plan)] − n·(N·C_Messung + C_fix + FA·C_FA). Quellen: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Beispielwerte: Lernannahmen.',
+                  'P(det) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_reactie; I_adv = W(P–F_laag)/2. Netto = n·λ·P(det)·c·[(C_storing − C_gepland) + D·(MTTR − t_gepland)] − n·(N·C_meting + C_vast + FA·C_FA). Bronnen: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Voorbeeldwaarden: leeraannames.',
+                  'P(dét) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_intervention ; I_rec = W(P–F_bas)/2. Net = n·λ·P(dét)·c·[(C_panne − C_plan) + D·(MTTR − t_plan)] − n·(N·C_mesure + C_fixe + FA·C_FA). Sources : Moubray, RCM II (1997) ; NASA RCM Guide for Facilities and Collateral Equipment (2008) ; US DOE O&M Best Practices Guide, Release 3.0 (2010). Valeurs des exemples : hypothèses pédagogiques.',
+                  'P(det) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_respuesta; I_rec = W(P–F_bajo)/2. Neto = n·λ·P(det)·c·[(C_fallo − C_plan) + D·(MTTR − t_plan)] − n·(N·C_lectura + C_fijo + FA·C_FA). Fuentes: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Valores de ejemplo: supuestos didácticos.',
+                  'P(wykr) = 1 − [(1−f)(1−p)^min(k,c) + f(1−p)^min(k+1,c)], k + f = W/I, W = φ·P–F − t_reakcji; I_zal = W(P–F_niski)/2. Netto = n·λ·P(wykr)·c·[(C_uszk − C_plan) + D·(MTTR − t_plan)] − n·(N·C_odczyt + C_stały + FA·C_FA). Źródła: Moubray, RCM II (1997); NASA RCM Guide for Facilities and Collateral Equipment (2008); US DOE O&M Best Practices Guide, Release 3.0 (2010). Wartości przykładów: założenia dydaktyczne.'),
+
+      on: {
+        rebuild: adoptStages,
+        compute: function (s) {
+          last = solve(s);
+          renderUseNote();
+          if (stagePF) stagePF.schedule();
+          if (stageEco) stageEco.schedule();
+          if (stageBE) stageBE.schedule();
+          if (!last) return null;
+          return payload(s);
+        }
+      }
+    });
+
+    /* register bar + library loader (only when mep-core.js is present) */
+    if (hasCore) {
+      ui.panel({
+        id: 'register', slot: 'inputs', collapsible: true, collapsed: true,
+        title: T('Site register', 'Реєстр об’єкта', 'Anlagenregister', 'Installatieregister', 'Registre du site', 'Registro del edificio', 'Rejestr obiektu'),
+        render: function (box) {
+          var core = CORE();
+          if (core && core.ui && typeof core.ui.registerBar === 'function') {
+            try { bar = core.ui.registerBar({ mount: box, toolId: 'mepmonitoring', lang: function () { return DiagramUI.lang(); },
+                                        getDoc: function () { return bar ? bar.getDoc() : core.register.load(); },
+                                        onUse: function (k, mod, doc) { useModule(k, mod, doc); if (ui) { ui.sync(); ui.run(); } renderUseNote(); },
+                                        onChange: function () { if (ui) ui.sync(); } }); } catch (e) { bar = null; /* bar optional */ }
+            if (bar && bar.element) Array.prototype.forEach.call(bar.element.querySelectorAll('input[type=file]'), function (f) {
+              if (!f.getAttribute('aria-label')) f.setAttribute('aria-label', L(T('Import register JSON', 'Імпорт реєстру JSON', 'Register-JSON importieren', 'Register-JSON importeren', 'Importer le registre JSON', 'Importar registro JSON', 'Importuj rejestr JSON'))); });
+          }
+          useNoteEl = document.createElement('p');
+          useNoteEl.setAttribute('role', 'status'); useNoteEl.setAttribute('aria-live', 'polite');
+          useNoteEl.className = 'mep-use-note';
+          useNoteEl.style.cssText = 'margin:4px 0 0;color:var(--muted,#5b6675);font-size:var(--fs-small,13px)';
+          box.appendChild(useNoteEl); renderUseNote();
+        },
+        fields: [
+          { id: 'f-asset', key: 'asset_id', type: 'select',
+            label: T('Asset', 'Об’єкт', 'Anlage', 'Object', 'Équipement', 'Equipo', 'Urządzenie'),
+            options: function () { return [['', '—']].concat(regAssets().map(function (a) { return [a.id, a.id + (function (n) { return n && n !== a.id ? ' — ' + n : ''; })(CORE() && typeof CORE().assetName === 'function' ? CORE().assetName(a, DiagramUI.lang()) : a.name)]; })); } },
+          { id: 'f-fm', key: 'fm_id', type: 'select',
+            label: T('Failure mode', 'Вид відмови', 'Ausfallart', 'Faalwijze', 'Mode de défaillance', 'Modo de fallo', 'Rodzaj uszkodzenia'),
+            visible: function () { return !!state.asset_id; },
+            options: function () {
+              var a = regAssets().filter(function (x) { return x.id === state.asset_id; })[0];
+              var cls = a ? classOf(a.class) : null;
+              return (cls && cls.failure_modes ? cls.failure_modes : []).map(function (f) { return [f.id, f.name || f.id]; });
+            } }
+        ],
+        actions: [
+          { label: T('Load from the class library', 'Завантажити з бібліотеки класів', 'Aus der Klassenbibliothek laden', 'Laden uit de klassenbibliotheek', 'Charger depuis la bibliothèque', 'Cargar desde la biblioteca de clases', 'Wczytaj z biblioteki klas'),
+            variant: 'ghost', run: function () { if (loadFromLibrary()) { ui.sync(); ui.run(); } } },
+          { label: T('Write result to the register', 'Записати результат у реєстр', 'Ergebnis ins Register schreiben', 'Resultaat in het register schrijven', 'Écrire le résultat dans le registre', 'Escribir el resultado en el registro', 'Zapisz wynik w rejestrze'),
+            variant: 'ghost', run: function () { writeToRegister(); ui.run(); } }
+        ]
+      });
+    }
+
+    ui.panel({
+      id: 'io', slot: 'inputs', actionsAlign: 'end',
+      actions: [
+        { id: 'csv-out', label: T('Export the comparison as CSV', 'Експорт порівняння в CSV', 'Vergleich als CSV exportieren', 'Vergelijking als CSV exporteren', 'Exporter la comparaison en CSV', 'Exportar la comparación en CSV', 'Eksportuj porównanie do CSV'),
+          variant: 'ghost', run: function () { download(csvText(), 'mepmonitoring-' + (state.preset || state.fm_id || 'case') + '.csv', 'text/csv;charset=utf-8'); } },
+        { id: 'json-out', label: T('Save the case as JSON', 'Зберегти випадок у JSON', 'Fall als JSON speichern', 'Geval als JSON opslaan', 'Enregistrer le cas en JSON', 'Guardar el caso en JSON', 'Zapisz przypadek jako JSON'),
+          variant: 'ghost', run: function () {
+            download(JSON.stringify({ schema: 'tools.petrov.re/mepmonitoring-case/v1', inputs: state,
+              result: last ? CM.toModuleResult(last.cmp, { fm_id: state.fm_id }) : null }, null, 2),
+              'mepmonitoring-' + (state.preset || 'case') + '.json', 'application/json'); } },
+        ui.importAction({
+          label: T('Open a saved case…', 'Відкрити збережений випадок…', 'Gespeicherten Fall öffnen…', 'Opgeslagen geval openen…', 'Ouvrir un cas enregistré…', 'Abrir un caso guardado…', 'Otwórz zapisany przypadek…'),
+          accept: '.json,application/json', as: 'json',
+          run: function (data) { applyCase((data && data.inputs) || data); ui.sync(); ui.run(); }
+        }),
+        ui.resetAction()
+      ]
+    });
+
+    ui.examples(CM.PRESETS.map(function (p) {
+      var tx = PRESET_TEXT[p.id] || {};
+      return { id: p.id, group: tx.group, label: tx.label || p.id, note: tx.note,
+               state: stateFromPreset(p) };
+    }));
+
+    /* --- stage 1: P–F curve ---------------------------------------------------------------- */
+    ui.stage({
+      caption: T('P–F curve: when the defect is visible, the inspections, and the window that counts',
+                 'Крива P–F: коли дефект видно, огляди та вікно, яке має значення',
+                 'P–F-Kurve: wann der Schaden sichtbar ist, die Prüfungen und das Fenster, das zählt',
+                 'P–F-curve: wanneer het defect zichtbaar is, de inspecties en het venster dat telt',
+                 'Courbe P–F : quand le défaut devient visible, les inspections et la fenêtre utile',
+                 'Curva P–F: cuándo se ve el defecto, las inspecciones y la ventana que cuenta',
+                 'Krzywa P–F: kiedy defekt jest widoczny, inspekcje i okno, które się liczy'),
+      minHeight: 260,
+      a11y: function () { return last ? L(a11yPF()) : ''; },
+      render: renderPF
+    });
+    /* --- stage 2: economics (range bars + tornado) ------------------------------------------ */
+    ui.stage({
+      caption: T('Net benefit per option (low–mid–high) and what drives it',
+                 'Чиста вигода за варіантами (низька–середня–висока) і що на неї впливає',
+                 'Nettonutzen je Option (niedrig–mittel–hoch) und was ihn treibt',
+                 'Nettovoordeel per optie (laag–midden–hoog) en wat het bepaalt',
+                 'Bénéfice net par option (bas–médian–haut) et ce qui le détermine',
+                 'Beneficio neto por opción (bajo–medio–alto) y lo que lo determina',
+                 'Korzyść netto wariantów (niska–średnia–wysoka) i co ją kształtuje'),
+      minHeight: 300,
+      a11y: function () { return last ? L(a11yEco()) : ''; },
+      render: renderEco
+    });
+    /* --- stage 3: net vs downtime cost ----------------------------------------------------- */
+    ui.stage({
+      caption: T('Net benefit against the downtime cost — where it starts to pay',
+                 'Чиста вигода залежно від вартості простою — де починає окупатися',
+                 'Nettonutzen über den Stillstandskosten — ab wann es sich lohnt',
+                 'Nettovoordeel tegen de stilstandskosten — waar het begint te lonen',
+                 'Bénéfice net en fonction du coût d’arrêt — à partir d’où c’est rentable',
+                 'Beneficio neto frente al coste de parada — dónde empieza a compensar',
+                 'Korzyść netto w funkcji kosztu przestoju — od kiedy się opłaca'),
+      minHeight: 220,
+      a11y: function () { return last ? L(a11yBE()) : ''; },
+      render: renderBE
+    });
+    adoptStages(ui);
+    ui.ready();
+    window.__mepmonitoring = { ui: ui, state: function () { return state; }, solve: solve, last: function () { return last; }, csv: csvText,
+                              loadFromLibrary: loadFromLibrary, writeToRegister: writeToRegister };
+  }
+
+  function applyCase(src) {
+    if (!src || typeof src !== 'object') return;
+    Object.keys(DEFAULTS).forEach(function (k) {
+      if (k === 'options') {
+        if (Array.isArray(src.options) && src.options.length) {
+          state.options = src.options.slice(0, 12).map(function (o) {
+            return { id: String(o.id || ''), technique: CM.TECH_FALLBACK[o.technique] ? o.technique : 'visual_inspection',
+                     mode: CM.MODES[o.mode] ? o.mode : 'route', interval: +o.interval || 0,
+                     pod: isFinite(+o.pod) ? +o.pod : 0.8, pf_fraction: isFinite(+o.pf_fraction) ? +o.pf_fraction : 0.7,
+                     c_lo: +o.c_lo || 0, c_mid: +o.c_mid || 0, c_hi: +o.c_hi || 0 };
+          });
+        }
+      } else if (typeof DEFAULTS[k] === 'number' && typeof src[k] === 'number' && isFinite(src[k])) state[k] = src[k];
+      else if (typeof DEFAULTS[k] === 'boolean' && typeof src[k] === 'boolean') state[k] = src[k];
+      else if ((k === 'preset' || k === 'fm_id' || k === 'asset_id' || k === 'pick' || k === 'asset_class') && (typeof src[k] === 'string' || src[k] === null)) state[k] = src[k];
+    });
+  }
+
+  /* --- results payload ----------------------------------------------------------------------- */
+  function payload(s) {
+    var c = last.cmp, rec = c.recommendation, b = c.best, p = last.pick;
+    var verdict;
+    if (rec.code === 'monitor') {
+      var t = TF(VERDICTS.monitor, [optLabel(b, true), cadenceText(b), F(100 * b.mid.p_detect, 0), F(b.mid.net_eur_y, 0)]);
+      if (rec.fragile) Object.keys(t).forEach(function (l) { t[l] += VERDICTS.fragile[l]; });
+      verdict = { tone: rec.fragile ? 'warn' : 'ok', text: t };
+    } else if (rec.code === 'safety_no_cbm') verdict = { tone: 'bad', text: VERDICTS.safety };
+    else verdict = { tone: 'warn', text: VERDICTS.rtf };
+
+    var tiles = [
+      { label: T('Caught in time (mid)', 'Виявлено вчасно (сер.)', 'Rechtzeitig erkannt (Mitte)', 'Op tijd gezien (midden)', 'Détecté à temps (médian)', 'Detectado a tiempo (medio)', 'Wykryte na czas (śr.)'),
+        value: 100 * p.mid.p_detect, unit: '%', precision: 0, learn: 'pdetect',
+        hint: TF(T('low {0} % · high {1} %', 'низ. {0} % · вис. {1} %', 'niedrig {0} % · hoch {1} %', 'laag {0} % · hoog {1} %', 'bas {0} % · haut {1} %', 'bajo {0} % · alto {1} %', 'nisk. {0} % · wys. {1} %'), [F(100 * p.lo.p_detect), F(100 * p.hi.p_detect)]),
+        tone: p.mid.p_detect < 0.5 ? 'bad' : (p.mid.p_detect < 0.8 ? 'warn' : 'ok') },
+      { label: T('Net benefit (mid)', 'Чиста вигода (сер.)', 'Nettonutzen (Mitte)', 'Nettovoordeel (midden)', 'Bénéfice net (médian)', 'Beneficio neto (medio)', 'Korzyść netto (śr.)'),
+        value: p.mid.net_eur_y, unit: 'EUR/a', precision: 0, learn: 'economics',
+        hint: TF(T('{0} … {1} EUR/a', '{0} … {1} EUR/рік', '{0} … {1} EUR/a', '{0} … {1} EUR/j', '{0} … {1} EUR/an', '{0} … {1} EUR/año', '{0} … {1} EUR/rok'), [F(p.lo.net_eur_y), F(p.hi.net_eur_y)]),
+        tone: p.mid.net_eur_y < 0 ? 'bad' : (p.lo.net_eur_y < 0 ? 'warn' : 'ok') },
+      { label: T('Break-even downtime cost', 'Беззбиткова вартість простою', 'Break-even-Stillstandskosten', 'Break-even stilstandskosten', 'Coût d’arrêt d’équilibre', 'Coste de parada de equilibrio', 'Progowy koszt przestoju'),
+        value: p.mid.breakeven_kind === 'finite' ? p.mid.breakeven_downtime_eur_h : null, unit: 'EUR/h', precision: 0, learn: 'breakeven',
+        hint: p.mid.breakeven_kind === 'finite' ? TF(T('yours: {0} EUR/h', 'ваша: {0} EUR/год', 'Ihre: {0} EUR/h', 'de uwe: {0} EUR/h', 'la vôtre : {0} EUR/h', 'la suya: {0} EUR/h', 'Twój: {0} EUR/h'), [F(s.downtime)]) : beText(p.mid),
+        tone: p.mid.breakeven_kind === 'always' ? 'ok' : (p.mid.breakeven_kind === 'never' || p.mid.breakeven_downtime_eur_h > s.downtime ? 'bad' : 'ok') },
+      { label: T('Inspection interval', 'Інтервал оглядів', 'Prüfintervall', 'Inspectie-interval', 'Périodicité', 'Intervalo de inspección', 'Interwał inspekcji'),
+        value: p.option.mode === 'route' ? p.interval_days : null, unit: 'd', precision: 0, headline: false, learn: 'interval',
+        hint: p.option.mode === 'route'
+          ? TF(T('half-window rule: {0} d', 'правило половини вікна: {0} діб', 'Halbfenster-Regel: {0} d', 'halve-vensterregel: {0} d', 'règle de la demi-fenêtre : {0} j', 'regla de media ventana: {0} d', 'reguła połowy okna: {0} d'), [F(p.recommended_interval_days, 1)])
+          : S.continuous },
+      { label: T('Readings per year', 'Вимірювань на рік', 'Messungen pro Jahr', 'Metingen per jaar', 'Mesures par an', 'Lecturas al año', 'Odczytów na rok'),
+        value: p.option.mode === 'route' ? p.readings_per_year : null, precision: 1, headline: false,
+        hint: p.option.mode === 'route' ? T('', '', '', '', '', '', '') : S.continuous },
+      { label: T('Usable detection window (mid)', 'Корисне вікно виявлення (сер.)', 'Nutzbares Erkennungsfenster (Mitte)', 'Bruikbaar detectievenster (midden)', 'Fenêtre de détection utile (médiane)', 'Ventana de detección útil (media)', 'Użyteczne okno wykrycia (śr.)'),
+        value: Math.max(0, p.mid.window_days), unit: 'd', precision: 1, headline: false, learn: 'usable' },
+      { label: T('Failure cost without monitoring', 'Витрати на відмови без моніторингу', 'Ausfallkosten ohne Überwachung', 'Storingskosten zonder bewaking', 'Coût des pannes sans surveillance', 'Coste de fallos sin monitorización', 'Koszt uszkodzeń bez monitorowania'),
+        value: p.rtf_expected_cost_eur_y, unit: 'EUR/a', precision: 0, headline: false }
+    ];
+
+    var head = [T('Option', 'Варіант', 'Option', 'Optie', 'Option', 'Opción', 'Wariant'),
+                { label: T('Interval', 'Інтервал', 'Intervall', 'Interval', 'Périodicité', 'Intervalo', 'Interwał'), num: true },
+                { label: T('Caught', 'Виявлено', 'Erkannt', 'Gezien', 'Détecté', 'Detectado', 'Wykryto'), num: true },
+                { label: T('Cost, EUR/a', 'Витрати, EUR/рік', 'Kosten, EUR/a', 'Kosten, EUR/j', 'Coût, EUR/an', 'Coste, EUR/año', 'Koszt, EUR/rok'), num: true },
+                { label: T('Net low', 'Чиста низ.', 'Netto niedrig', 'Netto laag', 'Net bas', 'Neto bajo', 'Netto nisk.'), num: true },
+                { label: T('Net mid', 'Чиста сер.', 'Netto Mitte', 'Netto midden', 'Net médian', 'Neto medio', 'Netto śr.'), num: true },
+                { label: T('Net high', 'Чиста вис.', 'Netto hoch', 'Netto hoog', 'Net haut', 'Neto alto', 'Netto wys.'), num: true },
+                { label: T('Break-even', 'Беззбитковість', 'Break-even', 'Break-even', 'Équilibre', 'Equilibrio', 'Próg'), num: true }];
+    var rows = c.ranked.map(function (id) {
+      var r = c.rows.filter(function (x) { return x.option.id === id; })[0];
+      var why = r.reasons.filter(function (k) { return REASONS[k]; }).map(function (k) { return REASONS[k]; });
+      var reason = why.length ? TF(T('{0}', '{0}', '{0}', '{0}', '{0}', '{0}', '{0}'), [why[0]]) : null;
+      if (why.length > 1) reason = (function () { var o = {}; Object.keys(why[0]).forEach(function (l) { o[l] = why.map(function (w) { return w[l]; }).join('; '); }); return o; })();
+      return {
+        cells: [{ text: optLabel(r) },
+                r.option.mode === 'route' ? { value: r.interval_days, precision: 0 } : { text: S.continuous },
+                { text: F(100 * r.mid.p_detect) + ' %' },
+                { value: r.mid.cost_eur_y, precision: 0 },
+                { value: r.lo.net_eur_y, precision: 0, tone: r.lo.net_eur_y < 0 ? 'bad' : 'ok' },
+                { value: r.mid.net_eur_y, precision: 0, tone: r.mid.net_eur_y < 0 ? 'bad' : 'ok' },
+                { value: r.hi.net_eur_y, precision: 0, tone: r.hi.net_eur_y < 0 ? 'bad' : 'ok' },
+                { text: beText(r.mid) }],
+        chosen: rec.option === r.option.id,
+        dim: !r.feasible,
+        reason: reason || T('', '', '', '', '', '', '')
+      };
+    });
+
+    var notes = [];
+    var tx = state.preset && PRESET_TEXT[state.preset];
+    if (tx && tx.note) notes.push(tx.note);
+    notes.push(T('Numbers in the presets are learning assumptions (orders of magnitude after the NASA RCM Guide 2008 and the DOE O&M Best Practices Guide R3), not manufacturer or statistical data. Replace them with your own failure history and quotes.',
+                 'Числа в прикладах — навчальні припущення (порядки величин за NASA RCM Guide 2008 і DOE O&M Best Practices Guide R3), а не дані виробника чи статистика. Замініть їх власною історією відмов і цінами.',
+                 'Die Beispielwerte sind Lernannahmen (Größenordnungen nach NASA RCM Guide 2008 und DOE O&M Best Practices Guide R3), keine Hersteller- oder Statistikdaten. Ersetzen Sie sie durch eigene Ausfallhistorie und Angebote.',
+                 'Voorbeeldwaarden zijn leeraannames (ordegroottes naar NASA RCM Guide 2008 en DOE O&M Best Practices Guide R3), geen fabrikant- of statistische gegevens. Vervang ze door uw eigen storingshistorie en offertes.',
+                 'Les valeurs des exemples sont des hypothèses pédagogiques (ordres de grandeur d’après le NASA RCM Guide 2008 et le DOE O&M Best Practices Guide R3), pas des données de constructeur ni des statistiques. Remplacez-les par votre historique de pannes et vos devis.',
+                 'Los valores de los ejemplos son supuestos didácticos (órdenes de magnitud según la NASA RCM Guide 2008 y la DOE O&M Best Practices Guide R3), no datos de fabricante ni estadísticas. Sustitúyalos por su historial de fallos y presupuestos.',
+                 'Liczby w przykładach to założenia dydaktyczne (rzędy wielkości wg NASA RCM Guide 2008 i DOE O&M Best Practices Guide R3), nie dane producenta ani statystyka. Zastąp je własną historią uszkodzeń i ofertami.'));
+    notes.push(T('Statutory inspections (F-gas leak checks, sprinkler pump tests, emergency lighting, fire alarm) are retained regardless of this result; this tool only judges the condition monitoring on top of them.',
+                 'Обов’язкові огляди (перевірки витоків F-газів, випробування спринклерних насосів, аварійне освітлення, пожежна сигналізація) зберігаються незалежно від результату; інструмент оцінює лише моніторинг стану понад них.',
+                 'Gesetzliche Prüfungen (F-Gas-Dichtheitskontrollen, Sprinklerpumpentests, Sicherheitsbeleuchtung, Brandmeldeanlage) bleiben unabhängig vom Ergebnis; das Werkzeug bewertet nur die Zustandsüberwachung zusätzlich dazu.',
+                 'Wettelijke keuringen (F-gaslekcontroles, sprinklerpomptests, noodverlichting, brandmeldinstallatie) blijven staan, wat de uitkomst ook is; deze tool beoordeelt alleen de conditiebewaking daarbovenop.',
+                 'Les contrôles réglementaires (contrôles d’étanchéité gaz fluorés, essais de pompe sprinkler, éclairage de sécurité, détection incendie) sont maintenus quel que soit le résultat ; l’outil ne juge que la surveillance d’état en plus.',
+                 'Las inspecciones reglamentarias (control de fugas de gases fluorados, pruebas de bomba de rociadores, alumbrado de emergencia, detección de incendios) se mantienen sea cual sea el resultado; la herramienta solo valora la monitorización adicional.',
+                 'Przeglądy ustawowe (kontrole szczelności F-gazów, próby pomp tryskaczowych, oświetlenie awaryjne, sygnalizacja pożaru) pozostają niezależnie od wyniku; narzędzie ocenia tylko monitorowanie stanu ponad nie.'));
+    if (!(CORE() && CORE().register)) notes.push(T('The shared site register (mep-core.js) is not loaded: this page works on its own case; the register bar and the hand-over to the other MEP tools are off.',
+                 'Спільний реєстр об’єкта (mep-core.js) не завантажено: сторінка працює зі своїм випадком; панель реєстру й передача в інші інструменти MEP вимкнені.',
+                 'Das gemeinsame Anlagenregister (mep-core.js) ist nicht geladen: die Seite arbeitet mit ihrem eigenen Fall; Registerleiste und Übergabe an die anderen TGA-Werkzeuge sind aus.',
+                 'Het gedeelde installatieregister (mep-core.js) is niet geladen: deze pagina werkt met haar eigen geval; registerbalk en overdracht naar de andere MEP-tools staan uit.',
+                 'Le registre partagé du site (mep-core.js) n’est pas chargé : la page travaille sur son propre cas ; la barre de registre et le passage aux autres outils MEP sont désactivés.',
+                 'El registro compartido del edificio (mep-core.js) no está cargado: la página trabaja con su propio caso; la barra de registro y el traspaso a las demás herramientas MEP están desactivados.',
+                 'Wspólny rejestr obiektu (mep-core.js) nie jest wczytany: strona pracuje na własnym przypadku; pasek rejestru i przekazanie do innych narzędzi MEP są wyłączone.'));
+    return {
+      verdict: verdict, tiles: tiles,
+      tables: [{ title: T('Options compared, best first', 'Порівняння варіантів, найкращий першим', 'Optionen im Vergleich, beste zuerst', 'Opties vergeleken, beste eerst', 'Options comparées, la meilleure d’abord', 'Opciones comparadas, la mejor primero', 'Porównanie wariantów, najlepszy pierwszy'),
+                 head: head, rows: rows }],
+      notes: notes
+    };
+  }
+
+  /* text alternatives of the three stages, in the domain language */
+  function a11yPF() {
+    var t = last.pick.timeline, r = last.pick;
+    var how = t.mode === 'route'
+      ? TF(T('inspection every {0} days', 'огляд кожні {0} діб', 'Prüfung alle {0} Tage', 'inspectie elke {0} dagen', 'inspection tous les {0} jours', 'inspección cada {0} días', 'inspekcja co {0} dni'), [F(t.interval_days)])
+      : T('continuous monitoring', 'безперервний моніторинг', 'kontinuierliche Überwachung', 'continue bewaking', 'surveillance continue', 'monitorización continua', 'monitorowanie ciągłe');
+    return TF(T('P–F curve of {0}. Functional failure at day {1}; the technique sees the defect from day {2}; the detection window ends at day {3}; {4}; probability of detection {5} %.',
+                'Крива P–F для: {0}. Функціональна відмова на {1}-й добі; метод бачить дефект з {2}-ї доби; вікно виявлення закінчується на {3}-й добі; {4}; імовірність виявлення {5} %.',
+                'P–F-Kurve für {0}. Funktionsausfall am Tag {1}; das Verfahren sieht den Schaden ab Tag {2}; das Erkennungsfenster endet am Tag {3}; {4}; Erkennungswahrscheinlichkeit {5} %.',
+                'P–F-curve van {0}. Functieverlies op dag {1}; de techniek ziet het defect vanaf dag {2}; het detectievenster eindigt op dag {3}; {4}; detectiekans {5} %.',
+                'Courbe P–F de {0}. Défaillance fonctionnelle au jour {1} ; la technique voit le défaut à partir du jour {2} ; la fenêtre de détection se ferme au jour {3} ; {4} ; probabilité de détection {5} %.',
+                'Curva P–F de {0}. Fallo funcional el día {1}; la técnica ve el defecto desde el día {2}; la ventana de detección termina el día {3}; {4}; probabilidad de detección {5} %.',
+                'Krzywa P–F dla: {0}. Utrata funkcji w dniu {1}; technika widzi defekt od dnia {2}; okno wykrycia kończy się w dniu {3}; {4}; prawdopodobieństwo wykrycia {5} %.'),
+              [optLabel(r), F(t.failure_day), F(t.detect_day, 1), F(t.window_end, 1), how, F(100 * r.mid.p_detect)]);
+  }
+  function a11yEco() {
+    var parts = last.cmp.rows.map(function (r) {
+      return TF(T('{0}: {1} to {2} EUR/a', '{0}: від {1} до {2} EUR/рік', '{0}: {1} bis {2} EUR/a', '{0}: {1} tot {2} EUR/j', '{0} : de {1} à {2} EUR/an', '{0}: de {1} a {2} EUR/año', '{0}: od {1} do {2} EUR/rok'), [optLabel(r), F(r.lo.net_eur_y), F(r.hi.net_eur_y)]);
+    });
+    var o = {};
+    Object.keys(parts[0] || T('', '', '', '', '', '', '')).forEach(function (l) { o[l] = parts.map(function (x) { return x[l]; }).join('; '); });
+    return TF(T('Net benefit ranges. {0}.', 'Діапазони чистої вигоди. {0}.', 'Bandbreiten des Nettonutzens. {0}.', 'Bandbreedtes van het nettovoordeel. {0}.', 'Fourchettes du bénéfice net. {0}.', 'Rangos del beneficio neto. {0}.', 'Przedziały korzyści netto. {0}.'), [o]);
+  }
+  function a11yBE() {
+    return TF(T('Break-even downtime cost: {0}; your value {1} EUR/h.', 'Беззбиткова вартість простою: {0}; ваше значення {1} EUR/год.', 'Break-even-Stillstandskosten: {0}; Ihr Wert {1} EUR/h.', 'Break-even stilstandskosten: {0}; uw waarde {1} EUR/h.', 'Coût d’arrêt d’équilibre : {0} ; votre valeur {1} EUR/h.', 'Coste de parada de equilibrio: {0}; su valor {1} EUR/h.', 'Progowy koszt przestoju: {0}; Twoja wartość {1} EUR/h.'), [beText(last.pick.mid), F(state.downtime)]);
+  }
+
+  /* --- drawing ------------------------------------------------------------------------------- */
+  function tokens() {
+    var cs = getComputedStyle(document.documentElement);
+    return { muted: cs.getPropertyValue('--muted').trim() || '#777', line: cs.getPropertyValue('--line').trim() || '#ddd',
+             ink: cs.getPropertyValue('--ink').trim() || '#222', font: cs.getPropertyValue('--font').trim() || 'sans-serif' };
+  }
+  function txt(ctx, s, x, y, align, color) { ctx.textAlign = align || 'left'; if (color) ctx.fillStyle = color; ctx.fillText(s, x, y); }
+
+  /* canvas a11y (QA-16): focusable image with the data summary; arrow keys pick the option on the economics chart */
+  var CANVAS_NAMES = [
+    T('P–F curve', 'Крива P–F', 'P–F-Kurve', 'P–F-curve', 'Courbe P–F', 'Curva P–F', 'Krzywa P–F'),
+    T('Net benefit per option; arrow keys pick the option', 'Чиста вигода за варіантами; стрілки вибирають варіант', 'Nettonutzen je Option; Pfeiltasten wählen die Option', 'Nettovoordeel per optie; pijltjestoetsen kiezen de optie', 'Bénéfice net par option ; les flèches choisissent l’option', 'Beneficio neto por opción; las flechas eligen la opción', 'Korzyść netto wariantów; strzałki wybierają wariant'),
+    T('Net benefit against the downtime cost', 'Чиста вигода залежно від вартості простою', 'Nettonutzen über den Stillstandskosten', 'Nettovoordeel tegen de stilstandskosten', 'Bénéfice net selon le coût d’arrêt', 'Beneficio neto frente al coste de parada', 'Korzyść netto a koszt przestoju')
+  ];
+  function wireA11y(st, idx, textFn) {
+    var cv = st && st.cv; if (!cv) return;
+    if (!cv.__cmWired) {
+      cv.__cmWired = true; cv.tabIndex = 0; cv.setAttribute('role', 'img');
+      if (idx === 1) cv.addEventListener('keydown', function (ev) {
+        if (!last || !state.options.length) return;
+        var n = state.options.length, cur = last.cmp.rows.indexOf(last.pick), step = 0;
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') step = 1; else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') step = -1; else return;
+        ev.preventDefault();
+        var nx = ((cur < 0 ? 0 : cur) + step + n) % n;
+        var po = state.options[nx]; state.pick = nx + ':' + po.technique + ':' + po.mode + ':' + (po.interval || 0); if (ui) { ui.sync(); ui.run(); } cv.focus();
+      });
+    }
+    cv.setAttribute('aria-label', L(CANVAS_NAMES[idx]) + (last ? '. ' + L(textFn()) : ''));
+  }
+
+  function renderPF(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, k = tokens();
+    wireA11y(st, 0, a11yPF);
+    var coarse = size.density === 'coarse';
+    ctx.clearRect(0, 0, w, h);
+    if (!last) return;
+    var r = last.pick, t = r.timeline;
+    var padL = coarse ? 30 : 44, padR = 14, padT = 34, padB = coarse ? 44 : 50;
+    var x0 = t.span[0], x1 = Math.max(t.span[1], t.pf_days * 1.05);
+    var X = function (d) { return padL + (w - padL - padR) * (d - x0) / (x1 - x0); };
+    var yTop = padT, yBot = h - padB;
+    var Yc = function (c) { return yBot - (yBot - yTop) * c; };          /* condition 0..1 */
+    var yF = 0.15;                                                       /* functional-failure level */
+    var cond = function (d) { if (d <= 0) return 1; var u = Math.min(1, d / t.pf_days); return 1 - (1 - yF) * u * u; };
+    ctx.font = '400 12px ' + k.font; ctx.lineWidth = 1;
+
+    /* detection window band */
+    var ws = Math.max(t.window_start, x0), we = Math.min(t.window_end, x1);
+    if (we > ws) {
+      ctx.globalAlpha = 0.16; ctx.fillStyle = DiagramUI.series(2);
+      ctx.fillRect(X(ws), yTop, X(we) - X(ws), yBot - yTop);
+      ctx.globalAlpha = 1;
+    }
+    /* response band (too late) */
+    var rs = Math.max(t.window_end, 0);
+    ctx.globalAlpha = 0.10; ctx.fillStyle = DiagramUI.series(3);
+    ctx.fillRect(X(rs), yTop, X(t.failure_day) - X(rs), yBot - yTop);
+    ctx.globalAlpha = 1;
+
+    /* axes */
+    ctx.strokeStyle = k.line;
+    ctx.beginPath(); ctx.moveTo(padL, yTop); ctx.lineTo(padL, yBot); ctx.lineTo(w - padR, yBot); ctx.stroke();
+    /* functional failure line */
+    ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(padL, Yc(yF)); ctx.lineTo(w - padR, Yc(yF)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = k.muted;
+    DiagramUI.ticks(x0, x1, w - padL - padR, size.density).forEach(function (d) {
+      var x = X(d); if (x < padL - 1 || x > w - padR + 1) return;
+      ctx.beginPath(); ctx.moveTo(x, yBot); ctx.lineTo(x, yBot + 4); ctx.stroke();
+      txt(ctx, F(d, 0), x, yBot + 16, 'center', k.muted);
+    });
+    txt(ctx, L(S.days), w - padR, yBot + 30, 'right', k.muted);
+    if (!coarse) {
+      ctx.save(); ctx.translate(12, (yTop + yBot) / 2); ctx.rotate(-Math.PI / 2);
+      txt(ctx, L(T('condition', 'стан', 'Zustand', 'conditie', 'état', 'estado', 'stan')), 0, 0, 'center', k.muted); ctx.restore();
+    }
+    /* F range (low..high P–F) */
+    ctx.strokeStyle = DiagramUI.series(3); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(X(Math.max(x0, t.pf_lo)), Yc(yF)); ctx.lineTo(X(Math.min(x1, t.pf_hi)), Yc(yF)); ctx.stroke();
+    ctx.lineWidth = 1;
+
+    /* condition curve */
+    ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (var i = 0; i <= 160; i++) { var d = x0 + (Math.min(t.failure_day, x1) - x0) * i / 160; var px = X(d), py = Yc(cond(d)); if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py); }
+    ctx.stroke(); ctx.lineWidth = 1;
+
+    /* P (technique), F markers */
+    ctx.fillStyle = DiagramUI.series(0);
+    [[0, 'P₀'], [t.detect_day, 'P'], [t.failure_day, 'F']].forEach(function (m) {
+      var x = X(m[0]), y = Yc(cond(m[0]));
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, 6.2832); ctx.fill();
+      txt(ctx, m[1], x + 6, y - 6, 'left', k.ink);
+    });
+
+    /* inspections */
+    var yTick = yBot - 2;
+    if (t.mode === 'route') {
+      t.ticks.forEach(function (tk) {
+        if (tk.t < x0 || tk.t > x1) return;
+        var x = X(tk.t);
+        ctx.strokeStyle = tk.inWindow ? DiagramUI.series(1) : k.muted; ctx.lineWidth = tk.inWindow ? 3 : 1.5;
+        ctx.beginPath(); ctx.moveTo(x, yTick); ctx.lineTo(x, yTick - (tk.inWindow ? 22 : 12)); ctx.stroke();
+      });
+      ctx.lineWidth = 1;
+    } else {
+      ctx.globalAlpha = 0.6; ctx.fillStyle = DiagramUI.series(1);
+      ctx.fillRect(padL, yTick - 6, w - padL - padR, 6); ctx.globalAlpha = 1;
+    }
+    /* caption line */
+    var cap = TF(T('{0}: caught in {1} % of cases (mid P–F {2} d, window {3} d)', '{0}: виявлено в {1} % випадків (P–F {2} діб, вікно {3} діб)', '{0}: erkannt in {1} % der Fälle (P–F {2} d, Fenster {3} d)', '{0}: gezien in {1} % van de gevallen (P–F {2} d, venster {3} d)', '{0} : détecté dans {1} % des cas (P–F {2} j, fenêtre {3} j)', '{0}: detectado en el {1} % de los casos (P–F {2} d, ventana {3} d)', '{0}: wykryto w {1} % przypadków (P–F {2} d, okno {3} d)'),
+      [optShort(r), F(100 * r.mid.p_detect), F(t.pf_days), F(Math.max(0, r.mid.window_days), 1)]);
+    ctx.font = (coarse ? '600 11px ' : '600 12px ') + k.font;
+    txt(ctx, L(cap).slice(0, coarse ? 60 : 140), w - padR, 16, 'right', k.ink);
+  }
+
+  function renderEco(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, k = tokens();
+    wireA11y(st, 1, a11yEco);
+    var coarse = size.density === 'coarse';
+    ctx.clearRect(0, 0, w, h);
+    if (!last) return;
+    ctx.font = '400 12px ' + k.font;
+    var rows = last.cmp.rows, bars = last.tornado.bars;
+    var labW = coarse ? Math.min(110, w * 0.34) : Math.min(230, w * 0.32);
+    var padR = 14, top = 8;
+    var nTop = rows.length, nBot = bars.length;
+    var rowH = Math.max(16, Math.min(26, (h - 60) / (nTop + nBot + 1)));
+    var splitY = top + nTop * rowH + 22;
+    var all = [0];
+    rows.forEach(function (r) { all.push(r.lo.net_eur_y, r.hi.net_eur_y); });
+    bars.forEach(function (b) { all.push(b.net_low, b.net_high); });
+    var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all);
+    if (mx - mn < 1) { mx += 1; mn -= 1; }
+    var span = mx - mn; mn -= span * 0.05; mx += span * 0.05;
+    var X = function (v) { return labW + (w - labW - padR) * (v - mn) / (mx - mn); };
+    var short = function (s, n) {           /* fit to n characters and to the label column width */
+      s = s.length > n ? s.slice(0, n - 1) + '…' : s;
+      while (s.length > 2 && ctx.measureText(s).width > labW - 10) s = s.slice(0, -2) + '…';
+      return s;
+    };
+    var maxC = coarse ? 16 : 34;
+    /* zero line */
+    ctx.strokeStyle = k.line; ctx.beginPath(); ctx.moveTo(X(0), top); ctx.lineTo(X(0), h - 22); ctx.stroke();
+    /* range bars */
+    rows.forEach(function (r, i) {
+      var y = top + i * rowH + rowH / 2;
+      var chosen = r === last.pick;
+      txt(ctx, short(L(optShort(r)), maxC), labW - 6, y + 4, 'right', chosen ? k.ink : k.muted);
+      ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = chosen ? 7 : 5; ctx.globalAlpha = r.feasible ? 0.85 : 0.35;
+      ctx.beginPath(); ctx.moveTo(X(r.lo.net_eur_y), y); ctx.lineTo(X(r.hi.net_eur_y), y); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.lineWidth = 1;
+      ctx.fillStyle = k.ink; ctx.beginPath(); ctx.arc(X(r.mid.net_eur_y), y, 3.5, 0, 6.2832); ctx.fill();
+    });
+    /* tornado */
+    ctx.font = '600 12px ' + k.font;
+    txt(ctx, L(TF(T('What moves the net of: {0}', 'Що змінює чисту вигоду: {0}', 'Was den Nettonutzen bewegt: {0}', 'Wat het netto beweegt: {0}', 'Ce qui fait bouger le net : {0}', 'Qué mueve el neto de: {0}', 'Co zmienia wynik netto: {0}'), [optShort(last.pick)])).slice(0, coarse ? 40 : 90), 4, splitY - 6, 'left', k.ink);
+    ctx.font = '400 12px ' + k.font;
+    var PN = {
+      pf_days: T('P–F interval', 'Інтервал P–F', 'P–F-Intervall', 'P–F-interval', 'Intervalle P–F', 'Intervalo P–F', 'Interwał P–F'),
+      mtbf_y: T('MTBF', 'Напрацювання', 'MTBF', 'MTBF', 'MTBF', 'MTBF', 'MTBF'),
+      cost: T('Monitoring cost', 'Ціна моніторингу', 'Überwachungskosten', 'Bewakingskosten', 'Coût de surveillance', 'Coste de monitorización', 'Koszt monitorowania'),
+      pod: T('Detection per look', 'Виявлення за огляд', 'Erkennung je Prüfung', 'Detectie per blik', 'Détection par contrôle', 'Detección por inspección', 'Wykrycie na pomiar'),
+      downtime_cost_eur_h: T('Downtime cost ×0.5…×2', 'Вартість простою ×0,5…×2', 'Stillstandskosten ×0,5…×2', 'Stilstandskosten ×0,5…×2', 'Coût d’arrêt ×0,5…×2', 'Coste de parada ×0,5…×2', 'Koszt przestoju ×0,5…×2'),
+      mttr_h: T('Outage after failure ×0.5…×2', 'Простій після відмови ×0,5…×2', 'Ausfalldauer ×0,5…×2', 'Uitval na storing ×0,5…×2', 'Arrêt après panne ×0,5…×2', 'Parada tras fallo ×0,5…×2', 'Przestój po uszkodzeniu ×0,5…×2'),
+      response_days: T('Response time ×2…×0.5', 'Час реагування ×2…×0,5', 'Reaktionszeit ×2…×0,5', 'Reactietijd ×2…×0,5', 'Délai d’intervention ×2…×0,5', 'Tiempo de respuesta ×2…×0,5', 'Czas reakcji ×2…×0,5')
+    };
+    var base = last.tornado.base;
+    bars.forEach(function (b, i) {
+      var y = splitY + i * rowH + rowH / 2;
+      txt(ctx, short(L(PN[b.param] || T(b.param, b.param, b.param, b.param, b.param, b.param, b.param)), maxC), labW - 6, y + 4, 'right', k.muted);
+      var bh = Math.max(6, rowH - 8);
+      ctx.fillStyle = DiagramUI.series(3); ctx.globalAlpha = 0.85;
+      ctx.fillRect(Math.min(X(base), X(b.net_low)), y - bh / 2, Math.abs(X(b.net_low) - X(base)), bh);
+      ctx.fillStyle = DiagramUI.series(2);
+      ctx.fillRect(Math.min(X(base), X(b.net_high)), y - bh / 2, Math.abs(X(b.net_high) - X(base)), bh);
+      ctx.globalAlpha = 1;
+    });
+    ctx.strokeStyle = k.ink; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(X(base), splitY); ctx.lineTo(X(base), splitY + nBot * rowH); ctx.stroke(); ctx.setLineDash([]);
+    /* axis */
+    ctx.fillStyle = k.muted;
+    DiagramUI.ticks(mn, mx, w - labW - padR, size.density).forEach(function (v) {
+      var x = X(v); if (x < labW + 24 || x > w - padR - 14) return;
+      txt(ctx, F(v, 0), x, h - 6, 'center', k.muted);
+    });
+    txt(ctx, 'EUR/a', labW - 6, h - 6, 'right', k.muted);
+  }
+
+  function renderBE(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, k = tokens();
+    wireA11y(st, 2, a11yBE);
+    var coarse = size.density === 'coarse';
+    ctx.clearRect(0, 0, w, h);
+    if (!last) return;
+    ctx.font = '400 12px ' + k.font;
+    var c = last.curve, padL = coarse ? 46 : 64, padR = 14, padT = 12, padB = 34;
+    var mn = 0, mx = 0;
+    c.forEach(function (p) { mn = Math.min(mn, p.lo, p.mid, p.hi); mx = Math.max(mx, p.lo, p.mid, p.hi); });
+    if (mx - mn < 1) { mx += 1; mn -= 1; }
+    var X = function (d) { return padL + (w - padL - padR) * d / last.dMax; };
+    var Y = function (v) { return h - padB - (h - padT - padB) * (v - mn) / (mx - mn); };
+    ctx.strokeStyle = k.line;
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(padL, Y(0)); ctx.lineTo(w - padR, Y(0)); ctx.stroke();
+    DiagramUI.ticks(mn, mx, h - padT - padB, size.density).forEach(function (v) {
+      var y = Y(v); if (y < padT - 1 || y > h - padB + 1) return;
+      txt(ctx, F(v, 0), padL - 6, y + 4, 'right', k.muted);
+    });
+    DiagramUI.ticks(0, last.dMax, w - padL - padR, size.density).forEach(function (d) {
+      var x = X(d); if (x > w - padR - 18) return;
+      txt(ctx, F(d, 0), x, h - padB + 16, 'center', k.muted);
+    });
+    txt(ctx, 'EUR/h', w - padR, h - 4, 'right', k.muted);
+    var line = function (key, dash, width) {
+      ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = width; ctx.setLineDash(dash);
+      ctx.beginPath(); c.forEach(function (p, i) { var x = X(p.d), y = Y(p[key]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth = 1;
+    };
+    line('lo', [5, 4], 1.5); line('hi', [5, 4], 1.5); line('mid', [], 2.5);
+    /* your downtime cost */
+    var xd = X(Math.min(state.downtime, last.dMax));
+    ctx.strokeStyle = DiagramUI.series(1); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(xd, padT); ctx.lineTo(xd, h - padB); ctx.stroke(); ctx.lineWidth = 1;
+    /* break-even marker */
+    var m = last.pick.mid;
+    if (m.breakeven_kind === 'finite' && m.breakeven_downtime_eur_h <= last.dMax) {
+      var xb = X(m.breakeven_downtime_eur_h);
+      ctx.fillStyle = k.ink; ctx.beginPath(); ctx.arc(xb, Y(0), 4.5, 0, 6.2832); ctx.fill();
+      txt(ctx, L(TF(T('break-even {0} EUR/h', 'беззбитковість {0} EUR/год', 'Break-even {0} EUR/h', 'break-even {0} EUR/h', 'équilibre {0} EUR/h', 'equilibrio {0} EUR/h', 'próg {0} EUR/h'), [F(m.breakeven_downtime_eur_h)])),
+          Math.min(xb + 6, w - padR - 120), Y(0) - 8, 'left', k.ink);
+    }
+  }
+
+  /* ======================================================= 3. the data layer */
+  function installData() {
+    if (!window.Diagram) return;
+    Diagram.init({
+      id: 'mepmonitoring',
+      file: 'mepmonitoring.html',
+      state: {
+        serialize: function () { return state; },
+        deserialize: function (o) { applyCase(o || {}); last = solve(state); if (ui) { ui.sync(); ui.run(); } }
+      },
+      record: function () {
+        if (!last) last = solve(state);
+        if (!last) return null;
+        var c = last.cmp;
+        return {
+          inputs: JSON.parse(JSON.stringify(state)),
+          outputs: {
+            recommendation: c.recommendation.code, recommended_option: c.recommendation.option, fragile: !!c.recommendation.fragile,
+            options: c.rows.map(function (r) {
+              return { id: r.option.id, technique: r.option.technique, mode: r.option.mode, interval_days: r.interval_days,
+                       recommended_interval_days: r.recommended_interval_days, readings_per_year: r.readings_per_year,
+                       feasible: r.feasible, reasons: r.reasons,
+                       p_detect: { lo: r.lo.p_detect, mid: r.mid.p_detect, hi: r.hi.p_detect },
+                       cost_eur_y: { lo: r.lo.cost_eur_y, mid: r.mid.cost_eur_y, hi: r.hi.cost_eur_y },
+                       net_eur_y: { lo: r.lo.net_eur_y, mid: r.mid.net_eur_y, hi: r.hi.net_eur_y },
+                       breakeven_downtime_eur_h: r.mid.breakeven_downtime_eur_h, breakeven_kind: r.mid.breakeven_kind };
+            }),
+            tornado: last.tornado
+          },
+          units: { pf: 'd', mtbf: 'a', response_days: 'd', corrective: 'EUR', planned: 'EUR', downtime: 'EUR/h', mttr: 'h',
+                   planned_dt: 'h', fa_cost: 'EUR', interval: 'd', net_eur_y: 'EUR/a', cost_eur_y: 'EUR/a', breakeven: 'EUR/h' },
+          model: {
+            equations: ['W = pf_fraction * PF - t_response', 'I_rec = W(PF_low) / 2',
+                        'P_det = 1 - [(1-f)(1-pod)^min(k,cap) + f(1-pod)^min(k+1,cap)], k+f = W/I',
+                        'net = n*lambda*P_det*c*[(C_corr - C_plan) + D*max(0, MTTR - t_plan)] - n*(N*C_read + C_fixed + FA*C_FA)',
+                        'D_breakeven = (cost/(n*lambda*P_det*c) - dC)/dh'],
+            ranges: ['lo = short P-F, long MTBF, high cost; hi = the opposite; one failure mode at a time; undiscounted annual values'],
+            notes: ['engine MEPCM ' + CM.VERSION + ' (mep-monitoring.js)', 'preset numbers are learning assumptions',
+                    'statutory inspections are retained regardless (D-MEP-5)']
+          },
+          warnings: c.rows.filter(function (r) { return !r.feasible; }).map(function (r) { return r.option.id + ': ' + r.reasons.join(', '); })
+        };
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

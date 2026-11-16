@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gaussian Beam &amp; Mode Matching</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-13.gaussbeam-1.2",
+  "id": "gaussbeam",
+  "file": "gaussbeam.html",
+  "listed": true,
+  "category": "optics",
+  "order": 20,
+  "title": {
+    "en": "Gaussian Beam & Mode Matching",
+    "uk": "Гаусів пучок і узгодження мод",
+    "de": "Gaußstrahl & Modenanpassung",
+    "nl": "Gaussische bundel & modematching",
+    "fr": "Faisceau gaussien & adaptation de mode",
+    "es": "Haz gaussiano y acoplamiento de modos",
+    "pl": "Wiązka gaussowska i dopasowanie modów"
+  },
+  "summary": {
+    "en": "Laser beam radius, waist, Rayleigh range, wavefront and Gouy phase through lenses, mirrors and plates (with M² and x/y astigmatism); two-lens mode matching, fibre coupling efficiency, ISO 11146 fit and two-mirror cavity stability.",
+    "uk": "Радіус лазерного пучка, перетяжка, довжина Релея, хвильовий фронт і фаза Гуї крізь лінзи, дзеркала й пластини (з M² та астигматизмом x/y); узгодження мод двома лінзами, ефективність введення у волокно, апроксимація за ISO 11146 і стійкість двозеркального резонатора.",
+    "de": "Strahlradius, Taille, Rayleigh-Länge, Wellenfront und Gouy-Phase durch Linsen, Spiegel und Platten (mit M² und x/y-Astigmatismus); Modenanpassung mit zwei Linsen, Faserkopplung, ISO-11146-Fit und Stabilität eines Zwei-Spiegel-Resonators.",
+    "nl": "Bundelstraal, taille, Rayleigh-lengte, golffront en Gouy-fase door lenzen, spiegels en platen (met M² en x/y-astigmatisme); modematching met twee lenzen, vezelkoppelrendement, ISO 11146-fit en stabiliteit van een resonator met twee spiegels.",
+    "fr": "Rayon du faisceau laser, col, longueur de Rayleigh, front d’onde et phase de Gouy à travers lentilles, miroirs et lames (avec M² et astigmatisme x/y) ; adaptation de mode à deux lentilles, couplage dans une fibre, ajustement ISO 11146 et stabilité d’une cavité à deux miroirs.",
+    "es": "Radio del haz láser, cintura, longitud de Rayleigh, frente de onda y fase de Gouy a través de lentes, espejos y láminas (con M² y astigmatismo x/y); acoplamiento de modos con dos lentes, eficiencia de acoplo a fibra, ajuste ISO 11146 y estabilidad de una cavidad de dos espejos.",
+    "pl": "Promień wiązki laserowej, przewężenie, długość Rayleigha, czoło fali i faza Gouy’a przez soczewki, zwierciadła i płytki (z M² i astygmatyzmem x/y); dopasowanie modów dwiema soczewkami, sprawność sprzęgania do światłowodu, dopasowanie ISO 11146 i stabilność rezonatora dwuzwierciadlanego."
+  },
+  "description": {
+    "en": "Define a laser beam by its waist, its divergence or measured diameters (ISO 11146 hyperbola fit gives w0, z0 and M²), place thin lenses, cylindrical lenses, curved mirrors at an angle, plates and apertures along the axis, and see w(z), R(z) and the Gouy phase for x and y, the waist after every element, the Rayleigh ranges and clipping at each aperture. The mode-matching solver finds two-lens telescopes from a list of focal lengths that turn your beam into a target waist and ranks them by alignment tolerance; the expander list compares Keplerian and Galilean telescopes. Fibre coupling gives the overlap efficiency with a fibre mode including lateral, angular and axial misalignment; the cavity mode gives g1·g2 stability, the eigenmode, free spectral range and transverse mode spacing.",
+    "uk": "Задайте пучок перетяжкою, розбіжністю або виміряними діаметрами (апроксимація гіперболою за ISO 11146 дає w0, z0 і M²), розставте вздовж осі тонкі та циліндричні лінзи, похилі сферичні дзеркала, пластини й діафрагми — і побачите w(z), R(z) та фазу Гуї для x і y, перетяжку після кожного елемента, довжини Релея й обрізання на кожній апертурі. Розв’язувач узгодження мод підбирає з переліку фокусних відстаней двохлінзові телескопи, що перетворюють ваш пучок на цільову перетяжку, і впорядковує їх за допуском юстування; перелік розширювачів порівнює телескопи Кеплера й Галілея. Введення у волокно дає ефективність перекриття з модою волокна з урахуванням поперечного, кутового й осьового зміщення; резонатор — стійкість g1·g2, власну моду, вільний спектральний інтервал і відстань між поперечними модами.",
+    "de": "Definieren Sie den Strahl über Taille, Divergenz oder gemessene Durchmesser (der Hyperbel-Fit nach ISO 11146 liefert w0, z0 und M²), setzen Sie dünne Linsen, Zylinderlinsen, schräg gestellte Hohlspiegel, Platten und Blenden entlang der Achse und sehen Sie w(z), R(z) und die Gouy-Phase für x und y, die Taille nach jedem Element, die Rayleigh-Längen und die Abschattung an jeder Apertur. Der Modenanpassungs-Löser findet aus einer Brennweitenliste Zwei-Linsen-Teleskope, die Ihren Strahl in eine Zieltaille überführen, und ordnet sie nach Justagetoleranz; die Aufweiter-Liste vergleicht Kepler- und Galilei-Teleskope. Die Faserkopplung liefert den Überlappwirkungsgrad mit der Fasermode einschließlich lateralem, Winkel- und axialem Versatz; der Resonator die g1·g2-Stabilität, die Eigenmode, den freien Spektralbereich und den Transversalmodenabstand.",
+    "nl": "Definieer de bundel via taille, divergentie of gemeten diameters (de hyperboolfit volgens ISO 11146 geeft w0, z0 en M²), plaats dunne lenzen, cilinderlenzen, schuin geplaatste holle spiegels, platen en diafragma’s langs de as en zie w(z), R(z) en de Gouy-fase voor x en y, de taille na elk element, de Rayleigh-lengtes en het afsnijden bij elke apertuur. De modematching-oplosser zoekt uit een lijst brandpuntsafstanden telescopen met twee lenzen die uw bundel omzetten in een doeltaille en rangschikt ze naar uitlijntolerantie; de expanderlijst vergelijkt Kepler- en Galilei-telescopen. Vezelkoppeling geeft het overlaprendement met de vezelmode inclusief laterale, hoek- en axiale verschuiving; de resonator geeft g1·g2-stabiliteit, de eigenmode, het vrije spectrale bereik en de transversale modeafstand.",
+    "fr": "Définissez le faisceau par son col, sa divergence ou des diamètres mesurés (l’ajustement hyperbolique ISO 11146 donne w0, z0 et M²), placez lentilles minces, lentilles cylindriques, miroirs concaves inclinés, lames et diaphragmes le long de l’axe, et voyez w(z), R(z) et la phase de Gouy en x et y, le col après chaque élément, les longueurs de Rayleigh et la troncature à chaque ouverture. Le solveur d’adaptation de mode trouve, dans une liste de focales, les télescopes à deux lentilles qui transforment votre faisceau en un col cible et les classe selon la tolérance d’alignement ; la liste des élargisseurs compare télescopes de Kepler et de Galilée. Le couplage dans une fibre donne le rendement de recouvrement avec le mode de la fibre, désalignements latéral, angulaire et axial compris ; la cavité donne la stabilité g1·g2, le mode propre, l’intervalle spectral libre et l’écart des modes transverses.",
+    "es": "Defina el haz por su cintura, su divergencia o diámetros medidos (el ajuste hiperbólico ISO 11146 da w0, z0 y M²), coloque lentes delgadas, lentes cilíndricas, espejos cóncavos inclinados, láminas y diafragmas a lo largo del eje y vea w(z), R(z) y la fase de Gouy en x e y, la cintura tras cada elemento, las longitudes de Rayleigh y el recorte en cada apertura. El solucionador de acoplamiento de modos busca en una lista de focales telescopios de dos lentes que convierten su haz en una cintura objetivo y los ordena por tolerancia de alineación; la lista de expansores compara telescopios de Kepler y de Galileo. El acoplo a fibra da la eficiencia de solapamiento con el modo de la fibra, incluidos desalineamientos lateral, angular y axial; la cavidad da la estabilidad g1·g2, el modo propio, el rango espectral libre y la separación de modos transversales.",
+    "pl": "Zdefiniuj wiązkę przez przewężenie, rozbieżność lub zmierzone średnice (dopasowanie hiperboli wg ISO 11146 daje w0, z0 i M²), rozmieść wzdłuż osi cienkie soczewki, soczewki cylindryczne, nachylone zwierciadła wklęsłe, płytki i przesłony, a zobaczysz w(z), R(z) i fazę Gouy’a dla x i y, przewężenie za każdym elementem, długości Rayleigha i obcięcie na każdej aperturze. Solwer dopasowania modów wyszukuje z listy ogniskowych teleskopy dwusoczewkowe, które przekształcają wiązkę w przewężenie docelowe, i porządkuje je według tolerancji justowania; lista ekspanderów porównuje teleskopy Keplera i Galileusza. Sprzęganie do światłowodu daje sprawność nakładania z modem włókna z uwzględnieniem przesunięcia poprzecznego, kątowego i osiowego; rezonator — stabilność g1·g2, mod własny, przedział dyspersji swobodnej i odstęp modów poprzecznych."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Paraxial scalar Gaussian beam optics (ABCD law). Real beams are treated as embedded Gaussians of quality M² (Siegman); higher-order mode structure, partial coherence and twisted or general astigmatic beams are not modelled — x and y are independent (simple astigmatism). Lenses are thin and aberration-free, mirrors are unfolded into lenses (f = R/2) with the cosθ astigmatism of oblique incidence; apertures are checked for clipping but do not change the beam afterwards (no diffraction rings). Results lose accuracy for divergence half-angles above ≈ 0.25 rad (NA > 0.25). Fibre coupling is the overlap of fundamental Gaussian modes, without Fresnel loss; for M² > 1 it is an upper bound. The cavity is an empty two-mirror resonator. Stock focal lengths (Thorlabs Ø 25.4 mm N-BK7 singlets) are catalogue values at 587.6 nm used as thin lenses: thickness, principal planes and dispersion are ignored. Focal lengths are those in the medium where the element sits.",
+    "uk": "Параксіальна скалярна оптика гаусових пучків (закон ABCD). Реальні пучки розглядаються як вкладені гаусові пучки з якістю M² (Зігмен); структура вищих мод, часткова когерентність і закручені чи загальноастигматичні пучки не моделюються — x та y незалежні (простий астигматизм). Лінзи тонкі й без аберацій, дзеркала розгортаються в лінзи (f = R/2) з астигматизмом cosθ похилого падіння; апертури перевіряються на обрізання, але далі пучок не змінюють (без дифракційних кілець). Точність падає при півкуті розбіжності понад ≈ 0,25 рад (NA > 0,25). Введення у волокно — перекриття основних гаусових мод, без френелівських втрат; для M² > 1 це верхня межа. Резонатор — порожній двозеркальний. Складські фокусні відстані (сингліти Thorlabs Ø 25,4 мм з N-BK7) — каталожні значення на 587,6 нм, ужиті як тонкі лінзи: товщина, головні площини й дисперсія не враховуються. Фокусні відстані задаються для середовища, де стоїть елемент.",
+    "de": "Paraxiale skalare Gaußstrahloptik (ABCD-Gesetz). Reale Strahlen werden als eingebettete Gaußstrahlen der Qualität M² behandelt (Siegman); Struktur höherer Moden, partielle Kohärenz sowie verdrillte oder allgemein astigmatische Strahlen werden nicht modelliert — x und y sind unabhängig (einfacher Astigmatismus). Linsen sind dünn und aberrationsfrei, Spiegel werden zu Linsen entfaltet (f = R/2) mit dem cosθ-Astigmatismus schräger Inzidenz; Aperturen werden auf Abschattung geprüft, ändern den Strahl danach aber nicht (keine Beugungsringe). Ab Divergenz-Halbwinkeln über ≈ 0,25 rad (NA > 0,25) sinkt die Genauigkeit. Die Faserkopplung ist der Überlapp von Gaußschen Grundmoden ohne Fresnel-Verlust; für M² > 1 eine obere Schranke. Der Resonator ist ein leerer Zwei-Spiegel-Resonator. Lager-Brennweiten (Thorlabs-Einzellinsen Ø 25,4 mm aus N-BK7) sind Katalogwerte bei 587,6 nm, als dünne Linsen verwendet: Dicke, Hauptebenen und Dispersion bleiben unberücksichtigt. Brennweiten gelten im Medium, in dem das Element sitzt.",
+    "nl": "Paraxiale scalaire optica van Gaussische bundels (ABCD-wet). Echte bundels worden behandeld als ingebedde Gaussische bundels met kwaliteit M² (Siegman); structuur van hogere modes, partiële coherentie en getordeerde of algemeen astigmatische bundels worden niet gemodelleerd — x en y zijn onafhankelijk (eenvoudig astigmatisme). Lenzen zijn dun en aberratievrij, spiegels worden ontvouwen tot lenzen (f = R/2) met het cosθ-astigmatisme van schuine inval; apertures worden op afsnijden gecontroleerd maar veranderen de bundel daarna niet (geen buigingsringen). Bij halve divergentiehoeken boven ≈ 0,25 rad (NA > 0,25) neemt de nauwkeurigheid af. Vezelkoppeling is de overlap van Gaussische grondmodes zonder Fresnelverlies; voor M² > 1 een bovengrens. De resonator is een lege resonator met twee spiegels. Voorraadbrandpuntsafstanden (Thorlabs-singlets Ø 25,4 mm van N-BK7) zijn catalogus­waarden bij 587,6 nm, gebruikt als dunne lenzen: dikte, hoofdvlakken en dispersie worden genegeerd. Brandpuntsafstanden gelden in het medium waarin het element staat.",
+    "fr": "Optique paraxiale scalaire des faisceaux gaussiens (loi ABCD). Les faisceaux réels sont traités comme des gaussiens enchâssés de qualité M² (Siegman) ; la structure des modes d’ordre supérieur, la cohérence partielle et les faisceaux torsadés ou à astigmatisme général ne sont pas modélisés — x et y sont indépendants (astigmatisme simple). Les lentilles sont minces et sans aberration, les miroirs sont dépliés en lentilles (f = R/2) avec l’astigmatisme en cosθ de l’incidence oblique ; les ouvertures sont vérifiées pour la troncature mais ne modifient pas le faisceau ensuite (pas d’anneaux de diffraction). La précision baisse au-delà d’un demi-angle de divergence d’environ 0,25 rad (ON > 0,25). Le couplage dans une fibre est le recouvrement de modes gaussiens fondamentaux, sans pertes de Fresnel ; pour M² > 1 c’est une borne supérieure. La cavité est un résonateur vide à deux miroirs. Les focales du catalogue (singulets Thorlabs Ø 25,4 mm en N-BK7) sont des valeurs à 587,6 nm utilisées comme lentilles minces : épaisseur, plans principaux et dispersion sont ignorés. Les focales sont celles dans le milieu où se trouve l’élément.",
+    "es": "Óptica paraxial escalar de haces gaussianos (ley ABCD). Los haces reales se tratan como gaussianos embebidos de calidad M² (Siegman); no se modelan la estructura de modos de orden superior, la coherencia parcial ni los haces torcidos o con astigmatismo general — x e y son independientes (astigmatismo simple). Las lentes son delgadas y sin aberraciones, los espejos se despliegan en lentes (f = R/2) con el astigmatismo en cosθ de la incidencia oblicua; las aperturas se comprueban por recorte pero no modifican el haz después (sin anillos de difracción). La precisión baja con semiángulos de divergencia superiores a ≈ 0,25 rad (NA > 0,25). El acoplo a fibra es el solapamiento de modos gaussianos fundamentales, sin pérdidas de Fresnel; para M² > 1 es una cota superior. La cavidad es un resonador vacío de dos espejos. Las focales de catálogo (lentes simples Thorlabs Ø 25,4 mm de N-BK7) son valores a 587,6 nm usados como lentes delgadas: se ignoran el espesor, los planos principales y la dispersión. Las focales son las del medio donde está el elemento.",
+    "pl": "Przyosiowa skalarna optyka wiązek gaussowskich (prawo ABCD). Rzeczywiste wiązki traktowane są jako osadzone wiązki gaussowskie o jakości M² (Siegman); struktura modów wyższych rzędów, częściowa koherencja oraz wiązki skręcone lub o astygmatyzmie ogólnym nie są modelowane — x i y są niezależne (astygmatyzm prosty). Soczewki są cienkie i bez aberracji, zwierciadła są rozwijane w soczewki (f = R/2) z astygmatyzmem cosθ padania ukośnego; przesłony sprawdzane są pod kątem obcięcia, ale dalej nie zmieniają wiązki (bez pierścieni dyfrakcyjnych). Dokładność spada przy półkącie rozbieżności powyżej ≈ 0,25 rad (NA > 0,25). Sprzęganie do światłowodu to nakładanie podstawowych modów gaussowskich, bez strat Fresnela; dla M² > 1 to ograniczenie górne. Rezonator jest pustym rezonatorem dwuzwierciadlanym. Ogniskowe katalogowe (soczewki pojedyncze Thorlabs Ø 25,4 mm z N-BK7) to wartości dla 587,6 nm traktowane jak cienkie soczewki: grubość, płaszczyzny główne i dyspersja są pomijane. Ogniskowe dotyczą ośrodka, w którym stoi element."
+  },
+  "intended_use": "technical exploration",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "opt-core.js",
+    "opt-gauss.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Paraxial Gaussian beam optics: ABCD law of the complex beam parameter (Kogelnik & Li 1966; Siegman, Lasers, 1986, ch. 15–21), embedded Gaussian with M² (Siegman; ISO 11146-1), focusing by a thin lens (Self, Appl. Opt. 22, 1983), single-lens matching (Kogelnik & Li eq. 36), Gaussian mode overlap (Joyce & DeLoach 1984; Marcuse 1977), hyperbolic fit of ISO 11146-1, two-mirror resonator (Kogelnik & Li §3)."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "gaussbeam-method-2026-11-13",
+        "reference": {
+          "en": "55 cases against an independent Python reference: w(z) and wavefront radius at 21 planes per axis for 15 set-ups (free space, thin lenses at six object distances, a crystal plate, a tilted curved mirror, an astigmatic diode with a cylinder lens, Keplerian and Galilean telescopes, a medium with n = 1.333) with the physical q and interface matrices; Self (1983) focusing; fibre coupling against a numerical overlap integral (aligned, lateral, tilt, defocus, size mismatch); ISO 11146-1 fits; six resonators against the round-trip eigenmode; the complete mode-matching solution sets of two problems; and the claim of every preset.",
+          "uk": "55 випадки проти незалежної реалізації на Python: w(z) і радіус хвильового фронту в 21 площині на вісь для 15 схем (вільний простір, тонкі лінзи на шести відстанях, кристалічна пластина, похиле сферичне дзеркало, астигматичний діод із циліндричною лінзою, телескопи Кеплера й Галілея, середовище з n = 1,333) з фізичним q і матрицями меж; фокусування за Self (1983); введення у волокно проти чисельного інтеграла перекриття (без зсуву, поперечний зсув, нахил, розфокусування, невідповідність розміру); апроксимації ISO 11146-1; шість резонаторів проти власної моди матриці обходу; повні множини рішень узгодження мод для двох задач і твердження кожного прикладу.",
+          "de": "55 Fälle gegen eine unabhängige Python-Implementierung: w(z) und Wellenfrontradius in 21 Ebenen je Achse für 15 Aufbauten (Freiraum, dünne Linsen bei sechs Gegenstandsweiten, eine Kristallplatte, ein schräger Hohlspiegel, eine astigmatische Diode mit Zylinderlinse, Kepler- und Galilei-Teleskope, ein Medium mit n = 1,333) mit physikalischem q und Grenzflächenmatrizen; Fokussierung nach Self (1983); Faserkopplung gegen ein numerisches Überlappintegral (justiert, lateral, Verkippung, Defokus, Größenfehler); ISO-11146-1-Fits; sechs Resonatoren gegen die Eigenmode der Umlaufmatrix; die vollständigen Lösungsmengen zweier Modenanpassungen und die Aussage jedes Beispiels.",
+          "nl": "55 gevallen tegen een onafhankelijke Python-implementatie: w(z) en golffrontstraal in 21 vlakken per as voor 15 opstellingen (vrije ruimte, dunne lenzen bij zes voorwerpsafstanden, een kristalplaat, een schuine holle spiegel, een astigmatische diode met cilinderlens, Kepler- en Galilei-telescopen, een medium met n = 1,333) met de fysische q en grensvlakmatrices; focussering volgens Self (1983); vezelkoppeling tegen een numerieke overlapintegraal (uitgelijnd, lateraal, kanteling, defocus, grootteverschil); ISO 11146-1-fits; zes resonatoren tegen de eigenmode van de rondgangsmatrix; de volledige oplossingsverzamelingen van twee modematchingproblemen en de bewering van elk voorbeeld.",
+          "fr": "55 cas contre une implémentation Python indépendante : w(z) et rayon du front d’onde en 21 plans par axe pour 15 montages (espace libre, lentilles minces à six distances objet, une lame cristalline, un miroir concave incliné, une diode astigmate avec lentille cylindrique, télescopes de Kepler et de Galilée, un milieu d’indice 1,333) avec le q physique et les matrices d’interface ; focalisation selon Self (1983) ; couplage dans une fibre contre une intégrale de recouvrement numérique (aligné, latéral, inclinaison, défocalisation, écart de taille) ; ajustements ISO 11146-1 ; six résonateurs contre le mode propre de la matrice d’aller-retour ; les ensembles complets de solutions de deux adaptations de mode et l’affirmation de chaque exemple.",
+          "es": "55 casos frente a una implementación independiente en Python: w(z) y radio del frente de onda en 21 planos por eje para 15 montajes (espacio libre, lentes delgadas a seis distancias objeto, una lámina cristalina, un espejo cóncavo inclinado, un diodo astigmático con lente cilíndrica, telescopios de Kepler y Galileo, un medio con n = 1,333) con el q físico y matrices de interfaz; enfoque según Self (1983); acoplo a fibra frente a una integral de solapamiento numérica (alineado, lateral, inclinación, desenfoque, diferencia de tamaño); ajustes ISO 11146-1; seis resonadores frente al modo propio de la matriz de ida y vuelta; los conjuntos completos de soluciones de dos acoplamientos de modos y la afirmación de cada ejemplo.",
+          "pl": "55 przypadki względem niezależnej implementacji w Pythonie: w(z) i promień czoła fali w 21 płaszczyznach na oś dla 15 układów (wolna przestrzeń, cienkie soczewki przy sześciu odległościach przedmiotu, płytka krystaliczna, nachylone zwierciadło wklęsłe, astygmatyczna dioda z soczewką cylindryczną, teleskopy Keplera i Galileusza, ośrodek o n = 1,333) z fizycznym q i macierzami granic; ogniskowanie wg Self (1983); sprzęganie do światłowodu względem numerycznej całki nakładania (bez przesunięcia, poprzecznie, pochylenie, rozogniskowanie, niedopasowanie rozmiaru); dopasowania ISO 11146-1; sześć rezonatorów względem modu własnego macierzy obiegu; pełne zbiory rozwiązań dwóch zadań dopasowania modów i twierdzenie każdego przykładu."
+        },
+        "citations": [
+          "A. E. Siegman, Lasers, University Science Books 1986, ch. 15-21 (ABCD law, embedded Gaussian M², resonators, astigmatism).",
+          "H. Kogelnik, T. Li, Laser beams and resonators, Appl. Opt. 5 (1966) 1550-1567, eq. (36) and section 3.",
+          "S. A. Self, Focusing of spherical Gaussian beams, Appl. Opt. 22 (1983) 658-661.",
+          "W. B. Joyce, B. C. DeLoach, Alignment of Gaussian beams, Appl. Opt. 23 (1984) 4187-4196.",
+          "ISO 11146-1:2021, section 9 (hyperbolic fit of second-moment diameters).",
+          "Reference generator bench-src/ref/gen_gaussbeam.py; driver bench-src/run_gaussbeam.mjs."
+        ],
+        "cases": 55,
+        "passed": 55,
+        "tolerance": {
+          "en": "Relative 1e-9 on beam radii and 1e-8 on waists (same physics, different algebra); 1e-7 on wavefront radii; coupling within 2e-6 of the numerical integral; ISO fit 1e-6; mode-matching lens positions within 1 µm and the complete solution set equal; preset claims within the rounding of their text.",
+          "uk": "Відносно 1e-9 для радіусів пучка й 1e-8 для перетяжок (та сама фізика, інша алгебра); 1e-7 для радіусів хвильового фронту; введення у волокно в межах 2e-6 від чисельного інтеграла; апроксимація ISO 1e-6; положення лінз при узгодженні мод у межах 1 мкм, повна множина рішень збігається; твердження прикладів — у межах округлення їхнього тексту.",
+          "de": "Relativ 1e-9 auf Strahlradien und 1e-8 auf Taillen (gleiche Physik, andere Algebra); 1e-7 auf Wellenfrontradien; Kopplung innerhalb 2e-6 des numerischen Integrals; ISO-Fit 1e-6; Linsenpositionen der Modenanpassung innerhalb 1 µm, vollständige Lösungsmenge gleich; Beispielaussagen innerhalb der Rundung ihres Textes.",
+          "nl": "Relatief 1e-9 op bundelstralen en 1e-8 op tailles (zelfde fysica, andere algebra); 1e-7 op golffrontstralen; koppeling binnen 2e-6 van de numerieke integraal; ISO-fit 1e-6; lensposities bij modematching binnen 1 µm, volledige oplossingsverzameling gelijk; voorbeeldbeweringen binnen de afronding van hun tekst.",
+          "fr": "Relatif 1e-9 sur les rayons du faisceau et 1e-8 sur les cols (même physique, algèbre différente) ; 1e-7 sur les rayons de front d’onde ; couplage à 2e-6 près de l’intégrale numérique ; ajustement ISO 1e-6 ; positions des lentilles d’adaptation à 1 µm près, ensemble complet des solutions identique ; affirmations des exemples dans l’arrondi de leur texte.",
+          "es": "Relativa 1e-9 en radios del haz y 1e-8 en cinturas (misma física, distinta álgebra); 1e-7 en radios del frente de onda; acoplo dentro de 2e-6 de la integral numérica; ajuste ISO 1e-6; posiciones de las lentes de acoplamiento dentro de 1 µm, conjunto completo de soluciones igual; afirmaciones de los ejemplos dentro del redondeo de su texto.",
+          "pl": "Względnie 1e-9 dla promieni wiązki i 1e-8 dla przewężeń (ta sama fizyka, inna algebra); 1e-7 dla promieni czoła fali; sprzężenie w granicach 2e-6 od całki numerycznej; dopasowanie ISO 1e-6; położenia soczewek dopasowania w granicach 1 µm, pełny zbiór rozwiązań zgodny; twierdzenia przykładów w granicach zaokrąglenia ich tekstu."
+        },
+        "run_at": "2026-11-13T13:03:40Z",
+        "artifact": "benchmarks/gaussbeam.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "requires": [],
+    "reason": "The independent reference is bench-src/ref/gen_gaussbeam.py; the page exports w(z) as CSV and the case as JSON."
+  },
+  "handoff": {
+    "provides": [],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="opt-core.js" defer></script>
+<script src="opt-gauss.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script id="gaussbeam-page">
+(function () {
+  'use strict';
+  /* gaussbeam.html — page code (inlined by _opt/gauss/build.py). Model in opt-gauss.js (OptGauss).
+     State is held in optics-practical units (nm, µm, mm, mrad); the engine works in SI. */
+
+  var G = null;                                   /* window.OptGauss, bound in boot() (deferred script) */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var PI = Math.PI;
+
+  /* ============================================================ 1. state */
+  var DEFAULTS = {
+    mode: 'propagate', view: 'w',
+    lambda_nm: 632.8, n0: 1,
+    src: 'waist', w0_mm: 0.4, z0_mm: 0, M2: 1, div_mrad: 1.0,
+    astig: false, w0y_mm: 0.4, z0y_mm: 0, M2y: 1,
+    pts: [],
+    elements: [{ label: 'L1', kind: 'lens', z_mm: 200, f_mm: 100, t_mm: 0, n: 1.5, aoi: 0, D_mm: 25.4 }],
+    zStart_mm: 0, zEnd_mm: 400,
+    tW0_um: 100, tZ0_mm: 600, mzMin_mm: 50, mzMax_mm: 600, mGap_mm: 10, expM: 4,
+    focals: '-100 -50 -25 25 50 75 100 150 200 250 300', focSrc: 'typed', mAll: false,
+    fMFD_um: 10.4, fAuto: true, fz_mm: 300, fdx_um: 0, ftilt_mrad: 0,
+    R1_mm: 500, R1flat: false, R2_mm: 500, R2flat: false, L_mm: 300, cn: 1
+  };
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  var state = clone(DEFAULTS);
+  var last = null, ui = null, matchCache = null;
+
+  function num(v, d) { v = Number(v); return isFinite(v) ? v : d; }
+  var MAX_FOCALS = 32, MAX_ELEMENTS = 24, MAX_PTS = 60;          /* caps on every entry path (review R-7) */
+  function parseFocals(s) {
+    return String(s || '').slice(0, 600).replace(/[−–]/g, '-').split(/[\s,;]+/).map(function (t) { return Number(t.replace(',', '.')); })
+      .filter(function (v) { return isFinite(v) && v !== 0 && Math.abs(v) < 1e5; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; })
+      .map(function (v) { return { f: v / 1000, label: (v > 0 ? '+' : '−') + Math.abs(v) + ' mm' }; });
+  }
+  /* stock focal lengths: Thorlabs Ø 25.4 mm N-BK7 plano-convex / plano-concave singlets of OptCore.STOCK (f at 587.6 nm, review R-17) */
+  function stockFocals() {
+    var C = typeof window !== 'undefined' && window.OptCore;
+    if (!C || !C.stock || !C.stock.list) return [];
+    return C.stock.list({ type: ['plano-convex', 'plano-concave'], D: 25.4 }).filter(function (e) { return isFinite(e.f) && e.f !== 0 && Math.abs(e.f) <= 1000; })
+      .sort(function (a, b) { return a.f - b.f; })
+      .map(function (e) { return { f: e.f / 1000, label: e.id + ' ' + (e.f > 0 ? '+' : '−') + Math.abs(e.f) }; });
+  }
+  function focalList(s) { var all = s.focSrc === 'stock' ? stockFocals() : parseFocals(s.focals); return { list: all.slice(0, MAX_FOCALS), cut: all.length > MAX_FOCALS }; }
+
+  /* ---- validation of every value that enters from outside (file, link, project): the field limits (review R-2, R-9) */
+  var LIM = { lambda_nm: [150, 20000], n0: [1, 4], w0_mm: [1e-4, 100], z0_mm: [-1e5, 1e5], M2: [1, 100], div_mrad: [1e-3, 1000],
+              w0y_mm: [1e-4, 100], z0y_mm: [-1e5, 1e5], M2y: [1, 100], zStart_mm: [-1e5, 1e5], zEnd_mm: [-1e5, 1e5],
+              tW0_um: [0.5, 1e5], tZ0_mm: [-1e5, 1e5], mzMin_mm: [-1e5, 1e5], mzMax_mm: [-1e5, 1e5], mGap_mm: [0, 1e5], expM: [1, 100],
+              fMFD_um: [0.5, 1000], fz_mm: [-1e5, 1e5], fdx_um: [0, 1000], ftilt_mrad: [0, 500],
+              R1_mm: [-1e7, 1e7], R2_mm: [-1e7, 1e7], L_mm: [0.01, 1e5], cn: [1, 4] };
+  var ENUM = { mode: ['propagate', 'match', 'fibre', 'cavity'], view: ['w', 'R', 'gouy'], src: ['waist', 'div', 'fit'], focSrc: ['typed', 'stock'] };
+  var KINDS = ['lens', 'cylx', 'cyly', 'mirror', 'slab', 'aperture'];
+  function numIn(v, lo, hi) { if (typeof v === 'string' && v.trim() !== '') v = Number(v.replace(',', '.')); return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi ? v : null; }
+  function sanitizeElement(e, i, bad) {
+    if (!e || typeof e !== 'object' || KINDS.indexOf(e.kind) < 0) { bad.push('#' + (i + 1) + ' kind'); return null; }
+    var lensy = e.kind !== 'slab' && e.kind !== 'aperture', o = { label: String(e.label == null ? 'E' + (i + 1) : e.label).slice(0, 12), kind: e.kind };
+    var spec = { z_mm: [-1e5, 1e5, 0], f_mm: [-1e5, 1e5, 100], t_mm: [0, 1e4, 0], n: [1, 5, 1.5], aoi: [0, 80, 0], D_mm: [0, 1e4, 0] };
+    Object.keys(spec).forEach(function (k) {
+      var v = e[k] == null ? spec[k][2] : numIn(e[k], spec[k][0], spec[k][1]);
+      if (k === 'f_mm' && lensy && v !== null && Math.abs(v) < 1e-3) v = null;
+      if (v === null) { if (k === 'f_mm' && !lensy) v = spec[k][2]; else { bad.push(o.label + ' ' + k + ' = ' + String(e[k]).slice(0, 16)); v = spec[k][2]; } }
+      o[k] = v;
+    });
+    return o;
+  }
+  /* returns { st: validated partial state, bad: [problems] }; callers apply nothing when bad is not empty */
+  function sanitize(src) {
+    var st = {}, bad = [];
+    if (!src || typeof src !== 'object') return { st: st, bad: ['no state'] };
+    Object.keys(DEFAULTS).forEach(function (k) {
+      if (!(k in src) || src[k] == null) return;
+      var v = src[k];
+      if (LIM[k]) { var x = numIn(v, LIM[k][0], LIM[k][1]); if (x === null) bad.push(k + ' = ' + String(v).slice(0, 16)); else st[k] = x; }
+      else if (ENUM[k]) { if (ENUM[k].indexOf(v) < 0) bad.push(k + ' = ' + String(v).slice(0, 16)); else st[k] = v; }
+      else if (typeof DEFAULTS[k] === 'boolean') { if (typeof v !== 'boolean') bad.push(k); else st[k] = v; }
+      else if (k === 'focals') { if (typeof v !== 'string' || v.length > 600) bad.push('focals'); else st[k] = v; }
+      else if (k === 'elements') {
+        if (!Array.isArray(v) || v.length > MAX_ELEMENTS) bad.push('elements (' + (Array.isArray(v) ? v.length : typeof v) + ', max ' + MAX_ELEMENTS + ')');
+        else st[k] = v.map(function (e, i) { return sanitizeElement(e, i, bad); }).filter(Boolean);
+      } else if (k === 'pts') {
+        if (!Array.isArray(v) || v.length > MAX_PTS) bad.push('pts (max ' + MAX_PTS + ')');
+        else st[k] = v.map(function (q) { var z = numIn(q && q.z_mm, -1e5, 1e5), d = numIn(q && q.d_mm, 1e-6, 1e4); if (z === null || d === null) { bad.push('pts z/D4σ'); return null; } return { z_mm: z, d_mm: d }; }).filter(Boolean);
+      }
+    });
+    ['R1_mm', 'R2_mm'].forEach(function (k) { if (k in st && Math.abs(st[k]) < 1) bad.push(k + ' = ' + st[k] + ' (|R| ≥ 1 mm)'); });
+    return { st: st, bad: bad };
+  }
+  function applyState(st) { Object.keys(st).forEach(function (k) { state[k] = clone(st[k]); }); }
+
+  /* beam source in SI, x and y */
+  function sourceBeam(s) {
+    var lam = s.lambda_nm * 1e-9, M2 = Math.max(1, num(s.M2, 1)), w0 = s.w0_mm / 1000, z0 = s.z0_mm / 1000, fit = null;
+    if (s.src === 'div') {
+      var th = s.div_mrad / 2000;                         // full angle → half angle
+      w0 = th > 0 ? M2 * lam / (PI * s.n0 * th) : w0;
+    } else if (s.src === 'fit') {
+      fit = G.fitHyperbola((s.pts || []).map(function (p) { return { z: num(p.z_mm, NaN) / 1000, w: num(p.d_mm, NaN) / 2000 }; }), lam);
+      if (fit.ok) { w0 = fit.w0; z0 = fit.z0; M2 = Math.max(1, fit.M2); }
+    }
+    var bx = { w0: w0, z0: z0, M2: M2 };
+    var by = s.astig && s.src === 'waist' ? { w0: s.w0y_mm / 1000, z0: s.z0y_mm / 1000, M2: Math.max(1, num(s.M2y, 1)) } : clone(bx);
+    return { lambda: lam, x: bx, y: by, fit: fit };
+  }
+  function engineElements(s) {
+    return (s.elements || []).map(function (e, i) {
+      return { id: e.label || ('E' + (i + 1)), kind: e.kind, z: num(e.z_mm, 0) / 1000, f: num(e.f_mm, Infinity) / 1000,
+               t: num(e.t_mm, 0) / 1000, n: num(e.n, 1.5), aoi_deg: num(e.aoi, 0), D: num(e.D_mm, 0) / 1000 };
+    });
+  }
+  /* q̂ of the propagated beam at plane z (incoming side) */
+  function beamAt(prop, ax, z, lam) {
+    var segs = prop[ax].segs, j = 0;
+    while (j < segs.length - 1 && !(z >= segs[j].zA && z < segs[j].zB)) j++;
+    var q = G.abcd(G.Mspace(z - segs[j].zA, segs[j].n), segs[j].qA);
+    return { w: G.wOf(q, lam, prop[ax].M2), R: G.ROf(q, segs[j].n), n: segs[j].n };
+  }
+
+  function solve(s) {
+    var B = sourceBeam(s), lam = B.lambda;
+    if (!(B.x.w0 > 0) || !(lam > 0)) return { err: 'beam', fit: B.fit };
+    var r = { B: B, mode: s.mode, warn: [] };
+    if (s.mode === 'cavity') {
+      if ((!s.R1flat && !(Math.abs(s.R1_mm) >= 1)) || (!s.R2flat && !(Math.abs(s.R2_mm) >= 1))) return { err: 'R' };
+      r.cav = G.cavity({ lambda: lam, L: s.L_mm / 1000, n: s.cn, R1: s.R1flat ? Infinity : s.R1_mm / 1000, R2: s.R2flat ? Infinity : s.R2_mm / 1000 });
+      return r;
+    }
+    var els = engineElements(s);
+    var zA = Math.min(s.zStart_mm, s.zEnd_mm) / 1000, zB = Math.max(s.zStart_mm, s.zEnd_mm) / 1000;
+    if (s.mode === 'match') zB = Math.max(zB, s.tZ0_mm / 1000 + 0.05 * Math.abs(s.tZ0_mm / 1000 - zA));
+    if (zB - zA < 1e-6) zB = zA + 0.1;
+    r.zA = zA; r.zB = zB;
+    r.prop = G.propagate({ lambda: lam, n0: s.n0, beam: { x: B.x, y: B.y }, elements: els, zStart: zA, zEnd: zB, samples: 800 });
+    var segs = r.prop.segments, lastSeg = segs[segs.length - 1];
+    r.out = lastSeg;
+    /* first lens: Self focus vs far-field estimate */
+    var firstLens = r.prop.elements.filter(function (e) { return e.kind === 'lens'; })[0];
+    if (firstLens && segs.length > 1 && r.prop.elements[0] === firstLens) {
+      /* Self (1983) in the surrounding medium n0: wavelength λ/n0, f = physical focal length in that medium (review R-4) */
+      r.self = G.focus({ lambda: lam / s.n0, M2: B.x.M2, w0: B.x.w0, s: firstLens.z - B.x.z0, f: firstLens.f });
+    }
+    if (s.mode === 'match') {
+      var fl = focalList(s), foc = fl.list;
+      r.focCut = fl.cut;
+      /* how well the CURRENT element list matches the target */
+      r.etaNow = G.matchEfficiency(lam, B.x.M2, { w0: lastSeg.x.w0, z0: lastSeg.x.z0 }, { w0: s.tW0_um * 1e-6, z0: s.tZ0_mm / 1000 });
+      var mo = { lambda: lam, M2: B.x.M2, inW0: B.x.w0, inZ0: B.x.z0, tW0: s.tW0_um * 1e-6, tZ0: s.tZ0_mm / 1000,
+                 focals: foc, zMin: s.mzMin_mm / 1000, zMax: s.mzMax_mm / 1000, minGap: s.mGap_mm / 1000, all: true };
+      var mkey = JSON.stringify([mo, foc.map(function (f) { return f.label; })]);       /* the search is the slow part: cache it */
+      if (!matchCache || matchCache.key !== mkey) matchCache = { key: mkey, all: G.modeMatch(mo) };
+      r.matchAll = matchCache.all; r.matchTotal = r.matchAll.length;
+      r.match = s.mAll ? r.matchAll.slice() : r.matchAll.slice(0, 12);
+      r.exp = G.expanders({ M: Math.max(1.0001, num(s.expM, 2)), focals: foc, max: 8 });
+      r.nFocals = foc.length;
+      if (r.match.length) {                                  /* plot the best solution, not the bare input beam */
+        var b0 = r.match[0];
+        r.preview = [{ id: 'L1 ' + b0.l1, kind: 'lens', z: b0.x1, f: b0.f1, D: 0 }, { id: 'L2 ' + b0.l2, kind: 'lens', z: b0.x2, f: b0.f2, D: 0 }];
+        r.prop = G.propagate({ lambda: lam, n0: s.n0, beam: { x: B.x, y: B.y }, elements: r.preview, zStart: zA, zEnd: zB, samples: 800 });
+        r.out = r.prop.segments[r.prop.segments.length - 1];
+      }
+
+    }
+    if (s.mode === 'fibre') {
+      var wf = s.fMFD_um * 1e-6 / 2;
+      var zf = s.fAuto ? lastSeg.x.z0 : s.fz_mm / 1000;
+      var bx = beamAt(r.prop, 'x', zf, lam), by = beamAt(r.prop, 'y', zf, lam);
+      var lamE = lam * B.x.M2;                               // embedded Gaussian
+      function eta(dx, tx, z) {
+        var ax = z == null ? bx : beamAt(r.prop, 'x', z, lam), ay = z == null ? by : beamAt(r.prop, 'y', z, lam);
+        return G.fibreCoupling({ wx: ax.w, Rx: ax.R, wy: ay.w, Ry: ay.R, wf: wf, lambda: lamE, n: 1, dx: dx, tx: tx }).eta;
+      }
+      var e0 = eta(0, 0), e = eta(s.fdx_um * 1e-6, s.ftilt_mrad / 1000);
+      /* best axial position: golden search around the x waist */
+      var zc = lastSeg.x.z0, span = Math.max(lastSeg.x.zR, 1e-5) * 4, a = zc - span, b = zc + span, gr = (Math.sqrt(5) - 1) / 2;
+      for (var it = 0; it < 80; it++) {
+        var c1 = b - gr * (b - a), c2 = a + gr * (b - a);
+        if (eta(0, 0, c1) > eta(0, 0, c2)) b = c2; else a = c1;
+      }
+      var zBest = (a + b) / 2, eBest = eta(0, 0, zBest);
+      /* lateral offset for 1 dB extra loss */
+      var lo = 0, hi = 10 * wf;
+      for (var k = 0; k < 60; k++) { var m = (lo + hi) / 2; if (eta(m, 0) > e0 * Math.pow(10, -0.1)) lo = m; else hi = m; }
+      var tlo = 0, thi = 1;
+      for (var k2 = 0; k2 < 60; k2++) { var m2 = (tlo + thi) / 2; if (eta(0, m2) > e0 * Math.pow(10, -0.1)) tlo = m2; else thi = m2; }
+      var curve = [];
+      for (var i = 0; i <= 8; i++) { var d = i * wf / 4; curve.push({ d: d, eta: eta(d, 0) }); }
+      r.fib = { wf: wf, zf: zf, wx: bx.w, wy: by.w, Rx: bx.R, eta: e, eta0: e0, zBest: zBest, etaBest: eBest,
+                d1dB: lo, t1dB: tlo, curve: curve, fBest: PI * wf * (num(r.prop.at.length ? r.prop.at[r.prop.at.length - 1].wx : B.x.w0, B.x.w0)) / lamE,
+                naMode: lam / (PI * wf), thetaBeam: lastSeg.x.theta };
+      if (B.x.M2 > 1.05) r.warn.push('m2fibre');
+    }
+    return r;
+  }
+
+  /* ============================================================ 2. words */
+  var W = {
+    um: 'µm', mm: 'mm', mrad: 'mrad',
+    virtual: T('virtual', 'уявна', 'virtuell', 'virtueel', 'virtuel', 'virtual', 'pozorne'),
+    waist: T('Waist radius', 'Радіус перетяжки', 'Taillenradius', 'Tailleradius', 'Rayon du col', 'Radio de la cintura', 'Promień przewężenia'),
+    waistPos: T('Waist position', 'Положення перетяжки', 'Taillenlage', 'Taillepositie', 'Position du col', 'Posición de la cintura', 'Położenie przewężenia'),
+    zR: T('Rayleigh range', 'Довжина Релея', 'Rayleigh-Länge', 'Rayleigh-lengte', 'Longueur de Rayleigh', 'Longitud de Rayleigh', 'Długość Rayleigha'),
+    div: T('Divergence, full angle', 'Розбіжність, повний кут', 'Divergenz, voller Winkel', 'Divergentie, volle hoek', 'Divergence, angle total', 'Divergencia, ángulo total', 'Rozbieżność, kąt pełny'),
+    seg: T('After', 'Після', 'Nach', 'Na', 'Après', 'Tras', 'Za'),
+    source: T('source', 'джерела', 'Quelle', 'bron', 'source', 'fuente', 'źródłem'),
+    elem: T('Element', 'Елемент', 'Element', 'Element', 'Élément', 'Elemento', 'Element'),
+    beamAt: T('Beam radius', 'Радіус пучка', 'Strahlradius', 'Bundelstraal', 'Rayon du faisceau', 'Radio del haz', 'Promień wiązki'),
+    curv: T('Wavefront radius', 'Радіус хвильового фронту', 'Wellenfrontradius', 'Golffrontstraal', 'Rayon du front d’onde', 'Radio del frente de onda', 'Promień czoła fali'),
+    clip: T('Through aperture', 'Крізь апертуру', 'Durch die Apertur', 'Door de apertuur', 'À travers l’ouverture', 'A través de la apertura', 'Przez aperturę'),
+    use: T('Use', 'Застосувати', 'Übernehmen', 'Gebruiken', 'Utiliser', 'Usar', 'Użyj')
+  };
+
+  /* ============================================================ 3. formatting */
+  function F(v, p) { return (v == null || !isFinite(v)) ? '—' : DiagramUI.fmt(v, { precision: p == null ? 3 : p }); }
+  function sig(v, n) { if (!isFinite(v) || v === 0) return v; var d = Math.max(0, (n || 3) - 1 - Math.floor(Math.log10(Math.abs(v)))); return Number(v.toFixed(Math.min(d, 12))); }
+  function lenParts(m) {                                   // value + unit chosen for the size
+    var a = Math.abs(m);
+    if (!isFinite(m)) return { v: m, u: '' };
+    if (a < 1e-3) return { v: sig(m * 1e6, 4), u: 'µm' };
+    if (a < 1) return { v: sig(m * 1e3, 4), u: 'mm' };
+    return { v: sig(m, 4), u: 'm' };
+  }
+  function pr(v) { return (!isFinite(v) || v === 0) ? 0 : Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))); }
+  function LT(m, label, extra) { var q = lenParts(m); return Object.assign({ label: label, value: q.v, hint: q.u, precision: pr(q.v) }, extra || {}); }
+  function L(m) { var p = lenParts(m); return isFinite(p.v) ? DiagramUI.fmt(p.v, { precision: Math.max(0, 3 - Math.floor(Math.log10(Math.abs(p.v) || 1))) }) + ' ' + p.u : '∞'; }
+
+  /* ============================================================ 4. drawing (canvas or SVG shim) */
+  function tokens() {
+    var cs = getComputedStyle(document.documentElement);
+    return { muted: cs.getPropertyValue('--muted').trim() || '#777', line: cs.getPropertyValue('--line').trim() || '#ccc',
+             ink: cs.getPropertyValue('--ink').trim() || '#222', font: cs.getPropertyValue('--font').trim() || 'sans-serif',
+             bg: cs.getPropertyValue('--bg').trim() || '#fff' };
+  }
+  function axisLabelUnit(maxW) { return maxW < 1e-3 ? { f: 1e6, u: 'µm' } : { f: 1e3, u: 'mm' }; }
+
+  function draw(ctx, w, h, coarse, tk) {
+    ctx.clearRect(0, 0, w, h);
+    if (!last || last.err) return;
+    ctx.font = '400 12px ' + tk.font;
+    if (last.mode === 'cavity') return drawCavity(ctx, w, h, coarse, tk);
+    var P = last.prop, view = state.view;
+    var padL = coarse ? 44 : 58, padR = 12, padT = 22, padB = coarse ? 30 : 36;
+    var z0 = last.zA, z1 = last.zB;
+    var X = function (z) { return padL + (w - padL - padR) * (z - z0) / (z1 - z0); };
+    var ys = [], yUnit, ymin, ymax, ylab;
+    var axes = state.astig || last.B.x.w0 !== last.B.y.w0 || P.elements.some(function (e) { return e.kind === 'cylx' || e.kind === 'cyly' || (e.kind === 'mirror' && e.aoi_deg); }) ? ['x', 'y'] : ['x'];
+    if (view === 'R') {
+      yUnit = { f: 1, u: 'm' }; ylab = 'R';
+      var cap = Math.max(1e-3, (z1 - z0) * 2);
+      axes.forEach(function (ax) { ys.push(P[ax].R.map(function (r) { return Math.max(-cap, Math.min(cap, r)); })); });
+      ymin = -cap; ymax = cap;
+    } else if (view === 'gouy') {
+      yUnit = { f: 1 / PI, u: 'π rad' }; ylab = 'ψ';
+      axes.forEach(function (ax) { var g0 = P[ax].gouy[0]; ys.push(P[ax].gouy.map(function (g) { return g - g0; })); });
+      ymin = 0; ymax = 0;
+      ys.forEach(function (a) { a.forEach(function (v) { ymin = Math.min(ymin, v); ymax = Math.max(ymax, v); }); });
+      if (ymax - ymin < 0.1) ymax = ymin + 0.1;
+    } else {
+      var mw = 0;
+      axes.forEach(function (ax) { P[ax].w.forEach(function (v) { if (isFinite(v)) mw = Math.max(mw, v); }); ys.push(P[ax].w); });
+      if (last.mode === 'fibre') mw = Math.max(mw, last.fib.wf);
+      yUnit = axisLabelUnit(mw); ylab = 'w';
+      ymax = mw * 1.12; ymin = -ymax;
+    }
+    var Y = function (v) { return padT + (h - padT - padB) * (1 - (v - ymin) / (ymax - ymin)); };
+    /* axes and ticks */
+    ctx.strokeStyle = tk.line; ctx.lineWidth = 1; ctx.fillStyle = tk.muted;
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+    ctx.textAlign = 'right';
+    DiagramUI.ticks(ymin * yUnit.f, ymax * yUnit.f, h - padT - padB, coarse ? 'coarse' : 'fine').forEach(function (t) {
+      var y = Y(t / yUnit.f); if (y < padT - 1 || y > h - padB + 1) return;
+      ctx.strokeStyle = tk.line; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillText(DiagramUI.fmt(t, { precision: Math.abs(t) < 10 && t % 1 ? 2 : 0 }), padL - 5, y + 4);
+    });
+    ctx.textAlign = 'center';
+    DiagramUI.ticks(z0 * 1000, z1 * 1000, w - padL - padR, coarse ? 'coarse' : 'fine').forEach(function (t) {
+      var x = X(t / 1000); if (x < padL - 1 || x > w - padR + 1) return;
+      ctx.strokeStyle = tk.line; ctx.beginPath(); ctx.moveTo(x, h - padB); ctx.lineTo(x, h - padB + 4); ctx.stroke();
+      ctx.fillText(DiagramUI.fmt(t, { precision: 0 }), x, h - padB + 16);
+    });
+    ctx.textAlign = 'left';
+    ctx.fillText(ylab + ', ' + yUnit.u, 4, 14);
+    ctx.textAlign = 'right'; ctx.fillText('z, mm', w - padR, h - 4);
+    /* optical axis */
+    if (view === 'w') { ctx.strokeStyle = tk.line; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(padL, Y(0)); ctx.lineTo(w - padR, Y(0)); ctx.stroke(); ctx.setLineDash([]); }
+    /* elements */
+    P.elements.forEach(function (e) {
+      var x = X(e.z); if (x < padL - 2 || x > w - padR + 2) return;
+      ctx.strokeStyle = tk.ink; ctx.lineWidth = 1.5;
+      if (e.kind === 'slab') {
+        ctx.globalAlpha = 0.12; ctx.fillStyle = tk.ink; ctx.fillRect(x, padT, Math.max(2, X(e.z + e.t) - x), h - padT - padB); ctx.globalAlpha = 1;
+      } else if (e.kind === 'aperture') {
+        if (view === 'w' && e.D > 0) { var ya = Y(e.D / 2), yb = Y(-e.D / 2);
+          ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, Math.max(padT, ya)); ctx.moveTo(x, Math.min(h - padB, yb)); ctx.lineTo(x, h - padB); ctx.lineWidth = 3; ctx.stroke(); }
+      } else {
+        ctx.beginPath(); ctx.moveTo(x, padT + 4); ctx.lineTo(x, h - padB - 2); ctx.stroke();
+        var conv = e.f > 0, s = 5;
+        [padT + 4, h - padB - 2].forEach(function (yy, k) {
+          var dir = (k === 0 ? 1 : -1) * (conv ? 1 : -1);
+          ctx.beginPath(); ctx.moveTo(x - s, yy + dir * s); ctx.lineTo(x, yy); ctx.lineTo(x + s, yy + dir * s); ctx.stroke();
+        });
+        if (e.kind === 'mirror') { ctx.globalAlpha = 0.25; ctx.fillStyle = tk.ink; ctx.fillRect(x, padT + 4, 4, h - padT - padB - 6); ctx.globalAlpha = 1; }
+      }
+      ctx.fillStyle = tk.ink; ctx.textAlign = 'center'; ctx.fillText(String(e.id).slice(0, 8), x, padT - 6);
+    });
+    /* curves */
+    ys.forEach(function (arr, k) {
+      var col = DiagramUI.series(k);
+      var zs = P[axes[k]].z;
+      if (view === 'w') {
+        ctx.globalAlpha = 0.16; ctx.fillStyle = col; ctx.beginPath();
+        arr.forEach(function (v, i) { var xx = X(zs[i]), yy = Y(v); if (i) ctx.lineTo(xx, yy); else ctx.moveTo(xx, yy); });
+        for (var i = arr.length - 1; i >= 0; i--) ctx.lineTo(X(zs[i]), Y(-arr[i]));
+        ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      }
+      ctx.strokeStyle = col; ctx.lineWidth = 2; if (k) ctx.setLineDash([6, 4]);
+      [1, -1].forEach(function (sgn) {
+        if (sgn < 0 && view !== 'w') return;
+        ctx.beginPath(); var pen = false;
+        arr.forEach(function (v, i) { if (!isFinite(v)) { pen = false; return; } var xx = X(zs[i]), yy = Y(sgn * v); if (pen) ctx.lineTo(xx, yy); else { ctx.moveTo(xx, yy); pen = true; } });
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    });
+    /* waist markers */
+    if (view === 'w') {
+      ctx.fillStyle = tk.ink; ctx.textAlign = 'center';
+      P.segments.forEach(function (sg) {
+        var wx = sg.x; if (!wx.inside || wx.z0 < z0 || wx.z0 > z1) return;
+        var x = X(wx.z0);
+        ctx.beginPath(); ctx.arc(x, Y(wx.w0), 3, 0, 2 * PI); ctx.fill();
+        if (!coarse) ctx.fillText(L(wx.w0), x, Math.min(h - padB - 4, Y(-wx.w0) + 14));
+      });
+      if (last.mode === 'match') {
+        var tx = X(state.tZ0_mm / 1000), tw = state.tW0_um * 1e-6;
+        ctx.strokeStyle = DiagramUI.series(3); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(tx, Y(tw)); ctx.lineTo(tx, Y(-tw)); ctx.stroke();
+        ctx.beginPath(); ctx.arc(tx, Y(tw), 4, 0, 2 * PI); ctx.stroke();
+      }
+      if (last.mode === 'fibre') {
+        var fx = X(last.fib.zf); ctx.fillStyle = DiagramUI.series(3); ctx.globalAlpha = 0.5;
+        ctx.fillRect(fx, Y(last.fib.wf), Math.max(4, (w - padR) - fx), Y(-last.fib.wf) - Y(last.fib.wf)); ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  function drawCavity(ctx, w, h, coarse, tk) {
+    var c = last.cav, half = coarse ? w : w * 0.5, size = Math.min(half - 30, h - 40);
+    /* stability diagram g1–g2 in [−2, 2]² */
+    var ox = 30, oy = 10, S = size, G2 = 2;
+    var gx = function (g) { return ox + S * (g + G2) / (2 * G2); }, gy = function (g) { return oy + S * (1 - (g + G2) / (2 * G2)); };
+    ctx.fillStyle = DiagramUI.series(2); ctx.globalAlpha = 0.18;
+    var N = 160, d = 2 * G2 / N;
+    for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) {
+      var g1 = -G2 + (i + 0.5) * d, g2 = -G2 + (j + 0.5) * d, p = g1 * g2;
+      if (p > 0 && p < 1) ctx.fillRect(gx(g1 - d / 2), gy(g2 + d / 2), S / N + 0.5, S / N + 0.5);
+    }
+    ctx.globalAlpha = 1; ctx.strokeStyle = tk.line; ctx.lineWidth = 1;
+    ctx.strokeRect(ox, oy, S, S);
+    ctx.beginPath(); ctx.moveTo(gx(0), oy); ctx.lineTo(gx(0), oy + S); ctx.moveTo(ox, gy(0)); ctx.lineTo(ox + S, gy(0)); ctx.stroke();
+    ctx.fillStyle = tk.muted; ctx.textAlign = 'center';
+    [-2, -1, 1, 2].forEach(function (t) { ctx.fillText(String(t).replace('-', '−'), gx(t), oy + S + 14); });
+    ctx.textAlign = 'right'; [-2, -1, 1, 2].forEach(function (t) { ctx.fillText(String(t).replace('-', '−'), ox - 4, gy(t) + 4); });
+    ctx.textAlign = 'left'; ctx.fillText('g₂', ox + 4, oy + 14); ctx.textAlign = 'right'; ctx.fillText('g₁', ox + S - 4, gy(0) - 6);
+    /* special cavities */
+    [[0, 0, 'C'], [1, 1, 'P'], [-1, -1, 'S']].forEach(function (p) { ctx.fillStyle = tk.muted; ctx.beginPath(); ctx.arc(gx(p[0]), gy(p[1]), 2.5, 0, 2 * PI); ctx.fill(); ctx.textAlign = 'left'; ctx.fillText(p[2], gx(p[0]) + 4, gy(p[1]) - 4); });
+    var px = Math.max(-G2, Math.min(G2, c.g1)), py = Math.max(-G2, Math.min(G2, c.g2));
+    ctx.fillStyle = c.stable ? DiagramUI.series(0) : '#c0392b';
+    ctx.beginPath(); ctx.arc(gx(px), gy(py), 6, 0, 2 * PI); ctx.fill();
+    if (coarse || !c.stable) return;
+    /* the eigenmode inside the cavity */
+    var x0 = half + 20, x1 = w - 12, yc = h / 2, Lc = state.L_mm / 1000;
+    var wmax = Math.max(c.w1, c.w2) * 1.2, sc = (h / 2 - 30) / wmax;
+    ctx.strokeStyle = DiagramUI.series(0); ctx.fillStyle = DiagramUI.series(0); ctx.lineWidth = 2;
+    var pts = [];
+    for (var k = 0; k <= 100; k++) { var z = Lc * k / 100, ww = c.w0 * Math.sqrt(1 + Math.pow((z - c.z1) / c.zR, 2)); pts.push([x0 + (x1 - x0) * k / 100, ww * sc]); }
+    ctx.globalAlpha = 0.16; ctx.beginPath(); pts.forEach(function (p, i) { if (i) ctx.lineTo(p[0], yc - p[1]); else ctx.moveTo(p[0], yc - p[1]); });
+    for (var m = pts.length - 1; m >= 0; m--) ctx.lineTo(pts[m][0], yc + pts[m][1]); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+    [1, -1].forEach(function (sg) { ctx.beginPath(); pts.forEach(function (p, i) { if (i) ctx.lineTo(p[0], yc - sg * p[1]); else ctx.moveTo(p[0], yc - sg * p[1]); }); ctx.stroke(); });
+    ctx.strokeStyle = tk.ink; ctx.lineWidth = 3;
+    [[x0, state.R1flat ? Infinity : state.R1_mm], [x1, state.R2flat ? Infinity : state.R2_mm]].forEach(function (mr, i) {
+      var hh = Math.min(h / 2 - 12, wmax * sc * 1.1), bow = isFinite(mr[1]) ? Math.max(-14, Math.min(14, 2000 / mr[1])) : 0;
+      ctx.beginPath(); ctx.moveTo(mr[0] + (i ? -bow : bow), yc - hh); ctx.quadraticCurveTo(mr[0] - (i ? -bow : bow), yc, mr[0] + (i ? -bow : bow), yc + hh); ctx.stroke();
+    });
+    var inCav = c.z1 >= 0 && c.z1 <= Lc, zl = Math.max(0, Math.min(Lc, c.z1));            /* a waist outside the cavity is virtual: label at the nearer mirror */
+    ctx.fillStyle = tk.muted; ctx.textAlign = inCav ? 'center' : (c.z1 < 0 ? 'left' : 'right');
+    ctx.fillText('w₀ ' + L(c.w0) + (inCav ? '' : ' (' + W.virtual[(ui && ui.lang) || 'en'] + ')'), x0 + (x1 - x0) * zl / Lc, yc + c.w0 * sc + 16);
+  }
+
+  /* SVG shim: the subset of CanvasRenderingContext2D that draw() uses */
+  function svgContext(w, h) {
+    var out = [], path = '', st = { strokeStyle: '#000', fillStyle: '#000', lineWidth: 1, globalAlpha: 1, dash: [], font: '12px sans-serif', textAlign: 'left' };
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+    function f(n) { return Math.round(n * 100) / 100; }
+    var c = {
+      clearRect: function () {}, beginPath: function () { path = ''; }, closePath: function () { path += 'Z'; },
+      moveTo: function (x, y) { path += 'M' + f(x) + ' ' + f(y); }, lineTo: function (x, y) { path += 'L' + f(x) + ' ' + f(y); },
+      quadraticCurveTo: function (a, b, x, y) { path += 'Q' + f(a) + ' ' + f(b) + ' ' + f(x) + ' ' + f(y); },
+      arc: function (x, y, r) { path += 'M' + f(x - r) + ' ' + f(y) + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + (-2 * r) + ' 0'; },
+      setLineDash: function (d) { st.dash = d || []; },
+      stroke: function () { out.push('<path d="' + path + '" fill="none" stroke="' + st.strokeStyle + '" stroke-width="' + st.lineWidth + '" opacity="' + st.globalAlpha + '"' + (st.dash.length ? ' stroke-dasharray="' + st.dash.join(' ') + '"' : '') + '/>'); },
+      fill: function () { out.push('<path d="' + path + '" fill="' + st.fillStyle + '" opacity="' + st.globalAlpha + '"/>'); },
+      fillRect: function (x, y, ww, hh) { out.push('<rect x="' + f(x) + '" y="' + f(y) + '" width="' + f(ww) + '" height="' + f(hh) + '" fill="' + st.fillStyle + '" opacity="' + st.globalAlpha + '"/>'); },
+      strokeRect: function (x, y, ww, hh) { out.push('<rect x="' + f(x) + '" y="' + f(y) + '" width="' + f(ww) + '" height="' + f(hh) + '" fill="none" stroke="' + st.strokeStyle + '"/>'); },
+      fillText: function (t, x, y) { var a = { left: 'start', center: 'middle', right: 'end' }[st.textAlign] || 'start'; out.push('<text x="' + f(x) + '" y="' + f(y) + '" text-anchor="' + a + '" fill="' + st.fillStyle + '" opacity="' + st.globalAlpha + '" font-size="12" font-family="sans-serif">' + esc(t) + '</text>'); },
+      toString: function () { return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '"><rect width="100%" height="100%" fill="#fff"/>' + out.join('') + '</svg>'; }
+    };
+    ['strokeStyle', 'fillStyle', 'lineWidth', 'globalAlpha', 'font', 'textAlign'].forEach(function (k) {
+      Object.defineProperty(c, k, { get: function () { return st[k]; }, set: function (v) { st[k] = v; } });
+    });
+    return c;
+  }
+  var PRINT_TK = { muted: '#555', line: '#bbb', ink: '#222', font: 'sans-serif', bg: '#fff' };
+  function fileStem() { return 'gaussbeam_' + new Date().toISOString().slice(0, 19).replace(/[-:T]/g, ''); }
+  function exportSVG() {
+    var c = svgContext(1200, 600); draw(c, 1200, 600, false, PRINT_TK);
+    Diagram.export.download(fileStem() + '.svg', 'image/svg+xml', c.toString());
+  }
+  function exportPNG() {
+    var cv = document.createElement('canvas'); cv.width = 2400; cv.height = 1200;
+    var ctx = cv.getContext('2d'); ctx.scale(2, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1200, 600);
+    var save = ctx.clearRect; ctx.clearRect = function () {}; draw(ctx, 1200, 600, false, PRINT_TK); ctx.clearRect = save;
+    cv.toBlob(function (b) {
+      var u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = fileStem() + '.png';
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 1500);
+    }, 'image/png');
+  }
+  function csvText() {
+    if (!last || !last.prop) return null;
+    var P = last.prop, rows = [['z_mm', 'wx_um', 'wy_um', 'Rx_m', 'Ry_m', 'gouy_x_rad', 'gouy_y_rad']];
+    P.x.z.forEach(function (z, i) {
+      rows.push([z * 1e3, P.x.w[i] * 1e6, P.y.w[i] * 1e6, isFinite(P.x.R[i]) ? P.x.R[i] : 'inf', isFinite(P.y.R[i]) ? P.y.R[i] : 'inf', P.x.gouy[i] - P.x.gouy[0], P.y.gouy[i] - P.y.gouy[0]]
+        .map(function (v) { return typeof v === 'number' ? Number(v.toPrecision(10)) : v; }));
+    });
+    return rows.map(function (r) { return r.join(','); }).join('\r\n') + '\r\n';
+  }
+  function exportCSV() { var t = csvText(); if (t) Diagram.export.download(fileStem() + '.csv', 'text/csv', t); }
+
+  /* ============================================================ 5. presets (each aha is reproduced by _opt/gauss/test-presets.mjs) */
+  function els() { return Array.prototype.slice.call(arguments); }
+  function E(label, kind, z, f, extra) { return Object.assign({ label: label, kind: kind, z_mm: z, f_mm: f, t_mm: 0, n: 1.5, aoi: 0, D_mm: 25.4 }, extra || {}); }
+  var PRESETS = [
+    { id: 'hene100', label: T('HeNe focused by a 100 mm lens', 'HeNe, фокусування лінзою 100 мм', 'HeNe, fokussiert mit 100-mm-Linse', 'HeNe gefocust met een lens van 100 mm', 'HeNe focalisé par une lentille de 100 mm', 'HeNe enfocado con una lente de 100 mm', 'HeNe ogniskowany soczewką 100 mm'),
+      note: T('The waist lands 1.6 mm behind the focal plane, not on it.', 'Перетяжка на 1,6 мм за фокальною площиною, а не в ній.', 'Die Taille liegt 1,6 mm hinter der Brennebene, nicht in ihr.', 'De taille ligt 1,6 mm achter het brandvlak, niet erin.', 'Le col tombe 1,6 mm derrière le plan focal, pas dessus.', 'La cintura cae 1,6 mm detrás del plano focal, no en él.', 'Przewężenie wypada 1,6 mm za płaszczyzną ogniskową, a nie w niej.'),
+      state: { mode: 'propagate', lambda_nm: 632.8, src: 'waist', w0_mm: 0.4, z0_mm: 0, M2: 1, astig: false, elements: els(E('L1', 'lens', 200, 100)), zStart_mm: 0, zEnd_mm: 400 } },
+    { id: 'm2spot', label: T('1064 nm, M² = 1.3 vs 1: spot size', '1064 нм, M² = 1,3 проти 1: розмір плями', '1064 nm, M² = 1,3 statt 1: Fleckgröße', '1064 nm, M² = 1,3 tegenover 1: vlekgrootte', '1064 nm, M² = 1,3 contre 1 : taille du spot', '1064 nm, M² = 1,3 frente a 1: tamaño del punto', '1064 nm, M² = 1,3 wobec 1: rozmiar plamki'),
+      note: T('Same lens, 30 % larger focus than a perfect TEM00 beam (M² = 1 → 13.5 µm).', 'Та сама лінза — фокус на 30 % більший, ніж в ідеального TEM00 (M² = 1 → 13,5 мкм).', 'Gleiche Linse, 30 % größerer Fokus als ein idealer TEM00-Strahl (M² = 1 → 13,5 µm).', 'Zelfde lens, 30 % grotere focus dan een ideale TEM00-bundel (M² = 1 → 13,5 µm).', 'Même lentille, foyer 30 % plus grand qu’un TEM00 parfait (M² = 1 → 13,5 µm).', 'Misma lente, foco un 30 % mayor que un TEM00 perfecto (M² = 1 → 13,5 µm).', 'Ta sama soczewka — ognisko o 30 % większe niż idealnej wiązki TEM00 (M² = 1 → 13,5 µm).'),
+      state: { mode: 'propagate', lambda_nm: 1064, src: 'waist', w0_mm: 2.5, z0_mm: 0, M2: 1.3, astig: false, elements: els(E('F100', 'lens', 50, 100)), zStart_mm: 0, zEnd_mm: 200 } },
+    { id: 'harder', label: T('Focusing harder: f = 20 mm', 'Жорсткіше фокусування: f = 20 мм', 'Stärker fokussieren: f = 20 mm', 'Sterker focusseren: f = 20 mm', 'Focaliser plus fort : f = 20 mm', 'Enfocar más: f = 20 mm', 'Mocniejsze ogniskowanie: f = 20 mm'),
+      note: T('Against f = 40 mm: half the spot, but only a quarter of the depth of focus (set f = 40 to compare).', 'Порівняно з f = 40 мм: пляма вдвічі менша, але глибина фокуса лише чверть (поставте f = 40, щоб порівняти).', 'Gegenüber f = 40 mm: halber Fleck, aber nur ein Viertel der Schärfentiefe (f = 40 zum Vergleich eintragen).', 'Tegenover f = 40 mm: halve vlek, maar slechts een kwart van de scherptediepte (zet f = 40 om te vergelijken).', 'Par rapport à f = 40 mm : spot moitié, mais seulement un quart de la profondeur de champ (mettez f = 40 pour comparer).', 'Frente a f = 40 mm: mitad de punto, pero solo un cuarto de profundidad de foco (ponga f = 40 para comparar).', 'Wobec f = 40 mm: połowa plamki, ale tylko ćwierć głębi ostrości (wpisz f = 40, aby porównać).'),
+      state: { mode: 'propagate', lambda_nm: 1064, src: 'waist', w0_mm: 2, z0_mm: 0, M2: 1, astig: false, elements: els(E('F20', 'lens', 50, 20)), zStart_mm: 0, zEnd_mm: 90 } },
+    { id: 'galileo', label: T('Galilean ×4 expander', 'Розширювач Галілея ×4', 'Galilei-Aufweiter ×4', 'Galilei-expander ×4', 'Élargisseur de Galilée ×4', 'Expansor de Galileo ×4', 'Ekspander Galileusza ×4'),
+      note: T('−25/+100 mm, 75 mm long, no internal focus; the Keplerian ×4 needs 125 mm.', '−25/+100 мм, довжина 75 мм, без внутрішнього фокуса; Кеплерів ×4 потребує 125 мм.', '−25/+100 mm, 75 mm lang, kein innerer Fokus; der Kepler-Aufweiter ×4 braucht 125 mm.', '−25/+100 mm, 75 mm lang, geen inwendige focus; de Kepler ×4 heeft 125 mm nodig.', '−25/+100 mm, 75 mm de long, sans foyer interne ; le Kepler ×4 demande 125 mm.', '−25/+100 mm, 75 mm de largo, sin foco interno; el Kepler ×4 necesita 125 mm.', '−25/+100 mm, długość 75 mm, bez ogniska wewnętrznego; Kepler ×4 wymaga 125 mm.'),
+      state: { mode: 'propagate', lambda_nm: 632.8, src: 'waist', w0_mm: 0.4, z0_mm: 0, M2: 1, astig: false, elements: els(E('−25', 'lens', 100, -25, { D_mm: 12.7 }), E('+100', 'lens', 175, 100)), zStart_mm: 0, zEnd_mm: 1500 } },
+    { id: 'kepler', label: T('Keplerian ×4 expander (spatial filter)', 'Розширювач Кеплера ×4 (просторовий фільтр)', 'Kepler-Aufweiter ×4 (Raumfilter)', 'Kepler-expander ×4 (ruimtelijk filter)', 'Élargisseur de Kepler ×4 (filtre spatial)', 'Expansor de Kepler ×4 (filtro espacial)', 'Ekspander Keplera ×4 (filtr przestrzenny)'),
+      note: T('+25/+100 mm, 125 mm long; the internal 12.5 µm waist is where a pinhole cleans the beam.', '+25/+100 мм, 125 мм; внутрішня перетяжка 12,5 мкм — місце для мікродіафрагми.', '+25/+100 mm, 125 mm; die innere 12,5-µm-Taille ist der Ort für die Lochblende.', '+25/+100 mm, 125 mm; de inwendige taille van 12,5 µm is de plek voor een pinhole.', '+25/+100 mm, 125 mm ; le col interne de 12,5 µm accueille le trou de filtrage.', '+25/+100 mm, 125 mm; la cintura interna de 12,5 µm es donde va el pinhole.', '+25/+100 mm, 125 mm; wewnętrzne przewężenie 12,5 µm to miejsce na otworek filtrujący.'),
+      state: { mode: 'propagate', lambda_nm: 632.8, src: 'waist', w0_mm: 0.4, z0_mm: 0, M2: 1, astig: false, elements: els(E('+25', 'lens', 100, 25, { D_mm: 12.7 }), E('PH', 'aperture', 125.1, 0, { D_mm: 0.05 }), E('+100', 'lens', 225, 100)), zStart_mm: 0, zEnd_mm: 1500 } },
+    { id: 'smf28', label: T('Fibre coupling SMF-28 at 1550 nm', 'Введення в SMF-28 на 1550 нм', 'Faserkopplung SMF-28 bei 1550 nm', 'Vezelkoppeling SMF-28 bij 1550 nm', 'Couplage dans une SMF-28 à 1550 nm', 'Acoplo a SMF-28 a 1550 nm', 'Sprzęganie do SMF-28 przy 1550 nm'),
+      note: T('Matched f = 11 mm: > 99 %. Move the fibre 3 µm sideways and lose ≈ 1.4 dB.', 'Узгоджена f = 11 мм: > 99 %. Зсув волокна на 3 мкм убік — втрата ≈ 1,4 дБ.', 'Angepasste f = 11 mm: > 99 %. 3 µm seitlicher Versatz kosten ≈ 1,4 dB.', 'Aangepaste f = 11 mm: > 99 %. 3 µm zijwaarts kost ≈ 1,4 dB.', 'f = 11 mm adaptée : > 99 %. Décaler la fibre de 3 µm coûte ≈ 1,4 dB.', 'f = 11 mm adaptada: > 99 %. Desplazar la fibra 3 µm cuesta ≈ 1,4 dB.', 'Dopasowana f = 11 mm: > 99 %. Przesunięcie włókna o 3 µm w bok kosztuje ≈ 1,4 dB.'),
+      state: { mode: 'fibre', lambda_nm: 1550, src: 'waist', w0_mm: 1.05, z0_mm: 0, M2: 1, astig: false, elements: els(E('A11', 'lens', 50, 11, { D_mm: 5.5 })), zStart_mm: 0, zEnd_mm: 80, fMFD_um: 10.4, fAuto: true, fdx_um: 3, ftilt_mrad: 0 } },
+    { id: 'match', label: T('Mode matching: HeNe → 100 µm waist', 'Узгодження мод: HeNe → перетяжка 100 мкм', 'Modenanpassung: HeNe → 100-µm-Taille', 'Modematching: HeNe → taille van 100 µm', 'Adaptation de mode : HeNe → col de 100 µm', 'Acoplamiento de modos: HeNe → cintura de 100 µm', 'Dopasowanie modów: HeNe → przewężenie 100 µm'),
+      note: T('Dozens of lens pairs hit the target exactly, from a 90 mm to a 540 mm long path.', 'Десятки пар лінз точно дають ціль — зі шляхом від 90 до 540 мм.', 'Dutzende Linsenpaare treffen das Ziel exakt — mit Strahlwegen von 90 bis 540 mm.', 'Tientallen lensparen raken het doel exact — met een weglengte van 90 tot 540 mm.', 'Des dizaines de paires de lentilles atteignent exactement la cible, avec un trajet de 90 à 540 mm.', 'Decenas de pares de lentes alcanzan exactamente el objetivo, con trayectos de 90 a 540 mm.', 'Dziesiątki par soczewek trafiają dokładnie w cel — z drogą wiązki od 90 do 540 mm.'),
+      state: { mode: 'match', lambda_nm: 632.8, src: 'waist', w0_mm: 0.35, z0_mm: 0, M2: 1, astig: false, elements: [], zStart_mm: 0, zEnd_mm: 700, tW0_um: 100, tZ0_mm: 600, mzMin_mm: 50, mzMax_mm: 600, mGap_mm: 10, expM: 4, focals: '-100 -50 -25 25 50 75 100 150 200 250 300' } },
+    { id: 'fold', label: T('Curved fold mirror at 10°', 'Сферичне дзеркало під 10°', 'Hohlspiegel unter 10°', 'Holle spiegel onder 10°', 'Miroir concave à 10°', 'Espejo cóncavo a 10°', 'Zwierciadło wklęsłe pod kątem 10°'),
+      note: T('A 10° tilt splits the focus: the x and y waists sit 1.5 mm apart.', 'Нахил 10° розщеплює фокус: перетяжки x та y на відстані 1,5 мм.', '10° Neigung spaltet den Fokus: x- und y-Taille liegen 1,5 mm auseinander.', '10° kanteling splitst de focus: x- en y-taille liggen 1,5 mm uit elkaar.', 'Une inclinaison de 10° dédouble le foyer : cols x et y à 1,5 mm l’un de l’autre.', 'Una inclinación de 10° desdobla el foco: cinturas x e y a 1,5 mm.', 'Nachylenie 10° rozszczepia ognisko: przewężenia x i y są 1,5 mm od siebie.'),
+      state: { mode: 'propagate', lambda_nm: 1064, src: 'waist', w0_mm: 1, z0_mm: 0, M2: 1, astig: false, elements: els(E('M50', 'mirror', 100, 50, { aoi: 10 })), zStart_mm: 0, zEnd_mm: 220 } },
+    { id: 'edge', label: T('Resonator near the stability edge', 'Резонатор біля межі стійкості', 'Resonator nahe der Stabilitätsgrenze', 'Resonator nabij de stabiliteitsgrens', 'Résonateur près de la limite de stabilité', 'Resonador cerca del límite de estabilidad', 'Rezonator blisko granicy stabilności'),
+      note: T('R = 500 mm mirrors 990 mm apart: mirror spots 3× those of the confocal cavity (L = 500 mm).', 'Дзеркала R = 500 мм на відстані 990 мм: плями на дзеркалах утричі більші, ніж у конфокальному (L = 500 мм).', 'Spiegel R = 500 mm im Abstand 990 mm: Spiegelflecke 3× so groß wie im konfokalen Resonator (L = 500 mm).', 'Spiegels R = 500 mm op 990 mm: vlekken op de spiegels 3× die van de confocale resonator (L = 500 mm).', 'Miroirs R = 500 mm à 990 mm : taches sur les miroirs 3× celles de la cavité confocale (L = 500 mm).', 'Espejos R = 500 mm a 990 mm: manchas en los espejos 3× las de la cavidad confocal (L = 500 mm).', 'Zwierciadła R = 500 mm w odległości 990 mm: plamki na zwierciadłach 3× większe niż we wnęce konfokalnej (L = 500 mm).'),
+      state: { mode: 'cavity', lambda_nm: 1064, R1_mm: 500, R1flat: false, R2_mm: 500, R2flat: false, L_mm: 990, cn: 1 } },
+    { id: 'iso', label: T('ISO 11146 fit of measured diameters', 'Апроксимація виміряних діаметрів за ISO 11146', 'ISO-11146-Fit gemessener Durchmesser', 'ISO 11146-fit van gemeten diameters', 'Ajustement ISO 11146 de diamètres mesurés', 'Ajuste ISO 11146 de diámetros medidos', 'Dopasowanie ISO 11146 zmierzonych średnic'),
+      note: T('Ten synthetic D4σ readings (illustrative, not a real laser) → M² = 1.3.', 'Десять синтетичних відліків D4σ (ілюстрація, не реальний лазер) → M² = 1,3.', 'Zehn synthetische D4σ-Werte (zur Veranschaulichung, kein realer Laser) → M² = 1,3.', 'Tien synthetische D4σ-waarden (ter illustratie, geen echte laser) → M² = 1,3.', 'Dix mesures D4σ synthétiques (illustratives, pas un vrai laser) → M² = 1,3.', 'Diez lecturas D4σ sintéticas (ilustrativas, no un láser real) → M² = 1,3.', 'Dziesięć syntetycznych odczytów D4σ (ilustracja, nie rzeczywisty laser) → M² = 1,3.'),
+      state: { mode: 'propagate', lambda_nm: 1064, src: 'fit', astig: false, elements: [], zStart_mm: 0, zEnd_mm: 300, pts: isoPts() } }
+  ];
+  function isoPts() {
+    var lam = 1064e-9, w0 = 0.15e-3, z0 = 0.12, M2 = 1.3, zR = PI * w0 * w0 / (M2 * lam), out = [];
+    [-3.5, -3, -2.5, -0.9, -0.5, 0, 0.4, 0.8, 2.5, 3.2].forEach(function (k) {
+      var z = z0 + k * zR; out.push({ z_mm: Number((z * 1000).toFixed(3)), d_mm: Number((2 * w0 * Math.sqrt(1 + k * k) * 1000).toFixed(5)) });
+    });
+    return out;
+  }
+  function applyPreset(p) {
+    return function (t) {
+      var base = clone(DEFAULTS);
+      Object.keys(base).forEach(function (k) { t[k] = base[k]; });
+      Object.keys(p.state).forEach(function (k) { t[k] = clone(p.state[k]); });
+      t.view = t.mode === 'cavity' ? 'w' : 'w';
+    };
+  }
+
+  /* ============================================================ 6. interface */
+  var KIND_OPTS = [
+    ['lens', T('Thin lens', 'Тонка лінза', 'Dünne Linse', 'Dunne lens', 'Lentille mince', 'Lente delgada', 'Cienka soczewka')],
+    ['cylx', T('Cylinder lens x', 'Циліндрична лінза x', 'Zylinderlinse x', 'Cilinderlens x', 'Lentille cylindrique x', 'Lente cilíndrica x', 'Soczewka cylindryczna x')],
+    ['cyly', T('Cylinder lens y', 'Циліндрична лінза y', 'Zylinderlinse y', 'Cilinderlens y', 'Lentille cylindrique y', 'Lente cilíndrica y', 'Soczewka cylindryczna y')],
+    ['mirror', T('Curved mirror', 'Сферичне дзеркало', 'Hohlspiegel', 'Holle spiegel', 'Miroir sphérique', 'Espejo esférico', 'Zwierciadło sferyczne')],
+    ['slab', T('Plate / crystal', 'Пластина / кристал', 'Platte / Kristall', 'Plaat / kristal', 'Lame / cristal', 'Lámina / cristal', 'Płytka / kryształ')],
+    ['aperture', T('Aperture', 'Діафрагма', 'Blende', 'Diafragma', 'Diaphragme', 'Diafragma', 'Przesłona')]
+  ].map(function (o) { return { value: o[0], label: o[1] }; });
+
+  function isMode() { var a = arguments; return function (ctx) { for (var i = 0; i < a.length; i++) if (ctx.state.mode === a[i]) return true; return false; }; }
+  var notCavity = function (ctx) { return ctx.state.mode !== 'cavity'; };
+
+  var TXT = {
+    focCut: T('Only the first ' + MAX_FOCALS + ' focal lengths are searched.', 'Перебираються лише перші ' + MAX_FOCALS + ' фокусні відстані.', 'Nur die ersten ' + MAX_FOCALS + ' Brennweiten werden durchsucht.', 'Alleen de eerste ' + MAX_FOCALS + ' brandpuntsafstanden worden doorzocht.', 'Seules les ' + MAX_FOCALS + ' premières focales sont explorées.', 'Solo se exploran las ' + MAX_FOCALS + ' primeras focales.', 'Przeszukiwane są tylko pierwsze ' + MAX_FOCALS + ' ogniskowe.'),
+    stock: T('Stock focal lengths are the Thorlabs catalogue values at 587.6 nm (thin-lens approximation; the real f shifts with wavelength through the glass dispersion).', 'Складські фокусні відстані — каталожні значення Thorlabs на 587,6 нм (наближення тонкої лінзи; реальна f зміщується з довжиною хвилі через дисперсію скла).', 'Lager-Brennweiten sind Thorlabs-Katalogwerte bei 587,6 nm (Dünnlinsennäherung; die reale f verschiebt sich mit der Wellenlänge durch die Glasdispersion).', 'Voorraadbrandpuntsafstanden zijn Thorlabs-catalogus­waarden bij 587,6 nm (dunnelensbenadering; de echte f verschuift met de golflengte door de glasdispersie).', 'Les focales du catalogue Thorlabs sont données à 587,6 nm (approximation de lentille mince ; la focale réelle varie avec la longueur d’onde selon la dispersion du verre).', 'Las focales de catálogo de Thorlabs son valores a 587,6 nm (aproximación de lente delgada; la f real cambia con la longitud de onda por la dispersión del vidrio).', 'Ogniskowe katalogowe Thorlabs to wartości dla 587,6 nm (przybliżenie cienkiej soczewki; rzeczywista f zmienia się z długością fali wskutek dyspersji szkła).'),
+    paraxial: T('The divergence half-angle exceeds 0.25 rad: the paraxial Gaussian model is no longer accurate here (non-paraxial focusing, aberrations).', 'Півкут розбіжності перевищує 0,25 рад: параксіальна гаусова модель тут уже неточна (непараксіальне фокусування, аберації).', 'Der Divergenz-Halbwinkel übersteigt 0,25 rad: das paraxiale Gaußmodell ist hier nicht mehr genau (nichtparaxiale Fokussierung, Aberrationen).', 'De halve divergentiehoek is groter dan 0,25 rad: het paraxiale Gaussische model is hier niet meer nauwkeurig (niet-paraxiale focussering, aberraties).', 'Le demi-angle de divergence dépasse 0,25 rad : le modèle gaussien paraxial n’est plus précis ici (focalisation non paraxiale, aberrations).', 'El semiángulo de divergencia supera 0,25 rad: el modelo gaussiano paraxial ya no es preciso aquí (enfoque no paraxial, aberraciones).', 'Półkąt rozbieżności przekracza 0,25 rad: przyosiowy model gaussowski nie jest tu już dokładny (ogniskowanie nieprzyosiowe, aberracje).'),
+    m2fibre: T('M² > 1: the overlap uses the embedded Gaussian and is an upper bound — a multimode beam couples less into a single-mode fibre.', 'M² > 1: перекриття розраховано для вкладеного гаусового пучка, це верхня межа — багатомодовий пучок вводиться в одномодове волокно гірше.', 'M² > 1: der Überlapp nutzt den eingebetteten Gaußstrahl und ist eine obere Schranke — ein Multimodestrahl koppelt schlechter in eine Einmodenfaser.', 'M² > 1: de overlap gebruikt de ingebedde Gaussische bundel en is een bovengrens — een multimodebundel koppelt slechter in een singlemodevezel.', 'M² > 1 : le recouvrement utilise le gaussien enchâssé et constitue une borne supérieure — un faisceau multimode se couple moins bien dans une fibre monomode.', 'M² > 1: el solapamiento usa el gaussiano embebido y es una cota superior — un haz multimodo acopla peor en una fibra monomodo.', 'M² > 1: nakładanie liczone jest dla osadzonej wiązki gaussowskiej i jest ograniczeniem górnym — wiązka wielomodowa sprzęga się gorzej do włókna jednomodowego.')
+  };
+  function overlapNote(w) {
+    var a = String(w.id), b = String(w.with);
+    return T('Plates ' + b + ' and ' + a + ' overlap: inside the overlap the index of ' + a + ' (entered last) is used; check the positions.',
+      'Пластини ' + b + ' і ' + a + ' перекриваються: у зоні перекриття береться показник ' + a + ' (увійшли останньою); перевірте положення.',
+      'Die Platten ' + b + ' und ' + a + ' überlappen: im Überlapp gilt der Index von ' + a + ' (zuletzt betreten); Positionen prüfen.',
+      'De platen ' + b + ' en ' + a + ' overlappen: in de overlap geldt de index van ' + a + ' (als laatste betreden); controleer de posities.',
+      'Les lames ' + b + ' et ' + a + ' se chevauchent : dans le chevauchement, l’indice de ' + a + ' (entrée en dernier) est utilisé ; vérifiez les positions.',
+      'Las láminas ' + b + ' y ' + a + ' se solapan: en el solape se usa el índice de ' + a + ' (la última en entrar); compruebe las posiciones.',
+      'Płytki ' + b + ' i ' + a + ' nachodzą na siebie: w strefie nakładania przyjęto współczynnik ' + a + ' (weszła ostatnia); sprawdź położenia.');
+  }
+  function clipNote(w) {
+    var p = F(100 * w.T, 2) + ' %';
+    return T(w.id + ': only ' + p + ' of the power passes the clear aperture (< 99 %) — the beam is clipped and will ring.', w.id + ': крізь світловий отвір проходить лише ' + p + ' потужності (< 99 %) — пучок обрізається й утворює кільця.', w.id + ': nur ' + p + ' der Leistung passieren die freie Öffnung (< 99 %) — der Strahl wird beschnitten und bildet Ringe.', w.id + ': slechts ' + p + ' van het vermogen gaat door de vrije opening (< 99 %) — de bundel wordt afgesneden en vormt ringen.', w.id + ' : seulement ' + p + ' de la puissance traverse l’ouverture utile (< 99 %) — le faisceau est tronqué et formera des anneaux.', w.id + ': solo pasa ' + p + ' de la potencia por la apertura libre (< 99 %) — el haz se recorta y formará anillos.', w.id + ': przez aperturę czynną przechodzi tylko ' + p + ' mocy (< 99 %) — wiązka jest obcinana i powstaną pierścienie.');
+  }
+
+  function waistTable(r) {
+    var P = r.prop, astig = P.segments.some(function (s) { return Math.abs(s.x.w0 - s.y.w0) > 1e-12 * s.x.w0 || Math.abs(s.x.z0 - s.y.z0) > 1e-12; });
+    var head = [W.seg, W.waist, W.waistPos, W.zR, W.div].concat(astig ? [T('Waist y', 'Перетяжка y', 'Taille y', 'Taille y', 'Col y', 'Cintura y', 'Przewężenie y'), T('Position y', 'Положення y', 'Lage y', 'Positie y', 'Position y', 'Posición y', 'Położenie y')] : []);
+    var rows = P.segments.map(function (sg, i) {
+      var name = i === 0 ? W.source : String(P.elements[Math.min(i - 1, P.elements.length - 1)] ? segName(P, i) : '');
+      var cells = [i === 0 ? T('source', 'джерело', 'Quelle', 'bron', 'source', 'fuente', 'źródło') : name,
+        { text: L(sg.x.w0), num: true }, { value: sg.x.z0 * 1000, precision: 2 }, { text: L(sg.x.zR), num: true }, { value: 2000 * sg.x.theta, precision: 3 }];
+      if (astig) cells.push({ text: L(sg.y.w0), num: true }, { value: sg.y.z0 * 1000, precision: 2 });
+      return { cells: cells, dim: !sg.x.inside, title: sg.x.inside ? '' : W.virtual };
+    });
+    return { title: T('Waist after each element', 'Перетяжка після кожного елемента', 'Taille nach jedem Element', 'Taille na elk element', 'Col après chaque élément', 'Cintura tras cada elemento', 'Przewężenie za każdym elementem'), head: head, rows: rows };
+  }
+  function segName(P, i) {
+    /* segments are cut at element planes and at plate exits; the engine records which cut opened each segment (review R-15) */
+    var c = P.segments[i] && P.segments[i].cut;
+    return c ? String(c.id) + (c.type === 'slabEnd' ? ' ↦' : '') : '';
+  }
+  function elementTable(r) {
+    var P = r.prop;
+    if (!P.at.length) return null;
+    return { title: T('Beam at the elements', 'Пучок на елементах', 'Strahl an den Elementen', 'Bundel bij de elementen', 'Faisceau sur les éléments', 'Haz en los elementos', 'Wiązka na elementach'),
+      head: [W.elem, 'z', W.beamAt, W.curv, W.clip],
+      rows: P.at.map(function (a) {
+        return { cells: [String(a.id), { value: a.z * 1000, precision: 1 }, { text: L(a.wx) + (Math.abs(a.wx - a.wy) > 1e-9 ? ' / ' + L(a.wy) : ''), num: true },
+          { text: isFinite(a.Rx) && Math.abs(a.Rx) < 1e6 ? L(a.Rx) : '∞', num: true },
+          a.clipT == null ? { text: '—' } : { value: 100 * a.clipT, precision: 2, tone: a.clipT < 0.99 ? 'bad' : 'ok' }],
+          tone: a.clipT != null && a.clipT < 0.99 ? 'bad' : '' };
+      }) };
+  }
+  var UNIT_NOTE = T('Positions z in mm from the reference plane z = 0; divergence in mrad (full angle); transmission in %.', 'Положення z у мм від опорної площини z = 0; розбіжність у мрад (повний кут); пропускання у %.', 'Lagen z in mm ab der Bezugsebene z = 0; Divergenz in mrad (voller Winkel); Transmission in %.', 'Posities z in mm vanaf het referentievlak z = 0; divergentie in mrad (volle hoek); transmissie in %.', 'Positions z en mm depuis le plan de référence z = 0 ; divergence en mrad (angle total) ; transmission en %.', 'Posiciones z en mm desde el plano de referencia z = 0; divergencia en mrad (ángulo total); transmisión en %.', 'Położenia z w mm od płaszczyzny odniesienia z = 0; rozbieżność w mrad (kąt pełny); transmisja w %.');
+
+  function applySolution(sol) {
+    state.elements = [
+      { label: 'L1', kind: 'lens', z_mm: sig(sol.x1 * 1000, 6), f_mm: sol.f1 * 1000, t_mm: 0, n: 1.5, aoi: 0, D_mm: 25.4 },
+      { label: 'L2', kind: 'lens', z_mm: sig(sol.x2 * 1000, 6), f_mm: sol.f2 * 1000, t_mm: 0, n: 1.5, aoi: 0, D_mm: 25.4 }];
+    state.mode = 'propagate'; state.zEnd_mm = Math.max(state.zEnd_mm, state.tZ0_mm + 100);
+    ui.sync(); ui.run();
+  }
+
+  function sigTiles(pl) {                                /* tiles declared with precision 3 show 3 significant digits */
+    (pl.tiles || []).forEach(function (t) { if (t.precision === 3 && typeof t.value === 'number') t.precision = pr(t.value); });
+    return pl;
+  }
+  function compute(s) { return sigTiles(compute0(s)); }
+  function compute0(s) {
+    last = solve(s);
+    if (ui && ui.byKey && ui.byKey.main) ui.byKey.main.schedule();
+    if (last.err === 'R') {
+      return { verdict: { tone: 'bad', text: T('Mirror radius must be at least 1 mm in magnitude (or set the mirror flat).', 'Радіус дзеркала за модулем має бути не менше 1 мм (або позначте дзеркало плоским).', 'Der Spiegelradius muss betragsmäßig mindestens 1 mm sein (oder den Spiegel plan setzen).', 'De spiegelstraal moet in absolute waarde minstens 1 mm zijn (of zet de spiegel vlak).', 'Le rayon du miroir doit valoir au moins 1 mm en valeur absolue (ou déclarez le miroir plan).', 'El radio del espejo debe ser de al menos 1 mm en valor absoluto (o marque el espejo como plano).', 'Promień zwierciadła musi mieć co najmniej 1 mm co do wartości bezwzględnej (lub ustaw zwierciadło jako płaskie).') }, tiles: [], tables: [], notes: [] };
+    }
+    if (last.err) {
+      return { verdict: { tone: 'bad', text: T('No beam: check the waist, the wavelength or the measured points (at least 3, curving upwards).', 'Пучка немає: перевірте перетяжку, довжину хвилі або виміряні точки (щонайменше 3, з опуклістю вниз).', 'Kein Strahl: Taille, Wellenlänge oder Messpunkte prüfen (mindestens 3, nach oben gekrümmt).', 'Geen bundel: controleer taille, golflengte of meetpunten (minstens 3, naar boven gekromd).', 'Pas de faisceau : vérifiez le col, la longueur d’onde ou les points mesurés (au moins 3, courbés vers le haut).', 'Sin haz: revise la cintura, la longitud de onda o los puntos medidos (al menos 3, curvados hacia arriba).', 'Brak wiązki: sprawdź przewężenie, długość fali lub punkty pomiarowe (co najmniej 3, wygięte ku górze).') }, tiles: [] };
+    }
+    var notes = [];
+    if (last.mode === 'cavity') return cavityPayload(last.cav);
+    var P = last.prop, out = last.out;
+    P.warnings.forEach(function (w) { if (w.code === 'clip') notes.push(clipNote(w)); });
+    if (P.warnings.some(function (w) { return w.code === 'paraxial'; })) notes.push(TXT.paraxial);
+    P.warnings.forEach(function (w) { if (w.code === 'overlap') notes.push(overlapNote(w)); });
+    if (last.focCut) notes.push(TXT.focCut);
+    if (last.mode === 'match' && state.focSrc === 'stock') notes.push(TXT.stock);
+    if (last.warn.indexOf('m2fibre') >= 0) notes.push(TXT.m2fibre);
+    var fit = last.B.fit;
+    var tiles = [];
+    var tables = [];
+    var verdict = null;
+    if (last.mode === 'fibre') {
+      var fb = last.fib, dB = -10 * Math.log10(fb.eta);
+      verdict = { tone: fb.eta >= 0.9 ? 'ok' : (fb.eta >= 0.5 ? 'warn' : 'bad'), text: T('Coupling ' + F(100 * fb.eta, 1) + ' % (' + F(dB, 2) + ' dB loss) into a mode of ' + F(2e6 * fb.wf, 1) + ' µm MFD.', 'Введення ' + F(100 * fb.eta, 1) + ' % (втрати ' + F(dB, 2) + ' дБ) у моду з MFD ' + F(2e6 * fb.wf, 1) + ' мкм.', 'Kopplung ' + F(100 * fb.eta, 1) + ' % (' + F(dB, 2) + ' dB Verlust) in eine Mode mit ' + F(2e6 * fb.wf, 1) + ' µm MFD.', 'Koppeling ' + F(100 * fb.eta, 1) + ' % (' + F(dB, 2) + ' dB verlies) in een mode met MFD ' + F(2e6 * fb.wf, 1) + ' µm.', 'Couplage ' + F(100 * fb.eta, 1) + ' % (' + F(dB, 2) + ' dB de pertes) dans un mode de MFD ' + F(2e6 * fb.wf, 1) + ' µm.', 'Acoplo ' + F(100 * fb.eta, 1) + ' % (' + F(dB, 2) + ' dB de pérdida) en un modo de MFD ' + F(2e6 * fb.wf, 1) + ' µm.', 'Sprzężenie ' + F(100 * fb.eta, 1) + ' % (strata ' + F(dB, 2) + ' dB) do modu o MFD ' + F(2e6 * fb.wf, 1) + ' µm.') };
+      tiles.push(
+        { label: T('Coupling efficiency', 'Ефективність введення', 'Koppelwirkungsgrad', 'Koppelrendement', 'Rendement de couplage', 'Eficiencia de acoplo', 'Sprawność sprzęgania'), value: 100 * fb.eta, hint: '%', precision: 1, learn: 'overlap', tone: verdict.tone },
+        { label: T('Aligned, same plane', 'Без зсуву, та сама площина', 'Ohne Versatz, gleiche Ebene', 'Zonder verschuiving, zelfde vlak', 'Aligné, même plan', 'Alineado, mismo plano', 'Bez przesunięcia, ta sama płaszczyzna'), value: 100 * fb.eta0, hint: '%', precision: 1 },
+        { label: T('Lateral offset for −1 dB', 'Поперечний зсув для −1 дБ', 'Lateraler Versatz für −1 dB', 'Laterale verschuiving voor −1 dB', 'Décalage latéral pour −1 dB', 'Desplazamiento lateral para −1 dB', 'Przesunięcie poprzeczne dla −1 dB'), value: fb.d1dB * 1e6, hint: 'µm', precision: 2 },
+        { label: T('Tilt for −1 dB', 'Нахил для −1 дБ', 'Verkippung für −1 dB', 'Kanteling voor −1 dB', 'Inclinaison pour −1 dB', 'Inclinación para −1 dB', 'Pochylenie dla −1 dB'), value: fb.t1dB * 1000, hint: 'mrad', precision: 2, headline: false },
+        { label: T('Best fibre position', 'Найкраще положення волокна', 'Beste Faserlage', 'Beste vezelpositie', 'Meilleure position de la fibre', 'Mejor posición de la fibra', 'Najlepsze położenie włókna'), value: fb.zBest * 1000, hint: 'mm · ' + F(100 * fb.etaBest, 1) + ' %', precision: 3, headline: false },
+        { label: T('Beam radius at the fibre', 'Радіус пучка на волокні', 'Strahlradius an der Faser', 'Bundelstraal bij de vezel', 'Rayon du faisceau sur la fibre', 'Radio del haz en la fibra', 'Promień wiązki na włóknie'), value: fb.wx * 1e6, hint: 'µm · ' + T('mode', 'мода', 'Mode', 'mode', 'mode', 'modo', 'mod')[ (ui && ui.lang) || 'en'] + ' ' + F(fb.wf * 1e6, 2) + ' µm', precision: 2, headline: false });
+      tables.push({ title: T('Coupling against lateral offset', 'Введення залежно від поперечного зсуву', 'Kopplung über lateralem Versatz', 'Koppeling tegen laterale verschuiving', 'Couplage selon le décalage latéral', 'Acoplo según el desplazamiento lateral', 'Sprzężenie w funkcji przesunięcia poprzecznego'),
+        head: [T('Offset', 'Зсув', 'Versatz', 'Verschuiving', 'Décalage', 'Desplazamiento', 'Przesunięcie'), T('Efficiency', 'Ефективність', 'Wirkungsgrad', 'Rendement', 'Rendement', 'Eficiencia', 'Sprawność'), T('Loss', 'Втрати', 'Verlust', 'Verlies', 'Pertes', 'Pérdida', 'Strata')],
+        rows: fb.curve.map(function (c) { return { cells: [{ text: F(c.d * 1e6, 2) + ' µm' }, { text: F(100 * c.eta, 1) + ' %', num: true }, { text: F(-10 * Math.log10(c.eta), 2) + ' dB', num: true }] }; }) });
+      notes.push(T('Mode acceptance half-angle λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad; beam convergence half-angle ' + F(fb.thetaBeam * 1000, 1) + ' mrad. Fresnel reflection at an uncoated fibre face (≈ 3.5 %) is not included.', 'Кут прийому моди λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' мрад; півкут збіжності пучка ' + F(fb.thetaBeam * 1000, 1) + ' мрад. Френелівське відбиття від торця без покриття (≈ 3,5 %) не враховано.', 'Akzeptanz-Halbwinkel der Mode λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad; Konvergenz-Halbwinkel des Strahls ' + F(fb.thetaBeam * 1000, 1) + ' mrad. Fresnel-Reflexion an einer unbeschichteten Faserstirnfläche (≈ 3,5 %) ist nicht enthalten.', 'Acceptatie-halve hoek van de mode λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad; convergentie-halve hoek van de bundel ' + F(fb.thetaBeam * 1000, 1) + ' mrad. Fresnelreflectie aan een onbehandeld vezeluiteinde (≈ 3,5 %) is niet meegenomen.', 'Demi-angle d’acceptance du mode λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad ; demi-angle de convergence du faisceau ' + F(fb.thetaBeam * 1000, 1) + ' mrad. La réflexion de Fresnel sur une face de fibre non traitée (≈ 3,5 %) n’est pas incluse.', 'Semiángulo de aceptación del modo λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad; semiángulo de convergencia del haz ' + F(fb.thetaBeam * 1000, 1) + ' mrad. No se incluye la reflexión de Fresnel en una cara de fibra sin tratar (≈ 3,5 %).', 'Półkąt akceptacji modu λ/(π w_f) = ' + F(fb.naMode * 1000, 1) + ' mrad; półkąt zbieżności wiązki ' + F(fb.thetaBeam * 1000, 1) + ' mrad. Odbicie Fresnela na niepowlekanym czole włókna (≈ 3,5 %) nie jest uwzględnione.'));
+    } else {
+      tiles.push(
+        { label: T('Final waist radius', 'Радіус кінцевої перетяжки', 'Radius der letzten Taille', 'Straal van de laatste taille', 'Rayon du dernier col', 'Radio de la última cintura', 'Promień końcowego przewężenia'), value: lenParts(out.x.w0).v, hint: lenParts(out.x.w0).u, precision: pr(lenParts(out.x.w0).v), learn: 'waist' },
+        { label: T('at z', 'при z', 'bei z', 'bij z', 'à z', 'en z', 'przy z'), value: out.x.z0 * 1000, hint: 'mm' + (out.x.inside ? '' : ' · ' + T('virtual', 'уявна', 'virtuell', 'virtueel', 'virtuel', 'virtual', 'pozorne')[(ui && ui.lang) || 'en']), precision: 2 },
+        { label: W.zR, value: lenParts(out.x.zR).v, hint: lenParts(out.x.zR).u, precision: pr(lenParts(out.x.zR).v), learn: 'rayleigh' },
+        { label: W.div, value: 2000 * out.x.theta, hint: 'mrad', precision: 3, headline: false },
+        { label: T('Input waist', 'Вхідна перетяжка', 'Eingangstaille', 'Ingangstaille', 'Col d’entrée', 'Cintura de entrada', 'Przewężenie wejściowe'), value: lenParts(last.B.x.w0).v, hint: lenParts(last.B.x.w0).u + ' · M² ' + F(last.B.x.M2, 2), precision: 3, headline: false, learn: 'm2' });
+      if (Math.abs(out.y.z0 - out.x.z0) > 1e-9 || Math.abs(out.y.w0 - out.x.w0) > 1e-12)
+        tiles.push({ label: T('Astigmatic waist separation', 'Розсунення астигматичних перетяжок', 'Astigmatischer Taillenabstand', 'Astigmatische tailleafstand', 'Écart astigmatique des cols', 'Separación astigmática de cinturas', 'Astygmatyczne rozsunięcie przewężeń'), value: (out.y.z0 - out.x.z0) * 1000, hint: 'mm · y ' + L(out.y.w0), precision: 3, headline: false, learn: 'astig' });
+      if (last.self && last.prop.segments.length > 1) {
+        tiles.push({ label: T('Far-field estimate M²λf/(πw)', 'Оцінка дальнього поля M²λf/(πw)', 'Fernfeldschätzung M²λf/(πw)', 'Verreveldschatting M²λf/(πw)', 'Estimation champ lointain M²λf/(πw)', 'Estimación de campo lejano M²λf/(πw)', 'Oszacowanie pola dalekiego M²λf/(πw)'), value: lenParts(Math.abs(last.self.approx)).v, hint: lenParts(Math.abs(last.self.approx)).u + ' · ' + T('first lens', 'перша лінза', 'erste Linse', 'eerste lens', 'première lentille', 'primera lente', 'pierwsza soczewka')[(ui && ui.lang) || 'en'] + ' ' + L(last.prop.segments[1].x.w0) + (last.prop.segments[1].x.inside ? '' : ' · ' + W.virtual[(ui && ui.lang) || 'en']), precision: 3, headline: false, learn: 'selffocus' });
+      }
+      if (fit) {
+        if (fit.ok) {
+          tiles.push({ label: T('Fitted M²', 'Апроксимований M²', 'Angepasstes M²', 'Gefitte M²', 'M² ajusté', 'M² ajustado', 'Dopasowane M²'), value: fit.M2, precision: 3, headline: false, learn: 'iso', tone: fit.isoOk ? 'ok' : 'warn' });
+          notes.push(fit.isoOk ? T('Fit plan meets ISO 11146-1: ≥ 10 points, at least half within one Rayleigh range of the waist and half beyond two.', 'План вимірювань відповідає ISO 11146-1: ≥ 10 точок, половина в межах однієї довжини Релея від перетяжки, половина — далі двох.', 'Messplan erfüllt ISO 11146-1: ≥ 10 Punkte, mindestens die Hälfte innerhalb einer Rayleigh-Länge um die Taille und die Hälfte jenseits von zwei.', 'Meetplan voldoet aan ISO 11146-1: ≥ 10 punten, minstens de helft binnen één Rayleigh-lengte van de taille en de helft voorbij twee.', 'Le plan de mesure respecte l’ISO 11146-1 : ≥ 10 points, la moitié à moins d’une longueur de Rayleigh du col et la moitié au-delà de deux.', 'El plan de medida cumple ISO 11146-1: ≥ 10 puntos, la mitad dentro de una longitud de Rayleigh de la cintura y la mitad más allá de dos.', 'Plan pomiarów spełnia ISO 11146-1: ≥ 10 punktów, co najmniej połowa w obrębie jednej długości Rayleigha od przewężenia i połowa dalej niż dwie.')
+            : T('Fit plan does not meet ISO 11146-1 (≥ 10 points, half within one Rayleigh range, half beyond two): treat M² as indicative.', 'План вимірювань не відповідає ISO 11146-1 (≥ 10 точок, половина в межах однієї довжини Релея, половина — далі двох): M² орієнтовний.', 'Messplan erfüllt ISO 11146-1 nicht (≥ 10 Punkte, Hälfte innerhalb einer Rayleigh-Länge, Hälfte jenseits von zwei): M² nur als Richtwert.', 'Meetplan voldoet niet aan ISO 11146-1 (≥ 10 punten, helft binnen één Rayleigh-lengte, helft voorbij twee): M² is indicatief.', 'Le plan de mesure ne respecte pas l’ISO 11146-1 (≥ 10 points, moitié à moins d’une longueur de Rayleigh, moitié au-delà de deux) : M² indicatif.', 'El plan de medida no cumple ISO 11146-1 (≥ 10 puntos, mitad dentro de una longitud de Rayleigh, mitad más allá de dos): M² orientativo.', 'Plan pomiarów nie spełnia ISO 11146-1 (≥ 10 punktów, połowa w obrębie jednej długości Rayleigha, połowa dalej niż dwie): M² orientacyjne.'));
+        }
+      }
+      tables.push(waistTable(last));
+      var et = elementTable(last); if (et) tables.push(et);
+    }
+    if (last.mode === 'match') {
+      var M = last.match, lang = (ui && ui.lang) || 'en';
+      var N = last.matchTotal, K = M.length, lens = N ? last.matchAll.map(function (m) { return m.length * 1000; }) : [];
+      var lmin = N ? F(Math.min.apply(null, lens), 0) : '', lmax = N ? F(Math.max.apply(null, lens), 0) : '';
+      verdict = N ? { tone: 'ok', text: T(N + ' two-lens solutions reach the target waist exactly (' + K + ' shown), with paths from ' + lmin + ' to ' + lmax + ' mm. Ranked by alignment tolerance — the worse η after moving lens 1 or lens 2 by 1 mm, in 0.1 % steps — then by the shorter path.',
+          'Знайдено ' + N + ' двохлінзових рішень, що точно дають цільову перетяжку (показано ' + K + '), зі шляхом від ' + lmin + ' до ' + lmax + ' мм. Упорядковано за допуском юстування — гірша η після зсуву лінзи 1 або лінзи 2 на 1 мм, з кроком 0,1 %, — далі за коротшим шляхом.',
+          N + ' Zwei-Linsen-Lösungen treffen die Zieltaille exakt (' + K + ' gezeigt), mit Weglängen von ' + lmin + ' bis ' + lmax + ' mm. Geordnet nach Justagetoleranz — das schlechtere η nach 1 mm Verschiebung von Linse 1 oder Linse 2, in Schritten von 0,1 % — dann nach kürzerem Weg.',
+          N + ' oplossingen met twee lenzen bereiken de doeltaille exact (' + K + ' getoond), met weglengtes van ' + lmin + ' tot ' + lmax + ' mm. Gerangschikt naar uitlijntolerantie — de slechtste η na 1 mm verschuiving van lens 1 of lens 2, in stappen van 0,1 % — daarna naar de kortere weg.',
+          N + ' solutions à deux lentilles atteignent exactement le col cible (' + K + ' affichées), avec des trajets de ' + lmin + ' à ' + lmax + ' mm. Classées par tolérance d’alignement — le moins bon η après un déplacement de 1 mm de la lentille 1 ou 2, par pas de 0,1 % — puis par trajet le plus court.',
+          N + ' soluciones de dos lentes alcanzan exactamente la cintura objetivo (' + K + ' mostradas), con trayectos de ' + lmin + ' a ' + lmax + ' mm. Ordenadas por tolerancia de alineación — la peor η tras mover la lente 1 o la 2 en 1 mm, en pasos de 0,1 % — y luego por el trayecto más corto.',
+          'Znaleziono ' + N + ' rozwiązań dwusoczewkowych trafiających dokładnie w przewężenie docelowe (pokazano ' + K + '), z drogą od ' + lmin + ' do ' + lmax + ' mm. Uporządkowane według tolerancji justowania — gorsza η po przesunięciu soczewki 1 lub 2 o 1 mm, w krokach 0,1 % — a potem według krótszej drogi.') }
+        : { tone: 'warn', text: T('No two-lens solution with these focal lengths fits between the limits. Widen the range or add focal lengths.', 'Жодне двохлінзове рішення з цими фокусними відстанями не вміщується в межі. Розширте діапазон або додайте фокусні відстані.', 'Keine Zwei-Linsen-Lösung mit diesen Brennweiten passt in die Grenzen. Bereich erweitern oder Brennweiten ergänzen.', 'Geen oplossing met twee lenzen met deze brandpuntsafstanden past binnen de grenzen. Verruim het bereik of voeg brandpuntsafstanden toe.', 'Aucune solution à deux lentilles avec ces focales ne tient entre les limites. Élargissez la plage ou ajoutez des focales.', 'Ninguna solución de dos lentes con estas focales cabe entre los límites. Amplíe el rango o añada focales.', 'Żadne rozwiązanie dwusoczewkowe z tymi ogniskowymi nie mieści się w granicach. Poszerz zakres lub dodaj ogniskowe.') };
+      tiles.unshift({ label: T('Solutions found', 'Знайдено рішень', 'Gefundene Lösungen', 'Gevonden oplossingen', 'Solutions trouvées', 'Soluciones encontradas', 'Znalezione rozwiązania'), value: last.matchTotal, precision: 0, learn: 'modematch', tone: last.matchTotal ? 'ok' : 'warn' },
+                    { label: T('Current setup matches', 'Поточна схема узгоджена на', 'Aktueller Aufbau passt zu', 'Huidige opstelling past voor', 'Montage actuel adapté à', 'Montaje actual acoplado al', 'Obecny układ dopasowany w'), value: 100 * last.etaNow, hint: '%', precision: 1, learn: 'overlap' });
+      if (M.length) tables.unshift({ title: T('Two-lens solutions', 'Двохлінзові рішення', 'Zwei-Linsen-Lösungen', 'Oplossingen met twee lenzen', 'Solutions à deux lentilles', 'Soluciones de dos lentes', 'Rozwiązania dwusoczewkowe'),
+        head: ['f₁', 'z₁', 'f₂', 'z₂', T('Gap', 'Проміжок', 'Abstand', 'Afstand', 'Écart', 'Separación', 'Odstęp'), T('η, lens 1 +1 mm', 'η, лінза 1 +1 мм', 'η, Linse 1 +1 mm', 'η, lens 1 +1 mm', 'η, lentille 1 +1 mm', 'η, lente 1 +1 mm', 'η, soczewka 1 +1 mm'), T('η, lens 2 +1 mm', 'η, лінза 2 +1 мм', 'η, Linse 2 +1 mm', 'η, lens 2 +1 mm', 'η, lentille 2 +1 mm', 'η, lente 2 +1 mm', 'η, soczewka 2 +1 mm'), ''],
+        rows: M.map(function (m, i) { return { chosen: i === 0, cells: [m.l1, { value: m.x1 * 1000, precision: 1 }, m.l2, { value: m.x2 * 1000, precision: 1 }, { value: m.sep * 1000, precision: 1 }, { text: F(100 * m.eta1mmL1, 1) + ' %', num: true }, { text: F(100 * m.eta1mm, 1) + ' %', num: true },
+          { node: ui.actionButton({ label: W.use, variant: 'ghost', run: function () { applySolution(m); } }) }] }; }) });
+      if (last.exp.length) tables.push({ title: T('Afocal expanders ×' + F(state.expM, 2), 'Афокальні розширювачі ×' + F(state.expM, 2), 'Afokale Aufweiter ×' + F(state.expM, 2), 'Afocale expanders ×' + F(state.expM, 2), 'Élargisseurs afocaux ×' + F(state.expM, 2), 'Expansores afocales ×' + F(state.expM, 2), 'Ekspandery afokalne ×' + F(state.expM, 2)),
+        head: [T('Type', 'Тип', 'Typ', 'Type', 'Type', 'Tipo', 'Typ'), 'f₁', 'f₂', '×', T('Length', 'Довжина', 'Länge', 'Lengte', 'Longueur', 'Longitud', 'Długość')],
+        rows: last.exp.map(function (e) { return { cells: [e.kind === 'kepler' ? 'Kepler' : T('Galileo', 'Галілей', 'Galilei', 'Galilei', 'Galilée', 'Galileo', 'Galileusz'), e.l1, e.l2, { value: e.M, precision: 2 }, { text: F(e.L * 1000, 0) + ' mm', num: true }] }; }) });
+      notes.push(T('η, lens 1 / lens 2 +1 mm: mode-matching efficiency left after moving that lens 1 mm downstream — a direct measure of how critical the alignment is. Focal lengths are thin-lens values from the chosen list.', 'η, лінза 1 / лінза 2 +1 мм: ефективність узгодження після зсуву цієї лінзи на 1 мм уперед — пряма міра критичності юстування. Фокусні відстані — тонколінзові значення з вибраного переліку.', 'η, Linse 1 / Linse 2 +1 mm: Anpassungswirkungsgrad nach Verschieben dieser Linse um 1 mm stromab — ein direktes Maß, wie kritisch die Justage ist. Brennweiten sind Dünnlinsenwerte aus der gewählten Liste.', 'η, lens 1 / lens 2 +1 mm: matchingrendement na 1 mm verschuiven van die lens stroomafwaarts — een directe maat voor hoe kritisch de uitlijning is. Brandpuntsafstanden zijn dunnelenswaarden uit de gekozen lijst.', 'η, lentille 1 / lentille 2 +1 mm : rendement d’adaptation après un déplacement de 1 mm de cette lentille vers l’aval — mesure directe de la criticité de l’alignement. Les focales sont des valeurs de lentilles minces de la liste choisie.', 'η, lente 1 / lente 2 +1 mm: eficiencia de acoplamiento tras mover esa lente 1 mm aguas abajo — medida directa de lo crítico de la alineación. Las focales son valores de lente delgada de la lista elegida.', 'η, soczewka 1 / soczewka 2 +1 mm: sprawność dopasowania po przesunięciu tej soczewki o 1 mm dalej — bezpośrednia miara krytyczności justowania. Ogniskowe to wartości cienkich soczewek z wybranej listy.'));
+    }
+    if (!verdict && last.mode === 'propagate') {
+      verdict = { tone: 'ok', text: T('Final waist ' + L(out.x.w0) + ' at z = ' + F(out.x.z0 * 1000, 2) + ' mm; Rayleigh range ' + L(out.x.zR) + '.', 'Кінцева перетяжка ' + L(out.x.w0) + ' при z = ' + F(out.x.z0 * 1000, 2) + ' мм; довжина Релея ' + L(out.x.zR) + '.', 'Letzte Taille ' + L(out.x.w0) + ' bei z = ' + F(out.x.z0 * 1000, 2) + ' mm; Rayleigh-Länge ' + L(out.x.zR) + '.', 'Laatste taille ' + L(out.x.w0) + ' bij z = ' + F(out.x.z0 * 1000, 2) + ' mm; Rayleigh-lengte ' + L(out.x.zR) + '.', 'Dernier col ' + L(out.x.w0) + ' à z = ' + F(out.x.z0 * 1000, 2) + ' mm ; longueur de Rayleigh ' + L(out.x.zR) + '.', 'Última cintura ' + L(out.x.w0) + ' en z = ' + F(out.x.z0 * 1000, 2) + ' mm; longitud de Rayleigh ' + L(out.x.zR) + '.', 'Końcowe przewężenie ' + L(out.x.w0) + ' przy z = ' + F(out.x.z0 * 1000, 2) + ' mm; długość Rayleigha ' + L(out.x.zR) + '.') };
+    }
+    notes.push(UNIT_NOTE);
+    return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+  }
+
+  function cavityPayload(c) {
+    var lang = (ui && ui.lang) || 'en';
+    var tiles = [
+      { label: 'g₁ · g₂', value: c.G, precision: 4, tone: c.stable ? (c.G > 0.95 || c.G < 0.05 ? 'warn' : 'ok') : 'bad', learn: 'stability' },
+      { label: T('Waist radius', 'Радіус перетяжки', 'Taillenradius', 'Tailleradius', 'Rayon du col', 'Radio de la cintura', 'Promień przewężenia'), value: c.stable ? lenParts(c.w0).v : null, hint: c.stable ? lenParts(c.w0).u : '', precision: 3 },
+      { label: T('Spot on mirror 1 / 2', 'Пляма на дзеркалі 1 / 2', 'Fleck auf Spiegel 1 / 2', 'Vlek op spiegel 1 / 2', 'Tache sur miroir 1 / 2', 'Mancha en espejo 1 / 2', 'Plamka na zwierciadle 1 / 2'), value: c.stable ? lenParts(c.w1).v : null, hint: c.stable ? lenParts(c.w1).u + ' / ' + L(c.w2) : '', precision: 3 },
+      { label: T('Free spectral range', 'Вільний спектральний інтервал', 'Freier Spektralbereich', 'Vrij spectraal bereik', 'Intervalle spectral libre', 'Rango espectral libre', 'Przedział dyspersji swobodnej'), value: c.FSR / 1e6, hint: 'MHz', precision: 2, headline: false },
+      { label: T('Transverse mode spacing', 'Відстань між поперечними модами', 'Transversalmodenabstand', 'Transversale modeafstand', 'Écart des modes transverses', 'Separación de modos transversales', 'Odstęp modów poprzecznych'), value: c.stable ? c.dnuT / 1e6 : null, hint: 'MHz', precision: 2, headline: false, learn: 'gouy' },
+      { label: T('Waist from mirror 1', 'Перетяжка від дзеркала 1', 'Taille ab Spiegel 1', 'Taille vanaf spiegel 1', 'Col depuis le miroir 1', 'Cintura desde el espejo 1', 'Przewężenie od zwierciadła 1'), value: c.stable ? c.z1 * 1000 : null, hint: 'mm', precision: 2, headline: false }
+    ];
+    return {
+      verdict: c.stable ? { tone: c.G > 0.95 || c.G < 0.05 ? 'warn' : 'ok', text: c.G > 0.95 || c.G < 0.05
+          ? T('Stable, but close to the edge (g₁g₂ = ' + F(c.G, 3) + '): small length or curvature errors change the mode a lot.', 'Стійкий, але близько до межі (g₁g₂ = ' + F(c.G, 3) + '): малі похибки довжини чи кривини сильно змінюють моду.', 'Stabil, aber nahe der Grenze (g₁g₂ = ' + F(c.G, 3) + '): kleine Längen- oder Krümmungsfehler ändern die Mode stark.', 'Stabiel, maar dicht bij de grens (g₁g₂ = ' + F(c.G, 3) + '): kleine lengte- of krommingsfouten veranderen de mode sterk.', 'Stable, mais proche de la limite (g₁g₂ = ' + F(c.G, 3) + ') : de petites erreurs de longueur ou de courbure changent beaucoup le mode.', 'Estable, pero cerca del límite (g₁g₂ = ' + F(c.G, 3) + '): pequeños errores de longitud o curvatura cambian mucho el modo.', 'Stabilny, ale blisko granicy (g₁g₂ = ' + F(c.G, 3) + '): małe błędy długości lub krzywizny silnie zmieniają mod.')
+          : T('Stable resonator (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Стійкий резонатор (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Stabiler Resonator (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Stabiele resonator (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Résonateur stable (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Resonador estable (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).', 'Rezonator stabilny (0 < g₁g₂ = ' + F(c.G, 3) + ' < 1).') }
+        : { tone: 'bad', text: T('Unstable: g₁g₂ = ' + F(c.G, 3) + ' is outside 0…1, no Gaussian eigenmode exists.', 'Нестійкий: g₁g₂ = ' + F(c.G, 3) + ' поза 0…1, гаусової власної моди не існує.', 'Instabil: g₁g₂ = ' + F(c.G, 3) + ' liegt außerhalb 0…1, es gibt keine gaußsche Eigenmode.', 'Instabiel: g₁g₂ = ' + F(c.G, 3) + ' ligt buiten 0…1, er bestaat geen Gaussische eigenmode.', 'Instable : g₁g₂ = ' + F(c.G, 3) + ' hors de 0…1, aucun mode propre gaussien n’existe.', 'Inestable: g₁g₂ = ' + F(c.G, 3) + ' fuera de 0…1, no existe modo propio gaussiano.', 'Niestabilny: g₁g₂ = ' + F(c.G, 3) + ' poza 0…1, nie istnieje gaussowski mod własny.') },
+      tiles: tiles,
+      notes: [T('g = 1 − L/R (concave R > 0, flat R = ∞). C confocal, P plane-parallel, S concentric. The cavity is empty; the medium index only scales λ and the free spectral range.', 'g = 1 − L/R (угнуте R > 0, плоске R = ∞). C — конфокальний, P — плоскопаралельний, S — концентричний. Резонатор порожній; показник заломлення середовища лише масштабує λ та вільний спектральний інтервал.', 'g = 1 − L/R (konkav R > 0, plan R = ∞). C konfokal, P planparallel, S konzentrisch. Der Resonator ist leer; der Brechungsindex skaliert nur λ und den freien Spektralbereich.', 'g = 1 − L/R (hol R > 0, vlak R = ∞). C confocaal, P vlakparallel, S concentrisch. De resonator is leeg; de brekingsindex schaalt alleen λ en het vrije spectrale bereik.', 'g = 1 − L/R (concave R > 0, plan R = ∞). C confocale, P plan-parallèle, S concentrique. La cavité est vide ; l’indice ne fait qu’échelonner λ et l’intervalle spectral libre.', 'g = 1 − L/R (cóncavo R > 0, plano R = ∞). C confocal, P plano-paralelo, S concéntrico. La cavidad está vacía; el índice solo escala λ y el rango espectral libre.', 'g = 1 − L/R (wklęsłe R > 0, płaskie R = ∞). C — konfokalny, P — płasko-równoległy, S — koncentryczny. Wnęka jest pusta; współczynnik załamania skaluje tylko λ i przedział dyspersji swobodnej.')]
+    };
+  }
+
+  /* ---------------------------------------------------------------- learn */
+  var LEARN = {
+    version: 1,
+    intro: { title: T('What this tool does', 'Що робить цей інструмент', 'Was dieses Werkzeug tut', 'Wat deze tool doet', 'Ce que fait cet outil', 'Qué hace esta herramienta', 'Co robi to narzędzie'),
+      body: T('It follows a laser beam along its axis with the complex beam parameter q: through every lens, mirror and plate it tells you how wide the beam is, where its waists are and how long they stay small. Start with a preset, then edit the source and the element list; the mode selector adds mode matching, fibre coupling and cavity design.', 'Інструмент веде лазерний пучок уздовж осі за допомогою комплексного параметра q: крізь кожну лінзу, дзеркало й пластину він показує ширину пучка, положення перетяжок і як довго вони лишаються малими. Почніть із прикладу, потім змініть джерело та перелік елементів; перемикач режимів додає узгодження мод, введення у волокно і розрахунок резонатора.', 'Es verfolgt einen Laserstrahl entlang der Achse mit dem komplexen Strahlparameter q: durch jede Linse, jeden Spiegel und jede Platte zeigt es, wie breit der Strahl ist, wo seine Taillen liegen und wie lange sie klein bleiben. Beginnen Sie mit einem Beispiel und ändern Sie dann Quelle und Elementliste; der Moduswähler ergänzt Modenanpassung, Faserkopplung und Resonatorentwurf.', 'Het volgt een laserbundel langs de as met de complexe bundelparameter q: door elke lens, spiegel en plaat laat het zien hoe breed de bundel is, waar de tailles liggen en hoe lang ze klein blijven. Begin met een voorbeeld en pas dan bron en elementenlijst aan; de moduskeuze voegt modematching, vezelkoppeling en resonatorontwerp toe.', 'Il suit un faisceau laser le long de son axe avec le paramètre complexe q : à travers chaque lentille, miroir et lame, il indique la largeur du faisceau, la position de ses cols et la distance sur laquelle ils restent petits. Partez d’un exemple, puis modifiez la source et la liste d’éléments ; le sélecteur de mode ajoute l’adaptation de mode, le couplage dans une fibre et la conception de cavité.', 'Sigue un haz láser a lo largo de su eje con el parámetro complejo q: a través de cada lente, espejo y lámina indica lo ancho que es el haz, dónde están sus cinturas y cuánto tiempo permanecen pequeñas. Empiece con un ejemplo y luego edite la fuente y la lista de elementos; el selector de modo añade acoplamiento de modos, acoplo a fibra y diseño de cavidad.', 'Śledzi wiązkę laserową wzdłuż osi za pomocą zespolonego parametru q: przez każdą soczewkę, zwierciadło i płytkę pokazuje szerokość wiązki, położenie przewężeń i jak długo pozostają małe. Zacznij od przykładu, potem zmień źródło i listę elementów; przełącznik trybów dodaje dopasowanie modów, sprzęganie do światłowodu i projekt rezonatora.') },
+    topics: {
+      waist: { title: T('Waist and beam radius', 'Перетяжка й радіус пучка', 'Taille und Strahlradius', 'Taille en bundelstraal', 'Col et rayon du faisceau', 'Cintura y radio del haz', 'Przewężenie i promień wiązki'),
+        body: T('w is the 1/e² intensity radius (for M² > 1 the second-moment radius of ISO 11146). The waist w₀ is where the wavefront is flat; around it w(z) = w₀√(1 + (z/z_R)²). A lens does not change w at its plane, only the curvature — so the new waist appears downstream.', 'w — радіус за рівнем інтенсивності 1/e² (для M² > 1 — радіус другого моменту за ISO 11146). Перетяжка w₀ — місце, де хвильовий фронт плаский; навколо неї w(z) = w₀√(1 + (z/z_R)²). Лінза не змінює w у своїй площині, лише кривину — тому нова перетяжка з’являється далі.', 'w ist der 1/e²-Intensitätsradius (für M² > 1 der Radius zweiter Momente nach ISO 11146). Die Taille w₀ ist dort, wo die Wellenfront eben ist; um sie gilt w(z) = w₀√(1 + (z/z_R)²). Eine Linse ändert w in ihrer Ebene nicht, nur die Krümmung — daher erscheint die neue Taille weiter stromab.', 'w is de straal bij 1/e² van de intensiteit (voor M² > 1 de tweede-momentstraal van ISO 11146). De taille w₀ is waar het golffront vlak is; daaromheen geldt w(z) = w₀√(1 + (z/z_R)²). Een lens verandert w in haar vlak niet, alleen de kromming — dus de nieuwe taille verschijnt verderop.', 'w est le rayon à 1/e² de l’intensité (pour M² > 1, le rayon du second moment de l’ISO 11146). Le col w₀ est l’endroit où le front d’onde est plan ; autour, w(z) = w₀√(1 + (z/z_R)²). Une lentille ne change pas w dans son plan, seulement la courbure — le nouveau col apparaît donc plus loin.', 'w es el radio a 1/e² de intensidad (para M² > 1, el radio de segundo momento de ISO 11146). La cintura w₀ es donde el frente de onda es plano; a su alrededor w(z) = w₀√(1 + (z/z_R)²). Una lente no cambia w en su plano, solo la curvatura — por eso la nueva cintura aparece más adelante.', 'w to promień przy natężeniu 1/e² (dla M² > 1 promień drugiego momentu wg ISO 11146). Przewężenie w₀ to miejsce, gdzie czoło fali jest płaskie; wokół niego w(z) = w₀√(1 + (z/z_R)²). Soczewka nie zmienia w w swojej płaszczyźnie, tylko krzywiznę — dlatego nowe przewężenie pojawia się dalej.') },
+      rayleigh: { title: T('Rayleigh range', 'Довжина Релея', 'Rayleigh-Länge', 'Rayleigh-lengte', 'Longueur de Rayleigh', 'Longitud de Rayleigh', 'Długość Rayleigha'),
+        body: T('z_R = π n w₀²/(M² λ): the distance over which the beam area doubles. Depth of focus is about 2 z_R. Because it grows with w₀², halving the spot quarters the depth of focus.', 'z_R = π n w₀²/(M² λ): відстань, на якій площа перерізу пучка подвоюється. Глибина фокуса ≈ 2 z_R. Оскільки вона зростає як w₀², зменшення плями вдвічі зменшує глибину фокуса вчетверо.', 'z_R = π n w₀²/(M² λ): die Strecke, auf der sich die Strahlfläche verdoppelt. Die Schärfentiefe beträgt etwa 2 z_R. Da sie mit w₀² wächst, viertelt ein halbierter Fleck die Schärfentiefe.', 'z_R = π n w₀²/(M² λ): de afstand waarover het bundeloppervlak verdubbelt. De scherptediepte is ongeveer 2 z_R. Omdat die met w₀² groeit, geeft een halve vlek een kwart scherptediepte.', 'z_R = π n w₀²/(M² λ) : la distance sur laquelle l’aire du faisceau double. La profondeur de champ vaut environ 2 z_R. Comme elle croît en w₀², diviser le spot par deux divise la profondeur de champ par quatre.', 'z_R = π n w₀²/(M² λ): la distancia en la que el área del haz se duplica. La profundidad de foco es unos 2 z_R. Como crece con w₀², reducir el punto a la mitad reduce la profundidad de foco a la cuarta parte.', 'z_R = π n w₀²/(M² λ): odległość, na której pole przekroju wiązki się podwaja. Głębia ostrości wynosi około 2 z_R. Ponieważ rośnie jak w₀², zmniejszenie plamki o połowę zmniejsza głębię ostrości czterokrotnie.') },
+      m2: { title: T('Beam quality M²', 'Якість пучка M²', 'Strahlqualität M²', 'Bundelkwaliteit M²', 'Qualité de faisceau M²', 'Calidad de haz M²', 'Jakość wiązki M²'),
+        body: T('M² compares a real beam with a perfect TEM00 Gaussian of the same waist: it diverges M² times faster. Through any lens the real beam behaves like a Gaussian of wavelength M²λ (Siegman’s embedded Gaussian), so the focused spot is M² times larger.', 'M² порівнює реальний пучок з ідеальним гаусовим TEM00 тієї ж перетяжки: він розходиться в M² разів швидше. Крізь будь-яку лінзу реальний пучок поводиться як гаусів із довжиною хвилі M²λ (вкладений гаусів пучок Зігмена), тож сфокусована пляма в M² разів більша.', 'M² vergleicht einen realen Strahl mit einem idealen TEM00-Gaußstrahl gleicher Taille: er divergiert M²-mal schneller. Durch jede Linse verhält sich der reale Strahl wie ein Gaußstrahl der Wellenlänge M²λ (Siegmans eingebetteter Gaußstrahl), daher ist der Fokus M²-mal größer.', 'M² vergelijkt een echte bundel met een ideale TEM00-Gaussische bundel met dezelfde taille: hij divergeert M² keer sneller. Door elke lens gedraagt de echte bundel zich als een Gaussische bundel met golflengte M²λ (de ingebedde Gaussische bundel van Siegman), dus de focus is M² keer groter.', 'M² compare un faisceau réel à un gaussien TEM00 parfait de même col : il diverge M² fois plus vite. À travers toute lentille, le faisceau réel se comporte comme un gaussien de longueur d’onde M²λ (gaussien enchâssé de Siegman), d’où un foyer M² fois plus grand.', 'M² compara un haz real con un gaussiano TEM00 perfecto de la misma cintura: diverge M² veces más rápido. A través de cualquier lente el haz real se comporta como un gaussiano de longitud de onda M²λ (gaussiano embebido de Siegman), así que el foco es M² veces mayor.', 'M² porównuje rzeczywistą wiązkę z idealną wiązką gaussowską TEM00 o tym samym przewężeniu: rozbiega się M² razy szybciej. Przez każdą soczewkę rzeczywista wiązka zachowuje się jak gaussowska o długości fali M²λ (osadzona wiązka gaussowska Siegmana), więc plamka ogniskowa jest M² razy większa.') },
+      gouy: { title: T('Gouy phase', 'Фаза Гуї', 'Gouy-Phase', 'Gouy-fase', 'Phase de Gouy', 'Fase de Gouy', 'Faza Gouy’a'),
+        body: T('Passing through a focus, a Gaussian beam picks up an extra π of phase compared with a plane wave: ψ = arctan(z/z_R). In a cavity the round-trip Gouy phase sets the spacing of the transverse modes.', 'Проходячи крізь фокус, гаусів пучок набирає додаткову фазу π порівняно з плоскою хвилею: ψ = arctan(z/z_R). У резонаторі фаза Гуї за повний обхід визначає відстань між поперечними модами.', 'Beim Durchgang durch einen Fokus sammelt ein Gaußstrahl gegenüber einer ebenen Welle zusätzlich π Phase: ψ = arctan(z/z_R). Im Resonator bestimmt die Gouy-Phase eines Umlaufs den Abstand der Transversalmoden.', 'Bij het passeren van een focus krijgt een Gaussische bundel een extra fase π ten opzichte van een vlakke golf: ψ = arctan(z/z_R). In een resonator bepaalt de Gouy-fase per rondgang de afstand van de transversale modes.', 'En traversant un foyer, un faisceau gaussien accumule une phase supplémentaire de π par rapport à une onde plane : ψ = arctan(z/z_R). Dans une cavité, la phase de Gouy d’un aller-retour fixe l’écart des modes transverses.', 'Al atravesar un foco, un haz gaussiano acumula una fase extra de π respecto a una onda plana: ψ = arctan(z/z_R). En una cavidad la fase de Gouy de ida y vuelta fija la separación de los modos transversales.', 'Przechodząc przez ognisko, wiązka gaussowska nabiera dodatkowej fazy π względem fali płaskiej: ψ = arctan(z/z_R). We wnęce faza Gouy’a na obieg wyznacza odstęp modów poprzecznych.') },
+      selffocus: { title: T('Focusing by a lens (Self 1983)', 'Фокусування лінзою (Self 1983)', 'Fokussierung durch eine Linse (Self 1983)', 'Focussering door een lens (Self 1983)', 'Focalisation par une lentille (Self 1983)', 'Enfoque con una lente (Self 1983)', 'Ogniskowanie soczewką (Self 1983)'),
+        body: T('A Gaussian waist is not imaged like a point: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, i.e. s″ − f = f²(s − f)/((s − f)² + z_R²). The new waist lies between the focal plane and the geometric image: on the focal plane when z_R ≫ |s − f| (collimated input), close to the geometric image when z_R ≪ |s − f|; its distance from the focal plane is largest, f²/(2z_R), when z_R = |s − f|. The far-field estimate w ≈ M²λf/(πw_lens) is the limit of a collimated beam. In a medium of index n, λ becomes λ/n.', 'Гаусова перетяжка відображається не як точка: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, тобто s″ − f = f²(s − f)/((s − f)² + z_R²). Нова перетяжка лежить між фокальною площиною та геометричним зображенням: у фокальній площині, коли z_R ≫ |s − f| (колімований пучок), поблизу геометричного зображення, коли z_R ≪ |s − f|; найдалі від фокальної площини, на f²/(2z_R), вона при z_R = |s − f|. Оцінка дальнього поля w ≈ M²λf/(πw_лінзи) — границя для колімованого пучка. У середовищі з показником n замість λ береться λ/n.', 'Eine Gaußtaille wird nicht wie ein Punkt abgebildet: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, also s″ − f = f²(s − f)/((s − f)² + z_R²). Die neue Taille liegt zwischen Brennebene und geometrischem Bild: in der Brennebene, wenn z_R ≫ |s − f| (kollimierter Strahl), nahe dem geometrischen Bild, wenn z_R ≪ |s − f|; am weitesten von der Brennebene entfernt, um f²/(2z_R), ist sie bei z_R = |s − f|. Die Fernfeldschätzung w ≈ M²λf/(πw_Linse) ist der Grenzfall eines kollimierten Strahls. In einem Medium mit Brechungsindex n tritt λ/n an die Stelle von λ.', 'Een Gaussische taille wordt niet als een punt afgebeeld: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, dus s″ − f = f²(s − f)/((s − f)² + z_R²). De nieuwe taille ligt tussen het brandvlak en het geometrische beeld: in het brandvlak als z_R ≫ |s − f| (gecollimeerde bundel), dicht bij het geometrische beeld als z_R ≪ |s − f|; het verst van het brandvlak, f²/(2z_R), ligt ze bij z_R = |s − f|. De verreveldschatting w ≈ M²λf/(πw_lens) is de limiet voor een gecollimeerde bundel. In een medium met brekingsindex n wordt λ vervangen door λ/n.', 'Un col gaussien ne s’image pas comme un point : 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, soit s″ − f = f²(s − f)/((s − f)² + z_R²). Le nouveau col se trouve entre le plan focal et l’image géométrique : dans le plan focal si z_R ≫ |s − f| (faisceau collimaté), près de l’image géométrique si z_R ≪ |s − f| ; il s’écarte le plus du plan focal, de f²/(2z_R), pour z_R = |s − f|. L’estimation en champ lointain w ≈ M²λf/(πw_lentille) est la limite d’un faisceau collimaté. Dans un milieu d’indice n, λ devient λ/n.', 'Una cintura gaussiana no se forma como la imagen de un punto: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, es decir, s″ − f = f²(s − f)/((s − f)² + z_R²). La nueva cintura queda entre el plano focal y la imagen geométrica: en el plano focal si z_R ≫ |s − f| (haz colimado), cerca de la imagen geométrica si z_R ≪ |s − f|; se aleja más del plano focal, f²/(2z_R), cuando z_R = |s − f|. La estimación de campo lejano w ≈ M²λf/(πw_lente) es el límite de un haz colimado. En un medio de índice n, λ pasa a ser λ/n.', 'Przewężenie gaussowskie nie jest odwzorowywane jak punkt: 1/(s + z_R²/(s − f)) + 1/s″ = 1/f, czyli s″ − f = f²(s − f)/((s − f)² + z_R²). Nowe przewężenie leży między płaszczyzną ogniskową a obrazem geometrycznym: w płaszczyźnie ogniskowej, gdy z_R ≫ |s − f| (wiązka skolimowana), blisko obrazu geometrycznego, gdy z_R ≪ |s − f|; najdalej od płaszczyzny ogniskowej, o f²/(2z_R), jest przy z_R = |s − f|. Oszacowanie pola dalekiego w ≈ M²λf/(πw_soczewki) to granica dla wiązki skolimowanej. W ośrodku o współczynniku n zamiast λ bierze się λ/n.') },
+      modematch: { title: T('Mode matching', 'Узгодження мод', 'Modenanpassung', 'Modematching', 'Adaptation de mode', 'Acoplamiento de modos', 'Dopasowanie modów'),
+        body: T('To feed a cavity, fibre or crystal, the beam must arrive with the right waist size at the right place. One lens can do it only for special distances; two lenses usually can, often in several ways, if the focal lengths and the free length allow. The solver searches all pairs from the chosen focal-length list and ranks the exact solutions by how much efficiency survives a 1 mm error of either lens, then by the shorter path.', 'Щоб ввести пучок у резонатор, волокно чи кристал, він має прийти з потрібною перетяжкою в потрібне місце. Одна лінза може це лише за певних відстаней; дві зазвичай можуть, часто кількома способами, якщо дозволяють фокусні відстані й вільна довжина. Розв’язувач перебирає всі пари з вибраного переліку фокусних відстаней і впорядковує точні рішення за тим, скільки ефективності лишається при похибці 1 мм будь-якої з лінз, а далі — за коротшим шляхом.', 'Um einen Resonator, eine Faser oder einen Kristall zu speisen, muss der Strahl mit der richtigen Taille am richtigen Ort ankommen. Eine Linse schafft das nur bei bestimmten Abständen; zwei Linsen meist schon, oft auf mehrere Arten, wenn Brennweiten und freie Länge es zulassen. Der Löser prüft alle Paare der gewählten Brennweitenliste und ordnet die exakten Lösungen danach, wie viel Wirkungsgrad bei 1 mm Fehler einer der beiden Linsen bleibt, dann nach kürzerem Weg.', 'Om een resonator, vezel of kristal te voeden moet de bundel met de juiste taille op de juiste plek aankomen. Eén lens lukt dat alleen bij bepaalde afstanden; twee lenzen meestal wel, vaak op meerdere manieren, als de brandpuntsafstanden en de vrije lengte het toelaten. De oplosser probeert alle paren uit de gekozen lijst en rangschikt de exacte oplossingen naar het rendement dat overblijft bij 1 mm fout van een van beide lenzen, daarna naar de kortere weg.', 'Pour injecter une cavité, une fibre ou un cristal, le faisceau doit arriver avec le bon col au bon endroit. Une lentille n’y parvient qu’à certaines distances ; deux lentilles le peuvent en général, souvent de plusieurs façons, si les focales et la longueur libre le permettent. Le solveur essaie toutes les paires de la liste choisie et classe les solutions exactes selon le rendement conservé pour une erreur de 1 mm de l’une ou l’autre lentille, puis par trajet plus court.', 'Para alimentar una cavidad, fibra o cristal, el haz debe llegar con la cintura correcta al lugar correcto. Una lente lo logra solo a ciertas distancias; dos lentes normalmente sí, a menudo de varias formas, si las focales y la longitud libre lo permiten. El solucionador prueba todos los pares de la lista elegida y ordena las soluciones exactas por la eficiencia que queda con un error de 1 mm de cualquiera de las dos lentes y después por el trayecto más corto.', 'Aby zasilić rezonator, światłowód lub kryształ, wiązka musi dotrzeć z właściwym przewężeniem we właściwe miejsce. Jedna soczewka potrafi to tylko przy określonych odległościach; dwie zwykle tak, często na kilka sposobów, jeśli pozwalają na to ogniskowe i wolna długość. Solwer sprawdza wszystkie pary z wybranej listy i porządkuje dokładne rozwiązania według sprawności pozostałej przy błędzie 1 mm dowolnej z soczewek, a potem według krótszej drogi.') },
+      overlap: { title: T('Overlap efficiency', 'Ефективність перекриття', 'Überlappwirkungsgrad', 'Overlaprendement', 'Rendement de recouvrement', 'Eficiencia de solapamiento', 'Sprawność nakładania'),
+        body: T('The power coupled into a mode is |∫E₁E₂*|² normalised. For two Gaussians on one plane η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); a lateral offset d adds exp(−2d²/(w₁² + w₂²)). Size mismatch is forgiving, offset is not.', 'Потужність, що потрапляє в моду, — нормований |∫E₁E₂*|². Для двох гаусових пучків в одній площині η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); поперечний зсув d додає множник exp(−2d²/(w₁² + w₂²)). Невідповідність розміру прощається, зсув — ні.', 'Die in eine Mode gekoppelte Leistung ist das normierte |∫E₁E₂*|². Für zwei Gaußstrahlen in einer Ebene gilt η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); ein lateraler Versatz d fügt exp(−2d²/(w₁² + w₂²)) hinzu. Größenfehler verzeihen viel, Versatz nicht.', 'Het in een mode gekoppelde vermogen is de genormeerde |∫E₁E₂*|². Voor twee Gaussische bundels in één vlak geldt η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); een laterale verschuiving d voegt exp(−2d²/(w₁² + w₂²)) toe. Grootteverschil is vergeeflijk, verschuiving niet.', 'La puissance couplée dans un mode est le |∫E₁E₂*|² normalisé. Pour deux gaussiens dans un même plan, η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²) ; un décalage latéral d ajoute exp(−2d²/(w₁² + w₂²)). L’écart de taille pardonne, le décalage non.', 'La potencia acoplada a un modo es el |∫E₁E₂*|² normalizado. Para dos gaussianos en un mismo plano η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); un desplazamiento lateral d añade exp(−2d²/(w₁² + w₂²)). La diferencia de tamaño perdona, el desplazamiento no.', 'Moc sprzężona do modu to unormowane |∫E₁E₂*|². Dla dwóch wiązek gaussowskich w jednej płaszczyźnie η = 4/((w₁/w₂ + w₂/w₁)² + (πw₁w₂/λ)²(1/R₁ − 1/R₂)²); przesunięcie poprzeczne d dodaje exp(−2d²/(w₁² + w₂²)). Niedopasowanie rozmiaru jest wyrozumiałe, przesunięcie — nie.') },
+      iso: { title: T('ISO 11146 beam measurement', 'Вимірювання пучка за ISO 11146', 'Strahlvermessung nach ISO 11146', 'Bundelmeting volgens ISO 11146', 'Mesure de faisceau selon l’ISO 11146', 'Medición de haz según ISO 11146', 'Pomiar wiązki wg ISO 11146'),
+        body: T('Measure second-moment (D4σ) diameters at ten or more planes, half within one Rayleigh range of the waist and half beyond two, and fit d²(z) = a + bz + cz². The fit gives the waist, its position and M² = π w₀ θ/λ. A single knife-edge or 1/e² width is not the ISO diameter for non-Gaussian profiles.', 'Виміряйте діаметри за другими моментами (D4σ) щонайменше в десяти площинах — половину в межах однієї довжини Релея від перетяжки, половину далі двох — і апроксимуйте d²(z) = a + bz + cz². Апроксимація дає перетяжку, її положення та M² = π w₀ θ/λ. Ширина за ножем чи на рівні 1/e² не є діаметром ISO для негаусових профілів.', 'Messen Sie Durchmesser zweiter Momente (D4σ) in mindestens zehn Ebenen, die Hälfte innerhalb einer Rayleigh-Länge um die Taille und die Hälfte jenseits von zwei, und passen Sie d²(z) = a + bz + cz² an. Der Fit liefert Taille, Lage und M² = π w₀ θ/λ. Eine Messerschneiden- oder 1/e²-Breite ist für nicht-gaußförmige Profile nicht der ISO-Durchmesser.', 'Meet tweede-momentdiameters (D4σ) in tien of meer vlakken, de helft binnen één Rayleigh-lengte van de taille en de helft voorbij twee, en fit d²(z) = a + bz + cz². De fit geeft de taille, haar positie en M² = π w₀ θ/λ. Een mesrand- of 1/e²-breedte is voor niet-Gaussische profielen niet de ISO-diameter.', 'Mesurez des diamètres au second moment (D4σ) en dix plans ou plus, la moitié à moins d’une longueur de Rayleigh du col et la moitié au-delà de deux, puis ajustez d²(z) = a + bz + cz². L’ajustement donne le col, sa position et M² = π w₀ θ/λ. Une largeur au couteau ou à 1/e² n’est pas le diamètre ISO pour un profil non gaussien.', 'Mida diámetros de segundo momento (D4σ) en diez o más planos, la mitad dentro de una longitud de Rayleigh de la cintura y la mitad más allá de dos, y ajuste d²(z) = a + bz + cz². El ajuste da la cintura, su posición y M² = π w₀ θ/λ. Un ancho de cuchilla o a 1/e² no es el diámetro ISO para perfiles no gaussianos.', 'Zmierz średnice drugiego momentu (D4σ) w co najmniej dziesięciu płaszczyznach — połowę w obrębie jednej długości Rayleigha od przewężenia, połowę dalej niż dwie — i dopasuj d²(z) = a + bz + cz². Dopasowanie daje przewężenie, jego położenie i M² = π w₀ θ/λ. Szerokość metodą ostrza lub przy 1/e² nie jest średnicą ISO dla profili niegaussowskich.') },
+      stability: { title: T('Resonator stability', 'Стійкість резонатора', 'Resonatorstabilität', 'Resonatorstabiliteit', 'Stabilité du résonateur', 'Estabilidad del resonador', 'Stabilność rezonatora'),
+        body: T('With g = 1 − L/R for each mirror, a Gaussian mode repeats itself after a round trip only if 0 < g₁g₂ < 1 (shaded). Near the edges (plane-parallel, concentric) the mode size on the mirrors diverges and the cavity becomes hypersensitive to length and tilt.', 'Для g = 1 − L/R кожного дзеркала гаусова мода відтворюється після обходу лише при 0 < g₁g₂ < 1 (заштрихована область). Біля меж (плоскопаралельний, концентричний) розмір моди на дзеркалах необмежено зростає, а резонатор стає надчутливим до довжини й нахилу.', 'Mit g = 1 − L/R je Spiegel reproduziert sich eine Gaußmode nach einem Umlauf nur für 0 < g₁g₂ < 1 (schattiert). An den Rändern (planparallel, konzentrisch) wächst die Modengröße auf den Spiegeln über alle Grenzen, und der Resonator wird überempfindlich gegen Länge und Verkippung.', 'Met g = 1 − L/R per spiegel herhaalt een Gaussische mode zich na een rondgang alleen als 0 < g₁g₂ < 1 (gearceerd). Bij de randen (vlakparallel, concentrisch) groeit de modegrootte op de spiegels onbeperkt en wordt de resonator overgevoelig voor lengte en kanteling.', 'Avec g = 1 − L/R pour chaque miroir, un mode gaussien ne se reproduit après un aller-retour que si 0 < g₁g₂ < 1 (zone grisée). Près des bords (plan-parallèle, concentrique), la taille du mode sur les miroirs diverge et la cavité devient hypersensible à la longueur et à l’inclinaison.', 'Con g = 1 − L/R para cada espejo, un modo gaussiano se reproduce tras una ida y vuelta solo si 0 < g₁g₂ < 1 (sombreado). Cerca de los bordes (plano-paralelo, concéntrico) el tamaño del modo en los espejos diverge y la cavidad se vuelve hipersensible a la longitud y la inclinación.', 'Przy g = 1 − L/R dla każdego zwierciadła mod gaussowski odtwarza się po obiegu tylko dla 0 < g₁g₂ < 1 (obszar zacieniowany). Przy granicach (płasko-równoległy, koncentryczny) rozmiar modu na zwierciadłach rośnie bez ograniczeń, a wnęka staje się nadwrażliwa na długość i pochylenie.') },
+      astig: { title: T('Astigmatism x / y', 'Астигматизм x / y', 'Astigmatismus x / y', 'Astigmatisme x / y', 'Astigmatisme x / y', 'Astigmatismo x / y', 'Astygmatyzm x / y'),
+        body: T('x is the plane of a folded path (tangential), y is perpendicular (sagittal). A curved mirror hit at angle θ focuses with f·cosθ in x and f/cosθ in y; a cylindrical lens acts on one axis only. Diode lasers start astigmatic: give x and y their own waists.', 'x — площина згину ходу променів (меридіональна), y — перпендикулярна (сагітальна). Сферичне дзеркало під кутом θ фокусує з f·cosθ по x і f/cosθ по y; циліндрична лінза діє лише вздовж однієї осі. Діодні лазери астигматичні від початку: задайте x та y окремі перетяжки.', 'x ist die Ebene eines gefalteten Strahlengangs (tangential), y senkrecht dazu (sagittal). Ein unter θ getroffener Hohlspiegel fokussiert mit f·cosθ in x und f/cosθ in y; eine Zylinderlinse wirkt nur auf eine Achse. Diodenlaser sind von Haus aus astigmatisch: geben Sie x und y eigene Taillen.', 'x is het vlak van een gevouwen pad (tangentiaal), y staat er loodrecht op (sagittaal). Een holle spiegel onder hoek θ focusseert met f·cosθ in x en f/cosθ in y; een cilinderlens werkt op één as. Diodelasers zijn van nature astigmatisch: geef x en y elk een eigen taille.', 'x est le plan d’un trajet replié (tangentiel), y lui est perpendiculaire (sagittal). Un miroir concave attaqué sous l’angle θ focalise avec f·cosθ en x et f/cosθ en y ; une lentille cylindrique n’agit que sur un axe. Les diodes laser sont astigmates d’origine : donnez à x et y leurs propres cols.', 'x es el plano de un trayecto plegado (tangencial), y es perpendicular (sagital). Un espejo cóncavo iluminado con ángulo θ enfoca con f·cosθ en x y f/cosθ en y; una lente cilíndrica actúa en un solo eje. Los diodos láser son astigmáticos de origen: dé a x e y su propia cintura.', 'x to płaszczyzna załamanego biegu wiązki (południkowa), y — prostopadła (strzałkowa). Zwierciadło wklęsłe oświetlone pod kątem θ ogniskuje z f·cosθ w x i f/cosθ w y; soczewka cylindryczna działa tylko w jednej osi. Lasery diodowe są astygmatyczne z natury: nadaj x i y osobne przewężenia.') },
+      elements: { title: T('Elements along the axis', 'Елементи вздовж осі', 'Elemente entlang der Achse', 'Elementen langs de as', 'Éléments le long de l’axe', 'Elementos a lo largo del eje', 'Elementy wzdłuż osi'),
+        body: T('Each row is a thin element at position z (mm). f is the focal length (negative = diverging; for a curved mirror f = R/2). A plate of thickness t and index n moves the following waist by t(1 − 1/n). Ø is the clear aperture: if less than 99 % of the power passes, the row turns red. f is the focal length the element has in the medium it sits in: a collimated beam focuses a distance f behind it. A glass lens rated for air has a longer f in water — enter the in-medium value.', 'Кожен рядок — тонкий елемент у положенні z (мм). f — фокусна відстань (від’ємна — розсіювальна; для сферичного дзеркала f = R/2). Пластина товщиною t з показником n зсуває наступну перетяжку на t(1 − 1/n). Ø — світловий діаметр: якщо проходить менше 99 % потужності, рядок стає червоним. f — фокусна відстань елемента в тому середовищі, де він стоїть: колімований пучок фокусується на відстані f за ним. Скляна лінза з паспортною f для повітря у воді має довшу f — уводьте значення для середовища.', 'Jede Zeile ist ein dünnes Element an der Lage z (mm). f ist die Brennweite (negativ = zerstreuend; für einen Hohlspiegel f = R/2). Eine Platte der Dicke t mit Index n verschiebt die folgende Taille um t(1 − 1/n). Ø ist die freie Öffnung: passieren weniger als 99 % der Leistung, wird die Zeile rot. f ist die Brennweite des Elements in dem Medium, in dem es sitzt: ein kollimierter Strahl fokussiert im Abstand f dahinter. Eine Glaslinse mit Luft-Brennweite hat in Wasser ein längeres f — geben Sie den Wert im Medium ein.', 'Elke rij is een dun element op positie z (mm). f is de brandpuntsafstand (negatief = verstrooiend; voor een holle spiegel f = R/2). Een plaat van dikte t en index n verschuift de volgende taille met t(1 − 1/n). Ø is de vrije opening: gaat minder dan 99 % van het vermogen door, dan kleurt de rij rood. f is de brandpuntsafstand van het element in het medium waarin het staat: een gecollimeerde bundel focust op afstand f erachter. Een glazen lens met een f voor lucht heeft in water een langere f — vul de waarde in het medium in.', 'Chaque ligne est un élément mince à la position z (mm). f est la focale (négative = divergente ; pour un miroir sphérique f = R/2). Une lame d’épaisseur t et d’indice n décale le col suivant de t(1 − 1/n). Ø est l’ouverture utile : si moins de 99 % de la puissance passe, la ligne devient rouge. f est la focale de l’élément dans le milieu où il se trouve : un faisceau collimaté focalise à la distance f derrière lui. Une lentille de verre spécifiée dans l’air a une focale plus longue dans l’eau — saisissez la valeur dans le milieu.', 'Cada fila es un elemento delgado en la posición z (mm). f es la focal (negativa = divergente; para un espejo esférico f = R/2). Una lámina de espesor t e índice n desplaza la cintura siguiente t(1 − 1/n). Ø es la apertura libre: si pasa menos del 99 % de la potencia, la fila se vuelve roja. f es la focal del elemento en el medio donde está: un haz colimado enfoca a la distancia f detrás de él. Una lente de vidrio especificada en aire tiene una f más larga en agua: introduzca el valor en el medio.', 'Każdy wiersz to cienki element w położeniu z (mm). f to ogniskowa (ujemna = rozpraszająca; dla zwierciadła sferycznego f = R/2). Płytka o grubości t i współczynniku n przesuwa następne przewężenie o t(1 − 1/n). Ø to apertura czynna: jeśli przechodzi mniej niż 99 % mocy, wiersz zmienia kolor na czerwony. f to ogniskowa elementu w ośrodku, w którym stoi: wiązka skolimowana skupia się w odległości f za nim. Szklana soczewka o ogniskowej podanej dla powietrza ma w wodzie dłuższą f — wpisz wartość dla ośrodka.') }
+    },
+    tour: [
+      { topic: 'waist', focus: '[data-dgu-field="f-w0"]' },
+      { topic: 'elements', focus: '[data-dgu-field="f-els"]' },
+      { topic: 'rayleigh', focus: '.dgu-r-results' },
+      { topic: 'gouy', focus: '.dgu-stage' },
+      { topic: 'modematch', focus: '[data-dgu-field="f-mode"]' }
+    ]
+  };
+
+  /* ---------------------------------------------------------------- panels */
+  var PANELS = [
+    { id: 'mode', slot: 'inputs', title: T('Task', 'Завдання', 'Aufgabe', 'Taak', 'Tâche', 'Tarea', 'Zadanie'), fields: [
+      { id: 'f-mode', key: 'mode', type: 'select', learn: 'modematch', label: T('What to compute', 'Що обчислити', 'Was berechnen', 'Wat berekenen', 'Que calculer', 'Qué calcular', 'Co obliczyć'), options: [
+        { value: 'propagate', label: T('Beam through elements', 'Пучок крізь елементи', 'Strahl durch Elemente', 'Bundel door elementen', 'Faisceau à travers les éléments', 'Haz a través de elementos', 'Wiązka przez elementy') },
+        { value: 'match', label: T('Mode matching (2 lenses)', 'Узгодження мод (2 лінзи)', 'Modenanpassung (2 Linsen)', 'Modematching (2 lenzen)', 'Adaptation de mode (2 lentilles)', 'Acoplamiento de modos (2 lentes)', 'Dopasowanie modów (2 soczewki)') },
+        { value: 'fibre', label: T('Fibre coupling', 'Введення у волокно', 'Faserkopplung', 'Vezelkoppeling', 'Couplage dans une fibre', 'Acoplo a fibra', 'Sprzęganie do światłowodu') },
+        { value: 'cavity', label: T('Two-mirror cavity', 'Двозеркальний резонатор', 'Zwei-Spiegel-Resonator', 'Resonator met twee spiegels', 'Cavité à deux miroirs', 'Cavidad de dos espejos', 'Rezonator dwuzwierciadlany') }] },
+      { id: 'f-view', key: 'view', type: 'segmented', visible: notCavity, label: T('Plot', 'Графік', 'Diagramm', 'Grafiek', 'Tracé', 'Gráfico', 'Wykres'), options: [
+        { value: 'w', label: 'w(z)' }, { value: 'R', label: 'R(z)' }, { value: 'gouy', label: T('Gouy', 'Гуї', 'Gouy', 'Gouy', 'Gouy', 'Gouy', 'Gouy') }] },
+      { id: 'f-lambda', key: 'lambda_nm', type: 'number', unit: 'nm', min: 150, max: 20000, step: 0.1, precision: 1, required: true, label: T('Wavelength (vacuum)', 'Довжина хвилі (у вакуумі)', 'Wellenlänge (Vakuum)', 'Golflengte (vacuüm)', 'Longueur d’onde (vide)', 'Longitud de onda (vacío)', 'Długość fali (w próżni)') }
+    ] },
+    { id: 'src', slot: 'inputs', title: T('Laser beam', 'Лазерний пучок', 'Laserstrahl', 'Laserbundel', 'Faisceau laser', 'Haz láser', 'Wiązka laserowa'), fields: [
+      { id: 'f-src', key: 'src', type: 'segmented', visible: notCavity, label: T('Defined by', 'Задано через', 'Festgelegt durch', 'Bepaald door', 'Défini par', 'Definido por', 'Zdefiniowana przez'), options: [
+        { value: 'waist', label: T('Waist', 'Перетяжку', 'Taille', 'Taille', 'Col', 'Cintura', 'Przewężenie') },
+        { value: 'div', label: T('Divergence', 'Розбіжність', 'Divergenz', 'Divergentie', 'Divergence', 'Divergencia', 'Rozbieżność') },
+        { value: 'fit', label: T('Measured (ISO 11146)', 'Виміри (ISO 11146)', 'Gemessen (ISO 11146)', 'Gemeten (ISO 11146)', 'Mesuré (ISO 11146)', 'Medido (ISO 11146)', 'Pomiar (ISO 11146)') }] },
+      { id: 'f-w0', key: 'w0_mm', type: 'number', unit: 'mm', min: 1e-4, max: 100, step: 0.001, precision: 4, learn: 'waist', visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'waist'; }, label: T('Waist radius w₀ (1/e²)', 'Радіус перетяжки w₀ (1/e²)', 'Taillenradius w₀ (1/e²)', 'Tailleradius w₀ (1/e²)', 'Rayon du col w₀ (1/e²)', 'Radio de cintura w₀ (1/e²)', 'Promień przewężenia w₀ (1/e²)') },
+      { id: 'f-div', key: 'div_mrad', type: 'number', unit: 'mrad', min: 1e-3, max: 1000, step: 0.01, precision: 3, visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'div'; }, label: T('Full-angle divergence', 'Повний кут розбіжності', 'Voller Divergenzwinkel', 'Volle divergentiehoek', 'Divergence (angle total)', 'Divergencia (ángulo total)', 'Pełny kąt rozbieżności') },
+      { id: 'f-z0', key: 'z0_mm', type: 'number', unit: 'mm', min: -1e5, max: 1e5, step: 1, precision: 2, visible: function (c) { return c.state.mode !== 'cavity' && c.state.src !== 'fit'; }, label: T('Waist position z₀', 'Положення перетяжки z₀', 'Taillenlage z₀', 'Taillepositie z₀', 'Position du col z₀', 'Posición de la cintura z₀', 'Położenie przewężenia z₀') },
+      { id: 'f-M2', key: 'M2', type: 'number', min: 1, max: 100, step: 0.01, precision: 2, learn: 'm2', visible: function (c) { return c.state.mode !== 'cavity' && c.state.src !== 'fit'; }, label: T('Beam quality M²', 'Якість пучка M²', 'Strahlqualität M²', 'Bundelkwaliteit M²', 'Qualité de faisceau M²', 'Calidad de haz M²', 'Jakość wiązki M²') },
+      { id: 'f-n0', key: 'n0', type: 'number', min: 1, max: 4, step: 0.001, precision: 4, visible: notCavity, label: T('Index of the surrounding medium', 'Показник заломлення середовища', 'Brechungsindex der Umgebung', 'Brekingsindex van de omgeving', 'Indice du milieu ambiant', 'Índice del medio', 'Współczynnik załamania otoczenia') },
+      { id: 'f-astig', key: 'astig', type: 'toggle', learn: 'astig', visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'waist'; }, label: T('Separate y beam (astigmatic source)', 'Окремий пучок по y (астигматичне джерело)', 'Eigener y-Strahl (astigmatische Quelle)', 'Aparte y-bundel (astigmatische bron)', 'Faisceau y distinct (source astigmate)', 'Haz y independiente (fuente astigmática)', 'Osobna wiązka y (źródło astygmatyczne)') },
+      { id: 'f-w0y', key: 'w0y_mm', type: 'number', unit: 'mm', min: 1e-4, max: 100, step: 0.001, precision: 4, visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'waist' && c.state.astig; }, label: T('Waist radius y', 'Радіус перетяжки y', 'Taillenradius y', 'Tailleradius y', 'Rayon du col y', 'Radio de cintura y', 'Promień przewężenia y') },
+      { id: 'f-z0y', key: 'z0y_mm', type: 'number', unit: 'mm', min: -1e5, max: 1e5, step: 1, precision: 2, visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'waist' && c.state.astig; }, label: T('Waist position y', 'Положення перетяжки y', 'Taillenlage y', 'Taillepositie y', 'Position du col y', 'Posición de la cintura y', 'Położenie przewężenia y') },
+      { id: 'f-M2y', key: 'M2y', type: 'number', min: 1, max: 100, step: 0.01, precision: 2, visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'waist' && c.state.astig; }, label: T('M² in y', 'M² по y', 'M² in y', 'M² in y', 'M² en y', 'M² en y', 'M² w y') },
+      { id: 'f-pts', key: 'pts', type: 'list', learn: 'iso', visible: function (c) { return c.state.mode !== 'cavity' && c.state.src === 'fit'; }, label: T('Measured D4σ diameters', 'Виміряні діаметри D4σ', 'Gemessene D4σ-Durchmesser', 'Gemeten D4σ-diameters', 'Diamètres D4σ mesurés', 'Diámetros D4σ medidos', 'Zmierzone średnice D4σ'),
+        row: [{ key: 'z_mm', type: 'number', label: 'z', unit: 'mm', step: 0.1 }, { key: 'd_mm', type: 'number', label: 'D4σ', unit: 'mm', step: 0.001, min: 0 }],
+        newRow: function (rows) { var l = rows[rows.length - 1]; return { z_mm: l ? l.z_mm + 10 : 0, d_mm: l ? l.d_mm : 1 }; }, minRows: 0, maxRows: 60,
+        addLabel: T('Add a plane', 'Додати площину', 'Ebene hinzufügen', 'Vlak toevoegen', 'Ajouter un plan', 'Añadir un plano', 'Dodaj płaszczyznę') }
+    ] },
+    { id: 'els', slot: 'inputs', visible: notCavity, title: T('Elements', 'Елементи', 'Elemente', 'Elementen', 'Éléments', 'Elementos', 'Elementy'), learn: 'elements', fields: [
+      { id: 'f-els', key: 'elements', type: 'list', visible: notCavity, learn: 'elements', label: T('Along the axis', 'Уздовж осі', 'Entlang der Achse', 'Langs de as', 'Le long de l’axe', 'A lo largo del eje', 'Wzdłuż osi'),
+        row: [
+          { key: 'label', type: 'text', label: T('Name', 'Назва', 'Name', 'Naam', 'Nom', 'Nombre', 'Nazwa'), width: '64px' },
+          { key: 'kind', type: 'select', label: T('Kind', 'Тип', 'Art', 'Soort', 'Type', 'Tipo', 'Rodzaj'), options: KIND_OPTS },
+          { key: 'z_mm', type: 'number', label: 'z', unit: 'mm', step: 1, width: '78px' },
+          { key: 'f_mm', type: 'number', label: 'f', unit: 'mm', step: 1, width: '78px' },
+          { key: 't_mm', type: 'number', label: 't', unit: 'mm', step: 0.1, min: 0, width: '64px' },
+          { key: 'n', type: 'number', label: 'n', step: 0.01, min: 1, max: 5, width: '60px' },
+          { key: 'aoi', type: 'number', label: 'θ', unit: '°', step: 1, min: 0, max: 80, width: '56px' },
+          { key: 'D_mm', type: 'number', label: 'Ø', unit: 'mm', step: 0.1, min: 0, width: '64px' }],
+        newRow: function (rows) { var l = rows[rows.length - 1]; return { label: 'L' + (rows.length + 1), kind: 'lens', z_mm: l ? l.z_mm + 100 : 100, f_mm: 100, t_mm: 0, n: 1.5, aoi: 0, D_mm: 25.4 }; },
+        minRows: 0, maxRows: 24, reorder: true,
+        addLabel: T('Add element', 'Додати елемент', 'Element hinzufügen', 'Element toevoegen', 'Ajouter un élément', 'Añadir elemento', 'Dodaj element'),
+        validateRow: function (row) { return (row.kind === 'slab' || row.kind === 'aperture' || (isFinite(row.f_mm) && row.f_mm !== 0)) ? true : T('Focal length must not be 0', 'Фокусна відстань не може бути 0', 'Brennweite darf nicht 0 sein', 'Brandpuntsafstand mag niet 0 zijn', 'La focale ne peut pas être nulle', 'La focal no puede ser 0', 'Ogniskowa nie może wynosić 0'); } },
+      { id: 'f-zs', key: 'zStart_mm', type: 'number', unit: 'mm', step: 10, precision: 1, visible: notCavity, label: T('Plot from z', 'Графік від z', 'Diagramm ab z', 'Grafiek vanaf z', 'Tracé à partir de z', 'Gráfico desde z', 'Wykres od z') },
+      { id: 'f-ze', key: 'zEnd_mm', type: 'number', unit: 'mm', step: 10, precision: 1, visible: notCavity, label: T('Plot to z', 'Графік до z', 'Diagramm bis z', 'Grafiek tot z', 'Tracé jusqu’à z', 'Gráfico hasta z', 'Wykres do z') }
+    ] },
+    { id: 'match', slot: 'inputs', title: T('Target and lenses', 'Ціль і лінзи', 'Ziel und Linsen', 'Doel en lenzen', 'Cible et lentilles', 'Objetivo y lentes', 'Cel i soczewki'), learn: 'modematch', fields: [
+      { id: 'f-tw', key: 'tW0_um', type: 'number', unit: 'µm', min: 0.5, max: 1e5, step: 1, precision: 2, visible: isMode('match'), label: T('Target waist radius', 'Цільовий радіус перетяжки', 'Ziel-Taillenradius', 'Doeltailleradius', 'Rayon du col cible', 'Radio de cintura objetivo', 'Docelowy promień przewężenia') },
+      { id: 'f-tz', key: 'tZ0_mm', type: 'number', unit: 'mm', step: 1, precision: 1, visible: isMode('match'), label: T('Target waist at z', 'Цільова перетяжка при z', 'Zieltaille bei z', 'Doeltaille bij z', 'Col cible à z', 'Cintura objetivo en z', 'Przewężenie docelowe przy z') },
+      { id: 'f-zmin', key: 'mzMin_mm', type: 'number', unit: 'mm', step: 1, precision: 1, visible: isMode('match'), label: T('Lenses not before z', 'Лінзи не раніше z', 'Linsen nicht vor z', 'Lenzen niet vóór z', 'Lentilles pas avant z', 'Lentes no antes de z', 'Soczewki nie przed z') },
+      { id: 'f-zmax', key: 'mzMax_mm', type: 'number', unit: 'mm', step: 1, precision: 1, visible: isMode('match'), label: T('Lenses not after z', 'Лінзи не пізніше z', 'Linsen nicht nach z', 'Lenzen niet na z', 'Lentilles pas après z', 'Lentes no después de z', 'Soczewki nie za z') },
+      { id: 'f-gap', key: 'mGap_mm', type: 'number', unit: 'mm', min: 0, step: 1, precision: 1, visible: isMode('match'), label: T('Minimum lens gap', 'Мінімальний проміжок між лінзами', 'Mindestlinsenabstand', 'Minimale lensafstand', 'Écart minimal entre lentilles', 'Separación mínima entre lentes', 'Minimalny odstęp soczewek') },
+      { id: 'f-focsrc', key: 'focSrc', type: 'segmented', visible: isMode('match'), label: T('Focal lengths from', 'Фокусні відстані з', 'Brennweiten aus', 'Brandpuntsafstanden uit', 'Focales issues de', 'Focales de', 'Ogniskowe z'), options: [
+        { value: 'typed', label: T('My list', 'Мій перелік', 'Meine Liste', 'Mijn lijst', 'Ma liste', 'Mi lista', 'Moja lista') },
+        { value: 'stock', label: T('Stock: Thorlabs Ø 25.4 mm N-BK7 singlets', 'Склад: сингліти Thorlabs Ø 25,4 мм з N-BK7', 'Lager: Thorlabs-Einzellinsen Ø 25,4 mm aus N-BK7', 'Voorraad: Thorlabs-singlets Ø 25,4 mm van N-BK7', 'Catalogue : singulets Thorlabs Ø 25,4 mm en N-BK7', 'Catálogo: lentes simples Thorlabs Ø 25,4 mm de N-BK7', 'Katalog: soczewki pojedyncze Thorlabs Ø 25,4 mm z N-BK7') }] },
+      { id: 'f-mall', key: 'mAll', type: 'toggle', visible: isMode('match'), label: T('Show all solutions in the table', 'Показати всі рішення в таблиці', 'Alle Lösungen in der Tabelle zeigen', 'Alle oplossingen in de tabel tonen', 'Afficher toutes les solutions dans le tableau', 'Mostrar todas las soluciones en la tabla', 'Pokaż wszystkie rozwiązania w tabeli') },
+      { id: 'f-foc', key: 'focals', type: 'text', visible: function (c) { return c.state.mode === 'match' && c.state.focSrc !== 'stock'; }, label: T('Available focal lengths, mm', 'Доступні фокусні відстані, мм', 'Verfügbare Brennweiten, mm', 'Beschikbare brandpuntsafstanden, mm', 'Focales disponibles, mm', 'Focales disponibles, mm', 'Dostępne ogniskowe, mm'),
+        hint: T('Typical catalogue values; negative = diverging lens.', 'Типові каталожні значення; від’ємні — розсіювальні лінзи.', 'Typische Katalogwerte; negativ = Zerstreuungslinse.', 'Typische catalogwaarden; negatief = negatieve lens.', 'Valeurs de catalogue typiques ; négatif = lentille divergente.', 'Valores típicos de catálogo; negativo = lente divergente.', 'Typowe wartości katalogowe; ujemne = soczewka rozpraszająca.') },
+      { id: 'f-expM', key: 'expM', type: 'number', min: 1, max: 100, step: 0.5, precision: 2, visible: isMode('match'), label: T('Expander magnification', 'Збільшення розширювача', 'Aufweitungsfaktor', 'Vergroting van de expander', 'Grossissement de l’élargisseur', 'Aumento del expansor', 'Powiększenie ekspandera') }
+    ] },
+    { id: 'fibre', slot: 'inputs', title: T('Fibre', 'Волокно', 'Faser', 'Vezel', 'Fibre', 'Fibra', 'Włókno'), learn: 'overlap', fields: [
+      { id: 'f-mfd', key: 'fMFD_um', type: 'number', unit: 'µm', min: 0.5, max: 1000, step: 0.1, precision: 2, visible: isMode('fibre'), label: T('Mode field diameter', 'Діаметр поля моди', 'Modenfelddurchmesser', 'Modeveld-diameter', 'Diamètre du champ de mode', 'Diámetro del campo modal', 'Średnica pola modu'),
+        hint: T('SMF-28: 10.4 µm at 1550 nm, 9.2 µm at 1310 nm (Corning data sheet).', 'SMF-28: 10,4 мкм на 1550 нм, 9,2 мкм на 1310 нм (паспорт Corning).', 'SMF-28: 10,4 µm bei 1550 nm, 9,2 µm bei 1310 nm (Corning-Datenblatt).', 'SMF-28: 10,4 µm bij 1550 nm, 9,2 µm bij 1310 nm (Corning-datablad).', 'SMF-28 : 10,4 µm à 1550 nm, 9,2 µm à 1310 nm (fiche Corning).', 'SMF-28: 10,4 µm a 1550 nm, 9,2 µm a 1310 nm (hoja de datos de Corning).', 'SMF-28: 10,4 µm przy 1550 nm, 9,2 µm przy 1310 nm (karta katalogowa Corning).') },
+      { id: 'f-fauto', key: 'fAuto', type: 'toggle', visible: isMode('fibre'), label: T('Fibre face at the last waist', 'Торець волокна в останній перетяжці', 'Faserstirn in der letzten Taille', 'Vezeluiteinde in de laatste taille', 'Face de la fibre au dernier col', 'Cara de la fibra en la última cintura', 'Czoło włókna w ostatnim przewężeniu') },
+      { id: 'f-fz', key: 'fz_mm', type: 'number', unit: 'mm', step: 0.01, precision: 3, visible: function (c) { return c.state.mode === 'fibre' && !c.state.fAuto; }, label: T('Fibre face at z', 'Торець волокна при z', 'Faserstirn bei z', 'Vezeluiteinde bij z', 'Face de la fibre à z', 'Cara de la fibra en z', 'Czoło włókna przy z') },
+      { id: 'f-fdx', key: 'fdx_um', type: 'number', unit: 'µm', min: 0, max: 1000, step: 0.1, precision: 2, visible: isMode('fibre'), label: T('Lateral offset', 'Поперечний зсув', 'Lateraler Versatz', 'Laterale verschuiving', 'Décalage latéral', 'Desplazamiento lateral', 'Przesunięcie poprzeczne') },
+      { id: 'f-ftilt', key: 'ftilt_mrad', type: 'number', unit: 'mrad', min: 0, max: 500, step: 0.5, precision: 2, visible: isMode('fibre'), label: T('Angular tilt', 'Кутовий нахил', 'Winkelverkippung', 'Hoekkanteling', 'Inclinaison angulaire', 'Inclinación angular', 'Pochylenie kątowe') }
+    ] },
+    { id: 'cavity', slot: 'inputs', title: T('Resonator', 'Резонатор', 'Resonator', 'Resonator', 'Résonateur', 'Resonador', 'Rezonator'), learn: 'stability', fields: [
+      { id: 'f-R1', key: 'R1_mm', type: 'number', unit: 'mm', step: 10, precision: 1, visible: function (c) { return c.state.mode === 'cavity' && !c.state.R1flat; }, label: T('Mirror 1 radius R₁ (concave > 0)', 'Радіус дзеркала 1 R₁ (угнуте > 0)', 'Spiegel 1 Radius R₁ (konkav > 0)', 'Spiegel 1 straal R₁ (hol > 0)', 'Rayon du miroir 1 R₁ (concave > 0)', 'Radio del espejo 1 R₁ (cóncavo > 0)', 'Promień zwierciadła 1 R₁ (wklęsłe > 0)') },
+      { id: 'f-R1f', key: 'R1flat', type: 'toggle', visible: isMode('cavity'), label: T('Mirror 1 flat', 'Дзеркало 1 плоске', 'Spiegel 1 plan', 'Spiegel 1 vlak', 'Miroir 1 plan', 'Espejo 1 plano', 'Zwierciadło 1 płaskie') },
+      { id: 'f-R2', key: 'R2_mm', type: 'number', unit: 'mm', step: 10, precision: 1, visible: function (c) { return c.state.mode === 'cavity' && !c.state.R2flat; }, label: T('Mirror 2 radius R₂', 'Радіус дзеркала 2 R₂', 'Spiegel 2 Radius R₂', 'Spiegel 2 straal R₂', 'Rayon du miroir 2 R₂', 'Radio del espejo 2 R₂', 'Promień zwierciadła 2 R₂') },
+      { id: 'f-R2f', key: 'R2flat', type: 'toggle', visible: isMode('cavity'), label: T('Mirror 2 flat', 'Дзеркало 2 плоске', 'Spiegel 2 plan', 'Spiegel 2 vlak', 'Miroir 2 plan', 'Espejo 2 plano', 'Zwierciadło 2 płaskie') },
+      { id: 'f-Lc', key: 'L_mm', type: 'number', unit: 'mm', min: 0.01, max: 1e5, step: 1, precision: 2, visible: isMode('cavity'), label: T('Mirror spacing L', 'Відстань між дзеркалами L', 'Spiegelabstand L', 'Spiegelafstand L', 'Distance entre miroirs L', 'Distancia entre espejos L', 'Odległość zwierciadeł L') },
+      { id: 'f-cn', key: 'cn', type: 'number', min: 1, max: 4, step: 0.001, precision: 4, visible: isMode('cavity'), label: T('Index inside', 'Показник заломлення всередині', 'Brechungsindex innen', 'Brekingsindex binnenin', 'Indice intérieur', 'Índice interior', 'Współczynnik załamania wewnątrz') }
+    ] }
+  ];
+  PANELS.forEach(function (p) { delete p.visible; });
+
+  /* ------------------------------------------------- project document (opt-core.js) */
+  var bar = null;
+  /* payload for the project document (exposed for the hand-over chain test); prev = the document's current source block */
+  function projectPayload(prevSource) {
+    if (!last || last.err) return null;
+    var src = Object.assign({}, prevSource || {});
+    var B = last.B;
+    src.kind = src.kind || 'laser';
+    src.lambda_nm = state.lambda_nm;                       /* D-OPT-6: the wavelength travels in source.lambda_nm (review R-1) */
+    src.w0_mm = B.x.w0 * 1000; src.M2 = B.x.M2;
+    src.divergence_mrad = 2000 * B.x.M2 * B.lambda / (PI * state.n0 * B.x.w0);
+    var summary = { lambda_nm: state.lambda_nm, mode: state.mode };
+    if (last.out) Object.assign(summary, { final_waist_mm: last.out.x.w0 * 1000, final_waist_z_mm: last.out.x.z0 * 1000, zR_mm: last.out.x.zR * 1000 });
+    if (last.fib) summary.coupling_eta = last.fib.eta;
+    if (last.cav) Object.assign(summary, { g1g2: last.cav.G, stable: last.cav.stable });
+    return { state: clone(state), results: summary, summary: summary, blocks: { source: src } };
+  }
+  function saveToProject() {
+    if (!bar || !last || last.err) return;
+    try {
+      bar.commit(projectPayload((bar.getDoc() || {}).source));
+      bar.status(T('Saved.', 'Збережено.', 'Gespeichert.', 'Opgeslagen.', 'Enregistré.', 'Guardado.', 'Zapisano.')[(ui && ui.lang) || 'en']);
+    } catch (e) { bar.status(String(e && e.message || e)); }
+  }
+  /* "Use": take the shared source (source.lambda_nm, w0_mm, M², divergence) and, from the optical bench, the element list it hands over
+     as summary.gauss.elements = [{label, kind, z_mm, f_mm, t_mm, n, aoi, D_mm}] (+ summary.gauss.lambda_nm). Every value is checked against
+     the field limits; on any failure nothing is applied (review R-1, R-2, R-3). */
+  var UMSG = {
+    taken: T('Taken from the project: ', 'Узято з проєкту: ', 'Aus dem Projekt übernommen: ', 'Uit het project overgenomen: ', 'Repris du projet : ', 'Tomado del proyecto: ', 'Pobrano z projektu: '),
+    refused: T('Not applied — values outside the field limits: ', 'Не застосовано — значення поза межами полів: ', 'Nicht übernommen — Werte außerhalb der Feldgrenzen: ', 'Niet toegepast — waarden buiten de veldgrenzen: ', 'Non appliqué — valeurs hors des limites des champs : ', 'No aplicado: valores fuera de los límites de los campos: ', 'Nie zastosowano — wartości poza zakresem pól: '),
+    noLambda: T('The project source has no laser wavelength (source.lambda_nm); the wavelength was NOT changed — check it.', 'Джерело проєкту не містить довжини хвилі лазера (source.lambda_nm); довжину хвилі НЕ змінено — перевірте її.', 'Die Projektquelle enthält keine Laserwellenlänge (source.lambda_nm); die Wellenlänge wurde NICHT geändert — bitte prüfen.', 'De projectbron bevat geen lasergolflengte (source.lambda_nm); de golflengte is NIET gewijzigd — controleer ze.', 'La source du projet ne contient pas de longueur d’onde laser (source.lambda_nm) ; la longueur d’onde n’a PAS été modifiée — vérifiez-la.', 'La fuente del proyecto no tiene longitud de onda láser (source.lambda_nm); la longitud de onda NO se cambió: compruébela.', 'Źródło projektu nie zawiera długości fali lasera (source.lambda_nm); długości fali NIE zmieniono — sprawdź ją.'),
+    elements: T('elements', 'елементів', 'Elemente', 'elementen', 'éléments', 'elementos', 'elementów'),
+    nothing: T('The project holds no beam data for this tool.', 'Проєкт не містить даних пучка для цього інструмента.', 'Das Projekt enthält keine Strahldaten für dieses Werkzeug.', 'Het project bevat geen bundelgegevens voor deze tool.', 'Le projet ne contient aucune donnée de faisceau pour cet outil.', 'El proyecto no contiene datos de haz para esta herramienta.', 'Projekt nie zawiera danych wiązki dla tego narzędzia.'),
+    restore: T('Restore my saved setup', 'Відновити мою збережену схему', 'Meinen gespeicherten Aufbau wiederherstellen', 'Mijn opgeslagen opstelling herstellen', 'Restaurer ma configuration enregistrée', 'Restaurar mi configuración guardada', 'Przywróć mój zapisany układ'),
+    restored: T('Saved setup restored', 'Збережену схему відновлено', 'Gespeicherter Aufbau wiederhergestellt', 'Opgeslagen opstelling hersteld', 'Configuration enregistrée restaurée', 'Configuración guardada restaurada', 'Przywrócono zapisany układ'),
+    noOwn: T('This project has no saved Gaussian-beam setup.', 'У цьому проєкті немає збереженої схеми гаусового пучка.', 'Dieses Projekt enthält keinen gespeicherten Gaußstrahl-Aufbau.', 'Dit project bevat geen opgeslagen Gaussische-bundelopstelling.', 'Ce projet ne contient aucune configuration de faisceau gaussien enregistrée.', 'Este proyecto no tiene ninguna configuración de haz gaussiano guardada.', 'Ten projekt nie zawiera zapisanego układu wiązki gaussowskiej.'),
+    noCase: T('The file holds no gaussbeam case (state or permalink); nothing was changed.', 'Файл не містить випадку gaussbeam (стану чи постійного посилання); нічого не змінено.', 'Die Datei enthält keinen gaussbeam-Fall (Zustand oder Permalink); nichts wurde geändert.', 'Het bestand bevat geen gaussbeam-geval (toestand of permalink); er is niets gewijzigd.', 'Le fichier ne contient aucun cas gaussbeam (état ou lien permanent) ; rien n’a été modifié.', 'El archivo no contiene ningún caso de gaussbeam (estado o enlace permanente); no se cambió nada.', 'Plik nie zawiera przypadku gaussbeam (stanu ani linku trwałego); niczego nie zmieniono.'),
+    opened: T('Case opened.', 'Випадок відкрито.', 'Fall geöffnet.', 'Geval geopend.', 'Cas ouvert.', 'Caso abierto.', 'Otwarto przypadek.')
+  };
+  function M2derived(v) { return T('M² = ' + v + ' derived from w₀ and the divergence (π·w₀·θ/λ); w₀ is taken as the waist at z = 0.', 'M² = ' + v + ' виведено з w₀ і розбіжності (π·w₀·θ/λ); w₀ прийнято як перетяжку при z = 0.', 'M² = ' + v + ' aus w₀ und Divergenz abgeleitet (π·w₀·θ/λ); w₀ gilt als Taille bei z = 0.', 'M² = ' + v + ' afgeleid uit w₀ en de divergentie (π·w₀·θ/λ); w₀ geldt als taille bij z = 0.', 'M² = ' + v + ' déduit de w₀ et de la divergence (π·w₀·θ/λ) ; w₀ est pris comme col en z = 0.', 'M² = ' + v + ' deducido de w₀ y la divergencia (π·w₀·θ/λ); w₀ se toma como cintura en z = 0.', 'M² = ' + v + ' wyznaczono z w₀ i rozbieżności (π·w₀·θ/λ); w₀ przyjęto jako przewężenie w z = 0.'); }
+  var M2BELOW = T('The divergence is below the diffraction limit of that radius (π·w₀·θ/λ < 1): the radius is not a waist; M² = 1 assumed.', 'Розбіжність менша за дифракційну межу для цього радіуса (π·w₀·θ/λ < 1): це не перетяжка; прийнято M² = 1.', 'Die Divergenz liegt unter der Beugungsgrenze dieses Radius (π·w₀·θ/λ < 1): der Radius ist keine Taille; M² = 1 angenommen.', 'De divergentie ligt onder de diffractiegrens van die straal (π·w₀·θ/λ < 1): de straal is geen taille; M² = 1 aangenomen.', 'La divergence est sous la limite de diffraction de ce rayon (π·w₀·θ/λ < 1) : ce rayon n’est pas un col ; M² = 1 supposé.', 'La divergencia está por debajo del límite de difracción de ese radio (π·w₀·θ/λ < 1): el radio no es una cintura; se supone M² = 1.', 'Rozbieżność jest poniżej granicy dyfrakcyjnej dla tego promienia (π·w₀·θ/λ < 1): promień nie jest przewężeniem; przyjęto M² = 1.');
+  function lg() { return (ui && ui.lang) || 'en'; }
+  function say(msg) { if (bar) bar.status(msg); }
+  /* pure part of "Use" (also called by the bench): returns { st, bad, msgs, parts, empty } */
+  function fromProject(id, mod, doc) {
+    var src = (doc && doc.source) || {}, sum = (mod && mod.summary) || {}, cand = {}, msgs = [], parts = [], lang = lg();
+    var lamSrc = src.lambda_nm != null ? src.lambda_nm : (sum.gauss && sum.gauss.lambda_nm != null ? sum.gauss.lambda_nm : sum.lambda_nm);
+    if (lamSrc != null) { cand.lambda_nm = lamSrc; parts.push('λ ' + F(Number(lamSrc), 1) + ' nm'); } else msgs.push(UMSG.noLambda[lang]);
+    var hasM2 = src.M2 != null, hasDiv = src.divergence_mrad != null && Number(src.divergence_mrad) > 0;
+    if (src.w0_mm != null) {
+      cand.src = 'waist'; cand.w0_mm = src.w0_mm; cand.z0_mm = 0; cand.astig = false; parts.push('w₀ ' + F(Number(src.w0_mm), 4) + ' mm');
+      /* w0 + divergence imply M² = π w0 (θ/2)/λ. gaussbeam and opticbench write a consistent triple; lasersafety writes the exit radius and the
+         measured divergence without M² (an empty project carries the default M² = 1). If the given M² disagrees with the pair by > 2 %,
+         the measured pair wins and the derived M² is reported (review R-3). */
+      var m2 = NaN;
+      if (hasDiv) { var lamD = Number(cand.lambda_nm != null ? cand.lambda_nm : state.lambda_nm) * 1e-9 / state.n0; m2 = PI * Number(src.w0_mm) * 1e-3 * (Number(src.divergence_mrad) / 2000) / lamD; }
+      if (hasM2 && (!isFinite(m2) || Math.abs(m2 / Number(src.M2) - 1) <= 0.02)) { cand.M2 = src.M2; parts.push('M² ' + F(Number(src.M2), 3)); }
+      else if (isFinite(m2)) {
+        if (m2 >= 1) { cand.M2 = Math.round(m2 * 1000) / 1000; msgs.push(M2derived(F(cand.M2, 3))[lang]); }
+        else { cand.M2 = 1; msgs.push(M2BELOW[lang]); }
+        parts.push('θ ' + F(Number(src.divergence_mrad), 3) + ' mrad');
+      }
+    } else if (hasDiv) {
+      cand.src = 'div'; cand.div_mrad = src.divergence_mrad; parts.push('θ ' + F(Number(src.divergence_mrad), 3) + ' mrad');
+      if (hasM2) { cand.M2 = src.M2; parts.push('M² ' + F(Number(src.M2), 3)); }
+    }
+    var ge = sum.gauss && sum.gauss.elements;
+    if (Array.isArray(ge)) { cand.elements = ge; cand.mode = 'propagate'; parts.push(ge.length + ' ' + UMSG.elements[lang]); }
+    var v = sanitize(cand);
+    return { st: v.st, bad: v.bad, msgs: msgs, parts: parts, empty: !parts.length };
+  }
+  function useModule(id, mod, doc) {
+    var r = fromProject(id, mod, doc || {}), lang = lg();
+    if (r.bad.length) { say(UMSG.refused[lang] + r.bad.join('; ')); return r; }
+    if (r.empty) { say(UMSG.nothing[lang] + ' ' + r.msgs.join(' ')); return r; }
+    applyState(r.st);
+    say(UMSG.taken[lang] + r.parts.join(', ') + '. ' + r.msgs.join(' '));
+    if (ui) { ui.sync(); ui.run(); }
+    return r;
+  }
+  function restoreOwn() {
+    var doc = bar && bar.getDoc ? bar.getDoc() : null, mod = doc && doc.modules && doc.modules.gaussbeam, lang = lg();
+    if (!mod || !mod.state) { say(UMSG.noOwn[lang]); return false; }
+    var v = sanitize(mod.state);
+    if (v.bad.length) { say(UMSG.refused[lang] + v.bad.join('; ')); return false; }
+    applyState(v.st);
+    say(UMSG.restored[lang] + (mod.updatedAt ? ' (' + String(mod.updatedAt).slice(0, 16).replace('T', ' ') + ')' : '') + '.');
+    if (ui) { ui.sync(); ui.run(); }
+    return true;
+  }
+  /* a saved case: the page state itself, {state}, or a calculation record (its permalink carries the state in s=) — review R-8 */
+  function caseFromFile(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (data.state && typeof data.state === 'object') return data.state;
+    if (data.inputs && data.inputs.state && typeof data.inputs.state === 'object') return data.inputs.state;
+    var link = data.permalink || (data.record && data.record.permalink);
+    if (typeof link === 'string' && window.Diagram && Diagram.state && Diagram.state.decode) {
+      var m = /[?&]s=([^&#]*)/.exec(link);
+      if (m) { try { return Diagram.state.decode(decodeURIComponent(m[1])); } catch (e) { return null; } }
+    }
+    if ('mode' in data || 'lambda_nm' in data || 'elements' in data) return data;
+    return null;
+  }
+  function openCase(data) {
+    var lang = lg(), st = caseFromFile(data), v = st ? sanitize(st) : null;
+    if (!st || (!v.bad.length && !Object.keys(v.st).length)) { if (ui) ui.notify(UMSG.noCase[lang], { kind: 'bad' }); return false; }
+    if (v.bad.length) { if (ui) ui.notify(UMSG.refused[lang] + v.bad.join('; '), { kind: 'bad' }); return false; }
+    applyState(v.st);
+    if (ui) { ui.sync(); ui.run(); ui.notify(UMSG.opened[lang], { kind: 'ok' }); }
+    return true;
+  }
+
+  /* ---------------------------------------------------------------- boot */
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body, h = document.createElement('h1'), p = document.createElement('p');
+    h.textContent = 'Gaussian Beam & Mode Matching';
+    p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    if (G) last = solve(state);
+  }
+  function boot() {
+    G = window.OptGauss || null;
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && G) buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'gaussbeam', mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: DEFAULTS,
+      subtitle: T('q-parameter, M², mode matching, fibres, cavities', 'параметр q, M², узгодження мод, волокна, резонатори', 'q-Parameter, M², Modenanpassung, Fasern, Resonatoren', 'q-parameter, M², modematching, vezels, resonatoren', 'paramètre q, M², adaptation de mode, fibres, cavités', 'parámetro q, M², acoplamiento de modos, fibras, cavidades', 'parametr q, M², dopasowanie modów, światłowody, rezonatory'),
+      notices: [{ id: 'genre', tone: 'warn', sticky: true,
+        title: T('Learning and pre-design aid', 'Навчальний і передпроєктний засіб', 'Lern- und Vorentwurfshilfe', 'Hulpmiddel voor leren en voorontwerp', 'Aide à l’apprentissage et à l’avant-projet', 'Ayuda didáctica y de anteproyecto', 'Pomoc dydaktyczna i przedprojektowa'),
+        text: T('Paraxial Gaussian beam optics with thin, aberration-free elements. Verify final designs with a qualified optical engineer and the manufacturer’s data.', 'Параксіальна оптика гаусових пучків із тонкими безабераційними елементами. Остаточні рішення перевіряйте з кваліфікованим інженером-оптиком і за даними виробника.', 'Paraxiale Gaußstrahloptik mit dünnen, aberrationsfreien Elementen. Endgültige Auslegungen mit einer qualifizierten Optikingenieurin oder einem Optikingenieur und den Herstellerdaten prüfen.', 'Paraxiale optica van Gaussische bundels met dunne, aberratievrije elementen. Controleer definitieve ontwerpen met een gekwalificeerde optisch ingenieur en de gegevens van de fabrikant.', 'Optique gaussienne paraxiale avec des éléments minces sans aberration. Faites vérifier les conceptions finales par un ingénieur opticien qualifié et avec les données du fabricant.', 'Óptica paraxial de haces gaussianos con elementos delgados sin aberraciones. Verifique los diseños finales con un ingeniero óptico cualificado y los datos del fabricante.', 'Przyosiowa optyka wiązek gaussowskich z cienkimi elementami bez aberracji. Ostateczne projekty sprawdź z wykwalifikowanym inżynierem optykiem i według danych producenta.') }],
+      learn: LEARN,
+      panels: PANELS,
+      footer: T('q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); free space [[1, d/n],[0, 1]], thin lens [[1, 0],[−n/f, 1]]; mirror f = R/2 with f·cosθ (x) and f/cosθ (y). Self (1983) focus, Kogelnik & Li (1966) matching and resonators, Gaussian overlap (Joyce & DeLoach 1984), ISO 11146-1 hyperbola fit. Sources: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); вільний простір [[1, d/n],[0, 1]], тонка лінза [[1, 0],[−n/f, 1]]; дзеркало f = R/2 з f·cosθ (x) і f/cosθ (y). Фокус за Self (1983), узгодження й резонатори за Kogelnik & Li (1966), перекриття гаусових мод (Joyce & DeLoach 1984), апроксимація гіперболою за ISO 11146-1. Джерела: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); Freiraum [[1, d/n],[0, 1]], dünne Linse [[1, 0],[−n/f, 1]]; Spiegel f = R/2 mit f·cosθ (x) und f/cosθ (y). Fokus nach Self (1983), Anpassung und Resonatoren nach Kogelnik & Li (1966), Gauß-Überlapp (Joyce & DeLoach 1984), Hyperbel-Fit nach ISO 11146-1. Quellen: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); vrije ruimte [[1, d/n],[0, 1]], dunne lens [[1, 0],[−n/f, 1]]; spiegel f = R/2 met f·cosθ (x) en f/cosθ (y). Focus volgens Self (1983), matching en resonatoren volgens Kogelnik & Li (1966), Gaussische overlap (Joyce & DeLoach 1984), hyperboolfit volgens ISO 11146-1. Bronnen: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²) ; q̂′ = (Aq̂ + B)/(Cq̂ + D) ; espace libre [[1, d/n],[0, 1]], lentille mince [[1, 0],[−n/f, 1]] ; miroir f = R/2 avec f·cosθ (x) et f/cosθ (y). Foyer selon Self (1983), adaptation et résonateurs selon Kogelnik & Li (1966), recouvrement gaussien (Joyce & DeLoach 1984), ajustement hyperbolique ISO 11146-1. Sources : Siegman, Lasers (1986) ; Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); espacio libre [[1, d/n],[0, 1]], lente delgada [[1, 0],[−n/f, 1]]; espejo f = R/2 con f·cosθ (x) y f/cosθ (y). Foco según Self (1983), acoplamiento y resonadores según Kogelnik & Li (1966), solapamiento gaussiano (Joyce & DeLoach 1984), ajuste hiperbólico ISO 11146-1. Fuentes: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.', 'q̂ = q/n, 1/q̂ = n/R − i M²λ/(πw²); q̂′ = (Aq̂ + B)/(Cq̂ + D); wolna przestrzeń [[1, d/n],[0, 1]], cienka soczewka [[1, 0],[−n/f, 1]]; zwierciadło f = R/2 z f·cosθ (x) i f/cosθ (y). Ognisko wg Self (1983), dopasowanie i rezonatory wg Kogelnik & Li (1966), nakładanie gaussowskie (Joyce & DeLoach 1984), dopasowanie hiperboli wg ISO 11146-1. Źródła: Siegman, Lasers (1986); Saleh & Teich, Fundamentals of Photonics.'),
+      on: { compute: compute }
+    });
+
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end', actions: [
+      { label: 'CSV w(z)', run: exportCSV },
+      { label: 'PNG', run: exportPNG },
+      { label: 'SVG', run: exportSVG },
+      ui.importAction({ label: T('Open a saved case…', 'Відкрити збережений випадок…', 'Gespeicherten Fall öffnen…', 'Opgeslagen geval openen…', 'Ouvrir un cas enregistré…', 'Abrir un caso guardado…', 'Otwórz zapisany przypadek…'),
+        accept: '.json,application/json', as: 'json', quiet: true, run: function (data) { openCase(data); } }),
+      ui.resetAction()
+    ] });
+
+    ui.panel({ id: 'project', slot: 'inputs', collapsible: true, collapsed: true,
+      title: T('Optics project', 'Оптичний проєкт', 'Optik-Projekt', 'Optisch project', 'Projet optique', 'Proyecto óptico', 'Projekt optyczny'),
+      render: function (box, ctx) {
+        if (!window.OptCore || !OptCore.ui || !OptCore.ui.projectBar) return;
+        if (bar) { try { bar.destroy(); } catch (e) {} }
+        bar = OptCore.ui.projectBar({ mount: box, toolId: 'gaussbeam', lang: function () { return ctx.app.lang; }, onUse: useModule });
+      },
+      actions: [{ label: T('Save beam to project', 'Зберегти пучок у проєкт', 'Strahl im Projekt speichern', 'Bundel in project opslaan', 'Enregistrer le faisceau dans le projet', 'Guardar el haz en el proyecto', 'Zapisz wiązkę w projekcie'), run: saveToProject }, { label: UMSG.restore, variant: 'ghost', run: restoreOwn }] });
+
+    ui.examples(PRESETS.map(function (p) { return { id: p.id, label: p.label, note: p.note, apply: applyPreset(p) }; }));
+
+    ui.stage({ key: 'main',
+      caption: T('Beam radius along the axis (x solid, y dashed)', 'Радіус пучка вздовж осі (x — суцільна, y — штрихова)', 'Strahlradius entlang der Achse (x durchgezogen, y gestrichelt)', 'Bundelstraal langs de as (x doorgetrokken, y gestippeld)', 'Rayon du faisceau le long de l’axe (x trait plein, y pointillé)', 'Radio del haz a lo largo del eje (x continuo, y discontinuo)', 'Promień wiązki wzdłuż osi (x ciągła, y przerywana)'),
+      minHeight: 300,
+      a11y: function () {
+        if (!last || last.err) return '';
+        var lang = lg();
+        if (last.mode === 'cavity') {
+          var g1 = F(last.cav.g1, 3), g2 = F(last.cav.g2, 3), st = last.cav.stable;
+          return T('Stability diagram: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'stable' : 'unstable') + '.', 'Діаграма стійкості: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'стійкий' : 'нестійкий') + '.',
+            'Stabilitätsdiagramm: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'stabil' : 'instabil') + '.', 'Stabiliteitsdiagram: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'stabiel' : 'instabiel') + '.',
+            'Diagramme de stabilité : g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'stable' : 'instable') + '.', 'Diagrama de estabilidad: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'estable' : 'inestable') + '.',
+            'Wykres stabilności: g₁ = ' + g1 + ', g₂ = ' + g2 + ', ' + (st ? 'stabilny' : 'niestabilny') + '.')[lang];
+        }
+        var a = L(last.out.x.w0), b = F(last.out.x.z0 * 1000, 1);
+        return T('Beam radius along z. Final waist ' + a + ' at ' + b + ' mm.', 'Радіус пучка вздовж z. Кінцева перетяжка ' + a + ' при ' + b + ' мм.', 'Strahlradius entlang z. Letzte Taille ' + a + ' bei ' + b + ' mm.',
+          'Bundelstraal langs z. Laatste taille ' + a + ' bij ' + b + ' mm.', 'Rayon du faisceau le long de z. Dernier col ' + a + ' à ' + b + ' mm.', 'Radio del haz a lo largo de z. Última cintura ' + a + ' en ' + b + ' mm.',
+          'Promień wiązki wzdłuż z. Ostatnie przewężenie ' + a + ' przy ' + b + ' mm.')[lang];
+      },
+      render: function (size, st) { draw(st.canvas(), size.w, size.h, size.density === 'coarse', tokens()); }
+    });
+    ui.ready();
+    window.__gaussbeam = { ui: ui, state: state, sanitize: sanitize, fromProject: fromProject, useModule: useModule, restoreOwn: restoreOwn, openCase: openCase, caseFromFile: caseFromFile, saveToProject: saveToProject, projectPayload: projectPayload, get bar() { return bar; }, get last() { return last; }, solve: solve, csv: csvText, svg: function () { var c = svgContext(1200, 600); draw(c, 1200, 600, false, PRINT_TK); return c.toString(); }, presets: PRESETS.map(function (p) { return p.id; }) };
+  }
+
+  function installData() {
+    if (!window.Diagram) return;
+    Diagram.init({
+      id: 'gaussbeam', file: 'gaussbeam.html',
+      state: {
+        serialize: function () { return state; },
+        deserialize: function (o) {                    /* share link: same validation as a file (review R-7, R-9) */
+          var v = sanitize(o || {});
+          if (v.bad.length) { var msg = UMSG.refused[lg()] + v.bad.join('; '); if (ui) ui.notify(msg, { kind: 'bad' }); else if (Diagram.notify) Diagram.notify(msg, 'err'); return; }
+          applyState(v.st); if (G) last = solve(state); if (ui) { ui.sync(); ui.run(); }
+        }
+      },
+      record: function () {
+        if (!last || last.err) return null;
+        var inputs = { mode: state.mode, lambda_nm: state.lambda_nm, n0: state.n0, source: state.src, w0x_m: last.B.x.w0, z0x_m: last.B.x.z0, M2x: last.B.x.M2, w0y_m: last.B.y.w0, z0y_m: last.B.y.z0, M2y: last.B.y.M2 };
+        var outputs = {}, units = { lambda_nm: 'nm', w0x_m: 'm', z0x_m: 'm', w0y_m: 'm', z0y_m: 'm' };
+        if (last.mode === 'cavity') {
+          var c = last.cav; Object.assign(inputs, { R1_m: state.R1flat ? 'inf' : state.R1_mm / 1000, R2_m: state.R2flat ? 'inf' : state.R2_mm / 1000, L_m: state.L_mm / 1000, n: state.cn });
+          Object.assign(outputs, { g1: c.g1, g2: c.g2, g1g2: c.G, stable: c.stable, w0_m: c.w0, w1_m: c.w1, w2_m: c.w2, z_waist_from_M1_m: c.z1, FSR_Hz: c.FSR, transverse_spacing_Hz: c.dnuT });
+          Object.assign(units, { R1_m: 'm', R2_m: 'm', L_m: 'm', w0_m: 'm', w1_m: 'm', w2_m: 'm', z_waist_from_M1_m: 'm', FSR_Hz: 'Hz', transverse_spacing_Hz: 'Hz' });
+        } else {
+          inputs.elements = JSON.stringify(state.elements);
+          var o = last.out;
+          Object.assign(outputs, { final_waist_x_m: o.x.w0, final_waist_x_z_m: o.x.z0, final_zR_x_m: o.x.zR, final_div_full_x_rad: 2 * o.x.theta, final_waist_y_m: o.y.w0, final_waist_y_z_m: o.y.z0 });
+          Object.assign(units, { final_waist_x_m: 'm', final_waist_x_z_m: 'm', final_zR_x_m: 'm', final_div_full_x_rad: 'rad', final_waist_y_m: 'm', final_waist_y_z_m: 'm' });
+          if (last.fib) Object.assign(outputs, { coupling_eta: last.fib.eta, coupling_eta_aligned: last.fib.eta0, offset_1dB_m: last.fib.d1dB, tilt_1dB_rad: last.fib.t1dB });
+          if (last.match) outputs.match_solutions = JSON.stringify(last.match.map(function (m) { return { f1: m.f1, z1: m.x1, f2: m.f2, z2: m.x2, eta_lens1_plus1mm: m.eta1mmL1, eta_lens2_plus1mm: m.eta1mm }; }));
+          if (last.match) outputs.match_solutions_total = last.matchTotal;
+          if (last.B.fit && last.B.fit.ok) Object.assign(outputs, { fit_M2: last.B.fit.M2, fit_iso_plan_ok: last.B.fit.isoOk });
+        }
+        return {
+          inputs: inputs, outputs: outputs, units: units,
+          model: { equations: ['1/q = n/R - i M2 lambda/(pi w^2) (reduced q = q/n)', "q' = (A q + B)/(C q + D)", 'zR = pi n w0^2/(M2 lambda)', 'eta = |int E1 E2*|^2 / (int|E1|^2 int|E2|^2)', 'g = 1 - L/R, stable 0 < g1 g2 < 1'],
+                   ranges: ['paraxial (divergence half-angle < 0.25 rad)', 'thin aberration-free elements, simple astigmatism'],
+                   notes: ['Siegman, Lasers (1986); Kogelnik & Li, Appl. Opt. 5 (1966) 1550; Self, Appl. Opt. 22 (1983) 658; ISO 11146-1'] },
+          warnings: (last.prop ? last.prop.warnings.map(function (w) { return w.code + (w.id ? ' ' + w.id : ''); }) : []).concat(last.warn)
+        };
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

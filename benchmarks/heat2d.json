@@ -1,0 +1,1568 @@
+{
+ "tool": "heat2d",
+ "file": "heat2d.html",
+ "run_at": "2026-08-22T07:44:07.691Z",
+ "build": "2026-08-15.1",
+ "manifest_revision": "2026-08-15.1",
+ "build_detail": {
+  "manifest_revision": "2026-08-15.1",
+  "status": "benchmarked",
+  "ui": "2026-08-21.v3.5.2",
+  "compute": "0.33.0",
+  "backend": "compute: 2 workers"
+ },
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value was re-derived at run time from its cited primary source by /root/bench3/ref/gen_heat2d.py (Fourier / bipolar / erf / plane-wall / Bessel series, an MFS solve of the periodic buried-pipe row, and an independently written second-order finite-volume scheme that supplies the discretization tolerances). No value was read back out of benchmarks/heat2d.json.",
+ "reference": "Own python implementation of closed-form solutions of the 2-D heat equation: the Fourier-series rectangular plate (Incropera eq. 4.19), the cylindrical-shell log law (eq. 3.28), a bipolar limiting-point solution for eccentric cylinders cross-checked against the arccosh form of Table 4.1 case 7, a method-of-fundamental-solutions evaluation of the buried-pipe row shape factor cross-checked against the closed-form line-source row factor and the exact single-pipe factor (Table 4.1 case 1), the erf semi-infinite solid, and the plane-wall and infinite-cylinder eigenfunction series (full 200-term series, not truncated to one term, cross-checked against the one-term approximation). Eigenvalues from scipy.brentq on analytically guaranteed brackets. The tolerance for the mesh-dependent cases is taken from the discretization error of an independently written second-order finite-volume scheme on the same mesh, not from what makes the tool pass.",
+ "reference_citations": [
+  "F.P. Incropera, D.P. DeWitt, T.L. Bergman, A.S. Lavine, \"Fundamentals of Heat and Mass Transfer\", 6th ed., Wiley 2007: eq. 3.28, eq. 4.19, Table 4.1 cases 1 and 7, eq. 5.39a/5.43/5.47a/5.52, eq. 5.60, Table 5.1.",
+  "H.S. Carslaw, J.C. Jaeger, \"Conduction of Heat in Solids\", 2nd ed., Oxford University Press 1959: Sec. 2.5 (semi-infinite solid), Sec. 3.4 (slab with surface convection), Sec. 7.6 (cylinder with surface convection), Sec. 4.4 (buried line sources).",
+  "M.M. Yovanovich, \"Conduction and Thermal Contact Resistances (Conductances)\", in W.M. Rohsenow, J.P. Hartnett, Y.I. Cho (eds.), Handbook of Heat Transfer, 3rd ed., McGraw-Hill 1998, Ch. 3 (conduction shape factors)."
+ ],
+ "tolerance": "Per case, stated in each case entry. Steady Cartesian cases where the exact solution is linear are held to 0.002 K (the discrete scheme is exact there); mesh-dependent Cartesian cases to 2.5-3x the discretization error of an independent second-order FV scheme on the same mesh; curved (staircase) boundaries to a half-cell displacement of the Dirichlet surface propagated through the exact solution, plus a Richardson extrapolation in dx^1 to 0.5-1 %; transient cases to 0.25-1 % of the temperature step, which is the tool's own declared per-step time tolerance carried over the run. Never chosen from what makes the tool pass.",
+ "not_benchmarked": {
+  "sphere": "The tool solves the two-dimensional Cartesian heat equation on a square grid.  It has no axisymmetric or spherical mode, so the Heisler sphere solution cannot be set up in it at all and is not benchmarked.  The infinite cylinder, by contrast, IS a plane cross-section and is benchmarked above.",
+  "3d_shape_factors": "The edge factor S = 0.54 D and the corner factor S = 0.15 L (Incropera Table 4.1 cases 8 and 9) are three-dimensional constructs.  A plane 2-D model has no such degree of freedom, so they are not benchmarked.  The 2-D shape factors that ARE expressible (buried pipe / row, eccentric cylinders, cylindrical shell) are benchmarked above."
+ },
+ "driver": {
+  "ui_path_parity": {
+   "numeric_outputs": 10,
+   "worst_abs_diff": 0,
+   "identical": true
+  },
+  "solves": 29,
+  "distinct_field_exports": 26,
+  "field_exports": 26,
+  "distinct_record_outputs": 29,
+  "record_reads": 29,
+  "note": "distinct_* count SHA1 of the exported CSV field and of the record outputs across every solve. If they were smaller than the number of solves the driver would be grading the same scene more than once.",
+  "solve_log": [
+   {
+    "tag": "PLATE-FOURIER",
+    "steady": true,
+    "ms": 217,
+    "T_min": 0.0038689528591930866,
+    "T_max": 99.40979766845703
+   },
+   {
+    "tag": "PLATE-MESH nx=30",
+    "steady": true,
+    "ms": 24,
+    "T_min": 0.17255286872386932,
+    "T_max": 96.05618286132812
+   },
+   {
+    "tag": "PLATE-MESH nx=60",
+    "steady": true,
+    "ms": 20,
+    "T_min": 0.04302263259887695,
+    "T_max": 98.03160858154297
+   },
+   {
+    "tag": "PLATE-MESH nx=120",
+    "steady": true,
+    "ms": 58,
+    "T_min": 0.010748588480055332,
+    "T_max": 99.0162353515625
+   },
+   {
+    "tag": "PLATE-MESH nx=240",
+    "steady": true,
+    "ms": 253,
+    "T_min": 0.0026866996195167303,
+    "T_max": 99.50817108154297
+   },
+   {
+    "tag": "PLATE-MESH nx=480",
+    "steady": true,
+    "ms": 1725,
+    "T_min": 0.0006716496427543461,
+    "T_max": 99.75409698486328
+   },
+   {
+    "tag": "SLAB-CONV",
+    "steady": true,
+    "ms": 21,
+    "T_min": 60.20000076293945,
+    "T_max": 99.80000305175781
+   },
+   {
+    "tag": "SLAB-GEN",
+    "steady": true,
+    "ms": 35,
+    "T_min": 1,
+    "T_max": 50
+   },
+   {
+    "tag": "ANNULUS nx=200",
+    "steady": true,
+    "ms": 268,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "ANNULUS nx=350",
+    "steady": true,
+    "ms": 484,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "ANNULUS nx=500",
+    "steady": true,
+    "ms": 1085,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "ECCENTRIC nx=240",
+    "steady": true,
+    "ms": 200,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "ECCENTRIC nx=360",
+    "steady": true,
+    "ms": 561,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "ECCENTRIC nx=480",
+    "steady": true,
+    "ms": 1037,
+    "T_min": 0,
+    "T_max": 100
+   },
+   {
+    "tag": "BURIED nx=150",
+    "steady": true,
+    "ms": 762,
+    "T_min": 0.43060120940208435,
+    "T_max": 100
+   },
+   {
+    "tag": "BURIED nx=225",
+    "steady": true,
+    "ms": 2403,
+    "T_min": 0.2900298237800598,
+    "T_max": 100
+   },
+   {
+    "tag": "BURIED nx=300",
+    "steady": true,
+    "ms": 5755,
+    "T_min": 0.2185077667236328,
+    "T_max": 100
+   },
+   {
+    "tag": "SURF-DISC nx=120",
+    "steady": true,
+    "ms": 99,
+    "T_min": 35.452030181884766,
+    "T_max": 53.87277603149414
+   },
+   {
+    "tag": "SURF-DISC nx=200",
+    "steady": true,
+    "ms": 168,
+    "T_min": 35.53916931152344,
+    "T_max": 53.88972091674805
+   },
+   {
+    "tag": "SURF-DISC nx=400",
+    "steady": true,
+    "ms": 698,
+    "T_min": 35.675636291503906,
+    "T_max": 53.884864807128906
+   },
+   {
+    "tag": "TRANS-SEMI-INFINITE",
+    "steady": false,
+    "ms": 2623,
+    "T_min": 0,
+    "T_max": 99.45519256591797
+   },
+   {
+    "tag": "TRANS-WALL tol=0.5",
+    "steady": false,
+    "ms": 365,
+    "T_min": 49.241912841796875,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-WALL tol=0.1",
+    "steady": false,
+    "ms": 338,
+    "T_min": 49.23526382446289,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-WALL tol=0.02",
+    "steady": false,
+    "ms": 516,
+    "T_min": 49.21928787231445,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-WALL tol=0.005",
+    "steady": false,
+    "ms": 767,
+    "T_min": 49.1662483215332,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-WALL tol=0.001",
+    "steady": false,
+    "ms": 1074,
+    "T_min": 49.15902328491211,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-CYLINDER nx=120",
+    "steady": false,
+    "ms": 1481,
+    "T_min": 31.434513092041016,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-CYLINDER nx=200",
+    "steady": false,
+    "ms": 4738,
+    "T_min": 31.51726531982422,
+    "T_max": 100
+   },
+   {
+    "tag": "TRANS-CYLINDER nx=300",
+    "steady": false,
+    "ms": 13878,
+    "T_min": 31.60637855529785,
+    "T_max": 100
+   }
+  ],
+  "field_hashes": [
+   "a2cef024856876d6",
+   "cf3ad6148112e3c4",
+   "a89fa812be9fe15d",
+   "6bc871f19d821333",
+   "dda12024150e84b9",
+   "59e14c80aef9419a",
+   "a62a0e2ba609ae3d",
+   "be73ffe1aa81f134",
+   "9740e6e39545d894",
+   "b2c626848783ec49",
+   "c212b6671cf7700c",
+   "4a7f4a4d7b117c0d",
+   "40d53dbb36742b65",
+   "416d621092f9cf85",
+   "49ff2a7e68dc48d2",
+   "913bc4029b24c8af",
+   "d3a70bbb90ff8a3d",
+   "8650d0a1f5be0954",
+   "4f1405c1b1a269cc",
+   "240f5563d431e962",
+   "eef75a9baef209e8",
+   "8bfbb2ecd1ff7256",
+   "a031f818fe1650f9",
+   "53b71365ffe407e4",
+   "63bf380a7448a70a",
+   "2e1fcf1815c9f4f0"
+  ],
+  "record_hashes": [
+   "614df77e51aae4dd",
+   "26e42785e13f5ede",
+   "9543ba3c1043fbc0",
+   "c39981674c8c3a50",
+   "41f6880dbf3374fa",
+   "a56c50b0190adc7e",
+   "5140ccb7c236fe88",
+   "b8cd7f75b914086a",
+   "d8858be896fc9c5e",
+   "81cdef4038104a02",
+   "71bb027920d3e925",
+   "0160606ccb1485d7",
+   "75ae42f502ff59a3",
+   "e8382324e5bccdea",
+   "5a27100b4bd77541",
+   "02a75fc0e6ede6a8",
+   "12f1ab661928b06c",
+   "495b3579649b2c30",
+   "7ac6a09f34881d8e",
+   "772f2cd61966556c",
+   "47d41250fa417513",
+   "dd59bb0551c42af9",
+   "4730947ebd6b920f",
+   "bcfd031953109157",
+   "c4ccbfebd4c028ad",
+   "d3121646b025a385",
+   "56d488b235aeac65",
+   "1b3f5f76e147a2c4",
+   "4aa8b3461aa360bf"
+  ]
+ },
+ "reconstruction": {
+  "note": "The 2026-08-11 ref/ files were never delivered, so every case project was rebuilt from the artifact's case notes. Ten of the twelve rebuilt cases reproduce the artifact's recorded tool numbers exactly. The two curved-Dirichlet cases have a real degree of freedom in how the outer isothermal circle is realised on a voxel grid; four constructions were tried at nx=200 and the one used here (a fixed disc of radius r2+dx with the free disc of radius r2 laid on top, i.e. a one-cell fixed ring just OUTSIDE r2) reproduces the artifact's Q' = 22218.4 W/m exactly; a one-cell ring drawn inside r2 gives 22434.8 and a 3 mm inside ring 22890.8.",
+  "cases_rebuilt_exactly": [
+   "PLATE-FOURIER",
+   "PLATE-BALANCE",
+   "SLAB-CONV",
+   "SLAB-GEN",
+   "ANNULUS-LOG",
+   "SHAPE-ECCENTRIC",
+   "SHAPE-BURIED-PIPE",
+   "SURF-DISC",
+   "TRANS-SEMI-INFINITE",
+   "TRANS-WALL",
+   "TRANS-CYLINDER"
+  ],
+  "cases_with_a_new_sample_set": {
+   "PLATE-MESH": "The probe list of the 2026-08-11 run is lost. This run uses a fixed 9x9 grid of physical probes (x = 20..180 mm, y = 10..90 mm, none within 15 mm of the two mixed-BC corners), mapped to the nearest cell on each mesh. The mesh errors and the fitted order are therefore NOT comparable line for line with the artifact; every other number in this file is."
+  }
+ },
+ "total": 12,
+ "passed": 12,
+ "failed": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "PLATE-FOURIER",
+   "note": "Rectangular plate 200 x 100 mm, left/right/top edges held at 0 C, bottom edge at 100 C.  Fourier-series solution, Incropera eq. 4.19, summed to 20001 odd terms with an overflow-free sinh ratio.",
+   "inputs": {
+    "nx": 200,
+    "dx_mm": 1
+   },
+   "tolerance": "|dT| <= 0.0193 K",
+   "ref_source": "recomputed",
+   "cmp": {
+    "T(25.5,25.5)": {
+     "got": 10.017,
+     "ref": 10.016742570335524,
+     "abs": 0.00025742966447594995,
+     "rel": 0.00002569993814539321,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(25.5,50.5)": {
+     "got": 23.267,
+     "ref": 23.26531466301943,
+     "abs": 0.001685336980568053,
+     "rel": 0.0000724398962566761,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(25.5,75.5)": {
+     "got": 47.857,
+     "ref": 47.85777643839956,
+     "abs": 0.000776438399562096,
+     "rel": 0.00001622387117298468,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(25.5,90.5)": {
+     "got": 75.97,
+     "ref": 75.97763139391198,
+     "abs": 0.0076313939119785346,
+     "rel": 0.00010044264044522493,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(50.5,25.5)": {
+     "got": 16.959,
+     "ref": 16.95905401194718,
+     "abs": 0.00005401194718146485,
+     "rel": 0.0000031848443399858824,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(50.5,50.5)": {
+     "got": 37.055,
+     "ref": 37.05529962117357,
+     "abs": 0.0002996211735677434,
+     "rel": 0.000008085784668612922,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(50.5,75.5)": {
+     "got": 64.578,
+     "ref": 64.57976354127369,
+     "abs": 0.001763541273689384,
+     "rel": 0.000027307954953447358,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(50.5,90.5)": {
+     "got": 85.58,
+     "ref": 85.58185910006958,
+     "abs": 0.001859100069580677,
+     "rel": 0.000021723062447227973,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(100.5,25.5)": {
+     "got": 21.672,
+     "ref": 21.672200471141043,
+     "abs": 0.0002004711410421578,
+     "rel": 0.00000925015165437896,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(100.5,50.5)": {
+     "got": 45.007,
+     "ref": 45.007780952003394,
+     "abs": 0.0007809520033958961,
+     "rel": 0.00001735148871766659,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(100.5,75.5)": {
+     "got": 71.555,
+     "ref": 71.5562121991665,
+     "abs": 0.0012121991664884035,
+     "rel": 0.00001694051612338591,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(100.5,90.5)": {
+     "got": 88.815,
+     "ref": 88.81531802529622,
+     "abs": 0.0003180252962238228,
+     "rel": 0.0000035807482683701407,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(150.5,25.5)": {
+     "got": 16.748,
+     "ref": 16.74826836557409,
+     "abs": 0.00026836557409026796,
+     "rel": 0.000016023481844958423,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(150.5,50.5)": {
+     "got": 36.673,
+     "ref": 36.67300039343277,
+     "abs": 3.934327708066121e-7,
+     "rel": 1.0728131502353601e-8,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(150.5,75.5)": {
+     "got": 64.202,
+     "ref": 64.20436589003515,
+     "abs": 0.0023658900351506418,
+     "rel": 0.000036849363783185344,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(150.5,90.5)": {
+     "got": 85.397,
+     "ref": 85.39814070489906,
+     "abs": 0.0011407048990577096,
+     "rel": 0.000013357491037182152,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(175.5,25.5)": {
+     "got": 9.669,
+     "ref": 9.668388176540434,
+     "abs": 0.0006118234595664518,
+     "rel": 0.0000632808125196082,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(175.5,50.5)": {
+     "got": 22.513,
+     "ref": 22.511289996047278,
+     "abs": 0.0017100039527235822,
+     "rel": 0.00007596205961647863,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(175.5,75.5)": {
+     "got": 46.717,
+     "ref": 46.7171373779761,
+     "abs": 0.0001373779761024707,
+     "rel": 0.000002940633433743629,
+     "lim": 0.01925682368213444,
+     "ok": true
+    },
+    "T(175.5,90.5)": {
+     "got": 75.175,
+     "ref": 75.18305457103001,
+     "abs": 0.008054571030015722,
+     "rel": 0.00010713279842076752,
+     "lim": 0.01925682368213444,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.00010713279842076752,
+   "pass": true
+  },
+  {
+   "id": "PLATE-BALANCE",
+   "note": "Steady state: the algebraic sum of all boundary heat flows must vanish.  Graded as |residual| / (sum of positive inflows).  The reference is exact conservation, not a stored number.",
+   "inputs": {
+    "nx": 200
+   },
+   "tolerance": "|residual| / total inflow <= 1e-3",
+   "ref_source": "recomputed",
+   "cmp": {
+    "residual_over_inflow": {
+     "got": 5.033472058933629e-9,
+     "ref": 0,
+     "abs": 5.033472058933629e-9,
+     "rel": 5.033472058933629e-9,
+     "lim": 0.001,
+     "ok": true
+    }
+   },
+   "raw_balance": {
+    "Left": -18344.36156530203,
+    "Right": -18344.361542384162,
+    "Top": -5611.139653742082,
+    "Bottom": 42299.8625485131,
+    "Balance residual": -0.0002129151762346737
+   },
+   "worst_rel": 5.033472058933629e-9,
+   "pass": true
+  },
+  {
+   "id": "PLATE-MESH",
+   "note": "Same plate on nx = 30/60/120/240/480 (dx = 6.667 ... 0.4167 mm, H/dx integer on every level).  RMS error over a fixed set of physical probes must fall at second order.  Probes nearer than 15 mm to the two mixed-BC corners are excluded because the exact solution is not smooth there and the formal order degrades.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "nx": [
+     30,
+     60,
+     120,
+     240,
+     480
+    ],
+    "dx_mm": [
+     6.666666666666667,
+     3.3333333333333335,
+     1.6666666666666667,
+     0.8333333333333334,
+     0.4166666666666667
+    ],
+    "order_fitted_over_nx": [
+     30,
+     60,
+     120
+    ]
+   },
+   "tolerance": "observed order 2.0 +- 0.25, least-squares fitted over the meshes whose error exceeds 5x the 2.9e-4 K quantisation floor of the tool's 3-decimal CSV export; rms error on the finest mesh <= 3x the independent second-order FV error there plus 2 quantisation sigma; error strictly decreasing",
+   "cmp": {
+    "observed_order": {
+     "got": 1.958918562019793,
+     "ref": 2,
+     "abs": 0.041081437980206914,
+     "rel": 0.020540718990103457,
+     "lim": 0.25,
+     "ok": true
+    },
+    "rms_error_finest": {
+     "got": 0.0004723168916723927,
+     "ref": 0,
+     "abs": 0.0004723168916723927,
+     "rel": 0.0004723168916723927,
+     "lim": 0.0016051693128711015,
+     "ok": true
+    },
+    "monotone_decrease": {
+     "got": "0.08659 > 0.0194 > 0.005729 > 0.00141 > 0.0004723",
+     "ref": "strictly decreasing",
+     "abs": 0,
+     "rel": 0,
+     "lim": 0,
+     "ok": true
+    }
+   },
+   "detail": {
+    "dx_mm": [
+     6.666666666666667,
+     3.3333333333333335,
+     1.6666666666666667,
+     0.8333333333333334,
+     0.4166666666666667
+    ],
+    "rms_err_K": [
+     0.086587243342438,
+     0.019397602185207613,
+     0.005728849600575175,
+     0.0014104637845846874,
+     0.0004723168916723927
+    ],
+    "fv_err_K": [
+     0.08658416009191623,
+     0.019376318906869697,
+     0.005692119781065704,
+     0.001387626162099993,
+     0.0003426063478938252
+    ],
+    "quantisation_sigma_K": 0.0002886751345948129
+   },
+   "worst_rel": 0.020540718990103457,
+   "pass": true
+  },
+  {
+   "id": "SLAB-CONV",
+   "note": "1-D slab 100 mm of carbon steel (k = 50 W/mK): left face held at 100 C, right face convecting to 20 C with h = 500 W/m2K, top and bottom adiabatic.  The exact solution is linear, so a conservative cell-centred finite volume scheme must reproduce it to solver round-off.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "nx": 100,
+    "h": 500,
+    "Tw": 100,
+    "Tinf": 20
+   },
+   "tolerance": "|dT| <= 0.002 K (exact discrete solution); fluxes 1e-4 relative",
+   "cmp": {
+    "T(x=0.5)": {
+     "got": 99.8,
+     "ref": 99.8,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "T(x=9.5)": {
+     "got": 96.2,
+     "ref": 96.2,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "T(x=24.5)": {
+     "got": 90.2,
+     "ref": 90.2,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "T(x=49.5)": {
+     "got": 80.2,
+     "ref": 80.2,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "T(x=74.5)": {
+     "got": 70.2,
+     "ref": 70.2,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "T(x=99.5)": {
+     "got": 60.2,
+     "ref": 60.2,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.002,
+     "ok": true
+    },
+    "Q_left": {
+     "got": 399.99999999997016,
+     "ref": 400,
+     "abs": 2.984279490192421e-11,
+     "rel": 7.460698725481052e-14,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "Q_right": {
+     "got": -400.0000000877666,
+     "ref": -400,
+     "abs": 8.776657978160074e-8,
+     "rel": 2.1941644945400184e-10,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "residual": {
+     "got": 2.1949105644125665e-10,
+     "ref": 0,
+     "abs": 2.1949105644125665e-10,
+     "rel": 2.1949105644125665e-10,
+     "lim": 0.000001,
+     "ok": true
+    }
+   },
+   "raw_balance": {
+    "Left": 399.99999999997016,
+    "Right": -400.0000000877666,
+    "Balance residual": -8.779642257650266e-8
+   },
+   "worst_rel": 2.1949105644125665e-10,
+   "pass": true
+  },
+  {
+   "id": "SLAB-GEN",
+   "note": "1-D slab 100 mm of carbon steel with uniform volumetric source 2 MW/m3, both faces held at 0 C, top and bottom adiabatic.  T(x) = q x (L-x)/(2k), peak 50 C at mid-plane.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "nx": 100,
+    "q3": 2000000
+   },
+   "tolerance": "|dT| <= 0.0150 K (3x independent FV discretization error); source term exact to 1e-6; boundary fluxes 1e-4 relative",
+   "cmp": {
+    "T(x=0.5)": {
+     "got": 1,
+     "ref": 0.995,
+     "abs": 0.0050000000000000044,
+     "rel": 0.005025125628140708,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "T(x=9.5)": {
+     "got": 17.2,
+     "ref": 17.195000000000004,
+     "abs": 0.0049999999999954525,
+     "rel": 0.00029078220412884274,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "T(x=24.5)": {
+     "got": 37,
+     "ref": 36.995000000000005,
+     "abs": 0.0049999999999954525,
+     "rel": 0.00013515339910786462,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "T(x=49.5)": {
+     "got": 50,
+     "ref": 49.995,
+     "abs": 0.005000000000002558,
+     "rel": 0.00010001000100015117,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "T(x=74.5)": {
+     "got": 38,
+     "ref": 37.99500000000001,
+     "abs": 0.004999999999988347,
+     "rel": 0.00013159626266583355,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "T(x=99.5)": {
+     "got": 1,
+     "ref": 0.9950000000000009,
+     "abs": 0.004999999999999116,
+     "rel": 0.005025125628139811,
+     "lim": 0.01500000000427093,
+     "ok": true
+    },
+    "Q_source": {
+     "got": 4000,
+     "ref": 4000,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.000001,
+     "ok": true
+    },
+    "Q_left": {
+     "got": -1999.9999999611887,
+     "ref": -2000,
+     "abs": 3.881132215610705e-8,
+     "rel": 1.9405661078053525e-11,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "Q_right": {
+     "got": -2000.000000050885,
+     "ref": -2000,
+     "abs": 5.088509169581812e-8,
+     "rel": 2.5442545847909058e-11,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "residual": {
+     "got": 3.0183855415089057e-12,
+     "ref": 0,
+     "abs": 3.0183855415089057e-12,
+     "rel": 3.0183855415089057e-12,
+     "lim": 0.000001,
+     "ok": true
+    }
+   },
+   "raw_balance": {
+    "Left": -1999.9999999611887,
+    "Right": -2000.000000050885,
+    "Internal sources": 4000,
+    "Balance residual": -1.2073542166035622e-8
+   },
+   "worst_rel": 0.005025125628140708,
+   "pass": true
+  },
+  {
+   "id": "ANNULUS-LOG",
+   "note": "Concentric annulus r1 = 20 mm at 100 C, r2 = 80 mm at 0 C, carbon steel.  T(r) = T2 + (T1-T2) ln(r2/r)/ln(r2/r1) (Incropera eq. 3.28); Q' = 2 pi k (T1-T2)/ln(r2/r1).",
+   "ref_source": "recomputed",
+   "inputs": {
+    "meshes": [
+     200,
+     350,
+     500
+    ],
+    "r1": 20,
+    "r2": 80
+   },
+   "tolerance": "max |T - log law| over the whole annulus must stay inside the bound that follows from a staircase Dirichlet boundary being placed on cell centres, (dx/2)[|dT/dr|(r1)+|dT/dr|(r2)] = 2.71/1.55/1.08 K; error decreasing with dx; Q' within 2 % on the finest mesh and 0.5 % after first-order Richardson extrapolation",
+   "cmp": {
+    "max_dT_nx200": {
+     "got": 1.2927383619423978,
+     "ref": 0,
+     "abs": 1.2927383619423978,
+     "rel": 1.2927383619423978,
+     "lim": 2.7050532016668067,
+     "ok": true
+    },
+    "max_dT_nx350": {
+     "got": 0.8354351143951817,
+     "ref": 0,
+     "abs": 0.8354351143951817,
+     "rel": 0.8354351143951817,
+     "lim": 1.5457446866667466,
+     "ok": true
+    },
+    "max_dT_nx500": {
+     "got": 0.5738350713331499,
+     "ref": 0,
+     "abs": 0.5738350713331499,
+     "rel": 0.5738350713331499,
+     "lim": 1.0820212806667227,
+     "ok": true
+    },
+    "error_decreasing": {
+     "got": "1.2927 > 0.8354 > 0.5738",
+     "ref": "decreasing",
+     "abs": 0,
+     "rel": 0,
+     "lim": 0,
+     "ok": true
+    },
+    "Qprime_finest": {
+     "got": 22480.000000000022,
+     "ref": 22661.80070913597,
+     "abs": 181.80070913594682,
+     "rel": 0.008022341713677454,
+     "lim": 0.02,
+     "ok": true
+    },
+    "Qprime_extrapolated": {
+     "got": 22628.40000000013,
+     "ref": 22661.80070913597,
+     "abs": 33.40070913583986,
+     "rel": 0.0014738771011420361,
+     "lim": 0.005,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "nx": 200,
+     "dx": 1.2,
+     "n": 10884,
+     "max": 1.2927383619423978,
+     "rms": 0.44559797976435045,
+     "Q": 22218.39999999999
+    },
+    {
+     "nx": 350,
+     "dx": 0.6857142857142857,
+     "n": 33396,
+     "max": 0.8354351143951817,
+     "rms": 0.2538534343548785,
+     "Q": 22416.399999999976
+    },
+    {
+     "nx": 500,
+     "dx": 0.48,
+     "n": 68132,
+     "max": 0.5738350713331499,
+     "rms": 0.18574330504984285,
+     "Q": 22480.000000000022
+    }
+   ],
+   "Qprime_extrapolated": 22628.40000000013,
+   "worst_rel": 1.2927383619423978,
+   "pass": true
+  },
+  {
+   "id": "SHAPE-ECCENTRIC",
+   "note": "Eccentric cylinders, D1 = 40 mm at 100 C offset 30 mm from the axis of D2 = 160 mm at 0 C, carbon steel.  The exact field is linear in the bipolar coordinate eta = ln(r-/r+) built on the two limiting points of the pair; the shape factor is S/L = 2 pi/(eta1-eta2), which is identically 2 pi / arccosh((D1^2+D2^2-4e^2)/(2 D1 D2)), Incropera Table 4.1 case 7.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "meshes": [
+     240,
+     360,
+     480
+    ],
+    "D1": 40,
+    "D2": 160,
+    "e": 30
+   },
+   "tolerance": "max |T - bipolar exact| must stay inside (dx/2)(max|grad T| on the inner circle + max|grad T| on the outer circle) = (dx/2) x 7.617 K/mm, the error a half-cell displacement of a staircase Dirichlet boundary produces; S/L within 3 % on every mesh.  No Richardson extrapolation is applied: the S/L sequence is not monotone in dx because the cell count of the voxelised 40 mm inner disc jumps between meshes, so an extrapolation in dx would be meaningless.",
+   "crosscheck": {
+    "bipolar_limiting_points": 5.143229421551248,
+    "incropera_table_4_1_case_7": 5.143229421551251,
+    "rel_deviation": 5.180665766017345e-16,
+    "note": "Two independent evaluations of the same shape factor - the limiting-point construction solved here and the arccosh form quoted in Table 4.1 - agree to machine precision."
+   },
+   "cmp": {
+    "max_dT_nx240": {
+     "got": 1.1384535077499152,
+     "ref": 0,
+     "abs": 1.1384535077499152,
+     "rel": 1.1384535077499152,
+     "lim": 3.8085515125919733,
+     "ok": true
+    },
+    "SL_nx240": {
+     "got": 5.050059999999999,
+     "ref": 5.143229421551248,
+     "abs": 0.09316942155124863,
+     "rel": 0.0181149651152734,
+     "lim": 0.03,
+     "ok": true
+    },
+    "max_dT_nx360": {
+     "got": 0.8951116927543978,
+     "ref": 0,
+     "abs": 0.8951116927543978,
+     "rel": 0.8951116927543978,
+     "lim": 2.539034341727982,
+     "ok": true
+    },
+    "SL_nx360": {
+     "got": 5.072280000000002,
+     "ref": 5.143229421551248,
+     "abs": 0.07094942155124606,
+     "rel": 0.01379472229139781,
+     "lim": 0.03,
+     "ok": true
+    },
+    "max_dT_nx480": {
+     "got": 0.6462113096689563,
+     "ref": 0,
+     "abs": 0.6462113096689563,
+     "rel": 0.6462113096689563,
+     "lim": 1.9042757562959867,
+     "ok": true
+    },
+    "SL_nx480": {
+     "got": 5.087740000000007,
+     "ref": 5.143229421551248,
+     "abs": 0.0554894215512407,
+     "rel": 0.010788828769474677,
+     "lim": 0.03,
+     "ok": true
+    },
+    "error_decreasing": {
+     "got": "1.1385 > 0.8951 > 0.6462",
+     "ref": "decreasing",
+     "abs": 0,
+     "rel": 0,
+     "lim": 0,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "nx": 240,
+     "dx": 1,
+     "n": 15716,
+     "max": 1.1384535077499152,
+     "rms": 0.3062173272070214,
+     "Q": 25250.299999999996,
+     "SL": 5.050059999999999
+    },
+    {
+     "nx": 360,
+     "dx": 0.6666666666666666,
+     "n": 35324,
+     "max": 0.8951116927543978,
+     "rms": 0.24708521966414615,
+     "Q": 25361.40000000001,
+     "SL": 5.072280000000002
+    },
+    {
+     "nx": 480,
+     "dx": 0.5,
+     "n": 62828,
+     "max": 0.6462113096689563,
+     "rms": 0.19101267667001948,
+     "Q": 25438.700000000037,
+     "SL": 5.087740000000007
+    }
+   ],
+   "worst_rel": 1.1384535077499152,
+   "pass": true
+  },
+  {
+   "id": "SHAPE-BURIED-PIPE",
+   "note": "Isothermal pipe D = 80 mm, axis 300 mm below an isothermal surface.  A finite grid cannot be semi-infinite in x, so the side walls are adiabatic, which by mirror imaging is exactly a periodic row of pipes at pitch s = 1200 mm; the domain runs 2400 mm down so the adiabatic bottom is immaterial.  Primary reference: method of fundamental solutions with the periodic Green function and its image in the isothermal surface.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "meshes": [
+     150,
+     225,
+     300
+    ],
+    "D_mm": 80,
+    "z_mm": 300,
+    "pitch_mm": 1200
+   },
+   "tolerance": "S/L within 3 % on the finest mesh and 1 % after first-order Richardson extrapolation in dx; steady balance residual under 0.1 % of the throughput",
+   "crosscheck": {
+    "mfs_N720_f055": 2.0420450957967686,
+    "mfs_N1200_f040": 2.0420450957967695,
+    "mfs_self_agreement": 4.349455462704041e-16,
+    "line_source_row": 2.0334319980734827,
+    "single_pipe_exact_no_row": 2.324027769184111,
+    "note": "The MFS is verified two ways: it is insensitive to the number and radius of the sources to 1e-15, and at s -> 1.2e6 mm it reproduces the exact single-pipe factor 2 pi/arccosh(2z/D) to 1.5e-7.  The closed-form line-source row factor sits 0.42 % below it; that is the line-source approximation error at D/z = 0.27, not a tool error, so the MFS value grades and the deviation is recorded.",
+    "line_source_row_formula": 2.0334319980734827,
+    "mfs": 2.0420450957967686,
+    "rel_deviation": 0.004217878312782909,
+    "single_pipe_no_row_interaction": 2.324027769184111
+   },
+   "cmp": {
+    "SL_finest": {
+     "got": 2.0187229131528164,
+     "ref": 2.0420450957967686,
+     "abs": 0.02332218264395225,
+     "rel": 0.011420992950624511,
+     "lim": 0.03,
+     "ok": true
+    },
+    "SL_extrapolated": {
+     "got": 2.0560294123366667,
+     "ref": 2.0420450957967686,
+     "abs": 0.013984316539898067,
+     "rel": 0.006848191829202304,
+     "lim": 0.01,
+     "ok": true
+    },
+    "balance_residual": {
+     "got": 2.4848277395366108e-9,
+     "ref": 0,
+     "abs": 2.4848277395366108e-9,
+     "rel": 2.4848277395366108e-9,
+     "lim": 0.001,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "nx": 150,
+     "Q": 9924.952179021007,
+     "SL": 1.9849904358042014,
+     "dx": 8,
+     "residual": 0.0000013935659808339551,
+     "bal": {
+      "Top": -9924.952179021007,
+      "From fixed-T regions": 9924.952180414573,
+      "Balance residual": 0.0000013935659808339551
+     }
+    },
+    {
+     "nx": 225,
+     "Q": 10031.437067124332,
+     "SL": 2.0062874134248663,
+     "dx": 5.333333333333333,
+     "residual": 0.000005106472599436529,
+     "bal": {
+      "Top": -10031.437067124332,
+      "From fixed-T regions": 10031.437072230805,
+      "Balance residual": 0.000005106472599436529
+     }
+    },
+    {
+     "nx": 300,
+     "Q": 10093.61456576408,
+     "SL": 2.0187229131528164,
+     "dx": 4,
+     "residual": -0.00002508089346520137,
+     "bal": {
+      "Top": -10093.61456576408,
+      "From fixed-T regions": 10093.614540683187,
+      "Balance residual": -0.00002508089346520137
+     }
+    }
+   ],
+   "SL_extrapolated": 2.0560294123366667,
+   "worst_rel": 0.011420992950624511,
+   "pass": true
+  },
+  {
+   "id": "SURF-DISC",
+   "note": "Carbon-steel disc R = 60 mm with a uniform volumetric source 1 MW/m3 and surface convection h = 833.33 W/m2K to 0 C, steady.  Exact: T(r) = q R/(2h) + q (R^2-r^2)/(4k), so T(0) = 36 + 18 = 54 C.  This isolates the treatment of a CURVED convective boundary on a square grid: the staircase perimeter of a voxelised circle is 8R against a true 2 pi R, i.e. 27 % too long, and must be corrected.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "meshes": [
+     120,
+     200,
+     400
+    ],
+    "R_mm": 60,
+    "q3": 1000000,
+    "h": 833.3333333333334
+   },
+   "tolerance": "the internal-source term must equal q times the EXACT voxel area of the disc (computed independently in python from the same cell-centre-inside rule) to 1e-4 relative; source and surface flux must cancel to 1e-6; the centre temperature must lie within a half-cell effective-radius uncertainty propagated through both terms of the exact solution plus 1 % of the film rise, i.e. 1.36/0.96/0.66 K",
+   "cmp": {
+    "Qsource_nx120": {
+     "got": 11277.777777776797,
+     "ref": 11277.77777777778,
+     "abs": 9.822542779147625e-10,
+     "rel": 8.709643843579174e-14,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "conservation_nx120": {
+     "got": 8.133839611698107e-13,
+     "ref": 0,
+     "abs": 8.133839611698107e-13,
+     "rel": 8.133839611698107e-13,
+     "lim": 0.000001,
+     "ok": true
+    },
+    "Tcentre_nx120": {
+     "got": 53.873,
+     "ref": 54,
+     "abs": 0.12700000000000244,
+     "rel": 0.002351851851851897,
+     "lim": 1.3599999999999999,
+     "ok": true
+    },
+    "Qsource_nx200": {
+     "got": 11304,
+     "ref": 11304,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "conservation_nx200": {
+     "got": 5.765604240007788e-13,
+     "ref": 0,
+     "abs": 5.765604240007788e-13,
+     "rel": 5.765604240007788e-13,
+     "lim": 0.000001,
+     "ok": true
+    },
+    "Tcentre_nx200": {
+     "got": 53.89,
+     "ref": 54,
+     "abs": 0.10999999999999943,
+     "rel": 0.0020370370370370264,
+     "lim": 0.96,
+     "ok": true
+    },
+    "Qsource_nx400": {
+     "got": 11311,
+     "ref": 11311,
+     "abs": 0,
+     "rel": 0,
+     "lim": 0.0001,
+     "ok": true
+    },
+    "conservation_nx400": {
+     "got": 4.3532882286257923e-13,
+     "ref": 0,
+     "abs": 4.3532882286257923e-13,
+     "rel": 4.3532882286257923e-13,
+     "lim": 0.000001,
+     "ok": true
+    },
+    "Tcentre_nx400": {
+     "got": 53.885,
+     "ref": 54,
+     "abs": 0.11500000000000199,
+     "rel": 0.0021296296296296666,
+     "lim": 0.6599999999999999,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "nx": 120,
+     "dx": 1.6666666666666667,
+     "Tc": 53.873,
+     "source": 11277.777777776797,
+     "surface": -11277.777777767624,
+     "residual": 9.173163562081754e-9
+    },
+    {
+     "nx": 200,
+     "dx": 1,
+     "Tc": 53.89,
+     "source": 11304,
+     "surface": -11303.999999993483,
+     "residual": 6.517439032904804e-9
+    },
+    {
+     "nx": 400,
+     "dx": 0.5,
+     "Tc": 53.885,
+     "source": 11311,
+     "surface": -11311.000000004924,
+     "residual": -4.9240043153986335e-9
+    }
+   ],
+   "worst_rel": 0.002351851851851897,
+   "pass": true
+  },
+  {
+   "id": "TRANS-SEMI-INFINITE",
+   "note": "Semi-infinite carbon-steel bar, initially 0 C, left face stepped to 100 C at t = 0, read at t = 200 s.  T = Ts + (Ti-Ts) erf(x/(2 sqrt(alpha t))), alpha = k/(rho c) = 1.355197e-05 m2/s.  The 400 mm domain is semi-infinite to within erfc(3.84) = 5e-8 of the temperature step.",
+   "ref_source": "recomputed",
+   "inputs": {
+    "nx": 400,
+    "tEnd_s": 200,
+    "tol_K": 0.02
+   },
+   "tolerance": "|dT| <= 0.35 K, i.e. 0.35 % of the 100 K step: the sum of the O(dx^2) space error (0.05 K) and the first-order-in-time error the tool itself budgets through its 0.02 K per-step tolerance",
+   "cmp": {
+    "T(x=4.5)": {
+     "got": 95.1,
+     "ref": 95.12638734908549,
+     "abs": 0.026387349085496226,
+     "rel": 0.000277392528202112,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=14.5)": {
+     "got": 84.304,
+     "ref": 84.38734875070342,
+     "abs": 0.08334875070342207,
+     "rel": 0.0009876924910824066,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=29.5)": {
+     "got": 68.714,
+     "ref": 68.86604179441832,
+     "abs": 0.15204179441832366,
+     "rel": 0.0022077905228269825,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=49.5)": {
+     "got": 49.94,
+     "ref": 50.13820418943432,
+     "abs": 0.19820418943432117,
+     "rel": 0.003953156931697385,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=79.5)": {
+     "got": 27.865,
+     "ref": 28.02394848416185,
+     "abs": 0.1589484841618507,
+     "rel": 0.005671880400853677,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=119.5)": {
+     "got": 10.435,
+     "ref": 10.457490974929897,
+     "abs": 0.022490974929896268,
+     "rel": 0.002150704694253589,
+     "lim": 0.35,
+     "ok": true
+    },
+    "T(x=159.5)": {
+     "got": 3.078,
+     "ref": 3.0284138007893233,
+     "abs": 0.04958619921067653,
+     "rel": 0.016373653824240407,
+     "lim": 0.35,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.016373653824240407,
+   "pass": true
+  },
+  {
+   "id": "TRANS-WALL",
+   "note": "Plane wall, half thickness L = 100 mm of carbon steel, initially 100 C, adiabatic at x = 0 (symmetry plane), convecting from x = L to 0 C with h = 500 W/m2K so Bi = 1.  Read at t = 400 s, Fo = 0.542079.  Exact series theta* = SUM C_n exp(-z_n^2 Fo) cos(z_n x*), z_n tan z_n = Bi (200 terms).",
+   "ref_source": "recomputed",
+   "inputs": {
+    "nx": 100,
+    "tEnd_s": 400,
+    "h": 500,
+    "Bi": 1,
+    "Fo": 0.5420788724759451,
+    "tol_K_sequence": [
+     0.5,
+     0.1,
+     0.02,
+     0.005,
+     0.001
+    ]
+   },
+   "tolerance": "|dT| <= 0.06 K at the tightest time tolerance (0.06 % of the initial 100 K excess: the tool integrates in time with backward Euler, so the error is first order in the step and is driven to zero by tightening the per-step tolerance); the error must fall monotonically as the time tolerance is tightened",
+   "crosscheck": {
+    "zeta1": 0.8603335890193797,
+    "C1": 1.1191320084054335,
+    "T_one_term": [
+     74.92455706300854,
+     73.87333117892484,
+     70.64033182568681,
+     65.3210423408145,
+     58.072562512386185,
+     49.10896879707418
+    ],
+    "T_full_series": [
+     74.89835973047212,
+     73.85276155784098,
+     70.63467336491229,
+     65.33284880865486,
+     58.096505432928446,
+     49.134242288673406
+    ],
+    "max_deviation_K": 0.026197332536412432,
+    "note": "Crosscheck: the one-term approximation (Incropera eq. 5.43 with Table 5.1) against the full 200-term series.  The full series grades; the one-term deviation is recorded, not used."
+   },
+   "cmp": {
+    "T(x=0.5)": {
+     "got": 74.929,
+     "ref": 74.89835973047212,
+     "abs": 0.030640269527879127,
+     "rel": 0.00040909132907770805,
+     "lim": 0.06,
+     "ok": true
+    },
+    "T(x=19.5)": {
+     "got": 73.883,
+     "ref": 73.85276155784098,
+     "abs": 0.03023844215901761,
+     "rel": 0.00040944226757634605,
+     "lim": 0.06,
+     "ok": true
+    },
+    "T(x=39.5)": {
+     "got": 70.665,
+     "ref": 70.63467336491229,
+     "abs": 0.030326635087718046,
+     "rel": 0.0004293448761494914,
+     "lim": 0.06,
+     "ok": true
+    },
+    "T(x=59.5)": {
+     "got": 65.363,
+     "ref": 65.33284880865486,
+     "abs": 0.03015119134514066,
+     "rel": 0.00046150124929415955,
+     "lim": 0.06,
+     "ok": true
+    },
+    "T(x=79.5)": {
+     "got": 58.125,
+     "ref": 58.096505432928446,
+     "abs": 0.0284945670715544,
+     "rel": 0.0004904695533615349,
+     "lim": 0.06,
+     "ok": true
+    },
+    "T(x=99.5)": {
+     "got": 49.159,
+     "ref": 49.134242288673406,
+     "abs": 0.024757711326593324,
+     "rel": 0.0005038789685844114,
+     "lim": 0.06,
+     "ok": true
+    },
+    "time_step_convergence": {
+     "got": "0.1313 > 0.1233 > 0.1043 > 0.0393 > 0.0306",
+     "ref": "decreasing with the time tolerance",
+     "abs": 0,
+     "rel": 0,
+     "lim": 0,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "tol": 0.5,
+     "max_dT": 0.13132663508771714,
+     "T": [
+      75.027,
+      73.982,
+      70.766,
+      65.464,
+      58.221,
+      49.242
+     ]
+    },
+    {
+     "tol": 0.1,
+     "max_dT": 0.12332663508770736,
+     "T": [
+      75.019,
+      73.975,
+      70.758,
+      65.456,
+      58.213,
+      49.235
+     ]
+    },
+    {
+     "tol": 0.02,
+     "max_dT": 0.10432663508771611,
+     "T": [
+      75.001,
+      73.956,
+      70.739,
+      65.437,
+      58.195,
+      49.219
+     ]
+    },
+    {
+     "tol": 0.005,
+     "max_dT": 0.03932663508771839,
+     "T": [
+      74.937,
+      73.892,
+      70.674,
+      65.372,
+      58.133,
+      49.166
+     ]
+    },
+    {
+     "tol": 0.001,
+     "max_dT": 0.030640269527879127,
+     "T": [
+      74.929,
+      73.883,
+      70.665,
+      65.363,
+      58.125,
+      49.159
+     ]
+    }
+   ],
+   "worst_rel": 0.0005038789685844114,
+   "pass": true
+  },
+  {
+   "id": "TRANS-CYLINDER",
+   "note": "Infinite carbon-steel cylinder R = 60 mm, initially 100 C, convecting to 0 C with h = 833.33 W/m2K so Bi = hR/k = 1.  A 2-D Cartesian cross-section IS an infinite cylinder, so this case is exactly representable.  Read at t = 150 s, Fo = 0.564665.  Exact Bessel series theta* = SUM C_n exp(-z_n^2 Fo) J0(z_n r*), z_n J1(z_n)/J0(z_n) = Bi (200 terms).",
+   "ref_source": "recomputed",
+   "inputs": {
+    "meshes": [
+     120,
+     200,
+     300
+    ],
+    "R_mm": 60,
+    "tEnd_s": 150,
+    "Bi": 1,
+    "Fo": 0.5646654921624429,
+    "tol_K": 0.002
+   },
+   "tolerance": "the deviation from the exact Bessel series must stay inside the geometric resolution of a voxel cylinder: a half-cell effective-radius uncertainty propagated through the exact solution (0.84/0.50/0.34 K) plus |theta(1.01 Bi)-theta(Bi)| = 0.29 K for the 1 % accuracy of the corrected staircase perimeter. The time tolerance is tightened to 0.002 K so that the residual is spatial, not temporal.",
+   "crosscheck": {
+    "zeta1": 1.2557837117945938,
+    "C1": 1.2070920583918598,
+    "T_centre_one_term": 49.546470102289184,
+    "T_centre_full_series": 49.544063237533834,
+    "max_deviation_K": 0.0024068647553505684,
+    "note": "Crosscheck: one-term (Incropera eq. 5.52, Table 5.1) against the full 200-term Bessel series.  The full series grades."
+   },
+   "cmp": {
+    "max_dT_nx120": {
+     "got": 0.04059067244340042,
+     "ref": 0,
+     "abs": 0.04059067244340042,
+     "rel": 0.04059067244340042,
+     "lim": 1.1338241136869627,
+     "ok": true
+    },
+    "Tcentre_nx120": {
+     "got": 49.544,
+     "ref": 49.544063237533834,
+     "abs": 0.0000632375338369684,
+     "rel": 0.0000012763897368244233,
+     "lim": 1.1338241136869627,
+     "ok": true
+    },
+    "max_dT_nx200": {
+     "got": 0.024023458373100937,
+     "ref": 0,
+     "abs": 0.024023458373100937,
+     "rel": 0.024023458373100937,
+     "lim": 0.7988601498328478,
+     "ok": true
+    },
+    "Tcentre_nx200": {
+     "got": 49.565,
+     "ref": 49.544063237533834,
+     "abs": 0.020936762466163827,
+     "rel": 0.00042258872401693636,
+     "lim": 0.7988601498328478,
+     "ok": true
+    },
+    "max_dT_nx300": {
+     "got": 0.029285054564930135,
+     "ref": 0,
+     "abs": 0.029285054564930135,
+     "rel": 0.029285054564930135,
+     "lim": 0.6309138805624173,
+     "ok": true
+    },
+    "Tcentre_nx300": {
+     "got": 49.552,
+     "ref": 49.544063237533834,
+     "abs": 0.007936762466165703,
+     "rel": 0.00016019603455037033,
+     "lim": 0.6309138805624173,
+     "ok": true
+    },
+    "spatial_convergence": {
+     "got": "0.0406 > 0.024 > 0.0293",
+     "ref": "decreasing with dx, or already at the 0.05 K time-integration floor",
+     "abs": 0.04059067244340042,
+     "rel": 0.0004059067244340042,
+     "lim": 0.05,
+     "ok": true
+    }
+   },
+   "detail": [
+    {
+     "nx": 120,
+     "dx": 1.6666666666666667,
+     "n": 2828,
+     "max": 0.04059067244340042,
+     "rms": 0.012476987197792444,
+     "Tc": 49.544
+    },
+    {
+     "nx": 200,
+     "dx": 1,
+     "n": 7860,
+     "max": 0.024023458373100937,
+     "rms": 0.011993226354522964,
+     "Tc": 49.565
+    },
+    {
+     "nx": 300,
+     "dx": 0.6666666666666666,
+     "n": 17692,
+     "max": 0.029285054564930135,
+     "rms": 0.01364388614816963,
+     "Tc": 49.552
+    }
+   ],
+   "worst_rel": 0.04059067244340042,
+   "pass": true
+  }
+ ]
+}

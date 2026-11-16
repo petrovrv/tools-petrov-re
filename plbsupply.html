@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drinking Water Pipe Sizing</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-07.plbsupply-1.4",
+  "id": "plbsupply",
+  "file": "plbsupply.html",
+  "listed": true,
+  "category": "plumbing",
+  "order": 20,
+  "title": {
+    "en": "Drinking Water Pipe Sizing",
+    "uk": "Розрахунок труб питного водопроводу",
+    "de": "Trinkwasser-Rohrnetzberechnung",
+    "nl": "Leidingdimensionering drinkwater",
+    "fr": "Dimensionnement des conduites d’eau potable",
+    "es": "Dimensionado de tuberías de agua potable",
+    "pl": "Wymiarowanie przewodów wody pitnej"
+  },
+  "summary": {
+    "en": "Peak flow from the fixtures (DIN 1988-300 per building type, or EN 806-3 loading units), pipe sizes of the service pipe, main, riser and floor branches by velocity and available pressure, residual pressure at the worst fixture and whether a booster is needed.",
+    "uk": "Пікова витрата від приладів (DIN 1988-300 за типом будівлі або одиниці навантаження EN 806-3), діаметри вводу, магістралі, стояка й поверхових відгалужень за швидкістю та наявним тиском, залишковий тиск у найгіршого приладу і чи потрібна підвищувальна установка.",
+    "de": "Spitzendurchfluss aus den Entnahmestellen (DIN 1988-300 je Gebäudeart oder Belastungswerte nach EN 806-3), Rohrweiten von Anschlussleitung, Verteilleitung, Steigleitung und Stockwerksleitungen nach Fließgeschwindigkeit und verfügbarem Druck, Restdruck an der ungünstigsten Entnahmestelle und ob eine Druckerhöhung nötig ist.",
+    "nl": "Piekdebiet uit de tappunten (DIN 1988-300 per gebouwtype of belastingseenheden EN 806-3), diameters van aansluitleiding, verdeelleiding, stijgleiding en verdiepingsleidingen op snelheid en beschikbare druk, restdruk aan het ongunstigste tappunt en of een drukverhoging nodig is.",
+    "fr": "Débit de pointe des appareils (DIN 1988-300 par type de bâtiment ou unités de charge EN 806-3), diamètres du branchement, de la distribution, de la colonne et des dérivations d’étage selon la vitesse et la pression disponible, pression résiduelle au point le plus défavorable et besoin d’un surpresseur.",
+    "es": "Caudal punta de los aparatos (DIN 1988-300 por tipo de edificio o unidades de carga EN 806-3), diámetros de acometida, distribuidor, montante y derivaciones de planta por velocidad y presión disponible, presión residual en el punto más desfavorable y si hace falta un grupo de presión.",
+    "pl": "Przepływ szczytowy z punktów czerpalnych (DIN 1988-300 wg rodzaju budynku albo jednostki obciążenia EN 806-3), średnice przyłącza, przewodu rozdzielczego, pionu i odgałęzień piętrowych wg prędkości i dostępnego ciśnienia, ciśnienie resztkowe w najniekorzystniejszym punkcie i czy potrzebny jest zestaw hydroforowy."
+  },
+  "description": {
+    "en": "Describe the building as zones per floor (identical units × fixtures) or take the fixture inventory from the plumbing project file. The tool builds the tree service pipe → meter, filter, backflow preventer → basement main → riser → floor branch, computes the design flow of every segment, picks the smallest pipe within the DIN 1988-300 velocity limit, then enlarges the segments that eat the most pressure on the critical path until the worst fixture has its minimum flow pressure. If height and apparatus alone exceed the supply pressure it says so and hands the flow and head to the booster tool. The pressure profile of the critical path shows where the pressure goes.",
+    "uk": "Опишіть будівлю зонами по поверхах (однакові квартири/блоки × прилади) або візьміть перелік приладів з файлу проєкту водопостачання. Інструмент будує дерево ввід → лічильник, фільтр, зворотний клапан → магістраль у підвалі → стояк → поверхове відгалуження, розраховує розрахункову витрату кожної ділянки, обирає найменшу трубу в межах швидкостей DIN 1988-300, а потім збільшує ділянки, що «з'їдають» найбільше тиску на критичному шляху, доки найгірший прилад не отримає мінімальний тиск витікання. Якщо висота й арматура самі вже перевищують тиск у мережі, інструмент це показує й передає витрату та напір інструменту підвищувальних установок. Профіль тиску критичного шляху показує, куди йде тиск.",
+    "de": "Beschreiben Sie das Gebäude als Zonen je Geschoss (gleiche Einheiten × Entnahmestellen) oder übernehmen Sie das Inventar aus der Sanitär-Projektdatei. Das Werkzeug bildet den Strang Anschlussleitung → Wasserzähler, Filter, Rückflussverhinderer → Kellerverteilung → Steigleitung → Stockwerksleitung, berechnet den Spitzendurchfluss jeder Teilstrecke, wählt die kleinste Rohrweite innerhalb der Geschwindigkeitsgrenze nach DIN 1988-300 und vergrößert dann die Teilstrecken mit dem größten Druckverlust auf dem ungünstigsten Fließweg, bis die ungünstigste Entnahmestelle ihren Mindestfließdruck hat. Übersteigen schon Höhe und Apparate den Versorgungsdruck, sagt es das und gibt Durchfluss und Förderhöhe an das Druckerhöhungs-Werkzeug weiter. Das Druckprofil des Fließwegs zeigt, wo der Druck bleibt.",
+    "nl": "Beschrijf het gebouw als zones per verdieping (identieke eenheden × tappunten) of neem de inventaris over uit het sanitair-projectbestand. De tool bouwt de boom aansluitleiding → watermeter, filter, terugstroombeveiliging → verdeelleiding in de kelder → stijgleiding → verdiepingsleiding, berekent het ontwerpdebiet van elk segment, kiest de kleinste buis binnen de snelheidsgrens van DIN 1988-300 en vergroot daarna de segmenten met het grootste drukverlies op het kritieke pad tot het ongunstigste tappunt zijn minimale stromingsdruk heeft. Als hoogte en toestellen alleen al de leidingdruk overschrijden, zegt ze dat en geeft ze debiet en opvoerhoogte door aan de drukverhogingstool. Het drukprofiel van het kritieke pad toont waar de druk naartoe gaat.",
+    "fr": "Décrivez le bâtiment par zones d’étage (unités identiques × appareils) ou reprenez l’inventaire du fichier projet sanitaire. L’outil construit l’arbre branchement → compteur, filtre, clapet anti-retour → distribution en sous-sol → colonne → dérivation d’étage, calcule le débit de calcul de chaque tronçon, choisit le plus petit tube dans la limite de vitesse de la DIN 1988-300, puis agrandit les tronçons qui consomment le plus de pression sur le chemin critique jusqu’à ce que le point le plus défavorable ait sa pression minimale d’écoulement. Si la hauteur et les appareils dépassent déjà la pression du réseau, il le dit et transmet débit et hauteur à l’outil surpresseur. Le profil de pression du chemin critique montre où part la pression.",
+    "es": "Describa el edificio por zonas de planta (unidades idénticas × aparatos) o tome el inventario del archivo de proyecto de fontanería. La herramienta construye el árbol acometida → contador, filtro, antirretorno → distribuidor en sótano → montante → derivación de planta, calcula el caudal de cálculo de cada tramo, elige el tubo más pequeño dentro del límite de velocidad de DIN 1988-300 y después amplía los tramos que más presión consumen en el recorrido crítico hasta que el punto más desfavorable tenga su presión mínima de flujo. Si la altura y los equipos ya superan la presión de la red, lo indica y pasa caudal y altura a la herramienta de grupos de presión. El perfil de presión del recorrido crítico muestra adónde va la presión.",
+    "pl": "Opisz budynek strefami na kondygnacjach (jednakowe lokale × przybory) albo pobierz inwentarz z pliku projektu instalacji. Narzędzie buduje drzewo przyłącze → wodomierz, filtr, zabezpieczenie przed przepływem zwrotnym → przewód rozdzielczy w piwnicy → pion → odgałęzienie piętrowe, liczy przepływ obliczeniowy każdego odcinka, dobiera najmniejszą rurę w granicy prędkości DIN 1988-300, a potem powiększa odcinki o największej stracie ciśnienia na drodze krytycznej, aż najniekorzystniejszy punkt ma minimalne ciśnienie wypływu. Jeśli sama wysokość i armatura przekraczają ciśnienie w sieci, mówi to i przekazuje przepływ oraz wysokość podnoszenia do narzędzia zestawów hydroforowych. Profil ciśnienia drogi krytycznej pokazuje, gdzie znika ciśnienie."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "A design aid for one riser with floor branches: all fixtures of a zone are taken at the end of its branch, no looped networks, no circulation, no individual connection pipes. DIN 1988-300 Table 1/2 values as reproduced in trade literature; the EN 806-3 option uses the lines of Figure B.1 of the standard, digitised (about ±2 %). Apparatus losses are typical values — replace them by product data. Not a substitute for EN 806, DIN 1988-300, the water utility's rules and national/regional regulations.",
+    "uk": "Інструмент для попереднього проєктування одного стояка з поверховими відгалуженнями: усі прилади зони беруться в кінці її відгалуження, без кільцевих мереж, без циркуляції, без окремих підводок. Значення таблиць 1/2 DIN 1988-300 — у відтворенні фахової літератури; варіант EN 806-3 використовує лінії рисунка B.1 стандарту, оцифровані (приблизно ±2 %). Втрати в арматурі — типові значення, замініть їх даними виробу. Не замінює EN 806, DIN 1988-300, правила водоканалу та національні/регіональні норми.",
+    "de": "Planungshilfe für eine Steigleitung mit Stockwerksleitungen: alle Entnahmestellen einer Zone am Ende ihrer Leitung, keine Ringnetze, keine Zirkulation, keine Einzelzuleitungen. Werte der Tabellen 1/2 der DIN 1988-300 nach Wiedergabe in der Fachliteratur; die Option EN 806-3 nutzt die Linien von Bild B.1 der Norm, digitalisiert (etwa ±2 %). Apparateverluste sind typische Werte — durch Herstellerdaten ersetzen. Kein Ersatz für EN 806, DIN 1988-300, die Vorgaben des Wasserversorgers und nationale/regionale Vorschriften.",
+    "nl": "Ontwerphulp voor één stijgleiding met verdiepingsleidingen: alle tappunten van een zone aan het einde van haar leiding, geen ringnetten, geen circulatie, geen individuele aansluitleidingen. Waarden van tabel 1/2 van DIN 1988-300 zoals overgenomen in vakliteratuur; de optie EN 806-3 gebruikt de lijnen van figuur B.1 van de norm, gedigitaliseerd (ongeveer ±2 %). Verliezen van toestellen zijn typische waarden — vervang ze door productgegevens. Geen vervanging van EN 806, DIN 1988-300, de voorschriften van de waterleverancier en nationale/regionale regelgeving.",
+    "fr": "Aide à la conception pour une colonne avec dérivations d’étage : tous les appareils d’une zone sont placés en bout de dérivation, pas de réseaux maillés, pas de bouclage, pas de raccordements individuels. Valeurs des tableaux 1/2 de la DIN 1988-300 telles que reproduites dans la littérature technique ; l’option EN 806-3 utilise les droites de la figure B.1 de la norme, numérisées (environ ±2 %). Les pertes des appareils sont des valeurs typiques — remplacez-les par les données produit. Ne remplace pas l’EN 806, la DIN 1988-300, les règles du distributeur d’eau ni la réglementation nationale/régionale.",
+    "es": "Ayuda de diseño para un montante con derivaciones de planta: todos los aparatos de una zona se toman al final de su derivación, sin redes malladas, sin recirculación, sin conexiones individuales. Valores de las tablas 1/2 de DIN 1988-300 según su reproducción en literatura técnica; la opción EN 806-3 usa las rectas de la figura B.1 de la norma, digitalizadas (aprox. ±2 %). Las pérdidas de equipos son valores típicos: sustitúyalas por datos de producto. No sustituye a EN 806, DIN 1988-300, las normas de la compañía de agua ni la reglamentación nacional/regional.",
+    "pl": "Pomoc projektowa dla jednego pionu z odgałęzieniami piętrowymi: wszystkie przybory strefy przyjmuje się na końcu jej odgałęzienia, bez sieci pierścieniowych, bez cyrkulacji, bez pojedynczych podejść. Wartości tablic 1/2 DIN 1988-300 w wersji przytaczanej w literaturze branżowej; opcja EN 806-3 używa linii z rysunku B.1 normy, zdigitalizowanych (ok. ±2 %). Straty w urządzeniach to wartości typowe — zastąp je danymi wyrobu. Nie zastępuje EN 806, DIN 1988-300, wymagań przedsiębiorstwa wodociągowego ani przepisów krajowych/regionalnych."
+  },
+  "intended_use": "preliminary design",
+  "catalog_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "tool_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "dependencies": ["plumbing-core.js", "plb-supply.js"],
+  "network_access": { "mode": "none" },
+  "validation": {
+    "basis": {
+      "en": "DIN 1988-300:2012 peak flow Qs = a·(ΣQa)^b − c with the Table 2 constants and Table 3 velocity limits, EN 806-3 loading units, Darcy–Weisbach with Colebrook–White and the stated tree, sizing and booster rules of the method notes (_plb/sup/METHOD.md).",
+      "uk": "Пікова витрата DIN 1988-300:2012 Qs = a·(ΣQa)^b − c з константами таблиці 2 і граничними швидкостями таблиці 3, одиниці навантаження EN 806-3, Дарсі–Вейсбах з Колбруком–Вайтом і викладені в методиці правила дерева, підбору й підвищення тиску (_plb/sup/METHOD.md).",
+      "de": "Spitzendurchfluss nach DIN 1988-300:2012 Qs = a·(ΣQa)^b − c mit den Konstanten der Tabelle 2 und den Geschwindigkeitsgrenzen der Tabelle 3, Belastungswerte nach EN 806-3, Darcy–Weisbach mit Colebrook–White sowie die in den Methodenhinweisen genannten Regeln für Strang, Bemessung und Druckerhöhung (_plb/sup/METHOD.md).",
+      "nl": "Piekdebiet volgens DIN 1988-300:2012 Qs = a·(ΣQa)^b − c met de constanten van tabel 2 en de snelheidsgrenzen van tabel 3, belastingseenheden EN 806-3, Darcy–Weisbach met Colebrook–White en de in de methode beschreven regels voor boom, dimensionering en drukverhoging (_plb/sup/METHOD.md).",
+      "fr": "Débit de pointe DIN 1988-300:2012 Qs = a·(ΣQa)^b − c avec les constantes du tableau 2 et les vitesses limites du tableau 3, unités de charge EN 806-3, Darcy–Weisbach avec Colebrook–White et les règles d’arbre, de dimensionnement et de surpression décrites dans la méthode (_plb/sup/METHOD.md).",
+      "es": "Caudal punta DIN 1988-300:2012 Qs = a·(ΣQa)^b − c con las constantes de la tabla 2 y las velocidades límite de la tabla 3, unidades de carga EN 806-3, Darcy–Weisbach con Colebrook–White y las reglas de árbol, dimensionado y sobrepresión descritas en el método (_plb/sup/METHOD.md).",
+      "pl": "Przepływ szczytowy DIN 1988-300:2012 Qs = a·(ΣQa)^b − c ze stałymi z tablicy 2 i prędkościami granicznymi z tablicy 3, jednostki obciążenia EN 806-3, Darcy–Weisbach z Colebrookiem–White’em oraz opisane w metodzie zasady drzewa, doboru i podnoszenia ciśnienia (_plb/sup/METHOD.md)."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "plbsupply-method-2026-11-05",
+        "reference": {
+          "en": "49 cases computed on the page against an independent Python implementation of the method: the eight presets (flats at 4 and 3 bar, velocity-only sizing, multilayer pipe, office with cisterns and with flush valves, hotel, sports showers) and variations — hotel fixtures with residential constants, diversified vs simultaneous showers, EN 806-3 option, cold/hot circuits, single house, hospital in stainless, school in galvanised steel, nursing home, 12-storey towers at 5 and 3.5 bar, riser through empty floors, continuous process flow, low velocity limits, long service pipe, high fitting losses, warm cold water, flush-valve house, zero friction allowance.",
+          "uk": "49 випадків, розрахованих на сторінці, проти незалежної реалізації методики на Python: вісім прикладів (квартири при 4 і 3 бар, підбір лише за швидкістю, багатошарові труби, офіс з бачками і зі змивними кранами, готель, спортивні душові) і варіації — готельні прилади з житловими константами, душові з одночасністю й без, варіант EN 806-3, холодна/гаряча мережа, приватний будинок, лікарня з нержавіючої сталі, школа з оцинкованої сталі, будинок догляду, 12-поверхові будинки при 5 і 3,5 бар, стояк через порожні поверхи, постійна технологічна витрата, низькі граничні швидкості, довгий ввід, великі місцеві опори, тепла холодна вода, будинок зі змивним краном, нульовий запас на тертя.",
+          "de": "49 auf der Seite gerechnete Fälle gegen eine unabhängige Python-Umsetzung der Methode: die acht Beispiele (Wohnungen bei 4 und 3 bar, Bemessung nur nach Geschwindigkeit, Mehrschichtverbundrohr, Büro mit Spülkästen und mit Druckspülern, Hotel, Sportduschen) und Varianten — Hotelausstattung mit Wohnkonstanten, Duschen mit und ohne Gleichzeitigkeit, Option EN 806-3, Kalt-/Warmwasser, Einfamilienhaus, Krankenhaus in Edelstahl, Schule in verzinktem Stahl, Pflegeheim, 12-geschossige Häuser bei 5 und 3,5 bar, Steigleitung durch leere Geschosse, Dauerdurchfluss, niedrige Geschwindigkeitsgrenzen, lange Anschlussleitung, hohe Einzelwiderstände, warmes Kaltwasser, Haus mit Druckspüler, Reibungsreserve null.",
+          "nl": "49 op de pagina berekende gevallen tegen een onafhankelijke Python-implementatie van de methode: de acht voorbeelden (appartementen bij 4 en 3 bar, dimensionering alleen op snelheid, meerlagenbuis, kantoor met spoelreservoirs en met drukspoelers, hotel, sportdouches) en varianten — hoteltappunten met woonconstanten, douches met en zonder gelijktijdigheid, optie EN 806-3, koud/warm circuit, eengezinswoning, ziekenhuis in roestvast staal, school in gegalvaniseerd staal, woonzorgcentrum, torens van 12 verdiepingen bij 5 en 3,5 bar, stijgleiding door lege verdiepingen, continu procesdebiet, lage snelheidsgrenzen, lange aansluitleiding, hoge weerstanden, warm koud water, woning met drukspoeler, wrijvingsmarge nul.",
+          "fr": "49 cas calculés sur la page contre une implémentation Python indépendante de la méthode : les huit exemples (logements à 4 et 3 bar, dimensionnement à la seule vitesse, multicouche, bureaux à réservoirs et à robinets de chasse, hôtel, douches sportives) et des variantes — appareils d’hôtel avec constantes de logement, douches avec et sans simultanéité, option EN 806-3, circuits froid/chaud, maison individuelle, hôpital en inox, école en acier galvanisé, maison de repos, tours de 12 étages à 5 et 3,5 bar, colonne traversant des étages vides, débit de process continu, vitesses limites basses, long branchement, fortes singularités, eau froide tiède, maison à robinet de chasse, réserve de frottement nulle.",
+          "es": "49 casos calculados en la página frente a una implementación independiente en Python del método: los ocho ejemplos (viviendas a 4 y 3 bar, dimensionado solo por velocidad, multicapa, oficina con cisternas y con fluxores, hotel, duchas deportivas) y variantes: aparatos de hotel con constantes residenciales, duchas con y sin simultaneidad, opción EN 806-3, circuitos frío/caliente, vivienda unifamiliar, hospital en inoxidable, escuela en acero galvanizado, residencia asistida, torres de 12 plantas a 5 y 3,5 bar, montante por plantas vacías, caudal de proceso continuo, velocidades límite bajas, acometida larga, singularidades altas, agua fría templada, vivienda con fluxor, margen de fricción nulo.",
+          "pl": "49 przypadków policzonych na stronie wobec niezależnej implementacji metody w Pythonie: osiem przykładów (mieszkania przy 4 i 3 bar, dobór tylko wg prędkości, rury wielowarstwowe, biurowiec ze spłuczkami i z zaworami spłukującymi, hotel, prysznice sportowe) i warianty — przybory hotelowe ze stałymi mieszkaniowymi, prysznice z jednoczesnością i bez, opcja EN 806-3, obieg zimny/ciepły, dom jednorodzinny, szpital ze stali nierdzewnej, szkoła ze stali ocynkowanej, dom opieki, 12-kondygnacyjne budynki przy 5 i 3,5 bar, pion przez puste kondygnacje, stały przepływ technologiczny, niskie prędkości graniczne, długie przyłącze, duże opory miejscowe, ciepła woda zimna, dom z zaworem spłukującym, zerowy zapas na tarcie."
+        },
+        "citations": [
+          "DIN 1988-300:2012-05 Codes of practice for drinking water installations — pipe sizing (Tables 1, 2, 3), as reproduced in trade literature.",
+          "EN 806-3:2006 Specifications for installations inside buildings conveying water for human consumption — Part 3: Pipe sizing, simplified method (Table 2, §4.4, Annex B Figure B.1).",
+          "Colebrook C.F. (1939) Turbulent flow in pipes, J. ICE 11; Tanaka M. et al. (2001) Metrologia 38, 301–309.",
+          "Method: _plb/sup/METHOD.md (plbsupply-1.3; engine plbsupply-1.4: EN 806-3 Annex B Fig. B.1 lines); reference generator bench-src/ref/gen_plbsupply.py."
+        ],
+        "cases": 37,
+        "passed": 37,
+        "tolerance": {
+          "en": "Design flow ±0.1 %; every pipe size, the worst branch and fixture, the booster flag and the number of upsizing steps exact; worst pressure reserve ±0.005 bar; booster head ±0.05 m; the headline tiles show the design flow and the service pipe.",
+          "uk": "Розрахункова витрата ±0,1 %; кожен діаметр, найгірше відгалуження й прилад, ознака установки та кількість збільшень — точно; запас тиску ±0,005 бар; напір установки ±0,05 м; головні плитки показують розрахункову витрату й діаметр вводу.",
+          "de": "Spitzendurchfluss ±0,1 %; jede Rohrweite, ungünstigste Leitung und Entnahmestelle, Druckerhöhungs-Kennzeichen und Zahl der Vergrößerungen exakt; Druckreserve ±0,005 bar; Förderhöhe ±0,05 m; die Kopfkacheln zeigen Spitzendurchfluss und Anschlussleitung.",
+          "nl": "Ontwerpdebiet ±0,1 %; elke buismaat, ongunstigste leiding en tappunt, drukverhogingsvlag en aantal vergrotingen exact; drukreserve ±0,005 bar; opvoerhoogte ±0,05 m; de kopteksttegels tonen ontwerpdebiet en aansluitleiding.",
+          "fr": "Débit de calcul ±0,1 % ; chaque diamètre, la dérivation et l’appareil les plus défavorables, l’indicateur de surpresseur et le nombre d’agrandissements exacts ; réserve de pression ±0,005 bar ; hauteur ±0,05 m ; les tuiles principales affichent le débit et le branchement.",
+          "es": "Caudal de cálculo ±0,1 %; cada diámetro, la derivación y el aparato más desfavorables, el indicador de grupo de presión y el número de ampliaciones exactos; reserva de presión ±0,005 bar; altura ±0,05 m; las fichas principales muestran caudal y acometida.",
+          "pl": "Przepływ obliczeniowy ±0,1 %; każda średnica, najniekorzystniejsze odgałęzienie i przybór, flaga zestawu i liczba powiększeń dokładnie; zapas ciśnienia ±0,005 bar; wysokość podnoszenia ±0,05 m; główne kafelki pokazują przepływ i przyłącze."
+        },
+        "run_at": "2026-11-07T09:54:32Z",
+        "artifact": "benchmarks/plbsupply.json"
+      }
+    ]
+  },
+  "report": { "pdf": true, "source_attribution": true },
+  "python_export": { "supported": false, "requires": [], "reason": "A tree sizing with an iterative upsizing rule; the independent reference implementation is bench-src/ref/gen_plbsupply.py." },
+  "handoff": { "provides": [], "accepts": [] },
+  "inputsFrom": ["plbfixtures"],
+  "outputsTo": ["plbbooster", "plbdhw", "plbbackflow", "operatingpoint", "hydraulicnetwork"],
+  "state_codec": { "permalink": true, "record": "tools.petrov.re/calculation-record/v1" },
+  "workflow": { "entry": "calculate", "medium": "none", "lifecycle": ["basic", "detailed"] },
+  "ui": { "framework": "tools.petrov.re/ui/v1", "level": 3 }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="plumbing-core.js" defer></script>
+<script src="plb-supply.js?v=c1948b2c6304" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+'use strict';
+/* ===== plbsupply page: the model is plb-supply.js (PLBSupply); the project file is plumbing-core.js (PLBCore) when present ===== */
+var TOOL = 'plbsupply';
+function T7(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+var CORE = window.PLBCore || null, ENG = window.PLBSupply || null;
+
+var I18N = {
+  subtitle: T7('How big must each pipe be, and does the top floor still get enough pressure?',
+    'Якого діаметра має бути кожна труба і чи вистачить тиску на верхньому поверсі?',
+    'Wie groß muss jedes Rohr sein, und reicht der Druck im obersten Geschoss noch?',
+    'Hoe groot moet elke leiding zijn, en is er bovenaan nog genoeg druk?',
+    'Quelle taille pour chaque conduite, et reste-t-il assez de pression au dernier étage ?',
+    '¿Qué tamaño debe tener cada tubería y llega suficiente presión a la última planta?',
+    'Jak duża musi być każda rura i czy na ostatniej kondygnacji wystarczy ciśnienia?'),
+  'notice.t': T7('Design aid', 'Допоміжний інструмент', 'Planungshilfe', 'Ontwerphulp', 'Aide à la conception', 'Ayuda de diseño', 'Pomoc projektowa'),
+  'notice.b': T7('A design aid, not a substitute for EN 806, DIN 1988-300, the water utility’s rules (in Belgium the Belgaqua/TVBI inspection) and national/regional regulations. Apparatus losses and the EN 806-3 curve are stated assumptions.',
+    'Допоміжний інструмент, а не заміна EN 806, DIN 1988-300, правил водоканалу (у Бельгії — перевірка Belgaqua/TVBI) та національних/регіональних норм. Втрати в арматурі й крива EN 806-3 — явно зазначені припущення.',
+    'Eine Planungshilfe, kein Ersatz für EN 806, DIN 1988-300, die Vorgaben des Wasserversorgers (in Belgien die Belgaqua/TVBI-Abnahme) und nationale/regionale Vorschriften. Apparateverluste und die EN-806-3-Kurve sind ausgewiesene Annahmen.',
+    'Een ontwerphulp, geen vervanging van EN 806, DIN 1988-300, de voorschriften van de waterleverancier (in België de Belgaqua/TVBI-keuring) en nationale/regionale regelgeving. Toestelverliezen en de EN 806-3-curve zijn vermelde aannames.',
+    'Une aide à la conception, pas un substitut à l’EN 806, à la DIN 1988-300, aux règles du distributeur d’eau (en Belgique le contrôle Belgaqua/TVBI) ni à la réglementation nationale/régionale. Les pertes des appareils et la courbe EN 806-3 sont des hypothèses déclarées.',
+    'Una ayuda de diseño, no un sustituto de EN 806, DIN 1988-300, las normas de la compañía de agua (en Bélgica la inspección Belgaqua/TVBI) ni la reglamentación nacional/regional. Las pérdidas de equipos y la curva EN 806-3 son supuestos declarados.',
+    'Pomoc projektowa, nie zastępuje EN 806, DIN 1988-300, wymagań przedsiębiorstwa wodociągowego (w Belgii odbiór Belgaqua/TVBI) ani przepisów krajowych/regionalnych. Straty w urządzeniach i krzywa EN 806-3 to jawne założenia.'),
+  footer: T7('Qs = a·(ΣQa)^b − c (DIN 1988-300, bounded by the largest Qa and ΣQa) + simultaneous flows; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ from Colebrook–White; smallest pipe within the velocity limit, then the largest-loss segment on the critical path is enlarged until the worst fixture keeps its minimum flow pressure. Method: _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, обмежено найбільшим Qa і ΣQa) + одночасні витрати; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ за Колбруком–Вайтом; найменша труба в межах граничної швидкості, далі збільшується ділянка з найбільшою втратою на критичному шляху, доки найгірший прилад має мінімальний тиск витікання. Методика: _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, begrenzt durch das größte Qa und ΣQa) + gleichzeitige Durchflüsse; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ nach Colebrook–White; kleinste Rohrweite innerhalb der Geschwindigkeitsgrenze, dann wird die Teilstrecke mit dem größten Verlust auf dem ungünstigsten Fließweg vergrößert, bis die ungünstigste Entnahmestelle ihren Mindestfließdruck behält. Methode: _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, begrensd door het grootste Qa en ΣQa) + gelijktijdige debieten; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ volgens Colebrook–White; kleinste buis binnen de snelheidsgrens, daarna wordt het segment met het grootste verlies op het kritieke pad vergroot tot het ongunstigste tappunt zijn minimale stromingsdruk houdt. Methode: _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, borné par le plus grand Qa et ΣQa) + débits simultanés ; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ par Colebrook–White ; plus petit tube dans la limite de vitesse, puis le tronçon le plus déperditif du chemin critique est agrandi jusqu’à ce que le point le plus défavorable garde sa pression minimale d’écoulement. Méthode : _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, acotado por el mayor Qa y ΣQa) + caudales simultáneos; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ por Colebrook–White; tubo más pequeño dentro del límite de velocidad, después se amplía el tramo con mayor pérdida del recorrido crítico hasta que el punto más desfavorable conserve su presión mínima de flujo. Método: _plb/sup/METHOD.md.',
+    'Qs = a·(ΣQa)^b − c (DIN 1988-300, ograniczone największym Qa i ΣQa) + przepływy jednoczesne; Δp = (λ L/d + Σζ)·ρv²/2 + ρ g Δz, λ wg Colebrooka–White’a; najmniejsza rura w granicy prędkości, potem powiększa się odcinek o największej stracie na drodze krytycznej, aż najniekorzystniejszy punkt zachowa minimalne ciśnienie wypływu. Metoda: _plb/sup/METHOD.md.'),
+  /* panels */
+  'p.basis': T7('Method and building', 'Метод і будівля', 'Verfahren und Gebäude', 'Methode en gebouw', 'Méthode et bâtiment', 'Método y edificio', 'Metoda i budynek'),
+  'p.supply': T7('Supply pressure and apparatus', 'Тиск у мережі та арматура', 'Versorgungsdruck und Apparate', 'Leidingdruk en toestellen', 'Pression du réseau et appareils', 'Presión de red y equipos', 'Ciśnienie w sieci i urządzenia'),
+  'p.geo': T7('Pipes and geometry', 'Труби та геометрія', 'Rohre und Geometrie', 'Leidingen en geometrie', 'Conduites et géométrie', 'Tuberías y geometría', 'Rury i geometria'),
+  'p.zones': T7('Zones (per floor)', 'Зони (по поверхах)', 'Zonen (je Geschoss)', 'Zones (per verdieping)', 'Zones (par étage)', 'Zonas (por planta)', 'Strefy (na kondygnacjach)'),
+  'p.limits': T7('Velocity limits and temperatures', 'Граничні швидкості й температури', 'Geschwindigkeitsgrenzen und Temperaturen', 'Snelheidsgrenzen en temperaturen', 'Vitesses limites et températures', 'Velocidades límite y temperaturas', 'Prędkości graniczne i temperatury'),
+  'p.io': T7('Export and project file', 'Експорт і файл проєкту', 'Export und Projektdatei', 'Export en projectbestand', 'Export et fichier projet', 'Exportación y archivo de proyecto', 'Eksport i plik projektu'),
+  /* fields */
+  'f.method': T7('Design flow method', 'Метод розрахункової витрати', 'Verfahren Spitzendurchfluss', 'Methode ontwerpdebiet', 'Méthode du débit de calcul', 'Método de caudal de cálculo', 'Metoda przepływu obliczeniowego'),
+  'm.din': T7('DIN 1988-300', 'DIN 1988-300', 'DIN 1988-300', 'DIN 1988-300', 'DIN 1988-300', 'DIN 1988-300', 'DIN 1988-300'),
+  'm.en806': T7('EN 806-3 (LU)', 'EN 806-3 (ОН)', 'EN 806-3 (BW)', 'EN 806-3 (BE)', 'EN 806-3 (UC)', 'EN 806-3 (UC)', 'EN 806-3 (JO)'),
+  'f.btype': T7('Building type (peak-flow constants)', 'Тип будівлі (константи пікової витрати)', 'Gebäudeart (Konstanten Spitzendurchfluss)', 'Gebouwtype (constanten piekdebiet)', 'Type de bâtiment (constantes de pointe)', 'Tipo de edificio (constantes de punta)', 'Rodzaj budynku (stałe przepływu szczytowego)'),
+  'bt.sports': T7('Sports hall / changing rooms (no DIN constants)', 'Спортзал / роздягальні (без констант DIN)', 'Sporthalle / Umkleiden (keine DIN-Konstanten)', 'Sporthal / kleedkamers (geen DIN-constanten)', 'Salle de sport / vestiaires (sans constantes DIN)', 'Polideportivo / vestuarios (sin constantes DIN)', 'Hala sportowa / szatnie (bez stałych DIN)'),
+  'bt.retail': T7('Retail (no DIN constants)', 'Торгівля (без констант DIN)', 'Einzelhandel (keine DIN-Konstanten)', 'Winkel (geen DIN-constanten)', 'Commerce (sans constantes DIN)', 'Comercio (sin constantes DIN)', 'Handel (bez stałych DIN)'),
+  'bt.restaurant': T7('Restaurant (no DIN constants)', 'Ресторан (без констант DIN)', 'Gaststätte (keine DIN-Konstanten)', 'Restaurant (geen DIN-constanten)', 'Restaurant (sans constantes DIN)', 'Restaurante (sin constantes DIN)', 'Restauracja (bez stałych DIN)'),
+  'bt.industrial': T7('Industrial (no DIN constants)', 'Промисловий (без констант DIN)', 'Industrie (keine DIN-Konstanten)', 'Industrie (geen DIN-constanten)', 'Industriel (sans constantes DIN)', 'Industrial (sin constantes DIN)', 'Przemysłowy (bez stałych DIN)'),
+  'f.dincurve': T7('DIN peak-flow curve used', 'Крива пікової витрати DIN', 'Verwendete DIN-Spitzenkurve', 'Gebruikte DIN-piekcurve', 'Courbe de pointe DIN utilisée', 'Curva de punta DIN usada', 'Użyta krzywa szczytowa DIN'),
+  'f.dincurve.h': T7('Only needed for a building type without DIN 1988-300 peak-flow constants: choose the closest curve explicitly — the result is flagged as an assumption. Or use EN 806-3.', 'Потрібно лише для типу будівлі без констант пікової витрати DIN 1988-300: явно оберіть найближчу криву — результат позначається як припущення. Або використайте EN 806-3.', 'Nur für Gebäudearten ohne Spitzendurchfluss-Konstanten der DIN 1988-300: die nächstliegende Kurve ausdrücklich wählen — das Ergebnis wird als Annahme gekennzeichnet. Oder EN 806-3 verwenden.', 'Alleen nodig voor een gebouwtype zonder piekdebietconstanten van DIN 1988-300: kies uitdrukkelijk de dichtstbijzijnde curve — het resultaat wordt als aanname gemarkeerd. Of gebruik EN 806-3.', 'Nécessaire seulement pour un type de bâtiment sans constantes de débit de pointe DIN 1988-300 : choisir explicitement la courbe la plus proche — le résultat est signalé comme hypothèse. Ou utiliser l’EN 806-3.', 'Solo para un tipo de edificio sin constantes de caudal punta de la DIN 1988-300: elija explícitamente la curva más cercana; el resultado se marca como supuesto. O use la EN 806-3.', 'Potrzebne tylko dla rodzaju budynku bez stałych przepływu szczytowego DIN 1988-300: wybierz jawnie najbliższą krzywą — wynik jest oznaczony jako założenie. Albo użyj EN 806-3.'),
+  'dc.none': T7('— (building type)', '— (тип будівлі)', '— (Gebäudeart)', '— (gebouwtype)', '— (type de bâtiment)', '— (tipo de edificio)', '— (rodzaj budynku)'),
+  'v.invalid': T7('Input not accepted — correct the values below.', 'Вхідні дані не прийнято — виправте значення нижче.', 'Eingabe nicht angenommen — bitte die Werte unten korrigieren.', 'Invoer niet aanvaard — corrigeer de waarden hieronder.', 'Saisie refusée — corrigez les valeurs ci-dessous.', 'Datos no aceptados: corrija los valores de abajo.', 'Dane nie zostały przyjęte — popraw wartości poniżej.'),
+  'e.no_din_constants': T7('DIN 1988-300 has no peak-flow constants for “%s”: choose a DIN curve explicitly (field “DIN peak-flow curve used”), mark zones that draw all at once, or use the EN 806-3 method.', 'DIN 1988-300 не має констант пікової витрати для «%s»: явно оберіть криву DIN (поле «Крива пікової витрати DIN»), позначте зони, що відбирають воду одночасно, або використайте метод EN 806-3.', 'DIN 1988-300 hat keine Spitzendurchfluss-Konstanten für „%s“: DIN-Kurve ausdrücklich wählen (Feld „Verwendete DIN-Spitzenkurve“), gleichzeitig entnehmende Zonen markieren oder EN 806-3 verwenden.', 'DIN 1988-300 heeft geen piekdebietconstanten voor “%s”: kies uitdrukkelijk een DIN-curve (veld “Gebruikte DIN-piekcurve”), markeer zones die gelijktijdig tappen, of gebruik EN 806-3.', 'La DIN 1988-300 n’a pas de constantes de pointe pour « %s » : choisir explicitement une courbe DIN (champ « Courbe de pointe DIN utilisée »), marquer les zones qui puisent simultanément, ou utiliser l’EN 806-3.', 'La DIN 1988-300 no tiene constantes de caudal punta para «%s»: elija una curva DIN explícitamente (campo «Curva de punta DIN usada»), marque las zonas simultáneas o use la EN 806-3.', 'DIN 1988-300 nie ma stałych przepływu szczytowego dla „%s”: wybierz jawnie krzywą DIN (pole „Użyta krzywa szczytowa DIN”), oznacz strefy pobierające jednocześnie albo użyj metody EN 806-3.'),
+  'e.unknown_fixture': T7('Unknown fixture id “%s” — not in the package fixture library.', 'Невідомий ідентифікатор приладу «%s» — його немає в бібліотеці пакета.', 'Unbekannte Entnahmestellen-ID „%s“ — nicht in der Bibliothek des Pakets.', 'Onbekende tappunt-id “%s” — niet in de bibliotheek van het pakket.', 'Identifiant d’appareil inconnu « %s » — absent de la bibliothèque du paquet.', 'Identificador de aparato desconocido «%s»: no está en la biblioteca del paquete.', 'Nieznany identyfikator przyboru „%s” — brak w bibliotece pakietu.'),
+  'e.duplicate_zone_id': T7('Zone id “%s” is used twice — every zone needs its own id.', 'Ідентифікатор зони «%s» використано двічі — кожна зона потребує власного.', 'Zonen-ID „%s“ ist doppelt — jede Zone braucht eine eigene ID.', 'Zone-id “%s” komt twee keer voor — elke zone heeft een eigen id nodig.', 'L’identifiant de zone « %s » est utilisé deux fois — chaque zone a besoin du sien.', 'El identificador de zona «%s» está repetido: cada zona necesita el suyo.', 'Identyfikator strefy „%s” użyto dwa razy — każda strefa potrzebuje własnego.'),
+  'e.range': T7('Value out of the physical range: %s (floors −5…300; floors, units and fixture counts are whole numbers; lengths and ζ ≥ 0, pressures > 0, temperatures 0…90 °C).', 'Значення поза фізичним діапазоном: %s (поверхи −5…300; поверхи, кількість одиниць і приладів — цілі числа; довжини та ζ ≥ 0, тиски > 0, температури 0…90 °C).', 'Wert außerhalb des physikalischen Bereichs: %s (Geschosse −5…300; Geschosse, Einheiten und Objektanzahlen sind ganze Zahlen; Längen und ζ ≥ 0, Drücke > 0, Temperaturen 0…90 °C).', 'Waarde buiten het fysische bereik: %s (verdiepingen −5…300; verdiepingen, eenheden en aantallen toestellen zijn gehele getallen; lengtes en ζ ≥ 0, drukken > 0, temperaturen 0…90 °C).', 'Valeur hors plage physique : %s (niveaux −5…300 ; niveaux, unités et nombres d’appareils sont des entiers ; longueurs et ζ ≥ 0, pressions > 0, températures 0…90 °C).', 'Valor fuera del rango físico: %s (plantas −5…300; plantas, unidades y número de aparatos son números enteros; longitudes y ζ ≥ 0, presiones > 0, temperaturas 0…90 °C).', 'Wartość poza zakresem fizycznym: %s (kondygnacje −5…300; kondygnacje, liczba jednostek i przyborów to liczby całkowite; długości i ζ ≥ 0, ciśnienia > 0, temperatury 0…90 °C).'),
+  'e.other': T7('Input rejected: %s', 'Вхідні дані відхилено: %s', 'Eingabe abgelehnt: %s', 'Invoer geweigerd: %s', 'Saisie refusée : %s', 'Datos rechazados: %s', 'Dane odrzucone: %s'),
+  'w.en806_extrapolated': T7('EN 806-3 option: ΣLU = %v or the highest single LU lies outside Figure B.1 (up to 5000 LU, single values up to 15 LU; a single 1 LU uses the 2 LU line) — the flow is extrapolated along the last line; check it with a detailed national method.', 'Варіант EN 806-3: ΣОН = %v або найбільше одиничне значення ОН поза рисунком B.1 (до 5000 ОН, одиничні до 15 ОН; одиничне 1 ОН — за лінією 2 ОН) — витрату екстрапольовано вздовж останньої лінії; перевірте детальним національним методом.', 'Option EN 806-3: ΣBW = %v oder der größte Einzelwert liegt außerhalb von Bild B.1 (bis 5000 BW, Einzelwerte bis 15 BW; ein Einzelwert 1 BW nutzt die 2-BW-Linie) — der Durchfluss ist entlang der letzten Linie extrapoliert; mit einem genauen nationalen Verfahren prüfen.', 'Optie EN 806-3: ΣBE = %v of de grootste enkele waarde ligt buiten figuur B.1 (tot 5000 BE, enkele waarden tot 15 BE; een enkele 1 BE volgt de 2 BE-lijn) — het debiet is langs de laatste lijn geëxtrapoleerd; controleer met een gedetailleerde nationale methode.', 'Option EN 806-3 : ΣUC = %v ou la plus grande valeur unitaire hors de la figure B.1 (jusqu’à 5000 UC, valeurs unitaires jusqu’à 15 UC ; une valeur unitaire de 1 UC suit la ligne 2 UC) — débit extrapolé le long de la dernière droite ; vérifier par une méthode nationale détaillée.', 'Opción EN 806-3: ΣUC = %v o el mayor valor individual fuera de la figura B.1 (hasta 5000 UC, valores individuales hasta 15 UC; un valor individual de 1 UC usa la línea de 2 UC); caudal extrapolado a lo largo de la última recta: compruébelo con un método nacional detallado.', 'Wariant EN 806-3: ΣJO = %v lub największa pojedyncza wartość poza rysunkiem B.1 (do 5000 JO, wartości pojedyncze do 15 JO; pojedyncze 1 JO według linii 2 JO) — przepływ ekstrapolowany wzdłuż ostatniej linii; sprawdź szczegółową metodą krajową.'),
+  'w.din_range': T7('ΣQa = %v l/s is far beyond ordinary buildings: the DIN 1988-300 peak-flow curve is extrapolated (warning threshold 500 l/s is a learning assumption) — assess simultaneity explicitly.', 'ΣQa = %v л/с значно більше, ніж у звичайних будівлях: криву пікової витрати DIN 1988-300 екстрапольовано (поріг попередження 500 л/с — навчальне припущення) — оцініть одночасність явно.', 'ΣQa = %v l/s liegt weit über üblichen Gebäuden: die Spitzenkurve der DIN 1988-300 ist extrapoliert (Warnschwelle 500 l/s ist eine Lernannahme) — Gleichzeitigkeit ausdrücklich bewerten.', 'ΣQa = %v l/s ligt ver boven gewone gebouwen: de piekcurve van DIN 1988-300 is geëxtrapoleerd (waarschuwingsdrempel 500 l/s is een leeraanname) — beoordeel de gelijktijdigheid uitdrukkelijk.', 'ΣQa = %v l/s dépasse de loin les bâtiments courants : la courbe de pointe DIN 1988-300 est extrapolée (seuil d’alerte 500 l/s = hypothèse pédagogique) — évaluer la simultanéité explicitement.', 'ΣQa = %v l/s supera con mucho los edificios habituales: la curva de punta DIN 1988-300 se extrapola (umbral de aviso 500 l/s, supuesto didáctico); evalúe la simultaneidad explícitamente.', 'ΣQa = %v l/s znacznie przekracza zwykłe budynki: krzywa szczytowa DIN 1988-300 jest ekstrapolowana (próg ostrzeżenia 500 l/s to założenie dydaktyczne) — oceń jednoczesność jawnie.'),
+  'w.din_curve_assumed': T7('Assumption: this building type has no DIN 1988-300 peak-flow constants; the curve of “%v” was chosen by the user.', 'Припущення: для цього типу будівлі немає констант пікової витрати DIN 1988-300; криву «%v» обрав користувач.', 'Annahme: für diese Gebäudeart gibt es keine Spitzendurchfluss-Konstanten der DIN 1988-300; die Kurve „%v“ wurde vom Nutzer gewählt.', 'Aanname: dit gebouwtype heeft geen piekdebietconstanten van DIN 1988-300; de curve “%v” is door de gebruiker gekozen.', 'Hypothèse : ce type de bâtiment n’a pas de constantes de pointe DIN 1988-300 ; la courbe « %v » a été choisie par l’utilisateur.', 'Supuesto: este tipo de edificio no tiene constantes de caudal punta DIN 1988-300; la curva «%v» la eligió el usuario.', 'Założenie: ten rodzaj budynku nie ma stałych przepływu szczytowego DIN 1988-300; krzywą „%v” wybrał użytkownik.'),
+  'f.v.h': T7('Leave empty to use the DIN 1988-300 velocity limits per segment: 2 m/s service pipe; 5 m/s where the fittings have Σζ < 2.5, else 2.5 m/s; 2 m/s for flows lasting > 15 min (zones “all at once”, continuous flows) and for the EN 806-3 method. A value here caps all segments of that kind.', 'Залиште порожнім, щоб застосувати граничні швидкості DIN 1988-300 для кожної ділянки: 2 м/с ввід; 5 м/с, якщо Σζ арматури < 2,5, інакше 2,5 м/с; 2 м/с для відборів > 15 хв (зони «усі одночасно», постійні витрати) і для методу EN 806-3. Значення тут обмежує всі ділянки цього виду.', 'Leer lassen für die Geschwindigkeitsgrenzen der DIN 1988-300 je Teilstrecke: 2 m/s Anschlussleitung; 5 m/s bei Σζ der Einbauten < 2,5, sonst 2,5 m/s; 2 m/s bei Entnahmen > 15 min (Zonen „alle gleichzeitig“, Dauerdurchflüsse) und beim Verfahren EN 806-3. Ein Wert hier begrenzt alle Teilstrecken dieser Art.', 'Leeg laten voor de snelheidsgrenzen van DIN 1988-300 per segment: 2 m/s aansluitleiding; 5 m/s als Σζ van de appendages < 2,5, anders 2,5 m/s; 2 m/s voor tappingen > 15 min (zones “alle tegelijk”, continue debieten) en voor de methode EN 806-3. Een waarde hier begrenst alle segmenten van die soort.', 'Laisser vide pour les vitesses limites DIN 1988-300 par tronçon : 2 m/s branchement ; 5 m/s si Σζ des organes < 2,5, sinon 2,5 m/s ; 2 m/s pour des puisages > 15 min (zones « toutes en même temps », débits continus) et pour la méthode EN 806-3. Une valeur ici plafonne tous les tronçons de ce type.', 'Deje vacío para usar los límites de velocidad DIN 1988-300 por tramo: 2 m/s acometida; 5 m/s si Σζ de los accesorios < 2,5, si no 2,5 m/s; 2 m/s para consumos > 15 min (zonas «todo a la vez», caudales continuos) y para el método EN 806-3. Un valor aquí limita todos los tramos de ese tipo.', 'Pozostaw puste, aby użyć granic prędkości DIN 1988-300 dla każdego odcinka: 2 m/s przyłącze; 5 m/s gdy Σζ armatury < 2,5, w przeciwnym razie 2,5 m/s; 2 m/s dla poborów > 15 min (strefy „wszystko naraz”, przepływy ciągłe) i dla metody EN 806-3. Wartość tutaj ogranicza wszystkie odcinki tego rodzaju.'),
+  'bt.residential': T7('Residential', 'Житловий', 'Wohngebäude', 'Woongebouw', 'Logements', 'Residencial', 'Mieszkalny'),
+  'bt.care_home': T7('Nursing / care home', 'Будинок догляду', 'Pflegeheim', 'Woonzorgcentrum', 'Maison de repos et de soins', 'Residencia asistida', 'Dom opieki'),
+  'bt.hotel': T7('Hotel', 'Готель', 'Hotel', 'Hotel', 'Hôtel', 'Hotel', 'Hotel'),
+  'bt.hospital': T7('Hospital ward block', 'Лікарняний корпус', 'Bettenhaus Krankenhaus', 'Beddenhuis ziekenhuis', 'Bâtiment d’hospitalisation', 'Bloque de hospitalización', 'Budynek łóżkowy szpitala'),
+  'bt.office': T7('Office', 'Офіс', 'Verwaltungsgebäude', 'Kantoor', 'Bureaux', 'Oficinas', 'Biurowiec'),
+  'bt.school': T7('School', 'Школа', 'Schule', 'School', 'École', 'Escuela', 'Szkoła'),
+  'f.circuit': T7('Pipe to size', 'Яку трубу розраховуємо', 'Zu bemessende Leitung', 'Te dimensioneren leiding', 'Conduite à dimensionner', 'Tubería a dimensionar', 'Wymiarowany przewód'),
+  'c.total': T7('Cold + hot (both systems)', 'Холодна + гаряча (обидві системи)', 'Kalt + warm (beide Systeme)', 'Koud + warm (beide systemen)', 'Froide + chaude (les deux réseaux)', 'Fría + caliente (ambos sistemas)', 'Zimna + ciepła (oba systemy)'),
+  'c.cold': T7('Cold only', 'Лише холодна', 'Nur kalt', 'Alleen koud', 'Froide seule', 'Solo fría', 'Tylko zimna'),
+  'c.hot': T7('Hot only', 'Лише гаряча', 'Nur warm', 'Alleen warm', 'Chaude seule', 'Solo caliente', 'Tylko ciepła'),
+  'f.sizing': T7('Sizing rule', 'Правило підбору', 'Bemessungsregel', 'Dimensioneringsregel', 'Règle de dimensionnement', 'Regla de dimensionado', 'Reguła doboru'),
+  's.pressure': T7('Velocity + pressure', 'Швидкість + тиск', 'Geschwindigkeit + Druck', 'Snelheid + druk', 'Vitesse + pression', 'Velocidad + presión', 'Prędkość + ciśnienie'),
+  's.velocity': T7('Velocity only', 'Лише швидкість', 'Nur Geschwindigkeit', 'Alleen snelheid', 'Vitesse seule', 'Solo velocidad', 'Tylko prędkość'),
+  'f.ps': T7('Minimum supply pressure at the street main', 'Мінімальний тиск у вуличній мережі', 'Mindestversorgungsdruck an der Straßenleitung', 'Minimale leidingdruk aan de straatleiding', 'Pression minimale au réseau public', 'Presión mínima en la red pública', 'Minimalne ciśnienie w sieci ulicznej'),
+  'f.ps.h': T7('Ask the water utility (low-flow, peak-hour value).', 'Запитайте у водоканалу (мінімальне значення в годину пік).', 'Beim Wasserversorger erfragen (Mindestwert zur Spitzenstunde).', 'Vraag het waterbedrijf (minimum tijdens het piekuur).', 'À demander au distributeur (minimum à l’heure de pointe).', 'Pregunte a la compañía de agua (mínimo en hora punta).', 'Zapytaj przedsiębiorstwo wodociągowe (minimum w godzinie szczytu).'),
+  'f.pstat': T7('Maximum static pressure (optional)', 'Максимальний статичний тиск (необов’язково)', 'Maximaler Ruhedruck (optional)', 'Maximale statische druk (optioneel)', 'Pression statique maximale (facultatif)', 'Presión estática máxima (opcional)', 'Maksymalne ciśnienie statyczne (opcjonalnie)'),
+  'f.pstat.h': T7('Empty = not checked. Above 5 bar at an outlet → pressure-reducing valve (EN 806-2).', 'Порожньо — не перевіряється. Понад 5 бар у приладу → редуктор тиску (EN 806-2).', 'Leer = keine Prüfung. Über 5 bar an einer Entnahmestelle → Druckminderer (EN 806-2).', 'Leeg = geen controle. Boven 5 bar aan een tappunt → drukverminderaar (EN 806-2).', 'Vide = non vérifié. Plus de 5 bar à un point de puisage → réducteur de pression (EN 806-2).', 'Vacío = sin comprobar. Más de 5 bar en un punto de consumo → reductora de presión (EN 806-2).', 'Puste = bez sprawdzenia. Powyżej 5 bar w punkcie czerpalnym → reduktor ciśnienia (EN 806-2).'),
+  'f.meter': T7('Water meter loss', 'Втрата у лічильнику', 'Verlust Wasserzähler', 'Verlies watermeter', 'Perte du compteur', 'Pérdida del contador', 'Strata na wodomierzu'),
+  'f.filter': T7('Filter loss', 'Втрата у фільтрі', 'Verlust Filter', 'Verlies filter', 'Perte du filtre', 'Pérdida del filtro', 'Strata na filtrze'),
+  'f.bf': T7('Backflow preventer loss', 'Втрата у зворотному клапані', 'Verlust Rückflussverhinderer', 'Verlies terugstroombeveiliging', 'Perte du clapet anti-retour', 'Pérdida del antirretorno', 'Strata na zaworze zwrotnym'),
+  'f.heater': T7('Water heater loss (hot system)', 'Втрата у водонагрівачі (гаряча система)', 'Verlust Trinkwassererwärmer (Warmwasser)', 'Verlies boiler (warmwatersysteem)', 'Perte du préparateur (réseau chaud)', 'Pérdida del calentador (sistema caliente)', 'Strata w podgrzewaczu (system ciepłej wody)'),
+  'kind.cold': T7('cold', 'холодна', 'kalt', 'koud', 'froide', 'fría', 'zimna'),
+  'kind.hot': T7('hot, behind the heater', 'гаряча, після нагрівача', 'warm, hinter dem Erwärmer', 'warm, na de verwarmer', 'chaude, après le préparateur', 'caliente, tras el calentador', 'ciepła, za podgrzewaczem'),
+  'v.nosize': T7('Not sized: %s exceeds its velocity limit even with the largest pipe of the series — choose a larger pipe series or split the flow. The other numbers are shown for orientation only.', 'Не підібрано: %s перевищує граничну швидкість навіть із найбільшою трубою серії — оберіть серію з більшими діаметрами або розділіть витрату. Інші числа показано лише для орієнтації.', 'Nicht bemessen: %s überschreitet die Geschwindigkeitsgrenze auch mit dem größten Rohr der Reihe — größere Rohrreihe wählen oder den Durchfluss aufteilen. Die übrigen Zahlen dienen nur zur Orientierung.', 'Niet gedimensioneerd: %s overschrijdt de snelheidsgrens zelfs met de grootste buis van de reeks — kies een reeks met grotere maten of splits het debiet. De andere getallen zijn alleen ter oriëntatie.', 'Non dimensionné : %s dépasse sa vitesse limite même avec le plus gros tube de la série — choisir une série plus grande ou répartir le débit. Les autres valeurs ne sont données qu’à titre indicatif.', 'Sin dimensionar: %s supera su velocidad límite incluso con el mayor tubo de la serie; elija una serie mayor o reparta el caudal. Las demás cifras son solo orientativas.', 'Nie dobrano: %s przekracza prędkość graniczną nawet przy największej rurze szeregu — wybierz szereg o większych średnicach lub podziel przepływ. Pozostałe liczby są tylko orientacyjne.'),
+  'w.unit_floor': T7('One utilisation unit (DIN 1988-300): the peak of %s is at least the sum of the two largest draw-offs of the unit (a shower next to a bath, a second basin, a bidet and a urinal not counted) — the curve alone gave less. Source: DIN as quoted by SHK Profi 8/2012 and the KELOX handbook (secondary).', 'Одна одиниця користування (DIN 1988-300): пік %s не менший за суму двох найбільших точок водорозбору одиниці (душ поруч із ванною, другий умивальник, біде й пісуар не враховуються) — сама крива дала менше. Джерело: DIN у цитуванні SHK Profi 8/2012 і довідника KELOX (вторинне).', 'Eine Nutzungseinheit (DIN 1988-300): die Spitze von %s ist mindestens die Summe der beiden größten Entnahmestellen der Einheit (Dusche neben Wanne, zweiter Waschtisch, Bidet und Urinal zählen nicht) — die Kurve allein ergab weniger. Quelle: DIN nach SHK Profi 8/2012 und KELOX-Handbuch (Sekundärquelle).', 'Eén gebruikseenheid (DIN 1988-300): de piek van %s is minstens de som van de twee grootste tappunten van de eenheid (douche naast bad, tweede wastafel, bidet en urinoir tellen niet) — de curve alleen gaf minder. Bron: DIN zoals geciteerd door SHK Profi 8/2012 en het KELOX-handboek (secundair).', 'Une unité d’utilisation (DIN 1988-300) : la pointe de %s vaut au moins la somme des deux plus gros puisages de l’unité (douche à côté d’une baignoire, second lavabo, bidet et urinoir non comptés) — la courbe seule donnait moins. Source : DIN citée par SHK Profi 8/2012 et le manuel KELOX (secondaire).', 'Una unidad de uso (DIN 1988-300): la punta de %s es al menos la suma de los dos mayores puntos de consumo de la unidad (ducha junto a bañera, segundo lavabo, bidé y urinario no cuentan); la curva sola daba menos. Fuente: DIN citada por SHK Profi 8/2012 y el manual KELOX (secundaria).', 'Jedna jednostka użytkowa (DIN 1988-300): szczyt %s wynosi co najmniej sumę dwóch największych punktów poboru jednostki (prysznic obok wanny, druga umywalka, bidet i pisuar nie liczą się) — sama krzywa dawała mniej. Źródło: DIN cytowana przez SHK Profi 8/2012 i podręcznik KELOX (wtórne).'),
+  'f.allow': T7('Friction allowance behind a booster', 'Запас на тертя за підвищувальною установкою', 'Reibungsreserve hinter einer Druckerhöhung', 'Wrijvingsmarge achter een drukverhoging', 'Réserve de frottement après surpresseur', 'Margen de fricción tras el grupo de presión', 'Zapas na tarcie za zestawem hydroforowym'),
+  'f.allow.h': T7('Used only when height + apparatus already exceed the supply: pipes are sized to lose at most this much.', 'Лише коли висота + арматура вже перевищують тиск у мережі: труби підбираються так, щоб втратити не більше цього.', 'Nur wenn Höhe + Apparate den Versorgungsdruck schon übersteigen: die Rohre werden auf höchstens diesen Verlust bemessen.', 'Alleen als hoogte + toestellen de leidingdruk al overschrijden: de leidingen worden op hoogstens dit verlies gedimensioneerd.', 'Seulement si hauteur + appareils dépassent déjà la pression : les conduites sont dimensionnées pour perdre au plus cette valeur.', 'Solo si altura + equipos ya superan la presión de red: las tuberías se dimensionan para perder como máximo esto.', 'Tylko gdy wysokość + urządzenia już przekraczają ciśnienie w sieci: rury dobiera się na stratę najwyżej tej wartości.'),
+  'f.mat': T7('Pipe material in the building', 'Матеріал труб у будівлі', 'Rohrwerkstoff im Gebäude', 'Leidingmateriaal in het gebouw', 'Matériau dans le bâtiment', 'Material de tubería en el edificio', 'Materiał rur w budynku'),
+  'f.smat': T7('Service pipe material', 'Матеріал вводу', 'Werkstoff Anschlussleitung', 'Materiaal aansluitleiding', 'Matériau du branchement', 'Material de la acometida', 'Materiał przyłącza'),
+  'mat.copper': T7('Copper EN 1057', 'Мідь EN 1057', 'Kupfer EN 1057', 'Koper EN 1057', 'Cuivre EN 1057', 'Cobre EN 1057', 'Miedź EN 1057'),
+  'mat.stainless': T7('Stainless steel EN 10312', 'Нержавіюча сталь EN 10312', 'Edelstahl EN 10312', 'Roestvast staal EN 10312', 'Inox EN 10312', 'Acero inoxidable EN 10312', 'Stal nierdzewna EN 10312'),
+  'mat.multilayer': T7('Multilayer PE-X/Al/PE-X', 'Багатошарова PE-X/Al/PE-X', 'Mehrschichtverbund PE-X/Al/PE-X', 'Meerlagen PE-X/Al/PE-X', 'Multicouche PE-X/Al/PE-X', 'Multicapa PE-X/Al/PE-X', 'Wielowarstwowa PE-X/Al/PE-X'),
+  'mat.pe100': T7('PE100 SDR 11', 'PE100 SDR 11', 'PE100 SDR 11', 'PE100 SDR 11', 'PE100 SDR 11', 'PE100 SDR 11', 'PE100 SDR 11'),
+  'mat.galvanised': T7('Galvanised steel EN 10255', 'Оцинкована сталь EN 10255', 'Verzinkter Stahl EN 10255', 'Gegalvaniseerd staal EN 10255', 'Acier galvanisé EN 10255', 'Acero galvanizado EN 10255', 'Stal ocynkowana EN 10255'),
+  'f.lsvc': T7('Service pipe length', 'Довжина вводу', 'Länge Anschlussleitung', 'Lengte aansluitleiding', 'Longueur du branchement', 'Longitud de la acometida', 'Długość przyłącza'),
+  'f.zsvc': T7('Service pipe Σζ', 'Σζ вводу', 'Σζ Anschlussleitung', 'Σζ aansluitleiding', 'Σζ branchement', 'Σζ acometida', 'Σζ przyłącza'),
+  'f.lmain': T7('Basement main length', 'Довжина магістралі в підвалі', 'Länge Kellerverteilung', 'Lengte verdeelleiding kelder', 'Longueur de la distribution en sous-sol', 'Longitud del distribuidor en sótano', 'Długość przewodu rozdzielczego w piwnicy'),
+  'f.zmain': T7('Basement main Σζ', 'Σζ магістралі', 'Σζ Kellerverteilung', 'Σζ verdeelleiding', 'Σζ distribution', 'Σζ distribuidor', 'Σζ przewodu rozdzielczego'),
+  'f.zmeter': T7('Meter level (relative to ground floor)', 'Рівень лічильника (відносно першого поверху)', 'Höhe Wasserzähler (bezogen auf EG)', 'Hoogte watermeter (t.o.v. gelijkvloers)', 'Niveau du compteur (par rapport au rez)', 'Cota del contador (respecto a planta baja)', 'Poziom wodomierza (względem parteru)'),
+  'f.fh': T7('Floor height', 'Висота поверху', 'Geschosshöhe', 'Verdiepingshoogte', 'Hauteur d’étage', 'Altura de planta', 'Wysokość kondygnacji'),
+  'f.zriser': T7('Riser Σζ per floor', 'Σζ стояка на поверх', 'Σζ Steigleitung je Geschoss', 'Σζ stijgleiding per verdieping', 'Σζ colonne par étage', 'Σζ montante por planta', 'Σζ pionu na kondygnację'),
+  'f.lbr': T7('Floor branch length', 'Довжина поверхового відгалуження', 'Länge Stockwerksleitung', 'Lengte verdiepingsleiding', 'Longueur de la dérivation d’étage', 'Longitud de la derivación de planta', 'Długość odgałęzienia piętrowego'),
+  'f.zbr': T7('Floor branch Σζ', 'Σζ відгалуження', 'Σζ Stockwerksleitung', 'Σζ verdiepingsleiding', 'Σζ dérivation', 'Σζ derivación', 'Σζ odgałęzienia'),
+  'f.hout': T7('Outlet height above floor', 'Висота приладу над підлогою', 'Entnahmehöhe über Fußboden', 'Hoogte tappunt boven vloer', 'Hauteur du point de puisage', 'Altura del punto de consumo', 'Wysokość punktu czerpalnego nad podłogą'),
+  'f.zones': T7('Zones', 'Зони', 'Zonen', 'Zones', 'Zones', 'Zonas', 'Strefy'),
+  'z.id': T7('Zone', 'Зона', 'Zone', 'Zone', 'Zone', 'Zona', 'Strefa'),
+  'z.floor': T7('Floor', 'Поверх', 'Geschoss', 'Verdieping', 'Étage', 'Planta', 'Kondygnacja'),
+  'z.units': T7('Units', 'Блоків', 'Einheiten', 'Eenheden', 'Unités', 'Unidades', 'Lokale'),
+  'z.fx': T7('Fixtures per unit (id:count)', 'Прилади на блок (id:кількість)', 'Entnahmestellen je Einheit (id:Anzahl)', 'Tappunten per eenheid (id:aantal)', 'Appareils par unité (id:nombre)', 'Aparatos por unidad (id:número)', 'Przybory na lokal (id:liczba)'),
+  'z.sim': T7('All at once', 'Усі одночасно', 'Alle gleichzeitig', 'Alles tegelijk', 'Tous ensemble', 'Todos a la vez', 'Wszystkie naraz'),
+  'z.qa': T7('ΣQa', 'ΣQa', 'ΣQa', 'ΣQa', 'ΣQa', 'ΣQa', 'ΣQa'),
+  'z.add': T7('Add zone', 'Додати зону', 'Zone hinzufügen', 'Zone toevoegen', 'Ajouter une zone', 'Añadir zona', 'Dodaj strefę'),
+  'z.note': T7('Fixture ids: ', 'Ідентифікатори приладів: ', 'Kennungen der Entnahmestellen: ', 'Codes van de tappunten: ', 'Codes des appareils : ', 'Códigos de aparatos: ', 'Identyfikatory przyborów: '),
+  'z.bad': T7('Unknown fixture: %s', 'Невідомий прилад: %s', 'Unbekannte Entnahmestelle: %s', 'Onbekend tappunt: %s', 'Appareil inconnu : %s', 'Aparato desconocido: %s', 'Nieznany przybór: %s'),
+  'f.vsvc': T7('v max service pipe', 'v max вводу', 'v max Anschlussleitung', 'v max aansluitleiding', 'v max branchement', 'v max acometida', 'v max przyłącza'),
+  'f.vmain': T7('v max basement main', 'v max магістралі', 'v max Kellerverteilung', 'v max verdeelleiding', 'v max distribution', 'v max distribuidor', 'v max przewodu rozdzielczego'),
+  'f.vriser': T7('v max riser', 'v max стояка', 'v max Steigleitung', 'v max stijgleiding', 'v max colonne', 'v max montante', 'v max pionu'),
+  'f.vbr': T7('v max floor branch', 'v max відгалуження', 'v max Stockwerksleitung', 'v max verdiepingsleiding', 'v max dérivation', 'v max derivación', 'v max odgałęzienia'),
+  'f.tc': T7('Cold water temperature', 'Температура холодної води', 'Kaltwassertemperatur', 'Temperatuur koud water', 'Température eau froide', 'Temperatura del agua fría', 'Temperatura wody zimnej'),
+  'f.th': T7('Hot water temperature', 'Температура гарячої води', 'Warmwassertemperatur', 'Temperatuur warm water', 'Température eau chaude', 'Temperatura del agua caliente', 'Temperatura wody ciepłej'),
+  /* actions */
+  'a.csv': T7('Segments CSV', 'Ділянки CSV', 'Teilstrecken CSV', 'Segmenten CSV', 'Tronçons CSV', 'Tramos CSV', 'Odcinki CSV'),
+  'a.json': T7('Export project JSON', 'Експорт проєкту JSON', 'Projekt-JSON exportieren', 'Project-JSON exporteren', 'Exporter le projet JSON', 'Exportar proyecto JSON', 'Eksport projektu JSON'),
+  'a.import': T7('Import project JSON', 'Імпорт проєкту JSON', 'Projekt-JSON importieren', 'Project-JSON importeren', 'Importer un projet JSON', 'Importar proyecto JSON', 'Import projektu JSON'),
+  'a.use': T7('Use fixtures from the project', 'Взяти прилади з проєкту', 'Entnahmestellen aus dem Projekt übernehmen', 'Tappunten uit het project gebruiken', 'Reprendre les appareils du projet', 'Usar los aparatos del proyecto', 'Użyj przyborów z projektu'),
+  'a.save': T7('Save results to the project', 'Зберегти результати в проєкт', 'Ergebnisse im Projekt speichern', 'Resultaten in het project opslaan', 'Enregistrer les résultats dans le projet', 'Guardar resultados en el proyecto', 'Zapisz wyniki w projekcie'),
+  'import.bad': T7('Import refused: %e', 'Імпорт відхилено: %e', 'Import abgelehnt: %e', 'Import geweigerd: %e', 'Import refusé : %e', 'Importación rechazada: %e', 'Import odrzucony: %e'),
+  'import.nozones': T7('The project has no zones with fixtures.', 'У проєкті немає зон із приладами.', 'Das Projekt hat keine Zonen mit Entnahmestellen.', 'Het project heeft geen zones met tappunten.', 'Le projet n’a pas de zones avec appareils.', 'El proyecto no tiene zonas con aparatos.', 'Projekt nie ma stref z przyborami.'),
+  'proj.has': T7('The project file has %n zones with fixtures (%src). Nothing is applied until you press “Use fixtures from the project”.', 'Файл проєкту має %n зон із приладами (%src). Нічого не застосовується, доки ви не натиснете «Взяти прилади з проєкту».', 'Die Projektdatei hat %n Zonen mit Entnahmestellen (%src). Nichts wird übernommen, bevor Sie „Entnahmestellen aus dem Projekt übernehmen“ drücken.', 'Het projectbestand heeft %n zones met tappunten (%src). Er wordt niets toegepast tot u op „Tappunten uit het project gebruiken” drukt.', 'Le fichier projet contient %n zones avec appareils (%src). Rien n’est appliqué avant « Reprendre les appareils du projet ».', 'El archivo de proyecto tiene %n zonas con aparatos (%src). No se aplica nada hasta pulsar «Usar los aparatos del proyecto».', 'Plik projektu ma %n stref z przyborami (%src). Nic nie jest stosowane, dopóki nie naciśniesz „Użyj przyborów z projektu”.'),
+  'saved': T7('Saved to the project file in this browser.', 'Збережено у файлі проєкту в цьому браузері.', 'Im Projekt dieses Browsers gespeichert.', 'Opgeslagen in het projectbestand van deze browser.', 'Enregistré dans le projet de ce navigateur.', 'Guardado en el proyecto de este navegador.', 'Zapisano w pliku projektu w tej przeglądarce.'),
+  'nocore': T7('Shared plumbing core not loaded: the page works on its own; export/import JSON still exchange the project file.', 'Спільне ядро водопостачання не завантажилося: сторінка працює самостійно; експорт/імпорт JSON і далі обмінюються файлом проєкту.', 'Gemeinsamer Sanitärkern nicht geladen: die Seite arbeitet allein; Export/Import JSON tauschen die Projektdatei weiterhin aus.', 'Gedeelde sanitairkern niet geladen: de pagina werkt zelfstandig; export/import JSON wisselen het projectbestand nog steeds uit.', 'Noyau sanitaire commun non chargé : la page fonctionne seule ; l’export/import JSON échange toujours le fichier projet.', 'Núcleo común de fontanería no cargado: la página funciona sola; exportar/importar JSON sigue intercambiando el archivo de proyecto.', 'Wspólny rdzeń instalacji nie załadował się: strona działa samodzielnie; eksport/import JSON nadal wymienia plik projektu.'),
+  /* tiles */
+  't.q': T7('Design flow at the meter', 'Розрахункова витрата на лічильнику', 'Spitzendurchfluss am Zähler', 'Ontwerpdebiet aan de meter', 'Débit de calcul au compteur', 'Caudal de cálculo en el contador', 'Przepływ obliczeniowy na wodomierzu'),
+  't.sum': T7('Sum of design flows ΣQa', 'Сума розрахункових витрат ΣQa', 'Summe der Berechnungsdurchflüsse ΣQa', 'Som van de ontwerpdebieten ΣQa', 'Somme des débits ΣQa', 'Suma de caudales ΣQa', 'Suma przepływów ΣQa'),
+  't.div': T7('Simultaneity', 'Одночасність', 'Gleichzeitigkeit', 'Gelijktijdigheid', 'Simultanéité', 'Simultaneidad', 'Jednoczesność'),
+  't.svc': T7('Service pipe', 'Ввід', 'Anschlussleitung', 'Aansluitleiding', 'Branchement', 'Acometida', 'Przyłącze'),
+  't.worst': T7('Worst fixture residual', 'Залишок у найгіршого приладу', 'Reserve ungünstigste Entnahmestelle', 'Reserve ongunstigste tappunt', 'Réserve au point le plus défavorable', 'Reserva en el punto más desfavorable', 'Zapas w najniekorzystniejszym punkcie'),
+  't.boost': T7('Booster head needed', 'Потрібний напір установки', 'Nötige Förderhöhe Druckerhöhung', 'Benodigde opvoerhoogte drukverhoging', 'Hauteur de surpression nécessaire', 'Altura de sobrepresión necesaria', 'Wymagana wysokość podnoszenia'),
+  't.lu': T7('Loading units ΣLU', 'Одиниці навантаження ΣОН', 'Belastungswerte ΣBW', 'Belastingseenheden ΣBE', 'Unités de charge ΣUC', 'Unidades de carga ΣUC', 'Jednostki obciążenia ΣJO'),
+  't.up': T7('Segments enlarged for pressure', 'Ділянок збільшено через тиск', 'Für den Druck vergrößerte Teilstrecken', 'Voor de druk vergrote segmenten', 'Agrandissements pour la pression', 'Ampliaciones por presión', 'Powiększenia z powodu ciśnienia'),
+  /* verdict */
+  'v.ok': T7('%q l/s at the meter; every fixture keeps its minimum flow pressure (worst: %z, %f, %m bar to spare). Service pipe %s.', '%q л/с на лічильнику; кожен прилад має мінімальний тиск витікання (найгірший: %z, %f, запас %m бар). Ввід %s.', '%q l/s am Zähler; jede Entnahmestelle behält ihren Mindestfließdruck (ungünstigste: %z, %f, %m bar Reserve). Anschlussleitung %s.', '%q l/s aan de meter; elk tappunt houdt zijn minimale stromingsdruk (ongunstigste: %z, %f, %m bar reserve). Aansluitleiding %s.', '%q l/s au compteur ; chaque point garde sa pression minimale d’écoulement (le plus défavorable : %z, %f, %m bar de réserve). Branchement %s.', '%q l/s en el contador; cada punto conserva su presión mínima de flujo (el más desfavorable: %z, %f, %m bar de reserva). Acometida %s.', '%q l/s na wodomierzu; każdy punkt zachowuje minimalne ciśnienie wypływu (najniekorzystniejszy: %z, %f, zapas %m bar). Przyłącze %s.'),
+  'v.boost': T7('%q l/s at the meter, but %z (%f) is %m bar short: a booster of about %h m head is needed.', '%q л/с на лічильнику, але %z (%f) бракує %m бар: потрібна підвищувальна установка з напором близько %h м.', '%q l/s am Zähler, aber %z (%f) fehlen %m bar: eine Druckerhöhung mit etwa %h m Förderhöhe ist nötig.', '%q l/s aan de meter, maar %z (%f) komt %m bar tekort: een drukverhoging van ongeveer %h m opvoerhoogte is nodig.', '%q l/s au compteur, mais il manque %m bar à %z (%f) : un surpresseur d’environ %h m est nécessaire.', '%q l/s en el contador, pero a %z (%f) le faltan %m bar: hace falta un grupo de presión de unos %h m.', '%q l/s na wodomierzu, ale w %z (%f) brakuje %m bar: potrzebny zestaw hydroforowy o wysokości podnoszenia ok. %h m.'),
+  'v.empty': T7('Add at least one zone with fixtures that draw water.', 'Додайте хоча б одну зону з приладами, що споживають воду.', 'Fügen Sie mindestens eine Zone mit wasserziehenden Entnahmestellen hinzu.', 'Voeg minstens één zone toe met tappunten die water afnemen.', 'Ajoutez au moins une zone avec des appareils qui puisent de l’eau.', 'Añada al menos una zona con aparatos que consuman agua.', 'Dodaj co najmniej jedną strefę z przyborami pobierającymi wodę.'),
+  /* warnings */
+  'w.velocity': T7('%s exceeds its velocity limit even at the largest size of the series.', '%s перевищує граничну швидкість навіть при найбільшому діаметрі серії.', '%s überschreitet die Geschwindigkeitsgrenze auch mit der größten Rohrweite der Reihe.', '%s overschrijdt de snelheidsgrens zelfs met de grootste maat van de reeks.', '%s dépasse sa vitesse limite même avec le plus grand diamètre de la série.', '%s supera su velocidad límite incluso con el mayor diámetro de la serie.', '%s przekracza prędkość graniczną nawet przy największej średnicy szeregu.'),
+  'w.booster_static': T7('Height, meter, filter and backflow preventer alone already need more than the supply pressure: no pipe size can avoid a booster (plbbooster: %q l/s, %h m).', 'Висота, лічильник, фільтр і зворотний клапан самі по собі вимагають більше, ніж тиск у мережі: жоден діаметр не усуне потреби в установці (plbbooster: %q л/с, %h м).', 'Höhe, Zähler, Filter und Rückflussverhinderer allein brauchen schon mehr als den Versorgungsdruck: keine Rohrweite vermeidet die Druckerhöhung (plbbooster: %q l/s, %h m).', 'Hoogte, meter, filter en terugstroombeveiliging alleen vragen al meer dan de leidingdruk: geen buismaat vermijdt een drukverhoging (plbbooster: %q l/s, %h m).', 'La hauteur, le compteur, le filtre et le clapet demandent déjà plus que la pression du réseau : aucun diamètre n’évite le surpresseur (plbbooster : %q l/s, %h m).', 'La altura, el contador, el filtro y el antirretorno ya piden más que la presión de red: ningún diámetro evita el grupo de presión (plbbooster: %q l/s, %h m).', 'Sama wysokość, wodomierz, filtr i zawór zwrotny wymagają więcej niż ciśnienie w sieci: żadna średnica nie pozwoli uniknąć zestawu (plbbooster: %q l/s, %h m).'),
+  'w.booster_pipes': T7('Even the largest pipes on the critical path cannot recover the pressure: booster needed (plbbooster: %q l/s, %h m).', 'Навіть найбільші труби на критичному шляху не повертають тиск: потрібна установка (plbbooster: %q л/с, %h м).', 'Selbst die größten Rohre auf dem Fließweg holen den Druck nicht zurück: Druckerhöhung nötig (plbbooster: %q l/s, %h m).', 'Zelfs de grootste buizen op het kritieke pad halen de druk niet terug: drukverhoging nodig (plbbooster: %q l/s, %h m).', 'Même les plus gros tubes du chemin critique ne rattrapent pas la pression : surpresseur nécessaire (plbbooster : %q l/s, %h m).', 'Ni las tuberías más grandes del recorrido crítico recuperan la presión: grupo de presión necesario (plbbooster: %q l/s, %h m).', 'Nawet największe rury na drodze krytycznej nie odzyskają ciśnienia: potrzebny zestaw (plbbooster: %q l/s, %h m).'),
+  'w.prv': T7('Static pressure at the lowest outlet ≈ %p bar > 5 bar: fit a pressure-reducing valve (EN 806-2).', 'Статичний тиск у найнижчого приладу ≈ %p бар > 5 бар: встановіть редуктор тиску (EN 806-2).', 'Ruhedruck an der tiefsten Entnahmestelle ≈ %p bar > 5 bar: Druckminderer einbauen (EN 806-2).', 'Statische druk aan het laagste tappunt ≈ %p bar > 5 bar: plaats een drukverminderaar (EN 806-2).', 'Pression statique au point le plus bas ≈ %p bar > 5 bar : poser un réducteur de pression (EN 806-2).', 'Presión estática en el punto más bajo ≈ %p bar > 5 bar: instale una reductora de presión (EN 806-2).', 'Ciśnienie statyczne w najniższym punkcie ≈ %p bar > 5 bar: zamontuj reduktor ciśnienia (EN 806-2).'),
+  'w.en806_curve': T7('EN 806-3 option: the design flow follows Figure B.1 of the standard (line of the highest single LU up to 300 LU, then one line), digitised to about ±2 % — the simplified method for standard installations.', 'Варіант EN 806-3: розрахункова витрата за рисунком B.1 стандарту (лінія найбільшого одиничного ОН до 300 ОН, далі одна лінія), оцифровано з точністю близько ±2 % — спрощений метод для стандартних установок.', 'Option EN 806-3: der Spitzendurchfluss folgt Bild B.1 der Norm (Linie des größten Einzel-BW bis 300 BW, danach eine Linie), digitalisiert auf etwa ±2 % — vereinfachtes Verfahren für Standardinstallationen.', 'Optie EN 806-3: het ontwerpdebiet volgt figuur B.1 van de norm (lijn van de grootste enkele BE tot 300 BE, daarna één lijn), gedigitaliseerd op ongeveer ±2 % — vereenvoudigde methode voor standaardinstallaties.', 'Option EN 806-3 : le débit de calcul suit la figure B.1 de la norme (droite de la plus grande UC unitaire jusqu’à 300 UC, puis une seule droite), numérisée à environ ±2 % — méthode simplifiée pour installations standard.', 'Opción EN 806-3: el caudal de cálculo sigue la figura B.1 de la norma (recta de la mayor UC individual hasta 300 UC, luego una sola recta), digitalizada con aprox. ±2 %; método simplificado para instalaciones estándar.', 'Opcja EN 806-3: przepływ obliczeniowy wg rysunku B.1 normy (linia największej pojedynczej JO do 300 JO, dalej jedna linia), zdigitalizowany z dokładnością ok. ±2 % — metoda uproszczona dla instalacji standardowych.'),
+  'w.simultaneous': T7('Zones marked “all at once” are added in full, without simultaneity (team showers, schools after sport, process flows).', 'Зони з позначкою «усі одночасно» додаються повністю, без коефіцієнта одночасності (командні душові, школи після спорту, технологічні витрати).', 'Als „alle gleichzeitig“ markierte Zonen gehen voll ein, ohne Gleichzeitigkeit (Mannschaftsduschen, Schulen nach dem Sport, Prozessdurchflüsse).', 'Zones gemarkeerd als „alles tegelijk” tellen volledig mee, zonder gelijktijdigheid (teamdouches, scholen na de sport, procesdebieten).', 'Les zones « tous ensemble » sont comptées en entier, sans simultanéité (douches d’équipe, écoles après le sport, débits de process).', 'Las zonas «todos a la vez» se suman completas, sin simultaneidad (duchas de equipo, colegios tras el deporte, caudales de proceso).', 'Strefy oznaczone „wszystkie naraz” liczy się w całości, bez jednoczesności (prysznice drużynowe, szkoły po WF, przepływy technologiczne).'),
+  'w.upsized': T7('Velocity sizing alone left %z %m bar short; %n enlargements on the critical path fixed it — the pressure, not the velocity, decided these pipes.', 'Підбір лише за швидкістю залишав %z без %m бар; %n збільшень на критичному шляху це виправили — ці труби визначив тиск, а не швидкість.', 'Die Bemessung nur nach Geschwindigkeit ließ %z %m bar zu wenig; %n Vergrößerungen auf dem Fließweg beheben das — hier entscheidet der Druck, nicht die Geschwindigkeit.', 'Dimensionering alleen op snelheid liet %z %m bar tekort; %n vergrotingen op het kritieke pad losten het op — de druk, niet de snelheid, bepaalde deze leidingen.', 'Le dimensionnement à la seule vitesse laissait %z à court de %m bar ; %n agrandissements sur le chemin critique l’ont corrigé — c’est la pression, pas la vitesse, qui fixe ces tubes.', 'Dimensionar solo por velocidad dejaba a %z con %m bar de menos; %n ampliaciones en el recorrido crítico lo resolvieron: aquí manda la presión, no la velocidad.', 'Dobór tylko wg prędkości zostawiał %z bez %m bar; %n powiększeń na drodze krytycznej to naprawiło — o tych rurach zdecydowało ciśnienie, nie prędkość.'),
+  /* tables */
+  'tab.seg': T7('Segments (critical path in bold)', 'Ділянки (критичний шлях жирним)', 'Teilstrecken (Fließweg fett)', 'Segmenten (kritiek pad vet)', 'Tronçons (chemin critique en gras)', 'Tramos (recorrido crítico en negrita)', 'Odcinki (droga krytyczna pogrubiona)'),
+  'h.seg': T7('Segment', 'Ділянка', 'Teilstrecke', 'Segment', 'Tronçon', 'Tramo', 'Odcinek'),
+  'h.q': T7('Q l/s', 'Q л/с', 'Q l/s', 'Q l/s', 'Q l/s', 'Q l/s', 'Q l/s'),
+  'h.size': T7('Pipe OD×s', 'Труба D×s', 'Rohr da×s', 'Buis D×s', 'Tube D×e', 'Tubo D×e', 'Rura D×s'),
+  'h.v': T7('v m/s', 'v м/с', 'v m/s', 'v m/s', 'v m/s', 'v m/s', 'v m/s'),
+  'h.R': T7('R mbar/m', 'R мбар/м', 'R mbar/m', 'R mbar/m', 'R mbar/m', 'R mbar/m', 'R mbar/m'),
+  'h.dp': T7('Δp bar', 'Δp бар', 'Δp bar', 'Δp bar', 'Δp bar', 'Δp bar', 'Δp bar'),
+  'h.pend': T7('p end bar', 'p в кінці, бар', 'p Ende bar', 'p einde bar', 'p fin bar', 'p final bar', 'p koniec bar'),
+  'h.margin': T7('Reserve bar', 'Запас, бар', 'Reserve bar', 'Reserve bar', 'Réserve bar', 'Reserva bar', 'Zapas bar'),
+  'tab.zones': T7('Zones and their loads', 'Зони та їхні навантаження', 'Zonen und ihre Lasten', 'Zones en hun belasting', 'Zones et leurs charges', 'Zonas y sus cargas', 'Strefy i ich obciążenia'),
+  'h.fixtures': T7('Fixtures', 'Приладів', 'Entnahmestellen', 'Tappunten', 'Appareils', 'Aparatos', 'Przybory'),
+  'h.pmin': T7('p min bar', 'p min бар', 'p min bar', 'p min bar', 'p min bar', 'p min bar', 'p min bar'),
+  'h.crit': T7('Governing fixture', 'Визначальний прилад', 'Maßgebende Entnahmestelle', 'Bepalend tappunt', 'Appareil déterminant', 'Aparato determinante', 'Przybór decydujący'),
+  'kind.service': T7('service pipe', 'ввід', 'Anschlussleitung', 'aansluitleiding', 'branchement', 'acometida', 'przyłącze'),
+  'kind.main': T7('basement main', 'магістраль', 'Kellerverteilung', 'verdeelleiding', 'distribution', 'distribuidor', 'przewód rozdzielczy'),
+  'kind.riser': T7('riser to floor %f', 'стояк до поверху %f', 'Steigleitung bis Geschoss %f', 'stijgleiding tot verdieping %f', 'colonne jusqu’à l’étage %f', 'montante hasta planta %f', 'pion do kondygnacji %f'),
+  'kind.branch': T7('branch %z', 'відгалуження %z', 'Stockwerksleitung %z', 'verdiepingsleiding %z', 'dérivation %z', 'derivación %z', 'odgałęzienie %z'),
+  /* chart */
+  'chart.caption': T7('Pressure along the critical path: flowing pressure (line), pressure with no friction (dashed) and the minimum flow pressure of the worst fixture.', 'Тиск уздовж критичного шляху: тиск під час витікання (лінія), тиск без тертя (штрих) і мінімальний тиск витікання найгіршого приладу.', 'Druck entlang des Fließwegs: Fließdruck (Linie), Druck ohne Reibung (gestrichelt) und Mindestfließdruck der ungünstigsten Entnahmestelle.', 'Druk langs het kritieke pad: stromingsdruk (lijn), druk zonder wrijving (streep) en minimale stromingsdruk van het ongunstigste tappunt.', 'Pression le long du chemin critique : pression d’écoulement (trait), pression sans frottement (tirets) et pression minimale du point le plus défavorable.', 'Presión a lo largo del recorrido crítico: presión de flujo (línea), presión sin fricción (discontinua) y presión mínima del punto más desfavorable.', 'Ciśnienie wzdłuż drogi krytycznej: ciśnienie przy przepływie (linia), ciśnienie bez tarcia (przerywana) i minimalne ciśnienie wypływu najniekorzystniejszego punktu.'),
+  'chart.flow': T7('flowing pressure', 'тиск під час витікання', 'Fließdruck', 'stromingsdruk', 'pression d’écoulement', 'presión de flujo', 'ciśnienie przy przepływie'),
+  'chart.static': T7('no friction (height + apparatus only)', 'без тертя (лише висота + арматура)', 'ohne Reibung (nur Höhe + Apparate)', 'zonder wrijving (alleen hoogte + toestellen)', 'sans frottement (hauteur + appareils)', 'sin fricción (solo altura + equipos)', 'bez tarcia (tylko wysokość + urządzenia)'),
+  'chart.pmin': T7('minimum flow pressure', 'мінімальний тиск витікання', 'Mindestfließdruck', 'minimale stromingsdruk', 'pression minimale d’écoulement', 'presión mínima de flujo', 'minimalne ciśnienie wypływu'),
+  'chart.x': T7('distance from the street main, m', 'відстань від вуличної мережі, м', 'Abstand von der Straßenleitung, m', 'afstand vanaf de straatleiding, m', 'distance depuis le réseau public, m', 'distancia desde la red pública, m', 'odległość od sieci ulicznej, m'),
+  'u.bar': T7('bar', 'бар', 'bar', 'bar', 'bar', 'bar', 'bar'),
+  'u.m': T7('m', 'м', 'm', 'm', 'm', 'm', 'm'),
+  'u.lps': T7('l/s', 'л/с', 'l/s', 'l/s', 'l/s', 'l/s', 'l/s'),
+  'u.ms': T7('m/s', 'м/с', 'm/s', 'm/s', 'm/s', 'm/s', 'm/s'),
+  'u.c': T7('°C', '°C', '°C', '°C', '°C', '°C', '°C'),
+  'u.pct': T7('%', '%', '%', '%', '%', '%', '%'),
+  'u.n': T7('', '', '', '', '', '', ''),
+  'rep.title': T7('Drinking water pipe sizing', 'Розрахунок труб питного водопроводу', 'Trinkwasser-Rohrnetzberechnung', 'Leidingdimensionering drinkwater', 'Dimensionnement des conduites d’eau potable', 'Dimensionado de tuberías de agua potable', 'Wymiarowanie przewodów wody pitnej')
+};
+
+var FXN = {
+  wc_cistern: T7('WC with cistern', 'Унітаз з бачком', 'WC mit Spülkasten', 'Wc met spoelreservoir', 'WC à réservoir', 'Inodoro con cisterna', 'WC ze spłuczką'),
+  wc_flushvalve: T7('WC with flush valve DN 20', 'Унітаз зі змивним краном DN 20', 'WC mit Druckspüler DN 20', 'Wc met drukspoeler DN 20', 'WC à robinet de chasse DN 20', 'Inodoro con fluxor DN 20', 'WC z zaworem spłukującym DN 20'),
+  urinal_flush: T7('Urinal flush valve', 'Пісуар зі змивним краном', 'Urinal mit Druckspüler', 'Urinoir met drukspoeler', 'Urinoir à robinet de chasse', 'Urinario con fluxor', 'Pisuar z zaworem spłukującym'),
+  urinal_waterless: T7('Waterless urinal', 'Безводний пісуар', 'Wasserloses Urinal', 'Waterloos urinoir', 'Urinoir sans eau', 'Urinario sin agua', 'Pisuar bezwodny'),
+  basin: T7('Wash basin', 'Умивальник', 'Waschtisch', 'Wastafel', 'Lavabo', 'Lavabo', 'Umywalka'),
+  handbasin_small: T7('Hand basin', 'Рукомийник', 'Handwaschbecken', 'Fonteintje', 'Lave-mains', 'Lavamanos', 'Umywalka mała'),
+  bidet: T7('Bidet', 'Біде', 'Bidet', 'Bidet', 'Bidet', 'Bidé', 'Bidet'),
+  sink_kitchen: T7('Kitchen sink', 'Кухонна мийка', 'Küchenspüle', 'Keukenspoelbak', 'Évier de cuisine', 'Fregadero', 'Zlewozmywak'),
+  shower: T7('Shower', 'Душ', 'Dusche', 'Douche', 'Douche', 'Ducha', 'Prysznic'),
+  bath: T7('Bath', 'Ванна', 'Badewanne', 'Bad', 'Baignoire', 'Bañera', 'Wanna'),
+  washing_machine: T7('Washing machine', 'Пральна машина', 'Waschmaschine', 'Wasmachine', 'Lave-linge', 'Lavadora', 'Pralka'),
+  dishwasher_dom: T7('Dishwasher (domestic)', 'Посудомийна машина (побутова)', 'Geschirrspüler (Haushalt)', 'Vaatwasser (huishoudelijk)', 'Lave-vaisselle (domestique)', 'Lavavajillas (doméstico)', 'Zmywarka (domowa)'),
+  tap_utility: T7('Utility tap DN 15', 'Водорозбірний кран DN 15', 'Auslaufventil DN 15', 'Tapkraan DN 15', 'Robinet de puisage DN 15', 'Grifo de servicio DN 15', 'Zawór czerpalny DN 15'),
+  tap_garden: T7('Garden tap (no aerator)', 'Садовий кран (без аератора)', 'Gartenventil (ohne Strahlregler)', 'Buitenkraan (zonder straalregelaar)', 'Robinet de jardin (sans mousseur)', 'Grifo de jardín (sin aireador)', 'Zawór ogrodowy (bez perlatora)')
+};
+
+/* presets: label, aha */
+var PL = {
+  apartments_24: [T7('24 flats, 6 floors, 4 bar', '24 квартири, 6 поверхів, 4 бар', '24 Wohnungen, 6 Geschosse, 4 bar', '24 appartementen, 6 verdiepingen, 4 bar', '24 logements, 6 étages, 4 bar', '24 viviendas, 6 plantas, 4 bar', '24 mieszkania, 6 kondygnacji, 4 bar'),
+    T7('Aha: sized by velocity alone, the top floor is short of pressure; enlarging a few segments on the critical path — not every pipe — fixes it without a booster.', 'Ага: за самою швидкістю верхньому поверху бракує тиску; збільшення кількох ділянок на критичному шляху — не всіх труб — вирішує це без установки.', 'Aha: nur nach Geschwindigkeit bemessen fehlt oben Druck; einige Teilstrecken auf dem Fließweg zu vergrößern — nicht jedes Rohr — löst es ohne Druckerhöhung.', 'Aha: alleen op snelheid gedimensioneerd komt de bovenste verdieping druk tekort; enkele segmenten op het kritieke pad vergroten — niet elke buis — lost het op zonder drukverhoging.', 'Aha : dimensionné à la seule vitesse, le dernier étage manque de pression ; agrandir quelques tronçons du chemin critique — pas tous les tubes — suffit, sans surpresseur.', 'Ajá: dimensionado solo por velocidad, la última planta se queda sin presión; ampliar unos pocos tramos del recorrido crítico —no todas las tuberías— lo resuelve sin grupo de presión.', 'Aha: dobór tylko wg prędkości zostawia ostatnie piętro bez ciśnienia; powiększenie kilku odcinków drogi krytycznej — nie wszystkich rur — wystarcza bez zestawu hydroforowego.')],
+  apartments_low_pressure: [T7('Same flats, 3 bar supply', 'Ті самі квартири, 3 бар у мережі', 'Gleiche Wohnungen, 3 bar Versorgung', 'Zelfde appartementen, 3 bar leidingdruk', 'Mêmes logements, 3 bar au réseau', 'Mismas viviendas, 3 bar de red', 'Te same mieszkania, 3 bar w sieci'),
+    T7('Aha: 16 m of height (1.6 bar) plus 0.6 bar for meter, filter and backflow preventer leave less than the 1 bar a shower needs — no pipe size helps, a booster does.', 'Ага: 16 м висоти (1,6 бар) і 0,6 бар на лічильник, фільтр і зворотний клапан залишають менше за 1 бар, потрібний душу — жоден діаметр не допоможе, допоможе установка.', 'Aha: 16 m Höhe (1,6 bar) plus 0,6 bar für Zähler, Filter und Rückflussverhinderer lassen weniger als das 1 bar, das eine Dusche braucht — keine Rohrweite hilft, eine Druckerhöhung schon.', 'Aha: 16 m hoogte (1,6 bar) plus 0,6 bar voor meter, filter en terugstroombeveiliging laten minder over dan de 1 bar die een douche nodig heeft — geen buismaat helpt, een drukverhoging wel.', 'Aha : 16 m de hauteur (1,6 bar) plus 0,6 bar de compteur, filtre et clapet laissent moins que le 1 bar d’une douche — aucun diamètre n’y fait rien, un surpresseur si.', 'Ajá: 16 m de altura (1,6 bar) más 0,6 bar de contador, filtro y antirretorno dejan menos del 1 bar que necesita una ducha: ningún diámetro ayuda, un grupo de presión sí.', 'Aha: 16 m wysokości (1,6 bar) plus 0,6 bar na wodomierz, filtr i zawór zwrotny zostawiają mniej niż 1 bar potrzebny prysznicowi — żadna średnica nie pomoże, zestaw hydroforowy tak.')],
+  velocity_only: [T7('Flats sized by velocity only', 'Квартири, підбір лише за швидкістю', 'Wohnungen nur nach Geschwindigkeit', 'Appartementen alleen op snelheid', 'Logements à la seule vitesse', 'Viviendas solo por velocidad', 'Mieszkania tylko wg prędkości'),
+    T7('Aha: the velocity limit is a ceiling, not a design target — risers sized up to the 5 m/s allowed with low-loss fittings lose 0.8 bar and the top floor would need a 9 m booster that the 4 bar supply does not need.', 'Ага: гранична швидкість — це стеля, а не ціль — стояки, підібрані до 5 м/с (допустимо при малих втратах в арматурі), втрачають 0,8 бар, і верхньому поверху знадобилася б установка на 9 м, якої при 4 бар не потрібно.', 'Aha: die Grenzgeschwindigkeit ist eine Obergrenze, kein Planungsziel — Steigleitungen bis 5 m/s (zulässig bei verlustarmen Einbauten) verlieren 0,8 bar, und das oberste Geschoss bräuchte eine Druckerhöhung von 9 m, die bei 4 bar nicht nötig ist.', 'Aha: de snelheidsgrens is een plafond, geen ontwerpdoel — stijgleidingen tot 5 m/s (toegelaten bij appendages met weinig verlies) verliezen 0,8 bar en de bovenste verdieping zou een drukverhoging van 9 m vragen die bij 4 bar niet nodig is.', 'Aha : la vitesse limite est un plafond, pas un objectif — des colonnes montantes poussées jusqu’à 5 m/s (admis avec des organes à faible perte) perdent 0,8 bar et le dernier étage réclamerait un surpresseur de 9 m inutile avec 4 bar.', 'Ajá: la velocidad límite es un techo, no un objetivo: montantes dimensionados hasta 5 m/s (admisible con accesorios de baja pérdida) pierden 0,8 bar y la última planta pediría un grupo de presión de 9 m innecesario con 4 bar.', 'Aha: prędkość graniczna to sufit, nie cel projektowy — piony dobrane do 5 m/s (dopuszczalne przy armaturze o małych stratach) tracą 0,8 bar i najwyższa kondygnacja wymagałaby zestawu 9 m, który przy 4 bar nie jest potrzebny.')],
+  office_8f_cistern: [T7('Office, 8 floors, cisterns', 'Офіс, 8 поверхів, бачки', 'Büro, 8 Geschosse, Spülkästen', 'Kantoor, 8 verdiepingen, spoelreservoirs', 'Bureaux, 8 étages, réservoirs', 'Oficinas, 8 plantas, cisternas', 'Biurowiec, 8 kondygnacji, spłuczki'),
+    T7('Aha: 8 floors at 3.6 m put the top outlet 27 m above the meter — 2.7 bar of height — — with 4 bar at the street the office needs a booster whatever the pipes.', 'Ага: 8 поверхів по 3,6 м піднімають верхній прилад на 27 м над лічильником — 2,7 бар висоти; при 4 бар у мережі офісу потрібна установка, які б не були труби.', 'Aha: 8 Geschosse à 3,6 m heben die oberste Entnahmestelle 27 m über den Zähler — 2,7 bar Höhe — bei 4 bar an der Straße braucht das Büro eine Druckerhöhung, egal welche Rohre.', 'Aha: 8 verdiepingen van 3,6 m brengen het hoogste tappunt 27 m boven de meter — 2,7 bar hoogte — met 4 bar aan de straat heeft het kantoor een drukverhoging nodig, welke buizen ook.', 'Aha : 8 étages de 3,6 m placent le point le plus haut 27 m au-dessus du compteur — 2,7 bar de hauteur — avec 4 bar au réseau, il faut un surpresseur quels que soient les tubes.', 'Ajá: 8 plantas de 3,6 m sitúan el punto más alto 27 m sobre el contador (2,7 bar de altura): con 4 bar en la calle la oficina necesita grupo de presión sean cuales sean las tuberías.', 'Aha: 8 kondygnacji po 3,6 m stawia najwyższy punkt 27 m nad wodomierzem — 2,7 bar wysokości — przy 4 bar w ulicy biurowiec potrzebuje zestawu, niezależnie od rur.')],
+  office_8f_flushvalve: [T7('Same office, flush valves', 'Той самий офіс, змивні крани', 'Gleiches Büro, Druckspüler', 'Zelfde kantoor, drukspoelers', 'Mêmes bureaux, robinets de chasse', 'Misma oficina, fluxores', 'Ten sam biurowiec, zawory spłukujące'),
+    T7('Aha: one flush valve draws 1.0 l/s and needs 1.2 bar — the design flow jumps by 50 % and the service pipe grows a size.', 'Ага: один змивний кран бере 1,0 л/с і потребує 1,2 бар — розрахункова витрата зростає на 50 %, а ввід — на один діаметр.', 'Aha: ein Druckspüler zieht 1,0 l/s und braucht 1,2 bar — der Spitzendurchfluss steigt um 50 % und die Anschlussleitung um eine Nennweite.', 'Aha: één drukspoeler vraagt 1,0 l/s en 1,2 bar — het ontwerpdebiet stijgt met 50 % en de aansluitleiding met een maat.', 'Aha : un robinet de chasse tire 1,0 l/s et exige 1,2 bar — le débit de calcul bondit de 50 % et le branchement prend un diamètre.', 'Ajá: un fluxor pide 1,0 l/s y 1,2 bar: el caudal de cálculo sube un 50 % y la acometida un diámetro.', 'Aha: jeden zawór spłukujący pobiera 1,0 l/s i wymaga 1,2 bar — przepływ obliczeniowy rośnie o 50 %, a przyłącze o jedną średnicę.')],
+  hotel_120: [T7('Hotel, 120 rooms', 'Готель, 120 номерів', 'Hotel, 120 Zimmer', 'Hotel, 120 kamers', 'Hôtel, 120 chambres', 'Hotel, 120 habitaciones', 'Hotel, 120 pokoi')
+    , T7('Aha: the same bathrooms peak about twice as high in a hotel as in flats — guests shower in the same morning hour (DIN constants b = 0.48 vs 0.19).', 'Ага: ті самі ванні кімнати в готелі дають пік приблизно вдвічі вищий, ніж у квартирах — гості приймають душ в одну ранкову годину (константи DIN b = 0,48 проти 0,19).', 'Aha: dieselben Bäder erreichen im Hotel etwa die doppelte Spitze wie in Wohnungen — Gäste duschen in derselben Morgenstunde (DIN-Konstanten b = 0,48 statt 0,19).', 'Aha: dezelfde badkamers pieken in een hotel ongeveer dubbel zo hoog als in appartementen — gasten douchen in hetzelfde ochtenduur (DIN-constanten b = 0,48 tegen 0,19).', 'Aha : les mêmes salles de bains donnent une pointe environ deux fois plus forte à l’hôtel qu’en logements — les clients se douchent à la même heure (constantes DIN b = 0,48 contre 0,19).', 'Ajá: los mismos baños dan en un hotel una punta casi doble que en viviendas: los huéspedes se duchan a la misma hora (constantes DIN b = 0,48 frente a 0,19).', 'Aha: te same łazienki w hotelu dają szczyt mniej więcej dwa razy wyższy niż w mieszkaniach — goście biorą prysznic o tej samej porannej godzinie (stałe DIN b = 0,48 wobec 0,19).')],
+  sports_showers: [T7('Sports hall, 16 team showers', 'Спортзал, 16 командних душів', 'Sporthalle, 16 Mannschaftsduschen', 'Sporthal, 16 teamdouches', 'Salle de sport, 16 douches d’équipe', 'Polideportivo, 16 duchas de equipo', 'Hala sportowa, 16 pryszniców drużynowych'),
+    T7('Aha: after the match all 16 showers run together — no simultaneity applies, so 4.8 l/s of showers outweigh all the toilets and the pipes are set by that one room.', 'Ага: після матчу всі 16 душів працюють разом — одночасність не застосовується, тож 4,8 л/с душів переважають усі туалети, і труби визначає одна кімната.', 'Aha: nach dem Spiel laufen alle 16 Duschen zugleich — keine Gleichzeitigkeit, also überwiegen 4,8 l/s Duschen alle WCs und ein Raum bestimmt die Rohre.', 'Aha: na de wedstrijd lopen alle 16 douches samen — geen gelijktijdigheid, dus 4,8 l/s douches wegen zwaarder dan alle toiletten en één ruimte bepaalt de leidingen.', 'Aha : après le match les 16 douches coulent ensemble — pas de simultanéité, donc 4,8 l/s de douches dépassent tous les WC et une seule pièce fixe les tubes.', 'Ajá: tras el partido las 16 duchas corren juntas: sin simultaneidad, 4,8 l/s de duchas pesan más que todos los aseos y una sola sala fija las tuberías.', 'Aha: po meczu wszystkie 16 pryszniców działa naraz — bez jednoczesności, więc 4,8 l/s pryszniców przeważa wszystkie toalety i to jedno pomieszczenie decyduje o rurach.')],
+  multilayer_flats: [T7('Flats in multilayer pipe', 'Квартири, багатошарові труби', 'Wohnungen in Mehrschichtverbundrohr', 'Appartementen in meerlagenbuis', 'Logements en multicouche', 'Viviendas en multicapa', 'Mieszkania w rurach wielowarstwowych'),
+    T7('Aha: a 32×3 multilayer pipe has the bore of a 28×1 copper pipe — compare inner diameters, not the outside size on the label.', 'Ага: багатошарова труба 32×3 має прохід мідної 28×1 — порівнюйте внутрішні діаметри, а не зовнішній розмір на маркуванні.', 'Aha: ein Mehrschichtverbundrohr 32×3 hat den Innendurchmesser eines Kupferrohrs 28×1 — Innendurchmesser vergleichen, nicht die Außenmaße.', 'Aha: een meerlagenbuis 32×3 heeft de binnendiameter van een koperen buis 28×1 — vergelijk binnendiameters, niet de buitenmaat op het etiket.', 'Aha : un multicouche 32×3 a l’alésage d’un cuivre 28×1 — comparez les diamètres intérieurs, pas la taille extérieure de l’étiquette.', 'Ajá: un multicapa 32×3 tiene el paso de un cobre 28×1: compare diámetros interiores, no la medida exterior de la etiqueta.', 'Aha: rura wielowarstwowa 32×3 ma prześwit miedzianej 28×1 — porównuj średnice wewnętrzne, nie zewnętrzny wymiar z etykiety.')]
+};
+var PRESET_IDS = ['apartments_24', 'apartments_low_pressure', 'velocity_only', 'office_8f_cistern', 'office_8f_flushvalve', 'hotel_120', 'sports_showers', 'multilayer_flats'];
+
+var LEARN = { version: 1,
+  intro: { title: T7('Size the pipes from the fixtures', 'Підбір труб за приладами', 'Rohre aus den Entnahmestellen bemessen', 'Leidingen dimensioneren vanuit de tappunten', 'Dimensionner les conduites à partir des appareils', 'Dimensionar las tuberías desde los aparatos', 'Dobór rur z przyborów'),
+    body: T7('Load an example or describe your building as zones: each zone sits on a floor and has a number of identical units with their fixtures. Set the minimum pressure the water utility guarantees. The tool sizes every segment and tells you whether the worst fixture still gets its minimum flow pressure — and if not, how much a booster must add.',
+      'Завантажте приклад або опишіть будівлю зонами: кожна зона на певному поверсі й має кілька однакових блоків з приладами. Задайте мінімальний тиск, який гарантує водоканал. Інструмент підбирає кожну ділянку і показує, чи отримує найгірший прилад мінімальний тиск витікання, а якщо ні — скільки має додати установка.',
+      'Laden Sie ein Beispiel oder beschreiben Sie das Gebäude als Zonen: jede Zone liegt in einem Geschoss und hat gleiche Einheiten mit ihren Entnahmestellen. Tragen Sie den Mindestdruck ein, den der Versorger garantiert. Das Werkzeug bemisst jede Teilstrecke und zeigt, ob die ungünstigste Entnahmestelle noch ihren Mindestfließdruck hat — und sonst, wie viel eine Druckerhöhung liefern muss.',
+      'Laad een voorbeeld of beschrijf het gebouw als zones: elke zone ligt op een verdieping en heeft een aantal identieke eenheden met hun tappunten. Vul de minimale druk in die het waterbedrijf garandeert. De tool dimensioneert elk segment en zegt of het ongunstigste tappunt nog zijn minimale stromingsdruk krijgt — en anders hoeveel een drukverhoging moet toevoegen.',
+      'Chargez un exemple ou décrivez le bâtiment par zones : chaque zone est à un étage et compte des unités identiques avec leurs appareils. Indiquez la pression minimale garantie par le distributeur. L’outil dimensionne chaque tronçon et dit si le point le plus défavorable garde sa pression minimale — sinon, combien un surpresseur doit ajouter.',
+      'Cargue un ejemplo o describa el edificio por zonas: cada zona está en una planta y tiene unidades idénticas con sus aparatos. Indique la presión mínima que garantiza la compañía. La herramienta dimensiona cada tramo e indica si el punto más desfavorable conserva su presión mínima de flujo y, si no, cuánto debe aportar un grupo de presión.',
+      'Wczytaj przykład albo opisz budynek strefami: każda strefa leży na kondygnacji i ma kilka jednakowych lokali z przyborami. Podaj minimalne ciśnienie gwarantowane przez wodociągi. Narzędzie dobiera każdy odcinek i mówi, czy najniekorzystniejszy punkt ma jeszcze minimalne ciśnienie wypływu — a jeśli nie, ile musi dodać zestaw hydroforowy.') },
+  topics: {
+    peak: { title: T7('Peak flow, not the sum', 'Пікова витрата, а не сума', 'Spitzendurchfluss, nicht die Summe', 'Piekdebiet, niet de som', 'Débit de pointe, pas la somme', 'Caudal punta, no la suma', 'Przepływ szczytowy, nie suma'),
+      body: T7('Every fixture has a design flow Qa (DIN 1988-300 Table 1). They never all run together: DIN gives the peak as Qs = a·(ΣQa)^b − c with constants per building type, never below the largest single fixture and never above the sum. In a block of flats the peak is often below 10 % of ΣQa; in a hotel guests shower at the same hour, so the peak is higher.',
+        'Кожен прилад має розрахункову витрату Qa (DIN 1988-300 табл. 1). Вони ніколи не працюють усі разом: DIN дає пік як Qs = a·(ΣQa)^b − c з константами для типу будівлі, не менше за найбільший окремий прилад і не більше за суму. У багатоквартирному будинку пік часто менший за 10 % ΣQa; у готелі гості приймають душ в одну годину, тож пік вищий.',
+        'Jede Entnahmestelle hat einen Berechnungsdurchfluss Qa (DIN 1988-300 Tab. 1). Nie laufen alle zugleich: DIN gibt die Spitze als Qs = a·(ΣQa)^b − c mit Konstanten je Gebäudeart, nie unter der größten Einzelentnahme und nie über der Summe. Im Mehrfamilienhaus liegt die Spitze oft unter 10 % von ΣQa; im Hotel duschen die Gäste zur selben Stunde, die Spitze ist höher.',
+        'Elk tappunt heeft een ontwerpdebiet Qa (DIN 1988-300 tabel 1). Nooit lopen ze allemaal samen: DIN geeft de piek als Qs = a·(ΣQa)^b − c met constanten per gebouwtype, nooit onder het grootste afzonderlijke tappunt en nooit boven de som. In een appartementsgebouw ligt de piek vaak onder 10 % van ΣQa; in een hotel douchen gasten op hetzelfde uur, dus is de piek hoger.',
+        'Chaque appareil a un débit de calcul Qa (DIN 1988-300 tab. 1). Ils ne coulent jamais tous ensemble : la DIN donne la pointe Qs = a·(ΣQa)^b − c avec des constantes par type de bâtiment, jamais sous le plus grand appareil et jamais au-dessus de la somme. En logements la pointe est souvent sous 10 % de ΣQa ; à l’hôtel les clients se douchent à la même heure, la pointe est plus forte.',
+        'Cada aparato tiene un caudal de cálculo Qa (DIN 1988-300 tabla 1). Nunca funcionan todos a la vez: DIN da la punta como Qs = a·(ΣQa)^b − c con constantes por tipo de edificio, nunca por debajo del mayor aparato ni por encima de la suma. En viviendas la punta suele ser menos del 10 % de ΣQa; en un hotel los huéspedes se duchan a la misma hora y la punta es mayor.',
+        'Każdy przybór ma przepływ obliczeniowy Qa (DIN 1988-300 tabl. 1). Nigdy nie działają wszystkie naraz: DIN podaje szczyt jako Qs = a·(ΣQa)^b − c ze stałymi dla rodzaju budynku, nigdy poniżej największego pojedynczego przyboru i nigdy powyżej sumy. W budynku mieszkalnym szczyt to często mniej niż 10 % ΣQa; w hotelu goście biorą prysznic o tej samej godzinie, więc szczyt jest wyższy.') },
+    en806: { title: T7('EN 806-3 loading units', 'Одиниці навантаження EN 806-3', 'Belastungswerte nach EN 806-3', 'Belastingseenheden EN 806-3', 'Unités de charge EN 806-3', 'Unidades de carga EN 806-3', 'Jednostki obciążenia EN 806-3'),
+      body: T7('EN 806-3 is the simplified European method: each outlet has loading units (1 LU = 0.1 l/s; basin 1, shower 2, bath 4, flush valve 15) and Figure B.1 converts ΣLU into a design flow. The option follows that figure: QD = 0.1·ΣLU up to the highest single LU, then the straight line (on the log chart) of that LU to 300 LU / 1.7 l/s, above that one line to 5000 LU. A larger single outlet (a bath, a flush valve) lifts the flow of small networks; big networks all meet on one line. DIN 1988-300 is offered next to it because it distinguishes building types and computes pressure losses explicitly.',
+        'EN 806-3 — спрощений європейський метод: кожна точка має одиниці навантаження (1 ОН = 0,1 л/с; умивальник 1, душ 2, ванна 4, змивний кран 15), а рисунок B.1 переводить ΣОН у розрахункову витрату. Варіант іде за цим рисунком: QD = 0,1·ΣОН до найбільшого одиничного ОН, далі пряма (на логарифмічній сітці) цього ОН до 300 ОН / 1,7 л/с, вище — одна лінія до 5000 ОН. Більша одинична точка (ванна, змивний кран) підвищує витрату малої мережі; великі мережі сходяться на одній лінії. DIN 1988-300 запропоновано поруч, бо він розрізняє типи будівель і явно рахує втрати тиску.',
+        'EN 806-3 ist das vereinfachte europäische Verfahren: jede Entnahmestelle hat Belastungswerte (1 BW = 0,1 l/s; Waschtisch 1, Dusche 2, Wanne 4, Druckspüler 15), Bild B.1 rechnet ΣBW in den Spitzendurchfluss um. Die Option folgt diesem Bild: QD = 0,1·ΣBW bis zum größten Einzel-BW, dann die Gerade (im log-Netz) dieses BW bis 300 BW / 1,7 l/s, darüber eine Linie bis 5000 BW. Eine größere Einzelentnahme (Wanne, Druckspüler) hebt den Durchfluss kleiner Netze; große Netze laufen auf einer Linie zusammen. DIN 1988-300 steht daneben, weil sie Gebäudearten unterscheidet und Druckverluste ausdrücklich berechnet.',
+        'EN 806-3 is de vereenvoudigde Europese methode: elk tappunt heeft belastingseenheden (1 BE = 0,1 l/s; wastafel 1, douche 2, bad 4, drukspoeler 15) en figuur B.1 zet ΣBE om in een ontwerpdebiet. De optie volgt die figuur: QD = 0,1·ΣBE tot de grootste enkele BE, dan de rechte (op logpapier) van die BE tot 300 BE / 1,7 l/s, daarboven één lijn tot 5000 BE. Een groter enkel tappunt (bad, drukspoeler) verhoogt het debiet van kleine netten; grote netten komen op één lijn samen. DIN 1988-300 staat ernaast omdat ze gebouwtypes onderscheidt en drukverliezen expliciet berekent.',
+        'L’EN 806-3 est la méthode européenne simplifiée : chaque point a des unités de charge (1 UC = 0,1 l/s ; lavabo 1, douche 2, baignoire 4, robinet de chasse 15) et la figure B.1 convertit ΣUC en débit de calcul. L’option suit cette figure : QD = 0,1·ΣUC jusqu’à la plus grande UC unitaire, puis la droite (en échelle log) de cette UC jusqu’à 300 UC / 1,7 l/s, au-delà une seule droite jusqu’à 5000 UC. Un point plus gros (baignoire, robinet de chasse) relève le débit des petits réseaux ; les grands réseaux se rejoignent sur une droite. La DIN 1988-300 est proposée à côté car elle distingue les types de bâtiments et calcule explicitement les pertes de charge.',
+        'EN 806-3 es el método europeo simplificado: cada punto tiene unidades de carga (1 UC = 0,1 l/s; lavabo 1, ducha 2, bañera 4, fluxor 15) y la figura B.1 convierte ΣUC en caudal de cálculo. La opción sigue esa figura: QD = 0,1·ΣUC hasta la mayor UC individual, luego la recta (en escala log) de esa UC hasta 300 UC / 1,7 l/s y por encima una sola recta hasta 5000 UC. Un punto mayor (bañera, fluxor) eleva el caudal de las redes pequeñas; las grandes coinciden en una recta. DIN 1988-300 se ofrece al lado porque distingue tipos de edificio y calcula explícitamente las pérdidas de presión.',
+        'EN 806-3 to uproszczona metoda europejska: każdy punkt ma jednostki obciążenia (1 JO = 0,1 l/s; umywalka 1, prysznic 2, wanna 4, zawór spłukujący 15), a rysunek B.1 przelicza ΣJO na przepływ obliczeniowy. Opcja idzie za tym rysunkiem: QD = 0,1·ΣJO do największej pojedynczej JO, dalej prosta (na siatce log) tej JO do 300 JO / 1,7 l/s, powyżej jedna linia do 5000 JO. Większy pojedynczy punkt (wanna, zawór spłukujący) podnosi przepływ małych sieci; duże sieci zbiegają się na jednej linii. DIN 1988-300 jest obok, bo rozróżnia rodzaje budynków i jawnie liczy straty ciśnienia.') },
+    velocity: { title: T7('Velocity limits', 'Граничні швидкості', 'Geschwindigkeitsgrenzen', 'Snelheidsgrenzen', 'Vitesses limites', 'Velocidades límite', 'Prędkości graniczne'),
+      body: T7('The first pass picks the smallest pipe that stays under the velocity limit of its segment (DIN 1988-300 Table 3): 2 m/s in the service connection, 2.5 m/s where valves with a high loss coefficient sit, 5 m/s otherwise. These are ceilings against noise and water hammer, not targets — a pipe at its limit loses a lot of pressure. Where the flow lasts longer than 15 minutes (zones “all at once”, continuous flows) and in the EN 806-3 option the limit is 2 m/s.',
+        'Перший прохід обирає найменшу трубу, що лишається нижче граничної швидкості ділянки (DIN 1988-300 табл. 3): 2 м/с на вводі, 2,5 м/с там, де стоїть арматура з великим коефіцієнтом опору, 5 м/с в інших місцях. Це стелі проти шуму й гідроудару, а не цілі — труба на межі втрачає багато тиску. Де відбір триває понад 15 хвилин (зони «усі одночасно», постійні витрати) і у варіанті EN 806-3, межа — 2 м/с.',
+        'Der erste Durchgang wählt die kleinste Rohrweite unter der Geschwindigkeitsgrenze der Teilstrecke (DIN 1988-300 Tab. 3): 2 m/s in der Anschlussleitung, 2,5 m/s mit Armaturen hohen Verlustbeiwerts, sonst 5 m/s. Das sind Obergrenzen gegen Geräusch und Druckstoß, keine Ziele — ein Rohr an der Grenze verliert viel Druck. Bei Entnahmen über 15 Minuten (Zonen „alle gleichzeitig“, Dauerdurchflüsse) und bei der Option EN 806-3 gilt 2 m/s.',
+        'De eerste stap kiest de kleinste buis die onder de snelheidsgrens van het segment blijft (DIN 1988-300 tabel 3): 2 m/s in de aansluitleiding, 2,5 m/s waar kranen met een hoge verliescoëfficiënt zitten, anders 5 m/s. Het zijn plafonds tegen geluid en waterslag, geen doelen — een buis op de grens verliest veel druk. Waar de tapping langer dan 15 minuten duurt (zones “alle tegelijk”, continue debieten) en bij de optie EN 806-3 is de grens 2 m/s.',
+        'Le premier passage choisit le plus petit tube sous la vitesse limite du tronçon (DIN 1988-300 tab. 3) : 2 m/s au branchement, 2,5 m/s avec des robinets à forte perte, 5 m/s sinon. Ce sont des plafonds contre le bruit et les coups de bélier, pas des cibles — un tube à la limite perd beaucoup de pression. Pour un puisage de plus de 15 minutes (zones « toutes en même temps », débits continus) et avec l’option EN 806-3, la limite est de 2 m/s.',
+        'La primera pasada elige el tubo más pequeño bajo la velocidad límite del tramo (DIN 1988-300 tabla 3): 2 m/s en la acometida, 2,5 m/s con válvulas de alta pérdida, 5 m/s en el resto. Son techos contra ruido y golpe de ariete, no objetivos: un tubo en el límite pierde mucha presión. Donde el consumo dura más de 15 minutos (zonas «todo a la vez», caudales continuos) y en la opción EN 806-3 el límite es 2 m/s.',
+        'Pierwsze przejście wybiera najmniejszą rurę poniżej prędkości granicznej odcinka (DIN 1988-300 tabl. 3): 2 m/s w przyłączu, 2,5 m/s przy armaturze o dużym współczynniku strat, w pozostałych 5 m/s. To sufity przeciw hałasowi i uderzeniom hydraulicznym, nie cele — rura na granicy traci dużo ciśnienia. Gdy pobór trwa ponad 15 minut (strefy „wszystko naraz”, przepływy ciągłe) oraz w wariancie EN 806-3 granica wynosi 2 m/s.') },
+    pressure: { title: T7('Where the pressure goes', 'Куди йде тиск', 'Wo der Druck bleibt', 'Waar de druk naartoe gaat', 'Où passe la pression', 'Adónde va la presión', 'Gdzie znika ciśnienie'),
+      body: T7('From the street pressure subtract: meter, filter and backflow preventer; height (0.098 bar per metre); friction λ·L/d·ρv²/2 and fittings Σζ·ρv²/2 of every segment on the way. What is left at the end of a branch must cover the minimum flow pressure of its most demanding fixture (1.0 bar for a mixer, 1.2 bar for a flush valve). The second pass enlarges, one size at a time, the segment with the largest loss on the worst path until that holds.',
+        'Від тиску в мережі відніміть: лічильник, фільтр і зворотний клапан; висоту (0,098 бар на метр); тертя λ·L/d·ρv²/2 і місцеві опори Σζ·ρv²/2 кожної ділянки на шляху. Те, що лишається в кінці відгалуження, має покрити мінімальний тиск витікання найвибагливішого приладу (1,0 бар для змішувача, 1,2 бар для змивного крана). Другий прохід збільшує по одному розміру ділянку з найбільшою втратою на найгіршому шляху, доки це не виконано.',
+        'Vom Straßendruck abziehen: Zähler, Filter und Rückflussverhinderer; Höhe (0,098 bar je Meter); Reibung λ·L/d·ρv²/2 und Einzelwiderstände Σζ·ρv²/2 jeder Teilstrecke unterwegs. Was am Ende einer Leitung bleibt, muss den Mindestfließdruck der anspruchsvollsten Entnahmestelle decken (1,0 bar Mischer, 1,2 bar Druckspüler). Der zweite Durchgang vergrößert Stufe für Stufe die Teilstrecke mit dem größten Verlust auf dem ungünstigsten Weg, bis das gilt.',
+        'Trek van de straatdruk af: meter, filter en terugstroombeveiliging; hoogte (0,098 bar per meter); wrijving λ·L/d·ρv²/2 en weerstanden Σζ·ρv²/2 van elk segment onderweg. Wat aan het einde van een leiding overblijft, moet de minimale stromingsdruk van het veeleisendste tappunt dekken (1,0 bar mengkraan, 1,2 bar drukspoeler). De tweede stap vergroot maat per maat het segment met het grootste verlies op het ongunstigste pad tot dat klopt.',
+        'De la pression du réseau, retirez : compteur, filtre et clapet ; la hauteur (0,098 bar par mètre) ; le frottement λ·L/d·ρv²/2 et les singularités Σζ·ρv²/2 de chaque tronçon traversé. Ce qui reste en bout de dérivation doit couvrir la pression minimale de l’appareil le plus exigeant (1,0 bar mitigeur, 1,2 bar robinet de chasse). Le second passage agrandit, d’un diamètre à la fois, le tronçon le plus déperditif du chemin le plus défavorable jusqu’à y parvenir.',
+        'A la presión de red réstele: contador, filtro y antirretorno; la altura (0,098 bar por metro); la fricción λ·L/d·ρv²/2 y las singularidades Σζ·ρv²/2 de cada tramo del recorrido. Lo que queda al final de una derivación debe cubrir la presión mínima del aparato más exigente (1,0 bar mezclador, 1,2 bar fluxor). La segunda pasada amplía, de un diámetro en uno, el tramo con mayor pérdida del recorrido más desfavorable hasta lograrlo.',
+        'Od ciśnienia w sieci odejmij: wodomierz, filtr i zawór zwrotny; wysokość (0,098 bar na metr); tarcie λ·L/d·ρv²/2 i opory miejscowe Σζ·ρv²/2 każdego odcinka po drodze. To, co zostaje na końcu odgałęzienia, musi pokryć minimalne ciśnienie wypływu najbardziej wymagającego przyboru (1,0 bar bateria, 1,2 bar zawór spłukujący). Drugie przejście powiększa po jednej średnicy odcinek o największej stracie na najgorszej drodze, aż warunek jest spełniony.') },
+    booster: { title: T7('When a booster is unavoidable', 'Коли без установки не обійтися', 'Wann eine Druckerhöhung unvermeidlich ist', 'Wanneer drukverhoging onvermijdelijk is', 'Quand le surpresseur est inévitable', 'Cuándo el grupo de presión es inevitable', 'Kiedy zestaw hydroforowy jest nieunikniony'),
+      body: T7('Bigger pipes only reduce friction. If height plus meter, filter and backflow preventer already take more than the street pressure minus the fixture’s minimum, no pipe size helps: the tool then sizes the pipes for a stated friction allowance behind the booster and passes the flow and the missing head to the booster tool (plbbooster) and the pump-curve tool.',
+        'Більші труби зменшують лише тертя. Якщо висота плюс лічильник, фільтр і зворотний клапан уже забирають більше, ніж тиск у мережі мінус мінімум приладу, жоден діаметр не допоможе: тоді інструмент підбирає труби під заданий запас на тертя за установкою і передає витрату та відсутній напір інструменту установок (plbbooster) і інструменту робочої точки насоса.',
+        'Größere Rohre senken nur die Reibung. Brauchen Höhe plus Zähler, Filter und Rückflussverhinderer schon mehr als Straßendruck minus Mindestfließdruck, hilft keine Rohrweite: dann bemisst das Werkzeug die Rohre für eine angegebene Reibungsreserve hinter der Druckerhöhung und gibt Durchfluss und fehlende Förderhöhe an das Druckerhöhungs-Werkzeug (plbbooster) und das Pumpenkennlinien-Werkzeug weiter.',
+        'Grotere buizen verminderen alleen de wrijving. Als hoogte plus meter, filter en terugstroombeveiliging al meer vragen dan straatdruk min de minimale druk van het tappunt, helpt geen buismaat: de tool dimensioneert dan de leidingen voor een opgegeven wrijvingsmarge achter de drukverhoging en geeft debiet en ontbrekende opvoerhoogte door aan de drukverhogingstool (plbbooster) en de pompcurvetool.',
+        'Des tubes plus gros ne réduisent que le frottement. Si la hauteur plus compteur, filtre et clapet prennent déjà plus que la pression du réseau moins le minimum de l’appareil, aucun diamètre n’aide : l’outil dimensionne alors pour une réserve de frottement donnée derrière le surpresseur et transmet débit et hauteur manquante à l’outil surpresseur (plbbooster) et à l’outil point de fonctionnement.',
+        'Tuberías mayores solo reducen la fricción. Si la altura más contador, filtro y antirretorno ya consumen más que la presión de red menos el mínimo del aparato, ningún diámetro ayuda: la herramienta dimensiona entonces para un margen de fricción declarado tras el grupo y pasa caudal y altura que falta a la herramienta de grupos (plbbooster) y a la de punto de funcionamiento.',
+        'Większe rury zmniejszają tylko tarcie. Jeśli wysokość plus wodomierz, filtr i zawór zwrotny zabierają już więcej niż ciśnienie w sieci minus minimum przyboru, żadna średnica nie pomoże: narzędzie dobiera wtedy rury na podany zapas tarcia za zestawem i przekazuje przepływ oraz brakującą wysokość do narzędzia zestawów (plbbooster) i narzędzia punktu pracy pompy.') },
+    simultaneous: { title: T7('All at once: showers and processes', 'Усі одночасно: душові й технологія', 'Alle gleichzeitig: Duschen und Prozesse', 'Alles tegelijk: douches en processen', 'Tous ensemble : douches et process', 'Todos a la vez: duchas y procesos', 'Wszystkie naraz: prysznice i procesy'),
+      body: T7('The peak-flow formula assumes random use. Team showers after a match, school changing rooms or a process line run together: mark such a zone “all at once” and its full flow is added on top of the diversified rest. Ignoring this undersizes the pipes several times over.',
+        'Формула пікової витрати припускає випадкове користування. Командні душові після матчу, шкільні роздягальні чи технологічна лінія працюють разом: позначте таку зону «усі одночасно», і її повна витрата додається до решти з урахуванням одночасності. Ігнорування цього занижує труби в рази.',
+        'Die Spitzenformel setzt zufällige Nutzung voraus. Mannschaftsduschen nach dem Spiel, Schulumkleiden oder eine Prozesslinie laufen gemeinsam: markieren Sie die Zone „alle gleichzeitig“, dann kommt ihr voller Durchfluss zum Rest hinzu. Wer das übersieht, bemisst die Rohre um ein Mehrfaches zu klein.',
+        'De piekformule veronderstelt toevallig gebruik. Teamdouches na een wedstrijd, schoolkleedkamers of een proceslijn lopen samen: markeer zo’n zone „alles tegelijk” en haar volle debiet komt bovenop de rest. Wie dat negeert, dimensioneert de leidingen meervoudig te klein.',
+        'La formule de pointe suppose un usage aléatoire. Douches d’équipe après un match, vestiaires scolaires ou ligne de process coulent ensemble : marquez la zone « tous ensemble » et son débit complet s’ajoute au reste. L’ignorer sous-dimensionne les tubes de plusieurs fois.',
+        'La fórmula de punta supone uso aleatorio. Duchas de equipo tras un partido, vestuarios escolares o una línea de proceso funcionan a la vez: marque esa zona «todos a la vez» y su caudal completo se suma al resto. Ignorarlo infradimensiona las tuberías varias veces.',
+        'Wzór na szczyt zakłada losowe korzystanie. Prysznice drużynowe po meczu, szatnie szkolne czy linia technologiczna pracują razem: oznacz taką strefę „wszystkie naraz”, a jej pełny przepływ dodaje się do reszty. Pominięcie tego zaniża rury kilkukrotnie.') },
+    circuits: { title: T7('Cold and hot after the heater tee', 'Холодна й гаряча після трійника нагрівача', 'Kalt und warm nach dem Erwärmer-Abzweig', 'Koud en warm na de aftakking naar de verwarmer', 'Froide et chaude après le piquage du préparateur', 'Fría y caliente tras la derivación al calentador', 'Zimna i ciepła za trójnikiem podgrzewacza'),
+      body: T7('Up to the tee of the water heater one pipe carries cold + hot together (DIN 1988-300 adds both sum flows there). After it there are two systems: the cold risers and branches, and the hot ones behind the heater, which lose its pressure drop as well. In the cold + hot mode the tool sizes and checks both; the worse residual pressure decides the verdict and the booster. Hot-water circulation is a separate tool (plbcirc).',
+        'До трійника водонагрівача одна труба несе холодну й гарячу разом (DIN 1988-300 там додає обидві сумарні витрати). Після нього — дві системи: холодні стояки й відгалуження та гарячі після нагрівача, які ще втрачають його перепад тиску. У режимі «холодна + гаряча» інструмент підбирає й перевіряє обидві; гірший залишковий тиск визначає висновок і потребу в установці. Циркуляція ГВП — окремий інструмент (plbcirc).',
+        'Bis zum Abzweig des Trinkwassererwärmers führt eine Leitung kalt + warm zusammen (DIN 1988-300 addiert dort beide Summendurchflüsse). Danach gibt es zwei Systeme: die kalten Steig- und Stockwerksleitungen und die warmen hinter dem Erwärmer, die zusätzlich dessen Druckverlust tragen. Im Modus kalt + warm bemisst und prüft das Werkzeug beide; der schlechtere Restdruck entscheidet über Ergebnis und Druckerhöhung. Die Zirkulation ist ein eigenes Werkzeug (plbcirc).',
+        'Tot de aftakking naar de verwarmer voert één leiding koud + warm samen (DIN 1988-300 telt daar beide somdebieten op). Daarna zijn er twee systemen: de koude stijg- en verdiepingsleidingen en de warme na de verwarmer, die ook zijn drukverlies dragen. In de modus koud + warm dimensioneert en controleert de tool beide; de slechtste restdruk bepaalt het oordeel en de drukverhoging. Circulatie is een aparte tool (plbcirc).',
+        'Jusqu’au piquage du préparateur, une seule conduite porte froide + chaude (la DIN 1988-300 y additionne les deux débits cumulés). Ensuite il y a deux réseaux : les colonnes et dérivations froides, et les chaudes après le préparateur, qui subissent en plus sa perte de charge. En mode froide + chaude l’outil dimensionne et vérifie les deux ; la pire pression résiduelle décide du verdict et du surpresseur. Le bouclage est un outil séparé (plbcirc).',
+        'Hasta la derivación al calentador una sola tubería lleva fría + caliente juntas (la DIN 1988-300 suma ahí ambos caudales acumulados). Después hay dos sistemas: los montantes y derivaciones fríos y los calientes tras el calentador, que pierden además su caída de presión. En el modo fría + caliente la herramienta dimensiona y comprueba ambos; la peor presión residual decide el resultado y el grupo de presión. La recirculación es otra herramienta (plbcirc).',
+        'Do trójnika podgrzewacza jedna rura prowadzi zimną i ciepłą razem (DIN 1988-300 dodaje tam oba przepływy sumaryczne). Za nim są dwa systemy: zimne piony i odgałęzienia oraz ciepłe za podgrzewaczem, które tracą jeszcze jego spadek ciśnienia. W trybie zimna + ciepła narzędzie dobiera i sprawdza oba; gorsze ciśnienie resztkowe decyduje o wyniku i o zestawie hydroforowym. Cyrkulacja to osobne narzędzie (plbcirc).') },
+    unit: { title: T7('One flat: the two largest draw-offs', 'Одна квартира: дві найбільші точки', 'Eine Wohnung: die beiden größten Entnahmestellen', 'Eén woning: de twee grootste tappunten', 'Un logement : les deux plus gros puisages', 'Una vivienda: los dos mayores consumos', 'Jedno mieszkanie: dwa największe punkty poboru'),
+      body: T7('Inside one utilisation unit — a bathroom, kitchen or flat, a hotel or ward room — rarely more than two draw-offs run together, so DIN 1988-300 takes the peak of a pipe serving one unit from its two largest design flows (a shower next to a bath, a second basin, a bidet and a urinal not counted). The tool does not know the rooms, so it applies this as a floor where a segment serves exactly one unit of a residential, care, hotel or hospital building (zone with 1 unit): never less than the two largest, never less than the curve. Several units: the curve.',
+        'Усередині однієї одиниці користування — ванної, кухні чи квартири, номера готелю чи палати — рідко відкрито більше двох точок, тому DIN 1988-300 бере пік труби, що обслуговує одну одиницю, з двох найбільших розрахункових витрат (душ поруч із ванною, другий умивальник, біде й пісуар не враховуються). Інструмент не знає приміщень, тож застосовує це як нижню межу там, де ділянка обслуговує рівно одну одиницю житлової будівлі, будинку догляду, готелю чи лікарні (зона з 1 одиницею): не менше двох найбільших і не менше кривої. Кілька одиниць — крива.',
+        'In einer Nutzungseinheit — Bad, Küche oder Wohnung, Hotel- oder Krankenzimmer — laufen selten mehr als zwei Entnahmestellen gleichzeitig; DIN 1988-300 nimmt daher die Spitze einer Leitung, die eine Einheit versorgt, aus den beiden größten Berechnungsdurchflüssen (Dusche neben Wanne, zweiter Waschtisch, Bidet und Urinal zählen nicht). Das Werkzeug kennt die Räume nicht und setzt dies als Untergrenze an, wo eine Teilstrecke genau eine Einheit eines Wohn-, Pflege-, Hotel- oder Krankenhausbaus versorgt (Zone mit 1 Einheit): nie weniger als die beiden größten, nie weniger als die Kurve. Mehrere Einheiten: die Kurve.',
+        'Binnen één gebruikseenheid — badkamer, keuken of woning, hotel- of ziekenhuiskamer — lopen zelden meer dan twee tappunten samen; DIN 1988-300 neemt daarom de piek van een leiding die één eenheid bedient uit de twee grootste ontwerpdebieten (douche naast bad, tweede wastafel, bidet en urinoir tellen niet). De tool kent de ruimten niet en past dit toe als ondergrens waar een segment precies één eenheid van een woon-, zorg-, hotel- of ziekenhuisgebouw bedient (zone met 1 eenheid): nooit minder dan de twee grootste, nooit minder dan de curve. Meerdere eenheden: de curve.',
+        'Dans une unité d’utilisation — salle de bains, cuisine ou logement, chambre d’hôtel ou d’hôpital — il est rare que plus de deux puisages coulent ensemble ; la DIN 1988-300 prend donc la pointe d’une conduite qui dessert une unité à partir de ses deux plus gros débits de calcul (douche à côté d’une baignoire, second lavabo, bidet et urinoir non comptés). L’outil ne connaît pas les pièces : il l’applique comme plancher là où un tronçon dessert exactement une unité d’un bâtiment résidentiel, de soins, d’hôtel ou d’hôpital (zone à 1 unité) : jamais moins que les deux plus gros, jamais moins que la courbe. Plusieurs unités : la courbe.',
+        'Dentro de una unidad de uso —baño, cocina o vivienda, habitación de hotel u hospital— rara vez funcionan más de dos puntos a la vez; por eso la DIN 1988-300 toma la punta de una tubería que sirve a una unidad de sus dos mayores caudales de cálculo (ducha junto a bañera, segundo lavabo, bidé y urinario no cuentan). La herramienta no conoce los recintos y lo aplica como mínimo donde un tramo sirve exactamente a una unidad de un edificio residencial, asistencial, hotelero u hospitalario (zona con 1 unidad): nunca menos que los dos mayores ni que la curva. Varias unidades: la curva.',
+        'W jednej jednostce użytkowej — łazience, kuchni czy mieszkaniu, pokoju hotelowym lub szpitalnym — rzadko działają więcej niż dwa punkty naraz, więc DIN 1988-300 bierze szczyt rury zasilającej jedną jednostkę z dwóch największych przepływów obliczeniowych (prysznic obok wanny, druga umywalka, bidet i pisuar się nie liczą). Narzędzie nie zna pomieszczeń, więc stosuje to jako dolną granicę tam, gdzie odcinek zasila dokładnie jedną jednostkę budynku mieszkalnego, opiekuńczego, hotelu lub szpitala (strefa z 1 jednostką): nigdy mniej niż dwa największe ani niż krzywa. Kilka jednostek: krzywa.') },
+    profile: { title: T7('Reading the pressure profile', 'Як читати профіль тиску', 'Das Druckprofil lesen', 'Het drukprofiel lezen', 'Lire le profil de pression', 'Leer el perfil de presión', 'Jak czytać profil ciśnienia'),
+      body: T7('The dashed line drops only with height and apparatus: it is what no pipe size can change. The solid line also drops with friction; the gap between the two is what bigger pipes can win back. The line must end above the minimum flow pressure of the worst fixture.',
+        'Штрихова лінія падає лише з висотою та арматурою: це те, чого не змінить жоден діаметр. Суцільна падає ще й через тертя; проміжок між ними — те, що можуть повернути більші труби. Лінія має закінчуватися вище мінімального тиску витікання найгіршого приладу.',
+        'Die gestrichelte Linie fällt nur mit Höhe und Apparaten: das ändert keine Rohrweite. Die durchgezogene fällt auch mit der Reibung; der Abstand dazwischen ist, was größere Rohre zurückholen können. Die Linie muss über dem Mindestfließdruck der ungünstigsten Entnahmestelle enden.',
+        'De stippellijn daalt alleen met hoogte en toestellen: dat verandert geen buismaat. De volle lijn daalt ook door wrijving; de ruimte ertussen is wat grotere buizen kunnen terugwinnen. De lijn moet eindigen boven de minimale stromingsdruk van het ongunstigste tappunt.',
+        'La ligne en tirets ne baisse qu’avec la hauteur et les appareils : aucun diamètre n’y change rien. La ligne pleine baisse aussi avec le frottement ; l’écart entre les deux est ce que des tubes plus gros peuvent regagner. La ligne doit finir au-dessus de la pression minimale du point le plus défavorable.',
+        'La línea discontinua solo baja con la altura y los equipos: ningún diámetro la cambia. La continua baja también con la fricción; el hueco entre ambas es lo que tuberías mayores pueden recuperar. La línea debe terminar por encima de la presión mínima del punto más desfavorable.',
+        'Linia przerywana spada tylko z wysokością i urządzeniami: tego nie zmieni żadna średnica. Ciągła spada też przez tarcie; odstęp między nimi to to, co mogą odzyskać większe rury. Linia musi kończyć się powyżej minimalnego ciśnienia wypływu najniekorzystniejszego punktu.') }
+  },
+  tour: [{ topic: 'peak', focus: '[data-dgu-field="f-btype"]' }, { topic: 'simultaneous', focus: '[data-dgu-field="f-zones"]' }, { topic: 'velocity', focus: '[data-dgu-field="f-sizing"]' },
+         { topic: 'pressure', focus: '.dgu-r-results' }, { topic: 'profile', focus: '.dgu-stage' }, { topic: 'booster' }, { topic: 'en806', focus: '[data-dgu-field="f-method"]' }] };
+
+/* ---- helpers ---- */
+function tx(k) { return I18N[k] || { en: k }; }
+function curLang() { return (window.DiagramUI && DiagramUI.current && DiagramUI.current.lang) || document.documentElement.lang || 'en'; }
+function pick(o) { var l = curLang(); return (o && o[l]) || (o && o.en) || String(o == null ? '' : o); }
+function S(k, subs) { var s = pick(tx(k)); if (subs) Object.keys(subs).sort(function (a, b) { return b.length - a.length; }).forEach(function (p) { s = s.split('%' + p).join(subs[p]); }); return s; }
+function U(k) { return function () { return pick(tx(k)); }; }
+var LOCALE = { en: 'en-GB', uk: 'uk-UA', de: 'de-DE', nl: 'nl-NL', fr: 'fr-FR', es: 'es-ES', pl: 'pl-PL' };
+function fmt(v, d) {
+  if (v == null || !isFinite(v)) return '—';
+  if (CORE && typeof CORE.fmt === 'function') { try { var r = CORE.fmt(v, curLang(), d); if (typeof r === 'string' && r) return r; } catch (e) { /* local */ } }
+  try { return new Intl.NumberFormat(LOCALE[curLang()] || 'en-GB', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v); } catch (e) { return v.toFixed(d); }
+}
+function clone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function opts(prefix, keys) { return keys.map(function (k) { return { value: k, label: tx(prefix + k) }; }); }
+function fxName(id) { var c = CORE && CORE.FIXTURES && CORE.FIXTURES[id]; if (FXN[id]) return pick(FXN[id]); if (c && c.name) return pick(c.name); return id; }
+
+/* ---- state ---- */
+var INP_KEYS = ['method', 'building_type', 'din_curve', 'circuit', 'material', 'service_material', 'sizing', 'T_cold_c', 'T_hot_c', 'p_supply_bar', 'p_static_bar', 'friction_allowance_bar',
+  'dp_meter_bar', 'dp_filter_bar', 'dp_backflow_bar', 'dp_heater_bar', 'service_length_m', 'service_zeta', 'main_length_m', 'main_zeta', 'meter_level_m',
+  'floor_height_m', 'riser_zeta', 'branch_length_m', 'branch_zeta', 'outlet_height_m'];
+function zoneRow(z) { return { id: String(z.id || ''), floor: z.floor == null ? 0 : z.floor, units: z.units == null ? 1 : z.units, fx: ENG ? ENG.formatFixtures(z.fixtures) : '', sim: !!z.simultaneous, q_cont_lps: z.q_cont_lps || 0 }; }
+function fromPreset(k) {
+  var p = ENG ? ENG.PRESETS[k]() : { zones: [] }, inp = {};
+  INP_KEYS.forEach(function (key) { inp[key] = p[key] === undefined ? null : p[key]; });
+  inp.vmax = clone(p.vmax || { service: null, main: null, riser: null, branch: null });
+  return { inp: inp, zones: (p.zones || []).map(zoneRow), preset: k, origin: 'preset' };
+}
+var DEFAULTS = fromPreset('apartments_24');
+var state = clone(DEFAULTS), last = null, ui = null, stage = null, note = '';
+
+function engineInput() {
+  var o = clone(state.inp); o.zones = state.zones.map(function (r) {
+    var p = ENG.parseFixtures(r.fx); return { id: r.id, floor: r.floor, units: r.units, fixtures: p.fixtures, simultaneous: !!r.sim, q_cont_lps: r.q_cont_lps || 0 }; });
+  return o;
+}
+function badFixtures() { var b = []; if (!ENG) return b; state.zones.forEach(function (r) { ENG.parseFixtures(r.fx).bad.forEach(function (x) { b.push(r.id + ': ' + x); }); }); return b; }
+function solve() { last = ENG ? ENG.solve(engineInput()) : null; return last; }
+
+/* ---- project file (plumbing/v1) ---- */
+var SCHEMA = 'tools.petrov.re/plumbing/v1';
+function emptyProject() {
+  if (CORE && CORE.project && typeof CORE.project.empty === 'function') { try { return CORE.project.empty(); } catch (e) { /* local */ } }
+  return { schema: SCHEMA, revision: 1, project: { name: '', region: 'be_flanders', building_type: null, persons: null, floors: null, floor_height_m: null, supply_pressure_bar: null, currency: 'EUR', water_price_eur_m3: null, year: 2026 }, zones: [], modules: {} };
+}
+var projDoc = null;
+function loadProject() {
+  if (!(CORE && CORE.project && typeof CORE.project.load === 'function')) return null;
+  try { var d = CORE.project.load(); return d && typeof d === 'object' ? d : null; } catch (e) { return null; }
+}
+function projectZones(d) { return (d && Array.isArray(d.zones) ? d.zones : []).filter(function (z) { return z && z.fixtures && typeof z.fixtures === 'object' && Object.keys(z.fixtures).some(function (k) { return ENG && ENG.has(ENG.FIXTURES, k) && z.fixtures[k] > 0; }); }); }
+function useProject(d) {
+  var zs = projectZones(d);
+  if (!zs.length) { note = S('import.nozones'); return false; }
+  state.zones = zs.map(function (z, i) { return zoneRow({ id: z.id || ('Z' + (i + 1)), floor: +z.floor || 0, units: 1, fixtures: z.fixtures }); });
+  var p = d.project || {};
+  if (p.building_type && ENG && ENG.BUILDING_TYPES.indexOf(p.building_type) >= 0) state.inp.building_type = p.building_type;
+  if (typeof p.supply_pressure_bar === 'number' && isFinite(p.supply_pressure_bar)) state.inp.p_supply_bar = p.supply_pressure_bar;
+  if (typeof p.floor_height_m === 'number' && isFinite(p.floor_height_m)) state.inp.floor_height_m = p.floor_height_m;
+  state.origin = 'project'; state.preset = null; note = '';
+  return true;
+}
+function moduleOut() {
+  if (!last || !last.valid) return null;
+  return { state: { inp: clone(state.inp), zones: clone(state.zones) },
+    results: { q_design_lps: last.totals.q_design_lps, sumQa_lps: last.totals.sumQa_lps, sumLU: last.totals.sumLU, worst: clone(last.worst), booster: clone(last.booster),
+      segments: last.segments.map(function (s) { return { id: s.id, kind: s.kind, q_lps: s.q_lps, material: s.material, size: s.size, id_mm: s.id_mm, v_ms: s.v_ms, dp_bar: s.dp_bar, p_end_bar: s.p_end_bar }; }) },
+    summary: { q_design_lps: last.totals.q_design_lps, service_pipe: last.segments[0].size, booster_needed: last.booster.needed, booster_head_m: last.booster.head_m, booster_q_lps: last.booster.q_lps, worst_margin_bar: last.worst.margin_bar },
+    handoff: ENG.handoff(last), updatedAt: new Date().toISOString() };
+}
+function projectWithModule(base) {
+  var d = clone(base || projDoc || emptyProject()); var m = moduleOut();
+  if (!d.modules || typeof d.modules !== 'object') d.modules = {};
+  if (m) {
+    if (CORE && CORE.project && typeof CORE.project.withModule === 'function') { try { var r = CORE.project.withModule(d, TOOL, m); if (r && typeof r === 'object') return r; } catch (e) { /* local */ } }
+    d.modules[TOOL] = m;
+  }
+  if ((!d.zones || !d.zones.length) && state.zones.length) d.zones = state.zones.map(function (r) { return { id: r.id, name: '', floor: r.floor, persons: null, fixtures: (function () { var f = ENG.parseFixtures(r.fx).fixtures, o = {}; Object.keys(f).forEach(function (k) { o[k] = f[k] * (r.units || 1); }); return o; })(), notes: '' }; });
+  return d;
+}
+function safeParse(text) {
+  if (text.length > 2 * 1024 * 1024) throw new Error('> 2 MB');
+  var nodes = 0, d = JSON.parse(text, function (k, v) { if (k === '__proto__' || k === 'constructor' || k === 'prototype') throw new Error('forbidden key ' + k); if (++nodes > 100000) throw new Error('> 100 000 nodes'); if (typeof v === 'number' && !isFinite(v)) throw new Error('non-finite number'); return v; });
+  (function depth(o, n) { if (n > 64) throw new Error('depth > 64'); if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { depth(o[k], n + 1); }); })(d, 0);
+  return d;
+}
+function importText(text) {
+  var d = null, err = null;
+  try {
+    if (CORE && CORE.project && typeof CORE.project.importJSON === 'function') { var r = CORE.project.importJSON(text); if (r && r.ok === false) err = (r.errors || []).slice(0, 3).map(function (e) { return e && e.msg ? (e.path || '') + ' ' + e.msg : String(e); }).join('; '); else d = (r && r.doc) ? r.doc : r; }
+    else { d = safeParse(text); if (!d || typeof d !== 'object' || d.schema !== SCHEMA) { err = 'schema ≠ ' + SCHEMA; d = null; } }
+  } catch (e) { err = String(e && e.message || e); }
+  if (!d) { note = S('import.bad', { e: err || '?' }); return false; }
+  projDoc = d;
+  var m = d.modules && d.modules[TOOL] && d.modules[TOOL].state;
+  if (m && m.inp && Array.isArray(m.zones)) { INP_KEYS.forEach(function (k) { if (m.inp[k] !== undefined) state.inp[k] = m.inp[k]; }); if (m.inp.vmax) state.inp.vmax = clone(m.inp.vmax); state.zones = m.zones.map(zoneRow); state.origin = 'project'; note = ''; return true; }
+  return useProject(d);
+}
+function download(name, type, text) {
+  var b = new Blob([text], { type: type }), u = URL.createObjectURL(b), el = document.createElement('a');
+  el.href = u; el.download = name; document.body.appendChild(el); el.click(); setTimeout(function () { URL.revokeObjectURL(u); el.remove(); }, 0);
+}
+function exportJSON() {
+  var d = projectWithModule(projDoc), text = null;
+  if (CORE && CORE.project && typeof CORE.project.exportJSON === 'function') { try { text = CORE.project.exportJSON(d); } catch (e) { text = null; } }
+  if (typeof text !== 'string') text = JSON.stringify(d, null, 1);
+  download('plumbing-project-' + (String((d.project && d.project.name) || 'plbsupply').replace(/[^\w.-]+/g, '_').slice(0, 40) || 'plbsupply') + '.json', 'application/json', text);
+}
+function saveProject() {
+  if (!(CORE && CORE.project && typeof CORE.project.save === 'function')) return;
+  try { var d = projectWithModule(loadProject() || projDoc); CORE.project.save(d); projDoc = d; note = S('saved'); } catch (e) { note = String(e && e.message || e); }
+}
+function csvCell(v) { var s = String(v == null ? '' : v); if (typeof v !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function segmentsCSV() {
+  var cols = ['segment', 'kind', 'parent', 'floor', 'length_m', 'dz_m', 'zeta', 'fixtures', 'sumQa_lps', 'sumLU', 'q_lps', 'material', 'size', 'id_mm', 'v_ms', 'vmax_ms', 'R_pa_m', 'dp_bar', 'dp_geo_bar', 'apparatus_bar', 'p_start_bar', 'p_end_bar', 'pmin_bar', 'margin_bar'];
+  var rows = last.segments.map(function (s) { return { segment: s.id, kind: s.kind, parent: s.parent || '', floor: s.floor == null ? '' : s.floor, length_m: +s.L_m.toFixed(3), dz_m: +s.dz_m.toFixed(3), zeta: s.zeta, fixtures: s.fixtures,
+    sumQa_lps: +s.sumQa_lps.toFixed(4), sumLU: s.sumLU, q_lps: +s.q_lps.toFixed(4), material: s.material, size: s.size, id_mm: s.id_mm, v_ms: +s.v_ms.toFixed(3), vmax_ms: s.vmax_ms, R_pa_m: +s.R_pa_m.toFixed(1),
+    dp_bar: +s.dp_bar.toFixed(4), dp_geo_bar: +s.dp_geo_bar.toFixed(4), apparatus_bar: s.apparatus_bar, p_start_bar: +s.p_start_bar.toFixed(4), p_end_bar: +s.p_end_bar.toFixed(4),
+    pmin_bar: s.pmin_bar == null ? '' : s.pmin_bar, margin_bar: s.margin_bar == null ? '' : +s.margin_bar.toFixed(4) }; });
+  if (CORE && typeof CORE.csv === 'function') { try { var c = CORE.csv(rows, cols); if (typeof c === 'string') return c; } catch (e) { /* local */ } }
+  return [cols.join(',')].concat(rows.map(function (r) { return cols.map(function (c) { return csvCell(r[c]); }).join(','); })).join('\r\n') + '\r\n';
+}
+
+/* ---- results ---- */
+function sizeTxt(s) { if (s.od_mm == null) return s.size; var d = function (x) { return fmt(x, Math.round(x) === x ? 0 : 1); }; return d(s.od_mm) + '×' + d(s.wall_mm); }
+function errText(e) {
+  var k = String(e).split(':'), code = k[0], rest = k.slice(1).join(':');
+  if (code === 'no_zones' || code === 'no_flow') return S('v.empty');
+  if (code === 'no_din_constants') return S('e.no_din_constants', { s: S('bt.' + rest) });
+  if (code === 'unknown_fixture' || code === 'duplicate_zone_id') return S('e.' + code, { s: rest });
+  if (code === 'range' || code === 'not_number' || code === 'fixture_count') return S('e.range', { s: rest });
+  if (code === 'core_missing') return S('nocore');
+  return S('e.other', { s: String(e) });
+}
+function segLabel(s) {
+  var t = s.kind === 'riser' ? S('kind.riser', { f: s.floor }) : s.kind === 'branch' ? S('kind.branch', { z: s.zone }) : S('kind.' + s.kind);
+  /* r4 Y2-1: in the cold + hot mode the risers and branches exist twice, the hot ones behind the water heater */
+  return /\.[CH]$/.test(s.id) ? t + ' (' + S(s.circuit === 'hot' ? 'kind.hot' : 'kind.cold') + ')' : t;
+}
+function warnText(w) {
+  var q = fmt(last.booster.q_lps, 2), h = fmt(last.booster.head_m, 1);
+  if (w.code === 'velocity') return S('w.velocity', { s: w.seg });
+  if (w.code === 'unit_floor') return S('w.unit_floor', { s: w.segs.join(', ') });
+  if (w.code === 'prv') return S('w.prv', { p: fmt(w.value, 1) });
+  if (w.code === 'en806_extrapolated') return S('w.en806_extrapolated', { v: fmt(w.value, 0) });
+  if (w.code === 'din_range') return S('w.din_range', { v: fmt(w.value, 0) });
+  if (w.code === 'din_curve_assumed') return S('w.din_curve_assumed', { v: S('bt.' + w.value) });
+  if (w.code === 'booster_static' || w.code === 'booster_pipes') return S('w.' + w.code, { q: q, h: h });
+  return S('w.' + w.code);
+}
+function compute() {
+  if (!ENG) return { verdict: { tone: 'bad', text: 'plb-supply.js did not load.' }, tiles: [] };
+  solve();
+  if (stage) stage.schedule();
+  mountBar();
+  var notes = [];
+  var badFx = badFixtures();
+  badFx.forEach(function (b) { notes.push(S('z.bad', { s: b })); });
+  /* D-PLB-7: an unknown fixture is an error, not a silently dropped line */
+  if (badFx.length) return { verdict: { tone: 'bad', text: S('v.invalid') }, tiles: [], notes: notes };
+  if (!last.valid) {
+    var empty = last.errors && last.errors.length === 1 && (last.errors[0] === 'no_zones' || last.errors[0] === 'no_flow');
+    if (!empty) { var seenE = {}; (last.errors || []).forEach(function (e) { var t = errText(e); if (!seenE[t]) { seenE[t] = 1; notes.push(t); } }); }
+    return { verdict: { tone: empty ? 'warn' : 'bad', text: empty ? S('v.empty') : S('v.invalid') }, tiles: [], notes: notes };
+  }
+  var t = last.totals, wst = last.worst, b = last.booster;
+  var subs = { q: fmt(t.q_design_lps, 2), z: wst.zone, f: fxName(wst.fixture), m: fmt(Math.abs(wst.margin_bar), 2), s: sizeTxt(last.segments[0]), h: fmt(b.head_m, 1) };
+  var unsized = last.unsized_segments || [];
+  var vt = unsized.length ? S('v.nosize', { s: unsized.join(', ') }) : S(b.needed ? 'v.boost' : 'v.ok', subs);
+  var tiles = [
+    { label: tx('t.q'), value: t.q_design_lps, precision: 2, unit: 'l/s', learn: 'peak', tone: 'ok' },
+    { label: tx('t.sum'), value: t.sumQa_lps, precision: 2, unit: 'l/s', learn: 'peak' },
+    { label: tx('t.div'), value: t.diversity == null ? null : t.diversity * 100, precision: 0, unit: '%', learn: 'peak' },
+    { label: tx('t.svc'), value: sizeTxt(last.segments[0]), learn: 'velocity' },
+    { label: tx('t.worst'), value: wst.margin_bar, precision: 2, unit: 'bar', tone: wst.margin_bar < 0 ? 'bad' : 'ok', learn: 'pressure', hint: wst.zone },
+    { label: tx('t.boost'), value: b.needed ? b.head_m : 0, precision: 1, unit: 'm H₂O', tone: b.needed ? 'warn' : 'ok', learn: 'booster' },
+    { label: tx('t.lu'), value: t.sumLU, precision: 0, learn: 'en806' },
+    { label: tx('t.up'), value: last.upsized_steps, precision: 0, learn: 'pressure' }
+  ];
+  var crit = last.critical_path;
+  var segRows = last.segments.map(function (s) {
+    return { cells: [{ text: s.id, title: segLabel(s) }, { value: s.q_lps, precision: 2 }, { text: sizeTxt(s) + (s.material !== state.inp.material ? ' PE' : '') + (s.v_ok ? '' : ' ✗'), title: 'di ' + fmt(s.id_mm, 1) + ' mm', tone: s.v_ok ? null : 'bad' },
+      { value: s.v_ms, precision: 2, tone: s.v_ok ? null : 'bad' }, { value: s.R_pa_m / 100, precision: 1 }, { value: s.dp_bar + s.apparatus_bar, precision: 2 },
+      { value: s.p_end_bar, precision: 2 }, s.margin_bar == null ? '' : { value: s.margin_bar, precision: 2, tone: s.margin_bar < 0 ? 'bad' : 'ok' }], weight: crit.indexOf(s.id) >= 0 };
+  });
+  var tables = [{ title: tx('tab.seg'), head: [tx('h.seg'), { label: S('h.q'), num: true }, tx('h.size'), { label: S('h.v'), num: true }, { label: S('h.R'), num: true }, { label: S('h.dp'), num: true }, { label: S('h.pend'), num: true }, { label: S('h.margin'), num: true }], rows: segRows }];
+  var br = last.segments.filter(function (s) { return s.kind === 'branch'; });
+  tables.push({ title: tx('tab.zones'), head: [tx('z.id'), { label: S('z.floor'), num: true }, { label: S('h.fixtures'), num: true }, { label: 'ΣQa l/s', num: true }, { label: 'ΣLU', num: true }, { label: S('h.q'), num: true }, tx('h.crit'), { label: S('h.pmin'), num: true }],
+    rows: br.map(function (s) { return { cells: [/\.[CH]$/.test(s.id) ? s.zone + ' · ' + S(s.circuit === 'hot' ? 'kind.hot' : 'kind.cold') : s.zone, { value: s.floor, precision: 0 }, { value: s.fixtures, precision: 0 }, { value: s.sumQa_lps, precision: 2 }, { value: s.sumLU, precision: 0 }, { value: s.q_lps, precision: 2 }, s.pmin_fixture ? fxName(s.pmin_fixture) : '—', { value: s.pmin_bar, precision: 1 }] }; }) });
+  if (last.upsized_steps > 0 && last.static_feasible) notes.push(S('w.upsized', { z: last.worst.zone, m: fmt(-last.initial_worst_margin_bar, 2), n: last.upsized_steps }));
+  last.warnings.forEach(function (w) { notes.push(warnText(w)); });
+  if (!CORE) notes.push(S('nocore'));
+  var pd = loadProject(), pz = projectZones(pd);
+  if (pz.length && state.origin !== 'project') notes.push(S('proj.has', { n: pz.length, src: (pd.project && pd.project.name) || 'plbfixtures' }));
+  if (note) notes.push(note);
+  compute.lastVerdict = vt;
+  return { verdict: { tone: unsized.length ? 'bad' : b.needed ? 'warn' : 'ok', text: vt }, tiles: tiles, tables: tables, notes: notes };
+}
+
+/* ---- chart: pressure profile along the critical path ---- */
+function profile() {
+  if (!last || !last.valid) return null;
+  var byId = {}; last.segments.forEach(function (s) { byId[s.id] = s; });
+  var x = 0, p = last.input.p_supply_bar, ps = p, pts = [{ x: 0, p: p, ps: ps, id: '' }];
+  last.critical_path.forEach(function (id) {
+    var s = byId[id];
+    if (s.apparatus_bar) { p -= s.apparatus_bar; ps -= s.apparatus_bar; pts.push({ x: x, p: p, ps: ps, id: id, app: true }); }
+    x += s.L_m; p -= s.dp_bar + s.dp_geo_bar; ps -= s.dp_geo_bar; pts.push({ x: x, p: p, ps: ps, id: id });
+  });
+  return { pts: pts, pmin: last.worst.pmin_bar, L: x };
+}
+function draw(ctx, w, h, opt) {
+  opt = opt || {};
+  ctx.clearRect(0, 0, w, h);
+  var pr = profile(); if (!pr) return;
+  var cs = getComputedStyle(document.documentElement), ink = opt.ink || cs.getPropertyValue('--ink').trim() || '#222', muted = opt.muted || cs.getPropertyValue('--muted').trim() || '#777',
+      line = opt.line || cs.getPropertyValue('--line').trim() || '#ccc', font = cs.getPropertyValue('--font').trim() || 'sans-serif', fs = opt.fs || 12;
+  var accent = '0,114,178', warm = '213,94,0';
+  var L = 52, R = 14, T = 14, B = 44, W = w - L - R, H = h - T - B; if (W < 40 || H < 40) return;
+  var pmax = Math.max.apply(null, pr.pts.map(function (q) { return Math.max(q.p, q.ps); })), pmin = Math.min(0, Math.min.apply(null, pr.pts.map(function (q) { return q.p; })));
+  pmax = Math.ceil(pmax + 0.2); pmin = Math.floor(pmin);
+  function X(v) { return L + v / (pr.L || 1) * W; } function Y(v) { return T + (pmax - v) / (pmax - pmin) * H; }
+  ctx.font = '400 ' + fs + 'px ' + font; ctx.textBaseline = 'middle'; ctx.lineWidth = 1;
+  for (var g = pmin; g <= pmax; g += (pmax - pmin > 8 ? 2 : 1)) { ctx.strokeStyle = line; ctx.beginPath(); ctx.moveTo(L, Y(g) + 0.5); ctx.lineTo(L + W, Y(g) + 0.5); ctx.stroke(); ctx.fillStyle = muted; ctx.textAlign = 'right'; ctx.fillText(fmt(g, 0), L - 6, Y(g)); }
+  ctx.save(); ctx.translate(12, T + H / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillStyle = muted; ctx.fillText(S('u.bar'), 0, 0); ctx.restore();
+  ctx.textAlign = 'center'; ctx.fillStyle = muted; ctx.fillText(S('chart.x'), L + W / 2, h - 10);
+  var step = pr.L > 120 ? 20 : pr.L > 50 ? 10 : 5;
+  for (var xm = 0; xm <= pr.L + 1e-9; xm += step) ctx.fillText(fmt(xm, 0), X(xm), T + H + 12);
+  /* minimum flow pressure */
+  ctx.strokeStyle = 'rgb(' + warm + ')'; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(L, Y(pr.pmin)); ctx.lineTo(L + W, Y(pr.pmin)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = 'rgb(' + warm + ')'; ctx.textAlign = 'left'; ctx.fillText(S('chart.pmin') + ' ' + fmt(pr.pmin, 1), L + 4, Y(pr.pmin) - 8);
+  /* friction gap */
+  ctx.fillStyle = 'rgba(' + accent + ',0.12)'; ctx.beginPath();
+  pr.pts.forEach(function (q, i) { if (i === 0) ctx.moveTo(X(q.x), Y(q.ps)); else ctx.lineTo(X(q.x), Y(q.ps)); });
+  for (var i = pr.pts.length - 1; i >= 0; i--) ctx.lineTo(X(pr.pts[i].x), Y(pr.pts[i].p)); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = muted; ctx.setLineDash([6, 4]); ctx.lineWidth = 1.5; ctx.beginPath();
+  pr.pts.forEach(function (q, j) { if (j === 0) ctx.moveTo(X(q.x), Y(q.ps)); else ctx.lineTo(X(q.x), Y(q.ps)); }); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgb(' + accent + ')'; ctx.lineWidth = 2.5; ctx.beginPath();
+  pr.pts.forEach(function (q, j) { if (j === 0) ctx.moveTo(X(q.x), Y(q.p)); else ctx.lineTo(X(q.x), Y(q.p)); }); ctx.stroke();
+  /* node labels */
+  ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.lineWidth = 1;
+  var lastX = -1e9;
+  pr.pts.forEach(function (q) { if (!q.id || q.app) return; var xx = X(q.x); ctx.beginPath(); ctx.arc(xx, Y(q.p), 3, 0, 2 * Math.PI); ctx.fill(); if (!opt.coarse && xx - lastX > 34) { ctx.fillText(q.id, xx, Y(q.p) - 10); lastX = xx; } });
+  var end = pr.pts[pr.pts.length - 1];
+  ctx.textAlign = 'right'; ctx.fillStyle = end.p < pr.pmin ? 'rgb(' + warm + ')' : 'rgb(' + accent + ')';
+  ctx.fillText(fmt(end.p, 2) + ' ' + S('u.bar'), X(end.x) - 4, Y(end.p) + 14);
+}
+function a11yText() {
+  var pr = profile(); if (!pr) return '';
+  return pr.pts.filter(function (q) { return q.id; }).map(function (q) { return q.id + ': ' + fmt(q.p, 2) + ' bar'; }).join('; ') + '. ' + S('chart.pmin') + ' ' + fmt(pr.pmin, 1) + ' bar';
+}
+function reportCanvas() { var c = document.createElement('canvas'), w = 720, h = 380; c.width = w * 2; c.height = h * 2; var g = c.getContext('2d'); g.scale(2, 2); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+  draw(g, w, h, { ink: '#1a1a1a', muted: '#555', line: '#ccc', fs: 12 }); return c; }
+
+/* ---- record ---- */
+function record() {
+  if (!last || !last.valid) return null;
+  return {
+    inputs: { inp: clone(state.inp), zones: clone(state.zones) },
+    outputs: { totals: clone(last.totals), worst: clone(last.worst), booster: clone(last.booster), upsized_steps: last.upsized_steps, static_feasible: last.static_feasible,
+      critical_path: last.critical_path.slice(), p_static_lowest_bar: last.p_static_lowest_bar, prv_needed: last.prv_needed,
+      segments: last.segments.map(function (s) { return { id: s.id, kind: s.kind, q_lps: s.q_lps, size: s.size, material: s.material, id_mm: s.id_mm, v_ms: s.v_ms, dp_bar: s.dp_bar, p_end_bar: s.p_end_bar, margin_bar: s.margin_bar }; }) },
+    units: { q_lps: 'l/s', p: 'bar (gauge)', head_m: 'm water column', length: 'm', v: 'm/s', R: 'Pa/m', id_mm: 'mm' },
+    model: { version: ENG.version, equations: [S('footer')], ranges: [], notes: [S('notice.b')] },
+    warnings: last.warnings.map(warnText)
+  };
+}
+function reportProfile(rec, ctx) {
+  var fig = null; try { fig = ctx.figure(reportCanvas(), { caption: S('chart.caption'), alt: a11yText() }); } catch (e) { fig = null; }
+  return { title: S('rep.title'),
+    project: [{ label: S('f.btype'), text: S('bt.' + state.inp.building_type) }, { label: S('f.ps'), text: fmt(state.inp.p_supply_bar, 1) + ' bar' }, { label: S('f.mat'), text: S('mat.' + state.inp.material) }],
+    executive: { text: [compute.lastVerdict || ''], results: [{ label: S('t.q'), text: fmt(last.totals.q_design_lps, 2) + ' l/s' }, { label: S('t.worst'), text: fmt(last.worst.margin_bar, 2) + ' bar' }, { label: S('t.boost'), text: fmt(last.booster.head_m, 1) + ' m' }] },
+    results: last.segments.map(function (s) { return { label: s.id, text: sizeTxt(s) + ' · ' + fmt(s.q_lps, 2) + ' l/s · ' + fmt(s.v_ms, 2) + ' m/s · p ' + fmt(s.p_end_bar, 2) + ' bar' }; }),
+    checks: last.segments.filter(function (s) { return s.kind === 'branch'; }).map(function (s) { return { status: s.margin_bar >= 0 ? 'pass' : 'attention', title: s.zone + ': p ≥ p min', actual: fmt(s.p_end_bar, 2) + ' / ' + fmt(s.pmin_bar, 1) + ' bar' }; }),
+    figures: fig ? [fig] : [],
+    method: { equations: [S('footer')], notes: [S('notice.b')], references: ['DIN 1988-300:2012-05', 'EN 806-3:2006', 'EN 806-2:2005', 'Colebrook (1939)'] } };
+}
+
+/* ---- project bar of plumbing-core.js ---- */
+var barBox = null, bar = null, barSig = '';
+function mountBar() {
+  if (!barBox || !CORE || !CORE.ui || typeof CORE.ui.projectBar !== 'function') return;
+  var sig = curLang();
+  if (bar && sig === barSig && barBox.contains(bar.element)) return;
+  barSig = sig;
+  if (bar && barBox.contains(bar.element) && typeof bar.refresh === 'function') { try { bar.refresh(); return; } catch (e) { /* rebuild below */ } }
+  try { if (bar && bar.destroy) bar.destroy(); } catch (e) { /* rebuilt */ }
+  try {
+    bar = CORE.ui.projectBar({ mount: barBox, toolId: TOOL, consumes: ['plbfixtures'], lang: curLang, getDoc: function () { return projectWithModule(loadProject() || projDoc); },
+      onChange: function (d) { projDoc = d; if (ui) { ui.sync(); ui.run(); } } });
+  } catch (e) { bar = null; }
+  if (barBox) Array.prototype.forEach.call(barBox.querySelectorAll('input[type=file]'), function (f) { if (!f.getAttribute('aria-label')) f.setAttribute('aria-label', S('a.import')); });
+}
+
+function examples() {
+  return PRESET_IDS.map(function (k) { return { id: k, label: PL[k][0], note: PL[k][1], apply: function (t) { var x = fromPreset(k); t.inp = x.inp; t.zones = x.zones; t.preset = k; t.origin = 'preset'; note = ''; } }; });
+}
+function nf(id, key, label, unit, o) { return Object.assign({ id: id, key: key, type: 'number', label: tx(label), unit: unit ? U(unit) : undefined }, o || {}); }
+
+function buildInterface() {
+  var hasBar = !!(CORE && CORE.ui && typeof CORE.ui.projectBar === 'function');
+  var hasStore = !!(CORE && CORE.project && typeof CORE.project.load === 'function');
+  var ioActions = [
+    { label: tx('a.csv'), run: function () { if (last && last.valid) download('plbsupply-segments.csv', 'text/csv', segmentsCSV()); } },
+  ].concat(hasBar ? [] : [
+    { label: tx('a.json'), run: exportJSON },
+    { label: tx('a.import'), run: function () { ui.importAction({ label: tx('a.import'), accept: '.json,application/json', as: 'text', quiet: true,
+        run: function (text) { importText(String(text)); ui.sync(); ui.run(); } }).run(); } }
+  ], hasStore ? [
+    { label: tx('a.use'), run: function () { useProject(loadProject()); ui.sync(); ui.run(); } },
+    { label: tx('a.save'), run: function () { saveProject(); ui.sync(); ui.run(); } }
+  ] : []);
+  var MATS = ['copper', 'stainless', 'multilayer', 'pe100', 'galvanised'];
+  ui = DiagramUI.app({
+    id: TOOL, mount: '#app', layout: 'calculator', compute: 'live', state: state, defaults: DEFAULTS,
+    subtitle: tx('subtitle'), learn: LEARN, footer: tx('footer'),
+    notices: [{ id: 'genre', tone: 'warn', sticky: false, title: tx('notice.t'), text: tx('notice.b') }],
+    panels: [
+      { id: 'projbar', slot: 'inputs', visible: hasBar, render: hasBar ? function (box) { barBox = box; mountBar(); } : undefined },
+      { id: 'basis', slot: 'inputs', title: tx('p.basis'), learn: 'peak', fields: [
+        { id: 'f-method', key: 'inp.method', type: 'segmented', label: tx('f.method'), options: opts('m.', ['din', 'en806']), learn: 'en806' },
+        { id: 'f-btype', key: 'inp.building_type', type: 'select', label: tx('f.btype'), options: opts('bt.', ['residential', 'care_home', 'hotel', 'hospital', 'office', 'school', 'sports', 'retail', 'restaurant', 'industrial']), learn: 'peak' },
+        { id: 'f-dincurve', key: 'inp.din_curve', type: 'select', label: tx('f.dincurve'), hint: tx('f.dincurve.h'), options: [{ value: '', label: tx('dc.none') }].concat(opts('bt.', ['residential', 'care_home', 'hotel', 'hospital', 'office', 'school'])), learn: 'peak' },
+        { id: 'f-circuit', key: 'inp.circuit', type: 'segmented', label: tx('f.circuit'), options: opts('c.', ['total', 'cold', 'hot']), learn: 'circuits' },
+        { id: 'f-sizing', key: 'inp.sizing', type: 'segmented', label: tx('f.sizing'), options: opts('s.', ['pressure', 'velocity']), learn: 'velocity' } ] },
+      { id: 'supply', slot: 'inputs', title: tx('p.supply'), learn: 'pressure', fields: [
+        nf('f-ps', 'inp.p_supply_bar', 'f.ps', 'u.bar', { min: 0.5, max: 16, step: 0.1, hint: tx('f.ps.h') }),
+        nf('f-pstat', 'inp.p_static_bar', 'f.pstat', 'u.bar', { min: 0, max: 25, step: 0.1, hint: tx('f.pstat.h') }),
+        nf('f-meter', 'inp.dp_meter_bar', 'f.meter', 'u.bar', { min: 0, max: 2, step: 0.05 }),
+        nf('f-filter', 'inp.dp_filter_bar', 'f.filter', 'u.bar', { min: 0, max: 2, step: 0.05 }),
+        nf('f-bf', 'inp.dp_backflow_bar', 'f.bf', 'u.bar', { min: 0, max: 2, step: 0.05 }),
+        nf('f-heater', 'inp.dp_heater_bar', 'f.heater', 'u.bar', { min: 0, max: 2, step: 0.05, visible: function () { return state.inp.circuit === 'hot' || state.inp.circuit === 'total'; } }),
+        nf('f-allow', 'inp.friction_allowance_bar', 'f.allow', 'u.bar', { min: 0, max: 5, step: 0.1, hint: tx('f.allow.h'), learn: 'booster' }) ] },
+      { id: 'zones', slot: 'inputs', title: tx('p.zones'), learn: 'simultaneous', fields: [
+        { id: 'f-zones', key: 'zones', type: 'list', label: tx('f.zones'), minRows: 0, maxRows: 120, reorder: true, addLabel: tx('z.add'),
+          row: [{ key: 'id', type: 'text', label: tx('z.id'), width: '64px' },
+                { key: 'floor', type: 'number', label: tx('z.floor'), min: -5, max: 300, step: 1, width: '70px' },
+                { key: 'units', type: 'number', label: tx('z.units'), min: 1, max: 500, step: 1, width: '70px' },
+                { key: 'fx', type: 'text', label: tx('z.fx') },
+                { key: 'sim', type: 'toggle', label: tx('z.sim'), width: '80px' },
+                { type: 'derived', label: tx('z.qa'), width: '64px', precision: 2, value: function (row) { if (!ENG) return null; var f = ENG.parseFixtures(row.fx).fixtures, q = 0; Object.keys(f).forEach(function (k) { var x = ENG.fixtureFlow(k, state.inp.circuit); q += x ? x.qa * f[k] : 0; }); return q * (row.units || 1); },
+                  tone: function (row) { return ENG && ENG.parseFixtures(row.fx).bad.length ? 'bad' : ''; } }],
+          newRow: function (rows) { var n = rows.length + 1, id = 'Z' + n; while (rows.some(function (r) { return r.id === id; })) id = 'Z' + (++n); return { id: id, floor: 0, units: 1, fx: 'wc_cistern:1, basin:1', sim: false, q_cont_lps: 0 }; } },
+        { type: 'note', label: function () { return S('z.note') + (ENG ? ENG.FIXTURE_IDS.map(function (k) { return k + ' (' + fxName(k) + ')'; }).join(', ') : ''); } } ] },
+      { id: 'geo', slot: 'inputs', title: tx('p.geo'), learn: 'velocity', fields: [
+        { id: 'f-mat', key: 'inp.material', type: 'select', label: tx('f.mat'), options: opts('mat.', MATS) },
+        { id: 'f-smat', key: 'inp.service_material', type: 'select', label: tx('f.smat'), options: opts('mat.', MATS) },
+        nf('f-lsvc', 'inp.service_length_m', 'f.lsvc', 'u.m', { min: 0, max: 500, step: 1 }),
+        nf('f-zsvc', 'inp.service_zeta', 'f.zsvc', null, { min: 0, max: 100, step: 0.5 }),
+        nf('f-lmain', 'inp.main_length_m', 'f.lmain', 'u.m', { min: 0, max: 500, step: 1 }),
+        nf('f-zmain', 'inp.main_zeta', 'f.zmain', null, { min: 0, max: 100, step: 0.5 }),
+        nf('f-zmeter', 'inp.meter_level_m', 'f.zmeter', 'u.m', { min: -10, max: 10, step: 0.1 }),
+        nf('f-fh', 'inp.floor_height_m', 'f.fh', 'u.m', { min: 2, max: 8, step: 0.1 }),
+        nf('f-zriser', 'inp.riser_zeta', 'f.zriser', null, { min: 0, max: 50, step: 0.5 }),
+        nf('f-lbr', 'inp.branch_length_m', 'f.lbr', 'u.m', { min: 0, max: 200, step: 1 }),
+        nf('f-zbr', 'inp.branch_zeta', 'f.zbr', null, { min: 0, max: 100, step: 0.5 }),
+        nf('f-hout', 'inp.outlet_height_m', 'f.hout', 'u.m', { min: 0, max: 3, step: 0.1 }) ] },
+      { id: 'limits', slot: 'inputs', title: tx('p.limits'), collapsible: true, collapsed: true, learn: 'velocity', fields: [
+        nf('f-vsvc', 'inp.vmax.service', 'f.vsvc', 'u.ms', { min: 0.3, max: 5, step: 0.1, hint: tx('f.v.h'), placeholder: 'DIN' }),
+        nf('f-vmain', 'inp.vmax.main', 'f.vmain', 'u.ms', { min: 0.3, max: 5, step: 0.1, placeholder: 'DIN' }),
+        nf('f-vriser', 'inp.vmax.riser', 'f.vriser', 'u.ms', { min: 0.3, max: 5, step: 0.1, placeholder: 'DIN' }),
+        nf('f-vbr', 'inp.vmax.branch', 'f.vbr', 'u.ms', { min: 0.3, max: 5, step: 0.1, placeholder: 'DIN' }),
+        nf('f-tc', 'inp.T_cold_c', 'f.tc', 'u.c', { min: 2, max: 30, step: 1 }),
+        nf('f-th', 'inp.T_hot_c', 'f.th', 'u.c', { min: 40, max: 80, step: 1 }) ] },
+      { id: 'io', slot: 'inputs', title: tx('p.io'), collapsible: true, actionsAlign: 'end', actions: ioActions }
+    ],
+    on: { compute: function () { return compute(); }, rebuild: function (app) { stage = (app && app.stages && app.stages[0]) || stage; barSig = ''; } }
+  });
+  ui.examples(examples());
+  stage = ui.stage({ caption: tx('chart.caption'), minHeight: 340, a11y: a11yText,
+    render: function (size, st) { var c = st.canvas(); draw(c, size.w, size.h, { coarse: size.density === 'coarse' }); if (st.cv) { st.cv.setAttribute('role', 'img'); st.cv.setAttribute('aria-label', S('chart.caption') + '. ' + a11yText()); } } });
+  if (stage && stage.legend) stage.legend({ items: [{ label: tx('chart.flow'), color: 'rgb(0,114,178)' }, { label: tx('chart.static'), color: '#888' }, { label: tx('chart.pmin'), color: 'rgb(213,94,0)' }] });
+  window.__plbsupply = { state: state, ui: ui, get last() { return last; }, segmentsCSV: segmentsCSV, fromPreset: fromPreset, projectWithModule: projectWithModule, importText: importText, strings: function () { return { I18N: I18N, FXN: FXN, PL: PL, LEARN: LEARN }; } };
+  ui.ready();
+}
+function degrade() {
+  var h = document.createElement('h1'); h.textContent = 'Drinking Water Pipe Sizing';
+  var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The record and the export are still available from the bar at the bottom of the page.';
+  var m = document.getElementById('app'); m.appendChild(h); m.appendChild(p);
+  if (ENG) solve();
+}
+function installData() {
+  if (!window.Diagram) return;
+  Diagram.init({ id: TOOL, file: 'plbsupply.html',
+    state: { serialize: function () { return state; },
+             deserialize: function (o) { if (o && o.inp && Array.isArray(o.zones)) { Object.keys(state).forEach(function (k) { delete state[k]; }); Object.assign(state, clone(DEFAULTS), clone(o)); } if (ui) { ui.sync(); ui.run(); } else if (ENG) solve(); } },
+    record: record, report: { profile: reportProfile }, handoff: { provides: [], accepts: [] } });
+}
+projDoc = loadProject();
+if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface(); else degrade();
+installData();
+});
+</script>
+</body>
+</html>

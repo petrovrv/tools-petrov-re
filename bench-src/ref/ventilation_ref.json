@@ -1,0 +1,3115 @@
+{
+ "reference": "Buoyancy-driven opening flow, neutral pressure level and the steady single-zone sensible heat balance implemented from CIBSE AM10 and ASHRAE Handbook - Fundamentals chapters 16 and 18, solved with scipy.optimize.brentq; cross-checked against the analytic two-opening stack formula.",
+ "citations": [
+  "CIBSE Applications Manual AM10, \"Natural ventilation in non-domestic buildings\", 2005, section 5 (stack-driven flow, neutral pressure level, discharge coefficient)",
+  "ASHRAE Handbook - Fundamentals (2021), chapter 16 \"Ventilation and Infiltration\", thermal (stack) pressure difference dp = g (rho_o - rho_i) (z_NPL - z) and the orifice relation Q = Cd A sqrt(2 dp / rho)",
+  "ASHRAE Handbook - Fundamentals (2021), chapter 18 \"Nonresidential Cooling and Heating Load Calculations\", sol-air temperature Te = To + alpha It/ho - eps dR/ho",
+  "W.G. Brown and K.R. Solvason, \"Natural convection through rectangular openings in partitions\", Int. J. Heat Mass Transfer 5:859-868, 1962 (orifice/discharge coefficient convention)",
+  "scipy 1.17.1"
+ ],
+ "cases": [
+  {
+   "id": "closed_form_0",
+   "group": "stack_closed_form",
+   "note": "ASHRAE/CIBSE two-opening stack closed form against the network solver of this file",
+   "inputs": {
+    "A1": 2.0,
+    "z1": 0.5,
+    "A2": 2.0,
+    "z2": 6.0,
+    "T_in": 30.0,
+    "T_out": 10.0
+   },
+   "expected": {
+    "z_neutral_closed_form": 3.1561913696060033,
+    "z_neutral_solver": 3.1561913696059767,
+    "mdot_closed_form": 3.005046808661008,
+    "mdot_solver": 3.0050468086610223,
+    "effective_area": 1.414213562373095,
+    "q_boussinesq": 2.494188366935444,
+    "volume_flow_in_m3s": 2.4105089371977515
+   }
+  },
+  {
+   "id": "closed_form_1",
+   "group": "stack_closed_form",
+   "note": "ASHRAE/CIBSE two-opening stack closed form against the network solver of this file",
+   "inputs": {
+    "A1": 1.0,
+    "z1": 0.2,
+    "A2": 4.0,
+    "z2": 9.0,
+    "T_in": 26.0,
+    "T_out": 5.0
+   },
+   "expected": {
+    "z_neutral_closed_form": 8.445732753629292,
+    "z_neutral_solver": 8.445732753629287,
+    "mdot_closed_form": 2.77985809255086,
+    "mdot_solver": 2.779858092550871,
+    "effective_area": 0.9701425001453319,
+    "q_boussinesq": 2.2349282819065337,
+    "volume_flow_in_m3s": 2.190496832366833
+   }
+  },
+  {
+   "id": "closed_form_2",
+   "group": "stack_closed_form",
+   "note": "ASHRAE/CIBSE two-opening stack closed form against the network solver of this file",
+   "inputs": {
+    "A1": 3.0,
+    "z1": 1.0,
+    "A2": 1.5,
+    "z2": 5.0,
+    "T_in": 40.0,
+    "T_out": 32.0
+   },
+   "expected": {
+    "z_neutral_closed_form": 1.7835660407639224,
+    "z_neutral_solver": 1.7835660407639222,
+    "mdot_closed_form": 1.4136320667636844,
+    "mdot_solver": 1.4136320667636841,
+    "effective_area": 1.3416407864998738,
+    "q_boussinesq": 1.2427663184487834,
+    "volume_flow_in_m3s": 1.222054856312775
+   }
+  },
+  {
+   "id": "closed_form_3",
+   "group": "stack_closed_form",
+   "note": "ASHRAE/CIBSE two-opening stack closed form against the network solver of this file",
+   "inputs": {
+    "A1": 0.5,
+    "z1": 0.0,
+    "A2": 0.5,
+    "z2": 10.0,
+    "T_in": 22.0,
+    "T_out": -5.0
+   },
+   "expected": {
+    "z_neutral_closed_form": 4.760340848570921,
+    "z_neutral_solver": 4.76034084857092,
+    "mdot_closed_form": 1.25052862046421,
+    "mdot_solver": 1.2505286204642103,
+    "effective_area": 0.35355339059327373,
+    "q_boussinesq": 0.9966550438375797,
+    "volume_flow_in_m3s": 0.9499754363801137
+   }
+  },
+  {
+   "id": "room_default",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 40.85288344386778,
+    "temperature_bottom": 38.346221379855876,
+    "temperature_top": 43.35954550787969,
+    "temperature_at_probe": 39.28621965386034,
+    "vertical_gradient": 0.6266655160029773,
+    "stratification_span": 5.013324128023818,
+    "neutral_pressure_level": 2.602407912394372,
+    "neutral_bracketed": true,
+    "mass_flow_in": 3.5229502594044653,
+    "mass_flow_out": 3.5229502594044653,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 11281.934841124303,
+    "air_changes_per_hour": 1.7628023189256723,
+    "inflow_volume": 10963.856060845716,
+    "outflow_volume": 11281.934841123502,
+    "max_opening_velocity": 1.1393274852370838,
+    "heat_source": 40000.0,
+    "roof_gain": 715.8794000143232,
+    "wall_gain": -9371.670034836123,
+    "envelope_gain": -8655.7906348218,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -31344.209365176757,
+    "Q_vent_total": 31344.20936517675,
+    "balance_residual": 1.4406396076083183e-09,
+    "closure_residual": 1.4515535440295935e-09,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.5075859287428572,
+      "direction": "in",
+      "volume_flow_m3h": 10963.856060845716,
+      "mdot": 3.5229502594044653,
+      "dp": 0.3527021655492515
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.7269793680333405,
+      "direction": "out",
+      "volume_flow_m3h": 5129.56642084325,
+      "mdot": 1.6017826381224936,
+      "dp": -0.703093183183835
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.1393274852370838,
+      "direction": "out",
+      "volume_flow_m3h": 6152.368420280252,
+      "mdot": 1.9211676212817215,
+      "dp": -1.7268947334704643
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.999997493325,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00024478076348608533
+     },
+     "temperature_bottom": {
+      "abs": 0.01134717942083796,
+      "rel": 0.0002959138870146639
+     },
+     "temperature_top": {
+      "abs": 0.00865514056368255,
+      "rel": 0.0001996132676738888
+     },
+     "temperature_at_probe": {
+      "abs": 0.010841987138022091,
+      "rel": 0.00027597430431198887
+     },
+     "vertical_gradient": {
+      "abs": 0.00033679485520998753,
+      "rel": 0.0005374395855673467
+     },
+     "stratification_span": {
+      "abs": 0.0026943588416799003,
+      "rel": 0.0005374395855673467
+     },
+     "neutral_pressure_level": {
+      "abs": 2.6211318451707655e-05,
+      "rel": 1.0071948493113697e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.0018923559009524915,
+      "rel": 0.0005371508995623411
+     },
+     "mass_flow_out": {
+      "abs": 0.0018923559009524915,
+      "rel": 0.0005371508995623411
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 6.419202442182723,
+      "rel": 0.0005689806343131668
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0010030003815910682,
+      "rel": 0.0005689806343131769
+     },
+     "inflow_volume": {
+      "abs": 5.889245145754103,
+      "rel": 0.0005371508995622318
+     },
+     "outflow_volume": {
+      "abs": 6.419202442186361,
+      "rel": 0.0005689806343135296
+     },
+     "max_opening_velocity": {
+      "abs": 0.0006464248004565132,
+      "rel": 0.00056737400688793
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999996498,
+      "rel": 0.0024585146603805555
+     },
+     "wall_gain": {
+      "abs": 28.799999999995634,
+      "rel": 0.003073091550699186
+     },
+     "envelope_gain": {
+      "abs": 30.559999999995853,
+      "rel": 0.003530584471053926
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 52.25029209333661,
+      "rel": 0.001666983891174055
+     },
+     "Q_vent_total": {
+      "abs": 52.25029209333297,
+      "rel": 0.0016669838911739395
+     },
+     "balance_residual": {
+      "abs": 82.810292093327,
+      "rel": 57481615565.74495
+     },
+     "closure_residual": {
+      "abs": 82.810292093327,
+      "rel": 57049422967.50626
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.356966095045209e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_cold_outside",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": -5.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "winter",
+    "hour": 10.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 1.5207036079481977,
+    "temperature_bottom": -0.8756665962133332,
+    "temperature_top": 3.9170738121097286,
+    "temperature_at_probe": 0.02297223034724083,
+    "vertical_gradient": 0.5990925510403827,
+    "stratification_span": 4.792740408323062,
+    "neutral_pressure_level": 2.606175207483062,
+    "neutral_bracketed": true,
+    "mass_flow_in": 3.685092459180224,
+    "mass_flow_out": 3.685092459180224,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 10322.958190324447,
+    "air_changes_per_hour": 1.6129622172381948,
+    "inflow_volume": 10077.890369722703,
+    "outflow_volume": 10322.958190323754,
+    "max_opening_velocity": 1.0427245655771797,
+    "heat_source": 40000.0,
+    "roof_gain": -643.7680834914784,
+    "wall_gain": -15206.689243838304,
+    "envelope_gain": -15850.457327329783,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -24149.54267267018,
+    "Q_vent_total": 24149.542672670177,
+    "balance_residual": 3.637978807091713e-11,
+    "closure_residual": 4.001776687800884e-11,
+    "solar_irradiance": 159.05168923844835,
+    "sin_beta": 0.1937581542076382,
+    "sol_air_roof": -2.1370695937079294,
+    "sol_air_wall": -3.759396823940103,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.4665689985982733,
+      "direction": "in",
+      "volume_flow_m3h": 10077.890369722703,
+      "mdot": 3.685092459180224,
+      "dp": 0.33912226793328704
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.6650007846098333,
+      "direction": "out",
+      "volume_flow_m3h": 4692.245536206984,
+      "mdot": 1.6750391044211874,
+      "dp": -0.672565100043619
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.0427245655771797,
+      "direction": "out",
+      "volume_flow_m3h": 5630.712654116771,
+      "mdot": 2.0100533547587895,
+      "dp": -1.653595275051528
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.99999760363,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.010000000000000009,
+      "rel": 0.006575903382969192
+     },
+     "temperature_bottom": {
+      "abs": 0.011763415423490242,
+      "rel": 0.01343366924621662
+     },
+     "temperature_top": {
+      "abs": 0.008240694697488227,
+      "rel": 0.002103788463728184
+     },
+     "temperature_at_probe": {
+      "abs": 0.01110213463968135,
+      "rel": 0.48328501289883746
+     },
+     "vertical_gradient": {
+      "abs": 0.0004408538558725583,
+      "rel": 0.0007358693662723272
+     },
+     "stratification_span": {
+      "abs": 0.0035268308469804666,
+      "rel": 0.0007358693662723272
+     },
+     "neutral_pressure_level": {
+      "abs": 3.0031491617954487e-05,
+      "rel": 1.1523205167375403e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.002709752629373785,
+      "rel": 0.0007353282609296021
+     },
+     "mass_flow_out": {
+      "abs": 0.002709752629373785,
+      "rel": 0.0007353282609296021
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 7.96631686771434,
+      "rel": 0.0007717087215543553
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0012447370105803657,
+      "rel": 0.0007717087215543554
+     },
+     "inflow_volume": {
+      "abs": 7.410557599409003,
+      "rel": 0.0007353282609297632
+     },
+     "outflow_volume": {
+      "abs": 7.966316867716159,
+      "rel": 0.0007717087215545833
+     },
+     "max_opening_velocity": {
+      "abs": 0.0008027564916943675,
+      "rel": 0.0007698643708945491
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.759999999999991,
+      "rel": 0.0027339037848142845
+     },
+     "wall_gain": {
+      "abs": 28.80000000000291,
+      "rel": 0.0018939033696419203
+     },
+     "envelope_gain": {
+      "abs": 30.56000000000131,
+      "rel": 0.0019280200797303772
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 54.80490317959993,
+      "rel": 0.0022693971443865954
+     },
+     "Q_vent_total": {
+      "abs": 54.80490317960357,
+      "rel": 0.0022693971443867463
+     },
+     "balance_residual": {
+      "abs": 85.36490317960124,
+      "rel": 2346492591248.6
+     },
+     "closure_residual": {
+      "abs": 85.36490317960852,
+      "rel": 2133175082953.4546
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.762600732035935e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_big_source",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 150000.0,
+      "z": 4.0
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 52.3834736229227,
+    "temperature_bottom": 43.7388160281295,
+    "temperature_top": 61.0281312177159,
+    "temperature_at_probe": 46.98056262617695,
+    "vertical_gradient": 2.1611643986983005,
+    "stratification_span": 17.289315189586404,
+    "neutral_pressure_level": 2.5729887723166254,
+    "neutral_bracketed": true,
+    "mass_flow_in": 5.179629025602205,
+    "mass_flow_out": 5.179629025602205,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 17196.408287502163,
+    "air_changes_per_hour": 2.686938794922213,
+    "inflow_volume": 16119.644872556599,
+    "outflow_volume": 17196.408287500406,
+    "max_opening_velocity": 1.7335071165664095,
+    "heat_source": 150000.0,
+    "roof_gain": -1313.5044714993423,
+    "wall_gain": -42579.769750514286,
+    "envelope_gain": -43893.27422201363,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -106106.7257779868,
+    "Q_vent_total": 106106.72577798681,
+    "balance_residual": -4.220055416226387e-10,
+    "closure_residual": -4.511093720793724e-10,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.7462798552109536,
+      "direction": "in",
+      "volume_flow_m3h": 16119.644872556599,
+      "mdot": 5.179629025602205,
+      "dp": 0.7624167256948452
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 1.110469084189597,
+      "direction": "out",
+      "volume_flow_m3h": 7835.469858041795,
+      "mdot": 2.3600758034711427,
+      "dp": -1.582412278769851
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.7335071165664095,
+      "direction": "out",
+      "volume_flow_m3h": 9360.938429458613,
+      "mdot": 2.819553222130535,
+      "dp": -3.856185858856829
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 44999.99999135533,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.0001908999023619936
+     },
+     "temperature_bottom": {
+      "abs": 0.011888407175703719,
+      "rel": 0.00027180450353429765
+     },
+     "temperature_top": {
+      "abs": 0.008113038956892638,
+      "rel": 0.00013293933133802887
+     },
+     "temperature_at_probe": {
+      "abs": 0.01118025448481319,
+      "rel": 0.00023797617269452837
+     },
+     "vertical_gradient": {
+      "abs": 0.00047210179392642715,
+      "rel": 0.0002184478858761419
+     },
+     "stratification_span": {
+      "abs": 0.003776814351411417,
+      "rel": 0.0002184478858761419
+     },
+     "neutral_pressure_level": {
+      "abs": 2.4836284739482295e-05,
+      "rel": 9.652698451972104e-06
+     },
+     "mass_flow_in": {
+      "abs": 0.0011312318952656497,
+      "rel": 0.00021840017686095348
+     },
+     "mass_flow_out": {
+      "abs": 0.0011312318952656497,
+      "rel": 0.00021840017686095348
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 4.283836390794022,
+      "rel": 0.00024911227502706987
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0006693494360616725,
+      "rel": 0.0002491122750271095
+     },
+     "inflow_volume": {
+      "abs": 3.5205332911009464,
+      "rel": 0.00021840017686088048
+     },
+     "outflow_volume": {
+      "abs": 4.283836390783108,
+      "rel": 0.00024911227502646065
+     },
+     "max_opening_velocity": {
+      "abs": 0.0004292415018114504,
+      "rel": 0.0002476145022477076
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999997635,
+      "rel": 0.0013399269193128474
+     },
+     "wall_gain": {
+      "abs": 28.799999999995634,
+      "rel": 0.0006763775419346363
+     },
+     "envelope_gain": {
+      "abs": 30.55999999999767,
+      "rel": 0.000696234230452351
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 75.23273328204232,
+      "rel": 0.000709028883234566
+     },
+     "Q_vent_total": {
+      "abs": 75.23273328205687,
+      "rel": 0.000709028883234703
+     },
+     "balance_residual": {
+      "abs": 105.79273328203999,
+      "rel": 250690388745.27585
+     },
+     "closure_residual": {
+      "abs": 105.79273328203999,
+      "rel": 234516815277.8387
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.899024937301874e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_two_sources",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     },
+     {
+      "power": 60000.0,
+      "z": 6.0
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 47.472661160494184,
+    "temperature_bottom": 40.80942854673167,
+    "temperature_top": 54.1358937742567,
+    "temperature_at_probe": 43.30814077689261,
+    "vertical_gradient": 1.6658081534406286,
+    "stratification_span": 13.326465227525029,
+    "neutral_pressure_level": 2.585324807962881,
+    "neutral_bracketed": true,
+    "mass_flow_in": 4.573251239398559,
+    "mass_flow_out": 4.573251239398559,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 14954.18381829159,
+    "air_changes_per_hour": 2.336591221608061,
+    "inflow_volume": 14232.522353956265,
+    "outflow_volume": 14954.18381829027,
+    "max_opening_velocity": 1.5086027096334906,
+    "heat_source": 100000.0,
+    "roof_gain": -449.2014781119235,
+    "wall_gain": -28436.62985872016,
+    "envelope_gain": -28885.831336832085,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -71114.16866316908,
+    "Q_vent_total": 71114.16866316908,
+    "balance_residual": -1.1641532182693481e-09,
+    "closure_residual": -1.1641532182693481e-09,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.6589130719424197,
+      "direction": "in",
+      "volume_flow_m3h": 14232.522353956265,
+      "mdot": 4.573251239398559,
+      "dp": 0.5943540479125408
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.9648142270789994,
+      "direction": "out",
+      "volume_flow_m3h": 6807.729186269419,
+      "mdot": 2.081922779397341,
+      "dp": -1.2128177256626054
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.5086027096334906,
+      "direction": "out",
+      "volume_flow_m3h": 8146.45463202085,
+      "mdot": 2.4913284600008136,
+      "dp": -2.965226718220323
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 30624.99999333678,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00021064755494094387
+     },
+     "temperature_bottom": {
+      "abs": 0.011972308042835778,
+      "rel": 0.00029337112694744193
+     },
+     "temperature_top": {
+      "abs": 0.008029661756324913,
+      "rel": 0.00014832417452657383
+     },
+     "temperature_at_probe": {
+      "abs": 0.011232692526768062,
+      "rel": 0.0002593667685859503
+     },
+     "vertical_gradient": {
+      "abs": 0.0004930770107094418,
+      "rel": 0.0002959986776934788
+     },
+     "stratification_span": {
+      "abs": 0.003944616085675534,
+      "rel": 0.0002959986776934788
+     },
+     "neutral_pressure_level": {
+      "abs": 2.5408425454287453e-05,
+      "rel": 9.827943234068196e-06
+     },
+     "mass_flow_in": {
+      "abs": 0.0013532757520833272,
+      "rel": 0.0002959110884669656
+     },
+     "mass_flow_out": {
+      "abs": 0.0013532757520833272,
+      "rel": 0.0002959110884669656
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 4.8913814895822725,
+      "rel": 0.0003270911705391273
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0007642783577472834,
+      "rel": 0.0003270911705391501
+     },
+     "inflow_volume": {
+      "abs": 4.211561181389698,
+      "rel": 0.0002959110884669712
+     },
+     "outflow_volume": {
+      "abs": 4.8913814895822725,
+      "rel": 0.0003270911705391562
+     },
+     "max_opening_velocity": {
+      "abs": 0.0004911231186579545,
+      "rel": 0.0003255483471703899
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999996498,
+      "rel": 0.003918063688029821
+     },
+     "wall_gain": {
+      "abs": 28.799999999995634,
+      "rel": 0.0010127782421152148
+     },
+     "envelope_gain": {
+      "abs": 30.55999999999767,
+      "rel": 0.0010579581263784113
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 67.00966688974586,
+      "rel": 0.0009422829254622364
+     },
+     "Q_vent_total": {
+      "abs": 67.0096668897313,
+      "rel": 0.0009422829254620318
+     },
+     "balance_residual": {
+      "abs": 97.56966688974353,
+      "rel": 83811705674.6125
+     },
+     "closure_residual": {
+      "abs": 97.56966688972898,
+      "rel": 83811705674.6
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.9717845134437084e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_mech_supply",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": [
+     {
+      "flow": 20000.0,
+      "temp": 18.0,
+      "z": 0.5
+     }
+    ]
+   },
+   "expected": {
+    "indoor_mean_temperature": 28.353276983527305,
+    "temperature_bottom": 27.69803250851003,
+    "temperature_top": 29.008521458544582,
+    "temperature_at_probe": 27.943749186641508,
+    "vertical_gradient": 0.16381111875431914,
+    "stratification_span": 1.3104889500345531,
+    "neutral_pressure_level": 7.928041678404225,
+    "neutral_bracketed": true,
+    "mass_flow_in": 0.14738242136420854,
+    "mass_flow_out": 6.882881199107996,
+    "mass_flow_supply": 6.735498777743787,
+    "exhaust_flow": 21164.389713276338,
+    "air_changes_per_hour": 3.306935892699428,
+    "inflow_volume": 458.67228735987044,
+    "outflow_volume": 21164.389713275705,
+    "max_opening_velocity": 0.7979889950117186,
+    "heat_source": 40000.0,
+    "roof_gain": 2915.810137034247,
+    "wall_gain": 26627.196570944452,
+    "envelope_gain": 29543.0067079787,
+    "extra_flux": 0.0,
+    "supply_air_gain": -70083.15689053202,
+    "natural_ventilation_loss": 540.150182553398,
+    "Q_vent_total": 69543.00670797861,
+    "balance_residual": 7.844391802791506e-11,
+    "closure_residual": 8.731149137020111e-11,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.7979889950117186,
+      "direction": "out",
+      "volume_flow_m3h": 17236.562292253122,
+      "mdot": 5.605510583855021,
+      "dp": -0.8822752973053295
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.5566648839317718,
+      "direction": "out",
+      "volume_flow_m3h": 3927.827421022582,
+      "mdot": 1.2773706152527693,
+      "dp": -0.42933665334955856
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 0.08493931247405008,
+      "direction": "in",
+      "volume_flow_m3h": 458.67228735987044,
+      "mdot": 0.14738242136420854,
+      "dp": 0.009876577153007193
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 4532.519727305383,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.010000000000001563,
+      "rel": 0.0003526929182052348
+     },
+     "temperature_bottom": {
+      "abs": 0.009976217685885302,
+      "rel": 0.0003601778459470065
+     },
+     "temperature_top": {
+      "abs": 0.01002431355136224,
+      "rel": 0.00034556444269963083
+     },
+     "temperature_at_probe": {
+      "abs": 0.0099851360536789,
+      "rel": 0.00035732986246714125
+     },
+     "vertical_gradient": {
+      "abs": 6.078387840308119e-06,
+      "rel": 3.710607611089191e-05
+     },
+     "stratification_span": {
+      "abs": 4.8627102722464954e-05,
+      "rel": 3.710607611089191e-05
+     },
+     "neutral_pressure_level": {
+      "abs": 0.005740230249226208,
+      "rel": 0.0007240413814753829
+     },
+     "mass_flow_in": {
+      "abs": 0.00607562217724536,
+      "rel": 0.04122351988118991
+     },
+     "mass_flow_out": {
+      "abs": 0.006075622177245776,
+      "rel": 0.0008827149563518779
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 17.980780795987812,
+      "rel": 0.0008495770981153565
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0028094969993732732,
+      "rel": 0.0008495770981154101
+     },
+     "inflow_volume": {
+      "abs": 18.908086156930437,
+      "rel": 0.041223519881189837
+     },
+     "outflow_volume": {
+      "abs": 17.980780795351166,
+      "rel": 0.0008495770980853009
+     },
+     "max_opening_velocity": {
+      "abs": 0.0007461899913681069,
+      "rel": 0.0009350880726834447
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.760000000000673,
+      "rel": 0.000603605830724911
+     },
+     "wall_gain": {
+      "abs": 28.80000000000655,
+      "rel": 0.0010816009084273278
+     },
+     "envelope_gain": {
+      "abs": 30.560000000008586,
+      "rel": 0.0010344241634604925
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 67.69176271634933,
+      "rel": 0.0009658777617863593
+     },
+     "natural_ventilation_loss": {
+      "abs": 23.687025121147713,
+      "rel": 0.04385266521465272
+     },
+     "Q_vent_total": {
+      "abs": 91.37878783745691,
+      "rel": 0.0013139896038888567
+     },
+     "balance_residual": {
+      "abs": 121.93878783746561,
+      "rel": 1554470899758.8884
+     },
+     "closure_residual": {
+      "abs": 121.93878783745458,
+      "rel": 1396594949002.0
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 3.8365588711540113,
+      "rel": 0.000846451665293661
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_mech_supply_high",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": [
+     {
+      "flow": 30000.0,
+      "temp": 15.0,
+      "z": 6.0
+     }
+    ]
+   },
+   "expected": {
+    "indoor_mean_temperature": 23.515394264159333,
+    "temperature_bottom": 22.67949381376897,
+    "temperature_top": 24.351294714549695,
+    "temperature_at_probe": 22.992956482665356,
+    "vertical_gradient": 0.2089751125975904,
+    "stratification_span": 1.6718009007807233,
+    "neutral_pressure_level": 7.822408885202446,
+    "neutral_bracketed": true,
+    "mass_flow_in": 0.35603509510300274,
+    "mass_flow_out": 10.564470645025459,
+    "mass_flow_supply": 10.208435549922456,
+    "exhaust_flow": 31963.77533680264,
+    "air_changes_per_hour": 4.994339896375412,
+    "inflow_volume": 1108.0251629719874,
+    "outflow_volume": 31963.77533680263,
+    "max_opening_velocity": 1.2071557121864673,
+    "heat_source": 40000.0,
+    "roof_gain": 3767.2774956430103,
+    "wall_gain": 40560.29880272421,
+    "envelope_gain": 44327.57629836722,
+    "extra_flux": 0.0,
+    "supply_air_gain": -87363.49779548915,
+    "natural_ventilation_loss": 3035.921497121872,
+    "Q_vent_total": 84327.57629836732,
+    "balance_residual": -6.139089236967266e-11,
+    "closure_residual": -1.0186340659856796e-10,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 1.2071557121864673,
+      "direction": "out",
+      "volume_flow_m3h": 26074.563383227694,
+      "mdot": 8.618004492316631,
+      "dp": -2.0519276825539756
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.8346388823093732,
+      "direction": "out",
+      "volume_flow_m3h": 5889.211953574937,
+      "mdot": 1.9464661527088252,
+      "dp": -0.9809179653121118
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 0.20518984499481246,
+      "direction": "in",
+      "volume_flow_m3h": 1108.0251629719874,
+      "mdot": 0.35603509510300274,
+      "dp": 0.05763691201333209
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.999999164102,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.010000000000001563,
+      "rel": 0.0004252533420306257
+     },
+     "temperature_bottom": {
+      "abs": 0.009731953760159229,
+      "rel": 0.00042910806740540443
+     },
+     "temperature_top": {
+      "abs": 0.010269523308291895,
+      "rel": 0.000421723913601848
+     },
+     "temperature_at_probe": {
+      "abs": 0.009832471100100548,
+      "rel": 0.0004276297007526351
+     },
+     "vertical_gradient": {
+      "abs": 6.73808270722498e-05,
+      "rel": 0.00032243469681483367
+     },
+     "stratification_span": {
+      "abs": 0.0005390466165779983,
+      "rel": 0.00032243469681483367
+     },
+     "neutral_pressure_level": {
+      "abs": 0.0031775860901763764,
+      "rel": 0.0004062158008880585
+     },
+     "mass_flow_in": {
+      "abs": 0.0034052539177433783,
+      "rel": 0.00956437712062689
+     },
+     "mass_flow_out": {
+      "abs": 0.0034052539177444885,
+      "rel": 0.0003223307662223413
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 9.225820235758874,
+      "rel": 0.00028863362160903426
+     },
+     "air_changes_per_hour": {
+      "abs": 0.001441534411837253,
+      "rel": 0.00028863362160902006
+     },
+     "inflow_volume": {
+      "abs": 10.597570517808208,
+      "rel": 0.009564377120626936
+     },
+     "outflow_volume": {
+      "abs": 9.225820235751598,
+      "rel": 0.0002886336216088067
+     },
+     "max_opening_velocity": {
+      "abs": 0.00040923417737648293,
+      "rel": 0.00033900695100490003
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7600000000002183,
+      "rel": 0.00046718087585417335
+     },
+     "wall_gain": {
+      "abs": 28.80000000000291,
+      "rel": 0.0007100539406792678
+     },
+     "envelope_gain": {
+      "abs": 30.560000000004948,
+      "rel": 0.0006894128339954063
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 102.59477727673948,
+      "rel": 0.0011743437461364645
+     },
+     "natural_ventilation_loss": {
+      "abs": 32.58062801100414,
+      "rel": 0.010731709644630591
+     },
+     "Q_vent_total": {
+      "abs": 135.1754052877077,
+      "rel": 0.0016029798462300266
+     },
+     "balance_residual": {
+      "abs": 165.7354052877413,
+      "rel": 2699674151822.8076
+     },
+     "closure_residual": {
+      "abs": 165.73540528770536,
+      "rel": 1627035761142.8572
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 2.837623469531536e-10,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_cloudy_night",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 20.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 22.0,
+    "cloud": 100.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 26.381420927364182,
+    "temperature_bottom": 23.61851394560865,
+    "temperature_top": 29.144327909119713,
+    "temperature_at_probe": 24.654604063766975,
+    "vertical_gradient": 0.6907267454388828,
+    "stratification_span": 5.525813963511062,
+    "neutral_pressure_level": 2.6082315860843948,
+    "neutral_bracketed": true,
+    "mass_flow_in": 3.1962153726883926,
+    "mass_flow_out": 3.1962153726883926,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 9763.867163751444,
+    "air_changes_per_hour": 1.525604244336163,
+    "inflow_volume": 9555.851103006094,
+    "outflow_volume": 9763.867163750803,
+    "max_opening_velocity": 0.9863753718718851,
+    "heat_source": 40000.0,
+    "roof_gain": -1123.130083216096,
+    "wall_gain": -18378.492270808845,
+    "envelope_gain": -19501.62235402494,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -20498.377645975,
+    "Q_vent_total": 20498.377645974993,
+    "balance_residual": 5.820766091346741e-11,
+    "closure_residual": 6.912159733474255e-11,
+    "solar_irradiance": 0.0,
+    "sin_beta": 0.0,
+    "sol_air_roof": 20.0,
+    "sol_air_wall": 20.0,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.44240051402805997,
+      "direction": "in",
+      "volume_flow_m3h": 9555.851103006094,
+      "mdot": 3.1962153726883926,
+      "dp": 0.2788969080516237
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.628888910947084,
+      "direction": "out",
+      "volume_flow_m3h": 4437.440155642625,
+      "mdot": 1.4526021506626456,
+      "dp": -0.5515791477898945
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 0.9863753718718851,
+      "direction": "out",
+      "volume_flow_m3h": 5326.4270081081795,
+      "mdot": 1.743613222025538,
+      "dp": -1.3568892625453062
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.999997237093,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.010000000000001563,
+      "rel": 0.0003790546395334242
+     },
+     "temperature_bottom": {
+      "abs": 0.012086800537087328,
+      "rel": 0.0005117511019076882
+     },
+     "temperature_top": {
+      "abs": 0.007918161832893844,
+      "rel": 0.0002716879201189652
+     },
+     "temperature_at_probe": {
+      "abs": 0.011304250335680166,
+      "rel": 0.0004585046389892416
+     },
+     "vertical_gradient": {
+      "abs": 0.0005217001342716632,
+      "rel": 0.0007552916369847221
+     },
+     "stratification_span": {
+      "abs": 0.004173601074173305,
+      "rel": 0.0007552916369847221
+     },
+     "neutral_pressure_level": {
+      "abs": 2.7572131445552372e-05,
+      "rel": 1.057119758561969e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.002412252787388436,
+      "rel": 0.000754721602305369
+     },
+     "mass_flow_out": {
+      "abs": 0.002412252787388436,
+      "rel": 0.000754721602305369
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 7.694726836232803,
+      "rel": 0.0007880818846859812
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0012023010681614377,
+      "rel": 0.000788081884686022
+     },
+     "inflow_volume": {
+      "abs": 7.21200725585004,
+      "rel": 0.0007547216023051338
+     },
+     "outflow_volume": {
+      "abs": 7.694726836229165,
+      "rel": 0.0007880818846856603
+     },
+     "max_opening_velocity": {
+      "abs": 0.0007756723988414649,
+      "rel": 0.0007863866241605764
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7600000000004457,
+      "rel": 0.0015670491123883578
+     },
+     "wall_gain": {
+      "abs": 28.80000000000655,
+      "rel": 0.0015670491123883172
+     },
+     "envelope_gain": {
+      "abs": 30.560000000004948,
+      "rel": 0.0015670491123882147
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 47.603270072384475,
+      "rel": 0.002322294519816875
+     },
+     "Q_vent_total": {
+      "abs": 47.60327007238811,
+      "rel": 0.002322294519817053
+     },
+     "balance_residual": {
+      "abs": 78.16327007238942,
+      "rel": 1342834754837.3125
+     },
+     "closure_residual": {
+      "abs": 78.16327007239306,
+      "rel": 1130808214599.8948
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 2.090018824674189e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_uninsulated",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "corrugated",
+    "wallins": false,
+    "roofmat": "corrugated",
+    "roofins": false,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 42.00662457530282,
+    "temperature_bottom": 39.64132794858544,
+    "temperature_top": 44.371921202020204,
+    "temperature_at_probe": 40.52831418360446,
+    "vertical_gradient": 0.591324156679345,
+    "stratification_span": 4.73059325343476,
+    "neutral_pressure_level": 2.599392115333809,
+    "neutral_bracketed": true,
+    "mass_flow_in": 3.7335045714948762,
+    "mass_flow_out": 3.7335045714948762,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 12000.147035259622,
+    "air_changes_per_hour": 1.875022974259316,
+    "inflow_volume": 11619.12706973583,
+    "outflow_volume": 12000.147035258735,
+    "max_opening_velocity": 1.2116335692273799,
+    "heat_source": 40000.0,
+    "roof_gain": 26379.376664229123,
+    "wall_gain": -28832.799174117452,
+    "envelope_gain": -2453.422509888329,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -37546.57749011169,
+    "Q_vent_total": 37546.5774901117,
+    "balance_residual": -2.1827872842550278e-11,
+    "closure_residual": -2.9103830456733704e-11,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 47.79157559816009,
+    "sol_air_wall": 36.737472679448025,
+    "wall_u_value": 5.7,
+    "roof_u_value": 5.7,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.537922549524807,
+      "direction": "in",
+      "volume_flow_m3h": 11619.12706973583,
+      "mdot": 3.7335045714948762,
+      "dp": 0.39612155774379604
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.7734305217447398,
+      "direction": "out",
+      "volume_flow_m3h": 5457.325761430884,
+      "mdot": 1.6978917523736952,
+      "dp": -0.7929001955708714
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.2116335692273799,
+      "direction": "out",
+      "volume_flow_m3h": 6542.821273827852,
+      "mdot": 2.0356128191209053,
+      "dp": -1.9458909866638825
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.999997634704,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00023805768973585568
+     },
+     "temperature_bottom": {
+      "abs": 0.011117151206015308,
+      "rel": 0.0002804434609363789
+     },
+     "temperature_top": {
+      "abs": 0.008884554862525817,
+      "rel": 0.00020022921302134905
+     },
+     "temperature_at_probe": {
+      "abs": 0.010698219503758821,
+      "rel": 0.0002639690231203038
+     },
+     "vertical_gradient": {
+      "abs": 0.0002792878015052125,
+      "rel": 0.00047230913594598973
+     },
+     "stratification_span": {
+      "abs": 0.0022343024120417,
+      "rel": 0.00047230913594598973
+     },
+     "neutral_pressure_level": {
+      "abs": 2.606868537391449e-05,
+      "rel": 1.0028762194105063e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.00176253585689512,
+      "rel": 0.0004720861654628722
+     },
+     "mass_flow_out": {
+      "abs": 0.00176253585689512,
+      "rel": 0.0004720861654628722
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 6.04569136677128,
+      "rel": 0.0005038014408496356
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0009446392760581457,
+      "rel": 0.0005038014408497066
+     },
+     "inflow_volume": {
+      "abs": 5.485229144376717,
+      "rel": 0.0004720861654628094
+     },
+     "outflow_volume": {
+      "abs": 6.045691366765823,
+      "rel": 0.000503801440849218
+     },
+     "max_opening_velocity": {
+      "abs": 0.000608489865894013,
+      "rel": 0.0005022061796142109
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 45.59999999999127,
+      "rel": 0.0017286231051026172
+     },
+     "wall_gain": {
+      "abs": 54.71999999999025,
+      "rel": 0.0018978386270976822
+     },
+     "envelope_gain": {
+      "abs": 100.31999999998152,
+      "rel": 0.04088981803812818
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 55.25428774048487,
+      "rel": 0.001471619823538822
+     },
+     "Q_vent_total": {
+      "abs": 55.25428774046304,
+      "rel": 0.0014716198235382404
+     },
+     "balance_residual": {
+      "abs": 155.57428774046275,
+      "rel": 7127322431400.333
+     },
+     "closure_residual": {
+      "abs": 155.57428774043365,
+      "rel": 5345491823549.25
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.1295924196019769e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_tall_room",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 16.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 0.5,
+      "area": 6.0
+     },
+     {
+      "z": 8.0,
+      "area": 1.96
+     },
+     {
+      "z": 16.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 38.937100725308476,
+    "temperature_bottom": 37.28576303321489,
+    "temperature_top": 40.58843841740206,
+    "temperature_at_probe": 37.595388850482436,
+    "vertical_gradient": 0.20641721151169765,
+    "stratification_span": 3.3026753841871623,
+    "neutral_pressure_level": 3.0771624354854543,
+    "neutral_bracketed": true,
+    "mass_flow_in": 4.782795176553175,
+    "mass_flow_out": 4.782795176553175,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 15223.027811027088,
+    "air_changes_per_hour": 1.1892990477364913,
+    "inflow_volume": 14884.648951331068,
+    "outflow_volume": 15223.02781102624,
+    "max_opening_velocity": 1.5605371573430054,
+    "heat_source": 40000.0,
+    "roof_gain": 1053.0571584807612,
+    "wall_gain": -7708.43161077064,
+    "envelope_gain": -6655.374452289879,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -33344.62554771025,
+    "Q_vent_total": 33344.62554771025,
+    "balance_residual": -1.3096723705530167e-10,
+    "closure_residual": -1.3096723705530167e-10,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 1920.0,
+    "area_roof": 800.0,
+    "room_volume": 12800.0,
+    "flows": [
+     {
+      "z": 0.5,
+      "area": 6.0,
+      "v": 0.6891041181171791,
+      "direction": "in",
+      "volume_flow_m3h": 14884.648951331068,
+      "mdot": 4.782795176553175,
+      "dp": 0.6500678209612963
+     },
+     {
+      "z": 8.0,
+      "area": 1.96,
+      "v": 0.9631699491743217,
+      "direction": "out",
+      "volume_flow_m3h": 6796.127161374014,
+      "mdot": 2.1352180794885247,
+      "dp": -1.241744891376075
+     },
+     {
+      "z": 16.0,
+      "area": 1.5,
+      "v": 1.5605371573430054,
+      "direction": "out",
+      "volume_flow_m3h": 8426.900649652229,
+      "mdot": 2.6475770970643855,
+      "dp": -3.259678451202604
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 7937.499998348675,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.0002568244633966333
+     },
+     "temperature_bottom": {
+      "abs": 0.011145337303901215,
+      "rel": 0.00029891670163683466
+     },
+     "temperature_top": {
+      "abs": 0.008857169766024242,
+      "rel": 0.00021821903259591237
+     },
+     "temperature_at_probe": {
+      "abs": 0.010930586559418032,
+      "rel": 0.0002907427451512519
+     },
+     "vertical_gradient": {
+      "abs": 0.00014316716298823362,
+      "rel": 0.0006935815184196515
+     },
+     "stratification_span": {
+      "abs": 0.002290674607811738,
+      "rel": 0.0006935815184196515
+     },
+     "neutral_pressure_level": {
+      "abs": 6.143860244245403e-05,
+      "rel": 1.9965992608629205e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.003314959147133756,
+      "rel": 0.0006931007966606576
+     },
+     "mass_flow_out": {
+      "abs": 0.003314959147133756,
+      "rel": 0.0006931007966606576
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 11.038536006351933,
+      "rel": 0.0007251209249158673
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0008623856254963425,
+      "rel": 0.0007251209249159494
+     },
+     "inflow_volume": {
+      "abs": 10.31656204618048,
+      "rel": 0.0006931007966605699
+     },
+     "outflow_volume": {
+      "abs": 11.038536006335562,
+      "rel": 0.0007251209249148322
+     },
+     "max_opening_velocity": {
+      "abs": 0.0011288887734046682,
+      "rel": 0.0007233975609569795
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999997635,
+      "rel": 0.0016713242826618302
+     },
+     "wall_gain": {
+      "abs": 57.59999999998854,
+      "rel": 0.007472337163828072
+     },
+     "envelope_gain": {
+      "abs": 59.35999999998876,
+      "rel": 0.008919107471040204
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 71.19295358578529,
+      "rel": 0.0021350653191147934
+     },
+     "Q_vent_total": {
+      "abs": 71.19295358579257,
+      "rel": 0.0021350653191150116
+     },
+     "balance_residual": {
+      "abs": 130.55295358577132,
+      "rel": 996836739639.2778
+     },
+     "closure_residual": {
+      "abs": 130.55295358578587,
+      "rel": 996836739639.3889
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.1568772606551647e-09,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_small_openings",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.0,
+      "area": 0.5
+     },
+     {
+      "z": 7.0,
+      "area": 0.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 47.82033185011748,
+    "temperature_bottom": 38.82033185011748,
+    "temperature_top": 56.82033185011748,
+    "temperature_at_probe": 42.19533185011748,
+    "vertical_gradient": 2.25,
+    "stratification_span": 18.0,
+    "neutral_pressure_level": 3.9241982840423235,
+    "neutral_bracketed": true,
+    "mass_flow_in": 0.6322040989546333,
+    "mass_flow_out": 0.6322040989546333,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 2069.500988191753,
+    "air_changes_per_hour": 0.32335952940496143,
+    "inflow_volume": 1967.4971917392254,
+    "outflow_volume": 2069.500988191616,
+    "max_opening_velocity": 1.1497227712175646,
+    "heat_source": 40000.0,
+    "roof_gain": -510.39151948562426,
+    "wall_gain": -29437.92144483526,
+    "envelope_gain": -29948.312964320885,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -10051.687035679144,
+    "Q_vent_total": 10051.687035679144,
+    "balance_residual": -2.9103830456733704e-11,
+    "closure_residual": -2.9103830456733704e-11,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.0,
+      "area": 0.5,
+      "v": 1.0930539954106808,
+      "direction": "in",
+      "volume_flow_m3h": 1967.4971917392254,
+      "mdot": 0.6322040989546333,
+      "dp": 1.6355815769878606
+     },
+     {
+      "z": 7.0,
+      "area": 0.5,
+      "v": 1.1497227712175646,
+      "direction": "out",
+      "volume_flow_m3h": 2069.500988191616,
+      "mdot": 0.6322040989545915,
+      "dp": -1.7203773931956838
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 5718.286075044658,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00020911607287337223
+     },
+     "temperature_bottom": {
+      "abs": 0.00999999999999801,
+      "rel": 0.0002575969736324587
+     },
+     "temperature_top": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00017599334031304738
+     },
+     "temperature_at_probe": {
+      "abs": 0.00999999999999801,
+      "rel": 0.0002369930407353857
+     },
+     "vertical_gradient": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratification_span": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "neutral_pressure_level": {
+      "abs": 4.670420108565665e-05,
+      "rel": 1.1901590517374818e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.00018494648591127483,
+      "rel": 0.00029254237075825495
+     },
+     "mass_flow_out": {
+      "abs": 0.00018494648591127483,
+      "rel": 0.00029254237075825495
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 0.6698742582389059,
+      "rel": 0.000323688783944102
+     },
+     "air_changes_per_hour": {
+      "abs": 0.00010466785284984903,
+      "rel": 0.00032368878394416374
+     },
+     "inflow_volume": {
+      "abs": 0.5755762929313732,
+      "rel": 0.00029254237075813873
+     },
+     "outflow_volume": {
+      "abs": 0.6698742582389059,
+      "rel": 0.00032368878394412336
+     },
+     "max_opening_velocity": {
+      "abs": 0.00037215236568832744,
+      "rel": 0.0003236887839441637
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999996498,
+      "rel": 0.0034483331575990697
+     },
+     "wall_gain": {
+      "abs": 28.799999999995634,
+      "rel": 0.0009783299426885472
+     },
+     "envelope_gain": {
+      "abs": 30.55999999999767,
+      "rel": 0.0010204247576952171
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 9.294911535273059,
+      "rel": 0.0009247115934151293
+     },
+     "Q_vent_total": {
+      "abs": 9.29491153527124,
+      "rel": 0.0009247115934149483
+     },
+     "balance_residual": {
+      "abs": 39.85491153527073,
+      "rel": 1369404333031.6875
+     },
+     "closure_residual": {
+      "abs": 39.85491153526891,
+      "rel": 1369404333031.625
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 1.672840965067735,
+      "rel": 0.0002925423707582994
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_extra_flux",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 25000.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 40000.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 43.74398786445502,
+    "temperature_bottom": 41.55013186089617,
+    "temperature_top": 45.93784386801387,
+    "temperature_at_probe": 42.37282786223074,
+    "vertical_gradient": 0.5484640008897115,
+    "stratification_span": 4.387712007117692,
+    "neutral_pressure_level": 2.5948816505483068,
+    "neutral_bracketed": true,
+    "mass_flow_in": 4.025262257247536,
+    "mass_flow_out": 4.025262257247536,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 13009.230854463487,
+    "air_changes_per_hour": 2.03269232100992,
+    "inflow_volume": 12527.11300076012,
+    "outflow_volume": 13009.230854462468,
+    "max_opening_velocity": 1.3131567539796658,
+    "heat_source": 40000.0,
+    "roof_gain": 207.04502199096896,
+    "wall_gain": -17698.050766127373,
+    "envelope_gain": -17491.005744136404,
+    "extra_flux": 25000.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -47508.99425586571,
+    "Q_vent_total": 47508.99425586572,
+    "balance_residual": -2.117303665727377e-09,
+    "closure_residual": -2.1245796233415604e-09,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.5799589352203759,
+      "direction": "in",
+      "volume_flow_m3h": 12527.11300076012,
+      "mdot": 4.025262257247536,
+      "dp": 0.4604510478690429
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.8387449522352993,
+      "direction": "out",
+      "volume_flow_m3h": 5918.184382972272,
+      "mdot": 1.8311800670396003,
+      "dp": -0.9273596412651621
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 1.3131567539796658,
+      "direction": "out",
+      "volume_flow_m3h": 7091.0464714901955,
+      "mdot": 2.19408219020762,
+      "dp": -2.273115461031664
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 8874.999997806159,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00022860284322919936
+     },
+     "temperature_bottom": {
+      "abs": 0.010874086012336193,
+      "rel": 0.000261710024140021
+     },
+     "temperature_top": {
+      "abs": 0.009127055420677266,
+      "rel": 0.0001986827123819879
+     },
+     "temperature_at_probe": {
+      "abs": 0.01054630375770671,
+      "rel": 0.00024889308289728797
+     },
+     "vertical_gradient": {
+      "abs": 0.00021852150308621088,
+      "rel": 0.0003984245141554013
+     },
+     "stratification_span": {
+      "abs": 0.001748172024689687,
+      "rel": 0.0003984245141554013
+     },
+     "neutral_pressure_level": {
+      "abs": 2.5856075803964984e-05,
+      "rel": 9.964260142076812e-06
+     },
+     "mass_flow_in": {
+      "abs": 0.0016031244355145802,
+      "rel": 0.0003982658353820634
+     },
+     "mass_flow_out": {
+      "abs": 0.0016031244355145802,
+      "rel": 0.0003982658353820634
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 5.591491816398047,
+      "rel": 0.0004298095620679679
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0008736705963121594,
+      "rel": 0.0004298095620679504
+     },
+     "inflow_volume": {
+      "abs": 4.989121124175654,
+      "rel": 0.00039826583538225634
+     },
+     "outflow_volume": {
+      "abs": 5.591491816398047,
+      "rel": 0.0004298095620680016
+     },
+     "max_opening_velocity": {
+      "abs": 0.0005623347281797919,
+      "rel": 0.00042823122713687815
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999996498,
+      "rel": 0.008500566606602205
+     },
+     "wall_gain": {
+      "abs": 28.799999999995634,
+      "rel": 0.0016272978522084752
+     },
+     "envelope_gain": {
+      "abs": 30.559999999994034,
+      "rel": 0.0017471836924093866
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 59.381543536997924,
+      "rel": 0.0012499010864593573
+     },
+     "Q_vent_total": {
+      "abs": 59.38154353699065,
+      "rel": 0.001249901086459204
+     },
+     "balance_residual": {
+      "abs": 89.94154353699196,
+      "rel": 42479283908.524055
+     },
+     "closure_residual": {
+      "abs": 89.94154353698832,
+      "rel": 42333806908.83562
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 9.022187441587448e-10,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  },
+  {
+   "id": "room_no_source",
+   "group": "room",
+   "note": "steady stack ventilation and sensible heat balance of the whole room",
+   "inputs": {
+    "Tout": 32.0,
+    "H": 8.0,
+    "W": 20.0,
+    "L": 40.0,
+    "season": "summer",
+    "hour": 15.0,
+    "cloud": 0.0,
+    "lat": 50.8,
+    "wallmat": "concrete",
+    "wallins": false,
+    "roofmat": "sandwich",
+    "roofins": true,
+    "qextra": 0.0,
+    "openings": [
+     {
+      "z": 1.5,
+      "area": 6.0
+     },
+     {
+      "z": 4.8,
+      "area": 1.96
+     },
+     {
+      "z": 8.0,
+      "area": 1.5
+     }
+    ],
+    "sources": [
+     {
+      "power": 0.0,
+      "z": 1.5
+     }
+    ],
+    "supplies": []
+   },
+   "expected": {
+    "indoor_mean_temperature": 35.46776073648999,
+    "temperature_bottom": 35.46776073648999,
+    "temperature_top": 35.46776073648999,
+    "temperature_at_probe": 35.46776073648999,
+    "vertical_gradient": 0.0,
+    "stratification_span": 0.0,
+    "neutral_pressure_level": 2.616704986272663,
+    "neutral_bracketed": true,
+    "mass_flow_in": 2.2384279900767057,
+    "mass_flow_out": 2.2384279900767057,
+    "mass_flow_supply": 0.0,
+    "exhaust_flow": 7045.42965572018,
+    "air_changes_per_hour": 1.1008483837062781,
+    "inflow_volume": 6966.264204342708,
+    "outflow_volume": 7045.429655719778,
+    "max_opening_velocity": 0.7121226901766263,
+    "heat_source": 0.0,
+    "roof_gain": 1663.660996512814,
+    "wall_gain": 6137.483362411911,
+    "envelope_gain": 7801.144358924725,
+    "extra_flux": 0.0,
+    "supply_air_gain": 0.0,
+    "natural_ventilation_loss": -7801.144358925451,
+    "Q_vent_total": 7801.144358925449,
+    "balance_residual": -7.266862667165697e-10,
+    "closure_residual": -7.239577826112509e-10,
+    "solar_irradiance": 717.7988908254583,
+    "sin_beta": 0.7183887971779903,
+    "sol_air_roof": 44.920380034858255,
+    "sol_air_wall": 37.59883134843857,
+    "wall_u_value": 3.0,
+    "roof_u_value": 0.22,
+    "area_wall": 960.0,
+    "area_roof": 800.0,
+    "room_volume": 6400.0,
+    "flows": [
+     {
+      "z": 1.5,
+      "area": 6.0,
+      "v": 0.3225122316825328,
+      "direction": "in",
+      "volume_flow_m3h": 6966.264204342708,
+      "mdot": 2.2384279900767057,
+      "dp": 0.1423906127298392
+     },
+     {
+      "z": 4.8,
+      "area": 1.96,
+      "v": 0.45351008060742565,
+      "direction": "out",
+      "volume_flow_m3h": 3199.9671287659953,
+      "mdot": 1.0166726996613533,
+      "dp": -0.27839108681004066
+     },
+     {
+      "z": 8.0,
+      "area": 1.5,
+      "v": 0.7121226901766263,
+      "direction": "out",
+      "volume_flow_m3h": 3845.462526953782,
+      "mdot": 1.2217552904152247,
+      "dp": -0.686421825757803
+     }
+    ],
+    "stratified_exhaust_enthalpy_error": 0.0,
+    "tolerance": {
+     "indoor_mean_temperature": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00028194618978890864
+     },
+     "temperature_bottom": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00028194618978890864
+     },
+     "temperature_top": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00028194618978890864
+     },
+     "temperature_at_probe": {
+      "abs": 0.00999999999999801,
+      "rel": 0.00028194618978890864
+     },
+     "vertical_gradient": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratification_span": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "neutral_pressure_level": {
+      "abs": 2.6892708166581514e-05,
+      "rel": 1.0277317583625864e-05
+     },
+     "mass_flow_in": {
+      "abs": 0.0031666850173550642,
+      "rel": 0.0014146914850035222
+     },
+     "mass_flow_out": {
+      "abs": 0.0031666850173550642,
+      "rel": 0.0014146914850035222
+     },
+     "mass_flow_supply": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "exhaust_flow": {
+      "abs": 10.195076213830362,
+      "rel": 0.0014470481875513421
+     },
+     "air_changes_per_hour": {
+      "abs": 0.0015929806584109585,
+      "rel": 0.0014470481875513096
+     },
+     "inflow_volume": {
+      "abs": 9.855114652166776,
+      "rel": 0.0014146914850032798
+     },
+     "outflow_volume": {
+      "abs": 10.195076213830362,
+      "rel": 0.0014470481875514245
+     },
+     "max_opening_velocity": {
+      "abs": 0.0010292934559168465,
+      "rel": 0.0014453878104369248
+     },
+     "heat_source": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_gain": {
+      "abs": 1.7599999999997635,
+      "rel": 0.0010579078331997233
+     },
+     "wall_gain": {
+      "abs": 28.799999999994725,
+      "rel": 0.004692477078858734
+     },
+     "envelope_gain": {
+      "abs": 30.559999999994034,
+      "rel": 0.003917373989500983
+     },
+     "extra_flux": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "supply_air_gain": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "natural_ventilation_loss": {
+      "abs": 33.5473494926473,
+      "rel": 0.004300311332434847
+     },
+     "Q_vent_total": {
+      "abs": 33.547349492655485,
+      "rel": 0.004300311332435898
+     },
+     "balance_residual": {
+      "abs": 64.10734949264133,
+      "rel": 88218743670.91238
+     },
+     "closure_residual": {
+      "abs": 64.10734949264952,
+      "rel": 88551226373.201
+     },
+     "solar_irradiance": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sin_beta": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "sol_air_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "wall_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "roof_u_value": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_wall": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "area_roof": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "room_volume": {
+      "abs": 0.0,
+      "rel": 2e-09
+     },
+     "stratified_exhaust_enthalpy_error": {
+      "abs": 0.0,
+      "rel": 2e-09
+     }
+    },
+    "tolerance_basis": "the tool stops its outer temperature loop when the indoor temperature moves less than 0.01 K; every quantity is graded with the change a 0.01 K shift in that temperature produces"
+   }
+  }
+ ]
+}

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gas dispersion (Gaussian plume / Britter-McQuaid)</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-23.1",
+  "id": "gas_dispersion",
+  "file": "gas_dispersion.html",
+  "listed": true,
+  "category": "oil-gas-h2",
+  "order": 90,
+  "title": {
+    "en": "Gas dispersion",
+    "uk": "Розсіювання газу",
+    "de": "Gasausbreitung",
+    "nl": "Gasverspreiding",
+    "fr": "Dispersion de gaz",
+    "es": "Dispersión de gases",
+    "pl": "Dyspersja gazu"
+  },
+  "summary": {
+    "en": "Downwind distance and width of a continuous gas release to the LFL or a toxic level, using a Gaussian plume (Pasquill-Gifford) or Britter-McQuaid dense gas model.",
+    "uk": "Відстань за вітром і ширина шлейфу безперервного викиду газу до НКМП або токсичного рівня: гауссів шлейф (Пасквілл-Гіффорд) або важкий газ (Бріттер-Маккуейд).",
+    "de": "Abstand in Windrichtung und Breite einer kontinuierlichen Gasfreisetzung bis zur UEG oder einem toxischen Wert: Gauß-Fahne (Pasquill-Gifford) oder Schwergas (Britter-McQuaid).",
+    "nl": "Benedenwindse afstand en breedte van een continue gaslozing tot de OEG of een toxisch niveau, met Gaussische pluim (Pasquill-Gifford) of zwaar gas volgens Britter-McQuaid.",
+    "fr": "Distance sous le vent et largeur d'un rejet continu de gaz jusqu'à la LIE ou un seuil toxique, panache gaussien (Pasquill-Gifford) ou gaz lourd selon Britter-McQuaid.",
+    "es": "Distancia a sotavento y anchura de una emisión continua de gas hasta el LII o un nivel tóxico, con pluma gaussiana (Pasquill-Gifford) o gas denso de Britter-McQuaid.",
+    "pl": "Zasięg w kierunku wiatru i szerokość ciągłego uwolnienia gazu do DGW lub poziomu toksycznego: smuga gaussowska (Pasquill-Gifford) lub gaz ciężki (Britter-McQuaid)."
+  },
+  "description": {
+    "en": "Computes the ground-level centreline concentration of a continuous point release with the Gaussian plume model (Briggs 1973 open-country sigmas for Pasquill classes A-F, total ground reflection) and, for gases denser than air that meet the dense-gas criterion, the Britter-McQuaid (1988) continuous-release workbook correlation. Results include the distance to the LFL or a ppm target, half the LFL, the maximum half-width of the contour, the density criterion and a concentration-distance plot, for screening of flammable and toxic gas hazards in oil, gas and hydrogen facilities.",
+    "uk": "Обчислює приземну концентрацію на осі факела від безперервного точкового викиду за гауссовою моделлю факела (параметри дисперсії Бріггса 1973 р. для відкритої місцевості для класів стійкості Пасквілла A–F, повне відбиття від поверхні землі), а для газів, важчих за повітря, які відповідають критерію важкого газу, за кореляцією Бріттера–Мак-Квейда (1988) для безперервного викиду з їхнього робочого посібника (workbook). Результати включають відстань до НКМПП або до цільової концентрації в ppm, відстань до половини НКМПП, максимальну напівширину контуру, критерій густини та графік залежності концентрації від відстані для попередньої оцінки небезпек горючих і токсичних газів на об'єктах нафтової, газової та водневої галузей.",
+    "de": "Berechnet die bodennahe Konzentration auf der Fahnenachse einer kontinuierlichen Punktquellenfreisetzung mit dem Gaußschen Fahnenmodell (Briggs-Ausbreitungsparameter von 1973 für offenes Gelände für die Pasquill-Klassen A–F, vollständige Bodenreflexion) und, für Gase, die schwerer als Luft sind und das Schwergaskriterium erfüllen, mit der Britter-McQuaid-Korrelation (1988) für kontinuierliche Freisetzungen aus dem Workbook. Die Ergebnisse umfassen den Abstand bis zur UEG oder zu einem ppm-Zielwert, den Abstand bis zur halben UEG, die maximale Halbbreite der Konzentrationskontur, das Dichtekriterium sowie ein Konzentrations-Abstands-Diagramm zur orientierenden Bewertung von Gefahren durch brennbare und toxische Gase in Öl-, Gas- und Wasserstoffanlagen.",
+    "nl": "Berekent de concentratie op grondniveau langs de pluimas van een continue puntbronemissie met het Gaussische pluimmodel (Briggs-spreidingsparameters uit 1973 voor open terrein voor de Pasquill-klassen A–F, volledige grondreflectie) en, voor gassen die zwaarder zijn dan lucht en aan het zwaargascriterium voldoen, met de Britter-McQuaid-correlatie (1988) voor continue lozingen uit het workbook. De resultaten omvatten de afstand tot de OEG of een ppm-doelwaarde, de afstand tot de halve OEG, de maximale halve breedte van de contour, het dichtheidscriterium en een concentratie-afstandsgrafiek, voor de screening van gevaren van brandbare en toxische gassen in olie-, gas- en waterstofinstallaties.",
+    "fr": "Calcule la concentration au sol dans l'axe du panache d'un rejet ponctuel continu à l'aide du modèle de panache gaussien (écarts-types de Briggs 1973 en rase campagne pour les classes de Pasquill A à F, réflexion totale au sol) et, pour les gaz plus denses que l'air satisfaisant au critère de gaz lourd, à l'aide de la corrélation de Britter et McQuaid (1988) pour rejet continu issue de leur workbook. Les résultats comprennent la distance jusqu'à la LIE ou à une concentration cible en ppm, la distance jusqu'à la moitié de la LIE, la demi-largeur maximale du contour, le critère de densité et un graphique concentration-distance, pour l'évaluation préliminaire des dangers liés aux gaz inflammables et toxiques dans les installations pétrolières, gazières et d'hydrogène.",
+    "es": "Calcula la concentración a nivel del suelo en el eje de la pluma de una emisión puntual continua mediante el modelo de pluma gaussiana (coeficientes de dispersión de Briggs de 1973 para terreno abierto para las clases de Pasquill A–F, reflexión total en el suelo) y, para gases más densos que el aire que cumplen el criterio de gas denso, mediante la correlación de Britter y McQuaid (1988) para emisiones continuas de su workbook. Los resultados incluyen la distancia hasta el LII o hasta una concentración objetivo en ppm, la distancia hasta la mitad del LII, la semianchura máxima del contorno, el criterio de densidad y un gráfico de concentración frente a distancia, para el cribado de peligros de gases inflamables y tóxicos en instalaciones de petróleo, gas e hidrógeno.",
+    "pl": "Oblicza stężenie przy powierzchni ziemi w osi smugi dla ciągłego uwolnienia ze źródła punktowego za pomocą gaussowskiego modelu smugi (współczynniki dyspersji Briggsa z 1973 r. dla terenu otwartego dla klas stabilności Pasquilla A–F, pełne odbicie od podłoża), a dla gazów cięższych od powietrza spełniających kryterium gazu ciężkiego za pomocą korelacji Brittera i McQuaida (1988) dla uwolnień ciągłych z ich podręcznika (workbook). Wyniki obejmują odległość do DGW lub docelowego stężenia w ppm, odległość do połowy DGW, maksymalną półszerokość konturu, kryterium gęstości oraz wykres stężenia w funkcji odległości, służące do wstępnej oceny zagrożeń związanych z gazami palnymi i toksycznymi w instalacjach naftowych, gazowych i wodorowych."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Steady continuous release over flat open country; jet momentum, plume rise, buildings, terrain, averaging-time effects and non-isothermal dense gas are not modelled, and Briggs sigmas outside 100 m–10 km are extrapolated. Results are screening values; check designs with SLAB, DEGADIS, PHAST or CFD.",
+    "uk": "Розглядається стаціонарний безперервний викид над рівною відкритою місцевістю; імпульс струменя, підйом шлейфу, будівлі, рельєф, вплив часу усереднення та неізотермічний важкий газ не моделюються, а сигми Бріггса поза діапазоном 100 м–10 км екстраполюються. Результати є орієнтовними (скринінговими) значеннями; перевіряйте проєктні рішення за допомогою SLAB, DEGADIS, PHAST або CFD.",
+    "de": "Stationäre kontinuierliche Freisetzung über ebenem, offenem Gelände; Strahlimpuls, Fahnenüberhöhung, Gebäude, Topografie, Mittelungszeiteffekte und nicht-isothermes Schwergas werden nicht modelliert, und Briggs-Sigmas außerhalb von 100 m–10 km werden extrapoliert. Die Ergebnisse sind Screening-Werte; Auslegungen sind mit SLAB, DEGADIS, PHAST oder CFD zu prüfen.",
+    "nl": "Stationaire continue lozing boven vlak, open terrein; straalimpuls, pluimstijging, gebouwen, terreinreliëf, middelingstijdeffecten en niet-isotherm zwaar gas worden niet gemodelleerd, en Briggs-sigma's buiten 100 m–10 km worden geëxtrapoleerd. De resultaten zijn screeningswaarden; controleer ontwerpen met SLAB, DEGADIS, PHAST of CFD.",
+    "fr": "Rejet continu en régime permanent sur terrain plat et dégagé ; la quantité de mouvement du jet, la surélévation du panache, les bâtiments, le relief, les effets du temps de moyennage et le gaz lourd non isotherme ne sont pas modélisés, et les sigmas de Briggs hors de la plage 100 m–10 km sont extrapolés. Les résultats sont des valeurs d'estimation préliminaire ; vérifiez les conceptions avec SLAB, DEGADIS, PHAST ou la CFD.",
+    "es": "Emisión continua en régimen estacionario sobre terreno llano y despejado; no se modelan el momento del chorro, la elevación de la pluma, los edificios, el relieve, los efectos del tiempo de promediado ni el gas denso no isotermo, y las sigmas de Briggs fuera de 100 m–10 km se extrapolan. Los resultados son valores de cribado; verifique los diseños con SLAB, DEGADIS, PHAST o CFD.",
+    "pl": "Ustalone ciągłe uwolnienie nad płaskim, otwartym terenem; pęd strumienia, wznoszenie smugi, budynki, ukształtowanie terenu, wpływ czasu uśredniania oraz nieizotermiczny gaz ciężki nie są modelowane, a współczynniki sigma Briggsa poza zakresem 100 m–10 km są ekstrapolowane. Wyniki są wartościami szacunkowymi (przesiewowymi); projekty należy weryfikować za pomocą SLAB, DEGADIS, PHAST lub CFD."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ogh-safety.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python re-implementation (bench-src/ref/gen_gas_dispersion.py): 8 cases, worst relative deviation 2.2e-16; benchmark driver bench-src/run_gas_dispersion.mjs."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "python-reimpl-gas_dispersion",
+        "reference": "independent Python re-implementation (bench-src/ref/gen_gas_dispersion.py): Gaussian plume with Briggs 1973 rural sigmas (doubling + bisection search) and Britter-McQuaid 1988 continuous dense-gas workbook",
+        "citations": [
+          "TNO Yellow Book CPR14E (2005) ch. 4",
+          "CCPS Guidelines for Consequence Analysis of Chemical Releases (1999)",
+          "Briggs G.A. (1973) Diffusion estimation for small emissions, ATDL-106",
+          "Britter R.E., McQuaid J. (1988) Workbook on the dispersion of dense gases, HSE CRR 17/1988"
+        ],
+        "cases": 8,
+        "passed": 8,
+        "tolerance": "relative 1e-9 on record outputs; model label exact",
+        "run_at": "2026-10-23T14:58:18Z",
+        "artifact": "benchmarks/gas_dispersion.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "Not provided for this prototype."
+  },
+  "handoff": {
+    "provides": [
+      "mdot",
+      "T",
+      "p"
+    ],
+    "accepts": [
+      "mdot"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ogh-safety.js?v=77b8bacbb250" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+var DEFAULTS = { level: 'simple', gas: 'propane', Q_kg_s: 1, u10_m_s: 3, stab: 'D', H_m: 0, z_m: 0, T_C: 15, p_Pa: 101325, Ctarget_ppm: 0 };
+var IKEYS = ['gas', 'Q_kg_s', 'u10_m_s', 'stab', 'H_m', 'z_m', 'p_Pa', 'Ctarget_ppm'];
+function lib() { return (window.OGH || {}).gas_dispersion || null; }
+function has(o, p) { return o != null && Object.prototype.hasOwnProperty.call(o, p); }
+function toInput(s) {
+  var inp = {}, i, k;
+  for (i = 0; i < IKEYS.length; i++) {
+    k = IKEYS[i];
+    inp[k] = (k === 'gas' || k === 'stab') ? String(s[k]) : Number(s[k]);
+  }
+  inp.T_K = Number(s.T_C) + 273.15;
+  return inp;
+}
+function fromInput(inp, s) {
+  var i, k;
+  s = s || {};
+  for (i = 0; i < IKEYS.length; i++) {
+    k = IKEYS[i];
+    if (has(inp, k)) s[k] = inp[k];
+  }
+  if (has(inp, 'T_K')) s.T_C = inp.T_K - 273.15;
+  return s;
+}
+function solve(s) {
+  if (!lib()) return { ok: false, err: 'ogh-safety.js did not load' };
+  try {
+    var r = lib().solve(toInput(s));
+    return r && r.ok ? { ok: true, r: r } : { ok: false, err: (r && r.error) || 'error' };
+  } catch (e) { return { ok: false, err: String(e && e.message || e) }; }
+}
+
+function sig(v, n) {
+  if (n === undefined || n === null || !isFinite(n)) n = 5;
+  v = Number(v);
+  if (!isFinite(v) || v === 0) return 2;
+  var d = n - 1 - Math.floor(Math.log(Math.abs(v)) / Math.LN10);
+  return Math.max(0, Math.min(8, d));
+}
+function sigv(v, n) {
+  if (n === undefined || n === null || !isFinite(n)) n = 5;
+  n = Math.max(1, Math.min(21, Math.round(n)));
+  v = Number(v);
+  if (!isFinite(v)) return NaN;
+  if (v === 0) return 0;
+  return Number(v.toPrecision(n));
+}
+
+/* run14 i18n glue: language pick, $n templates, module warnings -> 7 languages (WARN table per page) */
+var LANGS7 = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+function LP(o) { return (window.DiagramUI && DiagramUI.pick) ? DiagramUI.pick(o, (ui && ui.lang) || 'en') : o.en; }
+function TF(o, a) {
+  var r = {}, i;
+  for (i = 0; i < LANGS7.length; i++) r[LANGS7[i]] = String(o[LANGS7[i]] || o.en).replace(/\$(\d)/g, function (m, k) { return a[k - 1] == null ? '' : a[k - 1]; });
+  return r;
+}
+function same7(s) { var r = {}, i; for (i = 0; i < LANGS7.length; i++) r[LANGS7[i]] = s; return r; }
+function trW(w) {
+  var i, m; w = String(w);
+  for (i = 0; i < WARN.length; i++) { m = WARN[i][0].exec(w); if (m) return TFW(WARN[i][1], m.slice(1)); }
+  return same7(w);
+}
+/* r3: numbers captured from the module warning (machine form) get the locale decimal comma outside en */
+function TFW(o, a) {
+  var r = {}, i, l;
+  for (i = 0; i < LANGS7.length; i++) {
+    l = LANGS7[i];
+    r[l] = String(o[l] || o.en).replace(/\$(\d)/g, function (x, k) { var g = a[k - 1] == null ? '' : String(a[k - 1]); return (l !== 'en' && /^-?\d+\.\d+$/.test(g)) ? g.replace('.', ',') : g; });
+  }
+  return r;
+}
+function trErr(e) {
+  return TF(T('Input error: $1', 'Помилка введення: $1', 'Eingabefehler: $1', 'Invoerfout: $1', 'Erreur de saisie : $1', 'Error de entrada: $1', 'Błąd danych: $1'), [String(e)]);
+}
+function trSrc(n) {
+  return TF(T('Sources: $1', 'Джерела: $1', 'Quellen: $1', 'Bronnen: $1', 'Sources : $1', 'Fuentes: $1', 'Źródła: $1'), [String(n)]);
+}
+var WARN = [
+  [/^All inputs must be finite and > 0/, T('All inputs must be finite and > 0', 'Усі вхідні дані мають бути скінченними та > 0', 'Alle Eingaben müssen endlich und > 0 sein', 'Alle invoer moet eindig en > 0 zijn', 'Toutes les entrées doivent être finies et > 0', 'Todas las entradas deben ser finitas y > 0', 'Wszystkie dane muszą być skończone i > 0')],
+  [/^Source gas not denser than air/, T('Gas is not denser than air: Britter-McQuaid not applicable', 'Газ не важчий за повітря: модель Бріттера-Маккуейда не застосовна', 'Gas ist nicht schwerer als Luft: Britter-McQuaid nicht anwendbar', 'Gas is niet zwaarder dan lucht: Britter-McQuaid niet van toepassing', 'Le gaz n’est pas plus dense que l’air : Britter-McQuaid non applicable', 'El gas no es más denso que el aire: Britter-McQuaid no aplicable', 'Gaz nie jest cięższy od powietrza: model Brittera-McQuaida nie ma zastosowania')],
+  [/^Density criterion ([\d.]+) < 0\.15/, T('Density criterion $1 < 0.15: passive dispersion, Gaussian plume used', 'Критерій густини $1 < 0,15: пасивне розсіювання, використано гаусів шлейф', 'Dichtekriterium $1 < 0,15: passive Ausbreitung, Gauß-Fahne verwendet', 'Dichtheidscriterium $1 < 0,15: passieve verspreiding, Gaussische pluim gebruikt', 'Critère de densité $1 < 0,15 : dispersion passive, panache gaussien utilisé', 'Criterio de densidad $1 < 0,15: dispersión pasiva, se usa la pluma gaussiana', 'Kryterium gęstości $1 < 0,15: dyspersja pasywna, użyto smugi Gaussa')],
+  [/^alpha=(-?[\d.]+) outside \[-1, 1\]/, T('Britter-McQuaid alpha = $1 outside [-1, 1]: correlation extrapolated', 'Параметр alpha = $1 поза [-1, 1]: кореляцію Бріттера-Маккуейда екстрапольовано', 'Britter-McQuaid alpha = $1 außerhalb [-1, 1]: Korrelation extrapoliert', 'Britter-McQuaid alpha = $1 buiten [-1, 1]: correlatie geëxtrapoleerd', 'Britter-McQuaid alpha = $1 hors de [-1, 1] : corrélation extrapolée', 'Britter-McQuaid alpha = $1 fuera de [-1, 1]: correlación extrapolada', 'Britter-McQuaid alpha = $1 poza [-1, 1]: korelacja ekstrapolowana')],
+  [/^Cm\/C0=(\S+) > (\S+): clamped to (\S+)/, T('Cm/C0 = $1 above the correlation range: clamped to $3', 'Cm/C0 = $1 вище діапазону кореляції: обмежено до $3', 'Cm/C0 = $1 über dem Korrelationsbereich: auf $3 begrenzt', 'Cm/C0 = $1 boven het correlatiebereik: begrensd op $3', 'Cm/C0 = $1 au-dessus du domaine de la corrélation : limité à $3', 'Cm/C0 = $1 por encima del rango de la correlación: limitado a $3', 'Cm/C0 = $1 powyżej zakresu korelacji: ograniczono do $3')],
+  [/^Cm\/C0=(\S+) < (\S+): clamped to (\S+)/, T('Target below the Britter-McQuaid range (Cm/C0 < $3): clamped to $3, the dense-gas distance is a lower bound', 'Ціль нижче діапазону Бріттера-Маккуейда (Cm/C0 < $3): обмежено до $3, відстань для важкого газу — нижня оцінка', 'Zielwert unter dem Britter-McQuaid-Bereich (Cm/C0 < $3): auf $3 begrenzt, der Schwergasabstand ist eine Untergrenze', 'Doel onder het Britter-McQuaid-bereik (Cm/C0 < $3): begrensd op $3, de zwaargasafstand is een ondergrens', 'Cible sous le domaine de Britter-McQuaid (Cm/C0 < $3) : limitée à $3, la distance gaz lourd est une borne inférieure', 'Objetivo por debajo del rango de Britter-McQuaid (Cm/C0 < $3): limitado a $3, la distancia de gas denso es un mínimo', 'Cel poniżej zakresu Brittera-McQuaida (Cm/C0 < $3): ograniczono do $3, odległość dla gazu ciężkiego jest dolnym oszacowaniem')],
+  [/^Briggs sigmas valid 100 m - 10 km: target distance below 100 m/, T('Briggs sigmas are fitted for 100 m - 10 km: a distance below 100 m is extrapolated', 'Сигми Бріггса підібрані для 100 м - 10 км: відстань менше 100 м екстрапольовано', 'Briggs-Sigmas gelten für 100 m - 10 km: ein Abstand unter 100 m ist extrapoliert', 'Briggs-sigma’s gelden voor 100 m - 10 km: een afstand onder 100 m is geëxtrapoleerd', 'Les sigmas de Briggs valent pour 100 m - 10 km : une distance inférieure à 100 m est extrapolée', 'Las sigmas de Briggs valen para 100 m - 10 km: una distancia inferior a 100 m está extrapolada', 'Sigmy Briggsa dopasowano dla 100 m - 10 km: odległość poniżej 100 m jest ekstrapolowana')],
+  [/^Briggs sigmas valid 100 m - 10 km: Gaussian distance capped/, T('Gaussian distance capped at 10 km (end of the Briggs range)', 'Гаусову відстань обмежено 10 км (межа діапазону Бріггса)', 'Gauß-Abstand auf 10 km begrenzt (Ende des Briggs-Bereichs)', 'Gaussische afstand begrensd op 10 km (einde Briggs-bereik)', 'Distance gaussienne limitée à 10 km (fin du domaine de Briggs)', 'Distancia gaussiana limitada a 10 km (fin del rango de Briggs)', 'Odległość Gaussa ograniczona do 10 km (koniec zakresu Briggsa)')],
+  [/^Gaussian model: target concentration not reached/, T('Gaussian plume: the target concentration is not reached at ground level', 'Гаусів шлейф: цільова концентрація на рівні землі не досягається', 'Gauß-Fahne: Zielkonzentration wird in Bodenhöhe nicht erreicht', 'Gaussische pluim: doelconcentratie wordt op grondniveau niet bereikt', 'Panache gaussien : la concentration cible n’est pas atteinte au sol', 'Pluma gaussiana: la concentración objetivo no se alcanza a nivel del suelo', 'Smuga Gaussa: stężenie docelowe nie jest osiągane przy gruncie')],
+  [/^H2\/light gas: buoyant plume rise ignored/, T('Light gas: buoyant plume rise is ignored (conservative at ground level)', 'Легкий газ: підйом шлейфу через плавучість не враховано (консервативно біля землі)', 'Leichtes Gas: Auftriebsüberhöhung vernachlässigt (konservativ in Bodenhöhe)', 'Licht gas: pluimstijging door opwaartse kracht genegeerd (conservatief op grondniveau)', 'Gaz léger : surélévation par flottabilité ignorée (conservatif au sol)', 'Gas ligero: se ignora la elevación por flotabilidad (conservador a nivel del suelo)', 'Gaz lekki: wznoszenie smugi z wyporu pominięte (konserwatywne przy gruncie)')],
+  [/^No averaging-time \/ peak-to-mean correction applied/, T('No averaging-time / peak-to-mean correction applied', 'Поправку на час усереднення / пік-до-середнього не застосовано', 'Keine Mittelungszeit- / Spitzen-Mittel-Korrektur angewendet', 'Geen middelingstijd- / piek-gemiddeldecorrectie toegepast', 'Aucune correction de durée d’intégration / pic-moyenne appliquée', 'Sin corrección de tiempo de promediado / pico-media', 'Bez korekty czasu uśredniania / pik-średnia')],
+  [/^No target concentration: Ctarget_ppm is 0 and (.+) has no LFL/, T('No target: $1 has no LFL, enter a ppm target', 'Немає цілі: $1 не має НКМП, введіть ціль у ppm', 'Kein Zielwert: $1 hat keine UEG, ppm-Zielwert eingeben', 'Geen doel: $1 heeft geen OEG, voer een ppm-doel in', 'Pas de cible : $1 n’a pas de LIE, saisissez une cible en ppm', 'Sin objetivo: $1 no tiene LII, introduzca un objetivo en ppm', 'Brak celu: $1 nie ma DGW, podaj cel w ppm')]
+];
+var MODEL_T = { 'Britter-McQuaid': same7('Britter-McQuaid'),
+  'Gaussian (Pasquill-Gifford)': T('Gaussian plume (Pasquill-Gifford)', 'Гаусів шлейф (Пасквілл-Гіффорд)', 'Gauß-Fahne (Pasquill-Gifford)', 'Gaussische pluim (Pasquill-Gifford)', 'Panache gaussien (Pasquill-Gifford)', 'Pluma gaussiana (Pasquill-Gifford)', 'Smuga Gaussa (Pasquill-Gifford)') };
+function trModel(m) { return MODEL_T[m] || same7(String(m)); }
+
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  var stage = null;
+  function LEGEND_ITEMS() {
+    return [
+      { label: T('Centreline concentration', 'Концентрація на осі', 'Konzentration auf der Achse', 'Concentratie op de as', 'Concentration dans l’axe', 'Concentración en el eje', 'Stężenie w osi'), series: 0 },
+      { label: T('Target', 'Ціль', 'Zielwert', 'Doel', 'Cible', 'Objetivo', 'Cel'), series: 1 }
+    ];
+  }
+  function adoptStage(app) {
+    stage = app.stages[0] || null;
+    if (stage) stage.legend({ items: LEGEND_ITEMS() });
+  }
+
+  var ui = null;
+
+  function computeView(s) {
+    last = solve(s);
+    if (stage) stage.schedule();
+    if (!last || !last.ok) { var e = String((last && last.err) || 'Error'); var ew = trW(e); return { verdict: { tone: 'bad', text: ew.en === e ? trErr(e) : ew }, tiles: [], notes: [] }; }
+    var r = last.r, tiles = [], notes = [], verdict, i, w, n;
+    var full = !!(s && s.level === 'full');
+    function fin(v) { return typeof v === 'number' && isFinite(v); }
+    function cell(v) { return fin(v) ? { value: sigv(v, 4), precision: sig(v, 4) } : { value: null, precision: 0 }; }
+    function tile(label, v, hint, learn, tone, headline) {
+      var c = cell(v);
+      return { label: label, value: c.value, hint: hint, precision: c.precision, tone: tone, learn: learn, headline: !!headline };
+    }
+    if (!fin(r.xTarget)) {
+      verdict = { tone: 'ok', text: T('Target concentration not reached at ground level',
+        'Цільова концентрація не досягається на рівні землі',
+        'Zielkonzentration in Bodenhöhe nicht erreicht',
+        'Doelconcentratie niet bereikt op grondniveau',
+        'Concentration cible non atteinte au niveau du sol',
+        'Concentración objetivo no alcanzada a nivel del suelo',
+        'Stężenie docelowe nieosiągnięte na poziomie gruntu') };
+    } else {
+      n = DiagramUI.fmt(r.xTarget, { precision: sig(r.xTarget, 3) });
+      verdict = { tone: 'warn', text: TF(T('Target reached up to $1 m downwind',
+        'Цільову концентрацію досягнуто до $1 м за вітром',
+        'Zielwert bis $1 m in Windrichtung erreicht',
+        'Doelwaarde bereikt tot $1 m benedenwinds',
+        'Cible atteinte jusqu\'à $1 m sous le vent',
+        'Objetivo alcanzado hasta $1 m a sotavento',
+        'Cel osiągnięty do $1 m z wiatrem'), [n]) };
+    }
+    tiles.push(tile(T('Distance to target', 'Відстань до цілі', 'Abstand bis Zielwert', 'Afstand tot doelwaarde',
+      'Distance à la cible', 'Distancia al objetivo', 'Odległość do celu'), r.xTarget, 'm', 'target', verdict.tone, true));
+    tiles.push(tile(T('Max. half-width (Gaussian)', 'Макс. напівширина (Гаус)', 'Max. Halbbreite (Gauß)', 'Max. halve breedte (Gauss)',
+      'Demi-largeur max. (gaussien)', 'Semiancho máx. (gaussiano)', 'Maks. półszerokość (Gauss)'), r.yMax, 'm', 'plume', null, true));
+    tiles.push(tile(T('Target concentration', 'Цільова концентрація', 'Zielkonzentration', 'Doelconcentratie',
+      'Concentration cible', 'Concentración objetivo', 'Stężenie docelowe'), fin(r.ct) ? r.ct * 1e6 : null, 'ppm', 'target'));
+    var mLbl = T('Model', 'Модель', 'Modell', 'Model', 'Modèle', 'Modelo', 'Model');
+    tiles.push(tile(mLbl, null, LP(trModel(r.model)), 'densegas'));
+    if (full) {
+      if (fin(r.xHalf)) tiles.push(tile(T('Distance to ½ LFL', 'Відстань до ½ НКМП', 'Abstand bis ½ UEG', 'Afstand tot ½ LEL',
+        'Distance à ½ LIE', 'Distancia a ½ LII', 'Odległość do ½ DGW'), r.xHalf, 'm', 'averaging'));
+      tiles.push(tile(T('Gaussian distance', 'Гаусова відстань', 'Gauß-Abstand', 'Gaussiaanse afstand',
+        'Distance gaussienne', 'Distancia gaussiana', 'Odległość Gaussa'), r.xGauss, 'm', 'plume'));
+      tiles.push(tile(T('Density criterion', 'Критерій густини', 'Dichtekriterium', 'Dichtheidscriterium',
+        'Critère de densité', 'Criterio de densidad', 'Kryterium gęstości'), r.densityCriterion, '-', 'densegas'));
+      tiles.push(tile(T('Gas density', 'Густина газу', 'Gasdichte', 'Gasdichtheid',
+        'Masse volumique du gaz', 'Densidad del gas', 'Gęstość gazu'), r.rho0, 'kg/m3', 'densegas'));
+    }
+    for (i = 0; r.warnings && i < r.warnings.length; i++) { w = String(r.warnings[i]); notes.push(trW(w)); }
+    notes.push(TF(T('Model: $1', 'Модель: $1', 'Modell: $1', 'Model: $1', 'Modèle : $1', 'Modelo: $1', 'Model: $1'), [LP(trModel(r.model))]));
+    notes.push(T('Concentrations are mean values; no averaging-time correction',
+      'Концентрації є середніми значеннями; без поправки на час усереднення',
+      'Konzentrationen sind Mittelwerte; keine Mittelungszeitkorrektur',
+      'Concentraties zijn gemiddelde waarden; geen middelingstijdcorrectie',
+      'Les concentrations sont des valeurs moyennes ; sans correction du temps d\'intégration',
+      'Las concentraciones son valores medios; sin corrección por tiempo de promediado',
+      'Stężenia są wartościami średnimi; bez korekty czasu uśredniania'));
+    if (r.norm) notes.push(trSrc(r.norm));
+    return { verdict: verdict, tiles: tiles, meters: [], tables: [], notes: notes };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'Gas dispersion';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record '
+                  + 'and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'gas_dispersion',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      learn: {
+        version: 1,
+        intro: {
+          title: T('Gas dispersion', 'Розсіювання газу', 'Gasausbreitung', 'Gasdispersie', 'Dispersion de gaz', 'Dispersión de gas', 'Dyspersja gazu'),
+          body: T(
+            'Estimates how far a continuous gas release travels downwind before diluting to the lower flammability limit or a chosen toxic or asphyxiant concentration. Passive gases use the Gaussian plume with Pasquill-Gifford (Briggs) dispersion coefficients, dense gases the Britter-McQuaid workbook (TNO Yellow Book, CCPS).',
+            'Оцінює, як далеко за вітром поширюється безперервний викид газу, перш ніж розбавитися до нижньої межі займистості або обраної токсичної чи задушливої концентрації. Для пасивних газів використовується гаусова модель шлейфу з коефіцієнтами розсіювання Пасквілла-Гіффорда (Бріггса), для важких газів — номограми Бріттера-Маккуейда (TNO Yellow Book, CCPS).',
+            'Schätzt, wie weit sich eine kontinuierliche Gasfreisetzung in Windrichtung ausbreitet, bevor sie auf die untere Explosionsgrenze oder eine gewählte toxische bzw. erstickende Konzentration verdünnt ist. Passive Gase werden mit der Gaußschen Ausbreitungsfahne und Pasquill-Gifford-(Briggs-)Ausbreitungsparametern berechnet, schwere Gase mit dem Britter-McQuaid-Workbook (TNO Yellow Book, CCPS).',
+            'Schat hoe ver een continue gasvrijzetting benedenwinds reikt voordat deze verdund is tot de onderste explosiegrens of een gekozen toxische of verstikkende concentratie. Passieve gassen gebruiken de Gaussische pluim met Pasquill-Gifford-(Briggs-)dispersiecoëfficiënten, zware gassen het Britter-McQuaid-werkboek (TNO Yellow Book, CCPS).',
+            'Estime la distance parcourue sous le vent par un rejet continu de gaz avant sa dilution jusqu\'à la limite inférieure d\'inflammabilité ou à une concentration toxique ou asphyxiante choisie. Les gaz passifs utilisent le panache gaussien avec les coefficients de dispersion de Pasquill-Gifford (Briggs), les gaz lourds la méthode de Britter-McQuaid (TNO Yellow Book, CCPS).',
+            'Estima hasta qué distancia viento abajo llega una fuga continua de gas antes de diluirse hasta el límite inferior de inflamabilidad o una concentración tóxica o asfixiante elegida. Los gases pasivos usan la pluma gaussiana con coeficientes de dispersión de Pasquill-Gifford (Briggs) y los gases densos el método de Britter-McQuaid (TNO Yellow Book, CCPS).',
+            'Szacuje, jak daleko z wiatrem rozprzestrzenia się ciągłe uwolnienie gazu, zanim rozcieńczy się do dolnej granicy wybuchowości lub wybranego stężenia toksycznego albo duszącego. Dla gazów pasywnych stosowany jest gaussowski model smugi ze współczynnikami dyspersji Pasquilla-Gifforda (Briggsa), dla gazów ciężkich metoda Brittera-McQuaida (TNO Yellow Book, CCPS).'
+          )
+        },
+        topics: {
+          source: {
+            title: T('Source and target', 'Джерело та цільова концентрація', 'Quelle und Zielwert', 'Bron en doelwaarde', 'Source et cible', 'Fuente y objetivo', 'Źródło i wartość docelowa'),
+            body: T(
+              'The release is a steady point source in kg/s of a pure gas (methane, natural gas, propane, hydrogen, H2S or CO2) at air temperature. The target is the LFL unless a ppm value is entered, converted to kg/m³ with the ideal-gas law.',
+              'Викид — це стаціонарне точкове джерело чистого газу в кг/с (метан, природний газ, пропан, водень, H2S або CO2) за температури повітря. Цільовим значенням є нижня межа займистості, якщо не задано значення в ppm, яке перераховується в кг/м³ за рівнянням стану ідеального газу.',
+              'Die Freisetzung ist eine stationäre Punktquelle in kg/s eines reinen Gases (Methan, Erdgas, Propan, Wasserstoff, H2S oder CO2) bei Lufttemperatur. Zielwert ist die UEG, sofern kein ppm-Wert eingegeben wird; dieser wird mit dem idealen Gasgesetz in kg/m³ umgerechnet.',
+              'De vrijzetting is een stationaire puntbron in kg/s van een zuiver gas (methaan, aardgas, propaan, waterstof, H2S of CO2) op luchttemperatuur. De doelwaarde is de OEG, tenzij een ppm-waarde wordt ingevoerd, die met de ideale gaswet wordt omgerekend naar kg/m³.',
+              'Le rejet est une source ponctuelle continue en kg/s d\'un gaz pur (méthane, gaz naturel, propane, hydrogène, H2S ou CO2) à la température de l\'air. La cible est la LII, sauf si une valeur en ppm est saisie, convertie en kg/m³ par la loi des gaz parfaits.',
+              'La fuga es una fuente puntual estacionaria en kg/s de un gas puro (metano, gas natural, propano, hidrógeno, H2S o CO2) a temperatura del aire. El objetivo es el LII salvo que se introduzca un valor en ppm, que se convierte a kg/m³ con la ley de los gases ideales.',
+              'Uwolnienie to ustalone źródło punktowe w kg/s czystego gazu (metan, gaz ziemny, propan, wodór, H2S lub CO2) o temperaturze powietrza. Wartością docelową jest DGW, chyba że podano wartość w ppm, przeliczaną na kg/m³ z równania stanu gazu doskonałego.'
+            )
+          },
+          plume: {
+            title: T('Gaussian plume', 'Гаусова модель шлейфу', 'Gaußsche Ausbreitungsfahne', 'Gaussische pluim', 'Panache gaussien', 'Pluma gaussiana', 'Smuga gaussowska'),
+            body: T(
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], with total ground reflection. The distance to the target is the furthest downwind point where the centreline concentration still exceeds it, and the half-width is the widest lateral extent of that contour. The half-width always comes from the Gaussian sigmas, also when the Britter-McQuaid distance governs for a dense gas: the Britter-McQuaid correlations give a distance, not a plume width, so for dense gases the half-width is indicative only.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], з повним відбиттям від землі. Відстань до цільової концентрації — це найвіддаленіша точка за вітром, де концентрація на осі шлейфу ще перевищує її, а напівширина — найбільша поперечна протяжність цього контуру. Напівширину завжди обчислено з гаусових сигм, також коли для важкого газу визначальною є відстань Britter-McQuaid: кореляції Britter-McQuaid дають відстань, а не ширину шлейфу, тож для важких газів напівширина лише орієнтовна.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], mit vollständiger Bodenreflexion. Die Zielentfernung ist der am weitesten entfernte Punkt in Windrichtung, an dem die Konzentration auf der Fahnenachse den Zielwert noch überschreitet; die Halbbreite ist die größte seitliche Ausdehnung dieser Kontur. Die Halbbreite stammt immer aus den Gauß-Sigmas, auch wenn für ein Schwergas der Britter-McQuaid-Abstand maßgebend ist: Die Britter-McQuaid-Korrelationen liefern einen Abstand, keine Fahnenbreite, daher ist die Halbbreite für Schwergase nur ein Richtwert.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], met volledige bodemreflectie. De afstand tot de doelwaarde is het verste benedenwindse punt waar de concentratie op de pluimas deze nog overschrijdt, en de halve breedte is de grootste zijdelingse uitgestrektheid van die contour. De halve breedte komt altijd uit de Gaussische sigma\'s, ook als voor een zwaar gas de Britter-McQuaid-afstand bepalend is: de Britter-McQuaid-correlaties geven een afstand, geen pluimbreedte, dus voor zware gassen is de halve breedte alleen indicatief.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], avec réflexion totale au sol. La distance à la cible est le point le plus éloigné sous le vent où la concentration dans l\'axe du panache la dépasse encore, et la demi-largeur est l\'extension latérale maximale de ce contour. La demi-largeur vient toujours des sigmas gaussiens, même lorsque la distance de Britter-McQuaid prévaut pour un gaz lourd : les corrélations de Britter-McQuaid donnent une distance, pas une largeur de panache, donc pour les gaz lourds la demi-largeur n\'est qu\'indicative.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], con reflexión total en el suelo. La distancia al objetivo es el punto más alejado viento abajo donde la concentración en el eje de la pluma aún lo supera, y la semianchura es la mayor extensión lateral de ese contorno. La semianchura sale siempre de las sigmas gaussianas, también cuando para un gas denso manda la distancia de Britter-McQuaid: las correlaciones de Britter-McQuaid dan una distancia, no una anchura de pluma, así que para gases densos la semianchura es solo orientativa.',
+              'C = Q/(2π u σy σz) · exp(−y²/2σy²) · [exp(−(z−H)²/2σz²) + exp(−(z+H)²/2σz²)], z pełnym odbiciem od podłoża. Odległość do wartości docelowej to najdalszy punkt z wiatrem, w którym stężenie na osi smugi wciąż ją przekracza, a półszerokość to największy boczny zasięg tego konturu. Półszerokość zawsze pochodzi z sigm gaussowskich, także gdy dla gazu ciężkiego decyduje odległość Britter-McQuaid: korelacje Britter-McQuaid dają odległość, a nie szerokość smugi, więc dla gazów ciężkich półszerokość jest tylko orientacyjna.'
+            )
+          },
+          stability: {
+            title: T('Weather and stability', 'Погода та стійкість атмосфери', 'Wetter und Stabilität', 'Weer en stabiliteit', 'Météo et stabilité', 'Meteorología y estabilidad', 'Pogoda i stabilność'),
+            body: T(
+              'Pasquill classes A (very unstable, sunny, light wind) to F (stable, clear night, light wind) set how fast the plume spreads, with Briggs (1973) open-country sigmas valid from 100 m to 10 km. F with 1.5–2 m/s is the usual worst case for ground-level releases and D with 5 m/s a typical average.',
+              'Класи Пасквілла від A (дуже нестійка, сонячно, слабкий вітер) до F (стійка, ясна ніч, слабкий вітер) визначають, як швидко розширюється шлейф; сигми Бріггса (1973) для відкритої місцевості чинні від 100 м до 10 км. Клас F при 1,5–2 м/с є типовим найгіршим випадком для приземних викидів, а D при 5 м/с відповідає типовим середнім умовам.',
+              'Die Pasquill-Klassen A (sehr labil, sonnig, schwacher Wind) bis F (stabil, klare Nacht, schwacher Wind) bestimmen, wie schnell sich die Fahne ausbreitet; die Briggs-Sigmas (1973) für offenes Gelände gelten von 100 m bis 10 km. F mit 1,5–2 m/s ist der übliche ungünstigste Fall für bodennahe Freisetzungen, D mit 5 m/s ein typischer Durchschnitt.',
+              'De Pasquill-klassen A (zeer onstabiel, zonnig, zwakke wind) tot F (stabiel, heldere nacht, zwakke wind) bepalen hoe snel de pluim zich verspreidt, met Briggs-sigma\'s (1973) voor open terrein, geldig van 100 m tot 10 km. F met 1,5–2 m/s is het gebruikelijke worstcasescenario voor lozingen op grondniveau en D met 5 m/s een typisch gemiddelde.',
+              'Les classes de Pasquill, de A (très instable, ensoleillé, vent faible) à F (stable, nuit claire, vent faible), déterminent la vitesse d\'étalement du panache, avec les sigmas de Briggs (1973) en rase campagne valables de 100 m à 10 km. La classe F avec 1,5–2 m/s est le cas le plus défavorable habituel pour les rejets au niveau du sol, et D avec 5 m/s une moyenne typique.',
+              'Las clases de Pasquill, de A (muy inestable, soleado, viento débil) a F (estable, noche despejada, viento débil), determinan la rapidez con que se dispersa la pluma, con las sigmas de Briggs (1973) para campo abierto válidas de 100 m a 10 km. F con 1,5–2 m/s es el peor caso habitual para emisiones a nivel del suelo y D con 5 m/s una media típica.',
+              'Klasy Pasquilla od A (bardzo chwiejna, słonecznie, słaby wiatr) do F (stała, bezchmurna noc, słaby wiatr) określają, jak szybko rozprzestrzenia się smuga, a sigmy Briggsa (1973) dla terenu otwartego obowiązują od 100 m do 10 km. F przy 1,5–2 m/s to typowy najgorszy przypadek dla uwolnień przy gruncie, a D przy 5 m/s to typowa średnia.'
+            )
+          },
+          target: {
+            title: T('Target concentration', 'Цільова концентрація', 'Zielkonzentration', 'Doelconcentratie', 'Concentration cible', 'Concentración objetivo', 'Stężenie docelowe'),
+            body: T(
+              'For flammables the LFL (methane 4.4 %, propane 1.7 %, hydrogen 4 %) and often half the LFL are used to allow for concentration fluctuations. For toxics use an exposure limit such as AEGL or ERPG (H2S 100 ppm is a common emergency level), and for CO2 about 4 % (40 000 ppm).',
+              'Для горючих речовин використовують НКМП (метан 4,4 %, пропан 1,7 %, водень 4 %), а часто й половину НКМП, щоб врахувати коливання концентрації. Для токсичних речовин застосовуйте граничний рівень впливу, наприклад AEGL або ERPG (для H2S поширеним аварійним рівнем є 100 ppm), а для CO2 близько 4 % (40 000 ppm).',
+              'Für brennbare Stoffe werden die UEG (Methan 4,4 %, Propan 1,7 %, Wasserstoff 4 %) und häufig die halbe UEG verwendet, um Konzentrationsschwankungen zu berücksichtigen. Für toxische Stoffe einen Expositionsgrenzwert wie AEGL oder ERPG verwenden (für H2S sind 100 ppm ein üblicher Notfallwert), für CO2 etwa 4 % (40 000 ppm).',
+              'Voor brandbare stoffen worden de OEG (methaan 4,4 %, propaan 1,7 %, waterstof 4 %) en vaak de helft van de OEG gebruikt om rekening te houden met concentratieschommelingen. Gebruik voor toxische stoffen een blootstellingsgrens zoals AEGL of ERPG (voor H2S is 100 ppm een gangbaar noodniveau) en voor CO2 ongeveer 4 % (40 000 ppm).',
+              'Pour les produits inflammables, on utilise la LIE (méthane 4,4 %, propane 1,7 %, hydrogène 4 %) et souvent la moitié de la LIE pour tenir compte des fluctuations de concentration. Pour les toxiques, utilisez un seuil d\'exposition tel que l\'AEGL ou l\'ERPG (100 ppm pour H2S est un niveau d\'urgence courant), et pour le CO2 environ 4 % (40 000 ppm).',
+              'Para sustancias inflamables se usa el LII (metano 4,4 %, propano 1,7 %, hidrógeno 4 %) y a menudo la mitad del LII para tener en cuenta las fluctuaciones de concentración. Para tóxicos use un límite de exposición como AEGL o ERPG (100 ppm de H2S es un nivel de emergencia habitual) y para el CO2 alrededor del 4 % (40 000 ppm).',
+              'Dla substancji palnych stosuje się DGW (metan 4,4 %, propan 1,7 %, wodór 4 %), a często połowę DGW, aby uwzględnić wahania stężenia. Dla substancji toksycznych należy przyjąć limit narażenia, np. AEGL lub ERPG (dla H2S typowym poziomem awaryjnym jest 100 ppm), a dla CO2 około 4 % (40 000 ppm).'
+            )
+          },
+          densegas: {
+            title: T('Dense-gas model', 'Модель важкого газу', 'Schwergasmodell', 'Zwaargasmodel', 'Modèle de gaz lourd', 'Modelo de gas denso', 'Model gazu ciężkiego'),
+            body: T(
+              'Gases heavier than air (propane, CO2, H2S) slump and spread sideways. When the criterion (g0\' q0/(u^3 Dc))^(1/3) is at least 0.15, the Britter-McQuaid continuous-release correlation gives the distance x = Dc 10^beta(alpha, C/C0); otherwise the release is treated as passive and the Gaussian result is used.',
+              'Гази, важчі за повітря (пропан, CO2, H2S), осідають і розтікаються в сторони. Якщо критерій (g0\' q0/(u^3 Dc))^(1/3) не менший за 0,15, кореляція Бріттера-Маккуейда для безперервного викиду дає відстань x = Dc 10^beta(alpha, C/C0); інакше викид вважається пасивним і використовується гаусів результат.',
+              'Gase, die schwerer als Luft sind (Propan, CO2, H2S), sinken ab und breiten sich seitlich aus. Ist das Kriterium (g0\' q0/(u^3 Dc))^(1/3) mindestens 0,15, liefert die Britter-McQuaid-Korrelation für kontinuierliche Freisetzung den Abstand x = Dc 10^beta(alpha, C/C0); andernfalls wird die Freisetzung als passiv behandelt und das Gauß-Ergebnis verwendet.',
+              'Gassen die zwaarder zijn dan lucht (propaan, CO2, H2S) zakken uit en verspreiden zich zijwaarts. Als het criterium (g0\' q0/(u^3 Dc))^(1/3) minstens 0,15 is, geeft de Britter-McQuaid-correlatie voor continue lozing de afstand x = Dc 10^beta(alpha, C/C0); anders wordt de lozing als passief behandeld en wordt het Gaussische resultaat gebruikt.',
+              'Les gaz plus lourds que l\'air (propane, CO2, H2S) s\'affaissent et s\'étalent latéralement. Lorsque le critère (g0\' q0/(u^3 Dc))^(1/3) est d\'au moins 0,15, la corrélation de Britter-McQuaid pour rejet continu donne la distance x = Dc 10^beta(alpha, C/C0) ; sinon, le rejet est traité comme passif et le résultat gaussien est utilisé.',
+              'Los gases más pesados que el aire (propano, CO2, H2S) se asientan y se extienden lateralmente. Cuando el criterio (g0\' q0/(u^3 Dc))^(1/3) es al menos 0,15, la correlación de Britter-McQuaid para emisión continua da la distancia x = Dc 10^beta(alpha, C/C0); en caso contrario, la emisión se trata como pasiva y se usa el resultado gaussiano.',
+              'Gazy cięższe od powietrza (propan, CO2, H2S) opadają i rozpływają się na boki. Gdy kryterium (g0\' q0/(u^3 Dc))^(1/3) wynosi co najmniej 0,15, korelacja Brittera-McQuaida dla uwolnienia ciągłego daje odległość x = Dc 10^beta(alpha, C/C0); w przeciwnym razie uwolnienie traktuje się jako pasywne i stosuje się wynik gaussowski.'
+            )
+          },
+          wind: {
+            title: T('Wind speed', 'Швидкість вітру', 'Windgeschwindigkeit', 'Windsnelheid', 'Vitesse du vent', 'Velocidad del viento', 'Prędkość wiatru'),
+            body: T('The wind speed at 10 m dilutes a passive plume directly: C is proportional to Q/u, so halving the wind doubles the centreline concentration. Low wind usually comes with stable classes E-F at night, which is why the worst case for passive gases is a calm night (1.5 m/s F), not a storm. For dense gases the wind also sets the density criterion (g0 q0/(u³ Dc))^(1/3): weaker wind makes a cloud more strongly dense-gas dominated. Below about 1 m/s the plume model loses meaning (meandering, pooling).', 'Швидкість вітру на висоті 10 м прямо розбавляє пасивний шлейф: C пропорційна Q/u, тож удвічі слабший вітер подвоює концентрацію на осі. Слабкий вітер зазвичай супроводжується стійкими класами E-F уночі, тому найгірший випадок для пасивних газів — тиха ніч (1,5 м/с, F), а не буря. Для важких газів вітер також задає критерій густини (g0 q0/(u³ Dc))^(1/3): слабший вітер робить хмару ще «важчою». Нижче приблизно 1 м/с модель шлейфу втрачає зміст (меандрування, застій).', 'Die Windgeschwindigkeit in 10 m verdünnt eine passive Fahne direkt: C ist proportional zu Q/u, halber Wind bedeutet doppelte Achsenkonzentration. Schwacher Wind tritt meist nachts mit stabilen Klassen E-F auf; deshalb ist der ungünstigste Fall für passive Gase eine ruhige Nacht (1,5 m/s, F), nicht Sturm. Bei Schwergasen bestimmt der Wind auch das Dichtekriterium (g0 q0/(u³ Dc))^(1/3): schwächerer Wind macht die Wolke stärker schwergasdominiert. Unter etwa 1 m/s verliert das Fahnenmodell seinen Sinn (Mäandrieren, Ansammlung).', 'De windsnelheid op 10 m verdunt een passieve pluim direct: C is evenredig met Q/u, dus halve wind verdubbelt de concentratie op de as. Weinig wind gaat ’s nachts meestal samen met stabiele klassen E-F; daarom is het slechtste geval voor passieve gassen een windstille nacht (1,5 m/s, F), geen storm. Bij zware gassen bepaalt de wind ook het dichtheidscriterium (g0 q0/(u³ Dc))^(1/3): zwakkere wind maakt de wolk sterker zwaargasgedomineerd. Onder ongeveer 1 m/s verliest het pluimmodel zijn betekenis (meanderen, ophoping).', 'La vitesse du vent à 10 m dilue directement un panache passif : C est proportionnelle à Q/u, un vent deux fois plus faible double la concentration dans l’axe. Le vent faible va souvent de pair avec les classes stables E-F la nuit ; le pire cas pour les gaz passifs est donc une nuit calme (1,5 m/s, F), pas une tempête. Pour les gaz lourds, le vent fixe aussi le critère de densité (g0 q0/(u³ Dc))^(1/3) : un vent plus faible rend le nuage plus dominé par la gravité. Sous environ 1 m/s, le modèle de panache perd son sens (méandres, accumulation).', 'La velocidad del viento a 10 m diluye directamente una pluma pasiva: C es proporcional a Q/u, así que la mitad de viento duplica la concentración en el eje. El viento flojo suele ir con clases estables E-F de noche; por eso el peor caso para gases pasivos es una noche en calma (1,5 m/s, F), no una tormenta. En gases densos el viento fija también el criterio de densidad (g0 q0/(u³ Dc))^(1/3): menos viento hace la nube más dominada por la gravedad. Por debajo de 1 m/s aprox. el modelo de pluma pierde sentido (serpenteo, acumulación).', 'Prędkość wiatru na 10 m bezpośrednio rozcieńcza smugę pasywną: C jest proporcjonalne do Q/u, więc wiatr o połowę słabszy podwaja stężenie w osi. Słaby wiatr zwykle idzie w parze z nocnymi klasami stabilnymi E-F, dlatego najgorszy przypadek dla gazów pasywnych to spokojna noc (1,5 m/s, F), a nie burza. Dla gazów ciężkich wiatr wyznacza też kryterium gęstości (g0 q0/(u³ Dc))^(1/3): słabszy wiatr czyni chmurę bardziej „ciężką”. Poniżej ok. 1 m/s model smugi traci sens (meandrowanie, gromadzenie się gazu).')
+          },
+          averaging: {
+            title: T('Averaging time and ½ LFL', 'Час усереднення та ½ НКМП', 'Mittelungszeit und ½ UEG', 'Middelingstijd en ½ OEG', 'Durée d’intégration et ½ LIE', 'Tiempo de promediado y ½ LII', 'Czas uśredniania i ½ DGW'),
+            body: T('Briggs sigmas describe concentrations averaged over about 10 minutes. A flammable cloud ignites on instantaneous peaks, which can be about twice the mean, so practice (API RP 752, many company standards) maps flammable zones to ½ LFL; the Full mode shows that distance. Toxic criteria are tied to an exposure time (e.g. 30-60 min for AEGL/ERPG), so a 10-minute mean is roughly consistent for them. No peak-to-mean factor is applied here - choose the endpoint knowingly.', 'Сигми Бріггса описують концентрації, усереднені приблизно за 10 хвилин. Горюча хмара займається від миттєвих піків, що можуть удвічі перевищувати середнє, тому на практиці (API RP 752, багато корпоративних стандартів) горючу зону будують до ½ НКМП; повний режим показує цю відстань. Токсичні критерії прив’язані до часу дії (наприклад, 30-60 хв для AEGL/ERPG), тож для них 10-хвилинне середнє приблизно узгоджене. Коефіцієнт пік/середнє тут не застосовано — обирайте поріг свідомо.', 'Briggs-Sigmas beschreiben Konzentrationen, die über etwa 10 Minuten gemittelt sind. Eine brennbare Wolke zündet an momentanen Spitzen, die etwa doppelt so hoch wie der Mittelwert sein können; daher werden Ex-Zonen in der Praxis (API RP 752, viele Werksnormen) bis ½ UEG gezogen - der Modus „Vollständig“ zeigt diesen Abstand. Toxische Kriterien hängen an einer Expositionszeit (z. B. 30-60 min für AEGL/ERPG), dafür passt ein 10-Minuten-Mittel ungefähr. Ein Spitzen-Mittel-Faktor wird hier nicht angewendet - wählen Sie den Endpunkt bewusst.', 'Briggs-sigma’s beschrijven concentraties gemiddeld over ongeveer 10 minuten. Een brandbare wolk ontsteekt op momentane pieken die ongeveer het dubbele van het gemiddelde kunnen zijn; daarom wordt in de praktijk (API RP 752, veel bedrijfsnormen) tot ½ OEG gerekend - de modus Volledig toont die afstand. Toxische criteria horen bij een blootstellingsduur (bijv. 30-60 min voor AEGL/ERPG), daarvoor past een 10-minutengemiddelde ongeveer. Er wordt hier geen piek-gemiddeldefactor toegepast - kies het eindpunt bewust.', 'Les sigmas de Briggs décrivent des concentrations moyennées sur environ 10 minutes. Un nuage inflammable s’enflamme sur des pics instantanés pouvant valoir environ deux fois la moyenne ; la pratique (API RP 752, nombreux standards d’entreprise) trace donc les zones inflammables à ½ LIE - le mode Complet affiche cette distance. Les critères toxiques sont liés à une durée d’exposition (p. ex. 30-60 min pour AEGL/ERPG), pour lesquels une moyenne de 10 minutes est à peu près cohérente. Aucun facteur pic/moyenne n’est appliqué ici - choisissez le seuil en connaissance de cause.', 'Las sigmas de Briggs describen concentraciones promediadas en unos 10 minutos. Una nube inflamable se enciende con picos instantáneos que pueden ser el doble de la media; por eso en la práctica (API RP 752, muchas normas de empresa) las zonas inflamables se trazan a ½ LII; el modo Completo muestra esa distancia. Los criterios tóxicos van ligados a un tiempo de exposición (p. ej. 30-60 min para AEGL/ERPG), para los que una media de 10 minutos es más o menos coherente. Aquí no se aplica factor pico/media: elija el umbral a sabiendas.', 'Sigmy Briggsa opisują stężenia uśrednione w ok. 10 minutach. Chmura palna zapala się od chwilowych pików, które mogą być ok. dwa razy wyższe od średniej, dlatego w praktyce (API RP 752, wiele norm firmowych) strefy palne wyznacza się do ½ DGW - tryb Pełny pokazuje tę odległość. Kryteria toksyczne są powiązane z czasem narażenia (np. 30-60 min dla AEGL/ERPG), dla nich średnia 10-minutowa jest mniej więcej spójna. Nie stosuje się tu współczynnika pik/średnia - wybierz próg świadomie.')
+          },
+          limits: {
+            title: T('Scope and limits', 'Сфера застосування та обмеження', 'Anwendungsbereich und Grenzen', 'Toepassingsgebied en beperkingen', 'Domaine et limites', 'Alcance y limitaciones', 'Zakres i ograniczenia'),
+            body: T(
+              'Steady continuous release over flat open country, with no jet momentum, plume rise, buildings, terrain or averaging-time correction; the dense gas is isothermal and Briggs sigmas outside 100 m-10 km are extrapolated. Use the result for screening and check designs with SLAB, DEGADIS, PHAST or CFD.',
+              'Усталений безперервний викид над рівною відкритою місцевістю, без імпульсу струменя, підйому шлейфу, будівель, рельєфу чи поправки на час усереднення; важкий газ ізотермічний, а сигми Бріггса поза межами 100 м-10 км екстрапольовані. Використовуйте результат для попередньої оцінки, а проєкти перевіряйте за допомогою SLAB, DEGADIS, PHAST або CFD.',
+              'Stationäre kontinuierliche Freisetzung über flachem, offenem Gelände, ohne Strahlimpuls, Fahnenüberhöhung, Gebäude, Geländeeinfluss oder Mittelungszeitkorrektur; das Schwergas ist isotherm, und Briggs-Sigmas außerhalb von 100 m-10 km sind extrapoliert. Verwenden Sie das Ergebnis zum Screening und prüfen Sie Auslegungen mit SLAB, DEGADIS, PHAST oder CFD.',
+              'Stationaire continue lozing boven vlak, open terrein, zonder straalimpuls, pluimstijging, gebouwen, terreinreliëf of middelingstijdcorrectie; het zware gas is isotherm en Briggs-sigma\'s buiten 100 m-10 km zijn geëxtrapoleerd. Gebruik het resultaat voor screening en controleer ontwerpen met SLAB, DEGADIS, PHAST of CFD.',
+              'Rejet continu stationnaire sur terrain plat et dégagé, sans quantité de mouvement du jet, surélévation du panache, bâtiments, relief ni correction de durée d\'intégration ; le gaz lourd est isotherme et les sigmas de Briggs hors de 100 m-10 km sont extrapolés. Utilisez le résultat pour une évaluation préliminaire et vérifiez les conceptions avec SLAB, DEGADIS, PHAST ou la CFD.',
+              'Emisión continua estacionaria sobre terreno llano y abierto, sin cantidad de movimiento del chorro, elevación de la pluma, edificios, relieve ni corrección por tiempo de promediado; el gas denso es isotermo y las sigmas de Briggs fuera de 100 m-10 km se extrapolan. Use el resultado para un cribado y verifique los diseños con SLAB, DEGADIS, PHAST o CFD.',
+              'Ustalone uwolnienie ciągłe nad płaskim, otwartym terenem, bez pędu strumienia, wyniesienia smugi, budynków, rzeźby terenu ani korekty czasu uśredniania; gaz ciężki jest izotermiczny, a sigmy Briggsa poza zakresem 100 m-10 km są ekstrapolowane. Wynik służy do wstępnej oceny, a projekty należy sprawdzać za pomocą SLAB, DEGADIS, PHAST lub CFD.'
+            )
+          }
+        },
+        tour: [
+          { topic: 'source', focus: '[data-dgu-field="f-gas"]' },
+          { topic: 'stability', focus: '[data-dgu-field="f-stab"]' },
+          { topic: 'wind', focus: '[data-dgu-field="f-u"]' },
+          { topic: 'target', focus: '[data-dgu-field="f-target"]' },
+          { topic: 'densegas', focus: '.dgu-r-results' },
+          { topic: 'plume', focus: '.dgu-stage' }
+        ]
+      },
+      panels: [
+        { id: 'how', slot: 'inputs', title: T('Method', 'Метод', 'Methode', 'Methode', 'Méthode', 'Método', 'Metoda'),
+          fields: [
+            { id: 'f-level', key: 'level', type: 'segmented', learn: 'limits', label: T('Level', 'Рівень', 'Stufe', 'Niveau', 'Niveau', 'Nivel', 'Poziom'),
+              options: function () { return [
+                ['simple', T('Simple', 'Простий', 'Einfach', 'Eenvoudig', 'Simple', 'Simple', 'Prosty')],
+                ['full', T('Full', 'Повний', 'Vollständig', 'Volledig', 'Complet', 'Completo', 'Pełny')]
+              ]; } }
+          ] },
+        { id: 'source', slot: 'inputs', title: T('Release', 'Викид', 'Freisetzung', 'Vrijkomen', 'Rejet', 'Emisión', 'Uwolnienie'),
+          fields: [
+            { id: 'f-gas', key: 'gas', type: 'select', learn: 'source', label: T('Gas', 'Газ', 'Gas', 'Gas', 'Gaz', 'Gas', 'Gaz'),
+              options: function () { return [
+                ['methane', T('Methane', 'Метан', 'Methan', 'Methaan', 'Méthane', 'Metano', 'Metan')],
+                ['natgas', T('Natural gas', 'Природний газ', 'Erdgas', 'Aardgas', 'Gaz naturel', 'Gas natural', 'Gaz ziemny')],
+                ['propane', T('Propane', 'Пропан', 'Propan', 'Propaan', 'Propane', 'Propano', 'Propan')],
+                ['hydrogen', T('Hydrogen', 'Водень', 'Wasserstoff', 'Waterstof', 'Hydrogène', 'Hidrógeno', 'Wodór')],
+                ['h2s', T('H2S', 'H2S', 'H2S', 'H2S', 'H2S', 'H2S', 'H2S')],
+                ['co2', T('CO2', 'CO2', 'CO2', 'CO2', 'CO2', 'CO2', 'CO2')]
+              ]; } },
+            { id: 'f-q', key: 'Q_kg_s', type: 'number', unit: 'kg/s', min: 0.001, max: 1000, step: 0.1, precision: 3, required: true, learn: 'source',
+              label: T('Release rate', 'Інтенсивність викиду', 'Freisetzungsrate', 'Uitstroomdebiet', 'Débit de rejet', 'Caudal de emisión', 'Natężenie wypływu') },
+            { id: 'f-h', key: 'H_m', type: 'number', unit: 'm', min: 0, max: 200, step: 1, precision: 1, required: true, learn: 'plume',
+              label: T('Release height', 'Висота викиду', 'Freisetzungshöhe', 'Uitstroomhoogte', 'Hauteur de rejet', 'Altura de emisión', 'Wysokość uwolnienia'),
+              visible: function (ctx) { return ctx.state.level === 'full'; } },
+            { id: 'f-target', key: 'Ctarget_ppm', type: 'number', unit: 'ppm', min: 0, max: 1000000, step: 100, precision: 0, required: true, learn: 'target',
+              label: T('Target (0 = LFL)', 'Ціль (0 = НКМП)', 'Zielwert (0 = UEG)', 'Doel (0 = OEG)', 'Cible (0 = LIE)', 'Objetivo (0 = LII)', 'Cel (0 = DGW)') }
+          ] },
+        { id: 'weather', slot: 'inputs', title: T('Weather', 'Погода', 'Wetter', 'Weer', 'Météo', 'Meteorología', 'Pogoda'),
+          fields: [
+            { id: 'f-u', key: 'u10_m_s', type: 'number', unit: 'm/s', min: 0.5, max: 20, step: 0.5, precision: 1, required: true, learn: 'wind',
+              label: T('Wind at 10 m', 'Вітер на 10 м', 'Wind in 10 m', 'Wind op 10 m', 'Vent à 10 m', 'Viento a 10 m', 'Wiatr na 10 m') },
+            { id: 'f-stab', key: 'stab', type: 'select', learn: 'stability',
+              label: T('Stability class', 'Клас стійкості', 'Stabilitätsklasse', 'Stabiliteitsklasse', 'Classe de stabilité', 'Clase de estabilidad', 'Klasa stabilności'),
+              options: function () { return [
+                ['A', T('A (very unstable)', 'A (дуже нестійкий)', 'A (sehr labil)', 'A (zeer onstabiel)', 'A (très instable)', 'A (muy inestable)', 'A (bardzo chwiejna)')],
+                ['B', T('B (unstable)', 'B (нестійкий)', 'B (labil)', 'B (onstabiel)', 'B (instable)', 'B (inestable)', 'B (chwiejna)')],
+                ['C', T('C (slightly unstable)', 'C (слабко нестійкий)', 'C (leicht labil)', 'C (licht onstabiel)', 'C (légèrement instable)', 'C (ligeramente inestable)', 'C (lekko chwiejna)')],
+                ['D', T('D (neutral)', 'D (нейтральний)', 'D (neutral)', 'D (neutraal)', 'D (neutre)', 'D (neutra)', 'D (obojętna)')],
+                ['E', T('E (slightly stable)', 'E (слабко стійкий)', 'E (leicht stabil)', 'E (licht stabiel)', 'E (légèrement stable)', 'E (ligeramente estable)', 'E (lekko stała)')],
+                ['F', T('F (stable)', 'F (стійкий)', 'F (stabil)', 'F (stabiel)', 'F (stable)', 'F (estable)', 'F (stała)')]
+              ]; } },
+            { id: 'f-t', key: 'T_C', type: 'number', unit: '°C', min: -40, max: 50, step: 1, precision: 0, required: true, learn: 'source',
+              label: T('Air temperature', 'Температура повітря', 'Lufttemperatur', 'Luchttemperatuur', 'Température de l\'air', 'Temperatura del aire', 'Temperatura powietrza'),
+              visible: function (ctx) { return ctx.state.level === 'full'; } },
+            { id: 'f-p', key: 'p_Pa', type: 'number', unit: 'Pa', min: 80000, max: 110000, step: 100, precision: 0, required: true, learn: 'source',
+              label: T('Air pressure', 'Тиск повітря', 'Luftdruck', 'Luchtdruk', 'Pression de l\'air', 'Presión del aire', 'Ciśnienie powietrza'),
+              visible: function (ctx) { return ctx.state.level === 'full'; } },
+            { id: 'f-z', key: 'z_m', type: 'number', unit: 'm', min: 0, max: 50, step: 0.5, precision: 1, required: true, learn: 'plume',
+              label: T('Receptor height', 'Висота рецептора', 'Rezeptorhöhe', 'Receptorhoogte', 'Hauteur du récepteur', 'Altura del receptor', 'Wysokość receptora'),
+              visible: function (ctx) { return ctx.state.level === 'full'; } }
+          ] }
+      ],
+      on: {
+        rebuild: adoptStage,
+        compute: computeView
+      }
+    });
+
+    ui.panel({
+      id: 'io',
+      slot: 'inputs',
+      actionsAlign: 'end',
+      actions: [ui.resetAction()]
+    });
+
+    var G1 = T('Flammable', 'Горючі', 'Brennbar', 'Ontvlambaar', 'Inflammable', 'Inflamable', 'Palne');
+    var G2 = T('Toxic and asphyxiant', 'Токсичні та задушливі', 'Giftig und erstickend', 'Giftig en verstikkend', 'Toxique et asphyxiant', 'Tóxico y asfixiante', 'Toksyczne i duszące');
+    function exA(lv, gas, Q, u, st, H, C) {
+      return function (t) {
+        t.level = lv; t.gas = gas; t.Q_kg_s = Q; t.u10_m_s = u; t.stab = st;
+        t.H_m = H; t.z_m = 0; t.T_C = 15; t.p_Pa = 101325; t.Ctarget_ppm = C;
+      };
+    }
+    var EX = [
+      { id: 'propane-day', group: G1,
+        label: T('Propane leak, neutral day', 'Витік пропану, нейтральний день', 'Propanleck, neutraler Tag', 'Propaanlek, neutrale dag', 'Fuite de propane, jour neutre', 'Fuga de propano, día neutro', 'Wyciek propanu, dzień obojętny'),
+        note: T('Look at the Model tile: 1 kg/s of propane is a dense gas (criterion 0.62 ≥ 0.15), so Britter-McQuaid sets the LFL distance, about 84 m - three times the passive Gaussian 27 m.', 'Дивіться на плитку «Модель»: 1 кг/с пропану — важкий газ (критерій 0,62 ≥ 0,15), тож відстань до НКМП задає Бріттер-Маккуейд, близько 84 м — утричі більше за пасивні гаусові 27 м.', 'Achten Sie auf die Kachel „Modell“: 1 kg/s Propan ist ein Schwergas (Kriterium 0,62 ≥ 0,15), daher bestimmt Britter-McQuaid den UEG-Abstand, etwa 84 m - dreimal so viel wie die passiven 27 m nach Gauß.', 'Kijk naar de tegel Model: 1 kg/s propaan is een zwaar gas (criterium 0,62 ≥ 0,15), dus Britter-McQuaid bepaalt de OEG-afstand, ongeveer 84 m - drie keer de passieve Gaussische 27 m.', 'Regardez la tuile Modèle : 1 kg/s de propane est un gaz lourd (critère 0,62 ≥ 0,15), donc Britter-McQuaid fixe la distance à la LIE, environ 84 m - trois fois les 27 m du panache gaussien passif.', 'Fíjese en la casilla Modelo: 1 kg/s de propano es un gas denso (criterio 0,62 ≥ 0,15), así que Britter-McQuaid fija la distancia al LII, unos 84 m - el triple de los 27 m de la pluma gaussiana pasiva.', 'Spójrz na kafelek Model: 1 kg/s propanu to gaz ciężki (kryterium 0,62 ≥ 0,15), więc odległość do DGW wyznacza Britter-McQuaid, około 84 m - trzy razy więcej niż pasywne 27 m z modelu Gaussa.'),
+        apply: exA('simple', 'propane', 1, 3, 'D', 0, 0) },
+      { id: 'propane-night', group: G1,
+        label: T('Propane leak, calm night', 'Витік пропану, тиха ніч', 'Propanleck, ruhige Nacht', 'Propaanlek, windstille nacht', 'Fuite de propane, nuit calme', 'Fuga de propano, noche en calma', 'Wyciek propanu, spokojna noc'),
+        note: T('Aha: on a calm stable night (F, 1.5 m/s) the LFL distance grows only from 84 to 90 m, because the dense-gas correlation has no stability class; a passive Gaussian plume would stretch from 27 to 104 m.', 'Ага: тихої стійкої ночі (F, 1,5 м/с) відстань до НКМП зростає лише з 84 до 90 м, бо кореляція для важкого газу не має класу стійкості; пасивний гаусів шлейф витягнувся б з 27 до 104 м.', 'Aha: In einer ruhigen, stabilen Nacht (F, 1,5 m/s) wächst der UEG-Abstand nur von 84 auf 90 m, denn die Schwergaskorrelation kennt keine Stabilitätsklasse; eine passive Gauß-Fahne würde sich von 27 auf 104 m strecken.', 'Aha: in een windstille stabiele nacht (F, 1,5 m/s) groeit de OEG-afstand maar van 84 naar 90 m, want de zwaargascorrelatie kent geen stabiliteitsklasse; een passieve Gaussische pluim zou van 27 naar 104 m gaan.', 'Aha : par nuit calme et stable (F, 1,5 m/s), la distance à la LIE passe seulement de 84 à 90 m, car la corrélation gaz lourd n’a pas de classe de stabilité ; un panache gaussien passif passerait de 27 à 104 m.', 'Ajá: en una noche estable y en calma (F, 1,5 m/s) la distancia al LII solo crece de 84 a 90 m, porque la correlación de gas denso no tiene clase de estabilidad; una pluma gaussiana pasiva pasaría de 27 a 104 m.', 'Aha: w spokojną, stabilną noc (F, 1,5 m/s) odległość do DGW rośnie tylko z 84 do 90 m, bo korelacja gazu ciężkiego nie zna klasy stabilności; pasywna smuga Gaussa wydłużyłaby się z 27 do 104 m.'),
+        apply: exA('simple', 'propane', 1, 1.5, 'F', 0, 0) },
+      { id: 'natgas-stack', group: G1,
+        label: T('Gas pipeline vent, 10 m stack', 'Скидання з газопроводу, свічка 10 м', 'Gasleitungsentlüftung, 10-m-Kamin', 'Afblazen gasleiding, 10 m schoorsteen', 'Évent de gazoduc, cheminée 10 m', 'Venteo de gasoducto, chimenea 10 m', 'Odpowietrzenie gazociągu, komin 10 m'),
+        note: T('Aha: 2 kg/s of natural gas vented from a 10 m stack never reaches the LFL at ground level - the plume dilutes before it touches down. Set the release height to 0 m and a 28 m LFL zone appears.', 'Ага: 2 кг/с природного газу зі свічки висотою 10 м ніде не досягають НКМП біля землі — шлейф розбавляється, перш ніж опуститися. Задайте висоту викиду 0 м — і з’явиться зона НКМП 28 м.', 'Aha: 2 kg/s Erdgas aus einem 10-m-Kamin erreichen in Bodenhöhe nie die UEG - die Fahne ist verdünnt, bevor sie den Boden erreicht. Setzen Sie die Freisetzungshöhe auf 0 m, und es entsteht eine UEG-Zone von 28 m.', 'Aha: 2 kg/s aardgas uit een schoorsteen van 10 m bereikt op grondniveau nooit de OEG - de pluim is verdund voordat hij de grond raakt. Zet de uitstroomhoogte op 0 m en er verschijnt een OEG-zone van 28 m.', 'Aha : 2 kg/s de gaz naturel rejetés par une cheminée de 10 m n’atteignent jamais la LIE au sol - le panache est dilué avant de toucher le sol. Mettez la hauteur de rejet à 0 m et une zone LIE de 28 m apparaît.', 'Ajá: 2 kg/s de gas natural venteados por una chimenea de 10 m nunca alcanzan el LII a nivel del suelo: la pluma se diluye antes de tocarlo. Ponga la altura de emisión en 0 m y aparece una zona LII de 28 m.', 'Aha: 2 kg/s gazu ziemnego z komina 10 m nigdy nie osiąga DGW przy gruncie - smuga rozcieńcza się, zanim opadnie. Ustaw wysokość uwolnienia 0 m, a pojawi się strefa DGW 28 m.'),
+        apply: exA('full', 'natgas', 2, 5, 'D', 10, 0) },
+      { id: 'hydrogen-vent', group: G1,
+        label: T('Hydrogen vent', 'Скидання водню', 'Wasserstoffentlüftung', 'Waterstof afblazen', 'Évent d’hydrogène', 'Venteo de hidrógeno', 'Odpowietrzenie wodoru'),
+        note: T('Look at the distance: 0.2 kg/s of hydrogen falls below its 4 % LFL about 28 m downwind. Hydrogen is buoyant and rises; the ground-level plume used here is a conservative screening value.', 'Дивіться на відстань: 0,2 кг/с водню розбавляються нижче НКМП 4 % приблизно за 28 м за вітром. Водень легкий і спливає; приземний шлейф тут — консервативна оцінка.', 'Achten Sie auf den Abstand: 0,2 kg/s Wasserstoff fallen etwa 28 m in Windrichtung unter die UEG von 4 %. Wasserstoff steigt auf; die bodennahe Fahne hier ist ein konservativer Screeningwert.', 'Kijk naar de afstand: 0,2 kg/s waterstof zakt ongeveer 28 m benedenwinds onder de OEG van 4 %. Waterstof stijgt op; de pluim op grondniveau is hier een conservatieve screeningwaarde.', 'Regardez la distance : 0,2 kg/s d’hydrogène passe sous sa LIE de 4 % à environ 28 m sous le vent. L’hydrogène monte ; le panache au sol utilisé ici est une valeur de criblage conservative.', 'Fíjese en la distancia: 0,2 kg/s de hidrógeno bajan de su LII del 4 % a unos 28 m a sotavento. El hidrógeno asciende; la pluma a nivel del suelo es aquí un valor de cribado conservador.', 'Spójrz na odległość: 0,2 kg/s wodoru spada poniżej DGW 4 % około 28 m z wiatrem. Wodór unosi się; smuga przy gruncie jest tu konserwatywną oceną wstępną.'),
+        apply: exA('simple', 'hydrogen', 0.2, 5, 'D', 0, 0) },
+      { id: 'h2s-100', group: G2,
+        label: T('H2S release to 100 ppm', 'Викид H2S до 100 ppm', 'H2S-Freisetzung bis 100 ppm', 'H2S-vrijzetting tot 100 ppm', 'Rejet de H2S jusqu’à 100 ppm', 'Escape de H2S hasta 100 ppm', 'Uwolnienie H2S do 100 ppm'),
+        note: T('Aha: 100 ppm lies below the Britter-McQuaid range, so the dense-gas distance of 120 m is only a lower bound (see the warning); the passive Gaussian plume in Full mode gives 522 m. For toxic endpoints check the far-field passive value.', 'Ага: 100 ppm лежить нижче діапазону Бріттера-Маккуейда, тож відстань для важкого газу 120 м — лише нижня оцінка (див. попередження); пасивний гаусів шлейф у повному режимі дає 522 м. Для токсичних порогів перевіряйте дальнє пасивне значення.', 'Aha: 100 ppm liegen unter dem Britter-McQuaid-Bereich, daher ist der Schwergasabstand von 120 m nur eine Untergrenze (siehe Warnung); die passive Gauß-Fahne im Modus „Vollständig“ ergibt 522 m. Für toxische Endpunkte den passiven Fernfeldwert prüfen.', 'Aha: 100 ppm ligt onder het Britter-McQuaid-bereik, dus de zwaargasafstand van 120 m is slechts een ondergrens (zie waarschuwing); de passieve Gaussische pluim in de modus Volledig geeft 522 m. Controleer bij toxische eindpunten de passieve verre-veldwaarde.', 'Aha : 100 ppm est sous le domaine de Britter-McQuaid, donc la distance gaz lourd de 120 m n’est qu’une borne inférieure (voir l’avertissement) ; le panache gaussien passif en mode Complet donne 522 m. Pour les seuils toxiques, vérifiez la valeur passive en champ lointain.', 'Ajá: 100 ppm queda por debajo del rango de Britter-McQuaid, así que la distancia de gas denso de 120 m es solo un mínimo (vea el aviso); la pluma gaussiana pasiva en modo Completo da 522 m. Para umbrales tóxicos compruebe el valor pasivo de campo lejano.', 'Aha: 100 ppm leży poniżej zakresu Brittera-McQuaida, więc odległość 120 m dla gazu ciężkiego to tylko dolne oszacowanie (patrz ostrzeżenie); pasywna smuga Gaussa w trybie Pełny daje 522 m. Dla progów toksycznych sprawdź pasywną wartość w polu dalekim.'),
+        apply: exA('simple', 'h2s', 0.1, 1.5, 'F', 0, 100) },
+      { id: 'co2-4pct', group: G2,
+        label: T('CO2 release to 4 % (40 000 ppm)', 'Викид CO2 до 4 % (40 000 ppm)', 'CO2-Freisetzung bis 4 % (40 000 ppm)', 'CO2-vrijzetting tot 4 % (40 000 ppm)', 'Rejet de CO2 jusqu’à 4 % (40 000 ppm)', 'Escape de CO2 hasta 4 % (40 000 ppm)', 'Uwolnienie CO2 do 4 % (40 000 ppm)'),
+        note: T('Look at the density criterion: 5 kg/s of CO2 on a calm night (1.14) slumps as a dense cloud and stays above 4 % (40 000 ppm) up to about 108 m - an asphyxiation zone hugging the ground.', 'Дивіться на критерій густини: 5 кг/с CO2 тихої ночі (1,14) осідає важкою хмарою і тримається вище 4 % (40 000 ppm) приблизно до 108 м — задушлива зона біля самої землі.', 'Achten Sie auf das Dichtekriterium: 5 kg/s CO2 in einer ruhigen Nacht (1,14) sinken als Schwergaswolke ab und bleiben bis etwa 108 m über 4 % (40 000 ppm) - eine Erstickungszone dicht am Boden.', 'Kijk naar het dichtheidscriterium: 5 kg/s CO2 in een windstille nacht (1,14) zakt uit als zware wolk en blijft tot ongeveer 108 m boven 4 % (40 000 ppm) - een verstikkingszone vlak boven de grond.', 'Regardez le critère de densité : 5 kg/s de CO2 par nuit calme (1,14) s’affaissent en nuage lourd et restent au-dessus de 4 % (40 000 ppm) jusqu’à environ 108 m - une zone asphyxiante au ras du sol.', 'Fíjese en el criterio de densidad: 5 kg/s de CO2 en una noche en calma (1,14) se asientan como nube densa y siguen por encima del 4 % (40 000 ppm) hasta unos 108 m: una zona asfixiante pegada al suelo.', 'Spójrz na kryterium gęstości: 5 kg/s CO2 w spokojną noc (1,14) opada jako ciężka chmura i utrzymuje się powyżej 4 % (40 000 ppm) do około 108 m - strefa duszenia tuż przy gruncie.'),
+        apply: exA('simple', 'co2', 5, 2, 'F', 0, 40000) }
+    ];
+    ui.examples(EX);
+
+    ui.stage({
+      caption: T('Centreline concentration vs downwind distance (Gaussian plume)', 'Концентрація на осі факела залежно від відстані за вітром (гаусова модель)', 'Konzentration auf der Fahnenachse über Entfernung in Windrichtung (Gauß-Fahne)', 'Concentratie op de pluimas versus afstand benedenwinds (Gaussische pluim)', 'Concentration dans l\'axe en fonction de la distance sous le vent (panache gaussien)', 'Concentración en el eje frente a la distancia a sotavento (penacho gaussiano)', 'Stężenie w osi smugi w funkcji odległości z wiatrem (smuga Gaussa)'),
+      minHeight: 260,
+      a11y: function () {
+        if (!last || !last.ok) return LP(T('No result', 'Немає результату', 'Kein Ergebnis', 'Geen resultaat', 'Pas de résultat', 'Sin resultado', 'Brak wyniku'));
+        var r = last.r, xt = typeof r.xTarget === 'number' && isFinite(r.xTarget), a = [LP(trModel(r.model)), DiagramUI.fmt(r.ct * 1e6, { precision: r.ct * 1e6 >= 100 ? 0 : 3 }), xt ? DiagramUI.fmt(r.xTarget, { precision: 0 }) : ''];
+        return LP(TF(xt ? T('Ground-level centreline concentration versus downwind distance; model $1; target $2 ppm reached up to $3 m.',
+          'Приземна концентрація на осі залежно від відстані за вітром; модель $1; ціль $2 ppm досягається до $3 м.',
+          'Bodennahe Achsenkonzentration über dem Abstand in Windrichtung; Modell $1; Zielwert $2 ppm bis $3 m erreicht.',
+          'Concentratie op de pluimas op grondniveau versus benedenwindse afstand; model $1; doel $2 ppm bereikt tot $3 m.',
+          'Concentration au sol dans l’axe en fonction de la distance sous le vent ; modèle $1 ; cible $2 ppm atteinte jusqu’à $3 m.',
+          'Concentración en el eje a nivel del suelo frente a la distancia a sotavento; modelo $1; objetivo $2 ppm alcanzado hasta $3 m.',
+          'Stężenie w osi przy gruncie w funkcji odległości z wiatrem; model $1; cel $2 ppm osiągany do $3 m.')
+          : T('Ground-level centreline concentration versus downwind distance; model $1; target $2 ppm not reached.',
+          'Приземна концентрація на осі залежно від відстані за вітром; модель $1; ціль $2 ppm не досягається.',
+          'Bodennahe Achsenkonzentration über dem Abstand in Windrichtung; Modell $1; Zielwert $2 ppm nicht erreicht.',
+          'Concentratie op de pluimas op grondniveau versus benedenwindse afstand; model $1; doel $2 ppm niet bereikt.',
+          'Concentration au sol dans l’axe en fonction de la distance sous le vent ; modèle $1 ; cible $2 ppm non atteinte.',
+          'Concentración en el eje a nivel del suelo frente a la distancia a sotavento; modelo $1; objetivo $2 ppm no alcanzado.',
+          'Stężenie w osi przy gruncie w funkcji odległości z wiatrem; model $1; cel $2 ppm nieosiągnięty.'), a));
+      },
+      render: function (size, st) {
+        var ctx = st.canvas(), i, k, p = [], r, cs, muted, line, font, L = 56, R = 12, Tm = 10, B = 36, pw, ph, xmin = Infinity, xmax = -Infinity, cmin = Infinity, cmax = -Infinity, tp, hasT, lx0, lx1, ly0, ly1, sx, sy, lab, X, Y;
+        ctx.clearRect(0, 0, size.w, size.h);
+        if (!last || !last.ok || !last.r || !last.r.profile) return;
+        r = last.r;
+        for (i = 0; i < r.profile.length; i++) { if (r.profile[i] && r.profile[i].c_vf > 0 && r.profile[i].x > 0) p.push(r.profile[i]); }
+        if (!p.length) return;
+        pw = size.w - L - R; ph = size.h - Tm - B;
+        if (pw < 20 || ph < 20) return;
+        cs = getComputedStyle(document.documentElement);
+        muted = cs.getPropertyValue('--muted').trim() || '#888'; line = cs.getPropertyValue('--line').trim() || '#ccc'; font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+        for (i = 0; i < p.length; i++) { xmin = Math.min(xmin, p[i].x); xmax = Math.max(xmax, p[i].x); cmin = Math.min(cmin, p[i].c_vf * 1e6); cmax = Math.max(cmax, p[i].c_vf * 1e6); }
+        tp = r.ct * 1e6; hasT = isFinite(tp) && tp > 0;
+        lx0 = Math.log(xmin) / Math.LN10; lx1 = Math.log(xmax) / Math.LN10;
+        ly0 = Math.log(Math.max(cmin, hasT ? tp / 100 : 0, 1e-3)) / Math.LN10; ly1 = Math.log(Math.max(cmax, hasT ? tp * 2 : 0)) / Math.LN10;
+        if (lx1 - lx0 < 1e-9) { lx0 -= 0.5; lx1 += 0.5; }
+        if (ly1 - ly0 < 1e-9) { ly0 -= 0.5; ly1 += 0.5; }
+        sx = function (x) { return L + (Math.log(x) / Math.LN10 - lx0) / (lx1 - lx0) * pw; };
+        sy = function (c) { return Tm + ph - (Math.log(c) / Math.LN10 - ly0) / (ly1 - ly0) * ph; };
+        lab = function (k) { var v = Math.pow(10, k); return DiagramUI.fmt(v, { precision: v < 1 ? 3 : 0 }); };
+        ctx.font = '11px ' + font; ctx.lineWidth = 1; ctx.strokeStyle = line; ctx.fillStyle = muted;
+        ctx.strokeRect(L, Tm, pw, ph);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        for (k = Math.ceil(lx0 - 1e-9); k <= Math.floor(lx1 + 1e-9); k++) { X = sx(Math.pow(10, k)); ctx.beginPath(); ctx.moveTo(X, Tm); ctx.lineTo(X, Tm + ph); ctx.stroke(); ctx.fillText(lab(k), X, Tm + ph + 4); }
+        ctx.fillText('x, m', L + pw / 2, Tm + ph + 20);
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (k = Math.ceil(ly0 - 1e-9); k <= Math.floor(ly1 + 1e-9); k++) { Y = sy(Math.pow(10, k)); ctx.beginPath(); ctx.moveTo(L, Y); ctx.lineTo(L + pw, Y); ctx.stroke(); ctx.fillText(lab(k), L - 4, Y); }
+        ctx.save(); ctx.translate(12, Tm + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('C, ppm', 0, 0); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(L, Tm, pw, ph); ctx.clip();
+        ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = 2; ctx.beginPath();
+        for (i = 0; i < p.length; i++) { X = sx(p[i].x); Y = sy(p[i].c_vf * 1e6); if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }
+        ctx.stroke(); ctx.restore();
+        ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+        if (hasT) { Y = sy(tp); ctx.strokeStyle = DiagramUI.series(1); ctx.beginPath(); ctx.moveTo(L, Y); ctx.lineTo(L + pw, Y); ctx.stroke(); ctx.fillStyle = DiagramUI.series(1); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(LP(T('target', 'ціль', 'Zielwert', 'doel', 'cible', 'objetivo', 'cel')), L + pw - 4, Y - 2); }
+        if (typeof r.xTarget === 'number' && isFinite(r.xTarget) && r.xTarget >= xmin && r.xTarget <= xmax) { X = sx(r.xTarget); ctx.strokeStyle = muted; ctx.beginPath(); ctx.moveTo(X, Tm); ctx.lineTo(X, Tm + ph); ctx.stroke(); ctx.fillStyle = muted; ctx.textAlign = X > L + pw / 2 ? 'right' : 'left'; ctx.textBaseline = 'top'; ctx.fillText('x = ' + DiagramUI.fmt(r.xTarget, { precision: 0 }) + ' m', X + (X > L + pw / 2 ? -4 : 4), Tm + 4); }
+        ctx.setLineDash([]);
+      }
+    });
+    adoptStage(ui);
+
+    ui.ready();
+    window.__gas_dispersion = { ui: ui, state: state, solve: solve, last: function () { return last; } };
+  }
+
+  /* ======================================================= 3. the data layer */
+  function buildRecord() {
+    if (!last) return null;
+    var keys = ['gas', 'Q_kg_s', 'u10_m_s', 'stab', 'H_m', 'z_m', 'T_C', 'p_Pa', 'Ctarget_ppm'];
+    var units = { gas: '-', Q_kg_s: 'kg/s', u10_m_s: 'm/s', stab: '-', H_m: 'm', z_m: 'm', T_C: 'degC', p_Pa: 'Pa', Ctarget_ppm: 'ppm' };
+    var outKeys = ['model', 'ct', 'ckg', 'rho0', 'rhoa', 'xTarget', 'xGauss', 'xHalf', 'yMax', 'xAtYmax', 'densityCriterion'];
+    var inputs = {}, outputs = {}, notes = [], warnings = [], r = last.ok ? last.r : null, i;
+    for (i = 0; i < keys.length; i++) inputs[keys[i]] = state[keys[i]];
+    if (r) {
+      for (i = 0; i < outKeys.length; i++) outputs[outKeys[i]] = r[outKeys[i]];
+      if (r.norm !== undefined && r.norm !== null && r.norm !== '') notes.push(r.norm);
+      var w = r.warnings || [];
+      for (i = 0; i < w.length; i++) warnings.push(w[i]);
+    } else {
+      warnings.push(String(last.err));
+    }
+    return {
+      inputs: inputs,
+      units: units,
+      outputs: outputs,
+      model: {
+        equations: [
+          'C = Q/(2 pi u sy sz) exp(-y2/2sy2)[exp(-(z-H)2/2sz2)+exp(-(z+H)2/2sz2)] (Gaussian plume, ground reflection)',
+          'Briggs (1973) open-country sigma_y, sigma_z for Pasquill classes A-F',
+          'Britter-McQuaid (1988) continuous dense-gas workbook: alpha = 0.2 log10(g0^2 q0/u^5), x = Dc 10^beta(alpha, Cm/C0)',
+          'dense-gas criterion (g0 q0/(u^3 Dc))^(1/3) >= 0.15'
+        ],
+        ranges: ['Q > 0 kg/s', 'u10 0.5..20 m/s', 'Briggs sigmas 100 m..10 km', 'BM alpha -1..1, Cm/C0 0.002..0.1'],
+        notes: notes
+      },
+      warnings: warnings
+    };
+  }
+
+  var HANDOFF = {
+    provides: ['mdot', 'T', 'p'],
+    accepts: ['mdot'],
+    build: function () {
+      if (!last || !last.ok) return null;
+      var r = last.r, row = {};
+      if (typeof r.xTarget === 'number' && isFinite(r.xTarget)) row.xTarget = { value: r.xTarget, unit: 'm' };
+      if (typeof r.yMax === 'number' && isFinite(r.yMax)) row.yMax = { value: r.yMax, unit: 'm' };
+      if (typeof r.ct === 'number' && isFinite(r.ct)) row.c_target = { value: r.ct, unit: '-' };
+      return {
+        quantities: { mdot: { value: state.Q_kg_s, unit: 'kg/s' }, T: { value: state.T_C + 273.15, unit: 'K' }, p: { value: state.p_Pa, unit: 'Pa' } },
+        sets: { dispersion: [row] }
+      };
+    },
+    apply: function (payload) {
+      var q = payload && payload.quantities ? (payload.quantities.mdot || payload.quantities.Q) : undefined;
+      var v = (q !== null && typeof q === 'object') ? q.value : q;
+      if (typeof v === 'number' && isFinite(v) && v > 0) { state.Q_kg_s = v; return true; }
+      return false;
+    }
+  };
+
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'gas_dispersion',
+        file: 'gas_dispersion.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); last = solve(state);
+                                      if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord,
+        handoff: HANDOFF
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

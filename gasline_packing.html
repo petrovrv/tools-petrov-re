@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gas-Line Packing / Depacking</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-15.gasline-packing-handoff-range-guard-1-number-locale",
+  "id": "gasline-packing",
+  "file": "gasline_packing.html",
+  "listed": true,
+  "category": "transients",
+  "order": 13,
+  "title": {
+    "en": "Gas-Line Packing / Depacking",
+    "uk": "Заповнення / спорожнення газопроводу",
+    "de": "Gasleitungs-Packen / Entpacken",
+    "nl": "Gasleiding linepack op-/afbouw",
+    "fr": "Stockage / déstockage en conduite de gaz",
+    "es": "Empaquetado / desempaquetado de gasoducto",
+    "pl": "Napełnianie / opróżnianie gazociągu"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — lumped isothermal gas-line inventory under supply-orifice inflow and specified withdrawal, showing linepack pressure and mass versus time.",
+    "uk": "Pipe / Vessel Transients — зосереджений ізотермічний inventory газопроводу з припливом через отвір та заданим відбором.",
+    "de": "Pipe / Vessel Transients — konzentrierter isothermer Leitungsbestand mit Blendenzufluss und vorgegebenem Abzug.",
+    "nl": "Pipe / Vessel Transients — lumped isotherme leidingvoorraad met orifice-instroming en opgegeven afname.",
+    "fr": "Pipe / Vessel Transients — inventaire isotherme global de conduite avec alimentation par orifice et soutirage imposé.",
+    "es": "Pipe / Vessel Transients — inventario isotérmico concentrado con entrada por orificio y consumo especificado.",
+    "pl": "Pipe / Vessel Transients — skupiony izotermiczny zapas gazu w rurociągu z dopływem przez kryzę i zadanym odbiorem."
+  },
+  "description": {
+    "en": "A single control-volume linepack model: pipe volume is computed from D and L, gas temperature is fixed, supply inflow follows compressible orifice flow and downstream withdrawal is prescribed.",
+    "uk": "Однооб’ємна модель linepack: об’єм труби з D та L, температура газу стала, приплив від джерела через стисливий отвір, відбір задається.",
+    "de": "Ein Einzonen-Linepack-Modell: Rohrvolumen aus D und L, konstante Gastemperatur, Zulauf über kompressible Blendenströmung und vorgegebener Abzug.",
+    "nl": "Een één-volume linepackmodel: leidingvolume uit D en L, constante gastemperatuur, instroom via compressibele orifice en opgegeven afname.",
+    "fr": "Modèle linepack à un volume: volume de conduite calculé par D et L, température fixe, alimentation par orifice compressible et soutirage imposé.",
+    "es": "Modelo linepack de un volumen: volumen de tubería a partir de D y L, temperatura fija, entrada por orificio compresible y retirada impuesta.",
+    "pl": "Jednoobjętościowy model linepack: objętość rury z D i L, stała temperatura, dopływ przez kryzę ściśliwą i zadany odbiór."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Single lumped control volume, ideal gas and fixed temperature. No spatial pressure profile, line friction, compressor map, heat transfer, acoustic waves or reverse flow through the supply valve. Inputs are held to the model's own domain, typed or arriving over the SI handoff: pressure 1 kPa to 100 MPa, gas temperature 150 to 1500 K, internal diameter 0.01 to 5 m, length 0.1 m to 1000 km, withdrawal 0 to 100 000 kg/s, supply orifice area 0 to 1 m². A typed value outside a bound is moved to it and announced; an arriving value outside it is named together with the range and is not applied.",
+    "uk": "Один зосереджений контрольний об’єм, ідеальний газ і стала температура. Без просторового профілю тиску, тертя, компресора, теплообміну, акустичних хвиль та зворотного потоку через живильний клапан. Вхідні дані утримуються в межах області моделі — і введені вручну, і отримані через SI-передавання: тиск 1 кПа – 100 МПа, температура газу 150 – 1500 K, внутрішній діаметр 0,01 – 5 м, довжина 0,1 м – 1000 км, відбір 0 – 100 000 кг/с, площа вхідного отвору 0 – 1 м². Введене значення поза межею зсувається до неї з повідомленням; отримане значення поза діапазоном називається разом із діапазоном і не застосовується.",
+    "de": "Ein konzentriertes Kontrollvolumen, ideales Gas und konstante Temperatur. Kein räumliches Druckprofil, keine Reibung, Verdichterkennlinie, Wärmeübertragung, akustischen Wellen oder Rückströmung durch das Zulaufventil. Eingaben bleiben im Gültigkeitsbereich des Modells, getippt wie über den SI-Handoff empfangen: Druck 1 kPa bis 100 MPa, Gastemperatur 150 bis 1500 K, Innendurchmesser 0,01 bis 5 m, Länge 0,1 m bis 1000 km, Abzug 0 bis 100 000 kg/s, Zulaufblendenfläche 0 bis 1 m². Ein getippter Wert außerhalb einer Grenze wird auf sie gesetzt und angezeigt; ein empfangener Wert außerhalb des Bereichs wird mit dem Bereich benannt und nicht übernommen.",
+    "nl": "Eén lumped controlevolume, ideaal gas en constante temperatuur. Geen ruimtelijk drukprofiel, wrijving, compressorcurve, warmteoverdracht, akoestische golven of terugstroming door de toevoerklep. Invoer blijft binnen het geldigheidsgebied van het model, zowel getypt als via de SI-handoff ontvangen: druk 1 kPa tot 100 MPa, gastemperatuur 150 tot 1500 K, binnendiameter 0,01 tot 5 m, lengte 0,1 m tot 1000 km, afname 0 tot 100 000 kg/s, oppervlak toevoerorifice 0 tot 1 m². Een getypte waarde buiten een grens gaat naar die grens en wordt gemeld; een ontvangen waarde buiten het bereik wordt met dat bereik benoemd en niet toegepast.",
+    "fr": "Un seul volume global, gaz parfait et température fixe. Pas de profil axial de pression, frottement, compresseur, transfert thermique, ondes acoustiques ni retour par la vanne d’alimentation. Les entrées restent dans le domaine du modèle, saisies comme reçues par le transfert SI : pression 1 kPa à 100 MPa, température du gaz 150 à 1500 K, diamètre intérieur 0,01 à 5 m, longueur 0,1 m à 1000 km, soutirage 0 à 100 000 kg/s, section d'orifice d'alimentation 0 à 1 m². Une valeur saisie hors borne est ramenée à cette borne et signalée ; une valeur reçue hors plage est nommée avec la plage et n'est pas appliquée.",
+    "es": "Un solo volumen concentrado, gas ideal y temperatura fija. Sin perfil espacial de presión, fricción, mapa de compresor, transferencia térmica, ondas acústicas ni flujo inverso por la válvula de suministro. Las entradas se mantienen en el dominio del modelo, escritas o recibidas por la transferencia SI: presión 1 kPa a 100 MPa, temperatura del gas 150 a 1500 K, diámetro interior 0,01 a 5 m, longitud 0,1 m a 1000 km, retirada 0 a 100 000 kg/s, área de orificio de suministro 0 a 1 m². Un valor escrito fuera de un límite se lleva a ese límite y se anuncia; un valor recibido fuera del rango se nombra junto con el rango y no se aplica.",
+    "pl": "Jeden skupiony obszar, gaz doskonały i stała temperatura. Bez przestrzennego profilu ciśnienia, tarcia, mapy sprężarki, wymiany ciepła, fal akustycznych i przepływu wstecznego przez zawór zasilania. Dane wejściowe pozostają w obszarze ważności modelu, zarówno wpisane, jak i otrzymane przez przekazanie SI: ciśnienie 1 kPa – 100 MPa, temperatura gazu 150 – 1500 K, średnica wewnętrzna 0,01 – 5 m, długość 0,1 m – 1000 km, odbiór 0 – 100 000 kg/s, pole kryzy zasilającej 0 – 1 m². Wpisana wartość poza granicą jest do niej przesuwana z komunikatem; otrzymana wartość poza zakresem jest nazwana wraz z zakresem i nie zostaje zastosowana."
+  },
+  "intended_use": [
+    "education",
+    "technical exploration",
+    "preliminary assessment"
+  ],
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Checked against an independent reference implementation of the same declared model, written separately in Python from a first-principles derivation and solved by a different route: because dm/dt = f(m) is autonomous and one-dimensional, the reference integrates the quadrature t(m) = ∫ dm/f(m), which contains no time step at all, with an implicit stiff march (scipy Radau) and closed forms on the choked branch as cross-routes. Anchored to Shapiro vol. 1 ch. 4 and NACA Report 1135 Table I. 456 of 456 checks pass; 436 of them are made outside the page - against that reference, and on the tool's own exported Python re-run outside the browser and graded against the same reference - rather than inside the tool against its own relations, and the remaining 20 are the retained in-page self-checks. The time integration was changed as part of this work: the step is now sized from the transient itself instead of from the simulated-time window, so the reported emptying instant and terminal pressure no longer depend on how wide a window is plotted. The reference shares no code with the tool, but the harness is the author's own; no external party has reviewed it.",
+      "uk": "Перевірено за незалежною реалізацією-еталоном тієї самої заявленої моделі, написаною окремо мовою Python із виведення від перших принципів та розв'язаною іншим шляхом: оскільки dm/dt = f(m) автономне та одновимірне, еталон інтегрує квадратуру t(m) = ∫ dm/f(m), яка взагалі не має кроку за часом, а як перехресні шляхи — неявний жорсткий розв'язувач (scipy Radau) та замкнені форми на критичній гілці. Прив'язано до Shapiro т. 1 розд. 4 та NACA Report 1135, табл. I. Пройдено 456 із 456 перевірок; 436 із них виконано поза сторінкою — проти цього еталона, а також на власному експортованому Python-коді тулзи, запущеному поза браузером і оціненому за тим самим еталоном, — а не всередині тулзи проти її власних співвідношень; решта 20 — збережені внутрішні самоперевірки. Інтегрування за часом змінено в ході цієї роботи: крок тепер визначається самим перехідним процесом, а не часом моделювання, тож момент спорожнення та кінцевий тиск більше не залежать від ширини вікна графіка. Еталон не має спільного коду з тулзою, але сама перевірочна обв'язка авторська; стороння сторона її не перевіряла.",
+      "de": "Geprüft gegen eine unabhängige Referenzimplementierung desselben erklärten Modells, getrennt in Python aus einer Herleitung von Grund auf geschrieben und auf anderem Weg gelöst: da dm/dt = f(m) autonom und eindimensional ist, integriert die Referenz die Quadratur t(m) = ∫ dm/f(m), die überhaupt keinen Zeitschritt enthält, mit einem impliziten steifen Marsch (scipy Radau) und geschlossenen Formen auf dem gesperrten Ast als Gegenwegen. Verankert an Shapiro Bd. 1 Kap. 4 und NACA Report 1135, Tab. I. 456 von 456 Prüfungen bestehen; 436 davon werden außerhalb der Seite ausgeführt - gegen diese Referenz sowie am eigenen exportierten Python-Code des Werkzeugs, außerhalb des Browsers ausgeführt und an derselben Referenz gemessen - statt im Werkzeug gegen dessen eigene Beziehungen; die übrigen 20 sind die beibehaltenen seiteneigenen Selbstprüfungen. Die Zeitintegration wurde dabei geändert: der Schritt wird nun aus dem Vorgang selbst statt aus der Simulationszeit bemessen, sodass Leerlaufzeitpunkt und Enddruck nicht mehr davon abhängen, wie breit das dargestellte Zeitfenster ist. Die Referenz teilt keinen Code mit dem Werkzeug, die Prüfumgebung stammt jedoch vom Autor selbst; kein Dritter hat sie geprüft.",
+      "nl": "Getoetst aan een onafhankelijke referentie-implementatie van hetzelfde verklaarde model, afzonderlijk in Python geschreven vanuit een afleiding vanaf de grondbeginselen en langs een andere weg opgelost: omdat dm/dt = f(m) autonoom en eendimensionaal is, integreert de referentie de kwadratuur t(m) = ∫ dm/f(m), die helemaal geen tijdstap bevat, met een impliciete stijve mars (scipy Radau) en gesloten vormen op de gesmoorde tak als kruisroutes. Verankerd aan Shapiro dl. 1 hfst. 4 en NACA Report 1135, tab. I. 456 van de 456 toetsen slagen; 436 daarvan worden buiten de pagina uitgevoerd - tegen die referentie en op de eigen geëxporteerde Python-code van de tool, buiten de browser uitgevoerd en aan dezelfde referentie getoetst - in plaats van binnen de tool tegen haar eigen betrekkingen; de overige 20 zijn de behouden zelftoetsen in de pagina. De tijdsintegratie is hierbij gewijzigd: de stap wordt nu bepaald door het verloop zelf in plaats van door de simulatietijd, zodat het leeglooptijdstip en de einddruk niet langer afhangen van de breedte van het getekende tijdvenster. De referentie deelt geen code met de tool, maar de toetsomgeving is van de auteur zelf; geen externe partij heeft haar beoordeeld.",
+      "fr": "Vérifié par une implémentation de référence indépendante du même modèle déclaré, écrite séparément en Python à partir d'une dérivation depuis les principes premiers et résolue par une autre voie: comme dm/dt = f(m) est autonome et unidimensionnel, la référence intègre la quadrature t(m) = ∫ dm/f(m), qui ne contient aucun pas de temps, avec une marche implicite raide (scipy Radau) et des formes fermées sur la branche bloquée comme voies croisées. Ancré à Shapiro vol. 1 ch. 4 et au NACA Report 1135, tabl. I. 456 vérifications sur 456 passent; 436 d'entre elles sont faites hors de la page - contre cette référence, et sur le code Python exporté par l'outil lui-même, exécuté hors du navigateur et jugé sur la même référence - plutôt qu'à l'intérieur de l'outil contre ses propres relations; les 20 autres sont les autocontrôles de la page conservés. L'intégration temporelle a été modifiée à cette occasion: le pas est désormais dimensionné par le transitoire lui-même et non par le temps de simulation, de sorte que l'instant de vidage et la pression finale ne dépendent plus de la largeur de la fenêtre tracée. La référence ne partage aucun code avec l'outil, mais le banc d'essai est celui de l'auteur; aucun tiers ne l'a examiné.",
+      "es": "Contrastado con una implementación de referencia independiente del mismo modelo declarado, escrita por separado en Python a partir de una derivación desde los principios y resuelta por otra vía: como dm/dt = f(m) es autónomo y unidimensional, la referencia integra la cuadratura t(m) = ∫ dm/f(m), que no contiene paso de tiempo alguno, con una marcha implícita rígida (scipy Radau) y formas cerradas en la rama bloqueada como vías cruzadas. Anclado a Shapiro vol. 1 cap. 4 y al NACA Report 1135, tabla I. Pasan 456 de 456 comprobaciones; 436 de ellas se hacen fuera de la página - frente a esa referencia y sobre el propio código Python exportado por la herramienta, ejecutado fuera del navegador y juzgado con la misma referencia - en lugar de dentro de la herramienta frente a sus propias relaciones; las 20 restantes son las autocomprobaciones de la página conservadas. La integración temporal se cambió en este trabajo: el paso se dimensiona ahora a partir del propio transitorio y no del tiempo de simulación, de modo que el instante de vaciado y la presión final ya no dependen de la anchura de la ventana representada. La referencia no comparte código con la herramienta, pero el banco de pruebas es del propio autor; ningún tercero lo ha revisado.",
+      "pl": "Sprawdzono względem niezależnej implementacji odniesienia tego samego zadeklarowanego modelu, napisanej osobno w Pythonie na podstawie wyprowadzenia od podstaw i rozwiązanej inną drogą: ponieważ dm/dt = f(m) jest autonomiczne i jednowymiarowe, odniesienie całkuje kwadraturę t(m) = ∫ dm/f(m), która w ogóle nie zawiera kroku czasowego, a jako drogi kontrolne służą niejawny sztywny marsz (scipy Radau) i postacie zamknięte na gałęzi krytycznej. Zakotwiczone w Shapiro t. 1 rozdz. 4 oraz NACA Report 1135, tab. I. Przechodzi 456 z 456 testów; 436 z nich wykonano poza stroną - względem tego odniesienia oraz na własnym wyeksportowanym kodzie Pythona narzędzia, uruchomionym poza przeglądarką i ocenionym względem tego samego odniesienia - a nie wewnątrz narzędzia względem jego własnych zależności; pozostałe 20 to zachowane samosprawdzenia w stronie. Całkowanie po czasie zostało przy tym zmienione: krok jest teraz dobierany na podstawie samego stanu przejściowego, a nie czasu symulacji, dzięki czemu chwila opróżnienia i ciśnienie końcowe nie zależą już od szerokości rysowanego okna. Odniesienie nie dzieli kodu z narzędziem, ale stanowisko testowe należy do autora; żaden podmiot zewnętrzny go nie recenzował."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "gasline-packing-independent-python-v1",
+        "reference": "An independent second implementation of the declared model, written in Python from a first-principles derivation (mass balance on the line volume; one-dimensional isentropic orifice flow assembled as rho*w from the stagnation relations) and solved by a structurally different route: dm/dt = f(m) is autonomous and one-dimensional, so the trajectory is the quadrature t(m) = integral dm/f(m), which contains no time step at all. Cross-routes: an implicit stiff march (scipy Radau, rtol 1e-12) and closed forms on the choked branch. The page's JavaScript was read only for input names, units, declared assumptions, the declared 1e-9 kg empty-line floor and the list of reported quantities; nothing was transcribed.",
+        "citations": [
+          "A. H. Shapiro, \"The Dynamics and Thermodynamics of Compressible Fluid Flow\", vol. 1, Ronald Press, New York, 1953, ch. 4: eq. 4.14, eq. 4.15, eq. 4.18-4.19 (critical pressure ratio r* = (2/(g+1))^(g/(g-1))) and eq. 4.21 (throat mass flux).",
+          "Ames Research Staff, \"Equations, Tables and Charts for Compressible Flow\", NACA Report 1135, 1953, Table I, isentropic column at M = 1 for gamma = 1.4: p/p_t = 0.528282, T/T_t = 0.833333, rho/rho_t = 0.633938; reproduced by the reference to 4.0e-7, 4.0e-7 and 2.3e-7 relative.",
+          "The three-significant-digit engineering form of the choked-orifice law for air, mdot = 0.0404 Cd A p_t / sqrt(T) (ISO 6358; Perry's Chemical Engineers' Handbook 8th ed. eq. 10-25); the reference gives 0.0404149.",
+          "CoolProp 8.0 (Lemmon et al. air EOS, Setzmann & Wagner methane EOS), used to confirm the reference collapses onto the ideal-gas limit at low pressure and to size the fidelity of the declared closure: Z = 0.8880 for methane at 6 MPa and 288.15 K.",
+          "scipy 1.17 solve_ivp with the Radau IIA implicit collocation method, rtol 1e-12, as a second independent numerical route to the same equations."
+        ],
+        "reference_provenance": "independent second implementation external to the page (out/gen_gasline_packing.py); the reference verifies itself against the published anchors, two separately derived analytic limits, three mutually independent routes and node refinement before it is allowed to grade anything, and the 20 superseded in-page checks are carried through beside it, labelled as self-checks",
+        "cases": 456,
+        "passed": 456,
+        "tolerance": "Four bands, each fixed by the physics or by what the page prints, none by any step size. Closed-form identities (the ideal-gas state closure p = m R T / V and the density reported from it) are exact arithmetic on both sides and are held to 1e-12 relative. Marched quantities - terminal pressure, inventory, inventory change, inlet flow, peak inlet flow and the terminal instant - are held to 1e-5 relative, two orders inside what the page prints and four orders inside the 12.6 % density error the declared ideal-gas closure itself carries at the default 60 bar supply (CoolProp 8.0 methane, Z = 0.8880). The six window-invariance families are held to a 1e-6 relative spread: the terminal answer is a property of the line, the gas and the two boundary flows, and the simulated-time window is not one of them. The line pressure may never exceed max(p0, p_supply), a hard consequence of having no reverse flow and no heat input, with round-off slack only. Observed worst residuals: 9.97e-07 on the marched quantities, 5.07e-08 on the window-invariance families, 2.41e-16 on the exact state-closure identities, 0.00e+00 on the browser/export parity, and 0.00e+00 on the pressure bound. A fifth band, 1e-6 relative, covers the parity between the page's exported Python and the browser: they share equations and step rule, so the only admissible difference is language-level floating point, and 1e-6 is an order inside the band the marched quantities themselves are held to.",
+        "run_at": "2026-10-16T09:53:02Z",
+        "artifact": "benchmarks/gasline_packing.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "p",
+      "rho",
+      "mdot",
+      "D",
+      "L"
+    ],
+    "accepts": [
+      "T",
+      "p",
+      "mdot",
+      "D",
+      "L",
+      "A"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"D":0.6,"L":2000.0,"p0":4000000.0,"T":288.15,"pSupply":6000000.0,"Ain":0.0003,"Cd":0.8,"mdotOut":2.0,"gamma":1.3,"R":500.0,"tEnd":1800.0};
+/* One table of input bounds in SI. The typed field and an incoming SI handoff
+   quantity read the same lo/hi from here, so the page cannot hold two bounds
+   for one input (AGENTS.md 2.4). */
+var LIM={D:{lo:0.01,hi:5,u:"m"},L:{lo:0.1,hi:1000000.0,u:"m"},p0:{lo:1000.0,hi:100000000.0,u:"Pa"},T:{lo:150,hi:1500,u:"K"},pSupply:{lo:1000.0,hi:100000000.0,u:"Pa"},Ain:{lo:0,hi:1,u:"m\u00b2"},Cd:{lo:0.05,hi:1.2,u:""},mdotOut:{lo:0,hi:100000.0,u:"kg/s"},gamma:{lo:1.01,hi:1.8,u:""},R:{lo:50,hi:2000,u:"J/(kg\u00b7K)"},tEnd:{lo:0.01,hi:10000000.0,u:"s"}};
+/* The labels of the inputs a handoff can reach, shared by the field and by the
+   refusal sentence, so a refusal names the input the reader sees. */
+var LBL={T:T("Gas temperature","Температура газу","Gastemperatur","Gastemperatuur","Température du gaz","Temperatura del gas","Temperatura gazu"),p0:T("Initial line pressure","Початковий тиск","Anfangsleitungsdruck","Begindruk leiding","Pression initiale","Presión inicial","Ciśnienie początkowe"),mdotOut:T("Specified withdrawal","Заданий відбір","Vorgegebener Abzug","Opgegeven afname","Soutirage imposé","Retirada especificada","Zadany odbiór"),D:T("Internal diameter","Внутрішній діаметр","Innendurchmesser","Binnendiameter","Diamètre intérieur","Diámetro interior","Średnica wewnętrzna"),L:T("Length","Довжина","Länge","Lengte","Longueur","Longitud","Długość"),Ain:T("Supply orifice area","Площа вхідного отвору","Zulaufblendenfläche","Oppervlak toevoerorifice","Section orifice alimentation","Área de orificio de suministro","Pole kryzy zasilającej")};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  /* AGENTS §2.2.1 -- one locale map for the on-screen chart and the report figure.
+     The digits are this chart's own and are not re-rounded; only the decimal
+     separator is re-written, by the framework map that the report engine reads.
+     group:false keeps the axis label ungrouped, which is what it has always been
+     and what the English rendering must stay (NUMBER-FORMAT.md rule 2). */
+  var sepNum = function (s) {
+    try { return window.DiagramUI.num.sep(s, { digits: 'raw', group: false }); }
+    catch (e) { return s; }
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return sepNum(v.toExponential(1));
+    return sepNum(String(Math.round(v * 1000) / 1000));
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{title:"Gas line packing — lumped isothermal inventory of a pipeline segment",
+ summary:"A {D} mm × {L} m line of {V} m³ holding gas at {T} °C starts at {p0} bar and is fed through a {A} mm² inlet orifice of discharge coefficient {Cd} from a supply at {ps} bar, against a withdrawal of {out} kg/s. After {t} s the line stands at {pf} bar and {mf} kg, a change of {dm} kg.",
+ concPack:"Inlet exceeds withdrawal at the terminal state, so the segment is still gaining inventory when the window closes.",
+ concDepack:"Withdrawal exceeds inlet at the terminal state, so the segment is still losing inventory when the window closes.",
+ concEmpty:"The inventory reached the solver's empty-line floor inside the window; the terminal state is the emptying event, not a settled state.",
+ system:"The pipeline segment is treated as one isothermal control volume. Inlet mass flow is set by a supply orifice working against the instantaneous line pressure, withdrawal is a fixed rate, and the difference changes the inventory. Pressure follows from the ideal-gas relation applied to that inventory at the fixed line temperature.",
+ figCap:"Line pressure against time over the simulated window.",
+ ckDepack:"Zero-inlet-area analytic limit",ckDepackB:"With the inlet area set to zero the orifice delivers nothing and dm/dt = −ṁ_out is constant, so the inventory is exactly linear in time and the emptying instant is (m₀ − m_floor)/ṁ_out. RK4 integrates a constant without truncation error, so the march must return that line and that instant as arithmetic.",
+ ckRK4:"Terminal state against a refined march",ckRK4B:"The same classical RK4 march repeated with the step fraction and the plotting cap divided by sixteen, so the comparison is a genuinely finer partition of the same trajectory. Both the terminal pressure and the terminal instant are compared, because a case that empties reaches the same floor pressure either way and only the instant can differ. Agreement tests the integration rather than the model.",
+ ckHandoff:"Handoff state closure",ckHandoffB:"The SI handoff hands out line pressure and density and writes an incoming pressure straight into the initial pressure. The inventory implied by the reported pressure must therefore be the inventory the march ended with, and the reported density must satisfy the same relation p = m R T / V.",
+ ckEquil:"Direction of the inventory rate",ckEquilB:"The orifice relation falls monotonically with downstream pressure, so one pressure makes inlet equal withdrawal. The inventory rate must point toward that pressure, and must be negative throughout when even the choked inlet cannot meet the withdrawal.",
+ ckChoke:"Inlet regime at the terminal state",ckChokeB:"Pressure ratio p/p_supply against the critical ratio (2/(γ+1))^(γ/(γ−1)). Below it the inlet orifice is choked and the inlet flow is set by the supply state alone.",
+ ckEnd:"Termination branch",ckEndB:"The march stops either at the requested simulation time or when the inventory reaches the empty-line floor, located by bisection. Which one occurred decides whether the terminal state can be read as a line state.",
+ flowSupply:"Supply at fixed pressure",flowInlet:"Inlet orifice (A_in, Cd)",flowLine:"Pipeline segment",flowDraw:"Withdrawal at fixed rate",
+ rPacking:"packing",rDepacking:"depacking",rBalanced:"balanced",rNoEq:"no equilibrium pressure",
+ rChoked:"choked",rSub:"subcritical",rHorizon:"simulation time reached",rEmptied:"empty-line floor reached",
+ rInv0:"Initial inventory",rDrawL:"Withdrawal rate",
+ rVol:"Line volume",rP0:"Initial line pressure",rPeq:"Equilibrium pressure",rNet:"Net inventory rate",
+ rMassFrac:"Inventory change as a fraction of the start",rResidence:"Inventory divided by withdrawal",
+ rPress:"Final line pressure",rInv:"Final inventory",rDelta:"Inventory change",rIn:"Final inlet flow",rPeak:"Peak inlet flow",rDens:"Line density",rElapsed:"Simulated time",
+ rSupplyWhy:"Sets the pressure the inlet can reach and, with the area, the maximum inlet flow",
+ rAreaWhy:"Sets the inlet flow at any line pressure and so the equilibrium pressure",
+ rDrawWhy:"Fixed withdrawal; the inventory rate is the inlet flow minus this",
+ riskDistT:"Distributed line dynamics",riskDist:"The segment is one lumped volume, so no pressure gradient runs along it and no wave travels. A fast valve event or a long line whose ends differ in pressure is outside this inventory model.",
+ riskIsoT:"Isothermal assumption",riskIso:"Line temperature is held at the input value, so the compression heat of packing and the cooling of depacking are absent. Pressure computed at a fixed temperature carries that error.",
+ riskFloorT:"Empty-line floor",riskFloor:"The march stops at an inventory floor of 1e-9 kg rather than at zero, and the pressure it reports there is the ideal-gas pressure of that floor mass. Read an emptying case for its emptying time, not for its terminal pressure.",
+ mNote:"Ideal gas with constant γ and R at a fixed line temperature. One lumped control volume, fixed supply pressure, specified withdrawal rate, no line friction and no spatial pressure gradient."},
+uk:{title:"Акумуляція газу в лінії — зосереджений ізотермічний запас ділянки трубопроводу",
+ summary:"Лінія {D} мм × {L} м об’ємом {V} м³ з газом за {T} °C починає з {p0} бар і живиться через вхідний отвір {A} мм² з коефіцієнтом витрати {Cd} від джерела {ps} бар проти відбору {out} кг/с. Через {t} с у лінії {pf} бар і {mf} кг, зміна {dm} кг.",
+ concPack:"У кінцевому стані приплив перевищує відбір, тож ділянка ще набирає запас, коли вікно завершується.",
+ concDepack:"У кінцевому стані відбір перевищує приплив, тож ділянка ще втрачає запас, коли вікно завершується.",
+ concEmpty:"Запас досяг нижньої межі порожньої лінії всередині вікна; кінцевий стан — це подія спорожнення, а не усталений стан.",
+ system:"Ділянка трубопроводу розглядається як один ізотермічний контрольний об’єм. Вхідну витрату задає отвір джерела, що працює проти миттєвого тиску в лінії, відбір сталий, а різниця змінює запас. Тиск випливає зі співвідношення ідеального газу для цього запасу за сталої температури лінії.",
+ figCap:"Тиск у лінії за часом у межах змодельованого вікна.",
+ ckDepack:"Аналітична границя при нульовій площі входу",ckDepackB:"За нульової площі входу отвір нічого не подає, dm/dt = −ṁ_відб стала, тож запас точно лінійний за часом, а момент спорожнення дорівнює (m₀ − m_підл)/ṁ_відб. RK4 інтегрує сталу без похибки зрізання, тож розрахунок має повернути цю пряму й цей момент як арифметику.",
+ ckRK4:"Кінцевий стан проти згущеного розрахунку",ckRK4B:"Той самий класичний RK4 повторено з часткою кроку та обмеженням для графіка, поділеними на шістнадцять, тож порівняння — це справді густіший поділ тієї самої траєкторії. Порівнюються і кінцевий тиск, і момент завершення, бо випадок, що спорожнюється, приходить до того самого порогового тиску за будь-якого кроку, і різнитися може лише момент. Збіг перевіряє інтегрування, а не модель.",
+ ckHandoff:"Замикання стану при передаванні",ckHandoffB:"Передавання SI віддає тиск і густину в лінії та записує вхідний тиск прямо в початковий. Тому запас, що випливає з наведеного тиску, має бути тим запасом, яким завершився розрахунок, а наведена густина має задовольняти те саме співвідношення p = m R T / V.",
+ ckEquil:"Напрям зміни запасу",ckEquilB:"Співвідношення для отвору монотонно спадає з тиском за ним, тож існує єдиний тиск, за якого приплив дорівнює відбору. Швидкість зміни запасу має бути спрямована до цього тиску і має бути від’ємною всюди, коли навіть критичний приплив не покриває відбору.",
+ ckChoke:"Режим входу в кінцевому стані",ckChokeB:"Відношення тисків p/p_джерела проти критичного відношення (2/(γ+1))^(γ/(γ−1)). Нижче нього вхідний отвір критичний, і приплив задає лише стан джерела.",
+ ckEnd:"Гілка завершення",ckEndB:"Розрахунок зупиняється або на заданому часі моделювання, або коли запас сягає нижньої межі порожньої лінії, локалізованої бісекцією. Те, що сталося, визначає, чи можна читати кінцевий стан як стан лінії.",
+ flowSupply:"Джерело зі сталим тиском",flowInlet:"Вхідний отвір (A_вх, Cd)",flowLine:"Ділянка трубопроводу",flowDraw:"Відбір зі сталою витратою",
+ rPacking:"накопичення",rDepacking:"спорожнення",rBalanced:"рівновага",rNoEq:"рівноважного тиску немає",
+ rChoked:"критичний",rSub:"докритичний",rHorizon:"досягнуто час моделювання",rEmptied:"досягнуто межу порожньої лінії",
+ rInv0:"Початковий запас",rDrawL:"Витрата відбору",
+ rVol:"Об’єм лінії",rP0:"Початковий тиск у лінії",rPeq:"Рівноважний тиск",rNet:"Чиста швидкість зміни запасу",
+ rMassFrac:"Зміна запасу як частка початкового",rResidence:"Запас, поділений на відбір",
+ rPress:"Кінцевий тиск у лінії",rInv:"Кінцевий запас",rDelta:"Зміна запасу",rIn:"Кінцевий приплив",rPeak:"Піковий приплив",rDens:"Густина в лінії",rElapsed:"Змодельований час",
+ rSupplyWhy:"Задає тиск, якого може досягти вхід, і разом із площею — максимальний приплив",
+ rAreaWhy:"Задає приплив за будь-якого тиску в лінії, а отже й рівноважний тиск",
+ rDrawWhy:"Сталий відбір; швидкість зміни запасу — це приплив мінус він",
+ riskDistT:"Розподілена динаміка лінії",riskDist:"Ділянка — один зосереджений об’єм, тож уздовж неї немає градієнта тиску і не біжить хвиля. Швидка подія на засувці чи довга лінія з різними тисками на кінцях лежать поза цією моделлю запасу.",
+ riskIsoT:"Припущення ізотермічності",riskIso:"Температура лінії тримається на заданому значенні, тож тепло стиснення при накопиченні й охолодження при спорожненні відсутні. Тиск, обчислений за сталої температури, несе цю похибку.",
+ riskFloorT:"Межа порожньої лінії",riskFloor:"Розрахунок зупиняється на запасі 1e-9 кг, а не на нулі, і тиск, який він там наводить, — це тиск ідеального газу для цієї підлогової маси. Випадок зі спорожненням читайте за часом спорожнення, а не за кінцевим тиском.",
+ mNote:"Ідеальний газ зі сталими γ і R за сталої температури лінії. Один зосереджений контрольний об’єм, сталий тиск джерела, заданий відбір, без тертя в лінії і без поздовжнього градієнта тиску."},
+de:{title:"Leitungsspeicherung — konzentrierter isothermer Bestand eines Rohrabschnitts",
+ summary:"Eine Leitung von {D} mm × {L} m mit {V} m³ Gas bei {T} °C beginnt bei {p0} bar und wird durch eine Eintrittsblende von {A} mm² mit Ausflussbeiwert {Cd} aus einer Versorgung bei {ps} bar gespeist, gegen eine Entnahme von {out} kg/s. Nach {t} s steht die Leitung bei {pf} bar und {mf} kg, eine Änderung von {dm} kg.",
+ concPack:"Im Endzustand übersteigt der Zulauf die Entnahme, der Abschnitt nimmt beim Fensterende also noch Bestand auf.",
+ concDepack:"Im Endzustand übersteigt die Entnahme den Zulauf, der Abschnitt verliert beim Fensterende also noch Bestand.",
+ concEmpty:"Der Bestand erreichte im Fenster die Leerlaufschwelle des Solvers; der Endzustand ist das Leerlaufereignis, kein eingeschwungener Zustand.",
+ system:"Der Rohrabschnitt gilt als ein isothermes Kontrollvolumen. Der Zulauf folgt aus einer Versorgungsblende gegen den momentanen Leitungsdruck, die Entnahme ist fest, und die Differenz ändert den Bestand. Der Druck folgt aus der Idealgasbeziehung für diesen Bestand bei fester Leitungstemperatur.",
+ figCap:"Leitungsdruck über der Zeit im simulierten Fenster.",
+ ckDepack:"Analytischer Grenzfall ohne Eintrittsfläche",ckDepackB:"Bei Eintrittsfläche null liefert die Blende nichts, dm/dt = −ṁ_ab ist konstant, der Bestand also exakt linear in der Zeit und der Leerlaufzeitpunkt (m₀ − m_Schwelle)/ṁ_ab. RK4 integriert eine Konstante ohne Abbruchfehler, der Marsch muss diese Gerade und diesen Zeitpunkt als Arithmetik zurückgeben.",
+ ckRK4:"Endzustand gegen einen verfeinerten Marsch",ckRK4B:"Derselbe klassische RK4-Marsch, mit durch sechzehn geteiltem Schrittanteil und Darstellungsdeckel, also eine wirklich feinere Zerlegung derselben Bahn. Verglichen werden Enddruck UND Endzeitpunkt, denn ein leerlaufender Fall erreicht ohnehin denselben Schwellendruck und nur der Zeitpunkt kann abweichen. Die Übereinstimmung prüft die Integration statt des Modells.",
+ ckHandoff:"Zustandsschluss der Übergabe",ckHandoffB:"Die SI-Übergabe gibt Leitungsdruck und Dichte heraus und schreibt einen eingehenden Druck direkt in den Anfangsdruck. Der aus dem gemeldeten Druck folgende Bestand muss daher der Bestand am Marschende sein, und die gemeldete Dichte muss dieselbe Beziehung p = m R T / V erfüllen.",
+ ckEquil:"Richtung der Bestandsänderung",ckEquilB:"Die Blendenbeziehung fällt monoton mit dem Gegendruck, es gibt also genau einen Druck, bei dem Zulauf gleich Entnahme ist. Die Bestandsrate muss auf diesen Druck zeigen und durchweg negativ sein, wenn selbst der gesperrte Zulauf die Entnahme nicht deckt.",
+ ckChoke:"Eintrittsregime im Endzustand",ckChokeB:"Druckverhältnis p/p_Versorgung gegen das kritische Verhältnis (2/(γ+1))^(γ/(γ−1)). Darunter ist die Eintrittsblende gesperrt und der Zulauf allein durch den Versorgungszustand bestimmt.",
+ ckEnd:"Abbruchzweig",ckEndB:"Der Marsch endet entweder bei der angeforderten Simulationszeit oder wenn der Bestand die per Bisektion lokalisierte Leerlaufschwelle erreicht. Was eingetreten ist, entscheidet, ob der Endzustand als Leitungszustand gelesen werden darf.",
+ flowSupply:"Versorgung mit festem Druck",flowInlet:"Eintrittsblende (A_ein, Cd)",flowLine:"Rohrabschnitt",flowDraw:"Entnahme mit fester Rate",
+ rPacking:"speichernd",rDepacking:"entspeichernd",rBalanced:"ausgeglichen",rNoEq:"kein Gleichgewichtsdruck",
+ rChoked:"gesperrt",rSub:"unterkritisch",rHorizon:"Simulationszeit erreicht",rEmptied:"Leerlaufschwelle erreicht",
+ rInv0:"Anfangsbestand",rDrawL:"Entnahmerate",
+ rVol:"Leitungsvolumen",rP0:"Anfangsdruck der Leitung",rPeq:"Gleichgewichtsdruck",rNet:"Netto-Bestandsrate",
+ rMassFrac:"Bestandsänderung als Anteil des Anfangs",rResidence:"Bestand geteilt durch Entnahme",
+ rPress:"Enddruck der Leitung",rInv:"Endbestand",rDelta:"Bestandsänderung",rIn:"Zulauf am Ende",rPeak:"Maximaler Zulauf",rDens:"Leitungsdichte",rElapsed:"Simulierte Zeit",
+ rSupplyWhy:"Legt den erreichbaren Eintrittsdruck fest und mit der Fläche den maximalen Zulauf",
+ rAreaWhy:"Legt den Zulauf bei jedem Leitungsdruck fest und damit den Gleichgewichtsdruck",
+ rDrawWhy:"Feste Entnahme; die Bestandsrate ist der Zulauf abzüglich dieser Rate",
+ riskDistT:"Verteilte Leitungsdynamik",riskDist:"Der Abschnitt ist ein konzentriertes Volumen, es läuft also kein Druckgefälle entlang und keine Welle hindurch. Ein schnelles Armaturereignis oder eine lange Leitung mit unterschiedlichen Enddrücken liegt außerhalb dieses Bestandsmodells.",
+ riskIsoT:"Isotherme Annahme",riskIso:"Die Leitungstemperatur bleibt auf dem Eingabewert, die Verdichtungswärme beim Speichern und die Abkühlung beim Entspeichern fehlen also. Der bei fester Temperatur berechnete Druck trägt diesen Fehler.",
+ riskFloorT:"Leerlaufschwelle",riskFloor:"Der Marsch hält bei einem Bestand von 1e-9 kg statt bei null, und der dort gemeldete Druck ist der Idealgasdruck dieser Schwellenmasse. Ein leerlaufender Fall ist auf seine Leerlaufzeit zu lesen, nicht auf seinen Enddruck.",
+ mNote:"Ideales Gas mit konstantem γ und R bei fester Leitungstemperatur. Ein konzentriertes Kontrollvolumen, fester Versorgungsdruck, vorgegebene Entnahme, keine Rohrreibung und kein örtliches Druckgefälle."},
+nl:{title:"Leidingpacking — geconcentreerde isotherme inventaris van een leidingsegment",
+ summary:"Een leiding van {D} mm × {L} m met {V} m³ gas op {T} °C start op {p0} bar en wordt gevoed via een inlaatorifice van {A} mm² met uitstroomcoëfficiënt {Cd} vanuit een bron op {ps} bar, tegen een afname van {out} kg/s. Na {t} s staat de leiding op {pf} bar en {mf} kg, een verandering van {dm} kg.",
+ concPack:"In de eindtoestand overtreft de instroom de afname, dus het segment wint bij het sluiten van het venster nog inventaris.",
+ concDepack:"In de eindtoestand overtreft de afname de instroom, dus het segment verliest bij het sluiten van het venster nog inventaris.",
+ concEmpty:"De inventaris bereikte binnen het venster de leegloopdrempel van de solver; de eindtoestand is die leegloopgebeurtenis, geen ingespeelde toestand.",
+ system:"Het leidingsegment geldt als één isotherm controlevolume. De instroom volgt uit een bronorifice tegen de momentane leidingdruk, de afname ligt vast, en het verschil verandert de inventaris. De druk volgt uit de ideaal-gasrelatie voor die inventaris bij de vaste leidingtemperatuur.",
+ figCap:"Leidingdruk tegen de tijd over het gesimuleerde venster.",
+ ckDepack:"Analytische limiet bij nul inlaatoppervlak",ckDepackB:"Met inlaatoppervlak nul levert de orifice niets en is dm/dt = −ṁ_uit constant, dus de inventaris is exact lineair in de tijd en het leeglooptijdstip is (m₀ − m_drempel)/ṁ_uit. RK4 integreert een constante zonder afbreekfout, dus de mars moet die rechte en dat tijdstip als rekenwerk teruggeven.",
+ ckRK4:"Eindtoestand tegen een verfijnde mars",ckRK4B:"Dezelfde klassieke RK4-mars, met de stapfractie en de tekenlimiet door zestien gedeeld, dus een werkelijk fijnere verdeling van dezelfde baan. Zowel de einddruk als het eindtijdstip worden vergeleken, want een leeglopend geval bereikt hoe dan ook dezelfde drempeldruk en alleen het tijdstip kan verschillen. Overeenstemming toetst de integratie in plaats van het model.",
+ ckHandoff:"Toestandssluiting van de overdracht",ckHandoffB:"De SI-overdracht geeft leidingdruk en dichtheid af en schrijft een binnenkomende druk rechtstreeks in de begindruk. De inventaris die uit de gemelde druk volgt moet dus de inventaris zijn waarmee de mars eindigde, en de gemelde dichtheid moet dezelfde relatie p = m R T / V voldoen.",
+ ckEquil:"Richting van de inventarisverandering",ckEquilB:"De orificerelatie daalt monotoon met de tegendruk, dus er is precies één druk waarbij instroom gelijk is aan afname. De inventarissnelheid moet naar die druk wijzen en overal negatief zijn wanneer zelfs de gechokte instroom de afname niet dekt.",
+ ckChoke:"Inlaatregime in de eindtoestand",ckChokeB:"Drukverhouding p/p_bron tegen de kritische verhouding (2/(γ+1))^(γ/(γ−1)). Daaronder is de inlaatorifice choked en wordt de instroom alleen door de brontoestand bepaald.",
+ ckEnd:"Beëindigingstak",ckEndB:"De mars stopt ofwel op de gevraagde simulatietijd, ofwel wanneer de inventaris de per bisectie gelokaliseerde leegloopdrempel bereikt. Wat er gebeurde bepaalt of de eindtoestand als leidingtoestand gelezen mag worden.",
+ flowSupply:"Bron op vaste druk",flowInlet:"Inlaatorifice (A_in, Cd)",flowLine:"Leidingsegment",flowDraw:"Afname met vast debiet",
+ rPacking:"packing",rDepacking:"depacking",rBalanced:"in evenwicht",rNoEq:"geen evenwichtsdruk",
+ rChoked:"choked",rSub:"subkritisch",rHorizon:"simulatietijd bereikt",rEmptied:"leegloopdrempel bereikt",
+ rInv0:"Beginvoorraad",rDrawL:"Afnamedebiet",
+ rVol:"Leidingvolume",rP0:"Begindruk leiding",rPeq:"Evenwichtsdruk",rNet:"Netto inventarissnelheid",
+ rMassFrac:"Inventarisverandering als deel van het begin",rResidence:"Inventaris gedeeld door afname",
+ rPress:"Einddruk leiding",rInv:"Eindinventaris",rDelta:"Inventarisverandering",rIn:"Instroom aan het eind",rPeak:"Piekinstroom",rDens:"Leidingdichtheid",rElapsed:"Gesimuleerde tijd",
+ rSupplyWhy:"Bepaalt de druk die de inlaat kan halen en met het oppervlak de maximale instroom",
+ rAreaWhy:"Bepaalt de instroom bij elke leidingdruk en daarmee de evenwichtsdruk",
+ rDrawWhy:"Vaste afname; de inventarissnelheid is de instroom minus deze",
+ riskDistT:"Verdeelde leidingdynamiek",riskDist:"Het segment is één geconcentreerd volume, dus er loopt geen drukgradiënt langs en geen golf doorheen. Een snelle afsluitergebeurtenis of een lange leiding met verschillende einddrukken valt buiten dit inventarismodel.",
+ riskIsoT:"Isotherme aanname",riskIso:"De leidingtemperatuur blijft op de invoerwaarde, dus de compressiewarmte van packing en de afkoeling van depacking ontbreken. De bij vaste temperatuur berekende druk draagt die fout.",
+ riskFloorT:"Leegloopdrempel",riskFloor:"De mars stopt bij een inventaris van 1e-9 kg in plaats van bij nul, en de daar gemelde druk is de ideaal-gasdruk van die drempelmassa. Lees een leeglopend geval op zijn leeglooptijd, niet op zijn einddruk.",
+ mNote:"Ideaal gas met constante γ en R bij een vaste leidingtemperatuur. Eén geconcentreerd controlevolume, vaste brondruk, opgegeven afname, geen leidingwrijving en geen plaatselijke drukgradiënt."},
+fr:{title:"Stockage en conduite — inventaire isotherme global d’un tronçon",
+ summary:"Une conduite de {D} mm × {L} m et {V} m³ contenant du gaz à {T} °C part de {p0} bar et est alimentée par un orifice d’entrée de {A} mm² et de coefficient de décharge {Cd} depuis une source à {ps} bar, contre un soutirage de {out} kg/s. Après {t} s la conduite est à {pf} bar et {mf} kg, soit une variation de {dm} kg.",
+ concPack:"À l’état final l’entrée dépasse le soutirage, le tronçon gagne donc encore de l’inventaire à la fermeture de la fenêtre.",
+ concDepack:"À l’état final le soutirage dépasse l’entrée, le tronçon perd donc encore de l’inventaire à la fermeture de la fenêtre.",
+ concEmpty:"L’inventaire a atteint le plancher de conduite vide du solveur dans la fenêtre; l’état final est cet événement de vidage, pas un état établi.",
+ system:"Le tronçon est traité comme un unique volume de contrôle isotherme. Le débit d’entrée est fixé par un orifice d’alimentation travaillant contre la pression instantanée, le soutirage est constant, et la différence fait évoluer l’inventaire. La pression découle de la relation des gaz parfaits appliquée à cet inventaire à température de conduite fixe.",
+ figCap:"Pression de conduite en fonction du temps sur la fenêtre simulée.",
+ ckDepack:"Limite analytique à section d’entrée nulle",ckDepackB:"Avec une section d’entrée nulle l’orifice ne délivre rien et dm/dt = −ṁ_sortie est constant, l’inventaire est donc exactement linéaire en temps et l’instant de vidage vaut (m₀ − m_plancher)/ṁ_sortie. RK4 intègre une constante sans erreur de troncature, la marche doit donc rendre cette droite et cet instant comme de l’arithmétique.",
+ ckRK4:"État final contre une marche raffinée",ckRK4B:"La même marche RK4 classique, avec la fraction de pas et le plafond de tracé divisés par seize, donc une partition réellement plus fine de la même trajectoire. La pression finale ET l’instant final sont comparés, car un cas qui se vide atteint de toute façon la même pression plancher et seul l’instant peut différer. L’accord teste l’intégration plutôt que le modèle.",
+ ckHandoff:"Fermeture d’état au transfert",ckHandoffB:"Le transfert SI livre la pression et la masse volumique de conduite et écrit une pression entrante directement dans la pression initiale. L’inventaire déduit de la pression annoncée doit donc être celui sur lequel la marche s’est achevée, et la masse volumique annoncée doit vérifier la même relation p = m R T / V.",
+ ckEquil:"Sens de variation de l’inventaire",ckEquilB:"La relation d’orifice décroît de façon monotone avec la contre-pression, il existe donc une seule pression où l’entrée égale le soutirage. Le taux d’inventaire doit pointer vers cette pression, et rester négatif partout quand même l’entrée bloquée ne couvre pas le soutirage.",
+ ckChoke:"Régime d’entrée à l’état final",ckChokeB:"Rapport de pression p/p_source contre le rapport critique (2/(γ+1))^(γ/(γ−1)). En dessous, l’orifice d’entrée est bloqué et le débit d’entrée ne dépend que de l’état de la source.",
+ ckEnd:"Branche d’arrêt",ckEndB:"La marche s’arrête soit au temps de simulation demandé, soit quand l’inventaire atteint le plancher de conduite vide localisé par bissection. Ce qui s’est produit décide si l’état final peut se lire comme un état de conduite.",
+ flowSupply:"Source à pression fixe",flowInlet:"Orifice d’entrée (A_in, Cd)",flowLine:"Tronçon de conduite",flowDraw:"Soutirage à débit fixe",
+ rPacking:"stockage",rDepacking:"déstockage",rBalanced:"équilibré",rNoEq:"pas de pression d’équilibre",
+ rChoked:"bloqué",rSub:"sous-critique",rHorizon:"temps de simulation atteint",rEmptied:"plancher de conduite vide atteint",
+ rInv0:"Inventaire initial",rDrawL:"Débit de soutirage",
+ rVol:"Volume de la conduite",rP0:"Pression initiale de conduite",rPeq:"Pression d’équilibre",rNet:"Taux net d’inventaire",
+ rMassFrac:"Variation d’inventaire rapportée au départ",rResidence:"Inventaire divisé par le soutirage",
+ rPress:"Pression finale de conduite",rInv:"Inventaire final",rDelta:"Variation d’inventaire",rIn:"Débit d’entrée final",rPeak:"Débit d’entrée de pointe",rDens:"Masse volumique de conduite",rElapsed:"Temps simulé",
+ rSupplyWhy:"Fixe la pression que l’entrée peut atteindre et, avec la section, le débit d’entrée maximal",
+ rAreaWhy:"Fixe le débit d’entrée à toute pression de conduite et donc la pression d’équilibre",
+ rDrawWhy:"Soutirage constant; le taux d’inventaire est le débit d’entrée moins celui-ci",
+ riskDistT:"Dynamique répartie de la conduite",riskDist:"Le tronçon est un volume global, aucun gradient de pression ne le parcourt et aucune onde ne s’y propage. Un événement de vanne rapide ou une conduite longue dont les extrémités diffèrent en pression sort de ce modèle d’inventaire.",
+ riskIsoT:"Hypothèse isotherme",riskIso:"La température de conduite reste à la valeur saisie, la chaleur de compression du stockage et le refroidissement du déstockage sont donc absents. La pression calculée à température fixe porte cette erreur.",
+ riskFloorT:"Plancher de conduite vide",riskFloor:"La marche s’arrête à un inventaire de 1e-9 kg et non à zéro, et la pression qu’elle y annonce est la pression de gaz parfait de cette masse plancher. Un cas qui se vide se lit sur son temps de vidage, pas sur sa pression finale.",
+ mNote:"Gaz parfait à γ et R constants et température de conduite fixe. Un volume de contrôle global, pression d’alimentation fixe, soutirage imposé, sans frottement de conduite ni gradient de pression axial."},
+es:{title:"Empaquetado de línea de gas — inventario isotérmico concentrado de un tramo",
+ summary:"Una línea de {D} mm × {L} m y {V} m³ con gas a {T} °C parte de {p0} bar y se alimenta por un orificio de entrada de {A} mm² con coeficiente de descarga {Cd} desde un suministro a {ps} bar, contra una extracción de {out} kg/s. Tras {t} s la línea queda a {pf} bar y {mf} kg, un cambio de {dm} kg.",
+ concPack:"En el estado final la entrada supera a la extracción, así que el tramo sigue ganando inventario al cerrarse la ventana.",
+ concDepack:"En el estado final la extracción supera a la entrada, así que el tramo sigue perdiendo inventario al cerrarse la ventana.",
+ concEmpty:"El inventario alcanzó el suelo de línea vacía del solver dentro de la ventana; el estado final es ese evento de vaciado, no un estado asentado.",
+ system:"El tramo se trata como un único volumen de control isotérmico. El caudal de entrada lo fija un orificio de suministro que trabaja contra la presión instantánea de línea, la extracción es fija, y la diferencia cambia el inventario. La presión sale de la relación de gas ideal aplicada a ese inventario a temperatura de línea fija.",
+ figCap:"Presión de línea frente al tiempo en la ventana simulada.",
+ ckDepack:"Límite analítico con área de entrada nula",ckDepackB:"Con área de entrada nula el orificio no entrega nada y dm/dt = −ṁ_sal es constante, de modo que el inventario es exactamente lineal en el tiempo y el instante de vaciado vale (m₀ − m_suelo)/ṁ_sal. RK4 integra una constante sin error de truncamiento, así que la marcha debe devolver esa recta y ese instante como aritmética.",
+ ckRK4:"Estado final frente a una marcha refinada",ckRK4B:"La misma marcha RK4 clásica, con la fracción de paso y el tope de trazado divididos por dieciséis, es decir una partición realmente más fina de la misma trayectoria. Se comparan la presión final Y el instante final, porque un caso que se vacía alcanza de todos modos la misma presión de umbral y solo el instante puede diferir. La concordancia prueba la integración en vez del modelo.",
+ ckHandoff:"Cierre de estado en la transferencia",ckHandoffB:"La transferencia SI entrega presión y densidad de línea y escribe una presión entrante directamente en la presión inicial. El inventario que se deduce de la presión reportada debe ser entonces el inventario con que terminó la marcha, y la densidad reportada debe cumplir la misma relación p = m R T / V.",
+ ckEquil:"Sentido de la variación de inventario",ckEquilB:"La relación del orificio decrece de forma monótona con la contrapresión, así que existe una sola presión en que la entrada iguala a la extracción. La tasa de inventario debe apuntar a esa presión, y ser negativa en todo momento cuando ni siquiera la entrada crítica cubre la extracción.",
+ ckChoke:"Régimen de entrada en el estado final",ckChokeB:"Relación de presiones p/p_suministro frente a la relación crítica (2/(γ+1))^(γ/(γ−1)). Por debajo el orificio de entrada es crítico y el caudal de entrada depende solo del estado del suministro.",
+ ckEnd:"Rama de terminación",ckEndB:"La marcha se detiene en el tiempo de simulación solicitado o cuando el inventario alcanza el suelo de línea vacía localizado por bisección. Lo ocurrido decide si el estado final puede leerse como estado de línea.",
+ flowSupply:"Suministro a presión fija",flowInlet:"Orificio de entrada (A_in, Cd)",flowLine:"Tramo de tubería",flowDraw:"Extracción a caudal fijo",
+ rPacking:"empaquetando",rDepacking:"desempaquetando",rBalanced:"equilibrado",rNoEq:"sin presión de equilibrio",
+ rChoked:"crítico",rSub:"subcrítico",rHorizon:"tiempo de simulación alcanzado",rEmptied:"suelo de línea vacía alcanzado",
+ rInv0:"Inventario inicial",rDrawL:"Caudal de extracción",
+ rVol:"Volumen de la línea",rP0:"Presión inicial de línea",rPeq:"Presión de equilibrio",rNet:"Tasa neta de inventario",
+ rMassFrac:"Cambio de inventario como fracción del inicio",rResidence:"Inventario dividido por la extracción",
+ rPress:"Presión final de línea",rInv:"Inventario final",rDelta:"Cambio de inventario",rIn:"Caudal de entrada final",rPeak:"Caudal de entrada máximo",rDens:"Densidad de línea",rElapsed:"Tiempo simulado",
+ rSupplyWhy:"Fija la presión que la entrada puede alcanzar y, con el área, el caudal de entrada máximo",
+ rAreaWhy:"Fija el caudal de entrada a cualquier presión de línea y con ello la presión de equilibrio",
+ rDrawWhy:"Extracción fija; la tasa de inventario es el caudal de entrada menos esta",
+ riskDistT:"Dinámica distribuida de la línea",riskDist:"El tramo es un volumen concentrado, así que ningún gradiente de presión lo recorre ni ninguna onda lo atraviesa. Un evento rápido de válvula o una línea larga con extremos a distinta presión queda fuera de este modelo de inventario.",
+ riskIsoT:"Hipótesis isotérmica",riskIso:"La temperatura de línea se mantiene en el valor de entrada, así que faltan el calor de compresión al empaquetar y el enfriamiento al desempaquetar. La presión calculada a temperatura fija arrastra ese error.",
+ riskFloorT:"Suelo de línea vacía",riskFloor:"La marcha se detiene en un inventario de 1e-9 kg en lugar de cero, y la presión que reporta allí es la presión de gas ideal de esa masa suelo. Un caso que se vacía se lee por su tiempo de vaciado, no por su presión final.",
+ mNote:"Gas ideal con γ y R constantes a temperatura de línea fija. Un volumen de control concentrado, presión de suministro fija, extracción impuesta, sin fricción de línea ni gradiente axial de presión."},
+pl:{title:"Akumulacja gazu w rurociągu — skupiony izotermiczny zapas odcinka",
+ summary:"Rurociąg {D} mm × {L} m o objętości {V} m³ z gazem o {T} °C startuje z {p0} bar i jest zasilany przez kryzę wlotową {A} mm² o współczynniku wypływu {Cd} ze źródła {ps} bar, przy poborze {out} kg/s. Po {t} s rurociąg ma {pf} bar i {mf} kg, zmiana {dm} kg.",
+ concPack:"W stanie końcowym dopływ przewyższa pobór, więc odcinek wciąż zyskuje zapas, gdy okno się zamyka.",
+ concDepack:"W stanie końcowym pobór przewyższa dopływ, więc odcinek wciąż traci zapas, gdy okno się zamyka.",
+ concEmpty:"Zapas osiągnął w oknie dolną granicę pustego rurociągu przyjętą przez solver; stan końcowy to zdarzenie opróżnienia, nie stan ustalony.",
+ system:"Odcinek rurociągu traktowany jest jako jedna izotermiczna objętość kontrolna. Strumień wlotowy wyznacza kryza źródłowa pracująca przeciw chwilowemu ciśnieniu w rurociągu, pobór jest stały, a różnica zmienia zapas. Ciśnienie wynika z równania gazu doskonałego dla tego zapasu przy stałej temperaturze rurociągu.",
+ figCap:"Ciśnienie w rurociągu w czasie w symulowanym oknie.",
+ ckDepack:"Granica analityczna przy zerowym polu wlotu",ckDepackB:"Przy zerowym polu wlotu kryza nic nie podaje, a dm/dt = −ṁ_pob jest stałe, więc zapas jest dokładnie liniowy w czasie, a chwila opróżnienia wynosi (m₀ − m_próg)/ṁ_pob. RK4 całkuje stałą bez błędu obcięcia, więc marsz musi zwrócić tę prostą i tę chwilę jako arytmetykę.",
+ ckRK4:"Stan końcowy wobec zagęszczonego marszu",ckRK4B:"Ten sam klasyczny marsz RK4, z ułamkiem kroku i ograniczeniem rysowania podzielonymi przez szesnaście, a więc naprawdę gęstszy podział tej samej trajektorii. Porównywane są zarówno ciśnienie końcowe, jak i chwila zakończenia, bo przypadek opróżniający się i tak dochodzi do tego samego ciśnienia progowego i różnić się może tylko chwila. Zgodność sprawdza całkowanie, a nie model.",
+ ckHandoff:"Domknięcie stanu przy przekazaniu",ckHandoffB:"Przekazanie SI oddaje ciśnienie i gęstość w rurociągu oraz wpisuje napływające ciśnienie wprost w ciśnienie początkowe. Zapas wynikający z podanego ciśnienia musi więc być zapasem, którym marsz się zakończył, a podana gęstość musi spełniać tę samą zależność p = m R T / V.",
+ ckEquil:"Kierunek zmiany zapasu",ckEquilB:"Zależność dla kryzy maleje monotonicznie z ciśnieniem za nią, istnieje więc jedno ciśnienie, przy którym dopływ równa się poborowi. Tempo zmiany zapasu musi być skierowane ku temu ciśnieniu i musi być wszędzie ujemne, gdy nawet dopływ krytyczny nie pokrywa poboru.",
+ ckChoke:"Reżim wlotu w stanie końcowym",ckChokeB:"Stosunek ciśnień p/p_zasilania wobec stosunku krytycznego (2/(γ+1))^(γ/(γ−1)). Poniżej niego kryza wlotowa jest zakrytyczna, a dopływ zależy tylko od stanu zasilania.",
+ ckEnd:"Gałąź zakończenia",ckEndB:"Marsz kończy się albo na żądanym czasie symulacji, albo gdy zapas osiągnie lokalizowaną bisekcją dolną granicę pustego rurociągu. To, co nastąpiło, rozstrzyga, czy stan końcowy wolno czytać jako stan rurociągu.",
+ flowSupply:"Źródło o stałym ciśnieniu",flowInlet:"Kryza wlotowa (A_wl, Cd)",flowLine:"Odcinek rurociągu",flowDraw:"Pobór o stałym natężeniu",
+ rPacking:"akumulacja",rDepacking:"rozładowanie",rBalanced:"równowaga",rNoEq:"brak ciśnienia równowagi",
+ rChoked:"zakrytyczny",rSub:"podkrytyczny",rHorizon:"osiągnięto czas symulacji",rEmptied:"osiągnięto granicę pustego rurociągu",
+ rInv0:"Zapas początkowy",rDrawL:"Natężenie poboru",
+ rVol:"Objętość rurociągu",rP0:"Początkowe ciśnienie w rurociągu",rPeq:"Ciśnienie równowagi",rNet:"Netto tempo zmiany zapasu",
+ rMassFrac:"Zmiana zapasu jako ułamek początkowego",rResidence:"Zapas podzielony przez pobór",
+ rPress:"Końcowe ciśnienie w rurociągu",rInv:"Zapas końcowy",rDelta:"Zmiana zapasu",rIn:"Końcowy dopływ",rPeak:"Szczytowy dopływ",rDens:"Gęstość w rurociągu",rElapsed:"Czas symulowany",
+ rSupplyWhy:"Ustala ciśnienie osiągalne na wlocie i wraz z polem maksymalny dopływ",
+ rAreaWhy:"Ustala dopływ przy dowolnym ciśnieniu w rurociągu, a więc i ciśnienie równowagi",
+ rDrawWhy:"Stały pobór; tempo zmiany zapasu to dopływ pomniejszony o niego",
+ riskDistT:"Rozłożona dynamika rurociągu",riskDist:"Odcinek jest jedną skupioną objętością, więc nie biegnie wzdłuż niego gradient ciśnienia ani fala. Szybkie zdarzenie na armaturze albo długi rurociąg o różnych ciśnieniach na końcach leżą poza tym modelem zapasu.",
+ riskIsoT:"Założenie izotermiczności",riskIso:"Temperatura rurociągu pozostaje na wartości wejściowej, więc brak ciepła sprężania przy akumulacji i schłodzenia przy rozładowaniu. Ciśnienie liczone przy stałej temperaturze niesie ten błąd.",
+ riskFloorT:"Granica pustego rurociągu",riskFloor:"Marsz zatrzymuje się przy zapasie 1e-9 kg, a nie przy zerze, a ciśnienie tam podawane to ciśnienie gazu doskonałego dla tej masy progowej. Przypadek opróżniający się czytaj po czasie opróżnienia, nie po ciśnieniu końcowym.",
+ mNote:"Gaz doskonały o stałych γ i R przy stałej temperaturze rurociągu. Jedna skupiona objętość kontrolna, stałe ciśnienie zasilania, zadany pobór, bez tarcia w rurociągu i bez osiowego gradientu ciśnienia."}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '—';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+
+/* Verification computed live from the current state. This is the SELF-CHECK subset:
+   the analytic zero-inlet-area limit of the shipped inventory equation, a sixteen-fold
+   refinement of the same step rule, and the state closure the SI handoff depends on.
+   Every figure is recomputed here, inside the tool, so these rows establish internal
+   consistency and nothing more. The published artifact is graded by an external
+   independent Python reference and carries these rows beside it, labelled as such. */
+var DGC_REF_REFINE=16, DGC_MID_REFINE=4;
+function dgcWith(s,o){var r={};for(var k in s)r[k]=s[k];for(var k in o)r[k]=o[k];return r;}
+function dgcVolume(s){return Math.PI*s.D*s.D*s.L/4;}
+/* The same classical RK4 march as solve() on the same step rule, with the step fraction and
+   the plotting cap divided by `refine`, so the shipped answer can be measured against a
+   genuinely finer partition of the same trajectory. Nothing else differs. */
+function dgcMarch(s,refine){
+  var V=dgcVolume(s),m=s.p0*V/(s.R*s.T),t=0,n=0,eps=1e-9,guard=GL_GUARD*refine;
+  function rhs(mass){var pr=mass*s.R*s.T/V;
+    return gasOrifice(s.pSupply,s.T,pr,s.Cd,s.Ain,s.gamma,s.R).mdot-s.mdotOut;}
+  function rk4(mass,h){var a=rhs(mass),b=rhs(Math.max(eps,mass+.5*h*a)),
+    c=rhs(Math.max(eps,mass+.5*h*b)),d=rhs(Math.max(eps,mass+h*c));
+    return mass+h*(a+2*b+2*c+d)/6;}
+  var tgt=glTarget(s,V,eps),f0=Math.abs(rhs(m)),
+      tau0=f0>0?Math.abs(m-tgt.m)/f0:0,
+      dtFloor=Math.max(1e-12,1e-9*(tau0>0?tau0:s.tEnd)),
+      plotCap=Math.max(s.tEnd/GL_PLOT_STEPS,1e-12);
+  while(t<s.tEnd&&n<guard){
+    var sp=glStep(s,m,t,tgt,rhs(m),dtFloor,plotCap,eps,refine),dt=sp.dt;
+    if(sp.settled){t+=dt;n++;continue;}
+    var mn=rk4(m,dt);
+    if(mn<=eps){var lo=0,hi=dt;
+      for(var k=0;k<50;k++){var mid=.5*(lo+hi);if(rk4(m,mid)>eps)lo=mid;else hi=mid;}
+      t+=hi;m=eps;break;}
+    m=mn;t+=dt;n++;
+  }
+  return {m:m,t:t,p:m*s.R*s.T/V,steps:n};
+}
+/* Pressure at which the inlet orifice delivers exactly the withdrawal rate.
+   gasOrifice is monotonically decreasing in downstream pressure, so a bisection
+   on the tool's own relation locates it. Returns null when even the choked
+   inlet cannot meet the withdrawal, in which case the line always depacks. */
+function dgcEquilibriumP(s){
+  var qMax=gasOrifice(s.pSupply,s.T,0,s.Cd,s.Ain,s.gamma,s.R).mdot;
+  if(!(qMax>s.mdotOut))return null;
+  var lo=0,hi=s.pSupply;
+  for(var k=0;k<200;k++){var mid=.5*(lo+hi);
+    if(gasOrifice(s.pSupply,s.T,mid,s.Cd,s.Ain,s.gamma,s.R).mdot>s.mdotOut)lo=mid;else hi=mid;}
+  return .5*(lo+hi);
+}
+/* With no inlet area the orifice returns zero flow, so dm/dt = -mdot_out is a
+   constant and the inventory is exactly linear in time. RK4 integrates a
+   constant without truncation error, so the march must reproduce the straight
+   line and the emptying instant to floating-point precision. */
+function dgcZeroInlet(s){
+  var a=dgcWith(s,{Ain:0}),V=dgcVolume(a),m0=a.p0*V/(a.R*a.T),eps=1e-9;
+  if(!(a.mdotOut>0))return null;
+  var tStar=(m0-eps)/a.mdotOut, tRef=Math.min(tStar,a.tEnd);
+  var mRef=tRef>=tStar?eps:m0-a.mdotOut*tRef;
+  var r=solve(a);
+  var relP=Math.abs(r.p-mRef*a.R*a.T/V)/Math.max(Math.abs(mRef*a.R*a.T/V),1e-30);
+  var relT=Math.abs(r.time-tRef)/Math.max(tRef,1e-30);
+  return {rel:Math.max(relP,relT),relP:relP,relT:relT,
+          pRef:mRef*a.R*a.T/V,pGot:r.p,tRef:tRef,tGot:r.time,emptied:tStar<=a.tEnd};
+}
+/* Returns one row per case: what was measured, what it was measured against,
+   the difference and the verdict. No case reports a verdict it cannot show the
+   numbers for. */
+function dgcVerify(s){
+  var out=[],r=solve(s),V=dgcVolume(s);
+  var q=gasOrifice(s.pSupply,s.T,r.p,s.Cd,s.Ain,s.gamma,s.R);
+  var dmdt=q.mdot-s.mdotOut;
+
+  // 1. Zero-inlet-area analytic limit. The comparison is exact arithmetic on
+  //    both sides, so the criterion is floating-point precision.
+  var zi=dgcZeroInlet(s);
+  out.push({id:'zero-inlet-area-analytic-depacking',key:'ckDepack',graded:!!zi,
+    got:zi?zi.pGot:null,ref:zi?zi.pRef:null,abs:zi?Math.abs(zi.pGot-zi.pRef):null,
+    rel:zi?zi.rel:null,tol:1e-12,unit:'Pa',dp:6,
+    pass:zi?zi.rel<=1e-12:false,status:zi?(zi.rel<=1e-12?'pass':'attention'):'info',
+    extra:zi?{tRef:zi.tRef,tGot:zi.tGot,relPressure:zi.relP,relTime:zi.relT,emptied:zi.emptied}:null});
+
+  // 2. Terminal state against the same march on a sixteen-fold finer step fraction.
+  //    The criterion is step-fraction convergence, stated as a relative departure: the
+  //    shipped step must already be converged to 1e-6 in both the terminal pressure and
+  //    the terminal instant. That band is fixed by what the tool prints and by the
+  //    fidelity of its own ideal-gas closure, not by the step - a band scaled by the
+  //    step could never fail, however coarse the step became. The four-fold run is
+  //    carried with the row because the ladder is what shows where the residue sits.
+  var ref=dgcMarch(s,DGC_REF_REFINE),mid=dgcMarch(s,DGC_MID_REFINE);
+  var dP=Math.abs(r.p-ref.p),relP=dP/Math.max(Math.abs(ref.p),1e-30);
+  var dT=Math.abs(r.time-ref.t),relT=dT/Math.max(Math.abs(ref.t),1e-30);
+  var relR=Math.max(relP,relT),tolR=1e-6,okP=relR<=tolR;
+  out.push({id:'final-pressure-vs-refined-rk4',key:'ckRK4',graded:true,
+    got:r.p,ref:ref.p,abs:dP,rel:relR,tol:tolR,unit:'Pa',dp:6,
+    pass:okP,status:okP?'pass':'attention',
+    extra:{pShipped:r.p,pMid:mid.p,pRefined:ref.p,
+           tShipped:r.time,tMid:mid.t,tRefined:ref.t,
+           relPressure:relP,relTime:relT,
+           refineMid:DGC_MID_REFINE,refineRef:DGC_REF_REFINE,
+           stepsShipped:r.steps,stepsMid:mid.steps,stepsRefined:ref.steps,
+           spread:Math.abs(r.p-mid.p)}});
+
+  // 3. State closure the SI handoff depends on. The handoff hands out p and rho
+  //    and writes an incoming p straight into p0, so the inventory implied by
+  //    the reported pressure must be the inventory the march ended with, and
+  //    the reported density must satisfy the same ideal-gas relation.
+  var mFromP=r.p*V/(s.R*s.T);
+  var relM=r.mass!==0?Math.abs(mFromP-r.mass)/Math.abs(r.mass):0;
+  var relD=r.p!==0?Math.abs(r.rho*s.R*s.T-r.p)/Math.abs(r.p):0;
+  var relHO=Math.max(relM,relD),okHO=relHO<=1e-12;
+  out.push({id:'handoff-state-closure',key:'ckHandoff',graded:true,
+    got:mFromP,ref:r.mass,abs:Math.abs(mFromP-r.mass),rel:relHO,tol:1e-12,unit:'kg',dp:6,
+    pass:okHO,status:okHO?'pass':'attention',
+    extra:{relInventory:relM,relDensity:relD,rho:r.rho,volume:V}});
+
+  // 4. Direction of the inventory rate against the equilibrium pressure. The
+  //    orifice relation falls monotonically with downstream pressure, so the
+  //    line must move toward the pressure where inlet equals withdrawal, and
+  //    must depack throughout when no such pressure exists. Exact, no tolerance.
+  var pEq=dgcEquilibriumP(s);
+  var okE=pEq===null?(dmdt<0):(dmdt===0||(dmdt>0)===(pEq>r.p));
+  out.push({id:'inventory-rate-direction',key:'ckEquil',graded:true,
+    got:dmdt,ref:pEq,rel:null,tol:null,unit:'kg/s',dp:6,
+    pass:okE,status:okE?'pass':'attention',
+    word:pEq===null?'rNoEq':(dmdt>0?'rPacking':dmdt<0?'rDepacking':'rBalanced'),
+    extra:{pTerminal:r.p,pEquilibrium:pEq,mdotIn:q.mdot,mdotOut:s.mdotOut}});
+
+  // 5. Orifice regime at the terminal state. Reported, not graded: it states
+  //    which branch of gasOrifice set the last inlet flow.
+  var rc=Math.pow(2/(s.gamma+1),s.gamma/(s.gamma-1));
+  out.push({id:'terminal-inlet-regime',key:'ckChoke',graded:false,
+    got:q.r,ref:rc,rel:null,unit:'-',dp:4,pass:true,status:'info',
+    word:q.choked?'rChoked':'rSub'});
+
+  // 6. How the march ended. Both terminations are legitimate; which one occurred
+  //    decides how the terminal state may be read. No criterion, so recorded.
+  var atHorizon=r.time>=s.tEnd-1e-12;
+  out.push({id:'termination-branch',key:'ckEnd',graded:false,
+    got:r.time,ref:s.tEnd,rel:null,unit:'s',dp:4,pass:true,status:'info',
+    word:atHorizon?'rHorizon':'rEmptied'});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption, no axis titles and no units. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+function dgcPlotSpec(){
+  if(!last||!last.series||!last.series.length)return null;
+  return {x:{label:dgcLabel('time'),unit:'s'},
+    series:[{x:last.series[0].x,y:last.series[0].y,label:dgcLabel('pressure'),unit:'bar',color:'#1f6feb'}]};
+}
+var DGC_AXIS={
+ time:{en:'Time',uk:'Час',de:'Zeit',nl:'Tijd',fr:'Temps',es:'Tiempo',pl:'Czas'},
+ pressure:{en:'Line pressure',uk:'Тиск у лінії',de:'Leitungsdruck',nl:'Leidingdruk',fr:'Pression de conduite',es:'Presión de línea',pl:'Ciśnienie w rurociągu'}
+};
+function dgcLabel(k){var l=dgcLang();return (DGC_AXIS[k]&&(DGC_AXIS[k][l]||DGC_AXIS[k].en))||k;}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{}, o=rec.outputs||{}, u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var n=dgcNum, V=dgcVolume(i), elapsed=last.time;
+  var q=gasOrifice(i.pSupply,i.T,o.p_final,i.Cd,i.Ain,i.gamma,i.R);
+  var dmdt=q.mdot-i.mdotOut;
+  var m0=i.p0*V/(i.R*i.T);
+  var emptied=elapsed<i.tEnd-1e-12;
+
+  var summary=dgcRt('summary')
+    .replace('{D}',n(i.D*1000,1)).replace('{L}',n(i.L,1)).replace('{V}',n(V,2))
+    .replace('{T}',n(i.T-273.15,1)).replace('{p0}',n(i.p0/1e5,2)).replace('{A}',n(i.Ain*1e6,1))
+    .replace('{Cd}',n(i.Cd,2)).replace('{ps}',n(i.pSupply/1e5,2)).replace('{out}',n(i.mdotOut,3))
+    .replace('{t}',n(elapsed,2)).replace('{pf}',n(o.p_final/1e5,3))
+    .replace('{mf}',n(o.inventory_final,2)).replace('{dm}',n(o.inventory_change,2));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcRt('rPress'),n(o.p_final/1e5,3),'bar'),
+    row(dgcRt('rDelta'),n(o.inventory_change,2),'kg'),
+    row(dgcRt('rInv'),n(o.inventory_final,2),'kg'),
+    row(dgcRt('rIn'),n(o.mdot_in_final,3),'kg/s'),
+    row(dgcRt('rDens'),n(o.rho_final,3),'kg/m³'),
+    row(dgcRt('rElapsed'),n(elapsed,2),'s')
+  ];
+  /* Quantities the tiles do not carry: the geometry behind the inventory, the
+     pressure the segment is heading for, and the rate that is taking it there. */
+  var pEq=dgcEquilibriumP(i);
+  var results=tiles.concat([
+    row(dgcRt('rVol'),n(V,3),'m³',n(i.D*1000,1)+' mm × '+n(i.L,1)+' m'),
+    row(dgcRt('rP0'),n(i.p0/1e5,3),'bar',dgcRt('rInv0')+': '+n(m0,2)+' kg'),
+    row(dgcRt('rPeq'),pEq===null?dgcRt('rNoEq'):n(pEq/1e5,3),pEq===null?'':'bar'),
+    row(dgcRt('rNet'),n(dmdt,4),'kg/s',dgcRt(dmdt>0?'rPacking':dmdt<0?'rDepacking':'rBalanced')),
+    row(dgcRt('rPeak'),n(o.mdot_in_peak,3),'kg/s'),
+    row(dgcRt('rMassFrac'),m0>0?n(100*o.inventory_change/m0,2):'—','%'),
+    row(dgcRt('rResidence'),i.mdotOut>0?n(o.inventory_final/i.mdotOut,1):'—','s')
+  ]);
+
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'attention');
+    var actual,criterion='',note='';
+    if(c.key==='ckDepack'){
+      actual=c.rel===null?'—':'max relative departure = '+Number(c.rel).toExponential(2);
+      criterion='≤ 1·10⁻¹²';
+      if(c.extra)note='p = '+n(c.got/1e5,6)+' bar vs '+n(c.ref/1e5,6)+' bar · t = '+
+        n(c.extra.tGot,4)+' s vs '+n(c.extra.tRef,4)+' s';
+    } else if(c.key==='ckRK4'){
+      actual='|Δp| = '+Number(c.abs).toExponential(3)+' Pa';
+      criterion='≤ |dm/dt| R T Δt / V = '+Number(c.tol).toExponential(3)+' Pa';
+      if(c.extra)note=n(c.extra.refSteps,0)+' steps · Δt = '+n(c.extra.stepSeconds,4)+
+        ' s · 800 → 1600 spread '+Number(c.extra.spread).toExponential(3)+' Pa · relative '+
+        Number(c.rel).toExponential(2);
+    } else if(c.key==='ckHandoff'){
+      actual='max(Δm/m, Δp/p) = '+Number(c.rel).toExponential(2);
+      criterion='≤ 1·10⁻¹²';
+      if(c.extra)note='m = '+n(c.ref,6)+' kg · ρ = '+n(c.extra.rho,5)+' kg/m³ · V = '+n(c.extra.volume,4)+' m³';
+    } else if(c.key==='ckEquil'){
+      actual='dm/dt = '+n(c.got,5)+' kg/s ('+dgcRt(c.word)+')';
+      criterion=c.ref===null?dgcRt('rNoEq')+', dm/dt < 0':dgcRt('rPeq')+' = '+n(c.ref/1e5,4)+' bar';
+      if(c.extra)note='p = '+n(c.extra.pTerminal/1e5,4)+' bar · ṁ_in = '+n(c.extra.mdotIn,4)+
+        ' kg/s · ṁ_out = '+n(c.extra.mdotOut,4)+' kg/s';
+    } else if(c.key==='ckChoke'){
+      actual='p/p_supply = '+n(c.got,4)+' ('+dgcRt(c.word)+')';
+      criterion='r_crit = '+n(c.ref,4);
+    } else {
+      actual=n(c.got,3)+' s ('+dgcRt(c.word)+')';
+      criterion=ctx.label('tEnd',u.tEnd||'s')+' = '+n(c.ref,3)+' s';
+    }
+    return {status:st,title:dgcRt(c.key),actual:actual,criterion:criterion,
+            basis:dgcRt(c.key+'B'),detail:note};
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckEnd'),detail:w});});
+
+  var decisions=[
+    row(ctx.label('pSupply',u.pSupply),n(i.pSupply/1e5,2)+' bar','',dgcRt('rSupplyWhy')),
+    row('A_in · Cd',n(i.Ain*1e6,2)+' mm² · '+n(i.Cd,2),'',dgcRt('rAreaWhy')),
+    row(dgcRt('rDrawL'),n(i.mdotOut,3)+' kg/s','',dgcRt('rDrawWhy'))
+  ];
+
+  var g1='1 · '+dgcRt('flowSupply'), g2='2 · '+dgcRt('flowLine');
+  var inputs=[
+    {label:ctx.label('pSupply',u.pSupply),value:n(i.pSupply/1e5,3),unit:'bar',group:g1},
+    {label:ctx.label('Ain',u.Ain),value:n(i.Ain*1e6,3),unit:'mm²',group:g1},
+    {label:ctx.label('Cd',u.Cd),value:n(i.Cd,3),unit:'-',group:g1},
+    {label:dgcRt('rDrawL'),value:n(i.mdotOut,4),unit:'kg/s',group:g1},
+    {label:ctx.label('D',u.D),value:n(i.D*1000,2),unit:'mm',group:g2},
+    {label:ctx.label('L',u.L),value:n(i.L,2),unit:'m',group:g2},
+    {label:dgcRt('rP0'),value:n(i.p0/1e5,3),unit:'bar',group:g2},
+    {label:ctx.label('T',u.T),value:n(i.T-273.15,2),unit:'°C',group:g2},
+    {label:ctx.label('gamma',u.gamma),value:n(i.gamma,3),unit:'-',group:g2},
+    {label:ctx.label('R',u.R),value:n(i.R,2),unit:'J/(kg·K)',group:g2},
+    {label:ctx.label('tEnd',u.tEnd),value:n(i.tEnd,2),unit:'s',group:g2}
+  ];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,
+      conclusion:emptied?dgcRt('concEmpty'):(dmdt>0?dgcRt('concPack'):dgcRt('concDepack'))},
+    system:{text:dgcRt('system'),
+      flow:[{label:dgcRt('flowSupply'),detail:n(i.pSupply/1e5,2)+' bar / '+n(i.T-273.15,1)+' °C'},
+            {label:dgcRt('flowInlet'),detail:n(i.Ain*1e6,2)+' mm² · Cd '+n(i.Cd,2)},
+            {label:dgcRt('flowLine'),detail:n(V,2)+' m³'},
+            {label:dgcRt('flowDraw'),detail:n(i.mdotOut,3)+' kg/s'}]},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskDistT'),detail:dgcRt('riskDist')},
+           {status:'attention',title:dgcRt('riskIsoT'),detail:dgcRt('riskIso')},
+           {status:'attention',title:dgcRt('riskFloorT'),detail:dgcRt('riskFloor')}],
+    method:{
+      equations:['V = π D² L / 4','m = p V / (R T)','dm/dt = ṁ_in(p) − ṁ_out',
+        'ṁ_in = C_d A_in p_s √(γ/(R T)) (2/(γ+1))^((γ+1)/(2(γ−1)))   for p/p_s ≤ (2/(γ+1))^(γ/(γ−1))',
+        'ṁ_in = C_d A_in p_s √(2γ/(R T (γ−1)) · [r^(2/γ) − r^((γ+1)/γ)])   otherwise, r = p/p_s'],
+      ranges:['single isothermal control volume','ideal gas','fixed supply pressure and specified withdrawal'],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Scenarios the published benchmark covers: packing toward an equilibrium
+   pressure, depacking to the empty-line event, the zero-inlet-area limit as a
+   case in its own right, a choked inlet, and a withdrawal no inlet can meet.
+   They live here rather than in a separate harness so the artifact is defined
+   by the tool it describes. */
+var DGC_BENCH_CASES=[
+ {id:'packing-shipped-default',note:'Shipped default: 600 mm / 2000 m line at 40 bar fed from 60 bar through 300 mm², 2 kg/s drawn',
+  s:{D:0.6,L:2000,p0:4e6,T:288.15,pSupply:6e6,Ain:3e-4,Cd:0.8,mdotOut:2.0,gamma:1.3,R:500,tEnd:1800}},
+ {id:'depacking-to-empty-line',note:'Withdrawal raised to 12 kg/s; the segment empties inside the window',
+  s:{D:0.6,L:2000,p0:4e6,T:288.15,pSupply:6e6,Ain:3e-4,Cd:0.8,mdotOut:12,gamma:1.3,R:500,tEnd:3600}},
+ {id:'zero-inlet-area-depacking',note:'Inlet area zero: pure linear depacking at the withdrawal rate',
+  s:{D:0.6,L:2000,p0:4e6,T:288.15,pSupply:6e6,Ain:0,Cd:0.8,mdotOut:8,gamma:1.3,R:500,tEnd:3600}},
+ {id:'choked-inlet-small-line',note:'300 mm / 500 m line at 10 bar fed from 80 bar through 100 mm², 0.5 kg/s drawn',
+  s:{D:0.3,L:500,p0:1e6,T:288.15,pSupply:8e6,Ain:1e-4,Cd:0.8,mdotOut:0.5,gamma:1.3,R:500,tEnd:3600}},
+ {id:'withdrawal-above-maximum-inlet',note:'Withdrawal of 3.4 kg/s above the choked inlet capacity, so no equilibrium pressure exists',
+  s:{D:0.6,L:2000,p0:4e6,T:288.15,pSupply:6e6,Ain:3e-4,Cd:0.8,mdotOut:3.4,gamma:1.3,R:500,tEnd:7200}}
+];
+/* Rebuilds the published benchmark record from this page. Open the tool and
+   call window.__dgcBenchmark() to reproduce benchmarks/gasline_packing.json. */
+function dgcBenchmark(scenarios){
+  var list=scenarios||DGC_BENCH_CASES, cases=[], total=0, passed=0;
+  list.forEach(function(sc){
+    var v=dgcVerify(sc.s);
+    var cmp=v.map(function(c){
+      if(c.graded){total++; if(c.pass)passed++;}
+      return {check:c.id,
+        got:(c.got===undefined?null:c.got),
+        ref:(c.ref===undefined?null:c.ref),
+        abs:(c.abs===undefined?null:c.abs),
+        rel:(c.rel===undefined?null:c.rel),
+        tol:(c.tol===undefined?null:c.tol),
+        unit:c.unit,extra:c.extra||null,
+        graded:!!c.graded,
+        status:c.status||(c.pass?'pass':'fail'),ok:c.graded?!!c.pass:null};
+    });
+    cases.push({id:sc.id,note:sc.note,inputs:sc.s,cmp:cmp,
+      pass:cmp.every(function(x){return !x.graded||x.ok;})});
+  });
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var pick=function(ci,id){return cases[ci].cmp.filter(function(x){return x.check===id;})[0];};
+  var d0=pick(0,'zero-inlet-area-analytic-depacking'), r0=pick(0,'final-pressure-vs-refined-rk4');
+  var ex=function(x,k){return x==null?'—':Number(x).toExponential(k);};
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'gasline-packing',file:'gasline_packing.html',manifest_revision:rev,
+    reference:'SELF-CHECK SUBSET ONLY. The analytic zero-inlet-area limit of the shipped inventory equation, a sixteen-fold refinement of the same step rule, and the ideal-gas state closure the SI handoff depends on, all recomputed in the page. These establish internal consistency; they are not an independent reference, because they re-evaluate the tool\'s own relations inside the tool. The published artifact benchmarks/gasline_packing.json is produced by an external independent Python reference (gen_gasline_packing.py) and carries these rows beside it, labelled as self-checks.',
+    reference_citations:[
+      'With A_in = 0 the orifice delivers nothing, so dm/dt = -mdot_out is constant and m(t) = m0 - mdot_out t exactly, emptying at (m0 - 1e-9)/mdot_out. Classical RK4 integrates a constant without truncation error.',
+      'Refined march: the same step rule as the shipped march with the step fraction and the plotting cap divided by 16, so the refined run is a genuinely finer partition of the same trajectory.',
+      'State closure p = m R T / V and the choking criterion (2/(gamma+1))^(gamma/(gamma-1)) as implemented in gasline_packing.html.'],
+    reference_provenance:'recomputed in page (self-check subset; the published artifact comes from the external independent harness)',
+    tolerance:'The zero-inlet-area limit and the handoff state closure are exact arithmetic on both sides and are held to floating-point precision, 1e-12 relative. The terminal pressure AND the terminal instant must each agree with the sixteen-fold refined march to 1e-6 relative: that band is fixed by what the tool prints and by the fidelity of its own ideal-gas closure, not by the step. The previous band was the pressure one solver step moves with dt = tEnd/800, which grew in proportion to the error it was meant to catch and could never fail. The direction of the inventory rate against the equilibrium pressure is exact and carries no tolerance. Observed on the shipped default: zero-inlet-area departure '+ex(d0&&d0.rel,2)+' relative, and a refinement departure of '+ex(r0&&r0.rel,2)+' relative against a band of 1e-6.',
+    run_at:new Date().toISOString().replace(/\.\d+Z$/,'Z'),
+    total:total,passed:passed,failed:total-passed,flagged:0,page_errors:[],
+    grading:'total counts checks with an acceptance criterion. The terminal inlet regime and the termination branch report the state of the solved case and carry no criterion, so they are recorded with their status and excluded from the count.',
+    cases:cases,
+    not_benchmarked:[
+      'Distributed line dynamics: axial pressure gradient, line friction and wave propagation.',
+      'Thermal behaviour; the control volume is isothermal at the input temperature.',
+      'Real-gas compressibility, which matters for natural gas above roughly 5 MPa.',
+      'The RK4 convergence ORDER. The check records the departure between the shipped step fraction and a sixteen-fold finer one, which shows whether the shipped step is converged, but it does not fit a rate.',
+      'Anything the tool does not compute itself. These rows re-evaluate the tool\'s own relations inside the tool, so they cannot detect an error shared by both sides; that is what the external independent reference in the published artifact is for.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page.'],
+    notes:[
+      'Each case runs the shipped solver and the reference inside the page. Inputs, measured value, reference value and tolerance are recorded per check, so any verdict can be reproduced by calling window.__dgcBenchmark() on the tool.',
+      'These rows are the self-check subset of the published artifact. The 2026-09-11 artifact graded the terminal pressure against a band equal to the pressure one solver step moves, with dt = tEnd/800; because the step was itself taken from the simulated-time window, that band grew with the error it existed to measure and no step size could fail it. It has been replaced by a 1e-6 relative refinement band, and the march now takes its step from the transient rather than from the window.',
+      'Both inventory directions are covered and both terminations: three cases run to the requested simulation time, two reach the empty-line floor.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"pipe\"]'},{topic:'t3',focus:'[data-dgu-panel=\"boundary\"]'},{topic:'t4',focus:'[data-dgu-panel=\"gas\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"pSupply":6000000.0,"Ain":0.0005,"mdotOut":1.5});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"Ain":8e-05,"mdotOut":2.5});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"Ain":0.0003,"mdotOut":2.35});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"Ain":0,"p0":5000000.0,"pSupply":5000000.0,"mdotOut":2});}}];
+
+
+function gasOrifice(pu,Tu,pd,Cd,A,gamma,R){
+ if(!(pu>pd&&Tu>0&&A>0&&Cd>0))return {mdot:0,choked:false,G:0,r:pd/Math.max(pu,1)};
+ var r=Math.max(0,Math.min(1,pd/pu));
+ var rc=Math.pow(2/(gamma+1),gamma/(gamma-1));
+ var G;
+ if(r<=rc){G=pu*Math.sqrt(gamma/(R*Tu))*Math.pow(2/(gamma+1),(gamma+1)/(2*(gamma-1)));return {mdot:Cd*A*G,choked:true,G:G,r:r};}
+ var z=Math.max(0,Math.pow(r,2/gamma)-Math.pow(r,(gamma+1)/gamma));
+ G=pu*Math.sqrt(2*gamma/(R*Tu*(gamma-1))*z);return {mdot:Cd*A*G,choked:false,G:G,r:r};
+}
+
+/* Step size for the inventory march.
+
+   dm/dt = f(m) is autonomous and one-dimensional, so it carries exactly one local timescale:
+       tau = |m - m_target| / |dm/dt|,
+   the time the rest of the approach would still take at the present rate. m_target is the
+   equilibrium inventory when some line pressure makes the inlet meet the withdrawal, and the
+   empty-line floor when no such pressure exists. Resolving a fixed fraction of tau makes the
+   accuracy a property of the line, the gas and the two boundary flows alone.
+
+   The simulated-time window survives only inside a Math.min(), where it can refine the step so
+   that a short window still draws a smooth curve, but can never coarsen it. Sizing the step
+   from the window instead - the earlier dt = tEnd/800 - let a wide plotting range put the whole
+   transient inside one or two steps: it moved the reported emptying instant by up to 14 % and,
+   on a small line behind a large orifice, made the explicit stage unstable and returned line
+   pressures thousands of times the supply pressure. */
+var GL_STEP_FRAC=0.005, GL_PLOT_STEPS=800, GL_GUARD=60000, GL_SETTLED=1e-11;
+/* Inventory at which the inlet delivers exactly the withdrawal, and whether one exists at
+   all. When it does not, the line depacks at every pressure and the target is the floor. */
+function glTarget(s,V,floor){var pe=dgcEquilibriumP(s);
+  return pe===null?{m:floor,eq:false}:{m:pe*V/(s.R*s.T),eq:true};}
+/* One inventory step, shared by the shipped march and by the refined march it is checked
+   against. `refine` divides both the step fraction and the plotting cap, so a refined run is a
+   genuinely finer partition of the same trajectory rather than a different rule.
+
+   The trajectory is monotone towards the target, so the inventory still to come is bounded
+   BOTH by the distance left to the target and by what the remaining window can deliver at the
+   present rate: it is at most min(|m - m_target|, |dm/dt| (tEnd - t)). Once that bound falls
+   below a relative 1e-11 the state cannot move again inside this window, and the rest of the
+   window is drawn rather than integrated. Stepping through it instead would let one enormous
+   explicit step overshoot a target the physics forbids passing - which is how the previous
+   window-sized step returned line pressures above the supply pressure. */
+function glStep(s,m,t,tgt,dm,dtFloor,plotCap,eps,refine){
+  var af=Math.abs(dm),rem=s.tEnd-t,cap=plotCap/refine,dt;
+  if(tgt.eq&&Math.min(Math.abs(m-tgt.m),af*rem)<=GL_SETTLED*Math.max(m,eps))
+    return {dt:Math.min(cap,rem),settled:true};
+  dt=af>0?GL_STEP_FRAC/refine*Math.abs(m-tgt.m)/af:cap;
+  if(!(dt>0))dt=cap;
+  dt=Math.min(dt,cap);
+  dt=Math.max(dt,dtFloor/refine);
+  return {dt:Math.min(dt,rem),settled:false};
+}
+function solve(s){var V=Math.PI*s.D*s.D*s.L/4,m=s.p0*V/(s.R*s.T),m0=m,t=0,x=[],pp=[],mm=[],peakIn=0,lastIn=0,n=0,eps=1e-9;function rhs(mass){var pr=mass*s.R*s.T/V,q=gasOrifice(s.pSupply,s.T,pr,s.Cd,s.Ain,s.gamma,s.R);return {dm:q.mdot-s.mdotOut,q:q.mdot};}function rk4(mass,h){var a=rhs(mass),b=rhs(Math.max(eps,mass+.5*h*a.dm)),c=rhs(Math.max(eps,mass+.5*h*b.dm)),d=rhs(Math.max(eps,mass+h*c.dm));return {m:mass+h*(a.dm+2*b.dm+2*c.dm+d.dm)/6,q1:a.q,q2:b.q,q3:c.q,q4:d.q};}
+ var tgt=glTarget(s,V,eps),f0=Math.abs(rhs(m0).dm),tau0=f0>0?Math.abs(m0-tgt.m)/f0:0,
+     dtFloor=Math.max(1e-12,1e-9*(tau0>0?tau0:s.tEnd)),plotCap=Math.max(s.tEnd/GL_PLOT_STEPS,1e-12);
+ while(t<s.tEnd&&n<GL_GUARD){var p=m*s.R*s.T/V;x.push(t);pp.push(p/1e5);mm.push(m);var sp=glStep(s,m,t,tgt,rhs(m).dm,dtFloor,plotCap,eps,1),dt=sp.dt;if(sp.settled){t+=dt;n++;continue;}var st=rk4(m,dt);peakIn=Math.max(peakIn,st.q1,st.q2,st.q3,st.q4);if(st.m<=eps){var lo=0,hi=dt;for(var k=0;k<50;k++){var mid=0.5*(lo+hi);if(rk4(m,mid).m>eps)lo=mid;else hi=mid;}t+=hi;m=eps;break;}m=st.m;t+=dt;n++;}var p=m*s.R*s.T/V,rho=m/V;var qf=gasOrifice(s.pSupply,s.T,p,s.Cd,s.Ain,s.gamma,s.R);lastIn=qf.mdot;peakIn=Math.max(peakIn,lastIn);x.push(t);pp.push(p/1e5);mm.push(m);return {p:p,rho:rho,mdot:lastIn,peakIn:peakIn,mass:m,delta:m-m0,time:t,steps:n,series:[{x:x,y:pp}],a11y:'Gas linepack pressure history.',warnings:(s.pSupply<=0||s.p0<=0?['Pressures must be positive.']:[]),notes:[(lastIn>s.mdotOut?'At the final state inlet exceeds withdrawal: the line is packing.':lastIn<s.mdotOut?'At the final state withdrawal exceeds inlet: the line is depacking.':'Final inlet and withdrawal are approximately balanced.'),'Inventory integration uses classical RK4 with a bisection-localized empty-line event. The step is sized from the transient itself, a fixed fraction of the local relaxation time, so the answer does not depend on the simulated-time window; the window can only refine the step for plotting.']};}
+
+function degrade(){
+  document.title="Gas-Line Packing / Depacking";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Gas-Line Packing / Depacking";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"gasline-packing",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · lumped linepack inventory","Pipe / Vessel Transients · зосереджений запас газу в трубопроводі","Pipe / Vessel Transients · konzentrierter Linepack-Bestand","Pipe / Vessel Transients · lumped linepack-inventaris","Pipe / Vessel Transients · inventaire linepack global","Pipe / Vessel Transients · inventario linepack concentrado","Pipe / Vessel Transients · skupiony zapas linepack"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("One isothermal control volume. Set inlet area to zero for pure depacking; set withdrawal below inlet capacity for packing.","Один ізотермічний контрольний об’єм. Ain=0 дає чисте спорожнення; відбір нижче пропускної здатності входу дає накопичення.","Ein isothermes Kontrollvolumen. Ain=0 ergibt reines Entpacken; ein Abzug unter der Zulaufkapazität ergibt Packen.","Eén isotherm controlevolume. Ain=0 geeft zuiver depacken; afname onder de instroomcapaciteit geeft packing.","Un volume de contrôle isotherme. Ain=0 donne un déstockage pur; un soutirage inférieur à la capacité d’entrée donne le stockage.","Un volumen de control isotérmico. Ain=0 da depacking puro; una retirada menor que la capacidad de entrada produce packing.","Jedna izotermiczna objętość kontrolna. Ain=0 daje czyste opróżnianie; odbiór mniejszy od zdolności dopływu daje napełnianie.")}],
+    panels:[{id:"pipe",slot:'inputs',learn:'t1',title:T("Pipeline","Газопровід","Gasleitung","Gasleiding","Conduite","Gasoducto","Gazociąg"),fields:[{id:'f-D',key:'D',label:LBL.D,type:'number',unit:"m",display:"mm",min:LIM.D.lo,max:LIM.D.hi},{id:'f-L',key:'L',label:LBL.L,type:'number',unit:"m",min:LIM.L.lo,max:LIM.L.hi},{id:'f-p0',key:'p0',label:LBL.p0,type:'number',unit:"Pa",display:"bar",min:LIM.p0.lo,max:LIM.p0.hi},{id:'f-T',key:'T',label:LBL.T,type:'number',unit:"K",display:"degC",min:LIM.T.lo,max:LIM.T.hi}]},{id:"boundary",slot:'inputs',learn:'t2',title:T("Boundary flows","Граничні витрати","Randströme","Randstromen","Débits aux limites","Caudales de frontera","Przepływy brzegowe"),fields:[{id:'f-pSupply',key:'pSupply',label:T("Supply pressure","Тиск джерела","Versorgungsdruck","Voedingsdruk","Pression d’alimentation","Presión de suministro","Ciśnienie zasilania"),type:'number',unit:"Pa",display:"bar",min:LIM.pSupply.lo,max:LIM.pSupply.hi},{id:'f-Ain',key:'Ain',label:LBL.Ain,type:'number',unit:"m²",min:LIM.Ain.lo,max:LIM.Ain.hi},{id:'f-Cd',key:'Cd',label:T("Supply discharge coefficient","Коефіцієнт витрати","Ausflussbeiwert","Uitstroomcoëfficiënt","Coefficient de décharge","Coeficiente de descarga","Współczynnik wypływu"),type:'number',min:LIM.Cd.lo,max:LIM.Cd.hi,step:0.01,precision:2},{id:'f-mdotOut',key:'mdotOut',label:LBL.mdotOut,type:'number',unit:"kg/s",min:LIM.mdotOut.lo,max:LIM.mdotOut.hi}]},{id:"gas",slot:'inputs',learn:'t3',title:T("Gas model","Модель газу","Gasmodell","Gasmodel","Modèle gaz","Modelo de gas","Model gazu"),fields:[{id:'f-gamma',key:'gamma',label:T("Heat-capacity ratio γ","Показник адіабати γ","Isentropenexponent γ","Warmtecapaciteitsverhouding γ","Rapport γ","Relación γ","Wykładnik γ"),type:'number',min:LIM.gamma.lo,max:LIM.gamma.hi,step:0.01,precision:3},{id:'f-R',key:'R',label:T("Specific gas constant R","Питома газова стала R","Spezifische Gaskonstante R","Specifieke gasconstante R","Constante spécifique R","Constante específica R","Indywidualna stała R"),type:'number',unit:"J/(kg·K)",min:LIM.R.lo,max:LIM.R.hi},{id:'f-tEnd',key:'tEnd',label:T("Simulation time","Час моделювання","Simulationszeit","Simulatietijd","Temps de simulation","Tiempo de simulación","Czas symulacji"),type:'number',unit:"s",min:LIM.tEnd.lo,max:LIM.tEnd.hi}]}],
+    footer:T("m = pV/(RT), dm/dt = ṁin − ṁout; inlet uses the same ideal-gas choking relation as Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; вхід використовує ту саму залежність критичної/докритичної течії ідеального газу, що й Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; der Zulauf verwendet dieselbe Idealgas-Sperrbeziehung wie Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; de instroom gebruikt dezelfde ideaal-gas chokingrelatie als Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; l’entrée utilise la même relation de blocage gaz parfait que Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; la entrada usa la misma relación de choking de gas ideal que Vessel Blowdown.","m = pV/(RT), dm/dt = ṁin − ṁout; dopływ wykorzystuje tę samą zależność krytycznego przepływu gazu co Vessel Blowdown."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Final line pressure","Кінцевий тиск","Endleitungsdruck","Einddruk leiding","Pression finale","Presión final","Ciśnienie końcowe"),value:last.p/1e5,hint:"bar",precision:3},{label:T("Inventory change","Зміна запасу газу","Bestandsänderung","Inventariswijziging","Variation d’inventaire","Cambio de inventario","Zmiana zapasu"),value:last.delta,hint:"kg",precision:2},{label:T("Final inventory","Кінцевий запас газу","Endbestand","Eindinventaris","Inventaire final","Inventario final","Zapas końcowy"),value:last.mass,hint:"kg",precision:2},{label:T("Final inlet flow","Кінцева вхідна витрата","End-Zulauf","Eindinstroom","Débit d’entrée final","Caudal de entrada final","Końcowy dopływ"),value:last.mdot,hint:"kg/s",precision:3},{label:T("Line density","Густина в лінії","Leitungsdichte","Leidingdichtheid","Masse volumique ligne","Densidad de línea","Gęstość w rurociągu"),value:last.rho,hint:"kg/m³",precision:3,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Line pressure history","Історія тиску в газопроводі","Leitungsdruckverlauf","Leidingdrukverloop","Historique de pression de conduite","Historia de presión de línea","Przebieg ciśnienia w gazociągu"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+/* ---- incoming SI handoff: one range check per accepted quantity -------------
+   A quantity that arrives over the handoff is a reading taken somewhere else. A
+   pressure named p may be a barometric reading, a pump suction pressure or a
+   contained line pressure, and the name alone does not say which (AGENTS.md
+   2.4, 2.7). Each accepted quantity is therefore applied only inside LIM, the
+   same lo/hi the typed field enforces: a typed value outside the bound is moved
+   to it and announced by the framework, an arriving value outside the bound is
+   refused and nothing is written for it.
+   The refused name is kept out of the `ignored` array, because the framework
+   renders that array as "this tool does not use them" and the tool does use
+   these quantities; the refusal sentence below carries the reason instead. */
+var HO_MAP={T:'T',p:'p0',mdot:'mdotOut',D:'D',L:'L',A:'Ain'};
+var HO_OUT=T(
+ "{q} = {v} {u} from {f} is outside {lo}–{hi} {u}, the range this tool applies to “{field}”; that input is unchanged.",
+ "{q} = {v} {u} від {f} лежить поза діапазоном {lo}–{hi} {u}, який цей інструмент застосовує до «{field}»; це поле не змінено.",
+ "{q} = {v} {u} von {f} liegt außerhalb von {lo}–{hi} {u}, dem Bereich, den dieses Werkzeug auf „{field}“ anwendet; dieses Eingabefeld bleibt unverändert.",
+ "{q} = {v} {u} van {f} valt buiten {lo}–{hi} {u}, het bereik dat deze tool op „{field}” toepast; dat invoerveld blijft ongewijzigd.",
+ "{q} = {v} {u} venant de {f} se situe hors de {lo}–{hi} {u}, la plage que cet outil applique à « {field} » ; ce champ reste inchangé.",
+ "{q} = {v} {u} procedente de {f} queda fuera de {lo}–{hi} {u}, el rango que esta herramienta aplica a «{field}»; ese campo no cambia.",
+ "{q} = {v} {u} z {f} leży poza zakresem {lo}–{hi} {u}, który to narzędzie stosuje do „{field}”; to pole pozostaje bez zmian.");
+/* A figure in the reader's locale. Above 1e4 and below 1e-2 the mantissa and the
+   decimal exponent are printed, so a 200 MPa bound stays one short token. */
+function hoFig(v){
+ if(!isFinite(v))return '—';
+ if(v===0)return '0';
+ var a=Math.abs(v);
+ if(a<0.01||a>=1e4){var e=Math.floor(Math.log(a)/Math.LN10);
+  return dgcNum(v/Math.pow(10,e),2)+'e'+(e<0?'':'+')+e;}
+ return dgcNum(v,a>=100?1:(a>=1?2:4));
+}
+function hoApply(pl){
+ var q=(pl&&pl.quantities)||{},from=(pl&&pl.from&&pl.from.tool)||'—',
+     acc=[],ign=[],lang=dgcLang();
+ Object.keys(q).forEach(function(n){
+  var key=HO_MAP[n];
+  if(!key){ign.push(n);return;}
+  var lim=LIM[key],v=Number(q[n]&&q[n].value);
+  if(!isFinite(v)||v<lim.lo||v>lim.hi){
+   var msg=(HO_OUT[lang]||HO_OUT.en)
+    .split('{q}').join(n)
+    .split('{v}').join(hoFig(v))
+    .split('{lo}').join(hoFig(lim.lo))
+    .split('{hi}').join(hoFig(lim.hi))
+    .split('{u}').join(lim.u)
+    .split('{f}').join(from)
+    .split('{field}').join((LBL[key]&&(LBL[key][lang]||LBL[key].en))||key);
+   try{if(window.Diagram&&Diagram.notify)Diagram.notify(msg,'warn');}catch(e){}
+   return;
+  }
+  state[key]=v;acc.push(n);
+ });
+ last=solve(state);if(ui){ui.sync();ui.run();}
+ return {accepted:acc,ignored:ign};
+}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"gasline-packing",file:"gasline_packing.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"D":state["D"],"L":state["L"],"p0":state["p0"],"T":state["T"],"pSupply":state["pSupply"],"Ain":state["Ain"],"Cd":state["Cd"],"mdotOut":state["mdotOut"],"gamma":state["gamma"],"R":state["R"],"tEnd":state["tEnd"]},outputs:{"p_final":last.p,"rho_final":last.rho,"inventory_final":last.mass,"inventory_change":last.delta,"mdot_in_final":last.mdot,"mdot_in_peak":last.peakIn},units:{"D":"m","L":"m","p0":"Pa","T":"K","pSupply":"Pa","Ain":"m2","Cd":"-","mdotOut":"kg/s","gamma":"-","R":"J/(kg K)","tEnd":"s","p_final":"Pa","rho_final":"kg/m3","inventory_final":"kg","inventory_change":"kg","mdot_in_final":"kg/s","mdot_in_peak":"kg/s"},model:{equations:["V = pi D^2 L / 4", "m = p V / (R T)", "dm/dt = mdot_in - mdot_out", "ideal-gas compressible supply-orifice relation"],ranges:["single isothermal control volume", "ideal gas", "fixed supply pressure and specified withdrawal"],notes:["line friction and spatial pressure gradients are outside this lumped inventory model"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef gas_orifice(pu, Tu, pd, Cd, A, gamma, R):\n    if not (pu > pd and Tu > 0 and A > 0 and Cd > 0):\n        return 0.0, False, 0.0\n    r=max(0.0,min(1.0,pd/pu)); rc=(2/(gamma+1))**(gamma/(gamma-1))\n    if r <= rc:\n        G=pu*math.sqrt(gamma/(R*Tu))*(2/(gamma+1))**((gamma+1)/(2*(gamma-1)))\n        return Cd*A*G, True, G\n    z=max(0.0,r**(2/gamma)-r**((gamma+1)/gamma))\n    G=pu*math.sqrt(2*gamma/(R*Tu*(gamma-1))*z)\n    return Cd*A*G, False, G\n\ndef equilibrium_pressure(ps, T, Cd, Ain, gamma, R, out):\n    \"\"\"Line pressure at which the inlet delivers exactly the withdrawal, or None when even\n    the choked inlet cannot meet it. gas_orifice falls monotonically with downstream\n    pressure, so a bisection locates the root.\"\"\"\n    qmax=gas_orifice(ps,T,0.0,Cd,Ain,gamma,R)[0]\n    if not (qmax > out):\n        return None\n    lo,hi=0.0,ps\n    for _ in range(200):\n        mid=0.5*(lo+hi)\n        if gas_orifice(ps,T,mid,Cd,Ain,gamma,R)[0] > out: lo=mid\n        else: hi=mid\n    return 0.5*(lo+hi)\n\ndef compute():\n    D=INPUTS['D']; L=INPUTS['L']; p0=INPUTS['p0']; T=INPUTS['T']; ps=INPUTS['pSupply']; Ain=INPUTS['Ain']; Cd=INPUTS['Cd']; out=INPUTS['mdotOut']; gamma=INPUTS['gamma']; R=INPUTS['R']; tEnd=INPUTS['tEnd']\n    V=math.pi*D*D*L/4; m=p0*V/(R*T); m0=m; t=0.0; peak=0.0; q=0.0; n=0; eps=1e-9\n    STEP_FRAC=0.005; PLOT_STEPS=800; GUARD=60000; SETTLED=1e-11\n    def rhs(mass):\n        p=mass*R*T/V; q,_,_=gas_orifice(ps,T,p,Cd,Ain,gamma,R); return q-out,q\n    def rk4(mass,h):\n        f1,q1=rhs(mass); f2,q2=rhs(max(eps,mass+0.5*h*f1)); f3,q3=rhs(max(eps,mass+0.5*h*f2)); f4,q4=rhs(max(eps,mass+h*f3))\n        return mass+h*(f1+2*f2+2*f3+f4)/6.0,q1,q2,q3,q4\n    # The step comes from the transient, not from the simulated-time window: tau is the time\n    # the rest of the approach would still take at the present rate, and a fixed fraction of\n    # it is resolved. tEnd appears only inside a min(), where it can refine the step for\n    # plotting but never coarsen it.\n    pe=equilibrium_pressure(ps,T,Cd,Ain,gamma,R,out)\n    has_eq = pe is not None\n    m_target = (pe*V/(R*T)) if has_eq else eps\n    f0=abs(rhs(m0)[0]); tau0=(abs(m0-m_target)/f0) if f0>0 else 0.0\n    dt_floor=max(1e-12, 1e-9*(tau0 if tau0>0 else tEnd)); plot_cap=max(tEnd/PLOT_STEPS,1e-12)\n    while t<tEnd and n<GUARD:\n        dm=rhs(m)[0]; af=abs(dm); rem=tEnd-t\n        if has_eq and min(abs(m-m_target), af*rem) <= SETTLED*max(m,eps):\n            t+=min(plot_cap,rem); n+=1; continue\n        dt=(STEP_FRAC*abs(m-m_target)/af) if af>0 else plot_cap\n        if not (dt>0): dt=plot_cap\n        dt=min(dt,plot_cap); dt=max(dt,dt_floor); dt=min(dt,rem)\n        mn,q1,q2,q3,q4=rk4(m,dt); peak=max(peak,q1,q2,q3,q4)\n        if mn<=eps:\n            lo=0.0; hi=dt\n            for _ in range(50):\n                mid=0.5*(lo+hi)\n                if rk4(m,mid)[0]>eps: lo=mid\n                else: hi=mid\n            t+=hi; m=eps; break\n        m=mn; t+=dt; n+=1\n    p=m*R*T/V; q,_,_=gas_orifice(ps,T,p,Cd,Ain,gamma,R); peak=max(peak,q)\n    return {'p_final':p,'rho_final':m/V,'inventory_final':m,'inventory_change':m-m0,'mdot_in_final':q,'mdot_in_peak':peak,'elapsed':t}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations and the same transient-sized stepping rule used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and exported Python evaluate the same equations, the same step rule and the same terminal-event bisection; the tolerance only covers floating-point implementation differences.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["p", "rho", "mdot", "D", "L"],accepts:["T", "p", "mdot", "D", "L", "A"],build:function(){if(!last)return null;return {quantities:{p:{value:last.p,unit:'Pa'},rho:{value:last.rho,unit:'kg/m3'},mdot:{value:state.mdotOut,unit:'kg/s'},D:{value:state.D,unit:'m'},L:{value:state.L,unit:'m'}}};},apply:function(p){return hoApply(p);}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

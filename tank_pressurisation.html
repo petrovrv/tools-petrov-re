@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tank Pressurisation</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-09-26.tank-pressurisation-handoff-guard-1",
+  "id": "tank-pressurisation",
+  "file": "tank_pressurisation.html",
+  "listed": true,
+  "category": "transients",
+  "order": 19,
+  "title": {
+    "en": "Tank Pressurisation",
+    "uk": "Наддув резервуара",
+    "de": "Behälterdruckaufbau",
+    "nl": "Tankdrukopbouw",
+    "fr": "Pressurisation d’un réservoir",
+    "es": "Presurización de tanque",
+    "pl": "Sprężanie zbiornika"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — adiabatic rigid-tank pressurisation from a fixed gas supply through an orifice, with choking transition, pressure, temperature and admitted mass versus time.",
+    "uk": "Pipe / Vessel Transients — адіабатичний наддув жорсткого резервуара від сталого gas supply через отвір із choking transition.",
+    "de": "Pipe / Vessel Transients — adiabatischer Druckaufbau eines starren Behälters aus konstanter Gasversorgung durch eine Blende mit Übergang aus der Sperrung.",
+    "nl": "Pipe / Vessel Transients — adiabatische tankdrukopbouw vanuit vaste gasbron via orifice, inclusief overgang uit choking.",
+    "fr": "Pipe / Vessel Transients — pressurisation adiabatique d’un réservoir rigide depuis une source de gaz fixe par orifice, avec transition de blocage.",
+    "es": "Pipe / Vessel Transients — presurización adiabática de un tanque rígido desde suministro de gas fijo por orificio, con transición de choking.",
+    "pl": "Pipe / Vessel Transients — adiabatyczne sprężanie sztywnego zbiornika ze stałego źródła gazu przez kryzę, z przejściem z przepływu krytycznego."
+  },
+  "description": {
+    "en": "Lumped mass and energy balance for an adiabatic rigid tank filled from a large ideal-gas source at fixed pressure and temperature. Incoming enthalpy raises tank internal energy and the supply orifice transitions automatically from choked to subcritical flow.",
+    "uk": "Зосереджений mass/energy balance для адіабатичного жорсткого tank, який наповнюється з великого ideal-gas source при сталих p,T. Incoming enthalpy підвищує internal energy; supply orifice автоматично переходить з choked до subcritical.",
+    "de": "Konzentrierte Massen- und Energiebilanz eines adiabatischen starren Behälters, gefüllt aus großer Idealgasquelle bei konstantem p,T. Zulaufenthalpie erhöht die innere Energie; die Blende wechselt automatisch von gesperrt zu unterkritisch.",
+    "nl": "Geconcentreerde massa- en energiebalans voor een adiabatische starre tank gevuld vanuit een grote ideaal-gasbron met vaste p,T. Instroomenthalpie verhoogt interne energie; de orifice gaat automatisch van choked naar subkritisch.",
+    "fr": "Bilan massique et énergétique global d’un réservoir rigide adiabatique rempli par une grande source de gaz parfait à p,T fixes. L’enthalpie entrante augmente l’énergie interne; l’orifice passe automatiquement du régime bloqué au sous-critique.",
+    "es": "Balance concentrado de masa y energía para tanque rígido adiabático llenado desde una gran fuente de gas ideal a p,T fijos. La entalpía entrante aumenta la energía interna; el orificio pasa automáticamente de crítico a subcrítico.",
+    "pl": "Skupiony bilans masy i energii sztywnego adiabatycznego zbiornika napełnianego z dużego źródła gazu doskonałego o stałych p,T. Entalpia dopływu zwiększa energię wewnętrzną; kryza przechodzi automatycznie z przepływu krytycznego do podkrytycznego."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Ideal gas with constant R and gamma; perfectly mixed rigid adiabatic tank; fixed supply state; no wall heat transfer, real-gas effects, regulator dynamics, supply-line inventory or mixing stratification. A supply pressure is accepted, typed or arriving through the SI handoff, above the tank's own initial pressure and up to 200 MPa; a value outside that range is refused by name with the range and nothing is applied for it, and the other handoff quantities are held to the bounds of their own typed fields.",
+    "uk": "Ідеальний газ зі сталими R та gamma; perfect mixing, rigid adiabatic tank; fixed supply state; без wall heat transfer, real-gas effects, regulator dynamics, supply-line inventory або stratification. Тиск джерела приймається, введений або отриманий через SI-передавання, вище за початковий тиск у резервуарі і до 200 MPa; значення поза цим діапазоном відхиляється з назвою величини та діапазоном і для нього нічого не застосовується, а інші величини передавання обмежені межами власних полів введення.",
+    "de": "Ideales Gas mit konstantem R und gamma; vollständig gemischter starrer adiabatischer Behälter; fester Versorgungszustand; keine Wandwärme, Realgaseffekte, Reglerdynamik, Zuleitungsinventar oder Schichtung. Ein Versorgungsdruck wird angenommen, eingegeben oder über die SI-Übergabe eintreffend, oberhalb des Anfangsdrucks des Behälters und bis 200 MPa; ein Wert außerhalb dieses Bereichs wird mit Namen und Bereich abgewiesen und nichts davon übernommen, die übrigen Übergabegrößen halten die Grenzen ihrer eigenen Eingabefelder.",
+    "nl": "Ideaal gas met constante R en gamma; volledig gemengde starre adiabatische tank; vaste voedingstoestand; geen wandwarmte, reëel-gaseffecten, regelaardynamiek, leidinginventaris of stratificatie. Een voedingsdruk wordt aanvaard, getypt of via de SI-overdracht binnengekomen, boven de begindruk van de tank zelf en tot 200 MPa; een waarde buiten dat bereik wordt met naam en bereik geweigerd en er wordt niets van toegepast, en de overige overdrachtsgrootheden houden de grenzen van hun eigen invoervelden.",
+    "fr": "Gaz parfait à R et gamma constants; réservoir rigide adiabatique parfaitement mélangé; état d’alimentation fixe; sans échange thermique, gaz réel, dynamique du détendeur, inventaire de ligne ni stratification. Une pression d’alimentation est acceptée, saisie ou reçue par le transfert SI, au-dessus de la pression initiale du réservoir et jusqu’à 200 MPa ; une valeur hors de cette plage est refusée avec son nom et la plage, rien n’en est appliqué, et les autres grandeurs du transfert respectent les bornes de leurs propres champs de saisie.",
+    "es": "Gas ideal con R y gamma constantes; tanque rígido adiabático perfectamente mezclado; suministro fijo; sin calor de pared, gas real, dinámica del regulador, inventario de línea ni estratificación. Se acepta una presión de suministro, escrita o recibida por la transferencia SI, por encima de la presión inicial del propio tanque y hasta 200 MPa; un valor fuera de ese rango se rechaza con su nombre y el rango, nada de él se aplica, y las demás magnitudes de la transferencia respetan los límites de sus propios campos de entrada.",
+    "pl": "Gaz doskonały o stałych R i gamma; idealnie mieszany sztywny zbiornik adiabatyczny; stały stan zasilania; bez wymiany ciepła, gazu rzeczywistego, dynamiki regulatora, objętości przewodu i stratyfikacji. Ciśnienie zasilania jest przyjmowane, wpisane albo otrzymane przez przekazanie SI, powyżej ciśnienia początkowego samego zbiornika oraz do 200 MPa; wartość poza tym zakresem jest odrzucana z nazwą i zakresem, nic z niej nie jest stosowane, a pozostałe wielkości przekazania trzymają granice własnych pól wpisu."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Checked against an independent reference implementation in Python, derived from first principles and sharing no code with the tool: the rigid-tank mass and energy balance is closed analytically, the orifice flux is built from the isentropic relations of Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, vol. 1, 1953, ch. 4), and the choking criterion is anchored to the published critical pressure ratio p*/p_t = 0.528282 of NACA Report 1135, Table I. The choked leg is solved in closed form and the subsonic leg by Gauss-Legendre quadrature in sqrt(1 - p/p_supply), which removes the endpoint singularity exactly; the result is cross-checked against an implicit stiff integrator and against CoolProp real-gas data. 234 checks pass, 219 of them against that reference rather than against the tool's own relations. The time integration is now step-controlled by the transient itself - the step is a fixed fraction of the remaining-fill timescale (m_stop - m)/mdot - so the computed fill time no longer depends on the simulated time window, which previously shortened it by up to 7 %. The reference shares no code with the tool, but the harness is the author's own; no external party has reviewed it.",
+      "uk": "Перевірено незалежною еталонною реалізацією на Python, виведеною з перших принципів і без спільного коду з інструментом: баланс маси та енергії жорсткого резервуара замкнено аналітично, витрату через отвір побудовано з ізоентропних співвідношень Шапіро (Shapiro, Dynamics and Thermodynamics of Compressible Fluid Flow, т. 1, 1953, розд. 4), а критерій запирання прив’язано до опублікованого критичного відношення тисків p*/p_t = 0,528282 з NACA Report 1135, табл. I. Закритичну ділянку розв’язано у замкненому вигляді, докритичну — квадратурою Гаусса–Лежандра за змінною sqrt(1 − p/p_supply), що точно усуває особливість на кінці; результат перехресно перевірено неявним інтегратором для жорстких задач і даними реального газу CoolProp. Проходить 234 перевірки, з них 219 — щодо цієї еталонної реалізації, а не щодо власних співвідношень інструмента. Крок інтегрування за часом тепер визначається самим перехідним процесом — це стала частка масштабу часу залишкового наповнення (m_stop − m)/mdot — тому обчислений час наповнення більше не залежить від заданого вікна моделювання, яке раніше скорочувало його до 7 %. Еталонна реалізація не має спільного коду з інструментом, однак перевірочний комплекс є власним авторським; жодна зовнішня сторона його не переглядала.",
+      "de": "Geprüft gegen eine unabhängige Referenzimplementierung in Python, aus ersten Prinzipien hergeleitet und ohne gemeinsamen Code mit dem Werkzeug: Die Massen- und Energiebilanz des starren Behälters ist analytisch geschlossen, der Blendenmassenstrom wird aus den isentropen Beziehungen von Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, Bd. 1, 1953, Kap. 4) aufgebaut, und das Sperrkriterium ist am veröffentlichten kritischen Druckverhältnis p*/p_t = 0,528282 aus NACA Report 1135, Tabelle I verankert. Der gesperrte Ast wird geschlossen gelöst, der unterkritische durch Gauß-Legendre-Quadratur in sqrt(1 − p/p_supply), was die Randsingularität exakt beseitigt; das Ergebnis wird gegen einen impliziten Integrator für steife Systeme und gegen CoolProp-Realgasdaten gegengeprüft. 234 Prüfungen bestehen, davon 219 gegen diese Referenzimplementierung statt gegen die eigenen Beziehungen des Werkzeugs. Die Zeitintegration wird jetzt vom Transienten selbst schrittgesteuert — der Schritt ist ein fester Bruchteil der verbleibenden Füllzeitskala (m_stop − m)/mdot —, sodass die berechnete Füllzeit nicht mehr vom simulierten Zeitfenster abhängt, das sie zuvor um bis zu 7 % verkürzte. Die Referenzimplementierung teilt keinen Code mit dem Werkzeug, das Prüfgerüst ist jedoch das des Autors selbst; keine externe Stelle hat es geprüft.",
+      "nl": "Getoetst aan een onafhankelijke referentie-implementatie in Python, afgeleid uit eerste principes en zonder gedeelde code met de tool: de massa- en energiebalans van de starre tank is analytisch gesloten, het orificedebiet is opgebouwd uit de isentrope betrekkingen van Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, deel 1, 1953, hfst. 4) en het chokingcriterium is verankerd aan de gepubliceerde kritieke drukverhouding p*/p_t = 0,528282 uit NACA Report 1135, tabel I. De gesmoorde tak wordt in gesloten vorm opgelost, de subkritische met Gauss-Legendre-kwadratuur in sqrt(1 − p/p_supply), wat de randsingulariteit exact wegneemt; het resultaat is gekruiscontroleerd met een impliciete integrator voor stijve problemen en met CoolProp-gegevens voor reëel gas. 234 controles slagen, waarvan 219 tegen die referentie-implementatie in plaats van tegen de eigen betrekkingen van de tool. De tijdintegratie wordt nu in stapgrootte geregeld door de transiënt zelf — de stap is een vaste fractie van de resterende vultijdschaal (m_stop − m)/mdot — zodat de berekende vultijd niet langer afhangt van het gesimuleerde tijdvenster, dat hem voorheen tot 7 % verkortte. De referentie-implementatie deelt geen code met de tool, maar het testharnas is dat van de auteur zelf; geen externe partij heeft het beoordeeld.",
+      "fr": "Confronté à une implémentation de référence indépendante en Python, dérivée des premiers principes et ne partageant aucun code avec l’outil : le bilan de masse et d’énergie du réservoir rigide est fermé analytiquement, le débit à l’orifice est construit à partir des relations isentropiques de Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, vol. 1, 1953, ch. 4) et le critère de blocage est ancré au rapport de pression critique publié p*/p_t = 0,528282 du NACA Report 1135, tableau I. La branche bloquée est résolue en forme fermée, la branche sous-critique par quadrature de Gauss-Legendre en sqrt(1 − p/p_supply), ce qui élimine exactement la singularité de bord ; le résultat est recoupé avec un intégrateur implicite pour problèmes raides et avec les données de gaz réel de CoolProp. 234 vérifications passent, dont 219 face à cette implémentation de référence plutôt qu’aux relations propres de l’outil. L’intégration temporelle est désormais pilotée en pas par le transitoire lui-même — le pas est une fraction fixe de l’échelle de temps de remplissage restante (m_stop − m)/mdot — de sorte que le temps de remplissage calculé ne dépend plus de la fenêtre de simulation, qui le raccourcissait auparavant jusqu’à 7 %. L’implémentation de référence ne partage aucun code avec l’outil, mais le banc de test est celui de l’auteur ; aucune partie externe ne l’a examiné.",
+      "es": "Contrastado con una implementación de referencia independiente en Python, derivada de primeros principios y sin código compartido con la herramienta: el balance de masa y energía del tanque rígido se cierra analíticamente, el caudal por el orificio se construye a partir de las relaciones isentrópicas de Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, vol. 1, 1953, cap. 4) y el criterio de bloqueo se ancla a la relación crítica de presiones publicada p*/p_t = 0,528282 del NACA Report 1135, tabla I. La rama crítica se resuelve en forma cerrada y la subcrítica por cuadratura de Gauss-Legendre en sqrt(1 − p/p_supply), que elimina exactamente la singularidad del extremo; el resultado se contrasta con un integrador implícito para problemas rígidos y con datos de gas real de CoolProp. Pasan 234 comprobaciones, 219 de ellas frente a esa implementación de referencia y no frente a las relaciones propias de la herramienta. La integración temporal ahora ajusta su paso al propio transitorio — el paso es una fracción fija de la escala de tiempo de llenado restante (m_stop − m)/mdot — de modo que el tiempo de llenado calculado ya no depende de la ventana de simulación, que antes lo acortaba hasta un 7 %. La implementación de referencia no comparte código con la herramienta, pero el banco de pruebas es del propio autor; ninguna parte externa lo ha revisado.",
+      "pl": "Sprawdzono względem niezależnej implementacji referencyjnej w Pythonie, wyprowadzonej z pierwszych zasad i niedzielącej kodu z narzędziem: bilans masy i energii sztywnego zbiornika zamknięto analitycznie, strumień przez kryzę zbudowano z izentropowych zależności Shapiro (Dynamics and Thermodynamics of Compressible Fluid Flow, t. 1, 1953, rozdz. 4), a kryterium zadławienia zakotwiczono w opublikowanym krytycznym stosunku ciśnień p*/p_t = 0,528282 z NACA Report 1135, tab. I. Gałąź zadławioną rozwiązano w postaci zamkniętej, podkrytyczną kwadraturą Gaussa-Legendre’a w zmiennej sqrt(1 − p/p_supply), co dokładnie usuwa osobliwość na końcu przedziału; wynik skonfrontowano z niejawnym całkowaniem dla zagadnień sztywnych i danymi gazu rzeczywistego z CoolProp. Przechodzi 234 kontrole, w tym 219 względem tej implementacji referencyjnej, a nie własnych zależności narzędzia. Całkowanie po czasie jest teraz sterowane krokiem przez sam stan przejściowy — krok to stały ułamek pozostałej skali czasu napełniania (m_stop − m)/mdot — więc obliczony czas napełniania nie zależy już od okna symulacji, które wcześniej skracało go nawet o 7 %. Implementacja referencyjna nie dzieli kodu z narzędziem, ale stanowisko testowe jest własne autora; żadna strona zewnętrzna go nie przeglądała."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "tank-pressurisation-independent-python-v1",
+        "reference": "A second implementation written in Python from an independent first-principles derivation, sharing no code and no numerical route with the page. The rigid-tank mass and energy balances are closed analytically (m T = m0 T0 + gamma T_supply (m - m0)), which makes tank pressure affine in mass and reduces the transient to one scalar ODE in the pressure ratio; its choked leg is solved in closed form and its subsonic leg by Gauss-Legendre quadrature in u = sqrt(1 - p/p_supply), a substitution that removes the integrable endpoint singularity exactly rather than truncating it. The orifice flux is assembled as rho*w from the isentropic stagnation relations of Shapiro vol. 1 ch. 4, and the choking criterion is anchored to the published critical pressure ratio of NACA Report 1135 Table I and to the three-digit SI rule mdot = 0.0404 Cd A p0/sqrt(T0) for air. Real-gas properties from CoolProp confirm the gas constants and quantify the ideal-gas closure error. The reference was verified before use against three structurally different routes (closed form, scipy Radau implicit stiff march, 4e5-node trapezoid), against node refinement, against the analytic near-equalisation asymptote, and by confirming that the tool converges onto it as the tool's own step is reduced.",
+        "citations": [
+          "A. H. Shapiro, The Dynamics and Thermodynamics of Compressible Fluid Flow, vol. 1, Ronald Press, 1953, ch. 4: eq. 4.14/4.15 isentropic stagnation relations, eq. 4.19 critical pressure ratio, eq. 4.21 choked mass flux per unit area, Table B.2.",
+          "Ames Research Staff, Equations, Tables and Charts for Compressible Flow, NACA Report 1135, 1953, eq. (45) and Table I: p/p_t = 0.528282 at M = 1 for gamma = 1.4, the digit-level anchor for the choking criterion.",
+          "The three-significant-figure SI choked-orifice rule for air, mdot = 0.0404 Cd A p0/sqrt(T0), as quoted in standard relief-sizing practice (API STD 520 Part I; Perry's Chemical Engineers' Handbook).",
+          "E. W. Lemmon, R. T. Jacobsen, S. G. Penoncello, D. G. Friend, J. Phys. Chem. Ref. Data 29(3), 2000, 331-385, reached through CoolProp 8.0: confirms R_air = 287.0475 J/(kg K) and gamma_air = 1.40194, and gives Z = 0.99362 for air at 20 bar / 293.15 K, which fixes the terminal-time tolerance.",
+          "scipy 1.17 solve_ivp(method='Radau'), Hairer & Wanner implicit Runge-Kutta, as the structurally independent cross-check on the quadrature route."
+        ],
+        "cases": 234,
+        "passed": 234,
+        "tolerance": "Closed-form quantities (p, T, rho, admitted mass of an equalised or t = 0 state) to 1e-12 relative: both sides evaluate a closed form, so only round-off may differ. Trajectory samples to 1e-8. Mass-flux comparisons to max(1e-12, 100 eps/(1 - r)), the condition number of the isentropic flux at that pressure ratio. Terminal fill time to 1e-3 relative: the ideal-gas closure the model rests on is itself 0.64 % wrong in density at a 20 bar supply (CoolProp, Z = 0.99362), so the discretisation must stay an order of magnitude inside the model's own physical fidelity; this band is deliberately NOT derived from the solver's step, which is the mistake the superseded in-page tolerance made. Window invariance to 1e-6 relative spread: the fill time is a property of the vessel, the orifice and the two gas states, so the simulated window must not enter it at all. Published anchors to half of their last published digit.",
+        "reference_provenance": "independent second implementation (Python 3 / numpy / scipy / CoolProp) in out/gen_tank_pressurisation.py, driving the shipping page over Playwright; published anchors as cited. Not recomputed in the page.",
+        "run_at": "2026-10-16T09:52:24Z",
+        "artifact": "benchmarks/tank_pressurisation.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "T",
+      "p",
+      "rho",
+      "mdot"
+    ],
+    "accepts": [
+      "T",
+      "p",
+      "A"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"V":1.0,"p0":120000.0,"T0":293.15,"pSupply":2000000.0,"TSupply":293.15,"A":0.0001,"Cd":0.8,"gamma":1.4,"R":287.05,"tEnd":300.0};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* ---- incoming SI handoff: one acceptance range per quantity (AGENTS 2.4) ---
+   A pressure is a reading at a place, not a property of a substance: a payload
+   carries the name `p` whether the sender read a barometric 101325 Pa, a liquid
+   line pressure or the contained pressure of a vessel, and the payload does not
+   say which. This tool wrote an incoming p straight into state.pSupply, so a
+   barometric reading set the supply pressure at or below the tank it is meant to
+   fill and no mass entered the tank.
+   Every quantity the manifest accepts is now held to the range this tool's own
+   model gives it, and a value outside that range is refused by name, with its
+   value and the range, and nothing is applied for it.
+     p -> state.pSupply  above the tank's own initial pressure p0, the bound
+                         solve() already states ('Supply pressure is not above
+                         initial tank pressure') and the bound the march needs,
+                         and at most HO_P_MAX = 2e8 Pa, the typed field's own
+                         maximum.
+     T -> state.TSupply  HO_T_MIN 100 .. HO_T_MAX 2000 K
+     A -> state.A        HO_A_MIN 1e-9 .. HO_A_MAX 1 m2
+   The last two are the typed fields' own min/max, named here so the guard and
+   the field cannot drift apart; the supply-pressure field carries the same
+   floor through its validate hook, so typing and a handoff obey one bound.   */
+var HO_P_MAX=2e8;
+var HO_T_MIN=100, HO_T_MAX=2000;
+var HO_A_MIN=1e-9, HO_A_MAX=1;
+var HO_KEYS=['T','p','A'];
+var HO_UNIT={p:'Pa',T:'K',A:'m²'};
+var HO_ROLE={
+ p:T('the supply pressure','тиск джерела','der Versorgungsdruck','de voedingsdruk','la pression d’alimentation','la presión de suministro','ciśnienie zasilania'),
+ T:T('the supply temperature','температура джерела','die Versorgungstemperatur','de voedingstemperatuur','la température d’alimentation','la temperatura de suministro','temperatura zasilania'),
+ A:T('the inlet flow area','площа проходу на вході','die Strömungsfläche des Zulaufs','het doorstroomoppervlak van de inlaat','la section de passage d’entrée','el área de paso de entrada','pole przepływu wlotu')
+};
+var HO_MSG={
+ span:T('%q = %v %u was not applied: %r here must be between %a and %b %u.',
+        '%q = %v %u не застосовано: %r тут має лежати в межах %a … %b %u.',
+        '%q = %v %u wurde nicht übernommen: %r muss hier zwischen %a und %b %u liegen.',
+        '%q = %v %u is niet toegepast: %r moet hier tussen %a en %b %u liggen.',
+        '%q = %v %u n’a pas été appliqué : %r doit ici se situer entre %a et %b %u.',
+        '%q = %v %u no se aplicó: %r debe estar aquí entre %a y %b %u.',
+        '%q = %v %u nie zostało zastosowane: %r musi się tu mieścić między %a a %b %u.'),
+ above:T('%q = %v %u was not applied: %r here must be above %a %u and at most %b %u.',
+        '%q = %v %u не застосовано: %r тут має перевищувати %a %u і бути не більшим за %b %u.',
+        '%q = %v %u wurde nicht übernommen: %r muss hier über %a %u liegen und höchstens %b %u betragen.',
+        '%q = %v %u is niet toegepast: %r moet hier boven %a %u liggen en ten hoogste %b %u zijn.',
+        '%q = %v %u n’a pas été appliqué : %r doit ici dépasser %a %u et valoir au plus %b %u.',
+        '%q = %v %u no se aplicó: %r debe superar aquí %a %u y no pasar de %b %u.',
+        '%q = %v %u nie zostało zastosowane: %r musi tu przekraczać %a %u i wynosić najwyżej %b %u.')
+};
+/* The acceptance range of one quantity in the state s. loOpen marks a bound the
+   value has to exceed rather than meet. */
+function hoRange(k,s){
+ if(k==='p')return {lo:s.p0,hi:HO_P_MAX,loOpen:true};
+ if(k==='T')return {lo:HO_T_MIN,hi:HO_T_MAX,loOpen:false};
+ if(k==='A')return {lo:HO_A_MIN,hi:HO_A_MAX,loOpen:false};
+ return null;
+}
+function hoOk(k,v,s){
+ var r=hoRange(k,s);
+ if(!r||typeof v!=='number'||!isFinite(v))return false;
+ return (r.loOpen?v>r.lo:v>=r.lo)&&v<=r.hi;
+}
+/* SI digits, no thousands separator: the payload is SI and the sentence says
+   which unit it is in. */
+function hoNum(v){
+ if(v===0)return '0';
+ var a=Math.abs(v);
+ if(a<1e-4||a>=1e9)return v.toExponential(3);
+ return String(Math.round(v*1e6)/1e6);
+}
+function hoRefusalMap(k,v,s){
+ var r=hoRange(k,s),u=HO_UNIT[k]||'',m=r.loOpen?HO_MSG.above:HO_MSG.span,out={};
+ Object.keys(m).forEach(function(l){
+  out[l]=m[l].replace(/%q/g,k).replace(/%v/g,hoNum(v)).replace(/%r/g,HO_ROLE[k][l])
+             .replace(/%a/g,hoNum(r.lo)).replace(/%b/g,hoNum(r.hi)).replace(/%u/g,u);
+ });
+ return out;
+}
+function hoRefusal(k,v,s){var o=hoRefusalMap(k,v,s),l=dgcLang();return o[l]||o.en;}
+/* The typed field is validated against the same range, so the page does not
+   hold one behaviour for typing and another for a handoff. */
+function hoTypedCheck(k,v,s){return hoOk(k,v,s)?true:hoRefusalMap(k,v,s);}
+function hoSay(msg){try{if(window.Diagram&&Diagram.notify)Diagram.notify(msg,'warn');}catch(e){}}
+
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return v.toExponential(1);
+    return String(Math.round(v * 1000) / 1000);
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{title:"Tank pressurisation — adiabatic filling of a rigid vessel",
+ summary:"A rigid, well-mixed, adiabatic vessel of {V} m³ is filled from a fixed-state supply at {ps} bar / {Ts} °C through a {A} mm² orifice of discharge coefficient {Cd}. The tank reaches {pf} bar and {Tf} °C after {t} s, admitting {m} kg.",
+ concEq:"Tank pressure reached the supply pressure within the simulated window; the terminal state is the equalised state.",
+ concCut:"The simulated window ended before pressure equalisation; the terminal state is not the equalised state.",
+ system:"Mass enters through a single orifice sized by area and discharge coefficient. The incoming enthalpy stays in the vessel: there is no wall heat transfer, so the gas heats as it is compressed by the arriving mass. Pressure follows from the ideal-gas relation applied to the instantaneous mass and temperature.",
+ figCap:"Tank pressure and temperature against time. Pressure is read on the left axis, temperature on the right.",
+ ckClosure:"State-equation closure",ckClosureB:"p = m R T / V recomputed from the terminal mass and temperature and compared with the reported pressure. This is the model's own closure, so it tests arithmetic rather than physics.",
+ ckEq:"Pressure equalisation",ckEqB:"The solver stops when tank pressure reaches 0.99999 of supply pressure. Whether that happened inside the requested window decides whether the terminal state is meaningful as an end state.",
+ ckChoke:"Orifice regime at the terminal state",ckChokeB:"Pressure ratio p/p_supply against the critical ratio (2/(γ+1))^(γ/(γ−1)). Below it the orifice is choked and mass flow is set by the supply state alone.",
+ ckRef:"Terminal time against the mass-domain reference",ckRefB:"The time march is RK4 in t. An independent quadrature of dt = dm/ṁ(m) over the same mass interval gives the elapsed time without using that march. Agreement tests the integration, not the model.",
+ ckConv:"Step-refinement convergence",ckConvB:"The same solve repeated on finer partitions. A terminal time that keeps moving under refinement means the shipped partition is too coarse for the case.",
+ flowSupply:"Fixed-state supply",flowOrifice:"Orifice (A, Cd)",flowTank:"Rigid adiabatic vessel",
+ mNote:"Ideal gas with constant γ and R. Rigid volume, perfect mixing, no wall heat transfer, no supply-line dynamics.",
+ riskReal:"Real-gas behaviour is outside the model. Near the saturation line or above roughly 10 MPa the ideal-gas state relation departs from the fluid, and both terminal temperature and admitted mass carry that error.",
+ riskWall:"Vessel-wall heat capacity is outside the model. A real vessel absorbs part of the compression heat, so the computed terminal temperature is an upper bound and the computed pressure with it.",
+ rNo:"no",rYes:"yes",rChoked:"choked",rSub:"subcritical",rRise:"Temperature rise",rMass0:"Initial gas mass",rMassEnd:"final",rMean:"Mean inlet flow",rChokeT:"Orifice choked until",rOfFill:"of the fill",rAdm:"Admitted mass",rTsup:"Supply temperature",rGasWhy:"Fixes the mass flow through the orifice and the heat released into the gas as it is compressed",riskRealT:"Real-gas behaviour",riskWallT:"Vessel-wall heat capacity",rSupplyWhy:"Sets the terminal pressure and, with it, the terminal temperature"},
+uk:{title:"Наповнення резервуара — адіабатичне заповнення жорсткої посудини",
+ summary:"Жорстка, добре перемішана адіабатична посудина об’ємом {V} м³ заповнюється від джерела зі сталим станом {ps} бар / {Ts} °C через отвір {A} мм² з коефіцієнтом витрати {Cd}. Резервуар досягає {pf} бар і {Tf} °C за {t} с, прийнявши {m} кг.",
+ concEq:"Тиск у резервуарі досяг тиску джерела в межах змодельованого вікна; кінцевий стан є станом вирівнювання.",
+ concCut:"Змодельоване вікно завершилося до вирівнювання тиску; кінцевий стан не є станом вирівнювання.",
+ system:"Маса надходить через один отвір, заданий площею та коефіцієнтом витрати. Ентальпія, що надходить, залишається в посудині: теплообміну через стінку немає, тому газ нагрівається від стиснення масою, що прибуває. Тиск випливає зі співвідношення ідеального газу для миттєвої маси й температури.",
+ figCap:"Тиск і температура в резервуарі за часом. Тиск читається на лівій осі, температура — на правій.",
+ ckClosure:"Замикання рівняння стану",ckClosureB:"p = m R T / V перераховано з кінцевої маси й температури та зіставлено з наведеним тиском. Це власне замикання моделі, тож перевіряється арифметика, а не фізика.",
+ ckEq:"Вирівнювання тиску",ckEqB:"Розв’язувач зупиняється, коли тиск у резервуарі досягає 0,99999 тиску джерела. Те, чи сталося це всередині заданого вікна, визначає, чи має кінцевий стан сенс як завершальний.",
+ ckChoke:"Режим отвору в кінцевому стані",ckChokeB:"Відношення тисків p/p_джерела проти критичного відношення (2/(γ+1))^(γ/(γ−1)). Нижче нього отвір закритичний, і витрата визначається лише станом джерела.",
+ ckRef:"Кінцевий час проти еталона в просторі маси",ckRefB:"Марш за часом — RK4 по t. Незалежна квадратура dt = dm/ṁ(m) на тому самому інтервалі маси дає час без цього маршу. Збіг перевіряє інтегрування, а не модель.",
+ ckConv:"Збіжність за подрібненням кроку",ckConvB:"Той самий розв’язок на дрібніших розбиттях. Кінцевий час, що продовжує змінюватися при подрібненні, означає, що штатне розбиття заґрубе для цього випадку.",
+ flowSupply:"Джерело зі сталим станом",flowOrifice:"Отвір (A, Cd)",flowTank:"Жорстка адіабатична посудина",
+ mNote:"Ідеальний газ зі сталими γ і R. Жорсткий об’єм, ідеальне перемішування, без теплообміну через стінку, без динаміки лінії живлення.",
+ riskReal:"Поведінка реального газу поза моделлю. Поблизу лінії насичення або вище приблизно 10 МПа співвідношення стану ідеального газу відходить від середовища, і кінцева температура та прийнята маса несуть цю похибку.",
+ riskWall:"Теплоємність стінки посудини поза моделлю. Реальна посудина поглинає частину теплоти стиснення, тож обчислена кінцева температура є верхньою межею, а з нею й обчислений тиск.",
+ rNo:"ні",rYes:"так",rChoked:"закритичний",rSub:"докритичний",rRise:"Приріст температури",rMass0:"Початкова маса газу",rMassEnd:"кінцева",rMean:"Середня вхідна витрата",rChokeT:"Отвір закритичний до",rOfFill:"від наповнення",rAdm:"Прийнята маса",rTsup:"Температура джерела",rGasWhy:"Визначає витрату через отвір і теплоту, що виділяється в газі при стисненні",riskRealT:"Поведінка реального газу",riskWallT:"Теплоємність стінки посудини",rSupplyWhy:"Задає кінцевий тиск, а з ним і кінцеву температуру"},
+de:{title:"Behälterbefüllung — adiabatisches Füllen eines starren Behälters",
+ summary:"Ein starrer, gut durchmischter adiabatischer Behälter von {V} m³ wird aus einer Versorgung mit festem Zustand bei {ps} bar / {Ts} °C über eine Blende von {A} mm² mit Ausflussbeiwert {Cd} gefüllt. Der Behälter erreicht {pf} bar und {Tf} °C nach {t} s und nimmt {m} kg auf.",
+ concEq:"Der Behälterdruck erreichte den Versorgungsdruck innerhalb des simulierten Fensters; der Endzustand ist der Ausgleichszustand.",
+ concCut:"Das simulierte Fenster endete vor dem Druckausgleich; der Endzustand ist nicht der Ausgleichszustand.",
+ system:"Masse tritt durch eine einzelne Blende ein, die über Fläche und Ausflussbeiwert festgelegt ist. Die zugeführte Enthalpie bleibt im Behälter: Es gibt keinen Wandwärmeübergang, daher erwärmt sich das Gas durch die Verdichtung der ankommenden Masse. Der Druck folgt aus der Idealgasbeziehung für die momentane Masse und Temperatur.",
+ figCap:"Behälterdruck und -temperatur über der Zeit. Der Druck wird an der linken Achse abgelesen, die Temperatur an der rechten.",
+ ckClosure:"Schließung der Zustandsgleichung",ckClosureB:"p = m R T / V wird aus Endmasse und Endtemperatur neu berechnet und mit dem ausgewiesenen Druck verglichen. Das ist die modelleigene Schließung, geprüft wird also die Arithmetik, nicht die Physik.",
+ ckEq:"Druckausgleich",ckEqB:"Der Löser hält an, wenn der Behälterdruck 0,99999 des Versorgungsdrucks erreicht. Ob das im angeforderten Fenster geschah, entscheidet, ob der Endzustand als Endzustand aussagekräftig ist.",
+ ckChoke:"Blendenregime im Endzustand",ckChokeB:"Druckverhältnis p/p_Versorgung gegen das kritische Verhältnis (2/(γ+1))^(γ/(γ−1)). Darunter ist die Blende gesperrt und der Massenstrom wird allein vom Versorgungszustand bestimmt.",
+ ckRef:"Endzeit gegen die Massenraum-Referenz",ckRefB:"Der Zeitmarsch ist RK4 in t. Eine unabhängige Quadratur von dt = dm/ṁ(m) über dasselbe Massenintervall liefert die Zeit ohne diesen Marsch. Übereinstimmung prüft die Integration, nicht das Modell.",
+ ckConv:"Konvergenz bei Schrittverfeinerung",ckConvB:"Dieselbe Rechnung auf feineren Unterteilungen. Eine Endzeit, die sich unter Verfeinerung weiter ändert, bedeutet, dass die ausgelieferte Unterteilung für den Fall zu grob ist.",
+ flowSupply:"Versorgung mit festem Zustand",flowOrifice:"Blende (A, Cd)",flowTank:"Starrer adiabatischer Behälter",
+ mNote:"Ideales Gas mit konstantem γ und R. Starres Volumen, perfekte Durchmischung, kein Wandwärmeübergang, keine Dynamik der Zuleitung.",
+ riskReal:"Realgasverhalten liegt außerhalb des Modells. Nahe der Sättigungslinie oder oberhalb von etwa 10 MPa weicht die Idealgas-Zustandsbeziehung vom Fluid ab, und Endtemperatur wie zugeführte Masse tragen diesen Fehler.",
+ riskWall:"Die Wärmekapazität der Behälterwand liegt außerhalb des Modells. Ein realer Behälter nimmt einen Teil der Verdichtungswärme auf, daher ist die berechnete Endtemperatur eine obere Schranke und mit ihr der berechnete Druck.",
+ rNo:"nein",rYes:"ja",rChoked:"gesperrt",rSub:"unterkritisch",rRise:"Temperaturanstieg",rMass0:"Anfangsgasmasse",rMassEnd:"Ende",rMean:"Mittlerer Zulaufstrom",rChokeT:"Blende gesperrt bis",rOfFill:"der Befüllung",rAdm:"Zugeführte Masse",rTsup:"Versorgungstemperatur",rGasWhy:"Bestimmt den Massenstrom durch die Blende und die beim Verdichten im Gas freigesetzte Wärme",riskRealT:"Realgasverhalten",riskWallT:"Wärmekapazität der Behälterwand",rSupplyWhy:"Legt den Enddruck fest und damit die Endtemperatur"},
+nl:{title:"Tankvulling — adiabatisch vullen van een starre vat",
+ summary:"Een star, goed gemengd adiabatisch vat van {V} m³ wordt gevuld vanuit een voeding met vaste toestand bij {ps} bar / {Ts} °C via een opening van {A} mm² met uitstroomcoëfficiënt {Cd}. De tank bereikt {pf} bar en {Tf} °C na {t} s en laat {m} kg binnen.",
+ concEq:"De tankdruk bereikte de voedingsdruk binnen het gesimuleerde venster; de eindtoestand is de vereffende toestand.",
+ concCut:"Het gesimuleerde venster eindigde vóór drukvereffening; de eindtoestand is niet de vereffende toestand.",
+ system:"Massa komt binnen via één opening, bepaald door oppervlak en uitstroomcoëfficiënt. De binnenkomende enthalpie blijft in het vat: er is geen wandwarmteoverdracht, dus het gas warmt op doordat de aankomende massa het samendrukt. De druk volgt uit de ideaalgasrelatie voor de momentane massa en temperatuur.",
+ figCap:"Tankdruk en -temperatuur tegen de tijd. Druk wordt op de linkeras afgelezen, temperatuur op de rechter.",
+ ckClosure:"Sluiting van de toestandsvergelijking",ckClosureB:"p = m R T / V herberekend uit de eindmassa en -temperatuur en vergeleken met de gerapporteerde druk. Dit is de eigen sluiting van het model, dus het toetst rekenwerk en geen fysica.",
+ ckEq:"Drukvereffening",ckEqB:"De oplosser stopt wanneer de tankdruk 0,99999 van de voedingsdruk bereikt. Of dat binnen het gevraagde venster gebeurde bepaalt of de eindtoestand als eindtoestand betekenis heeft.",
+ ckChoke:"Regime van de opening in de eindtoestand",ckChokeB:"Drukverhouding p/p_voeding tegen de kritische verhouding (2/(γ+1))^(γ/(γ−1)). Daaronder is de opening geblokkeerd en wordt de massastroom alleen door de voedingstoestand bepaald.",
+ ckRef:"Eindtijd tegen de massadomein-referentie",ckRefB:"De tijdmars is RK4 in t. Een onafhankelijke kwadratuur van dt = dm/ṁ(m) over hetzelfde massa-interval geeft de tijd zonder die mars. Overeenstemming toetst de integratie, niet het model.",
+ ckConv:"Convergentie bij stapverfijning",ckConvB:"Dezelfde oplossing op fijnere verdelingen. Een eindtijd die onder verfijning blijft bewegen betekent dat de geleverde verdeling voor dit geval te grof is.",
+ flowSupply:"Voeding met vaste toestand",flowOrifice:"Opening (A, Cd)",flowTank:"Star adiabatisch vat",
+ mNote:"Ideaal gas met constante γ en R. Star volume, perfecte menging, geen wandwarmteoverdracht, geen dynamica van de toevoerleiding.",
+ riskReal:"Reëelgasgedrag valt buiten het model. Nabij de verzadigingslijn of boven ongeveer 10 MPa wijkt de ideaalgasrelatie af van het medium, en zowel eindtemperatuur als ingelaten massa dragen die fout.",
+ riskWall:"De warmtecapaciteit van de vatwand valt buiten het model. Een echt vat neemt een deel van de compressiewarmte op, dus de berekende eindtemperatuur is een bovengrens en de berekende druk daarmee ook.",
+ rNo:"nee",rYes:"ja",rChoked:"geblokkeerd",rSub:"subkritisch",rRise:"Temperatuurstijging",rMass0:"Beginmassa gas",rMassEnd:"eind",rMean:"Gemiddelde instroom",rChokeT:"Opening geblokkeerd tot",rOfFill:"van de vulling",rAdm:"Ingelaten massa",rTsup:"Voedingstemperatuur",rGasWhy:"Bepaalt de massastroom door de opening en de warmte die bij compressie in het gas vrijkomt",riskRealT:"Reëelgasgedrag",riskWallT:"Warmtecapaciteit van de vatwand",rSupplyWhy:"Bepaalt de einddruk en daarmee de eindtemperatuur"},
+fr:{title:"Mise en pression d’un réservoir — remplissage adiabatique d’une enceinte rigide",
+ summary:"Une enceinte rigide, bien mélangée et adiabatique de {V} m³ est remplie depuis une alimentation à état fixe de {ps} bar / {Ts} °C par un orifice de {A} mm² de coefficient de décharge {Cd}. Le réservoir atteint {pf} bar et {Tf} °C au bout de {t} s, en admettant {m} kg.",
+ concEq:"La pression du réservoir a atteint la pression d’alimentation dans la fenêtre simulée ; l’état final est l’état d’équilibre.",
+ concCut:"La fenêtre simulée s’est terminée avant l’égalisation des pressions ; l’état final n’est pas l’état d’équilibre.",
+ system:"La masse entre par un orifice unique défini par sa section et son coefficient de décharge. L’enthalpie entrante reste dans l’enceinte : sans transfert thermique pariétal, le gaz s’échauffe sous la compression exercée par la masse qui arrive. La pression découle de la relation des gaz parfaits appliquée à la masse et à la température instantanées.",
+ figCap:"Pression et température du réservoir en fonction du temps. La pression se lit sur l’axe de gauche, la température sur celui de droite.",
+ ckClosure:"Fermeture de l’équation d’état",ckClosureB:"p = m R T / V recalculée à partir de la masse et de la température finales, comparée à la pression annoncée. C’est la fermeture propre au modèle : elle éprouve l’arithmétique et non la physique.",
+ ckEq:"Égalisation des pressions",ckEqB:"Le solveur s’arrête quand la pression du réservoir atteint 0,99999 de la pression d’alimentation. Que cela se produise ou non dans la fenêtre demandée décide si l’état final a un sens comme état terminal.",
+ ckChoke:"Régime de l’orifice à l’état final",ckChokeB:"Rapport de pression p/p_alimentation face au rapport critique (2/(γ+1))^(γ/(γ−1)). En dessous, l’orifice est bloqué et le débit masse ne dépend que de l’état d’alimentation.",
+ ckRef:"Temps final face à la référence en domaine de masse",ckRefB:"La marche temporelle est un RK4 en t. Une quadrature indépendante de dt = dm/ṁ(m) sur le même intervalle de masse donne le temps sans cette marche. L’accord éprouve l’intégration, pas le modèle.",
+ ckConv:"Convergence au raffinement du pas",ckConvB:"Le même calcul sur des partitions plus fines. Un temps final qui continue de bouger au raffinement signifie que la partition livrée est trop grossière pour le cas.",
+ flowSupply:"Alimentation à état fixe",flowOrifice:"Orifice (A, Cd)",flowTank:"Enceinte rigide adiabatique",
+ mNote:"Gaz parfait à γ et R constants. Volume rigide, mélange parfait, pas de transfert thermique pariétal, pas de dynamique de la ligne d’alimentation.",
+ riskReal:"Le comportement de gaz réel est hors modèle. Près de la ligne de saturation ou au-dessus d’environ 10 MPa, la relation d’état des gaz parfaits s’écarte du fluide, et la température finale comme la masse admise portent cette erreur.",
+ riskWall:"La capacité thermique de la paroi est hors modèle. Une enceinte réelle absorbe une part de la chaleur de compression, donc la température finale calculée est une borne supérieure, et la pression calculée avec elle.",
+ rNo:"non",rYes:"oui",rChoked:"bloqué",rSub:"sous-critique",rRise:"Élévation de température",rMass0:"Masse de gaz initiale",rMassEnd:"finale",rMean:"Débit d’entrée moyen",rChokeT:"Orifice bloqué jusqu’à",rOfFill:"du remplissage",rAdm:"Masse admise",rTsup:"Température d’alimentation",rGasWhy:"Fixe le débit masse à l’orifice et la chaleur dégagée dans le gaz lors de la compression",riskRealT:"Comportement de gaz réel",riskWallT:"Capacité thermique de la paroi",rSupplyWhy:"Fixe la pression finale et, avec elle, la température finale"},
+es:{title:"Presurización de tanque — llenado adiabático de un recipiente rígido",
+ summary:"Un recipiente rígido, bien mezclado y adiabático de {V} m³ se llena desde un suministro de estado fijo a {ps} bar / {Ts} °C por un orificio de {A} mm² con coeficiente de descarga {Cd}. El tanque alcanza {pf} bar y {Tf} °C tras {t} s, admitiendo {m} kg.",
+ concEq:"La presión del tanque alcanzó la de suministro dentro de la ventana simulada; el estado final es el estado igualado.",
+ concCut:"La ventana simulada terminó antes de la igualación de presiones; el estado final no es el estado igualado.",
+ system:"La masa entra por un único orificio definido por área y coeficiente de descarga. La entalpía entrante permanece en el recipiente: no hay transferencia de calor por la pared, así que el gas se calienta al ser comprimido por la masa que llega. La presión se obtiene de la relación de gas ideal aplicada a la masa y temperatura instantáneas.",
+ figCap:"Presión y temperatura del tanque frente al tiempo. La presión se lee en el eje izquierdo y la temperatura en el derecho.",
+ ckClosure:"Cierre de la ecuación de estado",ckClosureB:"p = m R T / V recalculada desde la masa y temperatura finales y comparada con la presión informada. Es el cierre propio del modelo, de modo que prueba la aritmética y no la física.",
+ ckEq:"Igualación de presiones",ckEqB:"El solucionador se detiene cuando la presión del tanque alcanza 0,99999 de la de suministro. Que ocurra dentro de la ventana solicitada decide si el estado final tiene sentido como estado terminal.",
+ ckChoke:"Régimen del orificio en el estado final",ckChokeB:"Relación de presiones p/p_suministro frente a la relación crítica (2/(γ+1))^(γ/(γ−1)). Por debajo el orificio está bloqueado y el caudal másico lo fija solo el estado de suministro.",
+ ckRef:"Tiempo final frente a la referencia en dominio de masa",ckRefB:"La marcha temporal es RK4 en t. Una cuadratura independiente de dt = dm/ṁ(m) sobre el mismo intervalo de masa da el tiempo sin esa marcha. La concordancia prueba la integración, no el modelo.",
+ ckConv:"Convergencia por refinamiento de paso",ckConvB:"El mismo cálculo en particiones más finas. Un tiempo final que sigue moviéndose al refinar significa que la partición entregada es demasiado gruesa para el caso.",
+ flowSupply:"Suministro de estado fijo",flowOrifice:"Orificio (A, Cd)",flowTank:"Recipiente rígido adiabático",
+ mNote:"Gas ideal con γ y R constantes. Volumen rígido, mezcla perfecta, sin transferencia de calor por la pared, sin dinámica de la línea de suministro.",
+ riskReal:"El comportamiento de gas real queda fuera del modelo. Cerca de la línea de saturación o por encima de unos 10 MPa la relación de estado de gas ideal se aparta del fluido, y tanto la temperatura final como la masa admitida arrastran ese error.",
+ riskWall:"La capacidad térmica de la pared queda fuera del modelo. Un recipiente real absorbe parte del calor de compresión, así que la temperatura final calculada es una cota superior, y con ella la presión calculada.",
+ rNo:"no",rYes:"sí",rChoked:"bloqueado",rSub:"subcrítico",rRise:"Aumento de temperatura",rMass0:"Masa de gas inicial",rMassEnd:"final",rMean:"Caudal de entrada medio",rChokeT:"Orificio bloqueado hasta",rOfFill:"del llenado",rAdm:"Masa admitida",rTsup:"Temperatura de suministro",rGasWhy:"Fija el caudal másico por el orificio y el calor liberado en el gas al comprimirse",riskRealT:"Comportamiento de gas real",riskWallT:"Capacidad térmica de la pared",rSupplyWhy:"Fija la presión final y, con ella, la temperatura final"},
+pl:{title:"Napełnianie zbiornika — adiabatyczne napełnianie sztywnego naczynia",
+ summary:"Sztywne, dobrze wymieszane naczynie adiabatyczne o objętości {V} m³ jest napełniane ze źródła o stałym stanie {ps} bar / {Ts} °C przez kryzę {A} mm² o współczynniku wypływu {Cd}. Zbiornik osiąga {pf} bar i {Tf} °C po {t} s, przyjmując {m} kg.",
+ concEq:"Ciśnienie zbiornika osiągnęło ciśnienie zasilania w symulowanym oknie; stan końcowy jest stanem wyrównanym.",
+ concCut:"Symulowane okno zakończyło się przed wyrównaniem ciśnień; stan końcowy nie jest stanem wyrównanym.",
+ system:"Masa wpływa przez jedną kryzę określoną polem i współczynnikiem wypływu. Napływająca entalpia zostaje w naczyniu: nie ma wymiany ciepła przez ściankę, więc gaz nagrzewa się od sprężania przez napływającą masę. Ciśnienie wynika z równania gazu doskonałego dla chwilowej masy i temperatury.",
+ figCap:"Ciśnienie i temperatura zbiornika w czasie. Ciśnienie odczytuje się na osi lewej, temperaturę na prawej.",
+ ckClosure:"Domknięcie równania stanu",ckClosureB:"p = m R T / V przeliczone z końcowej masy i temperatury i porównane z podanym ciśnieniem. To własne domknięcie modelu, więc sprawdza arytmetykę, a nie fizykę.",
+ ckEq:"Wyrównanie ciśnień",ckEqB:"Solver zatrzymuje się, gdy ciśnienie zbiornika osiągnie 0,99999 ciśnienia zasilania. To, czy nastąpiło to w żądanym oknie, rozstrzyga, czy stan końcowy ma sens jako stan docelowy.",
+ ckChoke:"Reżim kryzy w stanie końcowym",ckChokeB:"Stosunek ciśnień p/p_zasilania wobec stosunku krytycznego (2/(γ+1))^(γ/(γ−1)). Poniżej niego kryza jest zakrytyczna, a strumień masy zależy tylko od stanu zasilania.",
+ ckRef:"Czas końcowy wobec odniesienia w dziedzinie masy",ckRefB:"Marsz czasowy to RK4 po t. Niezależna kwadratura dt = dm/ṁ(m) na tym samym przedziale masy daje czas bez tego marszu. Zgodność sprawdza całkowanie, a nie model.",
+ ckConv:"Zbieżność przy zagęszczaniu kroku",ckConvB:"Ten sam rachunek na gęstszych podziałach. Czas końcowy, który wciąż się zmienia przy zagęszczaniu, oznacza, że dostarczony podział jest dla tego przypadku zbyt zgrubny.",
+ flowSupply:"Źródło o stałym stanie",flowOrifice:"Kryza (A, Cd)",flowTank:"Sztywne naczynie adiabatyczne",
+ mNote:"Gaz doskonały o stałych γ i R. Objętość sztywna, idealne wymieszanie, brak wymiany ciepła przez ściankę, brak dynamiki linii zasilającej.",
+ riskReal:"Zachowanie gazu rzeczywistego jest poza modelem. W pobliżu linii nasycenia lub powyżej około 10 MPa równanie stanu gazu doskonałego odbiega od czynnika, a temperatura końcowa i przyjęta masa niosą ten błąd.",
+ riskWall:"Pojemność cieplna ścianki jest poza modelem. Rzeczywiste naczynie pochłania część ciepła sprężania, więc obliczona temperatura końcowa jest ograniczeniem górnym, a wraz z nią obliczone ciśnienie.",
+ rNo:"nie",rYes:"tak",rChoked:"zakrytyczny",rSub:"podkrytyczny",rRise:"Przyrost temperatury",rMass0:"Początkowa masa gazu",rMassEnd:"końcowa",rMean:"Średni strumień dopływu",rChokeT:"Kryza zakrytyczna do",rOfFill:"napełnienia",rAdm:"Przyjęta masa",rTsup:"Temperatura zasilania",rGasWhy:"Ustala strumień masy przez kryzę i ciepło wydzielane w gazie przy sprężaniu",riskRealT:"Zachowanie gazu rzeczywistego",riskWallT:"Pojemność cieplna ścianki",rSupplyWhy:"Ustala ciśnienie końcowe, a wraz z nim temperaturę końcową"}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '—';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+
+/* Verification computed live from the current state.
+   The reference for elapsed time is a quadrature of dt = dm/mdot(m) over the
+   same mass interval. It shares the model's equations but not its time march,
+   so it tests the integration independently of the RK4 stepper. */
+function dgcMassDomainTime(s,m0,m1){
+  // Adaptive Simpson on dt/dm = 1/mdot(m), integrated in the substituted
+  // variable v = sqrt(mEq - m), where mEq is the mass at which the tank would
+  // reach the supply pressure exactly.
+  //
+  // mdot vanishes as sqrt(mEq - m) there, so 1/mdot has an integrable
+  // inverse-square-root singularity at mEq. The substitution m = mEq - v^2
+  // gives dm = -2v dv and turns the integrand into 2v/mdot, which is bounded
+  // and smooth. This used to be handled by simply stopping 1e-9 of the mass
+  // span short of the end, which silently subtracted the whole last sliver of
+  // the fill from the reference — 6.5e-6 s on the shipped default, which was
+  // larger than the march error the reference is there to measure once the
+  // march stopped taking its step from the window.
+  var mEq=(s.pSupply*s.V/s.R-m0*(s.T0-s.gamma*s.TSupply))/(s.gamma*s.TSupply);
+  var g=function(v){var m=mEq-v*v;
+    var st=tankState(s,m,m0);
+    var q=gasOrifice(s.pSupply,s.TSupply,st.p,s.Cd,s.A,s.gamma,s.R).mdot;
+    return q>0?2*v/q:0;};
+  var f=g;
+  var simpson=function(a,b,fa,fm,fb){return (b-a)*(fa+4*fm+fb)/6;};
+  var rec=function(a,b,fa,fm,fb,whole,depth){
+    var lm=(a+(a+b)/2)/2, rm=((a+b)/2+b)/2, flm=f(lm), frm=f(rm);
+    var left=simpson(a,(a+b)/2,fa,flm,fm), right=simpson((a+b)/2,b,fm,frm,fb);
+    if(depth<=0||Math.abs(left+right-whole)<=1e-13*Math.abs(left+right)+1e-15)
+      return left+right+(left+right-whole)/15;
+    return rec(a,(a+b)/2,fa,flm,fm,left,depth-1)+rec((a+b)/2,b,fm,frm,fb,right,depth-1);
+  };
+  if(!(m1>m0))return 0;
+  if(!(mEq>m1))return 0;
+  // v runs DOWN from sqrt(mEq-m0) to sqrt(mEq-m1); integrate over the ordered
+  // interval and the sign works out as an elapsed time.
+  var va=Math.sqrt(mEq-m1), vb=Math.sqrt(mEq-m0);
+  var fa=f(va),fb=f(vb),fm=f((va+vb)/2);
+  return rec(va,vb,fa,fm,fb,simpson(va,vb,fa,fm,fb),40);
+}
+/* The shipped solve() fixes its partition at tEnd/900. This repeats the same
+   march on n sub-steps so the terminal time can be watched under refinement. */
+/* Re-runs the same march at a different step fraction, for the refinement check. */
+function dgcSolveSteps(s,frac){return marchTank(s,frac,false);}
+/* Returns one row per case: what was measured, what it was measured against,
+   the relative difference and the verdict. No case reports a verdict it cannot
+   show the numbers for. */
+function dgcVerify(s){
+  var out=[],base=dgcSolveSteps(s,STEP_FRAC);
+  var st=tankState(s,base.m,base.m0);
+
+  // 1. State-equation closure: recompute p from the terminal mass and temperature.
+  var pClosed=base.m*s.R*st.T/s.V;
+  var relP=st.p!==0?Math.abs(pClosed-st.p)/Math.abs(st.p):0;
+  out.push({id:'state-equation-closure',key:'ckClosure',
+    graded:true,
+    got:pClosed,ref:st.p,rel:relP,tol:1e-12,unit:'Pa',dp:6,
+    pass:relP<=1e-12});
+
+  // 2. Equalisation inside the requested window.
+  var pStop=s.pSupply*0.99999, reached=st.p>=pStop;
+  out.push({id:'pressure-equalisation',key:'ckEq',
+    got:st.p,ref:pStop,rel:null,unit:'Pa',dp:0,
+    pass:reached,graded:false,status:reached?'pass':'attention',
+    word:reached?'rYes':'rNo'});
+
+  // 3. Orifice regime at the terminal state.
+  var r=st.p/s.pSupply, rc=Math.pow(2/(s.gamma+1),s.gamma/(s.gamma-1));
+  out.push({id:'terminal-orifice-regime',key:'ckChoke',
+    got:r,ref:rc,rel:null,unit:'-',dp:4,pass:true,graded:false,status:'info',
+    word:r<=rc?'rChoked':'rSub'});
+
+  // 4. Terminal time against the mass-domain quadrature over the same mass
+  //    interval the march covered.
+  //    The acceptance band is NOT taken from the solver's own partition. It used
+  //    to be one step, tEnd/900 — a band proportional to the very quantity that
+  //    caused the error, so no step size could ever fail it, which is how a
+  //    window-dependent fill time survived this check for so long. The band is
+  //    the model's own physical fidelity instead: the ideal-gas closure this
+  //    model rests on is about 0.64 % wrong in density at a 20 bar supply
+  //    (Z = 0.9936 for air at 293.15 K, Lemmon et al. 2000), so a discretisation
+  //    error is only defensible while it stays an order of magnitude inside
+  //    that. Hence 1e-3 relative, with a 1e-6 s floor for degenerate windows.
+  var tolAbs=null;
+  var mRef=base.m, tRef=null, dT=null, okT=true;
+  if(mRef>base.m0){
+    tRef=dgcMassDomainTime(s,base.m0,mRef);
+    dT=Math.abs(base.t-tRef);
+    tolAbs=Math.max(1e-3*Math.abs(tRef),1e-6);
+    okT=dT<=tolAbs;
+  }
+  out.push({id:'terminal-time-vs-mass-domain-integral',key:'ckRef',
+    graded:true,
+    got:base.t,ref:tRef,abs:dT,rel:(tRef&&base.t?dT/base.t:null),
+    tol:tolAbs,unit:'s',dp:6,
+    pass:okT,status:okT?'pass':'attention'});
+
+  // 5. Step-fraction convergence. The step is a fraction of the remaining-fill
+  //    timescale, so refinement means halving that FRACTION — there is no window
+  //    partition left to refine. The fill time is a property of the vessel, the
+  //    orifice and the two gas states, so tightening a purely numerical knob
+  //    must not move it: the band is 1e-6 relative, the same criterion and the
+  //    same reasoning as the published window-invariance case, and like it, it
+  //    is derived from a property the physics demands exactly rather than from
+  //    any step size.
+  var r2=dgcSolveSteps(s,STEP_FRAC/2), r4=dgcSolveSteps(s,STEP_FRAC/4);
+  var spread=Math.max(Math.abs(base.t-r4.t),Math.abs(r2.t-r4.t));
+  var tolC=Math.max(1e-6*Math.abs(r4.t),1e-9);
+  var okC=spread<=tolC;
+  out.push({id:'step-refinement-convergence',key:'ckConv',
+    graded:true,
+    got:spread,ref:tolC,abs:spread,rel:(r4.t?spread/r4.t:null),tol:tolC,unit:'s',dp:9,
+    pass:okC,status:okC?'pass':'attention',
+    extra:{tBase:base.t,tHalf:r2.t,tQuarter:r4.t,reference:tRef,frac:STEP_FRAC}});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption and no axis titles. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+function dgcPlotSpec(){
+  if(!last||!last.series||last.series.length<2)return null;
+  return {x:{label:dgcLabel('time'),unit:'s'},
+    series:[{x:last.series[0].x,y:last.series[0].y,label:dgcLabel('pressure'),unit:'bar',color:'#1f6feb'},
+            {x:last.series[1].x,y:last.series[1].y,label:dgcLabel('temperature'),unit:'K',color:'#d1651a'}]};
+}
+var DGC_AXIS={
+ time:{en:'Time',uk:'Час',de:'Zeit',nl:'Tijd',fr:'Temps',es:'Tiempo',pl:'Czas'},
+ pressure:{en:'Tank pressure',uk:'Тиск у резервуарі',de:'Behälterdruck',nl:'Tankdruk',fr:'Pression du réservoir',es:'Presión del tanque',pl:'Ciśnienie zbiornika'},
+ temperature:{en:'Tank temperature',uk:'Температура в резервуарі',de:'Behältertemperatur',nl:'Tanktemperatuur',fr:'Température du réservoir',es:'Temperatura del tanque',pl:'Temperatura zbiornika'}
+};
+function dgcLabel(k){var l=dgcLang();return (DGC_AXIS[k]&&(DGC_AXIS[k][l]||DGC_AXIS[k].en))||k;}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{}, o=rec.outputs||{}, u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var txt=function(label,text){return {label:label,text:text};};
+  var n=dgcNum;
+
+  var reached=o.p_final>=i.pSupply*0.99999;
+  var summary=dgcRt('summary')
+    .replace('{V}',n(i.V,3)).replace('{ps}',n(i.pSupply/1e5,2)).replace('{Ts}',n(i.TSupply-273.15,1))
+    .replace('{A}',n(i.A*1e6,2)).replace('{Cd}',n(i.Cd,2))
+    .replace('{pf}',n(o.p_final/1e5,3)).replace('{Tf}',n(o.T_final-273.15,1))
+    .replace('{t}',n(o.elapsed,2)).replace('{m}',n(o.m_admitted,3));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcLabel('pressure'),n(o.p_final/1e5,3),'bar'),
+    row(dgcLabel('temperature'),n(o.T_final-273.15,1),'°C',n(o.T_final,2)+' K'),
+    row(ctx.label('rho_final',u.rho_final||'kg/m3'),n(o.rho_final,3),'kg/m³'),
+    row(dgcRt('rAdm'),n(o.m_admitted,3),'kg'),
+    row(ctx.label('mdot_peak',u.mdot_peak||'kg/s'),n(o.mdot_peak,4),'kg/s'),
+    row(ctx.label('elapsed',u.elapsed||'s'),n(o.elapsed,2),'s')
+  ];
+  /* How long the orifice stays choked, read off the computed history: the
+     inlet flow is fixed by the supply state alone until p/p_supply rises past
+     the critical ratio, so this is the part of the fill that does not care
+     about tank pressure. */
+  var rc0=Math.pow(2/(i.gamma+1),i.gamma/(i.gamma-1)), tChoke=null;
+  if(last.series&&last.series[0]){
+    var xs=last.series[0].x, ys=last.series[0].y;
+    for(var k=0;k<ys.length;k++){
+      if(ys[k]*1e5/i.pSupply>rc0){tChoke=xs[k];break;}
+    }
+    if(tChoke===null)tChoke=o.elapsed;
+  }
+  var m0=i.p0*i.V/(i.R*i.T0);
+  var results=tiles.concat([
+    row(ctx.label('p0',u.p0),n(i.p0/1e5,3),'bar'),
+    row(ctx.label('T0',u.T0),n(i.T0-273.15,2),'°C'),
+    row(dgcRt('rRise'),n(o.T_final-i.T0,1),'K'),
+    row(dgcRt('rMass0'),n(m0,3),'kg',dgcRt('rMassEnd')+': '+n(m0+o.m_admitted,3)+' kg'),
+    row(dgcRt('rMean'),o.elapsed>0?n(o.m_admitted/o.elapsed,4):'—','kg/s'),
+    row(dgcRt('rChokeT'),tChoke===null?'—':n(tChoke,2),'s',
+        o.elapsed>0&&tChoke!==null?n(100*tChoke/o.elapsed,1)+' % '+dgcRt('rOfFill'):'')
+  ]);
+
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'attention');
+    var actual,criterion;
+    if(c.key==='ckClosure'){actual='|Δp| / p = '+Number(c.rel).toExponential(2);criterion='≤ 1·10⁻¹²';}
+    else if(c.key==='ckEq'){actual=n(c.got/1e5,3)+' bar ('+dgcRt(c.word)+')';criterion='p ≥ 0,99999 · p_supply = '+n(c.ref/1e5,3)+' bar';}
+    else if(c.key==='ckChoke'){actual='p/p_supply = '+n(c.got,4)+' ('+dgcRt(c.word)+')';criterion='r_crit = '+n(c.ref,4);}
+    else if(c.key==='ckRef'){actual='|Δt| = '+n(c.abs,4)+' s';criterion='≤ 0,1 % (ideal-gas closure limit) = '+n(c.tol,4)+' s';}
+    else {actual='|Δt| = '+n(c.got,6)+' s';criterion='≤ '+n(c.ref,6)+' s';}
+    var note='';
+    if(c.key==='ckRef'&&c.ref!=null)note='t = '+n(c.got,6)+' s; reference '+n(c.ref,6)+' s';
+    if(c.key==='ckConv'&&c.extra)note='step '+c.extra.frac+'τ: '+n(c.extra.tBase,6)+' s · '+(c.extra.frac/2)+'τ: '+n(c.extra.tHalf,6)+' s · '+(c.extra.frac/4)+'τ: '+n(c.extra.tQuarter,6)+' s · reference '+n(c.extra.reference,6)+' s';
+    return {status:st,title:dgcRt(c.key),actual:actual,criterion:criterion,
+            basis:dgcRt(c.key+'B'),detail:note};
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckEq'),detail:w});});
+
+  var decisions=[
+    row(dgcRt('flowSupply'),n(i.pSupply/1e5,2)+' bar / '+n(i.TSupply-273.15,1)+' °C','',dgcRt('rSupplyWhy')),
+    row('A · Cd',n(i.A*1e6,2)+' mm² · '+n(i.Cd,2),'',dgcRt('flowOrifice')),
+    row('γ · R',n(i.gamma,3)+' · '+n(i.R,2)+' J/(kg·K)','',dgcRt('rGasWhy'))
+  ];
+
+  var groupTank='1 · '+dgcRt('flowTank'), groupSup='2 · '+dgcRt('flowSupply');
+  var inputs=[
+    {label:ctx.label('V',u.V),value:n(i.V,3),unit:'m³',group:groupTank},
+    {label:ctx.label('p0',u.p0),value:n(i.p0/1e5,3),unit:'bar',group:groupTank},
+    {label:ctx.label('T0',u.T0),value:n(i.T0-273.15,2),unit:'°C',group:groupTank},
+    {label:ctx.label('pSupply',u.pSupply),value:n(i.pSupply/1e5,3),unit:'bar',group:groupSup},
+    {label:dgcRt('rTsup'),value:n(i.TSupply-273.15,2),unit:'°C',group:groupSup},
+    {label:ctx.label('A',u.A),value:n(i.A*1e6,3),unit:'mm²',group:groupSup},
+    {label:ctx.label('Cd',u.Cd),value:n(i.Cd,3),unit:'-',group:groupSup},
+    {label:ctx.label('gamma',u.gamma),value:n(i.gamma,3),unit:'-',group:groupSup},
+    {label:ctx.label('R',u.R),value:n(i.R,2),unit:'J/(kg·K)',group:groupSup},
+    {label:ctx.label('tEnd',u.tEnd),value:n(i.tEnd,2),unit:'s',group:groupSup}
+  ];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,
+      conclusion:reached?dgcRt('concEq'):dgcRt('concCut')},
+    system:{text:dgcRt('system'),
+      flow:[{label:dgcRt('flowSupply'),detail:n(i.pSupply/1e5,2)+' bar / '+n(i.TSupply-273.15,1)+' °C'},
+            {label:dgcRt('flowOrifice'),detail:n(i.A*1e6,2)+' mm² · Cd '+n(i.Cd,2)},
+            {label:dgcRt('flowTank'),detail:n(i.V,3)+' m³'}]},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskRealT'),detail:dgcRt('riskReal')},
+           {status:'attention',title:dgcRt('riskWallT'),detail:dgcRt('riskWall')}],
+    method:{
+      equations:['dm/dt = ṁ_in','d(m c_v T)/dt = ṁ_in c_p T_supply','p = m R T / V',
+        'ṁ = C_d A p_u √(γ/(R T_u)) (2/(γ+1))^((γ+1)/(2(γ−1)))   for p/p_u ≤ (2/(γ+1))^(γ/(γ−1))',
+        'ṁ = C_d A p_u √(2γ/(R T_u (γ−1)) · [r^(2/γ) − r^((γ+1)/γ)])   otherwise, r = p/p_u'],
+      ranges:['ideal gas','rigid adiabatic well-mixed tank','fixed large-source supply state'],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Scenarios the published benchmark covers. They live here rather than in a
+   separate harness so the artifact is defined by the tool it describes. */
+var DGC_BENCH_CASES=[
+ {id:'default-air-20-bar',note:'Shipped default: air, 1.2 -> 20 bar through 100 mm²',
+  s:{V:1,p0:120000,T0:293.15,pSupply:2000000,TSupply:293.15,A:1e-4,Cd:0.8,gamma:1.4,R:287.05,tEnd:300}},
+ {id:'window-shorter-than-fill',note:'Window ends before equalisation (tEnd = 10 s)',
+  s:{V:1,p0:120000,T0:293.15,pSupply:2000000,TSupply:293.15,A:1e-4,Cd:0.8,gamma:1.4,R:287.05,tEnd:10}},
+ {id:'subcritical-throughout',note:'Supply ratio above the critical ratio from the start (1.2 -> 1.5 bar)',
+  s:{V:1,p0:120000,T0:293.15,pSupply:150000,TSupply:293.15,A:1e-5,Cd:0.8,gamma:1.4,R:287.05,tEnd:3000}},
+ {id:'helium-large-vessel',note:'Helium (γ 1.667, R 2077 J/(kg·K)) into 50 m³',
+  s:{V:50,p0:100000,T0:293.15,pSupply:5000000,TSupply:300,A:5e-4,Cd:0.75,gamma:1.667,R:2077,tEnd:3000}},
+ {id:'hot-supply-small-orifice',note:'Supply at 250 °C through 1 mm²',
+  s:{V:2,p0:101325,T0:288.15,pSupply:1000000,TSupply:523.15,A:1e-6,Cd:0.62,gamma:1.4,R:287.05,tEnd:100000}}
+];
+/* Rebuilds the IN-PAGE SELF-CHECK subset of the published record. These checks
+   re-evaluate the tool's own relations inside the tool, so they test
+   implementation faithfulness and nothing more; site rule S5 excludes them from
+   counting as independent reference checks, and they are carried in
+   benchmarks/tank_pressurisation.json labelled basis:"self-check". The published artifact as a whole is NOT produced
+   here — it comes from the independent Python second implementation in
+   out/gen_tank_pressurisation.py, which derives the physics from first principles,
+   drives this page over Playwright and grades it. */
+function dgcBenchmark(scenarios){
+  var list=scenarios||DGC_BENCH_CASES, cases=[], total=0, passed=0;
+  list.forEach(function(sc){
+    var v=dgcVerify(sc.s);
+    var cmp=v.map(function(c){
+      if(c.graded){total++; if(c.pass)passed++;}
+      return {check:c.id,
+        got:(c.got===undefined?null:c.got),
+        ref:(c.ref===undefined?null:c.ref),
+        abs:(c.abs===undefined?null:c.abs),
+        rel:(c.rel===undefined?null:c.rel),
+        tol:(c.tol===undefined?null:c.tol),
+        unit:c.unit,extra:c.extra||null,
+        graded:!!c.graded,
+        status:c.status||(c.pass?'pass':'fail'),ok:c.graded?!!c.pass:null};
+    });
+    cases.push({id:sc.id,note:sc.note,inputs:sc.s,cmp:cmp,
+      pass:cmp.every(function(x){return !x.graded||x.ok;})});
+  });
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var d0=cases[0].cmp.filter(function(x){return x.check==='terminal-time-vs-mass-domain-integral';})[0];
+  var r0=cases[0].cmp.filter(function(x){return x.check==='step-refinement-convergence';})[0];
+  var ex=function(x,n){return x==null?'—':Number(x).toExponential(n);};
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'tank-pressurisation',file:'tank_pressurisation.html',manifest_revision:rev,
+    subset:'in-page self-checks only',
+    reference:'SELF-CHECK SUBSET. Quadrature of the mass-domain relation dt = dm/mdot(m) over the same mass interval as the time march, plus the state-equation closure p = m R T / V and the orifice choking criterion, all re-evaluated inside the page from the tool\'s own relations. This establishes implementation faithfulness only; the independent reference for this tool is the Python second implementation described in benchmarks/tank_pressurisation.json.',
+    reference_citations:['Closure and orifice relations as implemented in tank_pressurisation.html. Shares those relations with the tool, so it is a self-check and not an independent reference.'],
+    reference_provenance:'recomputed in page (self-check)',
+    tolerance:'State-equation closure to floating-point precision (1e-12 relative). Terminal time must agree with the mass-domain reference to 1e-3 relative — a band fixed by the model\'s own physical fidelity (the ideal-gas closure is about 0.64 % wrong in density at a 20 bar supply), NOT by the solver\'s own step, which is what the superseded tEnd/900 band did and why it could never fail. Halving and quartering the step fraction must move the terminal time by less than 1e-6 relative. Observed on the shipped default: gap '+ex(d0&&d0.abs,3)+' s against a band of '+ex(d0&&d0.tol,3)+' s, with a step-fraction spread of '+ex(r0&&r0.got,3)+' s.',
+    run_at:new Date().toISOString().replace(/\.\d+Z$/,'Z'),
+    total:total,passed:passed,failed:total-passed,flagged:0,page_errors:[],
+    grading:'total counts checks with an acceptance criterion. Pressure equalisation and orifice regime report the state of the solved case and carry no criterion, so they are recorded with their status and excluded from the count.',
+    cases:cases,
+    not_benchmarked:[
+      'Real-gas properties; the state relation is ideal-gas throughout.',
+      'Vessel-wall heat capacity and wall heat transfer.',
+      'Supply-line inventory, regulator dynamics and mixing stratification.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page.'],
+    notes:[
+      'Each case runs the shipped solver and the self-check reference inside the page. Inputs, measured value, reference value and tolerance are recorded per check, so any verdict can be reproduced by calling window.__dgcBenchmark() on the tool.',
+      'The march step is a fixed fraction of the remaining-fill timescale (m_stop - m)/mdot, not a partition of the simulated window, so the computed fill time does not depend on tEnd. The terminal event is located by bisection on a mass rate that vanishes at equalisation.',
+      'The mass-domain reference integrates in v = sqrt(m_eq - m), which makes the integrand bounded at the equalised end; it no longer truncates the last 1e-9 of the mass span.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"tank\"]'},{topic:'t3',focus:'[data-dgu-panel=\"supply\"]'},{topic:'t4',focus:'[data-dgu-panel=\"gas\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"A":0.0003});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"A":3e-05,"tEnd":1200});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"TSupply":423.15});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"p0":1500000.0,"pSupply":2000000.0});}}];
+
+
+function gasOrifice(pu,Tu,pd,Cd,A,gamma,R){
+ if(!(pu>pd&&Tu>0&&A>0&&Cd>0))return {mdot:0,choked:false,G:0,r:pd/Math.max(pu,1)};
+ var r=Math.max(0,Math.min(1,pd/pu));
+ var rc=Math.pow(2/(gamma+1),gamma/(gamma-1));
+ var G;
+ if(r<=rc){G=pu*Math.sqrt(gamma/(R*Tu))*Math.pow(2/(gamma+1),(gamma+1)/(2*(gamma-1)));return {mdot:Cd*A*G,choked:true,G:G,r:r};}
+ var z=Math.max(0,Math.pow(r,2/gamma)-Math.pow(r,(gamma+1)/gamma));
+ G=pu*Math.sqrt(2*gamma/(R*Tu*(gamma-1))*z);return {mdot:Cd*A*G,choked:false,G:G,r:r};
+}
+
+function tankState(s,m,m0){var T=(m0*s.T0+s.gamma*(m-m0)*s.TSupply)/m;return {T:T,p:m*s.R*T/s.V};}
+function tankRate(s,m,m0){var st=tankState(s,m,m0);return gasOrifice(s.pSupply,s.TSupply,st.p,s.Cd,s.A,s.gamma,s.R).mdot;}
+function rk4Mass(s,m,m0,dt){var k1=tankRate(s,m,m0),k2=tankRate(s,m+.5*dt*k1,m0),k3=tankRate(s,m+.5*dt*k2,m0),k4=tankRate(s,m+dt*k3,m0);return m+dt*(k1+2*k2+2*k3+k4)/6;}
+/* ---- time march ---------------------------------------------------------
+   The step is taken from the TRANSIENT, not from the display window.
+
+     tau = (m_stop - m) / mdot(m)
+
+   is how long the rest of the fill would still take at the current inlet flow,
+   so resolving a fixed fraction STEP_FRAC of tau makes the accuracy of the
+   march a property of the vessel and the orifice alone. It used to be
+   tEnd/900, which tied the resolution to how long the user chose to watch: a
+   generous window coarsened the step until the whole subsonic approach to
+   equalisation fell inside one step, and because the mass rate is
+   convex-decreasing there the stage average overestimated it and the reported
+   fill time came out short — by up to 7 % at the widest windows, silently and
+   always in the non-conservative direction.
+
+   tau -> 0 at equalisation (mdot vanishes as sqrt(m_stop - m)), so STEP_FLOOR
+   keeps the step from collapsing to zero; the terminal event is then crossed
+   and located exactly by bisection.
+
+   tEnd enters the step only through a min(), which can REFINE the step so a
+   short window still draws a smooth curve, but can never coarsen it. The
+   computed answer is therefore no longer a function of tEnd: across windows
+   from 1.02x to 185000x the fill, the reported fill time now moves by about
+   1e-8 relative, against 4.7e-2 before. */
+var STEP_FRAC=0.025, STEP_FLOOR=1e-9, PLOT_POINTS=900, STEP_GUARD=40000;
+
+function marchTank(s,frac,collect){
+  var m0=s.p0*s.V/(s.R*s.T0),m=m0,t=0,n=0,peak=0,lastq=0;
+  var pStop=s.pSupply*0.99999;
+  var mStop=(pStop*s.V/s.R-m0*(s.T0-s.gamma*s.TSupply))/(s.gamma*s.TSupply);
+  var q0=tankRate(s,m0,m0);
+  var tauFill=(q0>0&&mStop>m0)?(mStop-m0)/q0:Math.max(s.tEnd,1e-5);
+  var x=[],pp=[],TT=[];
+  while(t<s.tEnd&&n<STEP_GUARD){
+    var st=tankState(s,m,m0);
+    var q=gasOrifice(s.pSupply,s.TSupply,st.p,s.Cd,s.A,s.gamma,s.R);
+    lastq=q.mdot; if(lastq>peak)peak=lastq;
+    if(collect){x.push(t);pp.push(st.p/1e5);TT.push(st.T);}
+    if(st.p>=pStop||lastq<=0)break;
+    var dt=(lastq>0&&mStop>m)?frac*(mStop-m)/lastq:tauFill;
+    if(!(dt>0)||!isFinite(dt))dt=tauFill;
+    dt=Math.max(dt,STEP_FLOOR*tauFill);   /* never collapses to zero */
+    dt=Math.min(dt,s.tEnd/PLOT_POINTS);   /* plot resolution: refines only */
+    dt=Math.min(dt,s.tEnd-t);
+    if(!(dt>0))break;
+    var mn=rk4Mass(s,m,m0,dt);
+    if(!(mn>m))break;
+    if(mn>=mStop){
+      var lo=0,hi=dt;
+      for(var j=0;j<60;j++){var mid=(lo+hi)/2;if(rk4Mass(s,m,m0,mid)>=mStop)hi=mid;else lo=mid;}
+      m=mStop;t+=hi;n++;break;
+    }
+    m=mn;t+=dt;n++;
+  }
+  var stf=tankState(s,m,m0);
+  var qf=gasOrifice(s.pSupply,s.TSupply,stf.p,s.Cd,s.A,s.gamma,s.R);
+  lastq=qf.mdot; if(lastq>peak)peak=lastq;
+  if(collect){x.push(t);pp.push(stf.p/1e5);TT.push(stf.T);}
+  return {m:m,m0:m0,t:t,p:stf.p,T:stf.T,mdot:lastq,peak:peak,steps:n,x:x,pp:pp,TT:TT};
+}
+
+function solve(s){
+  var r=marchTank(s,STEP_FRAC,true);
+  return {p:r.p,T:r.T,rho:r.m/s.V,mdot:r.mdot,peak:r.peak,admitted:r.m-r.m0,time:r.t,steps:r.steps,
+    series:[{x:r.x,y:r.pp},{x:r.x,y:r.TT}],a11y:'Tank pressurisation history.',
+    warnings:(s.pSupply<=s.p0?['Supply pressure is not above initial tank pressure.']:[]),
+    notes:[r.t>=s.tEnd?'Simulation reached the user time limit before pressure equalisation.':'Tank pressure approached supply pressure.']};
+}
+
+function degrade(){
+  document.title="Tank Pressurisation";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Tank Pressurisation";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"tank-pressurisation",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · adiabatic gas-tank filling","Pipe / Vessel Transients · адіабатичне наповнення газового резервуара","Pipe / Vessel Transients · adiabatische Gasbehälterfüllung","Pipe / Vessel Transients · adiabatische gastankvulling","Pipe / Vessel Transients · remplissage adiabatique de gaz","Pipe / Vessel Transients · llenado adiabático de gas","Pipe / Vessel Transients · adiabatyczne napełnianie gazem"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Rigid, well-mixed, adiabatic tank filled from a large fixed-state supply. This is the inverse mass/energy problem to Vessel Blowdown.","Жорсткий, добре перемішаний адіабатичний резервуар, що наповнюється від великого джерела з фіксованим станом. Це обернена задача балансу маси й енергії до Vessel Blowdown.","Starrer, gut gemischter adiabatischer Behälter aus großer Versorgung mit festem Zustand. Das inverse Massen-/Energieproblem zu Vessel Blowdown.","Starre, goed gemengde adiabatische tank uit grote bron met vaste toestand. Het inverse massa/energieprobleem van Vessel Blowdown.","Réservoir rigide, bien mélangé et adiabatique alimenté par une grande source à état fixe. Problème inverse de Vessel Blowdown.","Tanque rígido, bien mezclado y adiabático desde una fuente grande de estado fijo. Problema inverso de Vessel Blowdown.","Sztywny, dobrze mieszany zbiornik adiabatyczny z dużego źródła o stałym stanie. Problem odwrotny do Vessel Blowdown.")}],
+    panels:[{id:"tank",slot:'inputs',learn:'t1',title:T("Tank","Резервуар","Behälter","Tank","Réservoir","Tanque","Zbiornik"),fields:[{id:'f-V',key:'V',label:T("Volume","Об’єм","Volumen","Volume","Volume","Volumen","Objętość"),type:'number',unit:"m³",min:0.001,max:100000.0},{id:'f-p0',key:'p0',label:T("Initial pressure","Початковий тиск","Anfangsdruck","Begindruk","Pression initiale","Presión inicial","Ciśnienie początkowe"),type:'number',unit:"Pa",display:"bar",min:1000.0,max:100000000.0},{id:'f-T0',key:'T0',label:T("Initial temperature","Початкова температура","Anfangstemperatur","Begintemperatuur","Température initiale","Temperatura inicial","Temperatura początkowa"),type:'number',unit:"K",display:"degC",min:100,max:2000}]},{id:"supply",slot:'inputs',learn:'t2',title:T("Supply","Джерело","Versorgung","Voeding","Alimentation","Suministro","Zasilanie"),fields:[{id:'f-pSupply',key:'pSupply',label:T("Supply pressure","Тиск джерела","Versorgungsdruck","Voedingsdruk","Pression d’alimentation","Presión de suministro","Ciśnienie zasilania"),type:'number',unit:"Pa",display:"bar",min:1000.0,max:200000000.0,validate:function(v,c){return hoTypedCheck('p',v,c.state);}},{id:'f-TSupply',key:'TSupply',label:T("Supply temperature","Температура джерела","Versorgungstemperatur","Voedingstemperatuur","Température alimentation","Temperatura de suministro","Temperatura zasilania"),type:'number',unit:"K",display:"degC",min:100,max:2000},{id:'f-A',key:'A',label:T("Flow area","Площа проходу","Strömungsfläche","Doorstroomoppervlak","Section de passage","Área de paso","Pole przepływu"),type:'number',unit:"m²",min:1e-09,max:1},{id:'f-Cd',key:'Cd',label:T("Discharge coefficient","Коефіцієнт витрати","Ausflussbeiwert","Uitstroomcoëfficiënt","Coefficient de décharge","Coeficiente de descarga","Współczynnik wypływu"),type:'number',min:0.05,max:1.2,step:0.01,precision:2}]},{id:"gas",slot:'inputs',learn:'t3',title:T("Gas model","Модель газу","Gasmodell","Gasmodel","Modèle gaz","Modelo de gas","Model gazu"),fields:[{id:'f-gamma',key:'gamma',label:T("Heat-capacity ratio γ","Показник γ","Isentropenexponent γ","Verhouding γ","Rapport γ","Relación γ","Wykładnik γ"),type:'number',min:1.01,max:1.8,step:0.01,precision:3},{id:'f-R',key:'R',label:T("Specific gas constant R","Питома газова стала R","Spezifische Gaskonstante R","Specifieke gasconstante R","Constante spécifique R","Constante específica R","Indywidualna stała R"),type:'number',unit:"J/(kg·K)",min:50,max:2000},{id:'f-tEnd',key:'tEnd',label:T("Maximum simulated time","Максимальний час","Maximale Simulationszeit","Maximale simulatietijd","Temps simulé maximal","Tiempo simulado máximo","Maksymalny czas symulacji"),type:'number',unit:"s",min:0.01,max:10000000.0}]}],
+    footer:T("dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. Supply orifice uses ideal-gas choked/subcritical flow against instantaneous tank pressure.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. Вхідний отвір використовує критичну/докритичну течію ідеального газу відносно миттєвого тиску в резервуарі.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. Die Zulaufblende nutzt Idealgas-Sperr-/Unterkritisch-Strömung gegen den momentanen Behälterdruck.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. De toevoerorifice gebruikt ideaal-gas choked/subkritische stroming tegen de momentane tankdruk.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. L’orifice d’alimentation utilise le débit gaz parfait bloqué/sous-critique contre la pression instantanée du réservoir.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. El orificio usa flujo de gas ideal crítico/subcrítico contra la presión instantánea del tanque.","dm/dt = ṁin; U = m cv T; dU/dt = ṁin cp Tsupply. Kryza zasilająca używa przepływu gazu doskonałego krytycznego/podkrytycznego względem chwilowego ciśnienia zbiornika."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Final tank pressure","Кінцевий тиск у резервуарі","Endbehälterdruck","Eindtankdruk","Pression finale du réservoir","Presión final del tanque","Końcowe ciśnienie zbiornika"),value:last.p/1e5,hint:"bar",precision:3},{label:T("Final tank temperature","Кінцева температура","Endbehältertemperatur","Eindtanktemperatuur","Température finale","Temperatura final","Końcowa temperatura"),value:last.T-273.15,hint:"°C",precision:1},{label:T("Admitted mass","Прийнята маса","Zugeführte Masse","Ingelaten massa","Masse admise","Masa admitida","Doprowadzona masa"),value:last.admitted,hint:"kg",precision:3},{label:T("Peak inlet flow","Пікова вхідна витрата","Maximaler Zulauf","Piekinstroom","Débit d’entrée de pointe","Caudal de entrada máximo","Szczytowy dopływ"),value:last.peak,hint:"kg/s",precision:3},{label:T("Final density","Кінцева густина","Enddichte","Einddichtheid","Masse volumique finale","Densidad final","Gęstość końcowa"),value:last.rho,hint:"kg/m³",precision:3,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("Tank pressure and temperature history","Історія тиску й температури в резервуарі","Behälterdruck- und Temperaturverlauf","Tankdruk- en temperatuurverloop","Historique pression et température du réservoir","Historia de presión y temperatura del tanque","Przebieg ciśnienia i temperatury zbiornika"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"tank-pressurisation",file:"tank_pressurisation.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"V":state["V"],"p0":state["p0"],"T0":state["T0"],"pSupply":state["pSupply"],"TSupply":state["TSupply"],"A":state["A"],"Cd":state["Cd"],"gamma":state["gamma"],"R":state["R"],"tEnd":state["tEnd"]},outputs:{"p_final":last.p,"T_final":last.T,"rho_final":last.rho,"m_admitted":last.admitted,"mdot_final":last.mdot,"mdot_peak":last.peak,"elapsed":last.time},units:{"V":"m3","p0":"Pa","T0":"K","pSupply":"Pa","TSupply":"K","A":"m2","Cd":"-","gamma":"-","R":"J/(kg K)","tEnd":"s","p_final":"Pa","T_final":"K","rho_final":"kg/m3","m_admitted":"kg","mdot_final":"kg/s","mdot_peak":"kg/s","elapsed":"s"},model:{equations:["dm/dt = mdot_in", "d(m cv T)/dt = mdot_in cp T_supply", "p = m R T / V", "ideal-gas supply-orifice relation with choking"],ranges:["ideal gas", "rigid adiabatic well-mixed tank", "fixed large-source supply state"],notes:["incoming enthalpy is retained in the rigid tank; no wall heat transfer"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\ndef gas_orifice(pu, Tu, pd, Cd, A, gamma, R):\n    if not (pu > pd and Tu > 0 and A > 0 and Cd > 0):\n        return 0.0, False, 0.0\n    r=max(0.0,min(1.0,pd/pu)); rc=(2/(gamma+1))**(gamma/(gamma-1))\n    if r <= rc:\n        G=pu*math.sqrt(gamma/(R*Tu))*(2/(gamma+1))**((gamma+1)/(2*(gamma-1)))\n        return Cd*A*G, True, G\n    z=max(0.0,r**(2/gamma)-r**((gamma+1)/gamma))\n    G=pu*math.sqrt(2*gamma/(R*Tu*(gamma-1))*z)\n    return Cd*A*G, False, G\n\n# The march step comes from the transient, not from the display window tEnd:\n# tau = (m_stop - m)/mdot is the time the rest of the fill would still take at\n# the current inlet flow, and the step resolves a fixed fraction of it. tEnd\n# enters only through a min() that can refine the step for plotting but never\n# coarsen it, so the computed answer does not depend on the window length.\nSTEP_FRAC = 0.025\nSTEP_FLOOR = 1e-9\nPLOT_POINTS = 900\nSTEP_GUARD = 40000\n\ndef compute():\n    V=INPUTS['V']; p0=INPUTS['p0']; T0=INPUTS['T0']; ps=INPUTS['pSupply']; Ts=INPUTS['TSupply']; A=INPUTS['A']; Cd=INPUTS['Cd']; gamma=INPUTS['gamma']; R=INPUTS['R']; tEnd=INPUTS['tEnd']\n    m0=p0*V/(R*T0); m=m0; t=0.0; peak=0.0; q=0.0; n=0\n    p_stop=ps*.99999\n    m_stop=(p_stop*V/R-m0*(T0-gamma*Ts))/(gamma*Ts)\n    def tank_state(mass):\n        temp=(m0*T0+gamma*(mass-m0)*Ts)/mass\n        return temp, mass*R*temp/V\n    def mass_rate(mass):\n        _,p=tank_state(mass)\n        return gas_orifice(ps,Ts,p,Cd,A,gamma,R)[0]\n    def rk4_mass(mass,dt):\n        k1=mass_rate(mass); k2=mass_rate(mass+0.5*dt*k1); k3=mass_rate(mass+0.5*dt*k2); k4=mass_rate(mass+dt*k3)\n        return mass+dt*(k1+2*k2+2*k3+k4)/6.0\n    q0=mass_rate(m0)\n    tau_fill=(m_stop-m0)/q0 if (q0>0 and m_stop>m0) else max(tEnd,1e-5)\n    while t<tEnd and n<STEP_GUARD:\n        T,p=tank_state(m); q,_,_=gas_orifice(ps,Ts,p,Cd,A,gamma,R); peak=max(peak,q)\n        if p>=p_stop or q<=0: break\n        dt=STEP_FRAC*(m_stop-m)/q if (q>0 and m_stop>m) else tau_fill\n        if not (dt>0) or dt!=dt or dt==float('inf'): dt=tau_fill\n        dt=max(dt,STEP_FLOOR*tau_fill)\n        dt=min(dt,tEnd/PLOT_POINTS)\n        dt=min(dt,tEnd-t)\n        if not (dt>0): break\n        m_next=rk4_mass(m,dt)\n        if not (m_next>m): break\n        if m_next>=m_stop:\n            lo=0.0; hi=dt\n            for _ in range(60):\n                mid=0.5*(lo+hi)\n                if rk4_mass(m,mid)>=m_stop: hi=mid\n                else: lo=mid\n            m=m_stop; t+=hi; n+=1; break\n        m=m_next; t+=dt; n+=1\n    T,p=tank_state(m); q,_,_=gas_orifice(ps,Ts,p,Cd,A,gamma,R); peak=max(peak,q)\n    return {'p_final':p,'T_final':T,'rho_final':m/V,'m_admitted':m-m0,'mdot_final':q,'mdot_peak':peak,'elapsed':t}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same equations used by the browser tool.'},selftest:{tolerance:1e-12,note:'Browser and exported Python evaluate the same equations, the same transient-sized step rule, RK4 stage order and terminal-event bisection; tolerance only covers floating-point implementation differences.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["T", "p", "rho", "mdot"],accepts:["T", "p", "A"],build:function(){if(!last)return null;return {quantities:{T:{value:last.T,unit:'K'},p:{value:last.p,unit:'Pa'},rho:{value:last.rho,unit:'kg/m3'},mdot:{value:last.mdot,unit:'kg/s'}}};},apply:function(p){var q=p&&p.quantities||{},accepted=[],ignored=[],refused=[];var take=function(k,put){var o=q[k];if(!o)return;var v=o.value;if(!hoOk(k,v,state)){refused.push(hoRefusal(k,v,state));return;}put(v);accepted.push(k);};take('T',function(v){state.TSupply=v;});take('p',function(v){state.pSupply=v;});take('A',function(v){state.A=v;});Object.keys(q).forEach(function(k){if(HO_KEYS.indexOf(k)<0)ignored.push(k);});refused.forEach(hoSay);last=solve(state);if(ui){ui.sync();ui.run();}return {accepted:accepted,ignored:ignored};}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

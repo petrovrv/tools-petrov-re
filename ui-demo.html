@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UI framework reference — Pipe Pressure Drop</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-09-11.pl",
+  "id": "uidemo",
+  "file": "ui-demo.html",
+  "listed": false,
+  "category": "thermo",
+  "order": 999,
+  "title": {"en":"Pipe Pressure Drop","uk":"Втрати тиску в трубі","de":"Rohrdruckverlust","nl":"Drukval in leiding","fr":"Perte de charge en conduite","es":"Pérdida de carga en tubería","pl":"Strata ciśnienia w rurociągu"},
+  "summary": {"en":"Reference implementation of the v3 UI framework: Darcy-Weisbach pressure drop for a single round pipe.","uk":"Еталонна реалізація UI-фреймворка v3.","de":"Referenzimplementierung des v3-UI-Frameworks.","nl":"Referentie-implementatie van het v3 UI-framework.","fr":"Implémentation de référence du framework UI v3.","es":"Implementación de referencia del framework UI v3.","pl":"Referencyjna implementacja frameworku UI v3."},
+  "description": {"en":"Shows the shell, the placement law, fields with units, results states, learn mode and the stage sizing rules.","uk":"Демонструє оболонку, закон розміщення, поля з одиницями, стани результатів, режим пояснень.","de":"Zeigt Shell, Platzierungsregeln, Felder mit Einheiten, Ergebniszustände und Lernmodus.","nl":"Toont de shell, de plaatsingsregels, velden met eenheden, resultaatstatussen en uitlegmodus.","fr":"Montre la coque, la loi de placement, les champs avec unités, les états de résultat et le mode explication.","es":"Muestra el armazón, la ley de colocación, los campos con unidades, los estados de resultado y el modo explicación.","pl":"Pokazuje powłokę, zasadę rozmieszczenia, pola z jednostkami, stany wyników i tryb wyjaśnień."},
+  "status": "prototype",
+  "independent_validation": false,
+  "limitations": {"en":"Reference implementation for the UI framework. Steady incompressible flow, Colebrook-White friction factor, no minor losses beyond the single K value.","uk":"Еталонна реалізація для UI-фреймворка.","de":"Referenzimplementierung für das UI-Framework.","nl":"Referentie-implementatie voor het UI-framework.","fr":"Implémentation de référence pour le framework UI.","es":"Implementación de referencia para el framework de interfaz.","pl":"Implementacja referencyjna dla frameworku interfejsu."},
+  "intended_use": "education",
+  "catalog_languages": ["en","uk","de","nl","fr","es","pl"],
+  "tool_languages": ["en","uk","de","nl","fr","es","pl"],
+  "dependencies": [],
+  "network_access": {"mode":"none"},
+  "validation": {"basis":{"en":"None. This page exists to demonstrate the UI layer."},"independent_validation":false,"benchmarks":[]},
+  "report": {"pdf": true, "source_attribution": true},
+  "python_export": {"supported": true, "requires": []},
+  "handoff": {"provides":["dp","Vdot","D","L","Re","f_darcy"],"accepts":["Vdot","D","L"]},
+  "state_codec": {"permalink": true, "record": "tools.petrov.re/calculation-record/v1"},
+  "ui": {"framework": "tools.petrov.re/ui/v1", "level": 3}
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------------------------------------------------------- physics */
+  var RHO = 998.2, MU = 1.002e-3;   /* water at 20 C */
+
+  function colebrook(Re, relRough) {
+    if (Re < 2300) return 64 / Math.max(Re, 1e-6);
+    var f = 0.02;
+    for (var i = 0; i < 60; i++) {
+      var rhs = -2 * Math.log10(relRough / 3.7 + 2.51 / (Re * Math.sqrt(f)));
+      var next = 1 / (rhs * rhs);
+      if (Math.abs(next - f) < 1e-12) { f = next; break; }
+      f = next;
+    }
+    return f;
+  }
+
+  function solve(s) {
+    var D = s.D, L = s.L, Q = s.Vdot, k = s.k, K = s.K;
+    var A = Math.PI * D * D / 4;
+    var v = Q / A;
+    var Re = RHO * v * D / MU;
+    var f = colebrook(Re, k / D);
+    var dpFric = f * (L / D) * RHO * v * v / 2;
+    var dpMinor = K * RHO * v * v / 2;
+    var dp = dpFric + dpMinor;
+    return { A: A, v: v, Re: Re, f: f, dpFric: dpFric, dpMinor: dpMinor, dp: dp,
+             head: dp / (RHO * 9.80665), power: dp * Q };
+  }
+
+  /* ------------------------------------------------------------------ state */
+  var DEFAULTS = { D: 0.1, L: 100, Vdot: 0.02, k: 4.5e-5, K: 3.5, regime: 'auto' };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  /* ------------------------------------------------------------------- boot */
+  function boot() {
+    if (!window.DiagramUI || DiagramUI.api !== 'tools.petrov.re/ui/v1') {
+      document.body.innerHTML = '<p style="font:15px system-ui;padding:24px">diagram-ui.js v1 is required.</p>';
+      return;
+    }
+
+    var ui = DiagramUI.app({
+      id: 'uidemo',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      subtitle: T('Darcy-Weisbach, water at 20 °C',
+                  'Дарсі–Вейсбаха, вода 20 °C',
+                  'Darcy-Weisbach, Wasser 20 °C',
+                  'Darcy-Weisbach, water 20 °C',
+                  'Darcy-Weisbach, eau à 20 °C',
+                  'Darcy-Weisbach, agua a 20 °C',
+                  'Darcy-Weisbach, woda 20 °C'),
+
+      learn: {
+        version: 1,
+        intro: {
+          title: T('What this tool does', 'Що робить цей інструмент', 'Was dieses Werkzeug tut',
+                   'Wat deze tool doet', 'Ce que fait cet outil', 'Qué hace esta herramienta', 'Co robi to narzędzie'),
+          body: T('It computes the steady pressure drop along one round pipe carrying water, from the Darcy-Weisbach equation with a Colebrook-White friction factor. Set the geometry and the flow; the result updates as you type.',
+                  'Обчислює усталені втрати тиску вздовж однієї круглої труби з водою за рівнянням Дарсі–Вейсбаха.',
+                  'Berechnet den stationären Druckverlust in einem runden Rohr nach Darcy-Weisbach.',
+                  'Berekent het stationaire drukverlies in een ronde leiding volgens Darcy-Weisbach.',
+                  'Calcule la perte de charge stationnaire dans une conduite ronde selon Darcy-Weisbach.',
+                  'Calcula la pérdida de carga estacionaria en una tubería según Darcy-Weisbach.',
+                  'Oblicza ustaloną stratę ciśnienia w jednej okrągłej rurze wg równania Darcy’ego–Weisbacha.')
+        },
+        topics: {
+          diameter: {
+            title: T('Inner diameter', 'Внутрішній діаметр', 'Innendurchmesser', 'Binnendiameter', 'Diamètre intérieur', 'Diámetro interior', 'Średnica wewnętrzna'),
+            body: T('The bore the fluid actually sees, not the nominal size. Pressure drop scales roughly with the fifth power of the diameter at fixed flow, so this is the single most sensitive input on the page.',
+                    'Реальний внутрішній діаметр, а не номінальний розмір.',
+                    'Der tatsächliche lichte Durchmesser, nicht die Nennweite.',
+                    'De werkelijke inwendige maat, niet de nominale maat.',
+                    'Le diamètre réellement vu par le fluide, non la taille nominale.',
+                    'El diámetro real que ve el fluido, no el nominal.',
+                    'Rzeczywisty prześwit widziany przez płyn, a nie wymiar nominalny.')
+          },
+          roughness: {
+            title: T('Absolute roughness', 'Абсолютна шорсткість', 'Absolute Rauheit', 'Absolute ruwheid', 'Rugosité absolue', 'Rugosidad absoluta', 'Chropowatość bezwzględna'),
+            body: T('Height of the wall irregularities. 0.0015 mm for drawn copper, 0.045 mm for commercial steel, 0.26 mm for cast iron. It only matters in the turbulent regime.',
+                    'Висота нерівностей стінки. 0,045 мм — сталь, 0,26 мм — чавун.',
+                    'Höhe der Wandrauheiten. 0,045 mm Stahl, 0,26 mm Guss.',
+                    'Hoogte van de wandoneffenheden. 0,045 mm staal, 0,26 mm gietijzer.',
+                    'Hauteur des aspérités. 0,045 mm acier, 0,26 mm fonte.',
+                    'Altura de las irregularidades. 0,045 mm acero, 0,26 mm fundición.',
+                    'Wysokość nierówności ścianki. 0,045 mm stal, 0,26 mm żeliwo.')
+          },
+          minor: {
+            title: T('Minor loss coefficient', 'Коефіцієнт місцевих втрат', 'Beiwert der Einzelverluste', 'Weerstandscoëfficiënt', 'Coefficient de pertes singulières', 'Coeficiente de pérdidas locales', 'Współczynnik strat miejscowych'),
+            body: T('Sum of the K values of the bends, valves and fittings on the run. A 90° elbow is about 0.3, a fully open gate valve about 0.15, a sharp entry 0.5.',
+                    'Сума коефіцієнтів місцевих опорів на ділянці.',
+                    'Summe der K-Werte von Bögen, Armaturen und Formstücken.',
+                    'Som van de K-waarden van bochten, appendages en fittingen.',
+                    'Somme des K des coudes, vannes et raccords.',
+                    'Suma de los K de codos, válvulas y accesorios.',
+                    'Suma współczynników K kolan, armatury i kształtek na odcinku.')
+          },
+          reynolds: {
+            title: T('Reynolds number', 'Число Рейнольдса', 'Reynolds-Zahl', 'Reynoldsgetal', 'Nombre de Reynolds', 'Número de Reynolds', 'Liczba Reynoldsa'),
+            body: T('Below 2300 the flow is laminar and the friction factor is 64/Re, independent of roughness. Above about 4000 it is turbulent and roughness dominates. In between the correlation is an interpolation, not a measurement.',
+                    'Нижче 2300 — ламінарний режим, вище ~4000 — турбулентний.',
+                    'Unter 2300 laminar, über etwa 4000 turbulent.',
+                    'Onder 2300 laminair, boven circa 4000 turbulent.',
+                    'En dessous de 2300 laminaire, au-dessus de 4000 turbulent.',
+                    'Por debajo de 2300 laminar, por encima de 4000 turbulento.',
+                    'Poniżej 2300 przepływ laminarny, powyżej około 4000 turbulentny.')
+          },
+          curve: {
+            title: T('System curve', 'Характеристика системи', 'Anlagenkennlinie', 'Systeemkarakteristiek', 'Courbe du réseau', 'Curva del sistema', 'Charakterystyka instalacji'),
+            body: T('Pressure drop against flow for the geometry you set. The marker is the current operating point. In turbulent flow the curve is close to quadratic.',
+                    'Залежність втрат тиску від витрати для заданої геометрії.',
+                    'Druckverlust über dem Volumenstrom für die eingestellte Geometrie.',
+                    'Drukval tegen debiet voor de ingestelde geometrie.',
+                    'Perte de charge en fonction du débit pour la géométrie choisie.',
+                    'Pérdida de carga frente al caudal para la geometría fijada.',
+                    'Strata ciśnienia w funkcji przepływu dla zadanej geometrii.')
+          }
+        },
+        tour: [
+          { topic: 'diameter', focus: '[data-dgu-field="f-D"]' },
+          { topic: 'roughness', focus: '[data-dgu-field="f-k"]' },
+          { topic: 'reynolds',  focus: '.dgu-r-results' },
+          { topic: 'curve',     focus: '.dgu-stage' }
+        ]
+      },
+
+      panels: [{
+        id: 'geometry',
+        slot: 'inputs',
+        title: T('Pipe', 'Труба', 'Rohr', 'Leiding', 'Conduite', 'Tubería', 'Rura'),
+        fields: [
+          { id: 'f-D', key: 'D', type: 'number', unit: 'm', label: T('Inner diameter','Внутрішній діаметр','Innendurchmesser','Binnendiameter','Diamètre intérieur','Diámetro interior','Średnica wewnętrzna'),
+            min: 0.005, max: 3, learn: 'diameter', required: true },
+          { id: 'f-L', key: 'L', type: 'number', unit: 'm', display: 'm', label: T('Length','Довжина','Länge','Lengte','Longueur','Longitud','Długość'),
+            min: 0.1, max: 100000, required: true },
+          { id: 'f-k', key: 'k', type: 'number', unit: 'm', label: T('Absolute roughness','Абсолютна шорсткість','Absolute Rauheit','Absolute ruwheid','Rugosité absolue','Rugosidad absoluta','Chropowatość bezwzględna'),
+            min: 0, max: 0.01, learn: 'roughness' }
+        ]
+      }, {
+        id: 'flow',
+        slot: 'inputs',
+        title: T('Flow', 'Потік', 'Strömung', 'Stroming', 'Écoulement', 'Flujo', 'Przepływ'),
+        fields: [
+          { id: 'f-Q', key: 'Vdot', type: 'number', unit: 'm3/s', label: T('Volume flow','Обʼємна витрата','Volumenstrom','Volumestroom','Débit volumique','Caudal volumétrico','Strumień objętości'),
+            min: 1e-5, max: 10, required: true },
+          { id: 'f-K', key: 'K', type: 'range', min: 0, max: 40, step: 0.1, learn: 'minor',
+            label: T('Minor losses, sum of K','Місцеві втрати, сума K','Einzelverluste, Summe K','Weerstanden, som K','Pertes singulières, somme K','Pérdidas locales, suma K','Straty miejscowe, suma K') }
+        ],
+        actions: [],
+        actionsAlign: 'end'
+      }],
+
+      footer: function (host, app) {
+        var d = document.createElement('details');
+        d.innerHTML = '<summary>' + DiagramUI.esc(DiagramUI.pick(
+          T('Model and limitations','Модель та обмеження','Modell und Grenzen','Model en beperkingen','Modèle et limites','Modelo y límites','Model i ograniczenia'), app.lang)) + '</summary>' +
+          '<p>dp = f (L/D) rho v^2 / 2 + K rho v^2 / 2, with f from Colebrook-White above Re = 2300 and 64/Re below it. ' +
+          'Water properties are fixed at 20 °C (rho = 998.2 kg/m3, mu = 1.002e-3 Pa s). No thermal effects, no two-phase flow, no transients.</p>';
+        host.appendChild(d);
+      },
+
+      on: {
+        compute: function (s) {
+          last = solve(s);
+          var lang = DiagramUI.current ? DiagramUI.current.lang : 'en';
+          var tone = last.v > 3 ? 'bad' : (last.v > 2 ? 'warn' : 'ok');
+          if (stage) stage.schedule();
+          return {
+            verdict: {
+              tone: tone,
+              text: DiagramUI.pick(
+                last.v > 3
+                  ? T('Velocity is above 3 m/s: noise and erosion are likely.','Швидкість понад 3 м/с: ймовірні шум та ерозія.','Geschwindigkeit über 3 m/s: Geräusch und Erosion wahrscheinlich.','Snelheid boven 3 m/s: geluid en erosie waarschijnlijk.','Vitesse supérieure à 3 m/s : bruit et érosion probables.','Velocidad superior a 3 m/s: ruido y erosión probables.','Prędkość powyżej 3 m/s: prawdopodobny hałas i erozja.')
+                  : T('Velocity is within the usual design range.','Швидкість у звичайному проєктному діапазоні.','Geschwindigkeit im üblichen Auslegungsbereich.','Snelheid binnen het gebruikelijke ontwerpbereik.','Vitesse dans la plage de dimensionnement usuelle.','Velocidad dentro del rango habitual de diseño.','Prędkość mieści się w zwykłym zakresie projektowym.'), lang)
+            },
+            tiles: [
+              { label: T('Pressure drop','Втрати тиску','Druckverlust','Drukval','Perte de charge','Pérdida de carga','Strata ciśnienia'), value: last.dp, unit: 'Pa', tone: tone },
+              { label: T('Velocity','Швидкість','Geschwindigkeit','Snelheid','Vitesse','Velocidad','Prędkość'), value: last.v, precision: 2, hint: 'm/s', tone: tone },
+              { label: 'Reynolds', value: last.Re, learn: 'reynolds', precision: 0 },
+              { label: T('Friction factor','Коефіцієнт тертя','Reibungsbeiwert','Wrijvingsfactor','Coefficient de frottement','Factor de fricción','Współczynnik tarcia'), value: last.f, precision: 4, headline: false },
+              { label: T('Head loss','Втрати напору','Druckhöhenverlust','Opvoerhoogteverlies','Perte de charge en hauteur','Pérdida de altura','Strata wysokości ciśnienia'), value: last.head, precision: 2, hint: 'm w.c.', headline: false },
+              { label: T('Hydraulic power','Гідравлічна потужність','Hydraulische Leistung','Hydraulisch vermogen','Puissance hydraulique','Potencia hidráulica','Moc hydrauliczna'), value: last.power, unit: 'W', headline: false }
+            ],
+            tables: [{
+              title: T('Split of the loss','Розподіл втрат','Aufteilung des Verlusts','Verdeling van het verlies','Répartition de la perte','Reparto de la pérdida','Podział strat'),
+              head: [T('Term','Складова','Term','Term','Terme','Término','Składnik'), 'Pa', '%'],
+              rows: [
+                [DiagramUI.pick(T('Wall friction','Тертя об стінку','Wandreibung','Wandwrijving','Frottement de paroi','Fricción de pared','Tarcie o ściankę'), lang), last.dpFric, 100 * last.dpFric / last.dp],
+                [DiagramUI.pick(T('Fittings','Місцеві опори','Formstücke','Fittingen','Raccords','Accesorios','Kształtki'), lang), last.dpMinor, 100 * last.dpMinor / last.dp]
+              ]
+            }]
+          };
+        }
+      }
+    });
+
+    /* examples: always the top of the inputs column, always under that name */
+    ui.examples([
+      { label: T('Domestic riser','Побутовий стояк','Steigleitung','Stijgleiding','Colonne montante','Montante doméstico','Pion domowy'),
+        note: 'DN25 copper, 12 m, 0.5 l/s',
+        state: { D: 0.025, L: 12, Vdot: 0.0005, k: 1.5e-6, K: 6, regime: 'auto' } },
+      { label: T('District heating branch','Гілка теплопостачання','Fernwärmestrang','Stadsverwarmingstak','Antenne de chauffage urbain','Ramal de calefacción','Odgałęzienie ciepłownicze'),
+        note: 'DN100 steel, 400 m, 20 l/s',
+        state: { D: 0.1, L: 400, Vdot: 0.02, k: 4.5e-5, K: 12, regime: 'auto' } },
+      { label: T('Laminar case','Ламінарний випадок','Laminarer Fall','Laminair geval','Cas laminaire','Caso laminar','Przypadek laminarny'),
+        note: 'DN15, 3 m, 0.01 l/s',
+        state: { D: 0.015, L: 3, Vdot: 1e-5, k: 1.5e-6, K: 0.5, regime: 'auto' } }
+    ]);
+
+    /* reset lives in the inputs footer, per the placement law */
+    ui.panel({
+      slot: 'inputs',
+      id: 'dgu-reset-row',
+      render: function (box) {
+        var row = document.createElement('div');
+        row.className = 'dgu-panel-actions';
+        row.appendChild(ui.actionButton(ui.resetAction()));
+        box.appendChild(row);
+      }
+    });
+
+    /* the stage owns its own sizing */
+    var stage = ui.stage({
+      caption: T('System curve — pressure drop against flow','Характеристика системи','Anlagenkennlinie','Systeemkarakteristiek','Courbe du réseau','Curva del sistema','Charakterystyka instalacji'),
+      minHeight: 300,
+      a11y: function () {
+        if (!last) return '';
+        return 'System curve. Operating point: ' + DiagramUI.fmt(state.Vdot * 3600) +
+               ' cubic metres per hour at ' + DiagramUI.fmt(last.dp / 1000) + ' kilopascal.';
+      },
+      render: function (size, st) {
+        var ctx = st.canvas();
+        var w = size.w, h = size.h, pad = size.density === 'coarse' ? 38 : 52;
+        var cs = getComputedStyle(document.documentElement);
+        var ink = cs.getPropertyValue('--ink').trim() || '#111';
+        var muted = cs.getPropertyValue('--muted').trim() || '#777';
+        var line = cs.getPropertyValue('--line').trim() || '#ddd';
+        var accent = cs.getPropertyValue('--accent').trim() || '#36e';
+        ctx.clearRect(0, 0, w, h);
+
+        var qmax = Math.max(state.Vdot * 2, 1e-4), pts = [], i;
+        for (i = 0; i <= 120; i++) {
+          var q = qmax * i / 120;
+          pts.push([q, q > 0 ? solve({ D: state.D, L: state.L, Vdot: q, k: state.k, K: state.K }).dp : 0]);
+        }
+        var pmax = 0;
+        pts.forEach(function (p) { if (isFinite(p[1])) pmax = Math.max(pmax, p[1]); });
+        pmax = pmax || 1;
+        var X = function (q) { return pad + (w - pad - 14) * (q / qmax); };
+        var Y = function (p) { return h - pad + 4 - (h - pad - 18) * (p / pmax); };
+
+        /* axes, ticks at the framework's density */
+        ctx.strokeStyle = line; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad, 12); ctx.lineTo(pad, h - pad + 4); ctx.lineTo(w - 10, h - pad + 4); ctx.stroke();
+        ctx.font = '400 12px ' + (cs.getPropertyValue('--font').trim() || 'sans-serif');
+        ctx.fillStyle = muted;
+        DiagramUI.ticks(0, qmax * 3600, w - pad, size.density).forEach(function (t) {
+          var x = X(t / 3600);
+          ctx.beginPath(); ctx.moveTo(x, h - pad + 4); ctx.lineTo(x, h - pad + 8); ctx.stroke();
+          ctx.textAlign = 'center'; ctx.fillText(DiagramUI.fmt(t, { precision: 0 }), x, h - pad + 22);
+        });
+        DiagramUI.ticks(0, pmax / 1000, h - pad, size.density).forEach(function (t) {
+          var y = Y(t * 1000);
+          ctx.beginPath(); ctx.moveTo(pad - 4, y); ctx.lineTo(pad, y); ctx.stroke();
+          ctx.textAlign = 'right'; ctx.fillText(DiagramUI.fmt(t, { precision: 0 }), pad - 8, y + 4);
+        });
+        ctx.textAlign = 'left';
+        ctx.fillText('m3/h', pad + 2, h - 8);
+        ctx.fillText('kPa', 4, 14);
+
+        ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.beginPath();
+        pts.forEach(function (p, j) { var x = X(p[0]), y = Y(p[1]); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+        ctx.stroke();
+
+        if (last) {
+          var px = X(state.Vdot), py = Y(last.dp);
+          ctx.fillStyle = accent;
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, 6.2832); ctx.fill();
+          if (size.density !== 'coarse') {
+            ctx.fillStyle = ink;
+            ctx.fillText(DiagramUI.fmt(last.dp / 1000, { precision: 1 }) + ' kPa', Math.min(px + 10, w - 90), Math.max(py - 8, 20));
+          }
+        }
+      }
+    });
+
+    ui.ready();
+
+    /* the data layer stays with diagram-common.js, and init is unconditional */
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'uidemo',
+        file: 'ui-demo.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); ui.sync(); ui.run(); }
+        },
+        record: function () {
+          if (!last) return null;
+          return {
+            inputs: { D: state.D, L: state.L, Vdot: state.Vdot, k: state.k, K: state.K },
+            outputs: { dp: last.dp, v: last.v, Re: last.Re, f: last.f, head: last.head, power: last.power },
+            units: { D: 'm', L: 'm', Vdot: 'm3/s', k: 'm', dp: 'Pa', v: 'm/s', head: 'm', power: 'W' },
+            model: { equations: ['dp = f (L/D) rho v^2/2 + K rho v^2/2', 'Colebrook-White for f, Re > 2300'],
+                     ranges: ['water at 20 C'], notes: ['reference implementation of the v3 UI framework'] },
+            warnings: last.v > 3 ? ['velocity above 3 m/s'] : []
+          };
+        },
+        handoff: {
+          provides: ['dp', 'Vdot', 'D', 'L', 'Re', 'f_darcy'],
+          accepts: ['Vdot', 'D', 'L'],
+          build: function () {
+            if (!last) return null;
+            return { quantities: {
+              dp: { value: last.dp, unit: 'Pa' }, Vdot: { value: state.Vdot, unit: 'm3/s' },
+              D: { value: state.D, unit: 'm' }, L: { value: state.L, unit: 'm' },
+              Re: { value: last.Re, unit: '' }, f_darcy: { value: last.f, unit: '' } } };
+          },
+          apply: function (p) {
+            var q = p && p.quantities || {};
+            ['Vdot', 'D', 'L'].forEach(function (k) { if (q[k]) state[k] = q[k].value; });
+            ui.sync(); ui.run();
+          }
+        }
+      });
+    }
+
+    window.__uidemo = { ui: ui, state: state, solve: solve };
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

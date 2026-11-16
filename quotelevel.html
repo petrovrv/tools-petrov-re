@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subcontractor &amp; Supplier Quote Levelling</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-15.quotelevel-1.1",
+  "id": "quotelevel",
+  "file": "quotelevel.html",
+  "listed": true,
+  "category": "tendering",
+  "order": 50,
+  "title": {
+    "en": "Subcontractor & Supplier Quote Levelling",
+    "uk": "Вирівнювання пропозицій субпідрядників і постачальників",
+    "de": "Preisspiegel für Nachunternehmer & Lieferanten",
+    "nl": "Prijsvergelijking onderaannemers & leveranciers",
+    "fr": "Comparatif des offres sous-traitants & fournisseurs",
+    "es": "Comparativo de ofertas de subcontratistas y proveedores",
+    "pl": "Porównanie ofert podwykonawców i dostawców"
+  },
+  "summary": {
+    "en": "Which quote is really cheapest? Fills every quote's scope gaps with plugs (own estimate, or the highest or mean price the other bidders gave), adds priced options, lands each quote on site in euro by its Incoterms 2020 rule with duty on the customs value, prices advances and stated commercial differences, ranks on paper and levelled, and shows how far your plugs may be wrong before the winner changes.",
+    "uk": "Яка пропозиція насправді найдешевша? Заповнює прогалини в обсязі кожної пропозиції доцінками (власна оцінка або найвища чи середня ціна інших учасників), додає оцінені опції, зводить кожну пропозицію до доставки на майданчик у євро за її правилом Incoterms 2020 з митом на митну вартість, оцінює аванси й заявлені комерційні відмінності, ранжує на папері й після вирівнювання і показує, наскільки можуть помилятися ваші доцінки, перш ніж зміниться переможець.",
+    "de": "Welches Angebot ist wirklich das günstigste? Schließt die Leistungslücken jedes Angebots mit Ansätzen (eigener Ansatz oder höchster bzw. mittlerer Preis der anderen Bieter), addiert bepreiste Optionen, rechnet jedes Angebot nach seiner Incoterms-2020-Klausel frei Baustelle in Euro mit Zoll auf den Zollwert, bewertet Anzahlungen und ausgewiesene kaufmännische Unterschiede, rangiert nach Papierpreis und nivelliert und zeigt, wie weit Ihre Ansätze danebenliegen dürfen, bevor der Gewinner wechselt.",
+    "nl": "Welke offerte is echt de goedkoopste? Vult de scopegaten van elke offerte met aanvullingen (eigen raming of de hoogste of gemiddelde prijs van de andere inschrijvers), telt geprijsde opties op, zet elke offerte volgens haar Incoterms 2020-regel geleverd op de bouwplaats in euro met invoerrechten op de douanewaarde, prijst voorschotten en vermelde commerciële verschillen, rangschikt op papier en genivelleerd en toont hoever uw aanvullingen mogen afwijken voordat de winnaar verandert.",
+    "fr": "Quelle offre est vraiment la moins chère ? Comble les lacunes de périmètre de chaque offre par des compléments (estimation propre, ou prix le plus élevé ou moyen des autres soumissionnaires), ajoute les options chiffrées, rend chaque offre chantier en euros selon sa règle Incoterms 2020 avec droits sur la valeur en douane, chiffre les avances et les écarts commerciaux déclarés, classe sur le papier et après nivellement et montre de combien vos compléments peuvent se tromper avant que le gagnant change.",
+    "es": "¿Qué oferta es realmente la más barata? Cubre los huecos de alcance de cada oferta con complementos (estimación propia, o el precio más alto o medio de los demás licitadores), suma opciones cotizadas, pone cada oferta en obra en euros según su regla Incoterms 2020 con arancel sobre el valor en aduana, valora anticipos y diferencias comerciales declaradas, clasifica sobre el papel y homogeneizado y muestra cuánto pueden errar sus complementos antes de que cambie la ganadora.",
+    "pl": "Która oferta jest naprawdę najtańsza? Uzupełnia luki w zakresie każdej oferty (własna wycena albo najwyższa lub średnia cena pozostałych oferentów), dodaje wycenione opcje, sprowadza każdą ofertę do dostawy na budowę w euro według jej reguły Incoterms 2020 z cłem od wartości celnej, wycenia zaliczki i jawne różnice handlowe, układa ranking na papierze i po wyrównaniu oraz pokazuje, o ile mogą mylić się Twoje uzupełnienia, zanim zmieni się zwycięzca."
+  },
+  "description": {
+    "en": "For the contractor (or a supplier levelling its own sub-suppliers) at life-cycle stage 5, after the RFQs to subcontractors and suppliers. Scope items come from your list or from a technical requisition of the project package (scope lines, FAT/SAT, spares, vendor documents). Per quote: price, currency and rate, Incoterms 2020 rule, EU or non-EU origin, transport legs, advance and a stated commercial adjustment; per item the bidder's status (included, excluded, unclear, priced separately). Levelled cost = price in € + options + plugs + logistics the buyer still pays to land the goods on site + cost of the advance + adjustment; duty on the customs value per Union Customs Code art. 70–72. Ranks on paper and levelled, scope matrix, logistics per leg, the leader's plug share and the range of a common plug factor in which the leader holds. Exports CSV, JSON and the quotes block of the tender project file.",
+    "uk": "Для підрядника (або постачальника, що вирівнює пропозиції власних постачальників) на етапі 5 життєвого циклу, після запитів субпідрядникам і постачальникам. Позиції обсягу — з вашого списку або з технічних вимог пакета проєкту (рядки обсягу, FAT/SAT, запчастини, документація постачальника). Для кожної пропозиції: ціна, валюта й курс, правило Incoterms 2020, походження з ЄС чи ні, ділянки перевезення, аванс і заявлене комерційне коригування; для кожної позиції — статус учасника (включено, виключено, неясно, окрема ціна). Вирівняна вартість = ціна в € + опції + доцінки + логістика, яку покупець ще оплачує до майданчика + вартість авансу + коригування; мито на митну вартість за ст. 70–72 Митного кодексу Союзу. Ранжування на папері й після вирівнювання, матриця обсягу, логістика за ділянками, частка доцінок лідера й діапазон спільного множника доцінок, у якому лідер тримається. Експорт CSV, JSON і блоку пропозицій файлу тендерного проєкту.",
+    "de": "Für den Auftragnehmer (oder einen Lieferanten, der seine Unterlieferanten vergleicht) in Lebenszyklus-Phase 5, nach den Anfragen an Nachunternehmer und Lieferanten. Leistungspositionen aus Ihrer Liste oder aus einer technischen Anfragespezifikation des Projektpakets (Umfangszeilen, FAT/SAT, Ersatzteile, Herstellerdokumente). Je Angebot: Preis, Währung und Kurs, Incoterms-2020-Klausel, EU- oder Nicht-EU-Ursprung, Transportabschnitte, Anzahlung und eine ausgewiesene kaufmännische Korrektur; je Position der Status des Bieters (enthalten, ausgeschlossen, unklar, separat bepreist). Nivellierte Kosten = Preis in € + Optionen + Ansätze + Logistik, die der Käufer bis zur Baustelle noch trägt + Kosten der Anzahlung + Korrektur; Zoll auf den Zollwert nach Art. 70–72 Zollkodex der Union. Rang nach Papierpreis und nivelliert, Leistungsmatrix, Logistik je Abschnitt, Ansatzanteil des Ersten und der Bereich eines gemeinsamen Ansatzfaktors, in dem der Erste vorn bleibt. Export als CSV, JSON und Angebotsblock der Vergabeprojektdatei.",
+    "nl": "Voor de aannemer (of een leverancier die zijn eigen toeleveranciers vergelijkt) in fase 5 van de levenscyclus, na de prijsaanvragen aan onderaannemers en leveranciers. Scope-items uit uw lijst of uit een technische aanvraagspecificatie van het projectpakket (scopelijnen, FAT/SAT, reserveonderdelen, leveranciersdocumenten). Per offerte: prijs, munt en koers, Incoterms 2020-regel, EU- of niet-EU-oorsprong, transporttrajecten, voorschot en een vermelde commerciële correctie; per item de status van de inschrijver (inbegrepen, uitgesloten, onduidelijk, apart geprijsd). Genivelleerde kost = prijs in € + opties + aanvullingen + logistiek die de koper nog betaalt tot op de bouwplaats + kost van het voorschot + correctie; invoerrechten op de douanewaarde volgens art. 70–72 van het douanewetboek van de Unie. Rangschikking op papier en genivelleerd, scopematrix, logistiek per traject, aandeel aanvullingen van de eerste en het bereik van een gemeenschappelijke factor waarin de eerste eerst blijft. Export naar CSV, JSON en het offerteblok van het aanbestedingsprojectbestand.",
+    "fr": "Pour l’entreprise (ou un fournisseur qui nivelle ses propres sous-fournisseurs) à l’étape 5 du cycle de vie, après les consultations de sous-traitants et fournisseurs. Postes du périmètre tirés de votre liste ou d’une réquisition technique du dossier projet (lignes de périmètre, FAT/SAT, pièces de rechange, documents fournisseur). Par offre : prix, devise et cours, règle Incoterms 2020, origine UE ou hors UE, tronçons de transport, avance et ajustement commercial déclaré ; par poste le statut du soumissionnaire (inclus, exclu, flou, chiffré à part). Coût nivelé = prix en € + options + compléments + logistique encore à charge de l’acheteur jusqu’au chantier + coût de l’avance + ajustement ; droits sur la valeur en douane selon les art. 70–72 du code des douanes de l’Union. Classement sur le papier et nivelé, matrice du périmètre, logistique par tronçon, part des compléments du premier et plage d’un facteur commun dans laquelle il reste premier. Export CSV, JSON et bloc des offres du fichier de projet de marché.",
+    "es": "Para el contratista (o un proveedor que homogeneiza a sus propios subproveedores) en la etapa 5 del ciclo de vida, tras las peticiones de oferta a subcontratistas y proveedores. Partidas de alcance de su lista o de una requisición técnica del paquete del proyecto (líneas de alcance, FAT/SAT, repuestos, documentos del proveedor). Por oferta: precio, divisa y tipo, regla Incoterms 2020, origen UE o no UE, tramos de transporte, anticipo y un ajuste comercial declarado; por partida el estado del licitador (incluido, excluido, ambiguo, cotizado aparte). Coste homogeneizado = precio en € + opciones + complementos + logística que el comprador aún paga hasta obra + coste del anticipo + ajuste; arancel sobre el valor en aduana según los art. 70–72 del código aduanero de la Unión. Clasificación sobre el papel y homogeneizada, matriz de alcance, logística por tramo, peso de complementos de la primera y rango de un factor común en el que se mantiene. Exporta CSV, JSON y el bloque de ofertas del archivo de proyecto de licitación.",
+    "pl": "Dla wykonawcy (lub dostawcy wyrównującego oferty własnych poddostawców) na etapie 5 cyklu życia, po zapytaniach do podwykonawców i dostawców. Pozycje zakresu z Twojej listy lub ze specyfikacji technicznej zapytania w pakiecie projektu (linie zakresu, FAT/SAT, części zamienne, dokumentacja dostawcy). Dla oferty: cena, waluta i kurs, reguła Incoterms 2020, pochodzenie z UE lub spoza UE, odcinki transportu, zaliczka i jawna korekta handlowa; dla pozycji status oferenta (zawarte, wyłączone, niejasne, wycenione osobno). Koszt wyrównany = cena w € + opcje + uzupełnienia + logistyka, którą kupujący nadal płaci do budowy + koszt zaliczki + korekta; cło od wartości celnej wg art. 70–72 unijnego kodeksu celnego. Ranking na papierze i po wyrównaniu, macierz zakresu, logistyka na odcinkach, udział uzupełnień lidera i zakres wspólnego mnożnika, w którym lider się utrzymuje. Eksport CSV, JSON i bloku ofert pliku projektu przetargowego."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Engineering and commercial analysis, not legal advice. Plugs, plug rule, unclear factor, duty rate, insurance and financing rate are the estimator's assumptions; transport legs are entered per quote, not computed; the cost split per Incoterms rule assumes the named place of C and D rules of any mode is the site and FCA is at the seller's premises; a D-rule price is taken as the customs value as quoted; exchange risk is not priced.",
+    "uk": "Інженерно-комерційний аналіз, не юридична консультація. Доцінки, правило доцінок, множник неясних позицій, ставка мита, страхування й ставка фінансування — припущення кошторисника; ділянки перевезення вводяться для кожної пропозиції, а не розраховуються; розподіл витрат за правилом Incoterms вважає, що названим місцем для правил C і D будь-яким транспортом є майданчик, а FCA — склад продавця; ціна за правилом D береться як митна вартість у тому вигляді, як заявлено; валютний ризик не оцінюється.",
+    "de": "Technisch-kaufmännische Analyse, keine Rechtsberatung. Ansätze, Ansatzregel, Unklar-Faktor, Zollsatz, Versicherung und Finanzierungssatz sind Annahmen des Kalkulators; Transportabschnitte werden je Angebot eingegeben, nicht berechnet; die Kostenaufteilung je Klausel nimmt an, dass der benannte Ort der C- und D-Klauseln für alle Transportarten die Baustelle ist und FCA beim Verkäufer liegt; ein D-Klausel-Preis wird als Zollwert wie angeboten genommen; das Währungsrisiko ist nicht bepreist.",
+    "nl": "Technisch-commerciële analyse, geen juridisch advies. Aanvullingen, aanvullingsregel, factor voor onduidelijke items, invoerrecht, verzekering en financieringsrente zijn aannames van de calculator; transporttrajecten worden per offerte ingevoerd, niet berekend; de kostenverdeling per regel neemt aan dat de benoemde plaats van C- en D-regels voor elke vervoerswijze de bouwplaats is en FCA bij de verkoper; een prijs onder een D-regel geldt als douanewaarde zoals geofferd; het wisselkoersrisico is niet geprijsd.",
+    "fr": "Analyse technique et commerciale, pas un avis juridique. Compléments, règle de complément, facteur des postes flous, taux de droit, assurance et taux de financement sont des hypothèses de l’estimateur ; les tronçons de transport sont saisis par offre, non calculés ; la répartition des coûts par règle suppose que le lieu convenu des règles C et D multimodales est le chantier et que FCA est chez le vendeur ; un prix en règle D est pris comme valeur en douane tel qu’offert ; le risque de change n’est pas chiffré.",
+    "es": "Análisis técnico y comercial, no asesoramiento jurídico. Complementos, regla de complemento, factor de ambiguas, arancel, seguro y tipo de financiación son hipótesis del estimador; los tramos de transporte se introducen por oferta, no se calculan; el reparto de costes por regla supone que el lugar designado de las reglas C y D multimodales es la obra y que FCA es en las instalaciones del vendedor; un precio en regla D se toma como valor en aduana tal como se ofertó; el riesgo de cambio no se valora.",
+    "pl": "Analiza techniczno-handlowa, nie porada prawna. Uzupełnienia, ich reguła, mnożnik pozycji niejasnych, stawka cła, ubezpieczenie i stopa finansowania to założenia kosztorysanta; odcinki transportu wpisuje się dla oferty, nie są liczone; podział kosztów wg reguły zakłada, że miejscem wskazanym reguł C i D dla każdego rodzaju transportu jest budowa, a FCA — zakład sprzedawcy; cenę w regule D przyjmuje się jako wartość celną w ofercie; ryzyko kursowe nie jest wyceniane."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "tnd-core.js",
+    "tnd-ql.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python reference (bench-src/ref/gen_quotelevel.py) that keeps its own table of the transport legs the buyer pays under each Incoterms 2020 rule, builds the customs value leg by leg per Union Customs Code art. 70–72, ranks by sorting and finds the leader's stability range by scanning and bisection; hand cases worked out by hand; preset findings checked in page and reference."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "quotelevel-levelling",
+        "reference": "bench-src/ref/gen_quotelevel.py — independent Python of the published method (own table of the legs the buyer pays per Incoterms 2020 rule, customs value leg by leg per UCC art. 70-72, ranks by sorting, leader stability by scan and bisection)",
+        "citations": [
+          "Regulation (EU) No 952/2013 (Union Customs Code) art. 70(1), 71(1)(e), 72, OJ L 269, 10.10.2013",
+          "ICC Incoterms 2020, ICC Publication 723E (rule structure)",
+          "Bid levelling of subcontract and supplier quotes (estimating practice)"
+        ],
+        "cases": 203,
+        "passed": 203,
+        "tolerance": "money values, shares and ranks relative 1e-9; stability range 1e-8; leaders, ranks and flags exact",
+        "run_at": "2026-11-15T09:16:00Z",
+        "artifact": "benchmarks/quotelevel.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "The levelling is exported as the calculation record and CSV; an independent Python reference of the same method lives in bench-src/ref/gen_quotelevel.py."
+  },
+  "handoff": {
+    "provides": [],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="tnd-core.js" defer></script>
+<script src="tnd-ql.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* page code of quotelevel.html (source: _tnd/quotelevel/page.js) */
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  var TOOL = 'quotelevel';
+  function lib() { return window.TndQl || null; }
+  function core() { return window.TndCore || null; }
+  var MAXI = 30, MAXQ = 8, MAXG = 240, MAXT = 8;
+  var INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP', 'site'];
+  var STATUSES = ['exc', 'unc', 'opt', 'inc'];
+  var LEGS = ['load', 'pre', 'main', 'ins', 'imp', 'onc', 'unload'];
+
+  /* percentages in percent in the state (6 = 6 %), money in euro (quote prices and amounts in the quote currency). Filled from the first preset at boot. */
+  var DEFAULTS = {
+    policy: 'allowance', unclear: 100, rate: 6, gapWarn: 10,
+    load: 0, ins: 0, duty: 0, impFix: 0, unload: 0,
+    items: [], quotes: [], terms: [], gaps: [],
+    pkgName: '', tenderRef: '', preparedBy: ''
+  };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null, ui = null, stage = null;
+
+  function pct(v) { return (+v || 0) / 100; }
+  /* lists are edited in place (the list fields keep a reference to the array) */
+  function setArr(t, k, arr) { if (!Array.isArray(t[k])) t[k] = []; t[k].length = 0; arr.forEach(function (x) { t[k].push(x); }); }
+  function assign(t, src) { Object.keys(src).forEach(function (k) { if (Array.isArray(src[k])) setArr(t, k, src[k]); else t[k] = src[k]; }); }
+  function engineInput(s) {
+    var items = (s.items || []).slice(0, MAXI).map(function (it, k) { return { id: String(it.id || 'I' + (k + 1)), name: it.name, allowance: +it.allowance || 0 }; });
+    var quotes = (s.quotes || []).slice(0, MAXQ).map(function (q, k) {
+      return { id: String(q.id || 'Q' + (k + 1)), name: q.name, price: q.price === '' || q.price == null ? NaN : +q.price, cur: String(q.cur || 'EUR').trim().toUpperCase() || 'EUR',
+               fx: q.fx === '' || q.fx == null ? NaN : +q.fx, incoterm: q.incoterm, eu: q.eu !== false, pre: 0, main: 0, onc: 0,
+               adv: 0, advMonths: 0, adj: 0, cells: {} };
+    });
+    /* the first quote with an id gets its terms and lines (the engine renames a repeated id to -2); a repeated terms or gap line is ignored and noted */
+    var byId = {}, dupRows = [], seenT = {}, seenG = {};
+    quotes.forEach(function (q) { if (!byId[q.id]) byId[q.id] = q; });
+    (s.terms || []).slice(0, MAXT).forEach(function (t) {
+      var q = byId[String(t.q)];
+      if (!q) return;
+      if (seenT[q.id]) { dupRows.push(q.id); return; }
+      seenT[q.id] = 1;
+      q.pre = +t.pre || 0; q.main = +t.main || 0; q.onc = +t.onc || 0; q.adv = pct(t.adv); q.advMonths = +t.months || 0; q.adj = +t.adj || 0;
+    });
+    (s.gaps || []).slice(0, MAXG).forEach(function (g) {
+      var q = byId[String(g.q)];
+      if (!q || STATUSES.indexOf(g.s) < 0) return;
+      var gk = q.id + '\u0000' + String(g.item);
+      if (seenG[gk]) { dupRows.push(q.id + '/' + String(g.item)); return; }
+      seenG[gk] = 1;
+      q.cells[String(g.item)] = { s: g.s, amt: g.amt === '' || g.amt == null || !isFinite(+g.amt) ? null : +g.amt };
+    });
+    return { policy: s.policy, unclear: pct(s.unclear), rate: pct(s.rate), gapWarn: pct(s.gapWarn),
+             load: +s.load || 0, ins: pct(s.ins), duty: pct(s.duty), impFix: +s.impFix || 0, unload: +s.unload || 0, items: items, quotes: quotes, dupRows: dupRows };
+  }
+  function solve(s) {
+    var B = lib();
+    if (!B) return { ok: false, errors: ['engine'] };
+    try { var inp = engineInput(s), r = B.analyse(inp); r.raw = inp; return r; }
+    catch (e) { return { ok: false, errors: ['exception'], msg: String(e && e.message || e) }; }
+  }
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var LANGS = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  function TF(fn) { var o = {}; LANGS.forEach(function (l) { o[l] = fn(l); }); return o; }
+  function lang() { try { var l = window.DiagramUI && DiagramUI.domainLang ? DiagramUI.domainLang() : 'en'; return LANGS.indexOf(l) >= 0 ? l : 'en'; } catch (e) { return 'en'; } }
+  var COMMA = { en: false, uk: true, de: true, nl: true, fr: true, es: true, pl: true };
+  function nf(v, l, d) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.fmt) return C.fmt(v, l, d == null ? 2 : d);
+    var s = v.toFixed(d == null ? 2 : d); return COMMA[l] ? s.replace('.', ',') : s;
+  }
+  function eur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.money) return C.money(v, 'EUR', l, 0);
+    return nf(v, l, 0) + ' €';
+  }
+  function keur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    if (Math.abs(v) >= 1e6) return nf(v / 1e6, l, 3) + ' M€';
+    if (Math.abs(v) >= 1e3) return nf(v / 1e3, l, 1) + ' k€';
+    return eur(v, l);
+  }
+  function pc(f, l, d) { return f == null || !isFinite(f) ? '—' : nf(100 * f, l, d == null ? 1 : d) + ' %'; }
+  function str(v, l) { return v && typeof v === 'object' ? (v[l] != null ? v[l] : v.en) : v; }
+
+  var S = {
+    subtitle: T('Which quote is really cheapest once scope gaps are filled and every quote is landed on site?',
+                'Яка пропозиція насправді найдешевша, коли прогалини в обсязі заповнено, а всі пропозиції зведено до доставки на майданчик?',
+                'Welches Angebot ist wirklich das günstigste, wenn Leistungslücken geschlossen und alle Angebote frei Baustelle verglichen werden?',
+                'Welke offerte is echt de goedkoopste zodra de scopegaten zijn ingevuld en elke offerte geleverd op de bouwplaats staat?',
+                'Quelle offre est vraiment la moins chère une fois les lacunes de périmètre comblées et toutes les offres rendues chantier ?',
+                '¿Qué oferta es realmente la más barata una vez cubiertos los huecos de alcance y puestas todas en obra?',
+                'Która oferta jest naprawdę najtańsza po uzupełnieniu luk w zakresie i sprowadzeniu wszystkich do dostawy na budowę?'),
+    pProject: T('Tender project', 'Тендерний проєкт', 'Vergabeprojekt', 'Aanbestedingsproject', 'Projet de marché', 'Proyecto de licitación', 'Projekt przetargowy'),
+    pItems: T('Scope items to level', 'Позиції обсягу для вирівнювання', 'Zu vergleichende Leistungspositionen', 'Te vergelijken scope-items', 'Postes du périmètre à niveler', 'Partidas de alcance a homogeneizar', 'Pozycje zakresu do wyrównania'),
+    pQuotes: T('Quotes', 'Пропозиції', 'Angebote', 'Offertes', 'Offres', 'Ofertas', 'Oferty'),
+    pGaps: T('Exclusions, qualifications and options', 'Виключення, застереження та опції', 'Ausschlüsse, Vorbehalte und Optionen', 'Uitsluitingen, voorbehouden en opties', 'Exclusions, réserves et options', 'Exclusiones, salvedades y opciones', 'Wyłączenia, zastrzeżenia i opcje'),
+    pLog: T('Logistics to site (package)', 'Логістика до майданчика (пакет)', 'Logistik bis Baustelle (Paket)', 'Logistiek tot bouwplaats (pakket)', 'Logistique jusqu’au chantier (lot)', 'Logística hasta obra (paquete)', 'Logistyka do budowy (pakiet)'),
+    pRules: T('Levelling rules (assumptions)', 'Правила вирівнювання (припущення)', 'Nivellierungsregeln (Annahmen)', 'Regels voor de vergelijking (aannames)', 'Règles de nivellement (hypothèses)', 'Reglas de homogeneización (hipótesis)', 'Zasady wyrównania (założenia)'),
+    pRec: T('Record', 'Запис', 'Protokoll', 'Verslag', 'Procès-verbal', 'Registro', 'Protokół'),
+    id: T('Id', 'Ід.', 'Id', 'Id', 'Id', 'Id', 'Id'),
+    iName: T('Scope item', 'Позиція обсягу', 'Leistungsposition', 'Scope-item', 'Poste', 'Partida', 'Pozycja'),
+    allowance: T('Own estimate €', 'Власна оцінка €', 'Eigener Ansatz €', 'Eigen raming €', 'Estimation propre €', 'Estimación propia €', 'Własna wycena €'),
+    addItem: T('Add item', 'Додати позицію', 'Position hinzufügen', 'Item toevoegen', 'Ajouter un poste', 'Añadir partida', 'Dodaj pozycję'),
+    qName: T('Bidder', 'Учасник', 'Bieter', 'Inschrijver', 'Soumissionnaire', 'Licitador', 'Oferent'),
+    price: T('Price', 'Ціна', 'Preis', 'Prijs', 'Prix', 'Precio', 'Cena'),
+    cur: T('Cur.', 'Вал.', 'Whg.', 'Munt', 'Dev.', 'Div.', 'Wal.'),
+    fx: T('€ per unit', '€ за од.', '€ je Einh.', '€ per eenh.', '€ par unité', '€ por unidad', '€ za jedn.'),
+    incoterm: T('Incoterms', 'Incoterms', 'Incoterms', 'Incoterms', 'Incoterms', 'Incoterms', 'Incoterms'),
+    eu: T('EU origin', 'Походження з ЄС', 'EU-Ursprung', 'EU-oorsprong', 'Origine UE', 'Origen UE', 'Pochodzenie UE'),
+    pre: T('Pre-carriage €', 'Довезення до порту €', 'Vorlauf €', 'Voortransport €', 'Pré-acheminement €', 'Precarriage €', 'Dowóz do portu €'),
+    main: T('Main carriage €', 'Основне перевезення €', 'Hauptlauf €', 'Hoofdtransport €', 'Transport principal €', 'Transporte principal €', 'Przewóz główny €'),
+    onc: T('On-carriage €', 'Доставка на майданчик €', 'Nachlauf €', 'Natransport €', 'Post-acheminement €', 'Transporte final €', 'Dowóz na budowę €'),
+    adv: T('Advance %', 'Аванс %', 'Anzahlung %', 'Voorschot %', 'Avance %', 'Anticipo %', 'Zaliczka %'),
+    months: T('Months', 'Місяців', 'Monate', 'Maanden', 'Mois', 'Meses', 'Miesięcy'),
+    adj: T('Commercial adj. €', 'Комерційне коригування €', 'Kaufm. Korrektur €', 'Commerciële correctie €', 'Ajustement commercial €', 'Ajuste comercial €', 'Korekta handlowa €'),
+    pTerms: T('Transport legs and payment terms per quote', 'Ділянки перевезення та умови оплати за пропозицією', 'Transportabschnitte und Zahlungsbedingungen je Angebot', 'Transporttrajecten en betalingsvoorwaarden per offerte', 'Tronçons de transport et conditions de paiement par offre', 'Tramos de transporte y condiciones de pago por oferta', 'Odcinki transportu i warunki płatności na ofertę'),
+    termsHint: T('One line per quote that needs it: transport legs in €, advance payment and a stated commercial adjustment (+ cost to you, − credit).', 'Один рядок на пропозицію, де це потрібно: ділянки перевезення в €, аванс і заявлене комерційне коригування (+ витрата для вас, − знижка).', 'Eine Zeile je Angebot, wo nötig: Transportabschnitte in €, Anzahlung und eine ausgewiesene kaufmännische Korrektur (+ Kosten für Sie, − Gutschrift).', 'Eén lijn per offerte waar nodig: transporttrajecten in €, voorschot en een vermelde commerciële correctie (+ kost voor u, − creditering).', 'Une ligne par offre si besoin : tronçons de transport en €, avance et ajustement commercial déclaré (+ coût pour vous, − avoir).', 'Una línea por oferta cuando haga falta: tramos de transporte en €, anticipo y un ajuste comercial declarado (+ coste para usted, − abono).', 'Jeden wiersz na ofertę, gdy potrzeba: odcinki transportu w €, zaliczka i jawna korekta handlowa (+ koszt dla Ciebie, − uznanie).'),
+    addTerms: T('Add line', 'Додати рядок', 'Zeile hinzufügen', 'Lijn toevoegen', 'Ajouter une ligne', 'Añadir línea', 'Dodaj wiersz'),
+    fHint: T('f = 1: plugs as entered', 'f = 1: доцінки як введено', 'f = 1: Ansätze wie eingegeben', 'f = 1: aanvullingen zoals ingevoerd', 'f = 1 : compléments tels que saisis', 'f = 1: complementos tal como se introdujeron', 'f = 1: uzupełnienia jak wpisano'),
+    addQuote: T('Add quote', 'Додати пропозицію', 'Angebot hinzufügen', 'Offerte toevoegen', 'Ajouter une offre', 'Añadir oferta', 'Dodaj ofertę'),
+    gQuote: T('Quote', 'Пропозиція', 'Angebot', 'Offerte', 'Offre', 'Oferta', 'Oferta'),
+    gItem: T('Item', 'Позиція', 'Position', 'Item', 'Poste', 'Partida', 'Pozycja'),
+    gStatus: T('Status', 'Статус', 'Status', 'Status', 'Statut', 'Estado', 'Status'),
+    gAmt: T('Amount (quote currency)', 'Сума (валюта пропозиції)', 'Betrag (Angebotswährung)', 'Bedrag (munt van de offerte)', 'Montant (devise de l’offre)', 'Importe (divisa de la oferta)', 'Kwota (waluta oferty)'),
+    addGap: T('Add exclusion / option', 'Додати виключення / опцію', 'Ausschluss / Option hinzufügen', 'Uitsluiting / optie toevoegen', 'Ajouter exclusion / option', 'Añadir exclusión / opción', 'Dodaj wyłączenie / opcję'),
+    gapsHint: T('Every item not listed here counts as included in the quote price.', 'Кожна позиція, якої тут немає, вважається включеною в ціну пропозиції.', 'Jede hier nicht aufgeführte Position gilt als im Angebotspreis enthalten.', 'Elk item dat hier niet staat, geldt als inbegrepen in de offerteprijs.', 'Tout poste non listé ici est réputé inclus dans le prix de l’offre.', 'Toda partida no listada aquí se considera incluida en el precio de la oferta.', 'Każda pozycja niewymieniona tutaj jest traktowana jako zawarta w cenie oferty.'),
+    st: {
+      exc: T('excluded', 'виключено', 'ausgeschlossen', 'uitgesloten', 'exclu', 'excluido', 'wyłączone'),
+      unc: T('unclear / qualified', 'неясно / із застереженням', 'unklar / mit Vorbehalt', 'onduidelijk / met voorbehoud', 'imprécis / avec réserve', 'ambiguo / con salvedad', 'niejasne / z zastrzeżeniem'),
+      opt: T('priced separately', 'окрема ціна', 'separat bepreist', 'apart geprijsd', 'chiffré à part', 'cotizado aparte', 'wycenione osobno'),
+      inc: T('included (itemised)', 'включено (з розбивкою)', 'enthalten (aufgeschlüsselt)', 'inbegrepen (uitgesplitst)', 'inclus (détaillé)', 'incluido (desglosado)', 'zawarte (rozbite)')
+    },
+    stShort: { exc: 'E', unc: '?', opt: 'O', inc: '✓' },
+    load: T('Loading and export formalities €', 'Завантаження та експортні формальності €', 'Verladung und Ausfuhrformalitäten €', 'Laden en uitvoerformaliteiten €', 'Chargement et formalités d’export €', 'Carga y trámites de exportación €', 'Załadunek i formalności wywozowe €'),
+    ins: T('Cargo insurance (% of price)', 'Страхування вантажу (% ціни)', 'Transportversicherung (% des Preises)', 'Transportverzekering (% van de prijs)', 'Assurance transport (% du prix)', 'Seguro de transporte (% del precio)', 'Ubezpieczenie ładunku (% ceny)'),
+    duty: T('Import duty (% of customs value)', 'Мито (% митної вартості)', 'Einfuhrzoll (% des Zollwerts)', 'Invoerrecht (% van de douanewaarde)', 'Droit de douane (% de la valeur en douane)', 'Arancel (% del valor en aduana)', 'Cło (% wartości celnej)'),
+    dutyHint: T('Rate of the HS code from TARIC; example value (assumption) until you enter yours.', 'Ставка коду ТН ЗЕД за TARIC; значення для прикладу (припущення), доки не введете свою.', 'Satz der HS-Position aus TARIC; Beispielwert (Annahme), bis Sie Ihren eingeben.', 'Tarief van de GS-code uit TARIC; voorbeeldwaarde (aanname) tot u de uwe invult.', 'Taux du code SH selon TARIC ; valeur d’exemple (hypothèse) tant que vous n’entrez pas le vôtre.', 'Tipo del código SA según TARIC; valor de ejemplo (hipótesis) hasta que introduzca el suyo.', 'Stawka kodu HS z TARIC; wartość przykładowa (założenie), dopóki nie wpiszesz własnej.'),
+    impFix: T('Import clearance €', 'Митне оформлення імпорту €', 'Einfuhrabfertigung €', 'Inklaring €', 'Dédouanement import €', 'Despacho de importación €', 'Odprawa importowa €'),
+    unload: T('Unloading on site €', 'Розвантаження на майданчику €', 'Entladung auf der Baustelle €', 'Lossen op de bouwplaats €', 'Déchargement sur chantier €', 'Descarga en obra €', 'Rozładunek na budowie €'),
+    policy: T('Plug for an excluded item', 'Доцінка за виключену позицію', 'Ansatz für eine ausgeschlossene Position', 'Aanvulling voor een uitgesloten item', 'Complément pour un poste exclu', 'Complemento para una partida excluida', 'Uzupełnienie za wyłączoną pozycję'),
+    polA: T('own estimate', 'власна оцінка', 'eigener Ansatz', 'eigen raming', 'estimation propre', 'estimación propia', 'własna wycena'),
+    polMax: T('highest price of the others', 'найвища ціна інших', 'höchster Preis der anderen', 'hoogste prijs van de anderen', 'prix le plus élevé des autres', 'precio más alto de los demás', 'najwyższa cena pozostałych'),
+    polMean: T('mean price of the others', 'середня ціна інших', 'mittlerer Preis der anderen', 'gemiddelde prijs van de anderen', 'prix moyen des autres', 'precio medio de los demás', 'średnia cena pozostałych'),
+    unclear: T('Unclear item counted at (% of plug)', 'Неясна позиція враховується як (% доцінки)', 'Unklare Position angesetzt mit (% des Ansatzes)', 'Onduidelijk item geteld aan (% van de aanvulling)', 'Poste imprécis compté à (% du complément)', 'Partida ambigua computada al (% del complemento)', 'Pozycja niejasna liczona jako (% uzupełnienia)'),
+    unclearHint: T('100 % = treat as excluded until the bidder confirms in writing.', '100 % = вважати виключеною, доки учасник не підтвердить письмово.', '100 % = als ausgeschlossen behandeln, bis der Bieter schriftlich bestätigt.', '100 % = als uitgesloten behandelen tot de inschrijver schriftelijk bevestigt.', '100 % = traiter comme exclu jusqu’à confirmation écrite du soumissionnaire.', '100 % = tratar como excluida hasta que el licitador confirme por escrito.', '100 % = traktować jako wyłączoną, dopóki oferent nie potwierdzi na piśmie.'),
+    rate: T('Financing rate for advances (%/yr)', 'Ставка фінансування авансів (%/рік)', 'Finanzierungssatz für Anzahlungen (%/Jahr)', 'Financieringsrente voor voorschotten (%/jaar)', 'Taux de financement des avances (%/an)', 'Tipo de financiación de anticipos (%/año)', 'Stopa finansowania zaliczek (%/rok)'),
+    gapWarn: T('Warn when plugs exceed (% of levelled)', 'Попереджати, якщо доцінки перевищують (% вирівняної)', 'Warnen, wenn Ansätze übersteigen (% nivelliert)', 'Waarschuwen als aanvullingen meer zijn dan (% van genivelleerd)', 'Alerter si les compléments dépassent (% du nivelé)', 'Avisar si los complementos superan (% del homogeneizado)', 'Ostrzegaj, gdy uzupełnienia przekraczają (% wyrównanej)'),
+    pkgName: T('Package', 'Пакет', 'Paket', 'Pakket', 'Lot', 'Paquete', 'Pakiet'),
+    tenderRef: T('Tender / RFQ reference', 'Номер тендеру / запиту', 'Vergabe- / Anfragenummer', 'Referentie aanbesteding / prijsaanvraag', 'Référence marché / consultation', 'Referencia licitación / petición', 'Numer przetargu / zapytania'),
+    preparedBy: T('Prepared by', 'Підготував', 'Erstellt von', 'Opgesteld door', 'Établi par', 'Preparado por', 'Sporządził'),
+    /* results */
+    tLow: T('Levelled lowest', 'Найнижча вирівняна', 'Niedrigstes nivelliert', 'Laagste genivelleerd', 'Moins-disant nivelé', 'Más baja homogeneizada', 'Najniższa wyrównana'),
+    tLead: T('Lead over 2nd', 'Відрив від 2-ї', 'Vorsprung vor Platz 2', 'Voorsprong op 2e', 'Avance sur le 2e', 'Ventaja sobre la 2.ª', 'Przewaga nad 2.'),
+    tGap: T('Leader’s plugs', 'Доцінки лідера', 'Ansätze des Ersten', 'Aanvullingen van de eerste', 'Compléments du premier', 'Complementos de la primera', 'Uzupełnienia lidera'),
+    tStab: T('Leader holds for plug factor', 'Лідер тримається при множнику доцінок', 'Erster hält bei Ansatzfaktor', 'Eerste blijft eerste bij factor', 'Le premier tient pour un facteur', 'La primera se mantiene con factor', 'Lider utrzymuje się przy mnożniku'),
+    tPaper: T('Cheapest on paper', 'Найдешевша на папері', 'Billigstes auf dem Papier', 'Goedkoopste op papier', 'Moins cher sur le papier', 'Más barata sobre el papel', 'Najtańsza na papierze'),
+    ofLev: T('of its levelled cost', 'її вирівняної вартості', 'seiner nivellierten Kosten', 'van zijn genivelleerde kost', 'de son coût nivelé', 'de su coste homogeneizado', 'jej wyrównanego kosztu'),
+    levRank: T('levelled rank', 'вирівняне місце', 'nivellierter Rang', 'genivelleerde rang', 'rang nivelé', 'puesto homogeneizado', 'miejsce po wyrównaniu'),
+    vLow: T('Levelled lowest', 'Найнижча після вирівнювання', 'Nach Nivellierung am niedrigsten', 'Laagste na vergelijking', 'Moins-disant après nivellement', 'Más baja tras homogeneizar', 'Najniższa po wyrównaniu'),
+    vLeads: T('leads by', 'попереду на', 'vorn mit', 'voor met', 'devance de', 'por delante en', 'przewaga'),
+    vPaper: T('cheapest on paper', 'найдешевша на папері', 'auf dem Papier am billigsten', 'op papier het goedkoopst', 'moins cher sur le papier', 'más barata sobre el papel', 'najtańsza na papierze'),
+    vTie: T('Tie on the levelled cost', 'Рівність вирівняної вартості', 'Gleichstand bei den nivellierten Kosten', 'Gelijke genivelleerde kost', 'Égalité du coût nivelé', 'Empate en coste homogeneizado', 'Remis kosztu wyrównanego'),
+    vNone: T('No valid quote: enter a price (and a rate for a foreign currency).', 'Немає дійсної пропозиції: введіть ціну (і курс для іноземної валюти).', 'Kein gültiges Angebot: Preis eingeben (und Kurs bei Fremdwährung).', 'Geen geldige offerte: vul een prijs in (en een koers bij vreemde munt).', 'Aucune offre valable : saisissez un prix (et un cours pour une devise étrangère).', 'Ninguna oferta válida: introduzca un precio (y un tipo para divisa extranjera).', 'Brak ważnej oferty: wpisz cenę (i kurs dla obcej waluty).'),
+    errEngine: T('The calculation engine tnd-ql.js did not load.', 'Модуль розрахунку tnd-ql.js не завантажився.', 'Die Rechenkomponente tnd-ql.js wurde nicht geladen.', 'De rekenmodule tnd-ql.js is niet geladen.', 'Le moteur de calcul tnd-ql.js ne s’est pas chargé.', 'El motor de cálculo tnd-ql.js no se cargó.', 'Moduł obliczeń tnd-ql.js nie został wczytany.'),
+    errQuotes: T('Add at least one quote.', 'Додайте хоча б одну пропозицію.', 'Mindestens ein Angebot hinzufügen.', 'Voeg minstens één offerte toe.', 'Ajoutez au moins une offre.', 'Añada al menos una oferta.', 'Dodaj co najmniej jedną ofertę.'),
+    tabLev: T('Levelling', 'Вирівнювання', 'Nivellierung', 'Vergelijking', 'Nivellement', 'Homogeneización', 'Wyrównanie'),
+    tabScope: T('Scope matrix (€ added per item)', 'Матриця обсягу (€ додано за позицію)', 'Leistungsmatrix (€ je Position zugeschlagen)', 'Scopematrix (€ toegevoegd per item)', 'Matrice du périmètre (€ ajoutés par poste)', 'Matriz de alcance (€ añadidos por partida)', 'Macierz zakresu (€ dodane na pozycję)'),
+    tabLog: T('Logistics to site per quote (€ the buyer still pays)', 'Логістика до майданчика (€, які ще платить покупець)', 'Logistik bis Baustelle je Angebot (€, die der Käufer noch trägt)', 'Logistiek tot bouwplaats per offerte (€ die de koper nog betaalt)', 'Logistique jusqu’au chantier par offre (€ encore à charge de l’acheteur)', 'Logística hasta obra por oferta (€ que aún paga el comprador)', 'Logistyka do budowy na ofertę (€, które nadal płaci kupujący)'),
+    cP: T('Price €', 'Ціна €', 'Preis €', 'Prijs €', 'Prix €', 'Precio €', 'Cena €'),
+    cOpt: T('Options', 'Опції', 'Optionen', 'Opties', 'Options', 'Opciones', 'Opcje'),
+    cPlug: T('Plugs', 'Доцінки', 'Ansätze', 'Aanvullingen', 'Compléments', 'Complementos', 'Uzupełnienia'),
+    cLog: T('Logistics', 'Логістика', 'Logistik', 'Logistiek', 'Logistique', 'Logística', 'Logistyka'),
+    cFin: T('Advance cost', 'Вартість авансу', 'Kosten Anzahlung', 'Kost voorschot', 'Coût de l’avance', 'Coste del anticipo', 'Koszt zaliczki'),
+    cAdj: T('Adjustment', 'Коригування', 'Korrektur', 'Correctie', 'Ajustement', 'Ajuste', 'Korekta'),
+    cL: T('Levelled €', 'Вирівняна €', 'Nivelliert €', 'Genivelleerd €', 'Nivelé €', 'Homogeneizado €', 'Wyrównana €'),
+    cRank: T('Rank paper → levelled', 'Місце папір → вирівн.', 'Rang Papier → nivelliert', 'Rang papier → genivelleerd', 'Rang papier → nivelé', 'Puesto papel → homog.', 'Miejsce papier → wyrówn.'),
+    cGap: T('Plug share', 'Частка доцінок', 'Ansatzanteil', 'Aandeel aanvullingen', 'Part des compléments', 'Peso de complementos', 'Udział uzupełnień'),
+    cCV: T('Customs value', 'Митна вартість', 'Zollwert', 'Douanewaarde', 'Valeur en douane', 'Valor en aduana', 'Wartość celna'),
+    cTot: T('Total', 'Разом', 'Summe', 'Totaal', 'Total', 'Total', 'Razem'),
+    cOrigin: T('Origin', 'Походження', 'Ursprung', 'Oorsprong', 'Origine', 'Origen', 'Pochodzenie'),
+    nonEU: T('non-EU', 'поза ЄС', 'Nicht-EU', 'buiten EU', 'hors UE', 'no UE', 'spoza UE'),
+    EUw: T('EU', 'ЄС', 'EU', 'EU', 'UE', 'UE', 'UE'),
+    legs: {
+      load: T('Loading, export', 'Завантаж., експорт', 'Verladung, Ausfuhr', 'Laden, uitvoer', 'Chargement, export', 'Carga, exportación', 'Załadunek, wywóz'),
+      pre: T('Pre-carriage', 'Довезення', 'Vorlauf', 'Voortransport', 'Pré-achem.', 'Precarriage', 'Dowóz'),
+      main: T('Main carriage', 'Осн. перевезення', 'Hauptlauf', 'Hoofdtransport', 'Transport principal', 'Transp. principal', 'Przewóz główny'),
+      ins: T('Insurance', 'Страхування', 'Versicherung', 'Verzekering', 'Assurance', 'Seguro', 'Ubezpieczenie'),
+      imp: T('Import (duty)', 'Імпорт (мито)', 'Einfuhr (Zoll)', 'Invoer (rechten)', 'Import (droits)', 'Importación (arancel)', 'Import (cło)'),
+      onc: T('On-carriage', 'Доставка', 'Nachlauf', 'Natransport', 'Post-achem.', 'Transp. final', 'Dowóz na budowę'),
+      unload: T('Unloading', 'Розвантаження', 'Entladung', 'Lossen', 'Déchargement', 'Descarga', 'Rozładunek')
+    },
+    siteRule: T('delivered & installed', 'з доставкою і монтажем', 'geliefert & montiert', 'geleverd & geplaatst', 'livré & posé', 'suministrado e instalado', 'dostawa z montażem'),
+    from: { allowance: T('own estimate', 'власна оцінка', 'eigener Ansatz', 'eigen raming', 'estimation propre', 'estimación propia', 'własna wycena'),
+            max: T('highest of others', 'найвища з інших', 'höchster der anderen', 'hoogste van anderen', 'max. des autres', 'máx. de los demás', 'najwyższa z innych'),
+            mean: T('mean of others', 'середня інших', 'Mittel der anderen', 'gemiddelde anderen', 'moyenne des autres', 'media de los demás', 'średnia innych'),
+            'opt-noamt': T('option without price', 'опція без ціни', 'Option ohne Preis', 'optie zonder prijs', 'option non chiffrée', 'opción sin precio', 'opcja bez ceny') },
+    invalidQ: { price: T('no price', 'немає ціни', 'kein Preis', 'geen prijs', 'pas de prix', 'sin precio', 'brak ceny'),
+                fx: T('no exchange rate', 'немає курсу', 'kein Kurs', 'geen koers', 'pas de cours', 'sin tipo de cambio', 'brak kursu'),
+                level: T('levelled cost ≤ 0', 'вирівняна вартість ≤ 0', 'nivellierte Kosten ≤ 0', 'genivelleerde kost ≤ 0', 'coût nivelé ≤ 0', 'coste homogeneizado ≤ 0', 'koszt wyrównany ≤ 0') },
+    nReversal: T('The cheapest quote on paper is not the cheapest once levelled: what it leaves out costs more than its discount.', 'Найдешевша на папері пропозиція не є найдешевшою після вирівнювання: те, чого в ній немає, коштує більше за її знижку.', 'Das billigste Angebot auf dem Papier ist nach der Nivellierung nicht das billigste: was fehlt, kostet mehr als sein Preisvorteil.', 'De goedkoopste offerte op papier is na de vergelijking niet de goedkoopste: wat ontbreekt, kost meer dan haar prijsvoordeel.', 'L’offre la moins chère sur le papier ne l’est plus une fois nivelée : ce qu’elle omet coûte plus que sa remise.', 'La oferta más barata sobre el papel no lo es tras homogeneizar: lo que omite cuesta más que su descuento.', 'Najtańsza na papierze oferta nie jest najtańsza po wyrównaniu: to, czego w niej brak, kosztuje więcej niż jej rabat.'),
+    nGap: T('The leader’s plugs exceed the warning level: its lead rests on your own estimates — clarify its exclusions in writing before you award.', 'Доцінки лідера перевищують поріг: його перевага тримається на ваших власних оцінках — до присудження з’ясуйте його виключення письмово.', 'Die Ansätze des Ersten übersteigen die Warnschwelle: sein Vorsprung beruht auf Ihren eigenen Schätzungen — Ausschlüsse vor der Vergabe schriftlich klären.', 'De aanvullingen van de eerste overschrijden de drempel: zijn voorsprong steunt op uw eigen ramingen — laat de uitsluitingen schriftelijk verduidelijken vóór de gunning.', 'Les compléments du premier dépassent le seuil : son avance repose sur vos propres estimations — faites clarifier ses exclusions par écrit avant d’attribuer.', 'Los complementos de la primera superan el umbral: su ventaja descansa en sus propias estimaciones — aclare sus exclusiones por escrito antes de adjudicar.', 'Uzupełnienia lidera przekraczają próg: jego przewaga opiera się na Twoich szacunkach — wyjaśnij wyłączenia na piśmie przed udzieleniem zamówienia.'),
+    nFragile: T('Fragile ranking: a moderate error in your plugs (factor outside the range on the tile) changes the leader.', 'Нестійке ранжування: помірна похибка доцінок (множник поза діапазоном на плитці) змінює лідера.', 'Instabile Rangfolge: ein mäßiger Fehler in den Ansätzen (Faktor außerhalb des Bereichs auf der Kachel) ändert den Ersten.', 'Fragiele rangschikking: een matige fout in de aanvullingen (factor buiten het bereik op de tegel) verandert de eerste.', 'Classement fragile : une erreur modérée sur les compléments (facteur hors de la plage de la tuile) change le premier.', 'Clasificación frágil: un error moderado en los complementos (factor fuera del rango de la ficha) cambia la primera.', 'Niestabilny ranking: umiarkowany błąd uzupełnień (mnożnik poza zakresem z kafelka) zmienia lidera.'),
+    nTie: T('Two or more quotes share the lowest levelled cost: decide on the documented non-price grounds or ask for a best and final offer.', 'Дві чи більше пропозицій мають однакову найнижчу вирівняну вартість: вирішуйте за задокументованими неціновими підставами або попросіть остаточну пропозицію.', 'Zwei oder mehr Angebote haben die gleichen niedrigsten nivellierten Kosten: nach dokumentierten Nichtpreisgründen entscheiden oder ein letztes Angebot (BAFO) einholen.', 'Twee of meer offertes delen de laagste genivelleerde kost: beslis op gedocumenteerde niet-prijsgronden of vraag een beste en finale offerte.', 'Deux offres ou plus partagent le coût nivelé le plus bas : décidez sur des motifs non-prix documentés ou demandez une meilleure offre finale.', 'Dos o más ofertas comparten el menor coste homogeneizado: decida por motivos no económicos documentados o pida una mejor oferta final.', 'Dwie lub więcej ofert ma ten sam najniższy koszt wyrównany: zdecyduj na udokumentowanych podstawach pozacenowych lub poproś o ofertę ostateczną.'),
+    nAllExc: T('Some items are excluded or unclear in every quote: they do not change the ranking but must be budgeted or bought separately.', 'Деякі позиції виключено чи неясні в усіх пропозиціях: на ранжування вони не впливають, але їх треба закласти в бюджет чи закупити окремо.', 'Einige Positionen fehlen oder sind unklar in allen Angeboten: sie ändern die Rangfolge nicht, müssen aber gesondert budgetiert oder vergeben werden.', 'Sommige items zijn in alle offertes uitgesloten of onduidelijk: ze veranderen de rangschikking niet, maar moeten apart begroot of besteld worden.', 'Certains postes sont exclus ou imprécis dans toutes les offres : ils ne changent pas le classement mais doivent être budgétés ou achetés à part.', 'Algunas partidas están excluidas o ambiguas en todas las ofertas: no cambian la clasificación pero deben presupuestarse o comprarse aparte.', 'Niektóre pozycje są wyłączone lub niejasne we wszystkich ofertach: nie zmieniają rankingu, ale trzeba je zabudżetować lub kupić osobno.'),
+    nInvalid: T('A quote without a price or exchange rate, or with a levelled cost of zero or less (a credit larger than the quote), is left out of the ranking.', 'Пропозицію без ціни чи курсу або з вирівняною вартістю нуль чи менше (кредит, більший за пропозицію) виключено з ранжування.', 'Ein Angebot ohne Preis oder Wechselkurs oder mit nivellierten Kosten von null oder weniger (Gutschrift größer als das Angebot) bleibt ohne Rang.', 'Een offerte zonder prijs of wisselkoers, of met een genivelleerde kost van nul of minder (creditering groter dan de offerte), blijft buiten de rangschikking.', 'Une offre sans prix ou sans cours de change, ou dont le coût nivelé est nul ou négatif (avoir supérieur à l’offre), est laissée hors classement.', 'Una oferta sin precio o sin tipo de cambio, o con un coste homogeneizado nulo o negativo (abono mayor que la oferta), queda fuera de la clasificación.', 'Oferta bez ceny lub kursu albo z kosztem wyrównanym równym zero lub ujemnym (uznanie większe niż oferta) pozostaje poza rankingiem.'),
+    nEurFx: T('A quote in EUR is taken at rate 1; the rate left in its field is ignored:', 'Пропозицію в EUR враховано за курсом 1; курс, що лишився в полі, проігноровано:', 'Ein Angebot in EUR wird mit Kurs 1 gerechnet; der im Feld verbliebene Kurs wird ignoriert:', 'Een offerte in EUR telt aan koers 1; de koers die nog in het veld staat, wordt genegeerd:', 'Une offre en EUR est prise au cours 1 ; le cours resté dans le champ est ignoré :', 'Una oferta en EUR se toma al tipo 1; el tipo que quedó en el campo se ignora:', 'Oferta w EUR liczona jest po kursie 1; kurs pozostawiony w polu jest pomijany:'),
+    nOptNoAmt: T('Options without a price are plugged like exclusions until the bidder prices them:', 'Опції без ціни доцінено як виключення, доки учасник не назве ціну:', 'Optionen ohne Preis werden wie Ausschlüsse angesetzt, bis der Bieter sie bepreist:', 'Opties zonder prijs worden aangevuld als uitsluitingen tot de inschrijver ze prijst:', 'Les options non chiffrées reçoivent un complément comme des exclusions jusqu’à ce que le soumissionnaire les chiffre :', 'Las opciones sin precio se complementan como exclusiones hasta que el licitador las cotice:', 'Opcje bez ceny są uzupełniane jak wyłączenia, dopóki oferent ich nie wyceni:'),
+    nZeroPlug: T('These excluded or unclear items add 0 € to the levelled cost, so the gap is free in the comparison — enter your own estimate (or use the max / mean rule):', 'Ці виключені чи неясні позиції додають 0 € до вирівняної вартості, тож прогалина в порівнянні безкоштовна — введіть власну оцінку (або правило max / середнє):', 'Diese ausgeschlossenen oder unklaren Positionen erhöhen die nivellierten Kosten um 0 €, die Lücke ist im Vergleich also gratis — eigenen Ansatz eingeben (oder Max-/Mittelwert-Regel):', 'Deze uitgesloten of onduidelijke items voegen 0 € toe aan de genivelleerde kost, dus het gat is gratis in de vergelijking — vul uw eigen raming in (of gebruik de regel max / gemiddelde):', 'Ces postes exclus ou imprécis ajoutent 0 € au coût nivelé : la lacune est gratuite dans la comparaison — saisissez votre estimation (ou la règle max / moyenne) :', 'Estas partidas excluidas o ambiguas añaden 0 € al coste homogeneizado, así que el hueco sale gratis en la comparación — introduzca su estimación (o use la regla máx. / media):', 'Te wyłączone lub niejasne pozycje dodają 0 € do kosztu wyrównanego, więc luka jest w porównaniu darmowa — wpisz własną wycenę (lub użyj reguły max / średnia):'),
+    nDup: T('Repeated ids: a second quote or item with the same id is renamed with -2; a second terms line for a quote, or a second exclusion / option line for the same quote and item, is ignored (the first counts):', 'Повторені ідентифікатори: друга пропозиція чи позиція з тим самим ід. отримує -2; другий рядок умов для пропозиції чи другий рядок виключення / опції для тієї ж пропозиції й позиції ігнорується (діє перший):', 'Doppelte Ids: ein zweites Angebot oder eine zweite Position mit derselben Id erhält -2; eine zweite Bedingungszeile für ein Angebot oder eine zweite Ausschluss-/Optionszeile für dasselbe Angebot und dieselbe Position wird ignoriert (die erste gilt):', 'Dubbele id’s: een tweede offerte of item met dezelfde id krijgt -2; een tweede voorwaardenlijn voor een offerte of een tweede uitsluitings- / optielijn voor dezelfde offerte en hetzelfde item wordt genegeerd (de eerste telt):', 'Identifiants répétés : une deuxième offre ou un deuxième poste de même identifiant reçoit -2 ; une deuxième ligne de conditions pour une offre, ou une deuxième ligne d’exclusion / option pour la même offre et le même poste, est ignorée (la première compte) :', 'Identificadores repetidos: una segunda oferta o partida con el mismo id recibe -2; una segunda línea de condiciones para una oferta, o una segunda línea de exclusión / opción para la misma oferta y partida, se ignora (cuenta la primera):', 'Powtórzone identyfikatory: druga oferta lub pozycja o tym samym id dostaje -2; drugi wiersz warunków dla oferty lub drugi wiersz wyłączenia / opcji dla tej samej oferty i pozycji jest pomijany (liczy się pierwszy):'),
+    nCustoms: T('Customs value simplifications: under C and D rules the quoted price is taken as it stands, without deducting on-carriage inside the EU (duty slightly overstated; UCC art. 72(a) allows the deduction only when that leg is shown separately on the invoice). Options and plugs are taken as landed amounts on site — include any duty in them.', 'Спрощення митної вартості: за правилами груп C і D ціну пропозиції беруть як є, без вирахування доставки всередині ЄС (мито трохи завищене; ст. 72(a) МКС дозволяє вирахування лише якщо цю ділянку окремо вказано в рахунку). Опції й доцінки вважаються сумами з доставкою на майданчик — включайте в них мито.', 'Vereinfachungen beim Zollwert: bei C- und D-Klauseln gilt der Angebotspreis wie angeboten, ohne Abzug des Nachlaufs innerhalb der EU (Zoll leicht überschätzt; Art. 72 Buchst. a UZK erlaubt den Abzug nur bei gesondertem Ausweis in der Rechnung). Optionen und Ansätze gelten als Beträge frei Baustelle — Zoll darin einrechnen.', 'Vereenvoudigingen van de douanewaarde: bij C- en D-regels telt de offerteprijs zoals geboden, zonder aftrek van het natransport binnen de EU (rechten iets overschat; art. 72, a) DWU staat de aftrek alleen toe als dat traject apart op de factuur staat). Opties en aanvullingen gelden als bedragen geleverd op de bouwplaats — reken eventuele rechten erin.', 'Simplifications de la valeur en douane : sous les règles C et D, le prix de l’offre est pris tel quel, sans déduire le post-acheminement dans l’UE (droits légèrement surestimés ; l’art. 72, a) CDU ne permet la déduction que si ce tronçon figure séparément sur la facture). Options et compléments sont des montants rendus chantier — incluez-y les droits éventuels.', 'Simplificaciones del valor en aduana: con reglas C y D se toma el precio ofertado tal cual, sin deducir el transporte final dentro de la UE (arancel algo sobrestimado; el art. 72.a CAU solo permite la deducción si ese tramo figura por separado en la factura). Opciones y complementos se toman como importes puestos en obra — incluya en ellos el arancel.', 'Uproszczenia wartości celnej: przy regułach C i D cenę oferty przyjmuje się bez zmian, bez odliczenia dowozu wewnątrz UE (cło lekko zawyżone; art. 72 lit. a UKC pozwala odliczyć tylko, gdy ten odcinek wykazano osobno na fakturze). Opcje i uzupełnienia traktuje się jako kwoty z dostawą na budowę — wliczaj w nie cło.'),
+    nFx: T('Foreign-currency quotes are converted at the rate you entered; the exchange risk until payment is not priced (hedge or add an adjustment).', 'Пропозиції в іноземній валюті перераховано за введеним курсом; валютний ризик до оплати не оцінено (хеджуйте або додайте коригування).', 'Fremdwährungsangebote sind zum eingegebenen Kurs umgerechnet; das Währungsrisiko bis zur Zahlung ist nicht bepreist (absichern oder Korrektur ansetzen).', 'Offertes in vreemde munt zijn omgerekend tegen de ingevoerde koers; het wisselkoersrisico tot betaling is niet geprijsd (indekken of correctie toevoegen).', 'Les offres en devise sont converties au cours saisi ; le risque de change jusqu’au paiement n’est pas chiffré (couvrir ou ajouter un ajustement).', 'Las ofertas en divisa se convierten al tipo introducido; el riesgo de cambio hasta el pago no está valorado (cubrir o añadir un ajuste).', 'Oferty w obcej walucie przeliczono po wpisanym kursie; ryzyko kursowe do zapłaty nie jest wycenione (zabezpiecz lub dodaj korektę).'),
+    nNoAllow: T('Some items have no own estimate: with the max / mean rule they fall back to 0 € when no other bidder priced them.', 'Деякі позиції не мають власної оцінки: за правилом max / середнє вони дорівнюють 0 €, якщо їх ніхто інший не оцінив.', 'Einige Positionen haben keinen eigenen Ansatz: mit der Max-/Mittelwert-Regel fallen sie auf 0 € zurück, wenn kein anderer Bieter sie bepreist hat.', 'Sommige items hebben geen eigen raming: met de regel max / gemiddelde vallen ze terug op 0 € als geen andere inschrijver ze prijsde.', 'Certains postes n’ont pas d’estimation propre : avec la règle max / moyenne ils retombent à 0 € si aucun autre soumissionnaire ne les a chiffrés.', 'Algunas partidas no tienen estimación propia: con la regla máx. / media caen a 0 € si ningún otro licitador las cotizó.', 'Niektóre pozycje nie mają własnej wyceny: przy regule max / średnia spadają do 0 €, gdy nikt inny ich nie wycenił.'),
+    nMethod: T('Levelled cost = price in € + priced options + plugs for excluded and unclear items + logistics the buyer still pays to land the goods on site (by Incoterms 2020 rule) + cost of the advance + commercial adjustments. Duty on the customs value per Union Customs Code art. 70–71.',
+               'Вирівняна вартість = ціна в € + оцінені опції + доцінки за виключені й неясні позиції + логістика, яку покупець ще оплачує до майданчика (за правилом Incoterms 2020) + вартість авансу + комерційні коригування. Мито на митну вартість за ст. 70–71 Митного кодексу ЄС.',
+               'Nivellierte Kosten = Preis in € + bepreiste Optionen + Ansätze für ausgeschlossene und unklare Positionen + Logistik, die der Käufer bis zur Baustelle noch trägt (nach Incoterms-2020-Klausel) + Kosten der Anzahlung + kaufmännische Korrekturen. Zoll auf den Zollwert nach Art. 70–71 Zollkodex der Union.',
+               'Genivelleerde kost = prijs in € + geprijsde opties + aanvullingen voor uitgesloten en onduidelijke items + logistiek die de koper nog betaalt tot op de bouwplaats (volgens Incoterms 2020-regel) + kost van het voorschot + commerciële correcties. Invoerrechten op de douanewaarde volgens art. 70–71 van het douanewetboek van de Unie.',
+               'Coût nivelé = prix en € + options chiffrées + compléments pour postes exclus et imprécis + logistique encore à charge de l’acheteur jusqu’au chantier (selon la règle Incoterms 2020) + coût de l’avance + ajustements commerciaux. Droits sur la valeur en douane selon les art. 70–71 du code des douanes de l’Union.',
+               'Coste homogeneizado = precio en € + opciones cotizadas + complementos por partidas excluidas y ambiguas + logística que el comprador aún paga hasta obra (según la regla Incoterms 2020) + coste del anticipo + ajustes comerciales. Arancel sobre el valor en aduana según los art. 70–71 del código aduanero de la Unión.',
+               'Koszt wyrównany = cena w € + wycenione opcje + uzupełnienia za pozycje wyłączone i niejasne + logistyka, którą kupujący nadal płaci do budowy (wg reguły Incoterms 2020) + koszt zaliczki + korekty handlowe. Cło od wartości celnej wg art. 70–71 unijnego kodeksu celnego.'),
+    nAssume: T('Own estimates, plug rule, unclear factor, duty rate, insurance and financing rate are your assumptions (example values in the presets); the levelled cost is a comparison basis, not a price to pay.', 'Власні оцінки, правило доцінок, множник неясних позицій, ставка мита, страхування й ставка фінансування — ваші припущення (у прикладах — значення для прикладу); вирівняна вартість — база порівняння, а не ціна до сплати.', 'Eigene Ansätze, Ansatzregel, Unklar-Faktor, Zollsatz, Versicherung und Finanzierungssatz sind Ihre Annahmen (in den Beispielen angenommene Werte); die nivellierten Kosten sind eine Vergleichsbasis, kein zu zahlender Preis.', 'Eigen ramingen, aanvullingsregel, factor voor onduidelijke items, invoerrecht, verzekering en financieringsrente zijn uw aannames (in de voorbeelden aangenomen waarden); de genivelleerde kost is een vergelijkingsbasis, geen te betalen prijs.', 'Estimations propres, règle des compléments, facteur des postes imprécis, taux de droit, assurance et taux de financement sont vos hypothèses (valeurs d’exemple dans les cas types) ; le coût nivelé est une base de comparaison, pas un prix à payer.', 'Estimaciones propias, regla de complementos, factor de ambiguas, arancel, seguro y tipo de financiación son sus hipótesis (valores de ejemplo en los casos tipo); el coste homogeneizado es una base de comparación, no un precio a pagar.', 'Własne wyceny, reguła uzupełnień, mnożnik pozycji niejasnych, stawka cła, ubezpieczenie i stopa finansowania to Twoje założenia (w przykładach przyjęte wartości); koszt wyrównany to podstawa porównania, nie cena do zapłaty.'),
+    nDisclaimer: T('Engineering and commercial analysis, not legal advice.', 'Інженерно-комерційний аналіз, не юридична консультація.', 'Technisch-kaufmännische Analyse, keine Rechtsberatung.', 'Technisch-commerciële analyse, geen juridisch advies.', 'Analyse technique et commerciale, pas un avis juridique.', 'Análisis técnico y comercial, no asesoramiento jurídico.', 'Analiza techniczno-handlowa, nie porada prawna.'),
+    stageCap: T('Levelled cost per quote (price, options, plugs, logistics, other) and how it moves with a common factor on all plugs', 'Вирівняна вартість за пропозиціями (ціна, опції, доцінки, логістика, інше) і як вона змінюється зі спільним множником доцінок', 'Nivellierte Kosten je Angebot (Preis, Optionen, Ansätze, Logistik, Sonstiges) und ihr Verlauf mit einem gemeinsamen Faktor auf alle Ansätze', 'Genivelleerde kost per offerte (prijs, opties, aanvullingen, logistiek, overige) en hoe die verandert met een gemeenschappelijke factor op alle aanvullingen', 'Coût nivelé par offre (prix, options, compléments, logistique, autres) et son évolution avec un facteur commun sur tous les compléments', 'Coste homogeneizado por oferta (precio, opciones, complementos, logística, otros) y cómo cambia con un factor común en todos los complementos', 'Koszt wyrównany na ofertę (cena, opcje, uzupełnienia, logistyka, inne) i jego zmiana przy wspólnym mnożniku wszystkich uzupełnień'),
+    other: T('other', 'інше', 'Sonstiges', 'overige', 'autres', 'otros', 'inne'),
+    fAxis: T('plug factor f', 'множник доцінок f', 'Ansatzfaktor f', 'factor aanvullingen f', 'facteur des compléments f', 'factor de complementos f', 'mnożnik uzupełnień f'),
+    save: T('Save to project', 'Зберегти в проєкт', 'Im Projekt speichern', 'Opslaan in project', 'Enregistrer dans le projet', 'Guardar en el proyecto', 'Zapisz w projekcie'),
+    useTaken: T('Taken from the project', 'Взято з проєкту', 'Aus dem Projekt übernommen', 'Overgenomen uit het project', 'Repris du projet', 'Tomado del proyecto', 'Pobrano z projektu'),
+    useNone: T('The project holds no quote levelling yet.', 'У проєкті ще немає вирівнювання пропозицій.', 'Das Projekt enthält noch keine Angebotsnivellierung.', 'Het project bevat nog geen offertevergelijking.', 'Le projet ne contient pas encore de nivellement des offres.', 'El proyecto aún no contiene una homogeneización de ofertas.', 'Projekt nie zawiera jeszcze wyrównania ofert.'),
+    useOther: T('This page applies only its own saved levelling; the other tools’ modules stay in the project.', 'Ця сторінка застосовує лише власне збережене вирівнювання; модулі інших інструментів лишаються в проєкті.', 'Diese Seite übernimmt nur ihre eigene gespeicherte Nivellierung; Module anderer Werkzeuge bleiben im Projekt.', 'Deze pagina past enkel haar eigen opgeslagen vergelijking toe; modules van andere tools blijven in het project.', 'Cette page n’applique que son propre nivellement enregistré ; les modules des autres outils restent dans le projet.', 'Esta página solo aplica su propia homogeneización guardada; los módulos de otras herramientas quedan en el proyecto.', 'Ta strona stosuje tylko własne zapisane wyrównanie; moduły innych narzędzi zostają w projekcie.'),
+    reqFound: T('Requisitions in the project package', 'Технічні вимоги в пакеті проєкту', 'Anfragespezifikationen im Projektpaket', 'Aanvraagspecificaties in het projectpakket', 'Réquisitions dans le dossier projet', 'Requisiciones en el paquete del proyecto', 'Specyfikacje zapytań w pakiecie projektu'),
+    reqUse: T('Use its scope as items', 'Взяти її обсяг як позиції', 'Umfang als Positionen übernehmen', 'Scope als items gebruiken', 'Reprendre son périmètre comme postes', 'Usar su alcance como partidas', 'Użyj zakresu jako pozycji'),
+    reqNone: T('The package holds no requisition with a scope.', 'Пакет не містить технічних вимог з обсягом.', 'Das Paket enthält keine Anfragespezifikation mit Umfang.', 'Het pakket bevat geen aanvraagspecificatie met scope.', 'Le dossier ne contient aucune réquisition avec périmètre.', 'El paquete no contiene requisiciones con alcance.', 'Pakiet nie zawiera specyfikacji z zakresem.'),
+    reqDone: T('Items taken from the requisition; enter your own estimate per item and the bidders’ exclusions.', 'Позиції взято з технічних вимог; введіть власну оцінку для кожної позиції та виключення учасників.', 'Positionen aus der Anfragespezifikation übernommen; eigenen Ansatz je Position und die Ausschlüsse der Bieter eingeben.', 'Items overgenomen uit de aanvraagspecificatie; vul per item uw eigen raming en de uitsluitingen van de inschrijvers in.', 'Postes repris de la réquisition ; saisissez votre estimation par poste et les exclusions des soumissionnaires.', 'Partidas tomadas de la requisición; introduzca su estimación por partida y las exclusiones de los licitadores.', 'Pozycje pobrano ze specyfikacji; wpisz własną wycenę każdej pozycji i wyłączenia oferentów.')
+  };
+
+  function qLabel(id) { var q = (state.quotes || []).filter(function (x) { return String(x.id) === String(id); })[0]; return q ? (q.name ? q.id + ' ' + q.name : q.id) : String(id); }
+  function iLabel(id) { var it = (state.items || []).filter(function (x) { return String(x.id) === String(id); })[0]; return it ? (it.name || it.id) : String(id); }
+  function incLabel(x, l) { return x === 'site' ? str(S.siteRule, l) : x; }
+
+  function computeView(s) {
+    last = solve(s);
+    if (stage) stage.schedule();
+    var R = last, LG = lang();
+    if (!R || !R.ok) {
+      var e = R && R.errors && R.errors[0];
+      return { verdict: { tone: 'bad', text: e === 'engine' ? S.errEngine : (e === 'exception' ? TF(function () { return 'Error: ' + R.msg; }) : S.errQuotes) }, tiles: [], notes: [] };
+    }
+    var rows = R.rows, valid = rows.filter(function (r) { return r.valid; });
+    var tiles = [], tables = [], notes = [];
+    if (!valid.length) return { verdict: { tone: 'bad', text: S.vNone }, tiles: [], tables: [], notes: [S.nInvalid, S.nDisclaimer] };
+    var byId = {}; rows.forEach(function (r) { byId[r.id] = r; });
+    var lead = R.leader ? byId[R.leader] : null, raw = R.rawLeader ? byId[R.rawLeader] : null;
+    var verdict;
+    if (lead) {
+      var tone = ['gap', 'fragile', 'zeroplug', 'optnoamt', 'dupid'].some(function (f) { return R.flags.indexOf(f) >= 0; }) ? 'warn' : 'ok';
+      verdict = { tone: tone, text: TF(function (l) {
+        var t = S.vLow[l] + ': ' + qLabel(lead.id) + ' — ' + eur(lead.L, l);
+        if (R.lead != null) t += ' · ' + S.vLeads[l] + ' ' + keur(R.lead, l);
+        if (raw && raw !== lead) t += ' · ' + S.vPaper[l] + ': ' + qLabel(raw.id) + ' (' + S.levRank[l] + ' ' + raw.rank + ')';
+        return t + '.';
+      }) };
+    } else {
+      verdict = { tone: 'warn', text: TF(function (l) { return S.vTie[l] + ': ' + R.leaders.map(qLabel).join(' = ') + ' — ' + eur(byId[R.leaders[0]].L, l) + '.'; }) };
+    }
+    function tile(label, value, hint, learn, tn, headline) { tiles.push({ label: label, value: str(value, LG), hint: str(hint || '', LG), learn: learn, tone: tn || null, headline: headline !== false }); }
+    var first = lead || byId[R.leaders[0]];
+    tile(S.tLow, keur(first.L, LG), qLabel(first.id), 'level', 'ok');
+    tile(S.tLead, R.lead == null ? '—' : keur(R.lead, LG), R.second ? qLabel(R.second) + ' · ' + pc(R.lead / first.L, LG, 1) : '', 'level', R.lead != null && R.lead > 0 ? null : 'warn');
+    tile(S.tGap, pc(first.gapShare, LG, 1), keur(first.plug, LG) + ' · ' + str(S.ofLev, LG), 'plugs', R.flags.indexOf('gap') >= 0 ? 'warn' : 'ok');
+    if (R.stability) tile(S.tStab, nf(R.stability.lo, LG, 2) + ' … ' + (R.stability.hi == null ? '∞' : nf(R.stability.hi, LG, 2)), S.fHint[LG], 'stability', R.flags.indexOf('fragile') >= 0 ? 'warn' : 'ok');
+    if (raw) tile(S.tPaper, keur(raw.P, LG), qLabel(raw.id) + ' → ' + keur(raw.L, LG) + ' (' + str(S.levRank, LG) + ' ' + raw.rank + ')', 'level', raw.rank === 1 ? null : 'warn', false);
+
+    /* 1 levelling table */
+    var lev = rows.slice().sort(function (a, b) { return (a.valid ? a.L : Infinity) - (b.valid ? b.L : Infinity) || (a.id < b.id ? -1 : 1); }).map(function (r) {
+      if (!r.valid) return { tone: 'bad', cells: [qLabel(r.id), { text: S.invalidQ[r.reason] }, '', '', '', '', '', '', '—', ''] };
+      function m(v) { return { value: Math.round(v), precision: 0, num: true }; }
+      return { tone: r.rank === 1 ? 'ok' : null, cells: [qLabel(r.id), m(r.P), m(r.opt), m(r.plug), m(r.logistics), m(r.fin), m(r.adj), m(r.L),
+        { text: r.rawRank + ' → ' + r.rank, num: true }, { text: TF(function (l) { return pc(r.gapShare, l, 1); }), num: true }] };
+    });
+    tables.push({ title: S.tabLev, head: [S.qName, S.cP, S.cOpt, S.cPlug, S.cLog, S.cFin, S.cAdj, S.cL, S.cRank, S.cGap], rows: lev });
+
+    /* 2 scope matrix */
+    var inp = R.input;
+    if (inp.items.length) {
+      var head = [S.iName, S.allowance].concat(valid.map(function (r) { return r.id; }));
+      var srows = inp.items.map(function (it) {
+        var all = R.allExcluded.indexOf(it.id) >= 0;
+        return { tone: all ? 'warn' : null, cells: [it.name || it.id, { value: it.allowance, precision: 0, num: true }].concat(valid.map(function (r) {
+          var c = r.cells[it.id];
+          if (c.s === 'inc') return { text: '✓', num: true };
+          return { text: TF(function (l) { return S.stShort[c.s] + ' ' + nf(Math.round(c.add), l, 0) + (c.from && c.from !== 'allowance' ? ' (' + str(S.from[c.from], l) + ')' : ''); }), num: true };
+        })) };
+      });
+      tables.push({ title: S.tabScope, head: head, rows: srows });
+    }
+    /* 3 logistics */
+    var lrows = valid.filter(function (r) { return r.incoterm !== 'site' || r.logistics > 0; }).map(function (r) {
+      var q = inp.quotes.filter(function (x) { return x.id === r.id; })[0];
+      return { cells: [qLabel(r.id), TF(function (l) { return incLabel(r.incoterm, l) + ' · ' + (q.eu ? S.EUw[l] : S.nonEU[l]); })].concat(LEGS.map(function (e) { return { value: Math.round(r.log[e]), precision: 0, num: true }; }))
+        .concat([{ value: r.customsValue == null ? null : Math.round(r.customsValue), precision: 0, num: true }, { value: Math.round(r.logistics), precision: 0, num: true }]) };
+    });
+    if (lrows.length) tables.push({ title: S.tabLog, head: [S.qName, TF(function (l) { return S.incoterm[l] + ' · ' + S.cOrigin[l]; })].concat(LEGS.map(function (e) { return S.legs[e]; })).concat([S.cCV, S.cTot]), rows: lrows });
+
+    if (R.flags.indexOf('reversal') >= 0) notes.push(S.nReversal);
+    if (R.flags.indexOf('gap') >= 0) notes.push(S.nGap);
+    if (R.flags.indexOf('fragile') >= 0) notes.push(S.nFragile);
+    if (R.flags.indexOf('tie') >= 0) notes.push(S.nTie);
+    if (R.flags.indexOf('allexc') >= 0) notes.push(TF(function (l) { return S.nAllExc[l] + ' (' + R.allExcluded.map(iLabel).join('; ') + ')'; }));
+    if (R.flags.indexOf('invalid') >= 0) notes.push(S.nInvalid);
+    if (R.flags.indexOf('fx') >= 0) notes.push(S.nFx);
+    if (R.flags.indexOf('noallow') >= 0) notes.push(S.nNoAllow);
+    function cellList(list) { return list.map(function (c) { return c.q + ' · ' + iLabel(c.item); }).join('; '); }
+    if (R.flags.indexOf('zeroplug') >= 0) notes.push(TF(function (l) { return S.nZeroPlug[l] + ' ' + cellList(R.zeroPlug) + '.'; }));
+    if (R.flags.indexOf('optnoamt') >= 0) notes.push(TF(function (l) { return S.nOptNoAmt[l] + ' ' + cellList(R.optNoAmount) + '.'; }));
+    var eurIgn = inp.quotes.filter(function (q) { return q.fxIgnored; }).map(function (q) { return q.id; });
+    if (eurIgn.length) notes.push(TF(function (l) { return S.nEurFx[l] + ' ' + eurIgn.join(', ') + '.'; }));
+    var dupL = (R.duplicates || []).concat(R.raw && R.raw.dupRows || []);
+    if (dupL.length) notes.push(TF(function (l) { return S.nDup[l] + ' ' + dupL.join(', ') + '.'; }));
+    if (inp.quotes.some(function (q) { return !q.eu && q.incoterm !== 'DDP' && q.incoterm !== 'site'; })) notes.push(S.nCustoms);
+    notes.push(S.nMethod);
+    notes.push(S.nAssume);
+    notes.push(S.nDisclaimer);
+    return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+  }
+
+  /* ---- stage: stacked bars (top) and levelled cost against the plug factor (bottom) ---- */
+  function renderStage(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#888', lineC = cs.getPropertyValue('--line').trim() || '#ccc', ink = cs.getPropertyValue('--ink').trim() || '#111';
+    var okC = cs.getPropertyValue('--ok').trim() || '#1e8449';
+    var font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+    ctx.clearRect(0, 0, w, h);
+    var R = last, B = lib();
+    if (!R || !R.ok || !B) return;
+    var valid = R.rows.filter(function (r) { return r.valid; });
+    if (!valid.length) return;
+    var l = lang(), fs = coarse ? 10 : 11;
+    ctx.font = fs + 'px ' + font;
+    var Lm = coarse ? 70 : 120, Rm = coarse ? 10 : 18, top = 10;
+    var bw = w - Lm - Rm;
+    if (bw < 80) return;
+    var parts = ['P', 'opt', 'plug', 'logistics', 'other'];
+    var cols = [DiagramUI.series(0), DiagramUI.series(1), DiagramUI.series(3), DiagramUI.series(2), DiagramUI.series(4)];
+    var names = [S.cP, S.cOpt, S.cPlug, S.cLog, S.other];
+    var maxL = 0; valid.forEach(function (r) { maxL = Math.max(maxL, r.L, r.P + r.opt + r.plug + r.logistics + Math.max(0, r.fin + r.adj)); });
+    var rh = coarse ? 22 : 26, hTop = top + valid.length * rh + 40;
+    var sorted = valid.slice().sort(function (a, b) { return a.L - b.L || (a.id < b.id ? -1 : 1); });
+    function X(v) { return Lm + v / maxL * bw * 0.86; }
+    ctx.textBaseline = 'middle';
+    sorted.forEach(function (r, k) {
+      var y = top + k * rh, x = Lm;
+      ctx.fillStyle = ink; ctx.textAlign = 'right';
+      var lab = (r.rank === 1 ? '★ ' : '') + r.id + (r.name && !coarse ? ' ' + r.name.slice(0, 14) : '');
+      ctx.fillText(lab, Lm - 6, y + rh / 2);
+      var vals = [r.P, r.opt, r.plug, r.logistics, r.fin + r.adj];
+      vals.forEach(function (v, i) {
+        if (!(v > 0)) return;
+        var x2 = X((x - Lm) / (bw * 0.86) * maxL + v);
+        ctx.fillStyle = cols[i]; ctx.globalAlpha = i === 2 ? 0.9 : 0.75;
+        ctx.fillRect(x, y + 3, Math.max(1, x2 - x), rh - 6); ctx.globalAlpha = 1;
+        x = x2;
+      });
+      ctx.fillStyle = ink; ctx.textAlign = 'left';
+      ctx.fillText(keur(r.L, l) + ' (' + r.rawRank + '→' + r.rank + ')', X(r.L) + 4 > x ? X(r.L) + 4 : x + 4, y + rh / 2);
+    });
+    /* legend */
+    var ly = top + sorted.length * rh + 8, lx = Lm;
+    ctx.textAlign = 'left';
+    names.forEach(function (nm, i) {
+      var t = str(nm, l); ctx.fillStyle = cols[i]; ctx.fillRect(lx, ly - 5, 10, 10); ctx.fillStyle = muted; ctx.fillText(t, lx + 14, ly);
+      lx += 22 + ctx.measureText(t).width; if (lx > w - 60) { lx = Lm; ly += 14; }
+    });
+    /* bottom: L_j(f) = L_j - plug_j + f plug_j, f in 0..2 */
+    var y0 = Math.max(ly + 22, hTop + 6), ph = h - y0 - 30;
+    if (ph < 60) return;
+    var cv = B.curve(R.raw, 2, 40), ymin = Infinity, ymax = -Infinity;
+    cv.forEach(function (c) { c.pts.forEach(function (p) { ymin = Math.min(ymin, p[1]); ymax = Math.max(ymax, p[1]); }); });
+    if (!(ymax > ymin)) { ymax = ymin + 1; }
+    var pad = (ymax - ymin) * 0.06; ymin -= pad; ymax += pad;
+    var pw = bw;
+    function FX(f) { return Lm + f / 2 * pw; }
+    function FY(v) { return y0 + ph - (v - ymin) / (ymax - ymin) * ph; }
+    if (R.stability) {
+      var a = FX(Math.min(2, R.stability.lo)), b = FX(Math.min(2, R.stability.hi == null ? 2 : R.stability.hi));
+      ctx.fillStyle = okC; ctx.globalAlpha = 0.10; ctx.fillRect(a, y0, Math.max(0, b - a), ph); ctx.globalAlpha = 1;
+    }
+    ctx.strokeStyle = muted; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(Lm, y0); ctx.lineTo(Lm, y0 + ph); ctx.lineTo(Lm + pw, y0 + ph); ctx.stroke();
+    ctx.strokeStyle = lineC; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(FX(1), y0); ctx.lineTo(FX(1), y0 + ph); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, 0.5, 1, 1.5, 2].forEach(function (f) { ctx.fillText(nf(f, l, 1), FX(f), y0 + ph + 3); });
+    ctx.fillText(str(S.fAxis, l), Lm + pw / 2, y0 + ph + 15);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    var yt = DiagramUI.ticks(ymin, ymax, ph, size.density) || [ymin, ymax];
+    yt.forEach(function (v) { if (v < ymin || v > ymax) return; ctx.fillText(keur(v, l), Lm - 4, FY(v)); });
+    var order = sorted.map(function (r) { return r.id; });
+    cv.forEach(function (c) {
+      var k = order.indexOf(c.id);
+      ctx.strokeStyle = DiagramUI.series(k % 6); ctx.lineWidth = c.id === R.leader ? 2.5 : 1.5;
+      ctx.beginPath(); c.pts.forEach(function (p, i) { if (i) ctx.lineTo(FX(p[0]), FY(p[1])); else ctx.moveTo(FX(p[0]), FY(p[1])); }); ctx.stroke();
+      var e = c.pts[c.pts.length - 1]; ctx.fillStyle = DiagramUI.series(k % 6); ctx.textAlign = 'right'; ctx.fillText(c.id, FX(2) - 2, FY(e[1]) - 7);
+    });
+  }
+
+  /* ---- examples (presets): numbers come from TndQl.PRESETS, each aha is a test in _tnd/quotelevel/test.mjs and the bench ---- */
+  var IK = {
+    bms: T('BMS integration and controls', 'Інтеграція в BMS і автоматика', 'GLT-Anbindung und Regelung', 'GBS-integratie en regeling', 'Intégration GTC et régulation', 'Integración BMS y control', 'Integracja BMS i automatyka'),
+    crane: T('Hoisting of rooftop AHUs (crane)', 'Підйом дахових AHU (кран)', 'Einheben der Dach-RLT-Geräte (Kran)', 'Inhijsen van dak-LBK’s (kraan)', 'Levage des CTA en toiture (grue)', 'Izado de climatizadoras en cubierta (grúa)', 'Wciągnięcie central dachowych (dźwig)'),
+    tab: T('Testing, adjusting and balancing', 'Випробування, налагодження й балансування', 'Prüfen, Einregulieren, hydraulischer Abgleich', 'Testen, inregelen en balanceren', 'Essais, réglages et équilibrage', 'Pruebas, ajuste y equilibrado', 'Próby, regulacja i równoważenie'),
+    dampers: T('Fire dampers and interface with fire alarm', 'Протипожежні клапани та зв’язок із пожсигналізацією', 'Brandschutzklappen und Schnittstelle BMA', 'Brandkleppen en koppeling met branddetectie', 'Clapets coupe-feu et interface SSI', 'Compuertas cortafuegos e interfaz con detección', 'Klapy pożarowe i współpraca z SSP'),
+    bwic: T('Builders’ work: openings, sleeves, fire-stopping', 'Будівельні роботи: отвори, гільзи, протипожежне ущільнення', 'Bauseitige Leistungen: Durchbrüche, Hülsen, Abschottungen', 'Bouwkundige werken: sparingen, mantelbuizen, brandwerende afdichting', 'Travaux de gros œuvre : réservations, fourreaux, calfeutrement coupe-feu', 'Ayudas de albañilería: huecos, pasamuros, sellado cortafuegos', 'Roboty budowlane: otwory, tuleje, uszczelnienia ppoż.'),
+    oandm: T('As-built drawings, O&M manuals, training', 'Виконавча документація, інструкції з експлуатації, навчання', 'Revisionsunterlagen, Betriebsanleitungen, Einweisung', 'As-builtplannen, onderhoudshandleidingen, opleiding', 'DOE, dossier d’exploitation, formation', 'Planos as-built, manuales de O&M, formación', 'Dokumentacja powykonawcza, instrukcje, szkolenie'),
+    tempheat: T('Temporary heating during works', 'Тимчасове опалення під час робіт', 'Bauheizung', 'Tijdelijke verwarming tijdens de werken', 'Chauffage provisoire de chantier', 'Calefacción provisional de obra', 'Ogrzewanie tymczasowe w trakcie robót'),
+    maint: T('Maintenance during the defects period (2 years)', 'Обслуговування в гарантійний період (2 роки)', 'Wartung während der Gewährleistung (2 Jahre)', 'Onderhoud tijdens de waarborgperiode (2 jaar)', 'Maintenance pendant la période de garantie (2 ans)', 'Mantenimiento en el periodo de garantía (2 años)', 'Konserwacja w okresie rękojmi (2 lata)'),
+    fat: T('Witnessed FAT at the works (incl. travel)', 'FAT на заводі за участі замовника (з відрядженням)', 'Werksabnahme mit Zeugen (inkl. Reise)', 'Bijgewoonde FAT in de fabriek (incl. reis)', 'FAT en usine avec témoin (déplacement compris)', 'FAT presenciada en fábrica (con viaje)', 'FAT u producenta z udziałem odbiorcy (z podróżą)'),
+    spares: T('Spare parts for 2 years of operation', 'Запчастини на 2 роки експлуатації', 'Ersatzteile für 2 Betriebsjahre', 'Reserveonderdelen voor 2 jaar bedrijf', 'Pièces de rechange pour 2 ans d’exploitation', 'Repuestos para 2 años de operación', 'Części zamienne na 2 lata eksploatacji'),
+    comm: T('Commissioning supervision on site', 'Шеф-налагодження на майданчику', 'Inbetriebnahmeüberwachung vor Ort', 'Supervisie inbedrijfstelling op de bouwplaats', 'Supervision de mise en service sur site', 'Supervisión de puesta en marcha en obra', 'Nadzór nad rozruchem na budowie'),
+    cert: T('EN 12845 / insurer approval documentation', 'Документація EN 12845 / погодження страховика', 'Nachweise EN 12845 / Versicherer-Zulassung', 'Documentatie EN 12845 / goedkeuring verzekeraar', 'Dossier EN 12845 / agrément de l’assureur', 'Documentación EN 12845 / aprobación de la aseguradora', 'Dokumentacja EN 12845 / akceptacja ubezpieczyciela'),
+    cabletray: T('Cable trays and supports', 'Кабельні лотки та кріплення', 'Kabeltrassen und Halterungen', 'Kabelgoten en ophangingen', 'Chemins de câbles et supports', 'Bandejas y soportes de cables', 'Koryta kablowe i zawiesia'),
+    earthing: T('Earthing and lightning protection', 'Заземлення та блискавкозахист', 'Erdung und Blitzschutz', 'Aarding en bliksembeveiliging', 'Mise à la terre et paratonnerre', 'Puesta a tierra y pararrayos', 'Uziemienie i ochrona odgromowa'),
+    precomm: T('Pre-commissioning and loop checks', 'Пусконалагодження та перевірка контурів', 'Vorinbetriebnahme und Loop-Checks', 'Pre-commissioning en loopchecks', 'Pré-mise en service et contrôles de boucles', 'Precomisionado y pruebas de lazos', 'Prace przedrozruchowe i sprawdzenie pętli'),
+    hv: T('HV terminations and tests', 'Оброблення кінців ВН і випробування', 'HS-Endverschlüsse und Prüfungen', 'HS-eindsluitingen en testen', 'Extrémités HT et essais', 'Terminaciones AT y pruebas', 'Głowice WN i próby'),
+    asbuilt: T('As-built documentation', 'Виконавча документація', 'Revisionsunterlagen', 'As-builtdocumentatie', 'Dossier des ouvrages exécutés', 'Documentación as-built', 'Dokumentacja powykonawcza'),
+    scaffold: T('Scaffolding and access', 'Риштування та доступ', 'Gerüste und Zugang', 'Stellingen en toegang', 'Échafaudages et accès', 'Andamios y accesos', 'Rusztowania i dostęp'),
+    galv: T('Hot-dip galvanising', 'Гаряче цинкування', 'Feuerverzinkung', 'Thermisch verzinken', 'Galvanisation à chaud', 'Galvanizado en caliente', 'Cynkowanie ogniowe'),
+    paint: T('Paint system (duplex)', 'Система фарбування (дуплекс)', 'Beschichtungssystem (Duplex)', 'Verfsysteem (duplex)', 'Système de peinture (duplex)', 'Sistema de pintura (dúplex)', 'System malarski (duplex)'),
+    fireproof: T('Fire protection R60 (intumescent)', 'Вогнезахист R60 (спучувальний)', 'Brandschutz R60 (dämmschichtbildend)', 'Brandwerende bescherming R60 (intumescent)', 'Protection au feu R60 (intumescente)', 'Protección al fuego R60 (intumescente)', 'Ochrona ogniowa R60 (pęczniejąca)'),
+    shopdwg: T('Shop drawings and connection design', 'Робочі креслення та розрахунок вузлів', 'Werkstattzeichnungen und Anschlussbemessung', 'Werkplaatstekeningen en verbindingsberekening', 'Plans d’atelier et calcul des assemblages', 'Planos de taller y cálculo de uniones', 'Rysunki warsztatowe i obliczenia połączeń')
+  };
+  var QN = {
+    'hvac-sub': ['Klimatech NV', 'Thermo-Services SA', 'Coolair BV', 'HVAC Partners'],
+    'pumps-landed': ['Pumpenwerk GmbH (DE)', 'FirePump Inc. (US)', 'Shanghai Pump Co. (CN)'],
+    'elec-epc': ['Elec-Install SA', 'Power & Control NV', 'Volta EPC Services'],
+    'steel-policy': ['Staalbouw Kempen', 'Constructions Métalliques Liège', 'SteelPro Polska']
+  };
+  var EXT = {
+    'hvac-sub': { group: 'be',
+      label: T('Contractor: HVAC subcontract, Brussels office building, 4 quotes', 'Підрядник: субпідряд ОВК, офісна будівля в Брюсселі, 4 пропозиції', 'Auftragnehmer: HLK-Nachunternehmer, Bürogebäude Brüssel, 4 Angebote', 'Aannemer: HVAC-onderaanneming, kantoorgebouw Brussel, 4 offertes', 'Entreprise : sous-traitance CVC, immeuble de bureaux à Bruxelles, 4 offres', 'Contratista: subcontrato de climatización, edificio de oficinas en Bruselas, 4 ofertas', 'Wykonawca: podwykonawstwo HVAC, biurowiec w Brukseli, 4 oferty'),
+      aha: T('The cheapest quote on paper (2.45 M€, 6.1 % below the next) leaves out BMS, hoisting and balancing and is vague on builders’ work: 320 k€ of plugs (11.6 %) make it the dearest, rank 4. Q2 leads levelled at 2.636 M€, 54 k€ ahead.',
+             'Найдешевша на папері пропозиція (2,45 млн €, на 6,1 % нижча за наступну) не містить BMS, підйому й балансування і нечітка щодо будівельних робіт: 320 тис. € доцінок (11,6 %) роблять її найдорожчою — 4-те місце. Після вирівнювання лідирує Q2: 2,636 млн €, на 54 тис. € дешевше.',
+             'Das billigste Angebot auf dem Papier (2,45 Mio. €, 6,1 % unter dem nächsten) lässt GLT, Einheben und Einregulierung weg und ist bei den bauseitigen Leistungen unklar: 320 T€ Ansätze (11,6 %) machen es zum teuersten, Rang 4. Nivelliert führt Q2 mit 2,636 Mio. €, 54 T€ vorn.',
+             'De goedkoopste offerte op papier (2,45 M€, 6,1 % onder de volgende) laat GBS, inhijsen en inregelen weg en is vaag over de bouwkundige werken: 320 k€ aanvullingen (11,6 %) maken haar de duurste, rang 4. Genivelleerd staat Q2 eerst met 2,636 M€, 54 k€ voor.',
+             'L’offre la moins chère sur le papier (2,45 M€, 6,1 % sous la suivante) omet la GTC, le levage et l’équilibrage et reste imprécise sur le gros œuvre : 320 k€ de compléments (11,6 %) en font la plus chère, rang 4. Nivelée, Q2 est première à 2,636 M€, 54 k€ devant.',
+             'La oferta más barata sobre el papel (2,45 M€, un 6,1 % por debajo de la siguiente) omite BMS, izado y equilibrado y es ambigua en albañilería: 320 k€ de complementos (11,6 %) la hacen la más cara, puesto 4. Homogeneizada, lidera Q2 con 2,636 M€, 54 k€ por delante.',
+             'Najtańsza na papierze oferta (2,45 mln €, o 6,1 % poniżej następnej) pomija BMS, wciągnięcie i równoważenie oraz jest niejasna co do robót budowlanych: 320 tys. € uzupełnień (11,6 %) czyni ją najdroższą — miejsce 4. Po wyrównaniu prowadzi Q2: 2,636 mln €, 54 tys. € przewagi.') },
+    'pumps-landed': { group: 'eq',
+      label: T('Fire-water pump sets for an Antwerp site: EU DAP, US EXW, China FOB', 'Пожежні насосні агрегати для майданчика в Антверпені: ЄС DAP, США EXW, Китай FOB', 'Löschwasserpumpen für einen Standort in Antwerpen: EU DAP, USA EXW, China FOB', 'Bluswaterpompgroepen voor een site in Antwerpen: EU DAP, VS EXW, China FOB', 'Groupes de pompage incendie pour un site anversois : UE DAP, É.-U. EXW, Chine FOB', 'Grupos de bombeo contra incendios para una planta en Amberes: UE DAP, EE. UU. EXW, China FOB', 'Zestawy pomp pożarowych dla zakładu w Antwerpii: UE DAP, USA EXW, Chiny FOB'),
+      aha: T('China FOB is 29.0 % below the EU quote on paper, yet landed on site and levelled it leads by only 12.5 k€ (415.5 vs 428.0 k€) — and 23.8 % of its cost is your plugs. If they are 12.6 % too low (f > 1.126), the US quote wins: clarify FAT, spares, commissioning and approvals first.',
+             'Китай FOB на папері на 29,0 % дешевший за пропозицію з ЄС, але з доставкою на майданчик і після вирівнювання лідирує лише на 12,5 тис. € (415,5 проти 428,0 тис. €) — і 23,8 % його вартості становлять ваші доцінки. Якщо вони занижені на 12,6 % (f > 1,126), виграє пропозиція зі США: спершу з’ясуйте FAT, запчастини, налагодження й погодження.',
+             'China FOB liegt auf dem Papier 29,0 % unter dem EU-Angebot, führt aber frei Baustelle und nivelliert nur mit 12,5 T€ (415,5 gegen 428,0 T€) — und 23,8 % seiner Kosten sind Ihre Ansätze. Sind sie 12,6 % zu niedrig (f > 1,126), gewinnt das US-Angebot: zuerst FAT, Ersatzteile, Inbetriebnahme und Zulassungen klären.',
+             'China FOB ligt op papier 29,0 % onder de EU-offerte, maar geleverd op de bouwplaats en genivelleerd staat ze maar 12,5 k€ voor (415,5 tegen 428,0 k€) — en 23,8 % van haar kost zijn uw aanvullingen. Zijn die 12,6 % te laag (f > 1,126), dan wint de Amerikaanse offerte: verduidelijk eerst FAT, reserveonderdelen, inbedrijfstelling en goedkeuringen.',
+             'La Chine FOB est 29,0 % sous l’offre UE sur le papier, mais rendue chantier et nivelée elle ne devance que de 12,5 k€ (415,5 contre 428,0 k€) — et 23,8 % de son coût sont vos compléments. S’ils sont 12,6 % trop bas (f > 1,126), l’offre américaine gagne : clarifiez d’abord FAT, pièces, mise en service et agréments.',
+             'China FOB está un 29,0 % por debajo de la oferta UE sobre el papel, pero puesta en obra y homogeneizada solo lidera por 12,5 k€ (415,5 frente a 428,0 k€) — y el 23,8 % de su coste son sus complementos. Si son un 12,6 % bajos (f > 1,126), gana la oferta de EE. UU.: aclare primero FAT, repuestos, puesta en marcha y aprobaciones.',
+             'Chiny FOB są na papierze o 29,0 % tańsze od oferty z UE, ale z dostawą na budowę i po wyrównaniu prowadzą tylko o 12,5 tys. € (415,5 wobec 428,0 tys. €) — a 23,8 % ich kosztu to Twoje uzupełnienia. Jeśli są zaniżone o 12,6 % (f > 1,126), wygrywa oferta z USA: najpierw wyjaśnij FAT, części, rozruch i akceptacje.') },
+    'elec-epc': { group: 'epc',
+      label: T('EPC contractor (FIDIC Yellow): electrical subcontract, 3 quotes', 'EPC-підрядник (FIDIC Yellow): електромонтажний субпідряд, 3 пропозиції', 'EPC-Auftragnehmer (FIDIC Yellow): Elektro-Nachunternehmer, 3 Angebote', 'EPC-aannemer (FIDIC Yellow): elektrische onderaanneming, 3 offertes', 'Entreprise EPC (FIDIC Yellow) : sous-traitance électrique, 3 offres', 'Contratista EPC (FIDIC Yellow): subcontrato eléctrico, 3 ofertas', 'Wykonawca EPC (FIDIC Yellow): podwykonawstwo elektryczne, 3 oferty'),
+      aha: T('Q1 leads by 105 k€, but on three “unclear” items. The lead holds only up to plug factor 1.447: if your estimates for earthing, pre-commissioning and scaffolding are 45 % low, Q2 is cheaper. Get them confirmed in the post-tender meeting.',
+             'Q1 лідирує на 105 тис. €, але на трьох «неясних» позиціях. Перевага тримається лише до множника 1,447: якщо ваші оцінки заземлення, пусконалагодження й риштування занижені на 45 %, дешевшою стає Q2. Підтвердьте їх на післятендерній зустрічі.',
+             'Q1 führt mit 105 T€, aber auf drei „unklaren“ Positionen. Der Vorsprung hält nur bis Faktor 1,447: sind Ihre Ansätze für Erdung, Vorinbetriebnahme und Gerüste 45 % zu niedrig, ist Q2 billiger. Im Bietergespräch bestätigen lassen.',
+             'Q1 staat 105 k€ voor, maar op drie “onduidelijke” items. De voorsprong houdt maar tot factor 1,447: zijn uw ramingen voor aarding, pre-commissioning en stellingen 45 % te laag, dan is Q2 goedkoper. Laat ze bevestigen in het verduidelijkingsgesprek.',
+             'Q1 mène de 105 k€, mais sur trois postes « imprécis ». L’avance ne tient que jusqu’au facteur 1,447 : si vos estimations pour la terre, la pré-mise en service et les échafaudages sont 45 % trop basses, Q2 est moins chère. Faites-les confirmer en réunion de clarification.',
+             'Q1 lidera por 105 k€, pero sobre tres partidas «ambiguas». La ventaja solo se mantiene hasta el factor 1,447: si sus estimaciones de puesta a tierra, precomisionado y andamios son un 45 % bajas, Q2 es más barata. Hágalas confirmar en la reunión de aclaraciones.',
+             'Q1 prowadzi o 105 tys. €, ale na trzech „niejasnych” pozycjach. Przewaga utrzymuje się tylko do mnożnika 1,447: jeśli Twoje wyceny uziemienia, prac przedrozruchowych i rusztowań są zaniżone o 45 %, tańsza jest Q2. Potwierdź je na spotkaniu wyjaśniającym.') },
+    'steel-policy': { group: 'be',
+      label: T('Structural steel package with itemised prices: which plug rule?', 'Пакет металоконструкцій з розбивкою цін: яке правило доцінок?', 'Stahlbaupaket mit Einzelpreisen: welche Ansatzregel?', 'Staalbouwpakket met uitgesplitste prijzen: welke aanvullingsregel?', 'Lot charpente métallique avec prix détaillés : quelle règle de complément ?', 'Paquete de estructura metálica con precios desglosados: ¿qué regla de complemento?', 'Pakiet konstrukcji stalowych z cenami jednostkowymi: jaka reguła uzupełnień?'),
+      aha: T('With your own estimates Q3 wins by 30 k€. Plug its missing galvanising at the highest price another bidder quoted (145 k€ instead of your 90 k€) and Q2 wins (1.990 vs 2.015 M€): your estimate is below the market. Fix the plug rule before opening the quotes.',
+             'З вашими власними оцінками виграє Q3 з перевагою 30 тис. €. Доцініть відсутнє цинкування за найвищою ціною іншого учасника (145 тис. € замість ваших 90 тис. €) — і виграє Q2 (1,990 проти 2,015 млн €): ваша оцінка нижча за ринок. Зафіксуйте правило доцінок до розкриття пропозицій.',
+             'Mit Ihren eigenen Ansätzen gewinnt Q3 mit 30 T€. Setzen Sie die fehlende Verzinkung zum höchsten Preis eines anderen Bieters an (145 T€ statt Ihrer 90 T€), gewinnt Q2 (1,990 gegen 2,015 Mio. €): Ihr Ansatz liegt unter dem Markt. Ansatzregel vor der Angebotsöffnung festlegen.',
+             'Met uw eigen ramingen wint Q3 met 30 k€. Vul de ontbrekende verzinking aan tegen de hoogste prijs van een andere inschrijver (145 k€ in plaats van uw 90 k€) en Q2 wint (1,990 tegen 2,015 M€): uw raming ligt onder de markt. Leg de aanvullingsregel vast vóór de opening van de offertes.',
+             'Avec vos estimations Q3 gagne de 30 k€. Complétez la galvanisation manquante au prix le plus élevé d’un autre soumissionnaire (145 k€ au lieu de vos 90 k€) et Q2 gagne (1,990 contre 2,015 M€) : votre estimation est sous le marché. Fixez la règle avant l’ouverture des offres.',
+             'Con sus propias estimaciones gana Q3 por 30 k€. Complete el galvanizado ausente al precio más alto de otro licitador (145 k€ en lugar de sus 90 k€) y gana Q2 (1,990 frente a 2,015 M€): su estimación está por debajo del mercado. Fije la regla antes de abrir las ofertas.',
+             'Przy Twoich wycenach wygrywa Q3 o 30 tys. €. Uzupełnij brakujące cynkowanie po najwyższej cenie innego oferenta (145 tys. € zamiast Twoich 90 tys. €), a wygrywa Q2 (1,990 wobec 2,015 mln €): Twoja wycena jest poniżej rynku. Ustal regułę przed otwarciem ofert.') }
+  };
+  var GROUP = {
+    be: T('Contractor levelling subcontract quotes', 'Підрядник вирівнює пропозиції субпідрядників', 'Auftragnehmer vergleicht Nachunternehmerangebote', 'Aannemer vergelijkt offertes van onderaannemers', 'Entreprise nivelant des offres de sous-traitants', 'Contratista homogeneizando ofertas de subcontratistas', 'Wykonawca wyrównuje oferty podwykonawców'),
+    eq: T('Equipment from several countries', 'Обладнання з різних країн', 'Ausrüstung aus mehreren Ländern', 'Uitrusting uit meerdere landen', 'Équipements de plusieurs pays', 'Equipos de varios países', 'Urządzenia z kilku krajów'),
+    epc: T('EPC / FIDIC', 'EPC / FIDIC', 'EPC / FIDIC', 'EPC / FIDIC', 'EPC / FIDIC', 'EPC / FIDIC', 'EPC / FIDIC')
+  };
+  var PKG = { 'hvac-sub': 'HVAC', 'pumps-landed': 'Fire-water pumps', 'elec-epc': 'Electrical', 'steel-policy': 'Structural steel' };
+  function applyPreset(t, p) {
+    var keep = { tenderRef: t.tenderRef, preparedBy: t.preparedBy }, l = lang();
+    Object.keys(DEFAULTS).forEach(function (k) { if (k !== 'items' && k !== 'quotes' && k !== 'gaps') t[k] = JSON.parse(JSON.stringify(DEFAULTS[k])); });
+    t.tenderRef = keep.tenderRef; t.preparedBy = keep.preparedBy;
+    t.policy = p.policy; t.unclear = +(100 * p.unclear).toFixed(6); t.rate = +(100 * p.rate).toFixed(6); t.gapWarn = +(100 * p.gapWarn).toFixed(6);
+    t.load = p.load || 0; t.ins = +(100 * (p.ins || 0)).toFixed(6); t.duty = +(100 * (p.duty || 0)).toFixed(6); t.impFix = p.impFix || 0; t.unload = p.unload || 0;
+    t.pkgName = PKG[p.id] || '';
+    setArr(t, 'items', p.items.map(function (it) { return { id: it.id, name: str(IK[it.key], l) || it.key, allowance: it.allowance }; }));
+    var names = QN[p.id] || [];
+    setArr(t, 'quotes', p.quotes.map(function (q, k) {
+      return { id: q.id, name: names[k] || '', price: q.price, cur: q.cur, fx: q.fx, incoterm: q.incoterm, eu: q.eu !== false };
+    }));
+    setArr(t, 'terms', p.quotes.filter(function (q) { return q.pre || q.main || q.onc || q.adv || q.advMonths || q.adj; }).map(function (q) {
+      return { q: q.id, pre: q.pre || 0, main: q.main || 0, onc: q.onc || 0, adv: +(100 * (q.adv || 0)).toFixed(6), months: q.advMonths || 0, adj: q.adj || 0 };
+    }));
+    var gaps = [];
+    p.quotes.forEach(function (q) { Object.keys(q.cells).forEach(function (iid) { var c = q.cells[iid]; gaps.push({ q: q.id, item: iid, s: c.s, amt: c.amt == null ? null : c.amt }); }); });
+    setArr(t, 'gaps', gaps);
+  }
+  function buildExamples() {
+    var B = lib();
+    if (!B) return [];
+    return B.PRESETS.map(function (p) {
+      var x = EXT[p.id];
+      return { id: p.id, group: GROUP[x.group], label: x.label, note: x.aha, apply: function (t) { applyPreset(t, p); } };
+    });
+  }
+
+  /* ---- learn ---- */
+  function buildLearn() {
+    return {
+      version: 1,
+      intro: {
+        title: T('Quote levelling in one page', 'Вирівнювання пропозицій на одній сторінці', 'Preisspiegel auf einer Seite', 'Offertevergelijking op één pagina', 'Le nivellement des offres en une page', 'Homogeneización de ofertas en una página', 'Wyrównanie ofert na jednej stronie'),
+        body: T('Life-cycle stage 5: the contractor has sent RFQs to subcontractors and suppliers and must carry one price per package into its own bid. Quotes never cover the same scope on the same terms; levelling adds what each one leaves out, lands every quote on site in euro and shows which is really cheapest — and how sure that is.',
+                'Етап життєвого циклу 5: підрядник розіслав запити субпідрядникам і постачальникам і має внести в свою пропозицію одну ціну на пакет. Пропозиції ніколи не покривають однаковий обсяг на однакових умовах; вирівнювання додає те, чого бракує кожній, зводить усі до доставки на майданчик у євро і показує, яка насправді найдешевша — і наскільки це надійно.',
+                'Lebenszyklus-Phase 5: der Auftragnehmer hat Nachunternehmer und Lieferanten angefragt und muss je Paket einen Preis in sein Angebot übernehmen. Angebote decken nie denselben Umfang zu denselben Bedingungen; der Preisspiegel ergänzt, was jedem fehlt, rechnet alle frei Baustelle in Euro und zeigt, welches wirklich das günstigste ist — und wie sicher.',
+                'Fase 5 van de levenscyclus: de aannemer heeft prijsaanvragen naar onderaannemers en leveranciers gestuurd en moet per pakket één prijs in zijn eigen offerte opnemen. Offertes dekken nooit dezelfde scope tegen dezelfde voorwaarden; de vergelijking vult aan wat elk mist, zet elke offerte geleverd op de bouwplaats in euro en toont welke echt de goedkoopste is — en hoe zeker dat is.',
+                'Étape 5 du cycle de vie : l’entreprise a consulté sous-traitants et fournisseurs et doit reporter un prix par lot dans sa propre offre. Les offres ne couvrent jamais le même périmètre aux mêmes conditions ; le nivellement ajoute ce qui manque à chacune, les rend toutes chantier en euros et montre laquelle est vraiment la moins chère — et avec quelle assurance.',
+                'Etapa 5 del ciclo de vida: el contratista ha pedido ofertas a subcontratistas y proveedores y debe llevar un precio por paquete a su propia oferta. Las ofertas nunca cubren el mismo alcance en las mismas condiciones; homogeneizar añade lo que omite cada una, pone todas en obra en euros y muestra cuál es realmente la más barata — y con qué seguridad.',
+                'Etap 5 cyklu życia: wykonawca wysłał zapytania do podwykonawców i dostawców i musi przenieść jedną cenę za pakiet do własnej oferty. Oferty nigdy nie obejmują tego samego zakresu na tych samych warunkach; wyrównanie dodaje to, czego brakuje każdej, sprowadza wszystkie do dostawy na budowę w euro i pokazuje, która jest naprawdę najtańsza — i na ile to pewne.')
+      },
+      topics: {
+        level: { title: T('Price on paper and levelled cost', 'Ціна на папері й вирівняна вартість', 'Papierpreis und nivellierte Kosten', 'Prijs op papier en genivelleerde kost', 'Prix sur le papier et coût nivelé', 'Precio sobre el papel y coste homogeneizado', 'Cena na papierze i koszt wyrównany'),
+          body: T('The levelled cost is what the package will cost you with that bidder: its price in euro, plus the options you must buy, plus your plug for every item it leaves out, plus the transport, insurance and duty you still pay to get the goods onto site, plus the cost of financing its advance and any commercial adjustment. Compare levelled costs, not prices.',
+                  'Вирівняна вартість — це скільки пакет коштуватиме вам із цим учасником: його ціна в євро плюс опції, які доведеться купити, плюс ваша доцінка за кожну позицію, якої він не включив, плюс перевезення, страхування й мито, які ви ще сплачуєте до майданчика, плюс вартість фінансування його авансу та комерційні коригування. Порівнюйте вирівняні вартості, а не ціни.',
+                  'Die nivellierten Kosten sind, was das Paket Sie mit diesem Bieter kostet: sein Preis in Euro, plus die Optionen, die Sie brauchen, plus Ihr Ansatz für jede fehlende Position, plus Transport, Versicherung und Zoll bis zur Baustelle, plus Finanzierung der Anzahlung und kaufmännische Korrekturen. Vergleichen Sie nivellierte Kosten, nicht Preise.',
+                  'De genivelleerde kost is wat het pakket u met die inschrijver kost: zijn prijs in euro, plus de opties die u moet nemen, plus uw aanvulling voor elk item dat ontbreekt, plus transport, verzekering en invoerrechten tot op de bouwplaats, plus de financiering van het voorschot en commerciële correcties. Vergelijk genivelleerde kosten, geen prijzen.',
+                  'Le coût nivelé est ce que le lot vous coûtera avec ce soumissionnaire : son prix en euros, plus les options à acheter, plus votre complément pour chaque poste omis, plus transport, assurance et droits jusqu’au chantier, plus le financement de son avance et les ajustements commerciaux. Comparez des coûts nivelés, pas des prix.',
+                  'El coste homogeneizado es lo que le costará el paquete con ese licitador: su precio en euros, más las opciones que debe comprar, más su complemento por cada partida omitida, más transporte, seguro y aranceles hasta obra, más la financiación del anticipo y los ajustes comerciales. Compare costes homogeneizados, no precios.',
+                  'Koszt wyrównany to tyle, ile kosztuje Cię pakiet z danym oferentem: jego cena w euro plus opcje do kupienia, plus Twoje uzupełnienie za każdą pominiętą pozycję, plus transport, ubezpieczenie i cło do budowy, plus finansowanie zaliczki i korekty handlowe. Porównuj koszty wyrównane, nie ceny.') },
+        scope: { title: T('Scope matrix: included, excluded, unclear, option', 'Матриця обсягу: включено, виключено, неясно, опція', 'Leistungsmatrix: enthalten, ausgeschlossen, unklar, Option', 'Scopematrix: inbegrepen, uitgesloten, onduidelijk, optie', 'Matrice du périmètre : inclus, exclu, imprécis, option', 'Matriz de alcance: incluido, excluido, ambiguo, opción', 'Macierz zakresu: zawarte, wyłączone, niejasne, opcja'),
+          body: T('List the scope items that bidders treat differently (from your requisition, or the lines that usually go missing: hoisting, testing, documentation, temporary works). Read every quote’s exclusions and qualifications and record them here; whatever is not listed counts as included. A priced option adds the bidder’s own price; an exclusion adds your plug.',
+                  'Перелічіть позиції обсягу, які учасники трактують по-різному (з ваших технічних вимог або ті, що зазвичай випадають: підйом, випробування, документація, тимчасові роботи). Прочитайте виключення й застереження кожної пропозиції та внесіть їх сюди; усе, чого тут немає, вважається включеним. Окремо оцінена опція додає ціну учасника; виключення — вашу доцінку.',
+                  'Listen Sie die Positionen auf, die Bieter unterschiedlich behandeln (aus Ihrer Anfrage oder die üblichen Lücken: Einheben, Prüfungen, Dokumentation, Hilfsleistungen). Lesen Sie Ausschlüsse und Vorbehalte jedes Angebots und tragen Sie sie hier ein; alles Nichtaufgeführte gilt als enthalten. Eine bepreiste Option addiert den Bieterpreis, ein Ausschluss Ihren Ansatz.',
+                  'Som de scope-items op die inschrijvers verschillend behandelen (uit uw aanvraagspecificatie of de gebruikelijke gaten: inhijsen, testen, documentatie, tijdelijke werken). Lees de uitsluitingen en voorbehouden van elke offerte en noteer ze hier; wat niet vermeld is, geldt als inbegrepen. Een geprijsde optie telt de prijs van de inschrijver op, een uitsluiting uw aanvulling.',
+                  'Listez les postes que les soumissionnaires traitent différemment (de votre réquisition, ou les oublis habituels : levage, essais, documentation, ouvrages provisoires). Lisez exclusions et réserves de chaque offre et reportez-les ici ; ce qui n’est pas listé est réputé inclus. Une option chiffrée ajoute le prix du soumissionnaire ; une exclusion, votre complément.',
+                  'Enumere las partidas que los licitadores tratan de forma distinta (de su requisición o los huecos habituales: izado, pruebas, documentación, medios auxiliares). Lea exclusiones y salvedades de cada oferta y anótelas aquí; lo no listado se considera incluido. Una opción cotizada suma el precio del licitador; una exclusión, su complemento.',
+                  'Wypisz pozycje, które oferenci traktują różnie (ze specyfikacji zapytania lub typowe luki: wciągnięcie, próby, dokumentacja, roboty tymczasowe). Przeczytaj wyłączenia i zastrzeżenia każdej oferty i wpisz je tutaj; to, czego nie wymieniono, uznaje się za zawarte. Wyceniona opcja dodaje cenę oferenta, wyłączenie — Twoje uzupełnienie.') },
+        plugs: { title: T('Plugs and the plug rule', 'Доцінки та правило доцінок', 'Ansätze und Ansatzregel', 'Aanvullingen en de aanvullingsregel', 'Compléments et règle de complément', 'Complementos y regla de complemento', 'Uzupełnienia i reguła uzupełnień'),
+          body: T('A plug is the money you add for a missing item. Three common rules: your own estimate; the highest price another bidder gave for that item (conservative, used when quotes are itemised); the mean of the others. Choose the rule before opening — the steel example shows it can pick the winner. Unclear items count at a share of the plug (100 % until the bidder confirms in writing).',
+                  'Доцінка — це сума, яку ви додаєте за відсутню позицію. Три поширені правила: власна оцінка; найвища ціна, яку за цю позицію дав інший учасник (консервативно, коли пропозиції мають розбивку); середня ціна інших. Оберіть правило до розкриття — приклад зі сталлю показує, що воно може визначити переможця. Неясні позиції враховуються як частка доцінки (100 %, доки учасник не підтвердить письмово).',
+                  'Ein Ansatz ist der Betrag, den Sie für eine fehlende Position zuschlagen. Drei übliche Regeln: eigener Ansatz; der höchste Preis eines anderen Bieters für diese Position (vorsichtig, bei aufgeschlüsselten Angeboten); der Mittelwert der anderen. Regel vor der Öffnung wählen — das Stahlbeispiel zeigt, dass sie den Gewinner bestimmen kann. Unklare Positionen zählen mit einem Anteil (100 %, bis der Bieter schriftlich bestätigt).',
+                  'Een aanvulling is het bedrag dat u optelt voor een ontbrekend item. Drie gangbare regels: uw eigen raming; de hoogste prijs die een andere inschrijver voor dat item gaf (voorzichtig, bij uitgesplitste offertes); het gemiddelde van de anderen. Kies de regel vóór de opening — het staalvoorbeeld toont dat ze de winnaar kan bepalen. Onduidelijke items tellen voor een deel van de aanvulling (100 % tot schriftelijke bevestiging).',
+                  'Un complément est le montant ajouté pour un poste manquant. Trois règles courantes : votre estimation ; le prix le plus élevé d’un autre soumissionnaire pour ce poste (prudent, si les offres sont détaillées) ; la moyenne des autres. Choisissez la règle avant l’ouverture — l’exemple acier montre qu’elle peut désigner le gagnant. Les postes imprécis comptent pour une part du complément (100 % jusqu’à confirmation écrite).',
+                  'Un complemento es el importe que suma por una partida ausente. Tres reglas habituales: su estimación; el precio más alto de otro licitador para esa partida (prudente, con ofertas desglosadas); la media de los demás. Elija la regla antes de abrir — el ejemplo del acero muestra que puede decidir el ganador. Las partidas ambiguas cuentan por una parte del complemento (100 % hasta confirmación escrita).',
+                  'Uzupełnienie to kwota dodawana za brakującą pozycję. Trzy typowe reguły: własna wycena; najwyższa cena innego oferenta za tę pozycję (ostrożnie, przy ofertach z rozbiciem); średnia pozostałych. Wybierz regułę przed otwarciem — przykład ze stalą pokazuje, że może wskazać zwycięzcę. Pozycje niejasne liczą się jako część uzupełnienia (100 % do pisemnego potwierdzenia).') },
+        incoterms: { title: T('Incoterms 2020: who pays which leg', 'Incoterms 2020: хто платить за яку ділянку', 'Incoterms 2020: wer zahlt welchen Abschnitt', 'Incoterms 2020: wie betaalt welk traject', 'Incoterms 2020 : qui paie quel tronçon', 'Incoterms 2020: quién paga cada tramo', 'Incoterms 2020: kto płaci za który odcinek'),
+          body: T('Every quote is brought to one basis: landed on site, import cleared, unloaded. Under EXW you pay everything from the seller’s floor; FCA adds loading and export formalities by the seller; FAS/FOB also the leg to the port; CFR/CPT the main carriage (CPT here to the site); CIF/CIP also the insurance; DAP carries the risk to site (no insurance for you); DPU also unloads; DDP also clears import and pays duty. Enter the legs per quote; the tool adds the ones the seller does not pay.',
+                  'Кожну пропозицію зводять до однієї бази: доставлено на майданчик, розмитнено, розвантажено. За EXW ви платите все від складу продавця; FCA — продавець завантажує й оформлює експорт; FAS/FOB — ще й доставка до порту; CFR/CPT — основне перевезення (CPT тут до майданчика); CIF/CIP — ще й страхування; DAP — ризик до майданчика несе продавець (страхування вам не потрібне); DPU — ще й розвантаження; DDP — ще й імпортне оформлення та мито. Введіть ділянки для кожної пропозиції; інструмент додасть ті, яких не оплачує продавець.',
+                  'Jedes Angebot wird auf eine Basis gebracht: frei Baustelle, verzollt, entladen. Bei EXW zahlen Sie alles ab Werk; FCA: Verladung und Ausfuhr durch den Verkäufer; FAS/FOB zusätzlich der Vorlauf zum Hafen; CFR/CPT der Hauptlauf (CPT hier bis zur Baustelle); CIF/CIP zusätzlich die Versicherung; DAP trägt das Risiko bis zur Baustelle (keine Versicherung für Sie); DPU entlädt auch; DDP verzollt auch und zahlt den Zoll. Abschnitte je Angebot eingeben; das Werkzeug addiert die, die der Verkäufer nicht zahlt.',
+                  'Elke offerte wordt op één basis gebracht: geleverd op de bouwplaats, ingeklaard, gelost. Bij EXW betaalt u alles vanaf de vloer van de verkoper; FCA: laden en uitvoerformaliteiten door de verkoper; FAS/FOB ook het traject tot de haven; CFR/CPT het hoofdtransport (CPT hier tot de bouwplaats); CIF/CIP ook de verzekering; DAP draagt het risico tot de bouwplaats (geen verzekering voor u); DPU lost ook; DDP klaart ook in en betaalt de rechten. Vul de trajecten per offerte in; de tool telt op wat de verkoper niet betaalt.',
+                  'Chaque offre est ramenée à une base : rendu chantier, dédouané, déchargé. En EXW vous payez tout depuis l’usine ; FCA : chargement et formalités d’export par le vendeur ; FAS/FOB aussi le pré-acheminement au port ; CFR/CPT le transport principal (CPT ici jusqu’au chantier) ; CIF/CIP aussi l’assurance ; DAP porte le risque jusqu’au chantier (pas d’assurance pour vous) ; DPU décharge aussi ; DDP dédouane aussi et paie les droits. Saisissez les tronçons par offre ; l’outil ajoute ceux que le vendeur ne paie pas.',
+                  'Cada oferta se lleva a una base: puesta en obra, despachada, descargada. En EXW paga todo desde el suelo del vendedor; FCA: carga y trámites de exportación por el vendedor; FAS/FOB también el tramo al puerto; CFR/CPT el transporte principal (CPT aquí hasta obra); CIF/CIP también el seguro; DAP lleva el riesgo hasta obra (sin seguro para usted); DPU también descarga; DDP también despacha importación y paga aranceles. Introduzca los tramos por oferta; la herramienta suma los que no paga el vendedor.',
+                  'Każdą ofertę sprowadza się do jednej bazy: dostawa na budowę, odprawa importowa, rozładunek. Przy EXW płacisz wszystko od magazynu sprzedawcy; FCA: załadunek i formalności wywozowe po stronie sprzedawcy; FAS/FOB także dowóz do portu; CFR/CPT przewóz główny (CPT tu do budowy); CIF/CIP także ubezpieczenie; DAP — ryzyko do budowy po stronie sprzedawcy (bez ubezpieczenia dla Ciebie); DPU także rozładunek; DDP także odprawa i cło. Wpisz odcinki dla każdej oferty; narzędzie doda te, których nie płaci sprzedawca.') },
+        customs: { title: T('Customs value and duty', 'Митна вартість і мито', 'Zollwert und Zoll', 'Douanewaarde en invoerrechten', 'Valeur en douane et droits', 'Valor en aduana y aranceles', 'Wartość celna i cło'),
+          body: T('For goods from outside the EU the duty is charged on the customs value: the price plus transport, insurance, loading and handling up to the entry into the Union (Union Customs Code, Reg. (EU) 952/2013 art. 70(1) and 71(1)(e)); transport after entry and erection or technical assistance after entry are not included (art. 72). So a FOB quote pays duty on its freight too. Take the rate for the HS code from TARIC. Simplification: a C or D price is taken as the customs value as quoted (on-carriage inside the EU not deducted).',
+                  'Для товарів з-поза ЄС мито нараховується на митну вартість: ціна плюс перевезення, страхування, завантаження й обробка до ввезення в Союз (Митний кодекс Союзу, Регламент (ЄС) 952/2013, ст. 70(1) і 71(1)(e)); перевезення після ввезення та монтаж чи технічна допомога після ввезення не включаються (ст. 72). Тож пропозиція FOB сплачує мито й на фрахт. Ставку для коду ТН ЗЕД беріть з TARIC. Спрощення: ціна за правилом C чи D береться як митна вартість без змін (доставку всередині ЄС не вираховано).',
+                  'Für Waren von außerhalb der EU wird der Zoll auf den Zollwert erhoben: Preis plus Beförderung, Versicherung, Lade- und Behandlungskosten bis zum Verbringen in die Union (Zollkodex der Union, VO (EU) 952/2013 Art. 70 Abs. 1 und 71 Abs. 1 Buchst. e); Beförderung nach dem Eingang sowie Montage oder technische Unterstützung danach gehören nicht dazu (Art. 72). Ein FOB-Angebot zahlt also auch Zoll auf die Fracht. Satz der HS-Position aus TARIC. Vereinfachung: ein C- oder D-Preis gilt unverändert als Zollwert (Nachlauf in der EU nicht abgezogen).',
+                  'Voor goederen van buiten de EU worden de invoerrechten geheven op de douanewaarde: prijs plus vervoer, verzekering, laad- en behandelingskosten tot het binnenbrengen in de Unie (douanewetboek van de Unie, Verord. (EU) 952/2013 art. 70, lid 1, en 71, lid 1, e)); vervoer na binnenkomst en montage of technische bijstand daarna tellen niet mee (art. 72). Een FOB-offerte betaalt dus ook rechten op de vracht. Tarief van de GS-code uit TARIC. Vereenvoudiging: een C- of D-prijs telt ongewijzigd als douanewaarde (natransport binnen de EU niet afgetrokken).',
+                  'Pour les marchandises hors UE, les droits portent sur la valeur en douane : prix plus transport, assurance, chargement et manutention jusqu’à l’entrée dans l’Union (code des douanes de l’Union, règl. (UE) 952/2013 art. 70, par. 1, et 71, par. 1, e)) ; le transport après l’entrée et le montage ou l’assistance technique après l’entrée n’en font pas partie (art. 72). Une offre FOB paie donc aussi des droits sur le fret. Taux du code SH dans TARIC. Simplification : un prix C ou D est pris tel quel comme valeur en douane (post-acheminement dans l’UE non déduit).',
+                  'Para mercancías de fuera de la UE el arancel se aplica sobre el valor en aduana: precio más transporte, seguro, carga y manipulación hasta la entrada en la Unión (código aduanero de la Unión, Regl. (UE) 952/2013 art. 70.1 y 71.1.e); el transporte tras la entrada y el montaje o asistencia técnica posteriores no se incluyen (art. 72). Así una oferta FOB paga arancel también sobre el flete. Tipo del código SA en TARIC. Simplificación: un precio C o D se toma tal cual como valor en aduana (transporte final dentro de la UE no deducido).',
+                  'Dla towarów spoza UE cło nalicza się od wartości celnej: cena plus transport, ubezpieczenie, załadunek i obsługa do wprowadzenia do Unii (unijny kodeks celny, rozp. (UE) 952/2013 art. 70 ust. 1 i 71 ust. 1 lit. e); transport po wprowadzeniu oraz montaż lub pomoc techniczna po wprowadzeniu nie są wliczane (art. 72). Oferta FOB płaci więc cło także od frachtu. Stawkę kodu HS weź z TARIC. Uproszczenie: cenę C lub D przyjmuje się bez zmian jako wartość celną (dowóz wewnątrz UE nie jest odliczany).') },
+        money: { title: T('Currency, advances, adjustments', 'Валюта, аванси, коригування', 'Währung, Anzahlungen, Korrekturen', 'Munt, voorschotten, correcties', 'Devise, avances, ajustements', 'Divisa, anticipos, ajustes', 'Waluta, zaliczki, korekty'),
+          body: T('A foreign-currency price is converted at the rate you enter (euro per unit); the exchange risk until payment is yours unless hedged. An advance of a% paid m months before delivery costs a × price × rate × m/12. Put other commercial differences — shorter warranty, lower LD cap, longer payment terms — as a stated euro adjustment per quote, with the reason in the record.',
+                  'Ціна в іноземній валюті перераховується за введеним курсом (євро за одиницю); валютний ризик до оплати — ваш, якщо не хеджовано. Аванс a %, сплачений за m місяців до поставки, коштує a × ціна × ставка × m/12. Інші комерційні відмінності — коротша гарантія, нижчий ліміт неустойки, довша відстрочка — вносьте як заявлене коригування в євро для кожної пропозиції з причиною в записі.',
+                  'Ein Fremdwährungspreis wird zum eingegebenen Kurs (Euro je Einheit) umgerechnet; das Währungsrisiko bis zur Zahlung tragen Sie, wenn nicht abgesichert. Eine Anzahlung von a %, m Monate vor Lieferung gezahlt, kostet a × Preis × Satz × m/12. Andere kaufmännische Unterschiede — kürzere Gewährleistung, niedrigere Vertragsstrafen-Obergrenze, längere Zahlungsziele — als ausgewiesene Euro-Korrektur je Angebot mit Begründung im Protokoll.',
+                  'Een prijs in vreemde munt wordt omgerekend tegen de ingevoerde koers (euro per eenheid); het wisselkoersrisico tot betaling is voor u, tenzij ingedekt. Een voorschot van a %, m maanden vóór levering betaald, kost a × prijs × rente × m/12. Andere commerciële verschillen — kortere waarborg, lager plafond voor vertragingsboetes, langere betalingstermijn — als vermelde correctie in euro per offerte, met de reden in het verslag.',
+                  'Un prix en devise est converti au cours saisi (euros par unité) ; le risque de change jusqu’au paiement est le vôtre sauf couverture. Une avance de a % versée m mois avant livraison coûte a × prix × taux × m/12. Les autres écarts commerciaux — garantie plus courte, plafond de pénalités plus bas, délai de paiement plus long — en ajustement en euros affiché par offre, avec le motif au procès-verbal.',
+                  'Un precio en divisa se convierte al tipo introducido (euros por unidad); el riesgo de cambio hasta el pago es suyo salvo cobertura. Un anticipo del a % pagado m meses antes de la entrega cuesta a × precio × tipo × m/12. Otras diferencias comerciales — garantía más corta, tope de penalizaciones menor, plazo de pago más largo — como ajuste declarado en euros por oferta, con el motivo en el registro.',
+                  'Cena w obcej walucie jest przeliczana po wpisanym kursie (euro za jednostkę); ryzyko kursowe do zapłaty jest Twoje, jeśli go nie zabezpieczysz. Zaliczka a % płatna m miesięcy przed dostawą kosztuje a × cena × stopa × m/12. Inne różnice handlowe — krótsza gwarancja, niższy limit kar, dłuższy termin płatności — wpisz jako jawną korektę w euro dla oferty, z uzasadnieniem w protokole.') },
+        stability: { title: T('How sure is the winner?', 'Наскільки надійний переможець?', 'Wie sicher ist der Gewinner?', 'Hoe zeker is de winnaar?', 'Quelle certitude pour le gagnant ?', '¿Qué tan segura es la ganadora?', 'Na ile pewny jest zwycięzca?'),
+          body: T('Your plugs are estimates. Multiply all of them by a common factor f: the leader stays the cheapest for f between the two values on the tile. If the range does not reach well past 1 (below 1.5) or starts above 0.5, a moderate estimating error changes the winner — clarify the leader’s exclusions in writing before you carry its price into your bid or award the subcontract.',
+                  'Ваші доцінки — це оцінки. Помножте їх усі на спільний множник f: лідер лишається найдешевшим для f між двома значеннями на плитці. Якщо діапазон не сягає помітно далі 1 (менше 1,5) або починається вище 0,5, помірна похибка оцінки змінює переможця — з’ясуйте виключення лідера письмово, перш ніж переносити його ціну у свою пропозицію чи укладати субпідряд.',
+                  'Ihre Ansätze sind Schätzungen. Multiplizieren Sie alle mit einem gemeinsamen Faktor f: der Erste bleibt am günstigsten für f zwischen den beiden Werten auf der Kachel. Reicht der Bereich nicht deutlich über 1 (unter 1,5) oder beginnt er über 0,5, ändert ein mäßiger Schätzfehler den Gewinner — Ausschlüsse des Ersten schriftlich klären, bevor sein Preis ins Angebot geht oder der Auftrag vergeben wird.',
+                  'Uw aanvullingen zijn ramingen. Vermenigvuldig ze allemaal met een gemeenschappelijke factor f: de eerste blijft de goedkoopste voor f tussen de twee waarden op de tegel. Reikt het bereik niet duidelijk voorbij 1 (onder 1,5) of begint het boven 0,5, dan verandert een matige ramingsfout de winnaar — laat de uitsluitingen van de eerste schriftelijk verduidelijken voordat u zijn prijs in uw offerte neemt of de onderaanneming gunt.',
+                  'Vos compléments sont des estimations. Multipliez-les tous par un facteur commun f : le premier reste le moins cher pour f entre les deux valeurs de la tuile. Si la plage ne dépasse pas nettement 1 (moins de 1,5) ou commence au-dessus de 0,5, une erreur d’estimation modérée change le gagnant — faites clarifier par écrit les exclusions du premier avant de reprendre son prix ou de passer la sous-traitance.',
+                  'Sus complementos son estimaciones. Multiplíquelos todos por un factor común f: la primera sigue siendo la más barata para f entre los dos valores de la ficha. Si el rango no llega claramente más allá de 1 (menos de 1,5) o empieza por encima de 0,5, un error moderado de estimación cambia la ganadora — aclare por escrito las exclusiones de la primera antes de llevar su precio a su oferta o adjudicar el subcontrato.',
+                  'Twoje uzupełnienia to szacunki. Pomnóż je wszystkie przez wspólny mnożnik f: lider pozostaje najtańszy dla f między dwiema wartościami z kafelka. Jeśli zakres nie sięga wyraźnie powyżej 1 (poniżej 1,5) lub zaczyna się powyżej 0,5, umiarkowany błąd wyceny zmienia zwycięzcę — wyjaśnij na piśmie wyłączenia lidera, zanim przeniesiesz jego cenę do oferty lub zlecisz podwykonawstwo.') }
+      },
+      tour: [
+        { topic: 'level', focus: '.dgu-r-results' },
+        { topic: 'scope', focus: '[data-dgu-field="f-items"]' },
+        { topic: 'plugs', focus: '[data-dgu-field="f-gaps"]' },
+        { topic: 'incoterms', focus: '[data-dgu-field="f-quotes"]' },
+        { topic: 'customs', focus: '[data-dgu-field="f-duty"]' },
+        { topic: 'stability', focus: '.dgu-stage' }
+      ]
+    };
+  }
+
+  /* ---- project bar (tnd-core.js) ---- */
+  var bar = null, useMsg = null;
+  function projectPayload() {
+    if (!last || !last.ok) return null;
+    var R = last, raw = R.input;
+    var quotes = R.rows.map(function (r) {
+      var q = raw.quotes.filter(function (x) { return x.id === r.id; })[0];
+      var scope = {}, excl = [];
+      raw.items.forEach(function (it) { var c = q.cells[it.id]; scope[it.id] = c ? c.s : 'inc'; if (c && (c.s === 'exc' || c.s === 'unc')) excl.push(it.name || it.id); });
+      return { party: r.id, name: q.name || '', package: state.pkgName || '', price: r.valid ? r.P : null, price_currency: 'EUR', quoted_price: isFinite(q.price) ? q.price : null, quoted_currency: q.cur,
+               levelled: r.valid ? r.L : null, rank: r.valid ? r.rank : null, scope: scope, exclusions: excl,
+               terms: { incoterm: q.incoterm, eu_origin: q.eu, fx: isFinite(q.fx) ? q.fx : null, advance: q.adv, advance_months: q.advMonths, adjustment: q.adj } };
+    });
+    return {
+      state: JSON.parse(JSON.stringify(state)),
+      results: { leader: R.leader, leaders: R.leaders, paper_leader: R.rawLeader, lead: R.lead, stability: R.stability, flags: R.flags,
+                 levelled: R.rows.filter(function (r) { return r.valid; }).map(function (r) { return { id: r.id, price: r.P, levelled: r.L, plugs: r.plug, logistics: r.logistics, rank: r.rank, paper_rank: r.rawRank }; }) },
+      summary: { text: sumText(R, lang()) },
+      blocks: { quotes: quotes }
+    };
+  }
+  /* summary in the reader's language (also rebuilt from the saved results when a module is used) */
+  function sumText(res, l) {
+    var lv = res.levelled || res.rows || [], top = lv.filter(function (r) { return r.id === res.leader; })[0];
+    var paper = res.paper_leader !== undefined ? res.paper_leader : res.rawLeader;
+    if (!res.leader) return res.leaders && res.leaders.length ? S.vTie[l] + ': ' + res.leaders.join(' = ') : '';
+    var L = top ? (top.levelled != null ? top.levelled : top.L) : null;
+    return S.vLow[l] + ': ' + res.leader + (typeof L === 'number' ? ' — ' + eur(L, l) : '') + (paper && paper !== res.leader ? ' · ' + S.vPaper[l] + ': ' + paper : '');
+  }
+  function showUse(text, tone) {
+    if (!useMsg) return;
+    useMsg.textContent = text; useMsg.style.display = text ? '' : 'none';
+    useMsg.style.borderColor = tone === 'bad' ? 'var(--bad,#c0392b)' : (tone === 'warn' ? 'var(--warn,#d68910)' : 'var(--line,#e2e7ee)');
+  }
+  /* "Use": only our own saved module applies (nothing silently) */
+  function useProject(doc, moduleId) {
+    var L = lang();
+    if (moduleId && moduleId !== TOOL) { showUse(S.useOther[L], 'warn'); return { ok: false }; }
+    var mod = doc && doc.modules && doc.modules[TOOL];
+    if (!mod || !mod.state || typeof mod.state !== 'object') { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    var clean = sanitize(mod.state);
+    if (!clean.quotes || !clean.quotes.length) { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    assign(state, clean);
+    if (ui) { ui.sync(); ui.run(); }
+    var sm = mod.results && typeof mod.results === 'object' ? sumText(mod.results, L) : '';
+    showUse(S.useTaken[L] + ': ' + (sm || (mod.summary && typeof mod.summary.text === 'string' ? mod.summary.text.slice(0, 200) : TOOL)), 'ok');
+    return { ok: true, from: 'module' };
+  }
+  /* project-package/v1: scope of a requisition -> items */
+  function useRequisition(req) {
+    var B = lib(), L = lang();
+    if (!B || !req) return { ok: false };
+    var items = B.itemsFromRequisition(req);
+    if (!items.length) { showUse(S.reqNone[L], 'warn'); return { ok: false }; }
+    setArr(state, 'items', items.map(function (it) { return { id: it.id, name: it.name, allowance: 0 }; }));
+    var ids = {}; state.items.forEach(function (it) { ids[it.id] = 1; });
+    setArr(state, 'gaps', (state.gaps || []).filter(function (g) { return ids[g.item]; }));
+    if (req.package_id) state.pkgName = String(req.package_id).slice(0, 120);
+    if (req.requisition_no) state.tenderRef = String(req.requisition_no + (req.revision ? ' rev ' + req.revision : '')).slice(0, 200);
+    if (ui) { ui.sync(); ui.run(); }
+    showUse(S.reqDone[L] + ' (' + (req.label || req.id || '') + ', ' + items.length + ')', 'ok');
+    return { ok: true, n: items.length };
+  }
+  function onPackage(pkg) {
+    var L = lang();
+    var reqs = (pkg && pkg.requisitions || []).filter(function (r) { return r && Array.isArray(r.scope) && r.scope.length; });
+    if (!useMsg) return;
+    if (!reqs.length) { showUse(S.reqNone[L], 'warn'); return; }
+    useMsg.textContent = ''; useMsg.style.display = '';
+    var lab = document.createElement('span'); lab.textContent = S.reqFound[L] + ': ';
+    var sel = document.createElement('select'); sel.setAttribute('data-tnd', 'req-pick');
+    reqs.forEach(function (r, k) { var o = document.createElement('option'); o.value = String(k); o.textContent = (r.label || r.requisition_no || r.id || ('#' + (k + 1))) + ' (' + r.scope.length + ')'; sel.appendChild(o); });
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = S.reqUse[L]; b.setAttribute('data-tnd', 'req-use');
+    b.style.marginLeft = '6px';
+    b.addEventListener('click', function () { useRequisition(reqs[+sel.value]); });
+    useMsg.appendChild(lab); useMsg.appendChild(sel); useMsg.appendChild(b);
+  }
+  function mountBar(box) {
+    var C = core();
+    if (!C || !C.ui || typeof C.ui.projectBar !== 'function') return;
+    try {
+      var lc = document.createElement('div'); box.appendChild(lc);
+      if (typeof C.ui.lifecycle === 'function') C.ui.lifecycle({ mount: lc, toolId: TOOL, role: 'contractor', lang: lang });
+      var bx = document.createElement('div'); box.appendChild(bx);
+      bar = C.ui.projectBar({ mount: bx, toolId: TOOL, lang: lang,
+        getDoc: function () { var p = projectPayload(), d = bar ? bar.getDoc() : C.project.empty(); return p ? C.project.withModule(d, TOOL, p) : d; },
+        onChange: function () { },
+        onUse: function (id, mod, doc) { useProject(doc, id); },
+        onPackage: onPackage });
+      if (bar && bar.element) {
+        var css = 'min-height:var(--ctl-h,32px);padding:0 10px;border:1px solid var(--line,#e2e7ee);border-radius:var(--radius-sm,8px);background:var(--panel-2,#f9fafc);color:var(--ink,#12161d);cursor:pointer;font:inherit';
+        var b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('data-tnd', 'save-module'); b.textContent = '↥ ' + S.save[lang()]; b.style.cssText = css;
+        b.addEventListener('click', function () { var p = projectPayload(); if (p && bar) bar.commit(p); });
+        var head = bar.element.firstChild; if (head) head.appendChild(b);
+        useMsg = document.createElement('div');
+        useMsg.setAttribute('role', 'status'); useMsg.setAttribute('data-tnd', 'use-msg');
+        useMsg.style.cssText = 'display:none;margin-top:6px;padding:6px 8px;border:1px solid var(--line,#e2e7ee);border-left-width:4px;border-radius:var(--radius-sm,8px);font-size:0.92em';
+        bar.element.appendChild(useMsg);
+      }
+    } catch (e) { bar = null; }
+  }
+
+  function quoteOpts() { return (state.quotes || []).map(function (q) { return [String(q.id), String(q.id) + (q.name ? ' ' + String(q.name).slice(0, 18) : '')]; }); }
+  function itemOpts() { return (state.items || []).map(function (it) { return [String(it.id), String(it.id) + ' ' + String(it.name || '').slice(0, 26)]; }); }
+  function nextId(rows, p) { var m = 0; rows.forEach(function (r) { var k = parseInt(String(r.id || '').replace(/^\D+/, ''), 10); if (k > m) m = k; }); return p + (m + 1); }
+
+  function stagePanels() {
+    return [        { id: 'items', slot: 'stage', collapsible: true, title: S.pItems, fields: [
+          { id: 'f-items', key: 'items', type: 'list', label: S.pItems, learn: 'scope', addLabel: S.addItem, minRows: 0, maxRows: MAXI, reorder: true,
+            row: [ { key: 'id', type: 'text', label: S.id, width: '52px' },
+                   { key: 'name', type: 'text', label: S.iName },
+                   { key: 'allowance', type: 'number', label: S.allowance, min: 0, step: 'any', width: '110px' } ],
+            newRow: function (rows) { return { id: nextId(rows, 'I'), name: '', allowance: 0 }; } }
+        ] },
+        { id: 'quotes', slot: 'stage', collapsible: true, title: S.pQuotes, fields: [
+          { id: 'f-quotes', key: 'quotes', type: 'list', label: S.pQuotes, learn: 'incoterms', addLabel: S.addQuote, minRows: 0, maxRows: MAXQ, reorder: false,
+            row: [ { key: 'id', type: 'text', label: S.id, width: '48px' },
+                   { key: 'name', type: 'text', label: S.qName, width: '120px' },
+                   { key: 'price', type: 'number', label: S.price, min: 0, step: 'any', width: '92px' },
+                   { key: 'cur', type: 'text', label: S.cur, width: '52px' },
+                   { key: 'fx', type: 'number', label: S.fx, min: 0, step: 'any', width: '62px' },
+                   { key: 'incoterm', type: 'select', label: S.incoterm, width: '104px', options: function () { var l = lang(); return INCOTERMS.map(function (x) { return [x, incLabel(x, l)]; }); } },
+                   { key: 'eu', type: 'toggle', label: S.eu } ],
+            newRow: function (rows) { return { id: nextId(rows, 'Q'), name: '', price: null, cur: 'EUR', fx: 1, incoterm: 'site', eu: true }; } }
+        ] },
+        { id: 'terms', slot: 'stage', collapsible: true, title: S.pTerms, fields: [
+          { id: 'f-terms', key: 'terms', type: 'list', label: S.pTerms, hint: S.termsHint, learn: 'money', addLabel: S.addTerms, minRows: 0, maxRows: MAXT, reorder: false,
+            row: [ { key: 'q', type: 'select', label: S.gQuote, options: quoteOpts, width: '110px' },
+                   { key: 'pre', type: 'number', label: S.pre, min: 0, step: 'any', width: '78px' },
+                   { key: 'main', type: 'number', label: S.main, min: 0, step: 'any', width: '78px' },
+                   { key: 'onc', type: 'number', label: S.onc, min: 0, step: 'any', width: '78px' },
+                   { key: 'adv', type: 'number', label: S.adv, min: 0, max: 100, step: 'any', width: '64px' },
+                   { key: 'months', type: 'number', label: S.months, min: 0, max: 60, step: 'any', width: '60px' },
+                   { key: 'adj', type: 'number', label: S.adj, step: 'any', width: '86px' } ],
+            newRow: function () { var q = (state.quotes || [])[0]; return { q: q ? String(q.id) : '', pre: 0, main: 0, onc: 0, adv: 0, months: 0, adj: 0 }; } }
+        ] },
+        { id: 'gaps', slot: 'stage', collapsible: true, title: S.pGaps, fields: [
+          { id: 'f-gaps', key: 'gaps', type: 'list', label: S.pGaps, hint: S.gapsHint, learn: 'plugs', addLabel: S.addGap, minRows: 0, maxRows: MAXG, reorder: false,
+            row: [ { key: 'q', type: 'select', label: S.gQuote, options: quoteOpts },
+                   { key: 'item', type: 'select', label: S.gItem, options: itemOpts },
+                   { key: 's', type: 'select', label: S.gStatus, options: function () { return STATUSES.map(function (k) { return [k, S.st[k]]; }); } },
+                   { key: 'amt', type: 'number', label: S.gAmt, min: 0, step: 'any', width: '110px', placeholder: '—' } ],
+            newRow: function () { var q = (state.quotes || [])[0], it = (state.items || [])[0]; return { q: q ? String(q.id) : '', item: it ? String(it.id) : '', s: 'exc', amt: null }; } }
+        ] }];
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: TOOL, mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: DEFAULTS,
+      subtitle: S.subtitle,
+      notices: [{ id: 'genre', tone: 'warn', sticky: false,
+        title: T('Engineering and commercial analysis, not legal advice', 'Інженерно-комерційний аналіз, не юридична консультація', 'Technisch-kaufmännische Analyse, keine Rechtsberatung', 'Technisch-commerciële analyse, geen juridisch advies', 'Analyse technique et commerciale, pas un avis juridique', 'Análisis técnico y comercial, no asesoramiento jurídico', 'Analiza techniczno-handlowa, nie porada prawna'),
+        text: T('Plugs, plug rule, duty rate and financing are your estimating assumptions. The levelled cost compares quotes; it does not replace the clarification of exclusions with the bidders.', 'Доцінки, правило доцінок, ставка мита й фінансування — ваші кошторисні припущення. Вирівняна вартість порівнює пропозиції; вона не замінює з’ясування виключень з учасниками.', 'Ansätze, Ansatzregel, Zollsatz und Finanzierung sind Ihre Kalkulationsannahmen. Die nivellierten Kosten vergleichen Angebote; sie ersetzen nicht die Klärung der Ausschlüsse mit den Bietern.', 'Aanvullingen, aanvullingsregel, invoerrecht en financiering zijn uw ramingsaannames. De genivelleerde kost vergelijkt offertes; hij vervangt niet het verduidelijken van uitsluitingen met de inschrijvers.', 'Compléments, règle de complément, taux de droit et financement sont vos hypothèses d’estimation. Le coût nivelé compare les offres ; il ne remplace pas la clarification des exclusions avec les soumissionnaires.', 'Complementos, regla, arancel y financiación son sus hipótesis de estimación. El coste homogeneizado compara ofertas; no sustituye la aclaración de exclusiones con los licitadores.', 'Uzupełnienia, ich reguła, stawka cła i finansowanie to Twoje założenia kosztorysowe. Koszt wyrównany porównuje oferty; nie zastępuje wyjaśnienia wyłączeń z oferentami.') }],
+      learn: buildLearn(),
+      panels: [
+        { id: 'project', slot: 'inputs', title: S.pProject, collapsible: true, collapsed: true,
+          visible: !!(core() && core().ui), render: function (box) { mountBar(box); } },
+        { id: 'log', slot: 'inputs', title: S.pLog, collapsible: true, fields: [
+          { id: 'f-load', key: 'load', type: 'number', unit: '€', min: 0, max: 1e8, step: 'any', precision: 0, label: S.load, learn: 'incoterms' },
+          { id: 'f-ins', key: 'ins', type: 'number', unit: '%', min: 0, max: 10, step: 'any', precision: 2, label: S.ins, learn: 'incoterms' },
+          { id: 'f-duty', key: 'duty', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 2, label: S.duty, hint: S.dutyHint, learn: 'customs' },
+          { id: 'f-impFix', key: 'impFix', type: 'number', unit: '€', min: 0, max: 1e7, step: 'any', precision: 0, label: S.impFix, learn: 'customs' },
+          { id: 'f-unload', key: 'unload', type: 'number', unit: '€', min: 0, max: 1e8, step: 'any', precision: 0, label: S.unload, learn: 'incoterms' }
+        ] },
+        { id: 'rules', slot: 'inputs', title: S.pRules, collapsible: true, fields: [
+          { id: 'f-policy', key: 'policy', type: 'segmented', label: S.policy, learn: 'plugs', options: function () { return [['allowance', S.polA], ['max', S.polMax], ['mean', S.polMean]]; } },
+          { id: 'f-unclear', key: 'unclear', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 0, label: S.unclear, hint: S.unclearHint, learn: 'plugs' },
+          { id: 'f-rate', key: 'rate', type: 'number', unit: '%', min: 0, max: 50, step: 'any', precision: 2, label: S.rate, learn: 'money' },
+          { id: 'f-gapWarn', key: 'gapWarn', type: 'number', unit: '%', min: 0, max: 100, step: 'any', precision: 0, label: S.gapWarn, learn: 'stability' }
+        ] },
+        { id: 'record', slot: 'inputs', title: S.pRec, collapsible: true, collapsed: true, fields: [
+          { id: 'f-pkg', key: 'pkgName', type: 'text', label: S.pkgName },
+          { id: 'f-ref', key: 'tenderRef', type: 'text', label: S.tenderRef },
+          { id: 'f-by', key: 'preparedBy', type: 'text', label: S.preparedBy }
+        ] }
+      ],
+      footer: T('Method: bid levelling of subcontract and supplier quotes (estimating practice): plugs for excluded and unclear scope, priced options, logistics to site by Incoterms® 2020 rule (ICC Publication 723E, rule structure in our own words), duty on the customs value per Regulation (EU) No 952/2013 (Union Customs Code) art. 70(1), 71(1)(e) and 72, read in the Official Journal text on 15.11.2026; leader stability against a common factor on all plugs.',
+                'Метод: вирівнювання пропозицій субпідрядників і постачальників (кошторисна практика): доцінки за виключений і неясний обсяг, оцінені опції, логістика до майданчика за правилом Incoterms® 2020 (публікація ICC 723E, структура правил своїми словами), мито на митну вартість за Регламентом (ЄС) № 952/2013 (Митний кодекс Союзу), ст. 70(1), 71(1)(e) і 72, прочитано в тексті Офіційного журналу 15.11.2026; стійкість лідера щодо спільного множника доцінок.',
+                'Methode: Preisspiegel für Nachunternehmer- und Lieferantenangebote (Kalkulationspraxis): Ansätze für ausgeschlossene und unklare Leistungen, bepreiste Optionen, Logistik bis Baustelle nach Incoterms®-2020-Klausel (ICC-Publikation 723E, Klauselstruktur in eigenen Worten), Zoll auf den Zollwert nach Verordnung (EU) Nr. 952/2013 (Zollkodex der Union) Art. 70 Abs. 1, 71 Abs. 1 Buchst. e und 72, gelesen im Amtsblatt-Text am 15.11.2026; Stabilität des Ersten gegenüber einem gemeinsamen Faktor auf alle Ansätze.',
+                'Methode: vergelijking van offertes van onderaannemers en leveranciers (ramingspraktijk): aanvullingen voor uitgesloten en onduidelijke scope, geprijsde opties, logistiek tot de bouwplaats volgens Incoterms® 2020-regel (ICC-publicatie 723E, structuur in eigen woorden), invoerrechten op de douanewaarde volgens Verordening (EU) nr. 952/2013 (douanewetboek van de Unie) art. 70, lid 1, 71, lid 1, e), en 72, gelezen in de tekst van het Publicatieblad op 15.11.2026; stabiliteit van de eerste tegenover een gemeenschappelijke factor op alle aanvullingen.',
+                'Méthode : nivellement des offres de sous-traitants et fournisseurs (pratique d’estimation) : compléments pour périmètre exclu ou imprécis, options chiffrées, logistique jusqu’au chantier selon la règle Incoterms® 2020 (publication ICC 723E, structure des règles dans nos mots), droits sur la valeur en douane selon le règlement (UE) n° 952/2013 (code des douanes de l’Union) art. 70, par. 1, 71, par. 1, e), et 72, lu au Journal officiel le 15.11.2026 ; stabilité du premier face à un facteur commun sur tous les compléments.',
+                'Método: homogeneización de ofertas de subcontratistas y proveedores (práctica de estimación): complementos por alcance excluido o ambiguo, opciones cotizadas, logística hasta obra según la regla Incoterms® 2020 (publicación ICC 723E, estructura de las reglas en palabras propias), arancel sobre el valor en aduana según el Reglamento (UE) n.º 952/2013 (código aduanero de la Unión) art. 70.1, 71.1.e y 72, leído en el texto del Diario Oficial el 15.11.2026; estabilidad de la primera frente a un factor común en todos los complementos.',
+                'Metoda: wyrównanie ofert podwykonawców i dostawców (praktyka kosztorysowa): uzupełnienia za zakres wyłączony i niejasny, wycenione opcje, logistyka do budowy wg reguły Incoterms® 2020 (publikacja ICC 723E, struktura reguł własnymi słowami), cło od wartości celnej wg rozporządzenia (UE) nr 952/2013 (unijny kodeks celny) art. 70 ust. 1, 71 ust. 1 lit. e i 72, przeczytane w tekście Dziennika Urzędowego 15.11.2026; stabilność lidera wobec wspólnego mnożnika uzupełnień.'),
+      on: { compute: computeView }
+    });
+
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end',
+      actions: [ { label: T('CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV'), run: function () { var t = csvText(); if (t) download('quotelevel.csv', 'text/csv', t); } },
+                 { label: T('JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON'), run: function () { var r = buildRecord(); if (r) download('quotelevel.json', 'application/json', JSON.stringify(r, null, 2)); } },
+                 ui.resetAction() ] });
+    ui.examples(buildExamples());
+    stage = ui.stage({
+      caption: S.stageCap, minHeight: 460,
+      a11y: function () {
+        var l = lang();
+        if (!last || !last.ok) return '';
+        return S.stageCap[l] + '. ' + last.rows.filter(function (r) { return r.valid; }).map(function (r) { return r.id + ' ' + keur(r.L, l) + ' (' + r.rawRank + '→' + r.rank + ')'; }).join('; ') +
+          (last.stability ? '; f ' + nf(last.stability.lo, l, 2) + '…' + (last.stability.hi == null ? '∞' : nf(last.stability.hi, l, 2)) : '') + '.';
+      },
+      render: renderStage
+    });
+    stagePanels().forEach(function (pd) { ui.panel(pd); });
+    ui.ready();
+    window.__quotelevel = { ui: ui, state: state, solve: solve, engineInput: engineInput, last: function () { return last; }, csv: csvText, record: buildRecord,
+      projectPayload: projectPayload, useProject: useProject, useRequisition: useRequisition, onPackage: onPackage, sanitize: sanitize, applyPreset: function (id) {
+        var p = lib().PRESETS.filter(function (x) { return x.id === id; })[0]; if (!p) return false; applyPreset(state, p); ui.sync(); ui.run(); return true; },
+      analyse: function (inp) { return lib().analyse(inp); } };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1'); h.textContent = 'Subcontractor & Supplier Quote Levelling';
+    var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    last = solve(state);
+  }
+  function boot() {
+    var B = lib();
+    if (B && B.PRESETS && B.PRESETS.length) { applyPreset(DEFAULTS, B.PRESETS[0]); assign(state, JSON.parse(JSON.stringify(DEFAULTS))); }
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  /* ======================================================= 3. the data layer */
+  function csvText() {
+    if (!last || !last.ok) return '';
+    var R = last, rows = [], cols = ['section', 'item', 'value', 'unit'];
+    function add(sec, item, v, unit) { rows.push([sec, item, v == null ? '' : v, unit || '']); }
+    add('meta', 'package', state.pkgName); add('meta', 'reference', state.tenderRef); add('meta', 'prepared_by', state.preparedBy);
+    add('rule', 'plug_policy', R.input.policy); add('rule', 'unclear_factor', R.input.unclear); add('rule', 'financing_rate', R.input.rate, '1/yr');
+    add('result', 'levelled_leader', R.leader || ('tie ' + R.leaders.join('='))); add('result', 'paper_leader', R.rawLeader); add('result', 'lead', R.lead == null ? '' : Math.round(R.lead * 100) / 100, 'EUR');
+    if (R.stability) { add('result', 'stability_f_low', R.stability.lo); add('result', 'stability_f_high', R.stability.hi == null ? 'inf' : R.stability.hi); }
+    R.rows.forEach(function (r) {
+      var q = R.input.quotes.filter(function (x) { return x.id === r.id; })[0];
+      if (q) {
+        add('quote:' + r.id, 'name', q.name); add('quote:' + r.id, 'quoted_price', isFinite(q.price) ? q.price : '', q.cur);
+        add('quote:' + r.id, 'fx', isFinite(q.fx) ? q.fx : '', 'EUR per ' + q.cur); add('quote:' + r.id, 'incoterm', q.incoterm); add('quote:' + r.id, 'origin', q.eu ? 'EU' : 'non-EU');
+      }
+      if (!r.valid) { add('quote', r.id, 'not ranked', r.reason); return; }
+      ['P', 'opt', 'plug', 'logistics', 'fin', 'adj', 'L'].forEach(function (k) { add('quote:' + r.id, { P: 'price_eur', opt: 'options', plug: 'plugs', logistics: 'logistics', fin: 'advance_cost', adj: 'adjustment', L: 'levelled' }[k], Math.round(r[k] * 100) / 100, 'EUR'); });
+      add('quote:' + r.id, 'rank_paper', r.rawRank); add('quote:' + r.id, 'rank_levelled', r.rank); add('quote:' + r.id, 'plug_share', r.gapShare);
+      LEGS.forEach(function (e) { if (r.log[e]) add('logistics:' + r.id, e, Math.round(r.log[e] * 100) / 100, 'EUR'); });
+      if (r.customsValue != null) add('logistics:' + r.id, 'customs_value', Math.round(r.customsValue * 100) / 100, 'EUR');
+      R.input.items.forEach(function (it) { var c = r.cells[it.id]; if (c.s !== 'inc' || c.add) add('scope:' + r.id, it.name || it.id, Math.round(c.add * 100) / 100, c.s + (c.from ? ' (' + c.from + ')' : '')); });
+    });
+    var C = core();
+    if (C && C.csv) { try { return C.csv(rows.map(function (x) { var o = {}; cols.forEach(function (c, i) { o[c] = x[i]; }); return o; }), cols); } catch (e) { /* fall through */ } }
+    return cols.join(',') + '\r\n' + rows.map(function (x) { return x.map(function (v) { v = String(v); if (/^[=+\-@\t\r]/.test(v) && isNaN(+v)) v = '\'' + v; return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n') + '\r\n';
+  }
+  function download(name, type, text) {
+    var a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: type }));
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function buildRecord() {
+    if (!last) return null;
+    var inputs = {}, outputs = {}, units = {}, warnings = [];
+    inputs.package = state.pkgName; inputs.tender_reference = state.tenderRef; inputs.prepared_by = state.preparedBy;
+    inputs.plug_policy = state.policy; inputs.unclear_factor = state.unclear; units.unclear_factor = '% of plug';
+    inputs.financing_rate = state.rate; units.financing_rate = '%/yr';
+    inputs.logistics = 'loading ' + state.load + ' EUR; insurance ' + state.ins + ' %; duty ' + state.duty + ' %; import clearance ' + state.impFix + ' EUR; unloading ' + state.unload + ' EUR';
+    inputs.items = (state.items || []).map(function (it) { return it.id + ' ' + it.name + ' (own estimate ' + it.allowance + ' EUR)'; }).join('; ');
+    inputs.quotes = (state.quotes || []).map(function (q) { return q.id + ' ' + q.name + ': ' + q.price + ' ' + q.cur + ' @' + q.fx + ' ' + q.incoterm + (q.eu === false ? ' non-EU' : ' EU'); }).join('; ');
+    inputs.terms = (state.terms || []).map(function (t) { return t.q + ': legs ' + t.pre + '/' + t.main + '/' + t.onc + ' EUR' + (t.adv ? ', advance ' + t.adv + ' % ' + t.months + ' m' : '') + (t.adj ? ', adjustment ' + t.adj + ' EUR' : ''); }).join('; ');
+    inputs.exclusions = (state.gaps || []).map(function (g) { return g.q + '/' + g.item + ' ' + g.s + (g.amt != null ? ' ' + g.amt : ''); }).join('; ');
+    if (last.ok) {
+      outputs.levelled_leader = last.leader; outputs.tie = last.leaders.length > 1 ? last.leaders.join(' = ') : null; outputs.paper_leader = last.rawLeader;
+      outputs.lead = last.lead; units.lead = 'EUR';
+      outputs.stability = last.stability ? 'f ' + last.stability.lo + ' .. ' + (last.stability.hi == null ? 'inf' : last.stability.hi) : null;
+      outputs.levelling = last.rows.map(function (r) { return r.valid ? r.id + ': price ' + Math.round(r.P) + ' + options ' + Math.round(r.opt) + ' + plugs ' + Math.round(r.plug) + ' + logistics ' + Math.round(r.logistics) + ' + advance ' + Math.round(r.fin) + ' + adj ' + Math.round(r.adj) + ' = ' + Math.round(r.L) + ' EUR, rank ' + r.rawRank + ' -> ' + r.rank : r.id + ': not ranked (' + r.reason + ')'; }).join('; ');
+      if (last.flags.length) warnings.push('flags: ' + last.flags.join(', '));
+    } else warnings.push('invalid input: ' + ((last && last.errors) || []).join(', '));
+    warnings.push('Engineering and commercial analysis, not legal advice. Own estimates, plug rule, unclear factor, duty rate, insurance and financing rate are assumptions of the estimator.');
+    return {
+      inputs: inputs, outputs: outputs, units: units,
+      model: {
+        equations: ['P = price x fx (EUR per unit)', 'options = sum(amt x fx) over items priced separately',
+                    'plug(i) = own estimate | max | mean of the other valid quotes\' stated EUR amounts for i (fallback own estimate)', 'plugs = sum over excluded plug + u x sum over unclear plug',
+                    'logistics = legs the seller does not pay under the Incoterms 2020 rule: load, pre, main, ins = ins% x P, import = clearance + duty% x CV (non-EU, not DDP), on-carriage, unloading',
+                    'CV = P + buyer-paid load, pre, main, ins (UCC art. 70(1), 71(1)(e); art. 72 excludes post-entry transport and erection)',
+                    'advance cost = adv x P x rate x months/12', 'L = P + options + plugs + logistics + advance cost + adjustment',
+                    'ranks by P and by L, ties within 1e-9 relative', 'leader stability: L_j(f) = L_j - plugs_j + f plugs_j, interval of f where the leader stays lowest'],
+        ranges: ['up to 30 items, 8 quotes, 240 exclusion / option lines'],
+        notes: ['Regulation (EU) No 952/2013 art. 70(1), 71(1)(e), 72(a)-(b), read in the OJ text (Publications Office, CELEX 32013R0952) 15.11.2026', 'ICC Incoterms 2020 (Publication 723E): rule names and cost split by structure only', 'Bid levelling: estimating practice']
+      },
+      warnings: warnings
+    };
+  }
+  var LIM = { unclear: [0, 100], rate: [0, 50], gapWarn: [0, 100], load: [0, 1e8], ins: [0, 10], duty: [0, 100], impFix: [0, 1e7], unload: [0, 1e8] };
+  var ENUM = { policy: ['allowance', 'max', 'mean'] };
+  function fin(v, lo, hi) { return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi; }
+  function n0(v, lo, hi, d) { v = typeof v === 'string' && v.trim() !== '' ? +v : v; return fin(v, lo, hi) ? v : d; }
+  function s0(v, n) { return String(v == null ? '' : v).slice(0, n); }
+  /* permalink / project import: known keys only, numbers within the field limits, enums checked, lists rebuilt */
+  function renumber(list) {
+    var seen = {};
+    list.forEach(function (x) {
+      var id = x.id, k = 2;
+      if (seen[id]) { while (seen[id + '-' + k]) k++; id = id + '-' + k; x.id = id; }
+      seen[id] = 1;
+    });
+    return list;
+  }
+  function sanitize(o) {
+    var out = {};
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+    Object.keys(DEFAULTS).forEach(function (k) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) return;
+      var v = o[k];
+      if (ENUM[k]) { if (ENUM[k].indexOf(String(v)) >= 0) out[k] = String(v); return; }
+      if (LIM[k]) { v = n0(v, LIM[k][0], LIM[k][1], null); if (v != null) out[k] = v; return; }
+      if (k === 'items' && Array.isArray(v)) {
+        out.items = v.slice(0, MAXI).filter(function (c) { return c && typeof c === 'object'; }).map(function (c, i) { return { id: s0(c.id || 'I' + (i + 1), 40), name: s0(c.name, 160), allowance: n0(c.allowance, 0, 1e10, 0) }; });
+        renumber(out.items);
+        return;
+      }
+      if (k === 'quotes' && Array.isArray(v)) {
+        out.quotes = v.slice(0, MAXQ).filter(function (c) { return c && typeof c === 'object'; }).map(function (c, i) {
+          return { id: s0(c.id || 'Q' + (i + 1), 40), name: s0(c.name, 120), price: n0(c.price, 0, 1e11, null), cur: s0(c.cur || 'EUR', 3).toUpperCase(), fx: n0(c.fx, 0, 1e6, null),
+                   incoterm: INCOTERMS.indexOf(c.incoterm) >= 0 ? c.incoterm : 'site', eu: c.eu !== false };
+        });
+        renumber(out.quotes);
+        return;
+      }
+      if (k === 'terms' && Array.isArray(v)) {
+        out.terms = v.slice(0, MAXT).filter(function (c) { return c && typeof c === 'object'; }).map(function (c) {
+          return { q: s0(c.q, 40), pre: n0(c.pre, 0, 1e9, 0), main: n0(c.main, 0, 1e9, 0), onc: n0(c.onc, 0, 1e9, 0), adv: n0(c.adv, 0, 100, 0), months: n0(c.months, 0, 60, 0), adj: n0(c.adj, -1e10, 1e10, 0) };
+        });
+        return;
+      }
+      if (k === 'gaps' && Array.isArray(v)) {
+        out.gaps = v.slice(0, MAXG).filter(function (c) { return c && typeof c === 'object' && STATUSES.indexOf(c.s) >= 0; }).map(function (c) { return { q: s0(c.q, 40), item: s0(c.item, 40), s: c.s, amt: n0(c.amt, 0, 1e11, null) }; });
+        return;
+      }
+      if (typeof v === 'string' && (k === 'tenderRef' || k === 'preparedBy' || k === 'pkgName')) out[k] = v.slice(0, 200);
+    });
+    return out;
+  }
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: TOOL, file: 'quotelevel.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { assign(state, sanitize(o)); last = solve(state); if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+</script>
+</body>
+</html>

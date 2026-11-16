@@ -1,0 +1,4866 @@
+{
+ "tool": "ppedecision",
+ "author_note": "independent reference authored without access to the tool code",
+ "reference": "Hand-built rule-table corpus for the PPE Decision Matrix: hierarchy-of-controls gating (all four levels assessed, eliminated hazard, each single level not assessed, state after controls unknown), required-context insufficient-data cases, oxygen-deficiency rejection of filtering respirators, EN 14387 gas filter type per substance from HSG53, particle filter class from PF_req = C/OEL against HSG53 assigned protection factors (analytic boundaries plus 6 seeded random cases), Directive 2003/10/EC action-value boundaries (plus 6 seeded random cases), EN 166 fields of use, arc rating >= incident energy, fall-arrest anchorage, compatibility (facial hair, eyewear + respirator seal) and two multi-hazard matrix cases. Every case also asserts that no product is named and no risk is declared acceptable. Categorical expectations are derived from the quoted source text, not from the tool's rule table.",
+ "reference_citations": [
+  "Council Directive 89/656/EEC, Art. 2, 3, 4(1) https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:31989L0656 (read 2026-09-16)",
+  "Directive 2003/10/EC, Art. 3(1), 5(1), 6(1)(a)-(b) https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003L0010 (read 2026-09-16)",
+  "HSE HSG53 'Respiratory protective equipment at work', 4th ed. 2013 https://www.hse.gov.uk/pubns/priced/hsg53.pdf - oxygen-deficiency warning, paras 19, 22, 45, 71-72, 80, APF table, EN 14387 filter type table, table 3",
+  "ISO 45001:2018 cl. 8.1.2 a)-e), wording as reproduced at https://preteshbiswas.com/2023/09/30/iso-450012018-clause-8-1-2-eliminating-hazards-and-reducing-ohs-risks/ (standard itself not read)",
+  "NIOSH Hierarchy of Controls https://www.cdc.gov/niosh/hierarchy-of-controls/about/index.html",
+  "EN 166:2001 field-of-use symbols 3, 4, 5, 8, 9, as reproduced at https://skanwear.com/blogs/ppe-standards/en-166 (standard itself not read)",
+  "29 CFR 1910.269(l)(8)(ii), (l)(8)(v) https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-R/section-1910.269",
+  "29 CFR 1926.502(d)(15), (d)(20) https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1926/subpart-M/section-1926.502",
+  "specs/10.md (validation and acceptance criteria), specs/00-common.md 0.5; bench/ppedecision/ref.py"
+ ],
+ "tolerance": "Categorical and boolean checks are exact: the tool is a discrete rule engine and any difference is a logic difference. The two numeric checks (required protection factor C/OEL and minimum arc rating) are single divisions or copies of an input, so relative 1e-9 covers floating-point rounding only. Action-value comparisons use the directive's own inequalities with no margin.",
+ "cases": [
+  {
+   "id": "hoc-all-assessed-hazard-remains",
+   "intent": "headline: PPE only against residual hazard after all four levels assessed",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1): PPE used when risks cannot be avoided/sufficiently limited by other means; ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com) e) after a)-d)"
+    },
+    "eye_face.standard_family_includes_EN166": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): mechanical-strength rated eye protectors"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSG53 para 22 / spec: PPE never closes the residual risk; the hazard stays open with PPE as last line"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-eliminated-no-ppe",
+   "intent": "negative: hazard eliminated -> no PPE",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "applied",
+       "substitution": "not_practicable",
+       "engineering": "not_practicable",
+       "administrative": "not_practicable"
+      },
+      "state_after_controls": "eliminated",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3: PPE only where the risk cannot be avoided; eliminated hazard has no residual"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-none-assessed",
+   "intent": "hierarchy step skipped: no PPE class, gap reported",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_assessed",
+       "substitution": "not_assessed",
+       "engineering": "not_assessed",
+       "administrative": "not_assessed"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com); HSG53 para 19 'only use RPE after you have taken all other reasonably practicable measures' - PPE step not reached"
+    },
+    "hierarchy_gap_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "open control step leaves hazard unresolved"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-elimination-not-assessed",
+   "intent": "boundary: only elimination not assessed -> no class, gap",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_assessed",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com): level 'elimination' precedes PPE and was not assessed"
+    },
+    "hierarchy_gap_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "open control step"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-substitution-not-assessed",
+   "intent": "boundary: only substitution not assessed -> no class, gap",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_assessed",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com): level 'substitution' precedes PPE and was not assessed"
+    },
+    "hierarchy_gap_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "open control step"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-engineering-not-assessed",
+   "intent": "boundary: only engineering not assessed -> no class, gap",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "not_assessed",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com): level 'engineering' precedes PPE and was not assessed"
+    },
+    "hierarchy_gap_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "open control step"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-administrative-not-assessed",
+   "intent": "boundary: only administrative not assessed -> no class, gap",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "not_assessed"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com): level 'administrative' precedes PPE and was not assessed"
+    },
+    "hierarchy_gap_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "ISO 45001:2018 cl. 8.1.2 a)-e) (as reproduced by preteshbiswas.com)"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "open control step"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-all-not-practicable",
+   "intent": "boundary: every level assessed not practicable -> PPE allowed",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "not_practicable",
+       "administrative": "not_practicable"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b) Art. 6(1)(b): 90 >= 85 dB(A); all prior levels assessed (ISO 45001 8.1.2)"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hoc-state-after-unknown",
+   "intent": "insufficient: state after controls unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "unknown",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "residual risk unknown -> no class"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - state after controls unknown"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-severity-missing",
+   "intent": "insufficient: severity unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": null,
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "required field missing"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - severity missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-exposure-missing",
+   "intent": "insufficient: exposure unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "cut",
+      "route": "hands",
+      "severity": "medium",
+      "exposure": null,
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hand.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "required field missing"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - exposure missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-type-missing",
+   "intent": "insufficient: hazard type unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": null,
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "any_class_for_hazard": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "type unknown -> no rule applies"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - type missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-route-invalid-for-type",
+   "intent": "negative: route not valid for type (noise via skin)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "skin",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 90.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "invalid route must not yield a class"
+    },
+    "hazard_flagged_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5 / spec: unsupported input flagged"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-hazard-no-task",
+   "intent": "insufficient: hazard not linked to a task",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": null
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "any_class_for_hazard": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "matrix is jobs x hazards x PPE; an unlinked hazard has no row"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - task link missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "ctx-unknown-hazard-type",
+   "intent": "negative: hazard type outside taxonomy",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "radiation_ionising_xyz",
+      "route": "whole_body",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "any_class_for_hazard": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no rule in the corpus for this type; must not produce a safe-looking result"
+    },
+    "hazard_flagged_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "00-common 0.5"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-o2-deficient-rejects-filter",
+   "intent": "headline negative: filter respirator in oxygen deficiency rejected",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "confined_space"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": "deficient",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {},
+    "requested_devices": [
+     "filtering_half_mask_gas_filter"
+    ]
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) warning box: 'Respirators must not be used in oxygen-deficient atmospheres'"
+    },
+    "respiratory.isolating_apparatus_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) para 45: 'specialist BA is required'"
+    },
+    "rejected_devices_includes_filtering": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 validation: 'filter respirator in oxygen deficiency must be rejected'"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-o2-deficient-particles",
+   "intent": "oxygen deficiency applies to particle filters too",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "confined_space"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "deficient",
+       "concentration_mg_m3": 2.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) warning box (applies to all respirators = filtering devices)"
+    },
+    "respiratory.isolating_apparatus_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) para 45"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-o2-unknown",
+   "intent": "insufficient: oxygen content unknown blocks filter recommendation",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": null,
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'Respiratory protection must check oxygen-deficiency context before filter respirator recommendation'"
+    },
+    "insufficient_data_or_isolating": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "unknown oxygen must not yield a filter class"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-environment-unknown",
+   "intent": "insufficient: environment unknown for respiratory hazard",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": null
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "environment is required context for respiratory decision"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - environment missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-conc-unknown",
+   "intent": "insufficient: concentration vs filter range unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": "normal",
+       "concentration_within_filter_range": null
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): selection needs exposure level vs protection factor"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - concentration unknown"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-conc-beyond-filter-range",
+   "intent": "beyond filter range -> not a filtering device",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": "normal",
+       "concentration_within_filter_range": false
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): filter devices only within their protection capability"
+    },
+    "respiratory.isolating_apparatus_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): breathing apparatus when respirators unsuitable"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-filter-k-ammonia",
+   "intent": "gas filter type for ammonia",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "boiling_point_c": -33.3,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; hierarchy assessed"
+    },
+    "respiratory.gas_filter_type": {
+     "ref": "K",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table of EN 14387 filter types: 'K: ammonia and its organic derivatives'"
+    },
+    "respiratory.fit_test_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) paras 71-72: fit test for tight-fitting facepieces"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-filter-e-sulphur",
+   "intent": "gas filter type for sulphur dioxide",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "sulphur dioxide",
+       "boiling_point_c": -10.0,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; hierarchy assessed"
+    },
+    "respiratory.gas_filter_type": {
+     "ref": "E",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table of EN 14387 filter types: 'E: SO2 and other acid gases'"
+    },
+    "respiratory.fit_test_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) paras 71-72: fit test for tight-fitting facepieces"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-filter-a-toluene",
+   "intent": "gas filter type for toluene",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "toluene",
+       "boiling_point_c": 110.6,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; hierarchy assessed"
+    },
+    "respiratory.gas_filter_type": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table of EN 14387 filter types: 'A: organic gases and vapours, boiling point above 65 C'"
+    },
+    "respiratory.fit_test_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) paras 71-72: fit test for tight-fitting facepieces"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-filter-ax-acetone",
+   "intent": "gas filter type for acetone",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "acetone",
+       "boiling_point_c": 56.0,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; hierarchy assessed"
+    },
+    "respiratory.gas_filter_type": {
+     "ref": "AX",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table of EN 14387 filter types: 'AX: organic ... boiling point at or below 65 C'"
+    },
+    "respiratory.fit_test_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) paras 71-72: fit test for tight-fitting facepieces"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-filter-b-chlorine",
+   "intent": "gas filter type for chlorine",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "chlorine",
+       "boiling_point_c": -34.0,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; hierarchy assessed"
+    },
+    "respiratory.gas_filter_type": {
+     "ref": "B",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table of EN 14387 filter types: 'B: inorganic gases and vapours'"
+    },
+    "respiratory.fit_test_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) paras 71-72: fit test for tight-fitting facepieces"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-carbon-monoxide",
+   "intent": "negative: CO has no standard A/B/E/K filter",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "carbon monoxide",
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.gas_filter_type_in_ABEK_AX": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): type B note 'not for CO'; none of A/AX/E/K covers CO"
+    },
+    "respiratory.filter_class_or_flag": {
+     "ref": "flag_or_isolating",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSG53: no A/AX/B/E/K filter applies"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-gas-substance-unknown",
+   "intent": "insufficient: substance not named",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": null,
+       "oxygen": "normal",
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.gas_filter_type_given": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): filter type depends on the substance"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - substance missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-3",
+   "intent": "particle class: PF 3 -> class 1",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 3.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 3.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP1/P1",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 3"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-4-boundary",
+   "intent": "boundary: PF exactly 4 -> class 1",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 4.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 4.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP1/P1",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 4"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-4p5",
+   "intent": "boundary: PF 4.5 -> class 2",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 4.5,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 4.5,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP2/P2",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 4.5"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-10-boundary",
+   "intent": "boundary: PF exactly 10 -> class 2",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 5.0,
+       "oel_mg_m3": 0.5
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP2/P2",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 10"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-15",
+   "intent": "PF 15 -> class 3",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 15.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 15.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP3/P3",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 15"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-20-boundary-apf",
+   "intent": "boundary: PF 20 -> class 3 (APF 20)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 20.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 20.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP3/P3",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 20"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-30-beyond-apf",
+   "intent": "PF above HSG53 half-mask APF: not class 1/2",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 30.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "respiratory.particle_class_below_3": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.): FFP2 APF 10 < 30; APF 20 < 30 means a half mask is insufficient under HSG53 (EN 149 nominal 50 would allow FFP3) - only the class-1/2 exclusion is asserted"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-01",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 25.509,
+       "oel_mg_m3": 2.878
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 8.863446838082,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP2/P2",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 8.86345"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-02",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 13.159,
+       "oel_mg_m3": 2.912
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 4.518887362637,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP2/P2",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 4.51889"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-03",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 67.498,
+       "oel_mg_m3": 4.076
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 16.559862610402,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP3/P3",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 16.5599"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-04",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 11.906,
+       "oel_mg_m3": 3.285
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 3.624353120244,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP1/P1",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 3.62435"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-05",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 18.104,
+       "oel_mg_m3": 2.627
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 6.891511229539,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP2/P2",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 6.89151"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "resp-pf-random-06",
+   "intent": "randomized particle class (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 24.556,
+       "oel_mg_m3": 1.287
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "required_protection_factor": {
+     "ref": 19.080031080031,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "PF_req = C/OEL (ref.py)"
+    },
+    "respiratory.particle_class_min": {
+     "ref": "FFP3/P3",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) APF FFP1/P1=4, FFP2/P2=10, FFP3/P3=20; lowest class with APF >= 19.08"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "oxygen normal, PF_req within half-mask APF"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-79p9",
+   "intent": "boundary below lower action value",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 79.9
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=79.9"
+    },
+    "hearing.required_or_offered": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=79.9"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-80p0",
+   "intent": "boundary: exactly lower action value (directive: 'exceeds')",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 80.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=80.0"
+    },
+    "hearing.required_or_offered": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=80.0 (DISPUTABLE: text says 'exceeding'; a >= reading gives true)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-80p1",
+   "intent": "just above lower action value",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 80.1
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=80.1"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=80.1"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-84p9",
+   "intent": "boundary below upper action value",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 84.9
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=84.9"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=84.9"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-85p0",
+   "intent": "boundary: exactly upper action value ('equal to or exceed')",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 85.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=85.0"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=85.0"
+    },
+    "hearing.standard_family_includes_EN352": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary: EN 352 hearing protector family (EN ISO 4869-2 selection)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-92",
+   "intent": "well above limit value 87 -> mandatory",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 92.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=92.0"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=92.0"
+    },
+    "hearing.standard_family_includes_EN352": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary: EN 352 hearing protector family (EN ISO 4869-2 selection)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-lex-unknown",
+   "intent": "insufficient: noise hazard without LEX,8h",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": null
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no exposure value"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - LEX,8h missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-01",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 94.9
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=94.9"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=94.9"
+    },
+    "hearing.standard_family_includes_EN352": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary: EN 352 hearing protector family (EN ISO 4869-2 selection)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-02",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 76.8
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=76.8"
+    },
+    "hearing.required_or_offered": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=76.8"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-03",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 92.3
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=92.3"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=92.3"
+    },
+    "hearing.standard_family_includes_EN352": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary: EN 352 hearing protector family (EN ISO 4869-2 selection)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-04",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 87.5
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=87.5"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=87.5"
+    },
+    "hearing.standard_family_includes_EN352": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary: EN 352 hearing protector family (EN ISO 4869-2 selection)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-05",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 83.3
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=83.3"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=83.3"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "noise-random-06",
+   "intent": "randomized action-value comparison (seed 10)",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "daily",
+      "context": {
+       "lex8h_dba": 81.4
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hearing.mandatory": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(b) used when LEX,8h >= 85; LEX=81.4"
+    },
+    "hearing.required_or_offered": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b): 6(1)(a) made available when LEX,8h exceeds 80; LEX=81.4"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-field-3-splash",
+   "intent": "eye protection field of use 3",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "splash",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "eye_face.en166_field_of_use": {
+     "ref": "3",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): field of use 3 liquid droplets/splashes"
+    },
+    "eye_face.is_spectacles_only": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): symbols 3/4/5/9 apply to goggles/face shields, not spectacles"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-field-4-dust_large",
+   "intent": "eye protection field of use 4",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_large",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "eye_face.en166_field_of_use": {
+     "ref": "4",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): field of use 4 large dust particles > 5 um"
+    },
+    "eye_face.is_spectacles_only": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): symbols 3/4/5/9 apply to goggles/face shields, not spectacles"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-field-5-dust_fine",
+   "intent": "eye protection field of use 5",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_fine",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "eye_face.en166_field_of_use": {
+     "ref": "5",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): field of use 5 gas and fine dust < 5 um"
+    },
+    "eye_face.is_spectacles_only": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): symbols 3/4/5/9 apply to goggles/face shields, not spectacles"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-field-9-molten_metal",
+   "intent": "eye protection field of use 9",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "molten_metal",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "eye_face.en166_field_of_use": {
+     "ref": "9",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): field of use 9 molten metal and hot solids"
+    },
+    "eye_face.is_spectacles_only": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): symbols 3/4/5/9 apply to goggles/face shields, not spectacles"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-arc-face-shield",
+   "intent": "short-circuit arc: face shield field 8",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "electric_arc",
+      "route": "face",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "incident_energy_cal_cm2": 4.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.en166_field_of_use": {
+     "ref": "8",
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com): symbol 8 short-circuit arc, face shields only"
+    },
+    "eye_face.is_face_shield": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "EN 166:2001 field-of-use symbols 3/4/5/8/9 (as reproduced by skanwear.com)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "eye-welding-filter",
+   "intent": "welding: filter to EN 169 family",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "welding_radiation",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "process": "MMA"
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "eye_face.standard_family_includes_EN169": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary EYE-R-006 (EN 169/EN 175/EN 379): welding filters (standard not read, family name only)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "head-falling-objects",
+   "intent": "head protection",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "falling_objects",
+      "route": "head",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "head.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "head.standard_family_includes_EN397": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary HEAD-R-001 (EN 397 industrial helmets)"
+    },
+    "trace_complete": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: every recommendation traces hazard -> residual risk -> PPE rule -> source (rule ID and source present on the cell)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hand-cut",
+   "intent": "cut -> mechanical gloves",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "cut",
+      "route": "hands",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hand.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "hand.standard_family_includes_EN388": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary HAND-R-001 (EN 388 mechanical risks)"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "hand-chemical-breakthrough-flag",
+   "intent": "chemical gloves need substance/product breakthrough data",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "chemicals",
+      "route": "hands",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "toluene"
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hand.standard_family_includes_EN374": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary HAND-R-002 (EN ISO 374-1)"
+    },
+    "breakthrough_data_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 limitations: 'Chemical glove breakthrough requires substance/product data outside generic MVP'"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "foot-impact",
+   "intent": "foot protection",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "feet",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "foot.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "foot.standard_family_includes_ENISO20345": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "README vocabulary FOOT-R-001"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "body-arc-rating-ge-energy",
+   "intent": "arc clothing rating >= incident energy",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "electric_arc",
+      "route": "whole_body",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "incident_energy_cal_cm2": 8.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "body.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.269(l)(8)(ii) and (l)(8)(v)"
+    },
+    "body.min_arc_rating_cal_cm2": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "source",
+     "derivation": "29 CFR 1910.269(l)(8)(ii) and (l)(8)(v) (v): arc rating no less than the estimated incident heat energy"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "body-arc-energy-unknown",
+   "intent": "insufficient: arc hazard with no incident energy",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "electric_arc",
+      "route": "whole_body",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "incident_energy_cal_cm2": null
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "body.arc_class_given": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.269(l)(8)(ii) and (l)(8)(v) (ii): an estimate of incident heat energy is required before selecting a rating"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - incident energy missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "fall-anchorage-rated",
+   "intent": "fall arrest with rated anchorage",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "fall",
+      "route": "whole_body",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "anchorage": "rated"
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "fall.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3; 29 CFR 1926.502(d)(15) and (d)(20)"
+    },
+    "fall.rescue_note": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1926.502(d)(15) and (d)(20) (d)(20) prompt rescue"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "fall-no-anchorage",
+   "intent": "negative: no anchorage -> no fall-arrest class",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "fall",
+      "route": "whole_body",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "anchorage": "none"
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "fall.arrest_class_given": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1926.502(d)(15) and (d)(20) (d)(15): PFAS anchorage must be capable of 22.2 kN or designed as part of a system; none -> not usable"
+    },
+    "hazard_listed_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "fall hazard left open"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "fall-anchorage-unknown",
+   "intent": "insufficient: anchorage unknown",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "fall",
+      "route": "whole_body",
+      "severity": "high",
+      "exposure": "regular",
+      "context": {
+       "anchorage": null
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "fall.arrest_class_given": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1926.502(d)(15) and (d)(20) (d)(15)"
+    },
+    "insufficient_data": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'No recommendation if required context field is unknown; show insufficient data' - anchorage missing"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "comp-facial-hair-loose-fitting",
+   "intent": "facial hair -> loose-fitting respirator",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 3.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {
+     "facial_hair": true
+    }
+   },
+   "checks": {
+    "respiratory.tight_fitting_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) para 72: 'tight-fitting RPE will only provide effective protection if the wearer is clean shaven'"
+    },
+    "respiratory.loose_fitting_recommended": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "HSE HSG53 (4th ed.) table 3: loose-fitting facepieces"
+    },
+    "compatibility_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 compatibility warnings"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "comp-eyewear-respirator-seal",
+   "intent": "eyewear + tight-fitting respirator on one task",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     },
+     {
+      "id": "H2",
+      "type": "dust_aerosol",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "oxygen": "normal",
+       "concentration_mg_m3": 3.0,
+       "oel_mg_m3": 1.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "respiratory.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "compatibility_flagged_eyewear_respirator": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 example 'eyewear + respirator seal'; Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 4(1) PPE without increased risk / compatible when combined"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "comp-no-flag-single-ppe",
+   "intent": "negative: single hand PPE raises no eyewear/respirator flag",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "cut",
+      "route": "hands",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "compatibility_flagged_eyewear_respirator": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no eyewear and no respirator on the task"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "matrix-two-tasks",
+   "intent": "job x PPE matrix keeps hazards on their own task",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "grinding",
+      "environment": "open_air"
+     },
+     {
+      "id": "T2",
+      "activity": "compressor room",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "impact",
+      "route": "eyes",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     },
+     {
+      "id": "H2",
+      "type": "noise",
+      "route": "ears",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "lex8h_dba": 88.0
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T2"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "T1.eye_face.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "T1.hearing.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no noise hazard on T1"
+    },
+    "T2.hearing.mandatory": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1), Art. 6(1)(a)-(b) 6(1)(b): 88 >= 85"
+    },
+    "T2.eye_face.required": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "no eye hazard on T2"
+    },
+    "export_keeps_rule_ids": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10: 'Matrix exports without losing rationale IDs'"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  },
+  {
+   "id": "matrix-mixed-resolved-and-insufficient",
+   "intent": "insufficient hazard does not hide a valid one",
+   "inputs": {
+    "tasks": [
+     {
+      "id": "T1",
+      "activity": "maintenance",
+      "environment": "open_air"
+     }
+    ],
+    "hazards": [
+     {
+      "id": "H1",
+      "type": "cut",
+      "route": "hands",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {},
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     },
+     {
+      "id": "H2",
+      "type": "gas_vapour",
+      "route": "inhalation",
+      "severity": "medium",
+      "exposure": "regular",
+      "context": {
+       "substance": "ammonia",
+       "oxygen": null,
+       "concentration_within_filter_range": true
+      },
+      "controls": {
+       "elimination": "not_practicable",
+       "substitution": "not_practicable",
+       "engineering": "applied",
+       "administrative": "applied"
+      },
+      "state_after_controls": "hazard_remains",
+      "task_id": "T1"
+     }
+    ],
+    "constraints": {}
+   },
+   "checks": {
+    "hand.required": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Council Directive 89/656/EEC Art. 3 and Art. 4(1) Art. 3"
+    },
+    "respiratory.filtering_device_recommended": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "oxygen unknown"
+    },
+    "unresolved_includes_H2": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 outputs: unresolved_hazards"
+    },
+    "risk_declared_acceptable": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'PPE cannot be used to declare risk acceptable automatically'; 00-common 0.5; HSG53 para 22 'RPE is the last line of protection'"
+    },
+    "names_commercial_product": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 10 'Never recommend a specific commercial product in core tool'"
+    }
+   }
+  }
+ ],
+ "not_benchmarked": [
+  "EN 14387 type B vs E for HCl and other acid inorganic gases: HSG53 wording overlaps, so no such case",
+  "particle class where HSG53 APF and EN 149 nominal protection factors disagree (PF_req in (10,12] and (20,50]): ref.py excludes that band; only the class-1/2 exclusion is asserted at PF 30",
+  "EN 352 attenuation / EN ISO 4869-2 SNR-HML selection (covered by noiseexposure bench; not read here)",
+  "welding shade numbers (EN 169), glove performance levels, footwear S-classes, EN ISO 20471 class: standards not read",
+  "COMP-R-003..007 heuristics (helmet + muffs, muffs + eyewear, corrective lenses, chemical clothing on heat task, gloves near rotating parts): no source read fixes them",
+  "RESP-R-003 (confined space with oxygen declared normal -> measure) and HOC-R-004 (high severity without upper controls): tool heuristics without an independent basis",
+  "arc incident energy exactly 0 and fall clearance / rescue arithmetic: semantics not fixed by a source read",
+  "JSA handoff import, CSV/PDF layout, seven-language labels, images: UI/exchange, not the safety decision",
+  "edition currency of EN standards (spec asks to confirm; not done here)"
+ ],
+ "coverage": "Covers the spec 10 headline claims: PPE only against residual hazard after the hierarchy step; insufficient data when required context is unknown; oxygen-deficiency rejection of filtering respirators (the named negative test); generic class/standard family per column for eye/face, hearing, respiratory, head, hand, foot, body and fall with no product names; compatibility warnings (eyewear + respirator seal, facial hair); hazard -> rule -> source trace and rule IDs surviving export; and PPE never declaring the risk acceptable."
+}

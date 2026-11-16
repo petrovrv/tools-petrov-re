@@ -1,0 +1,498 @@
+{
+ "tool": "smrselector",
+ "file": "smrselector.html",
+ "benchmark_kind": "data-integrity",
+ "reference": "DATA-INTEGRITY benchmark, not a physics one: the tool screens reactor designs against a site and a requirement by evaluating a documented set of gates and a weighted score. THE SHIPPED CORPUS COULD NOT BE BENCHMARKED: smr-data.json, smr-change-log.json and smr-update-status.json are server-maintained and are deliberately not part of this deployment tree, so the tool as deployed renders \"No dataset\" and cannot be exercised. What is benchmarked is the no-dataset path itself on the tree as it really is, the six-language catalogue that is in the tree, and the screening and catalogue logic driven through the DOM against a synthetic fixture served from a benchmark overlay (/root/bench/fixtures/smr-data.FIXTURE.json, never written into the site). Every design in that fixture is constructed to violate exactly one documented gate, or none, so the expected outcome follows from the specification rather than from the tool's own code; the ranking is checked against invariants that must hold whatever the data.",
+ "reference_citations": [
+  "Specification-based fixture: /root/bench/fixtures/smr-data.FIXTURE.json, built by this benchmark so that each design violates exactly one gate documented in the tool's own gate vocabulary (gate.notproc, gate.heatonly, gate.temp, gate.modules, gate.water, gate.transport, gate.timing, gate.turbine, gate.bloc_ru, gate.bloc_cn, gate.prohibited, gate.phaseout).",
+  "Catalogue filter expectations recomputed directly from the fixture records in the driver, independently of the page's catList().",
+  "Ranking invariants: a probability distribution over the surviving designs must sum to one, order must follow score, and scores must stay inside the 0-100 range the tool prints."
+ ],
+ "tolerance": "Exact. Every gate must fire for exactly the designs the fixture was built to trip and for no others; every catalogue filter must return exactly the recomputed set; the pass and eliminated sets must partition the register exactly; the win probabilities must sum to 1 within 1e-9. Nothing here is a physical quantity, so no physical tolerance applies.",
+ "crosscheck": "None available: there is no second implementation of this screening rule, and the shipped corpus that would allow a factual crosscheck is not in this tree.",
+ "not_benchmarked": [
+  "THE ENTIRE SHIPPED REGISTER: the ~100 design records, their outputs, temperatures, licensing stages, vendors and sources, and the national policy table, all live in the server-maintained smr-data.json which is absent from this deployment tree. No design name, number or status was checked against any primary source, because there was no data here to check.",
+  "the change log and update-status files (smr-change-log.json, smr-update-status.json) and the server-side updater described in SMR_UPDATING.md, which is not in this tree either",
+  "the world outline and the coastline-distance and nearby-plant lookups beyond the fixture geometry",
+  "the Monte-Carlo rank stability beyond its distributional invariants: it is stochastic by design and has no closed-form expectation to compare against"
+ ],
+ "fixture_note": "The fixture is served from an overlay directory of symbolic links; nothing was written into /root/site.",
+ "total": 10,
+ "passed": 10,
+ "failed": 0,
+ "flagged": [],
+ "page_errors": [],
+ "run_at": "2026-08-12T04:15:22.373Z",
+ "cases": [
+  {
+   "id": "no_dataset_path",
+   "note": "The register itself is a server-maintained dataset and is not in this tree. With it absent the page must say so plainly, name the file it wanted, and raise no exception — a silent empty screening would be far worse than an error",
+   "inputs": {},
+   "cmp": {
+    "dataset_absent_from_this_tree": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "says_there_is_no_dataset": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "names_the_file_it_wanted": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "no_uncaught_exception": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "no_stale_data_object": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "declared dependencies, all absent here as intended: smr-change-log.json, smr-data.json, smr-update-status.json"
+   ]
+  },
+  {
+   "id": "six_languages",
+   "note": "Every key of the reference language exists in the other five in both catalogues, no placeholder and no empty string, and every key the code asks for is in the data",
+   "inputs": {},
+   "cmp": {
+    "languages_present": {
+     "got": "de,en,es,fr,nl,uk",
+     "ref": "de,en,es,fr,nl,uk",
+     "rel": 0,
+     "ok": true
+    },
+    "keys_missing_per_language": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "knowledge_base_keys_missing": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "placeholders": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "empty_strings": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "keys_referenced_by_the_code_but_absent": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "363 interface keys and 6 knowledge-base keys per language"
+   ]
+  },
+  {
+   "id": "screening_gates",
+   "note": "Each design in the fixture is built to violate exactly one documented gate, or none. The tool must eliminate exactly those, for exactly that reason, and the passed and eliminated sets must partition the register",
+   "inputs": {},
+   "cmp": {
+    "eliminated_R_NOTPROC": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_HEATONLY": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_TEMP": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_MODULES": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "not_eliminated_R_WATER": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "not_eliminated_R_TRANSPORT": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_TIMING": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_BLOC_RU": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "eliminated_R_BLOC_CN": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "baseline_designs_survive": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true,
+     "missing": [],
+     "unexpected": []
+    },
+    "pass_and_gated_partition_the_register": {
+     "got": 17,
+     "ref": 17,
+     "rel": 0,
+     "ok": true
+    },
+    "no_design_is_both_passed_and_gated": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": []
+  },
+  {
+   "id": "screening_gates_site_dependent",
+   "note": "With no cooling water and a truck-only site, the two site gates the documented rule reserves for that case must fire, and only for the designs that need them",
+   "inputs": {},
+   "cmp": {
+    "water_gate_fires_for_the_water_cooled_design": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "water_gate_does_not_fire_for_an_air_cooled_design": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "transport_gate_fires_for_heavy_lift": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "transport_gate_does_not_fire_for_truckable": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": []
+  },
+  {
+   "id": "screening_gate_turbine",
+   "note": "When an existing ultra-supercritical turbine must be reused, a design whose live steam is more than 25 K below the archetype must be stopped, and one that meets it must not",
+   "inputs": {},
+   "cmp": {
+    "low_steam_design_stopped": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "matching_steam_design_not_stopped": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "archetype 600 C, so the documented rule stops anything below 575 C: R_OK1 live steam 300 C (stopped), R_HTGR 590 C (kept)"
+   ]
+  },
+  {
+   "id": "screening_gates_jurisdiction",
+   "note": "A jurisdiction that prohibits nuclear power stops every design; one that is phasing out flags every design; and a supplier bloc the country cannot buy from is stopped per design, not per country",
+   "inputs": {},
+   "cmp": {
+    "prohibited_stops_everything": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "prohibited_reason_on_every_design": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "phase_out_flagged_on_every_design": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "western_designs_pass_in_a_western_country": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "russian_supplier_named_outside_the_nsg": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "chinese_supplier_named_outside_the_nsg": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "western_supplier_named_outside_the_nsg": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "prohibited country: 0 designs pass; phase-out country: 17 eliminations, 0 pass"
+   ]
+  },
+  {
+   "id": "ranking_invariants",
+   "note": "Invariants that must hold whatever the data: every score axis and the combined score stay inside their range, the printed order is the score order, the Monte-Carlo rank probabilities are a real probability distribution, the redundancy rule is applied as documented, more demand never needs fewer modules, a zero demand is refused rather than silently scored, and a zero weight vector produces no rank probability at all",
+   "inputs": {},
+   "cmp": {
+    "every_axis_inside_0_100": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "score_inside_0_100": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "order_is_the_score_order": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "win_probabilities_sum_to_one": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "top3_probabilities_sum_to_at_most_three": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true
+    },
+    "every_probability_in_0_1": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "top3_at_least_as_likely_as_win": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "rank_stability_is_reproducible": {
+     "got": "[[\"R_OK3\",0.2125,0.6475],[\"R_SFR\",0.065,0.4975],[\"R_OK1\",0.2225,0.46],[\"R_TRANSPORT\",0.1575,0.3925],[\"R_TURBINE\",0.135,0.36],[\"R_OK2\",0.095,0.31],[\"R_WATER\",0.1125,0.33],[\"R_HTGR\",0,0.0025],[\"R_MSR\",0,0]]",
+     "ref": "[[\"R_OK3\",0.2125,0.6475],[\"R_SFR\",0.065,0.4975],[\"R_OK1\",0.2225,0.46],[\"R_TRANSPORT\",0.1575,0.3925],[\"R_TURBINE\",0.135,0.36],[\"R_OK2\",0.095,0.31],[\"R_WATER\",0.1125,0.33],[\"R_HTGR\",0,0.0025],[\"R_MSR\",0,0]]",
+     "rel": 0,
+     "ok": true
+    },
+    "redundancy_rule_n_plus_1": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "doubling_the_demand_never_reduces_the_module_count": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "zero_demand_is_refused": {
+     "got": "demand",
+     "ref": "demand",
+     "rel": 0,
+     "ok": true
+    },
+    "zero_demand_passes_nothing": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "zero_weights_produce_no_rank_probability": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": []
+  },
+  {
+   "id": "catalogue_filters",
+   "note": "Every catalogue filter path (20 cases: search, coolant, fuel, enrichment class, vendor country, output ranges, four combinations, the unfiltered set and two empty results) returns exactly the set recomputed from the data",
+   "inputs": {},
+   "cmp": {
+    "filter_cases_disagreeing": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "empty_results_covered": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": []
+  },
+  {
+   "id": "results_agree_with_the_engine",
+   "note": "The number of surviving designs the results page prints, and the number of elimination rows it renders, agree with the engine result exactly",
+   "inputs": {},
+   "cmp": {
+    "headline_survivors": {
+     "got": 9,
+     "ref": 9,
+     "rel": 0,
+     "ok": true
+    },
+    "headline_total": {
+     "got": 17,
+     "ref": 17,
+     "rel": 0,
+     "ok": true
+    },
+    "elimination_rows": {
+     "got": 8,
+     "ref": 8,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "headline: 9 of 17 designs passed the gates · Aaland · 200 MWe · 280 °C · 2035"
+   ]
+  },
+  {
+   "id": "permalink_round_trip",
+   "note": "A site and requirement state survives encode -> link -> fresh load",
+   "inputs": {},
+   "cmp": {
+    "runtime_present": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "permalink_demand": {
+     "got": 250,
+     "ref": 250,
+     "rel": 0,
+     "ok": true
+    },
+    "permalink_temperature": {
+     "got": 300,
+     "ref": 300,
+     "rel": 0,
+     "ok": true
+    },
+    "permalink_year": {
+     "got": 2033,
+     "ref": 2033,
+     "rel": 0,
+     "ok": true
+    },
+    "permalink_country": {
+     "got": "AA",
+     "ref": "AA",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "notes": [
+    "permalink (480 chars): https://tools.petrov.re/smrselector.html?lang=en&s=Dq1YqU7Iy1FHKScxLV7JSSs1T0lEqy0wtB7LLM6sSi1KA_OKS1AIlKyMg"
+   ]
+  }
+ ],
+ "reference_provenance": "recorded",
+ "provenance_note": "No generator for this corpus exists anywhere in this tree, so its stored reference values cannot be re-derived here and are reused as stored, which AGENTS §5 classes as a regression reference; its values are vendor-published reactor data and tracing them needs a generator that reads the cited datasheets."
+}

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New tool template — Flat wall heat loss</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-09-11.pl",
+  "id": "newtooltemplate",
+  "file": "NEW_TOOL_TEMPLATE.html",
+  "listed": false,
+  "category": "thermo",
+  "order": 999,
+  "title": {"en":"Flat wall heat loss","uk":"Тепловтрати плоскої стіни","de":"Wärmeverlust einer ebenen Wand","nl":"Warmteverlies vlakke wand","fr":"Déperdition d’une paroi plane","es":"Pérdida de calor de un muro plano","pl":"Straty ciepła przez ścianę płaską"},
+  "summary": {"en":"Template for a new tool: steady one-dimensional heat loss through a single-layer wall with surface films.","uk":"Шаблон нового інструмента: усталені одновимірні тепловтрати крізь одношарову стіну.","de":"Vorlage für ein neues Werkzeug: stationärer eindimensionaler Wärmeverlust durch eine einschichtige Wand.","nl":"Sjabloon voor een nieuwe tool: stationair eendimensionaal warmteverlies door een enkellaagse wand.","fr":"Modèle d’outil : déperdition unidimensionnelle stationnaire à travers une paroi monocouche.","es":"Plantilla de herramienta: pérdida de calor unidimensional estacionaria a través de un muro de una capa.","pl":"Szablon nowego narzędzia: ustalone jednowymiarowe straty ciepła przez ścianę jednowarstwową."},
+  "description": {"en":"The reference shape of a new tool on the v3 UI framework: a manifest, a model, and one declaration of the interface. It owns no CSS and builds no DOM; every visible surface is a framework component.","uk":"Еталонна форма нового інструмента на UI-фреймворку v3: маніфест, модель і одна декларація інтерфейсу.","de":"Die Referenzform eines neuen Werkzeugs auf dem v3-UI-Framework: ein Manifest, ein Modell und eine Deklaration der Oberfläche.","nl":"De referentievorm van een nieuwe tool op het v3 UI-framework: een manifest, een model en één declaratie van de interface.","fr":"La forme de référence d’un nouvel outil sur le framework UI v3 : un manifeste, un modèle et une déclaration de l’interface.","es":"La forma de referencia de una herramienta nueva sobre el framework UI v3: un manifiesto, un modelo y una declaración de la interfaz.","pl":"Wzorcowa postać nowego narzędzia na frameworku UI v3: manifest, model i jedna deklaracja interfejsu."},
+  "status": "prototype",
+  "independent_validation": false,
+  "limitations": {"en":"Steady state, one dimension, one homogeneous layer between two surface films. No thermal bridges, no moisture transport, no solar gain, no thermal mass. Surface resistances are inputs, not looked-up values.","uk":"Усталений режим, один вимір, один однорідний шар між двома поверхневими плівками. Без містків холоду, вологи, сонячних надходжень і теплової інерції.","de":"Stationär, eindimensional, eine homogene Schicht zwischen zwei Übergangswiderständen. Keine Wärmebrücken, keine Feuchte, kein Solareintrag, keine Speichermasse.","nl":"Stationair, één dimensie, één homogene laag tussen twee overgangsweerstanden. Geen koudebruggen, geen vocht, geen zoninstraling, geen massa.","fr":"Régime permanent, une dimension, une couche homogène entre deux résistances superficielles. Pas de ponts thermiques, pas d’humidité, pas d’apport solaire, pas d’inertie.","es":"Régimen estacionario, una dimensión, una capa homogénea entre dos resistencias superficiales. Sin puentes térmicos, humedad, ganancia solar ni inercia.","pl":"Stan ustalony, jeden wymiar, jedna jednorodna warstwa między dwoma oporami przejmowania ciepła. Bez mostków cieplnych, wilgoci, zysków słonecznych i pojemności cieplnej."},
+  "intended_use": "education",
+  "catalog_languages": ["en","uk","de","nl","fr","es","pl"],
+  "tool_languages": ["en","uk","de","nl","fr","es","pl"],
+  "dependencies": [],
+  "network_access": {"mode":"none"},
+  "validation": {"basis":{"en":"None. This page exists to demonstrate the shape of a new tool on diagram-ui.js. The physics is the textbook series-resistance model."},"independent_validation":false,"benchmarks":[]},
+  "report": {"pdf": true, "source_attribution": true},
+  "python_export": {"supported": true, "requires": []},
+  "handoff": {"provides":["U","Q","A"],"accepts":["T","A"]},
+  "state_codec": {"permalink": true, "record": "tools.petrov.re/calculation-record/v1"},
+  "ui": {"framework": "tools.petrov.re/ui/v1", "level": 3}
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* NEW TOOL TEMPLATE — tools.petrov.re UI framework v3, level 3.
+ *
+ * Three parts, in this order, and nothing else:
+ *
+ *   1. the model      — pure functions and a defaults object. No DOM, no strings
+ *                       for the screen, no knowledge that a screen exists.
+ *   2. the interface  — ONE DiagramUI.app({…}) declaration. Data, not markup.
+ *   3. the data layer — Diagram.init({state, record, handoff}), unchanged from v2.
+ *
+ * This file contains no <style> element, no CSS at all, no style= attribute,
+ * and on the path a reader actually takes it builds no DOM: it constructs no
+ * element, sets no markup, appends nothing, looks nothing up by id or selector,
+ * and binds no listener to a control. Everything on screen is a framework
+ * component.
+ *
+ * It touches the document seven times, and each one is named here so the claim
+ * above can be checked rather than believed:
+ *   - document.title, one createElement x2 and one appendChild x2, ALL inside
+ *     degrade() — the branch reached only when diagram-ui.js did not load and
+ *     there is therefore no framework left to render a message with. A reader
+ *     with a working browser executes none of them;
+ *   - getComputedStyle, to read the theme tokens the canvas draws with;
+ *   - one DOMContentLoaded listener, to boot.
+ *
+ * boot() does NOT return early when the framework is absent. installData() —
+ * Diagram.init — runs on both paths, so the shared bar, the calculation record,
+ * the export and the disclaimer survive a missing diagram-ui.js. That is the
+ * shape `check.js --block` on diagram-ui.js tests, and this file failed that
+ * gate at all four viewports until 2026-08-18. See AUTHORING.md §1.3 and §7.2.
+ * The canvas drawing is the only pixels the tool owns — which is the point:
+ * a tool owns its data, the framework owns its interface.
+ *
+ * Copy this file, replace the manifest, replace part 1, rewrite part 2's field
+ * and tile lists, and you have a new tool.
+ */
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+
+  /* Magnus formula, °C in and °C out. Used only to say where condensation
+     would start on the room-side face, at a fixed 50 % indoor humidity. */
+  function dewPointC(tC, rh) {
+    var g = Math.log(rh / 100) + 17.62 * tC / (243.12 + tC);
+    return 243.12 * g / (17.62 - g);
+  }
+
+  /* Series resistance through one homogeneous layer between two surface films.
+     Everything is SI: metres, kelvin, W/(m K), m2K/W, W/m2. */
+  function solve(s) {
+    var Rlayer = s.d / s.lambda;
+    var Rtot = s.Rsi + Rlayer + s.Rse;
+    var U = 1 / Rtot;
+    var dT = s.Ti - s.Te;
+    var q = U * dT;
+    var Tsi = s.Ti - q * s.Rsi;
+    var dew = dewPointC(s.Ti - 273.15, RH_INDOOR);
+    return {
+      Rlayer: Rlayer, Rtot: Rtot, U: U, dT: dT, q: q,
+      Tsi: Tsi,                           /* inside surface temperature, K */
+      Tse: s.Te + q * s.Rse,              /* outside surface temperature, K */
+      Qwall: q * s.A,                     /* heat flow for the declared area */
+      dew: dew,                           /* indoor dew point, °C */
+      damp: (Tsi - 273.15) <= dew,        /* the surface would wet */
+      ratio: U / s.Ulimit                 /* against the limit the user set */
+    };
+  }
+
+  var RH_INDOOR = 50;                     /* per cent, fixed and stated */
+
+  var DEFAULTS = {
+    d: 0.30, lambda: 0.90, Rsi: 0.13, Rse: 0.04,
+    Ti: 293.15, Te: 263.15, A: 25, Ulimit: 0.30
+  };
+
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  /* ======================================================== 2. the interface */
+
+  /* Seven languages, one call. Nothing else in this file is a string on screen. */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  /* The stage's legend, declared once. A language change rebuilds the shell and
+     replays the furniture, but the framework cannot hand a tool back the NEW
+     Stage object — so the tool re-points its own reference in on.rebuild. That
+     is the one thing an imperative declaration still costs. */
+  var stage = null;
+  function LEGEND_ITEMS() {
+    return [
+      { label: T('Temperature','Температура','Temperatur','Temperatuur','Température','Temperatura','Temperatura'), series: 0 },
+      { label: T('Dew point, ' + RH_INDOOR + ' % RH','Точка роси, ' + RH_INDOOR + ' % RH','Taupunkt, ' + RH_INDOOR + ' % rF','Dauwpunt, ' + RH_INDOOR + ' % RV','Point de rosée, ' + RH_INDOOR + ' % HR','Punto de rocío, ' + RH_INDOOR + ' % HR','Punkt rosy, ' + RH_INDOOR + ' % RH'),
+        series: 1, dash: true }
+    ];
+  }
+  function adoptStage(app) {
+    stage = app.stages[0] || null;
+    if (stage) stage.legend({ items: LEGEND_ITEMS() });
+  }
+
+  var ui = null;
+
+  /* honest degradation: the one place the tool touches the document, and only
+     because the framework that would render the message is absent. It does NOT
+     return early — installData() runs on both paths, so the shared bar, the
+     record, the export and the disclaimer survive. AUTHORING.md §1.3, §7.2. */
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'Flat wall heat loss';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record '
+                  + 'and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'newtooltemplate',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      subtitle: T('Steady one-dimensional series resistance',
+                  'Усталений одновимірний послідовний опір',
+                  'Stationärer eindimensionaler Reihenwiderstand',
+                  'Stationaire eendimensionale serieweerstand',
+                  'Résistances en série, régime permanent, 1-D',
+                  'Resistencias en serie, régimen estacionario, 1-D',
+                  'Ustalony jednowymiarowy opór szeregowy'),
+
+      /* --- the standing qualification, sticky, dismissible, remembered ---- */
+      notices: [{
+        id: 'genre',
+        tone: 'warn',
+        sticky: true,
+        title: T('What this number is', 'Що це за число', 'Was diese Zahl ist',
+                 'Wat dit getal is', 'Ce que représente ce nombre', 'Qué es este número', 'Czym jest ta liczba'),
+        text: T('A teaching estimate for one homogeneous layer. It ignores thermal bridges, moisture, solar gain and thermal mass, so it is not a compliance calculation and must not be used as one.',
+                'Навчальна оцінка для одного однорідного шару. Не враховує містків холоду, вологи, сонячних надходжень і теплової інерції.',
+                'Eine Lehrabschätzung für eine homogene Schicht. Ohne Wärmebrücken, Feuchte, Solareintrag und Speichermasse — kein Nachweis.',
+                'Een lesvoorbeeld voor één homogene laag. Zonder koudebruggen, vocht, zoninstraling en massa — geen toetsing.',
+                'Une estimation pédagogique pour une couche homogène. Sans ponts thermiques, humidité, apport solaire ni inertie — ce n’est pas une justification réglementaire.',
+                'Una estimación docente para una capa homogénea. Sin puentes térmicos, humedad, ganancia solar ni inercia — no es una justificación normativa.',
+                'Szacunek dydaktyczny dla jednej jednorodnej warstwy. Bez mostków cieplnych, wilgoci, zysków słonecznych i pojemności cieplnej — nie jest to obliczenie do wykazania zgodności z przepisami.')
+      }],
+
+      /* ------------------------------------------------------ learn content */
+      learn: {
+        version: 1,
+        intro: {
+          title: T('What this tool does', 'Що робить цей інструмент', 'Was dieses Werkzeug tut',
+                   'Wat deze tool doet', 'Ce que fait cet outil', 'Qué hace esta herramienta', 'Co robi to narzędzie'),
+          body: T('It adds three thermal resistances in series — the inside surface film, the wall material, the outside surface film — and reports the U-value and the heat flux that follow. Change any input and the answer follows.',
+                  'Додає три теплові опори послідовно — внутрішня плівка, матеріал, зовнішня плівка — і дає U та густину теплового потоку.',
+                  'Addiert drei Wärmewiderstände in Reihe — innerer Übergang, Baustoff, äußerer Übergang — und liefert U-Wert und Wärmestromdichte.',
+                  'Telt drie warmteweerstanden in serie op — binnenovergang, materiaal, buitenovergang — en geeft de U-waarde en de warmtestroomdichtheid.',
+                  'Additionne trois résistances thermiques en série — film intérieur, matériau, film extérieur — et en déduit le coefficient U et la densité de flux.',
+                  'Suma tres resistencias térmicas en serie — película interior, material, película exterior — y da el valor U y la densidad de flujo.',
+                  'Sumuje trzy opory cieplne połączone szeregowo — przejmowanie wewnętrzne, materiał przegrody, przejmowanie zewnętrzne — i podaje współczynnik U oraz gęstość strumienia ciepła.')
+        },
+        topics: {
+          conductivity: {
+            title: T('Thermal conductivity', 'Теплопровідність', 'Wärmeleitfähigkeit',
+                     'Warmtegeleiding', 'Conductivité thermique', 'Conductividad térmica', 'Przewodność cieplna'),
+            body: T('The material property, in watts per metre per kelvin. Mineral wool is about 0.035, aerated concrete about 0.15, dense brick about 0.8, reinforced concrete about 2.3. It is the single most sensitive input here.',
+                    'Властивість матеріалу, Вт/(м·К). Мінеральна вата ≈0,035, цегла ≈0,8, залізобетон ≈2,3.',
+                    'Stoffkennwert in W/(m·K). Mineralwolle ≈0,035, Ziegel ≈0,8, Stahlbeton ≈2,3.',
+                    'Materiaaleigenschap in W/(m·K). Minerale wol ≈0,035, baksteen ≈0,8, gewapend beton ≈2,3.',
+                    'Propriété du matériau, en W/(m·K). Laine minérale ≈0,035, brique ≈0,8, béton armé ≈2,3.',
+                    'Propiedad del material, en W/(m·K). Lana mineral ≈0,035, ladrillo ≈0,8, hormigón armado ≈2,3.',
+                    'Właściwość materiału, w W/(m·K). Wełna mineralna ≈0,035, cegła ≈0,8, żelbet ≈2,3.')
+          },
+          surface: {
+            title: T('Surface resistances', 'Поверхневі опори', 'Wärmeübergangswiderstände',
+                     'Overgangsweerstanden', 'Résistances superficielles', 'Resistencias superficiales', 'Opory przejmowania ciepła'),
+            body: T('The still air films either side of the wall. They are inputs here, not looked-up values, because the right pair depends on the direction of heat flow and on how exposed the outside face is.',
+                    'Плівки нерухомого повітря з обох боків. Тут це вхідні дані, бо правильна пара залежить від напряму потоку та відкритості фасаду.',
+                    'Die ruhenden Luftschichten beidseits. Hier Eingaben, weil das richtige Paar von Stromrichtung und Exposition abhängt.',
+                    'De stilstaande luchtlagen aan weerszijden. Hier invoer, omdat het juiste paar afhangt van de stroomrichting en de blootstelling.',
+                    'Les films d’air immobile de part et d’autre. Ce sont des entrées, car le bon couple dépend du sens du flux et de l’exposition.',
+                    'Las películas de aire en calma a ambos lados. Son entradas, porque el par correcto depende del sentido del flujo y de la exposición.',
+                    'Warstwy nieruchomego powietrza po obu stronach przegrody. Tutaj są daną wejściową, ponieważ właściwa para zależy od kierunku strumienia ciepła i od ekspozycji powierzchni zewnętrznej.')
+          },
+          uvalue: {
+            title: T('U-value', 'Коефіцієнт U', 'U-Wert', 'U-waarde', 'Coefficient U', 'Valor U', 'Współczynnik U'),
+            body: T('The reciprocal of the total resistance: watts lost per square metre per kelvin of temperature difference. The limit it is measured against is yours to set — this tool asserts no standard.',
+                    'Обернена величина до сумарного опору. Межа, з якою порівнюється, задається вами — інструмент не стверджує жодного стандарту.',
+                    'Der Kehrwert des Gesamtwiderstands. Den Grenzwert setzen Sie selbst — das Werkzeug behauptet keine Norm.',
+                    'Het omgekeerde van de totale weerstand. De grenswaarde stelt u zelf in — deze tool claimt geen norm.',
+                    'L’inverse de la résistance totale. La limite de comparaison est la vôtre — cet outil n’affirme aucune norme.',
+                    'La inversa de la resistencia total. El límite de comparación lo fija usted — esta herramienta no afirma ninguna norma.',
+                    'Odwrotność oporu całkowitego. Wartość graniczną, do której się porównuje, ustala użytkownik — narzędzie nie powołuje się na żadną normę.')
+          },
+          surfacetemp: {
+            title: T('Inside surface temperature', 'Температура внутрішньої поверхні', 'Innenoberflächentemperatur',
+                     'Binnenoppervlaktetemperatuur', 'Température de surface intérieure', 'Temperatura superficial interior', 'Temperatura powierzchni wewnętrznej'),
+            body: T('How cold the room-side face runs. It is where condensation and mould appear first, and it falls as the U-value rises — which is why it is on the first screen and not buried in a table.',
+                    'Наскільки холодна поверхня з боку приміщення. Саме там першою з’являється конденсація.',
+                    'Wie kalt die raumseitige Oberfläche wird. Dort tritt Tauwasser zuerst auf.',
+                    'Hoe koud het binnenoppervlak wordt. Daar treedt condensatie het eerst op.',
+                    'Le froid atteint par la face intérieure. C’est là que la condensation apparaît en premier.',
+                    'Cuán fría queda la cara interior. Allí aparece primero la condensación.',
+                    'Jak zimna jest powierzchnia od strony pomieszczenia. Tam najpierw pojawia się kondensacja.')
+          },
+          profile: {
+            title: T('Temperature profile', 'Профіль температури', 'Temperaturverlauf',
+                     'Temperatuurverloop', 'Profil de température', 'Perfil de temperatura', 'Rozkład temperatury'),
+            body: T('Temperature against position through the construction. Each resistance in series takes a share of the total drop in proportion to its own size, so the steepest segment is the one doing the insulating.',
+                    'Температура за товщиною. Кожен опір бере частку перепаду, пропорційну своїй величині.',
+                    'Temperatur über die Dicke. Jeder Widerstand nimmt einen zu seiner Größe proportionalen Anteil des Gefälles.',
+                    'Temperatuur over de dikte. Elke weerstand neemt een aan zijn grootte evenredig deel van het verval.',
+                    'Température à travers l’épaisseur. Chaque résistance prend une part de la chute proportionnelle à sa valeur.',
+                    'Temperatura a través del espesor. Cada resistencia toma una parte de la caída proporcional a su valor.',
+                    'Temperatura na grubości przegrody. Każdy opór przejmuje część spadku proporcjonalną do swojej wartości.')
+        }
+        },
+        tour: [
+          { topic: 'conductivity', focus: '[data-dgu-field="f-lambda"]' },
+          { topic: 'uvalue',       focus: '.dgu-r-results' },
+          { topic: 'profile',      focus: '.dgu-stage' }
+        ]
+      },
+
+      /* ----------------------------------------------------------- the form */
+      panels: [{
+        id: 'wall',
+        slot: 'inputs',
+        title: T('Wall', 'Стіна', 'Wand', 'Wand', 'Paroi', 'Muro', 'Ściana'),
+        fields: [
+          { id: 'f-d', key: 'd', type: 'number', unit: 'm', display: 'mm',
+            label: T('Layer thickness','Товщина шару','Schichtdicke','Laagdikte','Épaisseur de la couche','Espesor de la capa','Grubość warstwy'),
+            min: 0.005, max: 2, required: true },
+          { id: 'f-lambda', key: 'lambda', type: 'number', unit: 'W/(m·K)', learn: 'conductivity',
+            label: T('Thermal conductivity','Теплопровідність','Wärmeleitfähigkeit','Warmtegeleiding','Conductivité thermique','Conductividad térmica','Przewodność cieplna'),
+            min: 0.01, max: 5, step: 0.005, precision: 3, required: true },
+          { id: 'f-A', key: 'A', type: 'number', unit: 'm²',
+            label: T('Wall area','Площа стіни','Wandfläche','Wandoppervlak','Surface de paroi','Superficie del muro','Powierzchnia ściany'),
+            min: 0.1, max: 10000 }
+        ]
+      }, {
+        id: 'surfaces',
+        slot: 'inputs',
+        collapsible: true,
+        collapsed: true,
+        learn: 'surface',
+        title: T('Surface resistances','Поверхневі опори','Übergangswiderstände','Overgangsweerstanden','Résistances superficielles','Resistencias superficiales','Opory przejmowania'),
+        fields: [
+          { id: 'f-Rsi', key: 'Rsi', type: 'number', unit: 'm²·K/W',
+            label: T('Inside, Rsi','Внутрішній, Rsi','Innen, Rsi','Binnen, Rsi','Intérieure, Rsi','Interior, Rsi','Wewnętrzny, Rsi'),
+            min: 0, max: 1, step: 0.01, precision: 2 },
+          { id: 'f-Rse', key: 'Rse', type: 'number', unit: 'm²·K/W',
+            label: T('Outside, Rse','Зовнішній, Rse','Außen, Rse','Buiten, Rse','Extérieure, Rse','Exterior, Rse','Zewnętrzny, Rse'),
+            min: 0, max: 1, step: 0.01, precision: 2 }
+        ]
+      }, {
+        id: 'conditions',
+        slot: 'inputs',
+        title: T('Conditions','Умови','Randbedingungen','Condities','Conditions','Condiciones','Warunki'),
+        fields: [
+          { id: 'f-Ti', key: 'Ti', type: 'number', unit: 'K', display: 'degC',
+            label: T('Inside air','Повітря всередині','Innenluft','Binnenlucht','Air intérieur','Aire interior','Powietrze wewnętrzne'),
+            min: 253.15, max: 333.15, step: 0.5, precision: 1, required: true },
+          { id: 'f-Te', key: 'Te', type: 'number', unit: 'K', display: 'degC',
+            label: T('Outside air','Повітря зовні','Außenluft','Buitenlucht','Air extérieur','Aire exterior','Powietrze zewnętrzne'),
+            min: 213.15, max: 323.15, step: 0.5, precision: 1, required: true },
+          { id: 'f-Ulimit', key: 'Ulimit', type: 'range', unit: 'W/(m²·K)',
+            min: 0.1, max: 2, step: 0.01, learn: 'uvalue',
+            label: T('U-value limit you are working to','Ваша межа U','Ihr U-Grenzwert','Uw U-grenswaarde','Votre limite de U','Su límite de U','Twoja wartość graniczna U') }
+        ]
+      }],
+
+      /* footer notes are a string, not a <details> the tool builds */
+      footer: T('R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Steady state, one dimension, one homogeneous layer. No thermal bridges, no moisture, no solar gain, no thermal mass.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Усталений одновимірний режим, один однорідний шар.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Stationär, eindimensional, eine homogene Schicht.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Stationair, eendimensionaal, één homogene laag.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Régime permanent, 1-D, une couche homogène.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Régimen estacionario, 1-D, una capa homogénea.',
+                'R = d/λ, U = 1/(Rsi + R + Rse), q = U (Ti − Te). Stan ustalony, jeden wymiar, jedna jednorodna warstwa.'),
+
+      /* -------------------------------------------------------- the answer */
+      on: {
+        /* a language or unit change rebuilds the shell and replays the
+           furniture; this is where a tool re-points the references it holds */
+        rebuild: adoptStage,
+
+        compute: function (s) {
+          last = solve(s);
+          var warm = last.Tsi - 273.15;
+          var tone = last.ratio > 1 ? 'bad' : (last.ratio > 0.85 ? 'warn' : 'ok');
+          if (stage) stage.schedule();
+          return {
+            verdict: {
+              tone: tone,
+              text: last.ratio > 1
+                ? T('The wall is above the limit you set.','Стіна перевищує задану вами межу.','Die Wand liegt über Ihrem Grenzwert.','De wand ligt boven uw grenswaarde.','La paroi dépasse la limite que vous avez fixée.','El muro supera el límite que ha fijado.','Ściana przekracza ustaloną przez Ciebie wartość graniczną.')
+                : T('The wall is within the limit you set.','Стіна в межах заданої вами межі.','Die Wand liegt innerhalb Ihres Grenzwerts.','De wand blijft binnen uw grenswaarde.','La paroi respecte la limite que vous avez fixée.','El muro cumple el límite que ha fijado.','Ściana mieści się w ustalonej przez Ciebie wartości granicznej.')
+            },
+            tiles: [
+              { label: T('U-value','Коефіцієнт U','U-Wert','U-waarde','Coefficient U','Valor U','Współczynnik U'),
+                value: last.U, hint: 'W/(m²·K)', precision: 3, tone: tone, learn: 'uvalue' },
+              { label: T('Heat flux','Густина потоку','Wärmestromdichte','Warmtestroomdichtheid','Densité de flux','Densidad de flujo','Gęstość strumienia ciepła'),
+                value: last.q, hint: 'W/m²', precision: 1, tone: tone },
+              { label: T('Total resistance','Сумарний опір','Gesamtwiderstand','Totale weerstand','Résistance totale','Resistencia total','Opór całkowity'),
+                value: last.Rtot, hint: 'm²·K/W', precision: 3 },
+              { label: T('Inside surface','Внутрішня поверхня','Innenoberfläche','Binnenoppervlak','Surface intérieure','Superficie interior','Powierzchnia wewnętrzna'),
+                value: warm, hint: '°C', precision: 1, learn: 'surfacetemp',
+                tone: last.damp ? 'bad' : null, headline: false },
+              { label: T('Heat flow, whole wall','Тепловий потік, уся стіна','Wärmestrom, ganze Wand','Warmtestroom, hele wand','Flux, paroi entière','Flujo, muro completo','Strumień ciepła, cała ściana'),
+                value: last.Qwall, unit: 'W', precision: 0, headline: false }
+            ],
+            /* value against its own limit — the framework meter, not a track
+               and a fill the tool styles itself */
+            meters: [{
+              label: T('U against your limit','U відносно вашої межі','U gegen Ihren Grenzwert','U tegen uw grenswaarde','U par rapport à votre limite','U frente a su límite','U względem Twojej granicy'),
+              ratio: last.ratio,
+              text: DiagramUI.fmt(last.U, { precision: 3 }) + ' / ' + DiagramUI.fmt(s.Ulimit, { precision: 2 }) + ' W/(m²·K)'
+            }],
+            tables: [{
+              title: T('Where the resistance is','Де зосереджений опір','Wo der Widerstand sitzt','Waar de weerstand zit','Où se trouve la résistance','Dónde está la resistencia','Gdzie skupia się opór'),
+              head: [T('Layer','Шар','Schicht','Laag','Couche','Capa','Warstwa'),
+                     { label: 'm²·K/W', num: true },
+                     { label: '%', num: true },
+                     { label: T('Temperature drop','Перепад','Temperaturgefälle','Verval','Chute','Salto','Spadek temperatury'), num: true }],
+              rows: [
+                { cells: [T('Inside surface film','Внутрішня плівка','Innerer Übergang','Binnenovergang','Film intérieur','Película interior','Przejmowanie wewnętrzne'),
+                          { value: state.Rsi, precision: 3 },
+                          { value: 100 * state.Rsi / last.Rtot, precision: 1 },
+                          { value: last.q * state.Rsi, precision: 1 }] },
+                { cells: [T('Wall material','Матеріал стіни','Baustoff','Wandmateriaal','Matériau','Material','Materiał ściany'),
+                          { value: last.Rlayer, precision: 3 },
+                          { value: 100 * last.Rlayer / last.Rtot, precision: 1 },
+                          { value: last.q * last.Rlayer, precision: 1 }],
+                  chosen: last.Rlayer > state.Rsi + state.Rse },
+                { cells: [T('Outside surface film','Зовнішня плівка','Äußerer Übergang','Buitenovergang','Film extérieur','Película exterior','Przejmowanie zewnętrzne'),
+                          { value: state.Rse, precision: 3 },
+                          { value: 100 * state.Rse / last.Rtot, precision: 1 },
+                          { value: last.q * state.Rse, precision: 1 }] }
+              ],
+              foot: [T('Total','Разом','Summe','Totaal','Total','Total','Razem'),
+                     { value: last.Rtot, precision: 3 },
+                     { value: 100, precision: 0 },
+                     { value: last.dT, precision: 1 }]
+            }],
+            notes: [last.damp
+              ? T('The inside face runs at or below the dew point of ' + DiagramUI.fmt(last.dew, { precision: 1 }) + ' °C for ' + RH_INDOOR + ' % indoor humidity: this surface would wet.',
+                  'Внутрішня поверхня на рівні точки роси або нижче: поверхня зволожуватиметься.',
+                  'Die Innenoberfläche liegt auf oder unter dem Taupunkt: diese Fläche würde feucht.',
+                  'Het binnenoppervlak ligt op of onder het dauwpunt: dit vlak zou nat worden.',
+                  'La face intérieure est au point de rosée ou en dessous : cette surface se mouillerait.',
+                  'La cara interior está en el punto de rocío o por debajo: esta superficie se humedecería.',
+                  'Powierzchnia wewnętrzna jest na poziomie punktu rosy lub poniżej: powierzchnia ta uległaby zawilgoceniu.')
+              : T('The inside face stays above the dew point of ' + DiagramUI.fmt(last.dew, { precision: 1 }) + ' °C for ' + RH_INDOOR + ' % indoor humidity.',
+                  'Внутрішня поверхня лишається вище точки роси.',
+                  'Die Innenoberfläche bleibt über dem Taupunkt.',
+                  'Het binnenoppervlak blijft boven het dauwpunt.',
+                  'La face intérieure reste au-dessus du point de rosée.',
+                  'La cara interior se mantiene por encima del punto de rocío.',
+                  'Powierzchnia wewnętrzna pozostaje powyżej punktu rosy.')]
+          };
+        }
+      }
+    });
+
+    /* --------------------------------------------------- inputs footer row */
+    /* Reset lives in the inputs footer, under that name, per the placement law.
+       The shared bar exports; ui.importAction() is the framework's other half
+       of it, so no tool hand-builds a hidden <input type="file"> again. */
+    ui.panel({
+      id: 'io',
+      slot: 'inputs',
+      actionsAlign: 'end',
+      actions: [
+        ui.importAction({
+          label: T('Open a saved case…','Відкрити збережений випадок…','Gespeicherten Fall öffnen…','Opgeslagen geval openen…','Ouvrir un cas enregistré…','Abrir un caso guardado…','Otwórz zapisany przypadek…'),
+          accept: '.json,application/json',
+          as: 'json',
+          run: function (data) {
+            var src = (data && data.inputs) || data || {};
+            Object.keys(DEFAULTS).forEach(function (k) {
+              if (typeof src[k] === 'number' && isFinite(src[k])) state[k] = src[k];
+            });
+            ui.sync();
+            ui.run();
+          }
+        }),
+        ui.resetAction()
+      ]
+    });
+
+    /* ------------------------------------------------------------ examples */
+    /* Grouped, so the framework renders a grouped <select> with the selected
+       entry's note and a Load button instead of a wall of buttons.
+       `apply` PATCHES the state; the alternative key `state` REPLACES it whole
+       (see UI_FRAMEWORK_SPEC §8.3), so a preset that touches two of eight
+       inputs uses apply. */
+    ui.examples([
+      { group: T('Masonry','Мурування','Mauerwerk','Metselwerk','Maçonnerie','Fábrica','Mur'),
+        label: T('Solid brick, 300 mm','Суцільна цегла, 300 мм','Vollziegel, 300 mm','Massieve baksteen, 300 mm','Brique pleine, 300 mm','Ladrillo macizo, 300 mm','Cegła pełna, 300 mm'),
+        note: 'λ 0.80, d 300 mm', apply: function (t) { t.d = 0.30; t.lambda = 0.80; } },
+      { group: T('Masonry','Мурування','Mauerwerk','Metselwerk','Maçonnerie','Fábrica','Mur'),
+        label: T('Aerated concrete, 240 mm','Газобетон, 240 мм','Porenbeton, 240 mm','Cellenbeton, 240 mm','Béton cellulaire, 240 mm','Hormigón celular, 240 mm','Beton komórkowy, 240 mm'),
+        note: 'λ 0.15, d 240 mm', apply: function (t) { t.d = 0.24; t.lambda = 0.15; } },
+      { group: T('Concrete','Бетон','Beton','Beton','Béton','Hormigón','Beton'),
+        label: T('Reinforced concrete, 200 mm','Залізобетон, 200 мм','Stahlbeton, 200 mm','Gewapend beton, 200 mm','Béton armé, 200 mm','Hormigón armado, 200 mm','Żelbet, 200 mm'),
+        note: 'λ 2.30, d 200 mm', apply: function (t) { t.d = 0.20; t.lambda = 2.30; } },
+      { group: T('Insulation','Утеплення','Dämmung','Isolatie','Isolation','Aislamiento','Izolacja'),
+        label: T('Mineral wool, 150 mm','Мінеральна вата, 150 мм','Mineralwolle, 150 mm','Minerale wol, 150 mm','Laine minérale, 150 mm','Lana mineral, 150 mm','Wełna mineralna, 150 mm'),
+        note: 'λ 0.035, d 150 mm', apply: function (t) { t.d = 0.15; t.lambda = 0.035; } },
+      { group: T('Insulation','Утеплення','Dämmung','Isolatie','Isolation','Aislamiento','Izolacja'),
+        label: T('Rigid foam, 80 mm','Жорсткий пінопласт, 80 мм','Hartschaum, 80 mm','Hardschuim, 80 mm','Mousse rigide, 80 mm','Espuma rígida, 80 mm','Sztywna pianka, 80 mm'),
+        note: 'λ 0.024, d 80 mm', apply: function (t) { t.d = 0.08; t.lambda = 0.024; } }
+    ]);
+
+    /* --------------------------------------------------------- the drawing */
+    /* The one thing the framework does not own: the tool's own data. Even here
+       it owns the box, the sizing, the density, the caption and the legend. */
+    ui.stage({
+      caption: T('Temperature through the construction','Температура крізь конструкцію','Temperatur durch den Aufbau','Temperatuur door de opbouw','Température à travers la paroi','Temperatura a través del cerramiento','Temperatura w przekroju przegrody'),
+      minHeight: 260,
+      a11y: function () {
+        if (!last) return '';
+        return 'Temperature profile. Inside air ' + DiagramUI.fmt(state.Ti - 273.15, { precision: 1 }) +
+               ' degrees Celsius, inside surface ' + DiagramUI.fmt(last.Tsi - 273.15, { precision: 1 }) +
+               ', outside surface ' + DiagramUI.fmt(last.Tse - 273.15, { precision: 1 }) +
+               ', outside air ' + DiagramUI.fmt(state.Te - 273.15, { precision: 1 }) + '.';
+      },
+      render: function (size, st) {
+        var ctx = st.canvas(), w = size.w, h = size.h;
+        var coarse = size.density === 'coarse';
+        var pad = coarse ? 34 : 46, padR = 12, padT = 14, padB = coarse ? 26 : 32;
+        var cs = getComputedStyle(document.documentElement);
+        var muted = cs.getPropertyValue('--muted').trim() || '#777';
+        var line = cs.getPropertyValue('--line').trim() || '#ddd';
+        ctx.clearRect(0, 0, w, h);
+        if (!last) return;
+
+        /* x is thermal resistance, so each segment's width shows its share */
+        var Rtot = last.Rtot;
+        var xs = [0, state.Rsi, state.Rsi + last.Rlayer, Rtot];
+        var ts = [state.Ti, last.Tsi, last.Tse, state.Te].map(function (k) { return k - 273.15; });
+        var tmin = Math.min.apply(null, ts), tmax = Math.max.apply(null, ts);
+        if (tmax - tmin < 1) { tmax += 0.5; tmin -= 0.5; }
+        var X = function (r) { return pad + (w - pad - padR) * (r / Rtot); };
+        var Y = function (t) { return h - padB - (h - padT - padB) * ((t - tmin) / (tmax - tmin)); };
+
+        ctx.font = '400 12px ' + (cs.getPropertyValue('--font').trim() || 'sans-serif');
+        ctx.strokeStyle = line; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad, padT); ctx.lineTo(pad, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+        ctx.fillStyle = muted; ctx.textAlign = 'right';
+        DiagramUI.ticks(tmin, tmax, h - padT - padB, size.density).forEach(function (t) {
+          var y = Y(t);
+          if (y < padT - 2 || y > h - padB + 2) return;
+          ctx.beginPath(); ctx.moveTo(pad - 4, y); ctx.lineTo(pad, y); ctx.stroke();
+          ctx.fillText(DiagramUI.fmt(t, { precision: 0 }) + '°', pad - 7, y + 4);
+        });
+
+        /* layer boundaries, then the profile, in framework series colours */
+        ctx.setLineDash([3, 3]); ctx.strokeStyle = line;
+        [1, 2].forEach(function (i) {
+          ctx.beginPath(); ctx.moveTo(X(xs[i]), padT); ctx.lineTo(X(xs[i]), h - padB); ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        xs.forEach(function (r, i) { var x = X(r), y = Y(ts[i]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+        ctx.stroke();
+        ctx.fillStyle = DiagramUI.series(0);
+        xs.forEach(function (r, i) { ctx.beginPath(); ctx.arc(X(r), Y(ts[i]), 3.5, 0, 6.2832); ctx.fill(); });
+
+        /* the dew point of the indoor air, as a second series */
+        var dew = last.dew;
+        if (dew > tmin && dew < tmax) {
+          ctx.strokeStyle = DiagramUI.series(1); ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+          ctx.beginPath(); ctx.moveTo(pad, Y(dew)); ctx.lineTo(w - padR, Y(dew)); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.textAlign = 'left'; ctx.fillStyle = muted;
+        if (!coarse) ctx.fillText('R →', pad + 2, h - 8);
+      }
+    });
+    adoptStage(ui);
+
+    ui.ready();
+    window.__newtool = { ui: ui, state: state, solve: solve };
+  }
+
+  /* ======================================================= 3. the data layer
+     Unchanged from v2: diagram-common.js owns the permalink, the record, the
+     report, the export and the handoff. The UI layer never touches them.
+     Called UNCONDITIONALLY from boot(), on both paths. */
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'newtooltemplate',
+        file: 'NEW_TOOL_TEMPLATE.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); last = solve(state);
+                                      if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: function () {
+          if (!last) return null;
+          return {
+            inputs: { d: state.d, lambda: state.lambda, Rsi: state.Rsi, Rse: state.Rse,
+                      Ti: state.Ti, Te: state.Te, A: state.A, Ulimit: state.Ulimit },
+            outputs: { U: last.U, q: last.q, R_total: last.Rtot, T_si: last.Tsi,
+                       T_se: last.Tse, Q_wall: last.Qwall },
+            units: { d: 'm', lambda: 'W/(m K)', Rsi: 'm2K/W', Rse: 'm2K/W', Ti: 'K', Te: 'K',
+                     A: 'm2', Ulimit: 'W/(m2 K)', U: 'W/(m2 K)', q: 'W/m2', R_total: 'm2K/W',
+                     T_si: 'K', T_se: 'K', Q_wall: 'W' },
+            model: {
+              equations: ['R = d / lambda', 'U = 1 / (Rsi + R + Rse)', 'q = U (Ti - Te)',
+                          'T_si = Ti - q Rsi'],
+              ranges: ['steady state, one dimension, one homogeneous layer'],
+              notes: ['template tool for the v3 UI framework; no independent validation']
+            },
+            warnings: last.ratio > 1 ? ['U is above the limit set by the user'] : []
+          };
+        },
+        /* The handoff vocabulary is fixed (FRAMEWORK_V2_SPEC §1.5): a tool
+           may only offer and accept names from it. T arriving from another
+           tool is read as the outside design air temperature. */
+        handoff: {
+          provides: ['U', 'Q', 'A'],
+          accepts: ['T', 'A'],
+          build: function () {
+            if (!last) return null;
+            return { quantities: {
+              U: { value: last.U, unit: 'W/(m2 K)' },
+              Q: { value: last.Qwall, unit: 'W' },
+              A: { value: state.A, unit: 'm2' } } };
+          },
+          apply: function (p) {
+            var q = p && p.quantities || {};
+            if (q.T) state.Te = q.T.value;
+            if (q.A) state.A = q.A.value;
+            last = solve(state);
+            if (ui) { ui.sync(); ui.run(); }
+          }
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

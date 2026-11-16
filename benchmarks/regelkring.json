@@ -1,0 +1,3385 @@
+{
+ "tool": "regelkring",
+ "file": "regelkring.html",
+ "reference": "python-control 0.10.2 (margin, nyquist_response, feedback, step_response, frequency_response), numpy/scipy polynomial algebra and root finding, an independently coded Nyquist winding-number integrator, a high-resolution delay-differential-equation solution of the closed-loop FOPDT step response, and the published tuning rules of Ziegler & Nichols (1942), Rivera/Morari/Skogestad (1986) and Astrom & Hagglund (2004) implemented from their printed formulae.",
+ "reference_citations": [
+  "Ziegler, J.G. & Nichols, N.B., \"Optimum settings for automatic controllers\", Trans. ASME 64 (1942) 759-768, \"Summary of controller adjustments\", open-loop (reaction-curve) column",
+  "Rivera, D.E., Morari, M. & Skogestad, S., \"Internal model control 4: PID controller design\", Ind. Eng. Chem. Process Des. Dev. 25 (1986) 252-265, Table 2 (FOPDT)",
+  "Astrom, K.J. & Hagglund, T., \"Revisiting the Ziegler-Nichols step response method for PID control\", J. Process Control 14 (2004) 635-650, eqs. (7) and (10)",
+  "Baker, G.A. & Graves-Morris, P., \"Pade Approximants\", 2nd ed., Cambridge University Press 1996, eq. (1.24)",
+  "python-control 0.10.2 (Fuller, Greiner, Moore, Murray, van Paassen, Yorke, \"The Python Control Systems Library\", CDC 2021)",
+  "Franklin, Powell & Emami-Naeini, \"Feedback Control of Dynamic Systems\", the textbook value GM = 6 at w = sqrt(2) for L = 1/(s(s+1)(s+2))"
+ ],
+ "tolerance": "Rational LTI algebra the tool claims to implement exactly: 1e-10 relative on normalised polynomial coefficients, 1e-9 on pole locations, 1e-11 on |L(jw)|, 1e-9 deg on arg L(jw) (modulo 360 deg), 1e-7 relative on gain/phase/delay margins and crossover frequencies, 1e-8 of the response span on step responses, 1e-12 relative on tuning-rule outputs (closed-form arithmetic), exact integer equality on Nyquist counts. The closed-loop step response of a dead-time loop is NOT rational; there the criterion is that the tool declares its Pade approximation, that the error falls with Pade order, and that the default order 3 stays within 2 % of the exact delay-differential-equation solution.",
+ "total": 55,
+ "passed": 55,
+ "failed": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "A1-cl-pid-first-order",
+   "note": "PID (ideal, D-filter N=10) Kc=1.5 Ti=8 Td=2 on P(s)=2/(10s+1); unity feedback. Closed-loop T=L/(1+L): denominator coefficients and poles.",
+   "inputs": {
+    "C": {
+     "num": [
+      26.400000000000002,
+      12.299999999999999,
+      1.5
+     ],
+     "den": [
+      1.6,
+      8,
+      0
+     ]
+    },
+    "P": {
+     "num": [
+      2
+     ],
+     "den": [
+      10,
+      1
+     ]
+    },
+    "H": {
+     "num": [
+      1
+     ],
+     "den": [
+      1
+     ]
+    }
+   },
+   "cmp": {
+    "den_degree": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c1": {
+     "got": 8.4,
+     "ref": 8.4,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c2": {
+     "got": 2.0374999999999996,
+     "ref": 2.0374999999999996,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c3": {
+     "got": 0.1875,
+     "ref": 0.1875,
+     "rel": 0,
+     "ok": true
+    },
+    "pole0": {
+     "got": [
+      -8.152910057575106,
+      0
+     ],
+     "ref": [
+      -8.152910057575108,
+      0
+     ],
+     "rel": 2.1788009764069276e-16,
+     "ok": true
+    },
+    "pole1": {
+     "got": [
+      -0.12354497121244724,
+      -0.08794636642033103
+     ],
+     "ref": [
+      -0.12354497121244729,
+      -0.08794636642033074
+     ],
+     "rel": 3.610886590484085e-17,
+     "ok": true
+    },
+    "pole2": {
+     "got": [
+      -0.12354497121244726,
+      0.08794636642033103
+     ],
+     "ref": [
+      -0.12354497121244729,
+      0.08794636642033074
+     ],
+     "rel": 3.5907700741253293e-17,
+     "ok": true
+    },
+    "pole_count": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true
+    },
+    "dcGain": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.1788009764069276e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.feedback(control.tf(L),1) poles",
+    "max_rel": 4.357601952813855e-16
+   }
+  },
+  {
+   "id": "A2-cl-pid-second-order-sensor",
+   "note": "PID Kc=2.2 Ti=40 Td=6 (N=10) on P(s)=1.5/((5s+1)(2s+1)) with sensor H=1/(3s+1). T = G/(1+G H), G = C P.",
+   "inputs": {
+    "C": {
+     "num": [
+      580.8000000000001,
+      89.32000000000001,
+      2.2
+     ],
+     "den": [
+      24,
+      40,
+      0
+     ]
+    },
+    "P": {
+     "num": [
+      1.5
+     ],
+     "den": [
+      10,
+      7,
+      1
+     ]
+    },
+    "H": {
+     "num": [
+      1
+     ],
+     "den": [
+      3,
+      1
+     ]
+    }
+   },
+   "cmp": {
+    "den_degree": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c1": {
+     "got": 2.7,
+     "ref": 2.7,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c2": {
+     "got": 2.0555555555555554,
+     "ref": 2.0555555555555554,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c3": {
+     "got": 1.798888888888889,
+     "ref": 1.798888888888889,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c4": {
+     "got": 0.2416388888888889,
+     "ref": 0.2416388888888889,
+     "rel": 0,
+     "ok": true
+    },
+    "den_c5": {
+     "got": 0.004583333333333333,
+     "ref": 0.004583333333333333,
+     "rel": 0,
+     "ok": true
+    },
+    "pole0": {
+     "got": [
+      -2.1036352348989276,
+      0
+     ],
+     "ref": [
+      -2.1036352348989276,
+      0
+     ],
+     "rel": 0,
+     "ok": true
+    },
+    "pole1": {
+     "got": [
+      -0.221105782317861,
+      -0.8252153505970808
+     ],
+     "ref": [
+      -0.22110578231786102,
+      -0.8252153505970813
+     ],
+     "rel": 2.1151752871586393e-16,
+     "ok": true
+    },
+    "pole2": {
+     "got": [
+      -0.221105782317861,
+      0.8252153505970808
+     ],
+     "ref": [
+      -0.22110578231786102,
+      0.8252153505970813
+     ],
+     "rel": 2.1151752871586393e-16,
+     "ok": true
+    },
+    "pole3": {
+     "got": [
+      -0.13144248359305044,
+      0
+     ],
+     "ref": [
+      -0.13144248359305036,
+      0
+     ],
+     "rel": 3.9582302799224326e-17,
+     "ok": true
+    },
+    "pole4": {
+     "got": [
+      -0.022710716872300193,
+      0
+     ],
+     "ref": [
+      -0.02271071687230018,
+      0
+     ],
+     "rel": 6.5970504665373875e-18,
+     "ok": true
+    },
+    "pole_count": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true
+    },
+    "dcGain": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.1151752871586393e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.feedback",
+    "max_rel": 1.2666336895751784e-15
+   }
+  },
+  {
+   "id": "B1-bode",
+   "note": "PI x FOPDT: C=1.2(1+1/(25s)), P=2.5 e^-8s/(30s+1) -- |L| and arg L at 10 frequencies.",
+   "inputs": {
+    "L": {
+     "num": [
+      75,
+      3
+     ],
+     "den": [
+      750,
+      25,
+      0
+     ],
+     "delay": 8
+    }
+   },
+   "cmp": {
+    "mag@w=0.01": {
+     "got": 11.847656834879386,
+     "ref": 11.847656834879386,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.01": {
+     "got": -97.24666312711373,
+     "ref": -97.24666312711373,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.05": {
+     "got": 2.1310885625751133,
+     "ref": 2.1310885625751133,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.05": {
+     "got": -117.88805253334321,
+     "ref": -117.88805253334324,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=0.1": {
+     "got": 1.0217631819555841,
+     "ref": 1.0217631819555841,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.1": {
+     "got": -139.20308427389566,
+     "ref": -139.20308427389566,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.3": {
+     "got": 0.3342264458016013,
+     "ref": 0.3342264458016013,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.3": {
+     "got": 131.2356775459209,
+     "ref": 131.2356775459209,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.5": {
+     "got": 0.20019459559687094,
+     "ref": 0.20019459559687094,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.5": {
+     "got": 40.057035522060225,
+     "ref": 40.05703552206022,
+     "rel": 3.947459643111668e-17,
+     "ok": true
+    },
+    "mag@w=1": {
+     "got": 0.10002441433379695,
+     "ref": 0.10002441433379695,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1": {
+     "got": 171.2523062856993,
+     "ref": 171.2523062856993,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1.5708": {
+     "got": 0.06366813213928184,
+     "ref": 0.06366813213928184,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1.5708": {
+     "got": -90.2447211549591,
+     "ref": -90.2447211549591,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=2": {
+     "got": 0.050003054613719185,
+     "ref": 0.05000305461371917,
+     "rel": 2.77538800679726e-16,
+     "ok": true
+    },
+    "phase@w=2": {
+     "got": 73.07660620637996,
+     "ref": 73.07660620637996,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=5": {
+     "got": 0.020000195545908633,
+     "ref": 0.020000195545908633,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=5": {
+     "got": 138.09242922343577,
+     "ref": 138.09242922343577,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=10": {
+     "got": 0.010000024444142969,
+     "ref": 0.010000024444142969,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=10": {
+     "got": 6.299442282019918,
+     "ref": 6.299442282019918,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.77538800679726e-16,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "B2-bode",
+   "note": "L = 1/(s(s+1)(s+2)) -- |L| and arg L at 10 frequencies.",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      3,
+      2,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "mag@w=0.01": {
+     "got": 49.99687523044996,
+     "ref": 49.99687523044996,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.01": {
+     "got": -90.85941520796057,
+     "ref": -90.85941520796057,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.05": {
+     "got": 9.984403749974005,
+     "ref": 9.984403749974003,
+     "rel": 1.779131617553903e-16,
+     "ok": true
+    },
+    "phase@w=0.05": {
+     "got": -94.2945014102764,
+     "ref": -94.2945014102764,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.1": {
+     "got": 4.968978604963326,
+     "ref": 4.968978604963327,
+     "rel": 1.7874466571720733e-16,
+     "ok": true
+    },
+    "phase@w=0.1": {
+     "got": -98.5729983636114,
+     "ref": -98.57299836361139,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=0.3": {
+     "got": 1.578715388646659,
+     "ref": 1.578715388646659,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.3": {
+     "got": -115.23000984394177,
+     "ref": -115.23000984394176,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=0.5": {
+     "got": 0.8677218312746247,
+     "ref": 0.8677218312746247,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.5": {
+     "got": -130.6012946450045,
+     "ref": -130.6012946450045,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1": {
+     "got": 0.31622776601683794,
+     "ref": 0.31622776601683794,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1": {
+     "got": -161.56505117707798,
+     "ref": -161.565051177078,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=1.5708": {
+     "got": 0.13443459954693804,
+     "ref": 0.13443459954693804,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1.5708": {
+     "got": 174.33548482388807,
+     "ref": 174.33548482388804,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=2": {
+     "got": 0.07905694150420949,
+     "ref": 0.07905694150420949,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=2": {
+     "got": 161.56505117707798,
+     "ref": 161.565051177078,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=5": {
+     "got": 0.0072835704072922985,
+     "ref": 0.007283570407292298,
+     "rel": 1.1908469191428458e-16,
+     "ok": true
+    },
+    "phase@w=5": {
+     "got": 123.11134196037203,
+     "ref": 123.11134196037203,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=10": {
+     "got": 0.0009757142403137059,
+     "ref": 0.0009757142403137058,
+     "rel": 1.1111882226264507e-16,
+     "ok": true
+    },
+    "phase@w=10": {
+     "got": 107.02052561151987,
+     "ref": 107.02052561151987,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.7874466571720733e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.frequency_response",
+    "max_rel": 0
+   }
+  },
+  {
+   "id": "B3-bode",
+   "note": "L = (1-s)/(s(s+1)) - non-minimum phase -- |L| and arg L at 10 frequencies.",
+   "inputs": {
+    "L": {
+     "num": [
+      -1,
+      1
+     ],
+     "den": [
+      1,
+      1,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "mag@w=0.01": {
+     "got": 100.00000000000001,
+     "ref": 100,
+     "rel": 1.4210854715202004e-16,
+     "ok": true
+    },
+    "phase@w=0.01": {
+     "got": -91.14587739536698,
+     "ref": -91.14587739536698,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.05": {
+     "got": 20,
+     "ref": 20,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.05": {
+     "got": -95.72481045222351,
+     "ref": -95.72481045222351,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.1": {
+     "got": 9.999999999999998,
+     "ref": 10,
+     "rel": 1.7763568394002506e-16,
+     "ok": true
+    },
+    "phase@w=0.1": {
+     "got": -101.42118627499929,
+     "ref": -101.42118627499929,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.3": {
+     "got": 3.333333333333333,
+     "ref": 3.333333333333333,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.3": {
+     "got": -123.39848846798726,
+     "ref": -123.39848846798726,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.5": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.5": {
+     "got": -143.13010235415598,
+     "ref": -143.13010235415598,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1": {
+     "got": -180,
+     "ref": -180,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1.5708": {
+     "got": 0.6366182836771072,
+     "ref": 0.6366182836771072,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1.5708": {
+     "got": 154.9631517882391,
+     "ref": 154.96315178823912,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=2": {
+     "got": 0.5,
+     "ref": 0.5,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=2": {
+     "got": 143.13010235415598,
+     "ref": 143.13010235415598,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=5": {
+     "got": 0.19999999999999996,
+     "ref": 0.2,
+     "rel": 2.7755575615628914e-16,
+     "ok": true
+    },
+    "phase@w=5": {
+     "got": 112.61986494804044,
+     "ref": 112.61986494804043,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=10": {
+     "got": 0.09999999999999999,
+     "ref": 0.1,
+     "rel": 1.3877787807814457e-16,
+     "ok": true
+    },
+    "phase@w=10": {
+     "got": 101.42118627499929,
+     "ref": 101.42118627499929,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.7755575615628914e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.frequency_response",
+    "max_rel": 0
+   }
+  },
+  {
+   "id": "B4-bode",
+   "note": "L = e^-s/s - pure integrator with 1 s dead time -- |L| and arg L at 10 frequencies.",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      0
+     ],
+     "delay": 1
+    }
+   },
+   "cmp": {
+    "mag@w=0.01": {
+     "got": 100,
+     "ref": 100,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.01": {
+     "got": -90.57295779513083,
+     "ref": -90.57295779513082,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=0.05": {
+     "got": 20,
+     "ref": 20,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.05": {
+     "got": -92.86478897565414,
+     "ref": -92.86478897565412,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=0.1": {
+     "got": 10.000000000000002,
+     "ref": 10.000000000000002,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.1": {
+     "got": -95.72957795130823,
+     "ref": -95.72957795130824,
+     "rel": 7.894919286223336e-17,
+     "ok": true
+    },
+    "mag@w=0.3": {
+     "got": 3.333333333333333,
+     "ref": 3.3333333333333335,
+     "rel": 1.3322676295501878e-16,
+     "ok": true
+    },
+    "phase@w=0.3": {
+     "got": -107.1887338539247,
+     "ref": -107.1887338539247,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=0.5": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=0.5": {
+     "got": -118.64788975654116,
+     "ref": -118.64788975654116,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=1": {
+     "got": -147.29577951308232,
+     "ref": -147.29577951308232,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=1.5708": {
+     "got": 0.6366182836771072,
+     "ref": 0.6366182836771073,
+     "rel": 1.7439383270811956e-16,
+     "ok": true
+    },
+    "phase@w=1.5708": {
+     "got": 179.99978954085032,
+     "ref": 179.9997895408503,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "mag@w=2": {
+     "got": 0.5,
+     "ref": 0.5,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=2": {
+     "got": 155.40844097383535,
+     "ref": 155.40844097383535,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=5": {
+     "got": 0.2,
+     "ref": 0.2,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=5": {
+     "got": -16.478897565411604,
+     "ref": -16.478897565411604,
+     "rel": 0,
+     "ok": true
+    },
+    "mag@w=10": {
+     "got": 0.1,
+     "ref": 0.1,
+     "rel": 0,
+     "ok": true
+    },
+    "phase@w=10": {
+     "got": 57.04220486917679,
+     "ref": 57.04220486917679,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.7439383270811956e-16,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "C1-margins",
+   "note": "L = 1/(s(s+1)(s+2)) - textbook: GM = 6 (15.563 dB) at w=sqrt(2)",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      3,
+      2,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 5.999999999999999,
+     "ref": 6.000000000000002,
+     "rel": 4.4408920985006247e-16,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": 15.563025007672874,
+     "ref": 15.563025007672875,
+     "rel": 9.86864910777917e-18,
+     "ok": true
+    },
+    "wcg": {
+     "got": 1.414213562373095,
+     "ref": 1.4142135623730954,
+     "rel": 3.1401849173675493e-16,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": 53.41078617769918,
+     "ref": 53.41078617769916,
+     "rel": 1.1842378929335003e-16,
+     "ok": true
+    },
+    "wcp": {
+     "got": 0.4457479596318946,
+     "ref": 0.4457479596318946,
+     "rel": 0,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": 2.091303066534164,
+     "ref": 2.091303066534163,
+     "rel": 4.247009598527819e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.4408920985006247e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.margin",
+    "max_rel": 9.312349632474487e-16
+   }
+  },
+  {
+   "id": "C2-margins",
+   "note": "L = 10/(s(s+1)(s+2)) - closed loop unstable, GM = 0.6 (-4.437 dB)",
+   "inputs": {
+    "L": {
+     "num": [
+      10
+     ],
+     "den": [
+      1,
+      3,
+      2,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 0.5999999999999999,
+     "ref": 0.6000000000000001,
+     "rel": 3.700743415417188e-16,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": -4.436974992327128,
+     "ref": -4.4369749923271256,
+     "rel": 1.4802973661668754e-17,
+     "ok": true
+    },
+    "wcg": {
+     "got": 1.414213562373095,
+     "ref": 1.4142135623730954,
+     "rel": 3.1401849173675493e-16,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": -12.997208015488674,
+     "ref": -12.997208015488674,
+     "rel": 0,
+     "ok": true
+    },
+    "wcp": {
+     "got": 1.802203304606924,
+     "ref": 1.8022033046069244,
+     "rel": 2.464146019013777e-16,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 3.700743415417188e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.margin",
+    "max_rel": 1.6400662394108453e-15
+   }
+  },
+  {
+   "id": "C3-margins",
+   "note": "L = e^-s/s - analytic: wcp=1, PM=90-180/pi deg=32.704, wcg=pi/2, GM=pi/2, dm=PM/wcp",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      0
+     ],
+     "delay": 1
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 1.5707963267948966,
+     "ref": 1.5707963267948966,
+     "rel": 0,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": 3.9223975406030522,
+     "ref": 3.9223975406030527,
+     "rel": 2.4671622769447924e-18,
+     "ok": true
+    },
+    "wcg": {
+     "got": 1.5707963267948966,
+     "ref": 1.5707963267948966,
+     "rel": 0,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": 32.70422048691768,
+     "ref": 32.70422048691768,
+     "rel": 0,
+     "ok": true
+    },
+    "wcp": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": 0.5707963267948966,
+     "ref": 0.5707963267948966,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 2.4671622769447924e-18,
+   "pass": true,
+   "crosscheck": {
+    "analytic_source": "hand-derived closed form for L=e^-s/s",
+    "analytic_max_rel": 0
+   }
+  },
+  {
+   "id": "C4-margins",
+   "note": "PI x FOPDT: C=1.2(1+1/(25s)) on 2.5 e^-8s/(30s+1)",
+   "inputs": {
+    "L": {
+     "num": [
+      75,
+      3
+     ],
+     "den": [
+      750,
+      25,
+      0
+     ],
+     "delay": 8
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 1.909425732446386,
+     "ref": 1.9094257324463855,
+     "rel": 2.325773672700476e-16,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": 5.618055421078861,
+     "ref": 5.618055421078858,
+     "rel": 1.4802973661668754e-17,
+     "ok": true
+    },
+    "wcg": {
+     "got": 0.19216568967487427,
+     "ref": 0.1921656896748743,
+     "rel": 1.4443564646003486e-16,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": 39.88882407973342,
+     "ref": 39.888824079733446,
+     "rel": 1.5789838572446671e-16,
+     "ok": true
+    },
+    "wcp": {
+     "got": 0.10209717385809722,
+     "ref": 0.10209717385809719,
+     "rel": 2.7185449476011775e-16,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": 6.818908777120192,
+     "ref": 6.818908777120198,
+     "rel": 9.11765964484215e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 9.11765964484215e-16,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "C5-margins",
+   "note": "L = 1/(s+1)^3",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      3,
+      3,
+      1
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 7.999999999999995,
+     "ref": 7.999999999999991,
+     "rel": 4.440892098500631e-16,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": 18.061799739838868,
+     "ref": 18.06179973983886,
+     "rel": 3.947459643111668e-17,
+     "ok": true
+    },
+    "wcg": {
+     "got": 1.7320508075688767,
+     "ref": 1.7320508075688765,
+     "rel": 1.28197512425571e-16,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": null,
+     "ref": null,
+     "rel": 0,
+     "ok": true
+    },
+    "wcp": {
+     "got": null,
+     "ref": null,
+     "rel": 0,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": null,
+     "ref": null,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.440892098500631e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.margin",
+    "max_rel": 1.554312234475221e-15
+   }
+  },
+  {
+   "id": "C6-margins",
+   "note": "L = 4/(s+1)^3 - GM=2 (6.0206 dB) at w=sqrt(3), PM finite",
+   "inputs": {
+    "L": {
+     "num": [
+      4
+     ],
+     "den": [
+      1,
+      3,
+      3,
+      1
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "gainMargin": {
+     "got": 1.9999999999999987,
+     "ref": 1.9999999999999978,
+     "rel": 4.440892098500631e-16,
+     "ok": true
+    },
+    "gainMargin_dB": {
+     "got": 6.020599913279617,
+     "ref": 6.020599913279614,
+     "rel": 1.4802973661668754e-17,
+     "ok": true
+    },
+    "wcg": {
+     "got": 1.7320508075688767,
+     "ref": 1.7320508075688765,
+     "rel": 1.28197512425571e-16,
+     "ok": true
+    },
+    "phaseMargin_deg": {
+     "got": 27.14163059537622,
+     "ref": 27.141630595376224,
+     "rel": 1.973729821555834e-17,
+     "ok": true
+    },
+    "wcp": {
+     "got": 1.2328187619393802,
+     "ref": 1.2328187619393802,
+     "rel": 0,
+     "ok": true
+    },
+    "delayMargin_s": {
+     "got": 0.38425016950921215,
+     "ref": 0.38425016950921215,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 4.440892098500631e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.margin",
+    "max_rel": 1.554312234475221e-15
+   }
+  },
+  {
+   "id": "D1-nyquist",
+   "note": "L = 1/(s(s+1)(s+2)): P=0, N_ccw=0, Z=0 - stable",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      3,
+      2,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 7.067899292141149e-17,
+     "ref": 0,
+     "rel": 7.067899292141149e-17,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "D2-nyquist",
+   "note": "L = 10/(s(s+1)(s+2)): P=0, N_ccw=-2, Z=2 - unstable",
+   "inputs": {
+    "L": {
+     "num": [
+      10
+     ],
+     "den": [
+      1,
+      3,
+      2,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": -2,
+     "ref": -2,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 4.440892098500626e-16,
+     "ref": 0,
+     "rel": 4.440892098500626e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "D3-nyquist",
+   "note": "L = 3/(s-1): P=1, N_ccw=1, Z=0 - stabilised unstable plant",
+   "inputs": {
+    "L": {
+     "num": [
+      3
+     ],
+     "den": [
+      1,
+      -1
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 9.992007221626409e-16,
+     "ref": 0,
+     "rel": 9.992007221626409e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "D4-nyquist",
+   "note": "L = 0.5/(s-1): P=1, N_ccw=0, Z=1 - gain too low to stabilise",
+   "inputs": {
+    "L": {
+     "num": [
+      0.5
+     ],
+     "den": [
+      1,
+      -1
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 9.007430250238475e-18,
+     "ref": 0,
+     "rel": 9.007430250238475e-18,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "D5-nyquist",
+   "note": "L = e^-s/s: P=0, Z=0",
+   "inputs": {
+    "L": {
+     "num": [
+      1
+     ],
+     "den": [
+      1,
+      0
+     ],
+     "delay": 1
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 7.067899292141149e-17,
+     "ref": 0,
+     "rel": 7.067899292141149e-17,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "D6-nyquist",
+   "note": "L = 2 e^-s/s: |L|=1 at w=2, phase=-90-114.6=-204.6 -> Z=2",
+   "inputs": {
+    "L": {
+     "num": [
+      2
+     ],
+     "den": [
+      1,
+      0
+     ],
+     "delay": 1
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": -2,
+     "ref": -2,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 2.220446049250313e-16,
+     "ref": 0,
+     "rel": 2.220446049250313e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "D7-nyquist",
+   "note": "L = 0.5(1-s)/(s(s+1)): non-minimum phase, P=0, closed loop stable (Z=0)",
+   "inputs": {
+    "L": {
+     "num": [
+      -0.5,
+      0.5
+     ],
+     "den": [
+      1,
+      1,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 7.774689221355263e-16,
+     "ref": 0,
+     "rel": 7.774689221355263e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "D8-nyquist",
+   "note": "L = 2(1-s)/(s(s+1)): non-minimum phase, P=0, closed loop poles 0.5+-1.323j (Z=2)",
+   "inputs": {
+    "L": {
+     "num": [
+      -2,
+      2
+     ],
+     "den": [
+      1,
+      1,
+      0
+     ],
+     "delay": 0
+    }
+   },
+   "cmp": {
+    "P": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "encirclementsCCW": {
+     "got": -2,
+     "ref": -2,
+     "rel": 0,
+     "ok": true
+    },
+    "Z": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "closedLoopStable": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "residual": {
+     "got": 2.220446049250313e-15,
+     "ref": 0,
+     "rel": 2.220446049250313e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.nyquist_response(...).count (clockwise encirclements)",
+    "agrees": true
+   }
+  },
+  {
+   "id": "E1-step-fopdt-openloop",
+   "note": "Open-loop FOPDT G = 2.5 e^-8s/(30s+1). Exact: y(t)=0 for t<8, y(t)=2.5(1-exp(-(t-8)/30)) after. Derived by hand, not from residues. [tool method: analytic]",
+   "inputs": {
+    "G": {
+     "num": [
+      2.5
+     ],
+     "den": [
+      30,
+      1
+     ],
+     "delay": 8
+    },
+    "nPoints": 61
+   },
+   "cmp": {
+    "y@t=0": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=15": {
+     "got": 0.5202760841580458,
+     "ref": 0.5202760841580458,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=30": {
+     "got": 1.2992367472755015,
+     "ref": 1.2992367472755015,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=45": {
+     "got": 1.7717002721663224,
+     "ref": 1.7717002721663224,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=60": {
+     "got": 2.058263885608508,
+     "ref": 2.058263885608508,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=75": {
+     "got": 2.232073503119233,
+     "ref": 2.232073503119233,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=90": {
+     "got": 2.3374943650924136,
+     "ref": 2.3374943650924136,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=105": {
+     "got": 2.4014353500524814,
+     "ref": 2.4014353500524814,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=120": {
+     "got": 2.440217517842987,
+     "ref": 2.440217517842987,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=135": {
+     "got": 2.463740091658048,
+     "ref": 2.463740091658048,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=150": {
+     "got": 2.4780072538722364,
+     "ref": 2.478007253872236,
+     "rel": 1.7921223158491992e-16,
+     "ok": true
+    },
+    "__worst": {
+     "got": 1.7921223158491992e-16,
+     "ref": 0,
+     "rel": 1.7921223158491992e-16,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.7921223158491992e-16,
+   "pass": true,
+   "crosscheck": {
+    "source": "residue partial fractions (step_analytic)",
+    "max_rel": 1.7921223158491992e-16
+   }
+  },
+  {
+   "id": "E2-step-closedloop-pid-first-order",
+   "note": "Step response of the A1 closed loop, by residues at the simple poles. [tool method: analytic]",
+   "inputs": {
+    "G": {
+     "num": [
+      52.800000000000004,
+      24.599999999999998,
+      3
+     ],
+     "den": [
+      16,
+      134.4,
+      32.599999999999994,
+      3
+     ],
+     "delay": 0
+    },
+    "nPoints": 61
+   },
+   "cmp": {
+    "y@t=0": {
+     "got": 1.6653345369377348e-16,
+     "ref": -1.5543122344752192e-15,
+     "rel": 1.679803429857137e-15,
+     "ok": true
+    },
+    "y@t=15": {
+     "got": 1.0016817149871784,
+     "ref": 1.0016817149871775,
+     "rel": 8.669953186359417e-16,
+     "ok": true
+    },
+    "y@t=30": {
+     "got": 1.0150243645843187,
+     "ref": 1.0150243645843182,
+     "rel": 4.3349765931797085e-16,
+     "ok": true
+    },
+    "y@t=45": {
+     "got": 1.0011312125162553,
+     "ref": 1.0011312125162553,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=60": {
+     "got": 0.9997191774469856,
+     "ref": 0.9997191774469856,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=75": {
+     "got": 0.9999502935689721,
+     "ref": 0.9999502935689721,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=90": {
+     "got": 1.0000030198063938,
+     "ref": 1.0000030198063938,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=105": {
+     "got": 1.000001456811304,
+     "ref": 1.000001456811304,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=120": {
+     "got": 1.000000039504327,
+     "ref": 1.000000039504327,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=135": {
+     "got": 0.9999999672934285,
+     "ref": 0.9999999672934285,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=150": {
+     "got": 0.9999999964770181,
+     "ref": 0.9999999964770181,
+     "rel": 0,
+     "ok": true
+    },
+    "__worst": {
+     "got": 1.9507394669308687e-15,
+     "ref": 0,
+     "rel": 1.9507394669308687e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.9507394669308687e-15,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.step_response",
+    "max_rel": 2.0591138817603614e-15
+   }
+  },
+  {
+   "id": "E3-step-closedloop-pid-second-order",
+   "note": "Step response of the A2 closed loop (5 poles), by residues. [tool method: analytic]",
+   "inputs": {
+    "G": {
+     "num": [
+      2613.6000000000004,
+      1273.14,
+      143.88000000000002,
+      3.3000000000000003
+     ],
+     "den": [
+      720,
+      1944,
+      1480,
+      1295.2,
+      173.98000000000002,
+      3.3000000000000003
+     ],
+     "delay": 0
+    },
+    "nPoints": 61
+   },
+   "cmp": {
+    "y@t=0": {
+     "got": -1.7486012637846216e-15,
+     "ref": 5.551115123125783e-17,
+     "rel": 9.334320978191132e-16,
+     "ok": true
+    },
+    "y@t=15": {
+     "got": 0.7652305956590619,
+     "ref": 0.7652305956590619,
+     "rel": 0,
+     "ok": true
+    },
+    "y@t=30": {
+     "got": 0.8730846183027565,
+     "ref": 0.8730846183027562,
+     "rel": 1.723259257512209e-16,
+     "ok": true
+    },
+    "y@t=45": {
+     "got": 0.9110792873874334,
+     "ref": 0.911079287387433,
+     "rel": 1.723259257512209e-16,
+     "ok": true
+    },
+    "y@t=60": {
+     "got": 0.9367669033667518,
+     "ref": 0.9367669033667516,
+     "rel": 1.1488395050081393e-16,
+     "ok": true
+    },
+    "y@t=75": {
+     "got": 0.9550178245928057,
+     "ref": 0.9550178245928056,
+     "rel": 5.744197525040696e-17,
+     "ok": true
+    },
+    "y@t=90": {
+     "got": 0.9680032972025182,
+     "ref": 0.9680032972025181,
+     "rel": 5.744197525040696e-17,
+     "ok": true
+    },
+    "y@t=105": {
+     "got": 0.9772406089757365,
+     "ref": 0.9772406089757364,
+     "rel": 5.744197525040696e-17,
+     "ok": true
+    },
+    "y@t=120": {
+     "got": 0.9838112226861462,
+     "ref": 0.9838112226861461,
+     "rel": 5.744197525040696e-17,
+     "ok": true
+    },
+    "y@t=135": {
+     "got": 0.9884849172951286,
+     "ref": 0.9884849172951284,
+     "rel": 5.744197525040696e-17,
+     "ok": true
+    },
+    "y@t=150": {
+     "got": 0.9918093193112534,
+     "ref": 0.9918093193112534,
+     "rel": 0,
+     "ok": true
+    },
+    "__worst": {
+     "got": 1.6083753070113951e-15,
+     "ref": 0,
+     "rel": 1.6083753070113951e-15,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.6083753070113951e-15,
+   "pass": true,
+   "crosscheck": {
+    "source": "control.step_response",
+    "max_rel": 1.3786074060097672e-15
+   }
+  },
+  {
+   "id": "E4-step-closedloop-fopdt-exact",
+   "note": "EXACT closed-loop step response of a P controller Kc=0.6 on G=2 e^-5s/(20s+1), unity negative feedback, computed by direct integration of the delay differential equation tau y' + y = K Kc (r - y(t-L)) with L an exact multiple of h (h=L/8000). Two step sizes agree to 1.25e-06. This is the reference against which the tool's Pade-based closed loop is judged.",
+   "inputs": {
+    "K": 2,
+    "tau": 20,
+    "L": 5,
+    "Kc": 0.6,
+    "t": [
+     0,
+     2.5,
+     5,
+     7.5,
+     10,
+     12.5,
+     15,
+     17.5,
+     20,
+     22.5,
+     25,
+     27.5,
+     30,
+     32.5,
+     35,
+     37.5,
+     40,
+     42.5,
+     45,
+     47.5,
+     50,
+     52.5,
+     55,
+     57.5,
+     60,
+     62.5,
+     65,
+     67.5,
+     70,
+     72.5,
+     75,
+     77.5,
+     80,
+     82.5,
+     85,
+     87.5,
+     90,
+     92.5,
+     95,
+     97.5,
+     100,
+     102.5,
+     105,
+     107.5,
+     110,
+     112.5,
+     115,
+     117.5,
+     120,
+     122.5,
+     125,
+     127.5,
+     130,
+     132.5,
+     135,
+     137.5,
+     140,
+     142.5,
+     145,
+     147.5,
+     150,
+     152.5,
+     155,
+     157.5,
+     160,
+     162.5,
+     165,
+     167.5,
+     170,
+     172.5,
+     175,
+     177.5,
+     180,
+     182.5,
+     185,
+     187.5,
+     190,
+     192.5,
+     195,
+     197.5,
+     200
+    ]
+   },
+   "cmp": {
+    "maxdev_pade1": {
+     "got": 0.0896232998519242,
+     "ref": 0,
+     "rel": 0.0896232998519242,
+     "ok": true
+    },
+    "maxdev_pade2": {
+     "got": 0.04155919736944202,
+     "ref": 0,
+     "rel": 0.04155919736944202,
+     "ok": true
+    },
+    "maxdev_pade3": {
+     "got": 0.030360155529867806,
+     "ref": 0,
+     "rel": 0.030360155529867806,
+     "ok": true
+    },
+    "maxdev_pade6": {
+     "got": 0.01529582488122029,
+     "ref": 0,
+     "rel": 0.01529582488122029,
+     "ok": true
+    },
+    "pade_error_falls_with_order": {
+     "got": [
+      0.08962,
+      0.04156,
+      0.03036,
+      0.0153
+     ],
+     "ref": "monotone decreasing",
+     "rel": 0,
+     "ok": true
+    },
+    "approximation_declared": {
+     "got": {
+      "method": "pade",
+      "order": 3,
+      "forwardDelay": 5,
+      "feedbackDelay": 0
+     },
+     "ref": "pade",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.030360155529867806,
+   "pass": true,
+   "crosscheck": {
+    "source": "DDE self-convergence between h and h/2",
+    "max_rel": 0.0000022916590751139224
+   }
+  },
+  {
+   "id": "F1-zn-p",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "zn",
+    "type": "P",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.5,
+     "ref": 1.5,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-zn-pi",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "zn",
+    "type": "PI",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.35,
+     "ref": 1.35,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 26.666666666666668,
+     "ref": 26.666666666666668,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-zn-pid",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "zn",
+    "type": "PID",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.8,
+     "ref": 1.8,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 16,
+     "ref": 16,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-imc-pi",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 30 (the tool's own default, not from the paper). K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "imc",
+    "type": "PI",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 0.3157894736842105,
+     "ref": 0.3157894736842105,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 30,
+     "ref": 30,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-amigo-pi",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PI",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8
+   },
+   "cmp": {
+    "Kc": {
+     "got": 0.3356925207756233,
+     "ref": 0.3356925207756233,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 24.938126773888364,
+     "ref": 24.938126773888364,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-imc-pid",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 30 (the tool's own default, not from the paper). K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "imc",
+    "type": "PID",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 0.4,
+     "ref": 0.4,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 34,
+     "ref": 34,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 3.5294117647058822,
+     "ref": 3.5294117647058822,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F1-amigo-pid",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=2.5 tau=30 L=8.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PID",
+    "K": 2.5,
+    "tau": 30,
+    "L": 8
+   },
+   "cmp": {
+    "Kc": {
+     "got": 0.755,
+     "ref": 0.755,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 19.78181818181818,
+     "ref": 19.78181818181818,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 3.7037037037037037,
+     "ref": 3.7037037037037037,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-zn-p",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "zn",
+    "type": "P",
+    "K": 1,
+    "tau": 10,
+    "L": 1
+   },
+   "cmp": {
+    "Kc": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-zn-pi",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "zn",
+    "type": "PI",
+    "K": 1,
+    "tau": 10,
+    "L": 1
+   },
+   "cmp": {
+    "Kc": {
+     "got": 9,
+     "ref": 9,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 3.3333333333333335,
+     "ref": 3.3333333333333335,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-zn-pid",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "zn",
+    "type": "PID",
+    "K": 1,
+    "tau": 10,
+    "L": 1
+   },
+   "cmp": {
+    "Kc": {
+     "got": 12,
+     "ref": 12,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0.5,
+     "ref": 0.5,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-imc-pi",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 10 (the tool's own default, not from the paper). K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "imc",
+    "type": "PI",
+    "K": 1,
+    "tau": 10,
+    "L": 1,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 0.9090909090909091,
+     "ref": 0.9090909090909091,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-amigo-pi",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PI",
+    "K": 1,
+    "tau": 10,
+    "L": 1
+   },
+   "cmp": {
+    "Kc": {
+     "got": 2.823553719008264,
+     "ref": 2.823553719008264,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 6.076872246696035,
+     "ref": 6.076872246696035,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-imc-pid",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 10 (the tool's own default, not from the paper). K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "imc",
+    "type": "PID",
+    "K": 1,
+    "tau": 10,
+    "L": 1,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 10.5,
+     "ref": 10.5,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0.47619047619047616,
+     "ref": 0.47619047619047616,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F2-amigo-pid",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=1 tau=10 L=1.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PID",
+    "K": 1,
+    "tau": 10,
+    "L": 1
+   },
+   "cmp": {
+    "Kc": {
+     "got": 4.7,
+     "ref": 4.7,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 4.2,
+     "ref": 4.2,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0.48543689320388345,
+     "ref": 0.48543689320388345,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-zn-p",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "zn",
+    "type": "P",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25
+   },
+   "cmp": {
+    "Kc": {
+     "got": 6,
+     "ref": 6,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-zn-pi",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "zn",
+    "type": "PI",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25
+   },
+   "cmp": {
+    "Kc": {
+     "got": 5.4,
+     "ref": 5.4,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 83.33333333333334,
+     "ref": 83.33333333333334,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-zn-pid",
+   "note": "Ziegler-Nichols open-loop (reaction-curve) rule, Trans. ASME 64 (1942), pp. 759-768, 'Summary of controller adjustments', open-loop column. K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "zn",
+    "type": "PID",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25
+   },
+   "cmp": {
+    "Kc": {
+     "got": 7.2,
+     "ref": 7.2,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 50,
+     "ref": 50,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 12.5,
+     "ref": 12.5,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Ziegler & Nichols, Trans. ASME 64 (1942), 759–768, “Summary of controller adjustments” — open-loop column in controller sensitivity",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-imc-pi",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 120 (the tool's own default, not from the paper). K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "imc",
+    "type": "PI",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.0344827586206897,
+     "ref": 1.0344827586206897,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 120,
+     "ref": 120,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-amigo-pi",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PI",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.431376337693222,
+     "ref": 1.431376337693222,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 94.19043815609311,
+     "ref": 94.19043815609311,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-imc-pid",
+   "note": "IMC-PID for FOPDT, Rivera, Morari & Skogestad, IEC PDD 25 (1986) 252-265. lambda_c = max(tau, 1.7 L) = 120 (the tool's own default, not from the paper). K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "imc",
+    "type": "PID",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25,
+    "lambdaC": 0
+   },
+   "cmp": {
+    "Kc": {
+     "got": 1.25,
+     "ref": 1.25,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 132.5,
+     "ref": 132.5,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 11.320754716981131,
+     "ref": 11.320754716981131,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Rivera, Morari & Skogestad, IEC PDD 25 (1986), 252–265 (IMC-PID for FOPDT)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "F3-amigo-pid",
+   "note": "AMIGO, Astrom & Hagglund, J. Process Control 14 (2004) 635-650. K=0.8 tau=120 L=25.",
+   "inputs": {
+    "method": "amigo",
+    "type": "PID",
+    "K": 0.8,
+    "tau": 120,
+    "L": 25
+   },
+   "cmp": {
+    "Kc": {
+     "got": 2.95,
+     "ref": 2.95,
+     "rel": 0,
+     "ok": true
+    },
+    "Ti": {
+     "got": 71.62162162162163,
+     "ref": 71.62162162162163,
+     "rel": 0,
+     "ok": true
+    },
+    "Td": {
+     "got": 11.764705882352942,
+     "ref": 11.764705882352942,
+     "rel": 0,
+     "ok": true
+    },
+    "cites_source": {
+     "got": "Åström & Hägglund, J. Process Control 14 (2004), 635–650 (AMIGO)",
+     "ref": "non-empty citation",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "G1-pade-order1",
+   "note": "[1/1] Pade approximant of exp(-4s); Baker & Graves-Morris, Pade Approximants, 2nd ed., CUP 1996, eq. (1.24).",
+   "inputs": {
+    "L": 4,
+    "order": 1
+   },
+   "cmp": {
+    "num0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "num1": {
+     "got": -0.5,
+     "ref": -0.5,
+     "rel": 0,
+     "ok": true
+    },
+    "den0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "den1": {
+     "got": 0.5,
+     "ref": 0.5,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.interpolate.pade of the Taylor series of exp(-4s)",
+    "max_rel": 0
+   }
+  },
+  {
+   "id": "G2-pade-order2",
+   "note": "[2/2] Pade approximant of exp(-4s); Baker & Graves-Morris, Pade Approximants, 2nd ed., CUP 1996, eq. (1.24).",
+   "inputs": {
+    "L": 4,
+    "order": 2
+   },
+   "cmp": {
+    "num0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "num1": {
+     "got": -1.5,
+     "ref": -1.5,
+     "rel": 0,
+     "ok": true
+    },
+    "num2": {
+     "got": 0.75,
+     "ref": 0.75,
+     "rel": 0,
+     "ok": true
+    },
+    "den0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "den1": {
+     "got": 1.5,
+     "ref": 1.5,
+     "rel": 0,
+     "ok": true
+    },
+    "den2": {
+     "got": 0.75,
+     "ref": 0.75,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.interpolate.pade of the Taylor series of exp(-4s)",
+    "max_rel": 4.440892098500626e-16
+   }
+  },
+  {
+   "id": "G3-pade-order3",
+   "note": "[3/3] Pade approximant of exp(-4s); Baker & Graves-Morris, Pade Approximants, 2nd ed., CUP 1996, eq. (1.24).",
+   "inputs": {
+    "L": 4,
+    "order": 3
+   },
+   "cmp": {
+    "num0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "num1": {
+     "got": -3,
+     "ref": -3,
+     "rel": 0,
+     "ok": true
+    },
+    "num2": {
+     "got": 3.75,
+     "ref": 3.75,
+     "rel": 0,
+     "ok": true
+    },
+    "num3": {
+     "got": -1.875,
+     "ref": -1.875,
+     "rel": 0,
+     "ok": true
+    },
+    "den0": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    },
+    "den1": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true
+    },
+    "den2": {
+     "got": 3.75,
+     "ref": 3.75,
+     "rel": 0,
+     "ok": true
+    },
+    "den3": {
+     "got": 1.875,
+     "ref": 1.875,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.interpolate.pade of the Taylor series of exp(-4s)",
+    "max_rel": 3.315866100213801e-15
+   }
+  },
+  {
+   "id": "E5-default-loop-delay-exact",
+   "note": "The closed-loop step response the page DRAWS as its linear prediction for its own default loop, against the exact solution of the delay differential equation of the same loop (RK4 with the dead time an exact multiple of h; two step sizes agree to 2.69e-09). Scope: the loop transfer functions C, G, H are the tool's own plant model, so only the treatment of the dead time on closing the loop is being judged here.",
+   "inputs": {
+    "loop": "page default (coil)",
+    "nPoints": 1201
+   },
+   "cmp": {
+    "max_dev_of_step": {
+     "got": 0.000006480053187929435,
+     "ref": 0,
+     "rel": 0.000006480053187929435,
+     "ok": true
+    },
+    "approximation_declared": {
+     "got": {
+      "method": "pade",
+      "order": 3,
+      "forwardDelay": 10,
+      "feedbackDelay": 0
+     },
+     "ref": "pade",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.000006480053187929435,
+   "pass": true,
+   "crosscheck": {
+    "source": "DDE self-convergence between h and h/2",
+    "max_rel": 2.690302647323506e-9
+   }
+  },
+  {
+   "id": "H1-stiff-linear-tau0.01",
+   "note": "Fixed-step RK4 of the tool against scipy solve_ivp(Radau, rtol=1e-12, atol=1e-14) on a two-lag plant with tau_fast = 0.01 s and tau_slow = 50 s (stiffness ratio 5000), open loop, unit step at t = 0. The plant is stated as an ODE and implemented independently on both sides; the comparison instants are the tool's own recorded samples (h = 0.0005 s, 600000 steps, decimation 151), so nothing is interpolated. [tool: RK4 (fixed step), h = 0.0005 s, 600000 steps, 118 ms; worst at t = 163.835 s]",
+   "inputs": {
+    "model": "two-lag",
+    "tEnd": 300
+   },
+   "cmp": {
+    "max_rel_dev": {
+     "got": 1.4724785131012951e-13,
+     "ref": 0,
+     "rel": 1.4724785131012951e-13,
+     "ok": true
+    },
+    "all_finite": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "sample_instants_coincide": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.4724785131012951e-13,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.integrate.solve_ivp, Radau, rtol 1e-12/1e-11"
+   }
+  },
+  {
+   "id": "H2-stiff-linear-tau0.001",
+   "note": "Fixed-step RK4 of the tool against scipy solve_ivp(Radau, rtol=1e-12, atol=1e-14) on a two-lag plant with tau_fast = 0.001 s and tau_slow = 50 s (stiffness ratio 50000), open loop, unit step at t = 0. The plant is stated as an ODE and implemented independently on both sides; the comparison instants are the tool's own recorded samples (h = 5e-05 s, 6000000 steps, decimation 1501), so nothing is interpolated. [tool: RK4 (fixed step), h = 0.00005 s, 6000000 steps, 1045 ms; worst at t = 224.0993 s]",
+   "inputs": {
+    "model": "two-lag",
+    "tEnd": 300
+   },
+   "cmp": {
+    "max_rel_dev": {
+     "got": 1.5003014581811567e-13,
+     "ref": 0,
+     "rel": 1.5003014581811567e-13,
+     "ok": true
+    },
+    "all_finite": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "sample_instants_coincide": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 1.5003014581811567e-13,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.integrate.solve_ivp, Radau, rtol 1e-12/1e-11"
+   }
+  },
+  {
+   "id": "H3-stiff-vanderpol-mu1000",
+   "note": "Van der Pol oscillator, mu = 1000 (classic stiff test problem), x(0) = (2, 0), integrated to t = 1000 s so that the first fast switch (near t = 810 s) is inside the window. Tool: fixed-step RK4 at h = 1/(20 mu) = 5e-05 s, 20000000 steps, decimation 5001. Reference: scipy solve_ivp(Radau, rtol=1e-11, atol=1e-13) at the tool's own recorded instants. [tool: RK4 (fixed step), h = 0.00005 s, 20000000 steps, 3559 ms; worst at t = 999.9499500000001 s]",
+   "inputs": {
+    "model": "vanderpol",
+    "tEnd": 1000
+   },
+   "cmp": {
+    "max_rel_dev": {
+     "got": 7.381759698489399e-8,
+     "ref": 0,
+     "rel": 7.381759698489399e-8,
+     "ok": true
+    },
+    "all_finite": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "sample_instants_coincide": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 7.381759698489399e-8,
+   "pass": true,
+   "crosscheck": {
+    "source": "scipy.integrate.solve_ivp, Radau, rtol 1e-12/1e-11"
+   }
+  },
+  {
+   "id": "S1-nonlinear-converges-to-linear",
+   "note": "Default coil loop with every non-linear element disabled (instantaneous actuator, no deadband, hysteresis, noise or quantisation, continuous controller, no sensor lag). The largest difference between the non-linear run and the linear closed-loop prediction, as a fraction of the setpoint step, is measured against the step size (plant curvature) and against the integration step (integrator error). Deviation at h/16: 10 K -> 82.8213 %, 3 K -> 10.8215 %, 1 K -> 2.6859 %, 0.3 K -> 0.6865 %, 0.1 K -> 0.2082 %, 0.03 K -> 0.0522 %. At dw = 0.01 K, against h: h=1.0000 -> 0.4165 %, h=0.5000 -> 0.2046 %, h=0.2500 -> 0.0997 %, h=0.1250 -> 0.0490 %, h=0.0625 -> 0.0266 %. Measured order in h = 1.030.",
+   "inputs": {
+    "plant": "coil (page defaults)",
+    "nonlinear_elements": "all disabled"
+   },
+   "cmp": {
+    "deviation_falls_with_amplitude": {
+     "got": [
+      82.8213,
+      10.8215,
+      2.6859,
+      0.6865,
+      0.2082,
+      0.0522
+     ],
+     "ref": "monotone decreasing",
+     "rel": 0,
+     "ok": true
+    },
+    "smallest_amplitude_deviation_pct": {
+     "got": 0.052192289731560024,
+     "ref": 0.5,
+     "rel": 0.052192289731560024,
+     "ok": true
+    },
+    "residual_is_integrator_error": {
+     "got": 1.03,
+     "ref": 1,
+     "rel": 0.030334028526132206,
+     "ok": true
+    },
+    "tool_declares_that_order": {
+     "got": {
+      "order": 1,
+      "by": "sensor-zoh"
+     },
+     "ref": 1,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.052192289731560024,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "S2-own-reference-run-audit",
+   "note": "The page ships a 19-case reference run behind its Validate tab. This entry audits what those cases are, not whether they pass. 49 of 63 checked quantities are this page's own arithmetic or the output of a previous run of the same code; only 14 are read from the cited publication, and none of the 19 is compared against an independent implementation. The pass criterion is therefore that the tab SAYS so, per FRAMEWORK_V2_SPEC §3 (\"a self-check that re-evaluates the tool's own formula does not count towards benchmarked, and the UI must not present it as validation\").",
+   "inputs": {
+    "tab": "valid"
+   },
+   "cmp": {
+    "cases_run": {
+     "got": 19,
+     "ref": 19,
+     "rel": 0,
+     "ok": true
+    },
+    "cases_failed": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "checks_total": {
+     "got": 63,
+     "ref": 63,
+     "rel": 0,
+     "ok": true
+    },
+    "checks_not_from_a_source": {
+     "got": 49,
+     "ref": 49,
+     "rel": 0,
+     "ok": true
+    },
+    "ui_states_it_is_a_self_check": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "ui_shows_the_quote_and_the_reconstruction": {
+     "got": 20,
+     "ref": ">= 19",
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck": null
+  },
+  {
+   "id": "UI1-margins-on-screen",
+   "note": "The gain and phase margin printed on the Frequency tab for the default coil loop must equal LIN.margins on the loop the app assembled (display rounding 0.05).",
+   "inputs": {
+    "plant": "default (coil)",
+    "tab": "freq"
+   },
+   "cmp": {
+    "gain_margin_on_screen": {
+     "got": 7.48,
+     "ref": 7.479256948194321,
+     "rel": 0.0007430518056796842,
+     "ok": true
+    },
+    "phase_margin_on_screen": {
+     "got": 39,
+     "ref": 38.988842772461844,
+     "rel": 0.011157227538156178,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.011157227538156178,
+   "pass": true,
+   "crosscheck": null
+  }
+ ],
+ "build": "2026-10-16.regelkring-bench-rerun-1",
+ "manifest_revision": "2026-10-16.regelkring-bench-rerun-1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_regelkring.py from the sources this artifact cites. That generator was re-run on 2026-10-16 with the control package installed (0.10.2), in a reference directory from which regelkring_ref.json had first been removed, and wrote a file byte-identical to the deployed corpus (126 060 B); so no case reuses a stored reference that this tree cannot re-derive.",
+ "run_at": "2026-10-16T09:44:49Z"
+}

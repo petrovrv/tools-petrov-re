@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thermal System Optimizer</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-09-06b",
+  "id": "thermaloptimizer",
+  "file": "thermaloptimizer.html",
+  "listed": true,
+  "category": "hvac",
+  "order": 90,
+  "title": {
+    "en": "Thermal System Optimizer",
+    "uk": "Оптимізатор теплової системи",
+    "de": "Thermalsystem-Optimierer",
+    "nl": "Thermisch systeemoptimalisator",
+    "fr": "Optimiseur de système thermique",
+    "es": "Optimizador de sistema térmico",
+    "pl": "Optymalizator systemu cieplnego"
+  },
+  "summary": {
+    "en": "Compare site-specific heating and cooling system architectures with chronological thermal storage, comfort, plant staging and lifecycle economics.",
+    "uk": "Порівнює архітектури опалення й охолодження для конкретного об’єкта з погодинним акумулюванням, комфортом, каскадуванням обладнання та економікою життєвого циклу.",
+    "de": "Vergleicht standortspezifische Heiz- und Kühlsysteme mit chronologischem Speicher, Komfort, Anlagenstufung und Lebenszykluskosten.",
+    "nl": "Vergelijkt locatiespecifieke verwarmings- en koelsystemen met chronologische opslag, comfort, installatiestaging en levenscycluskosten.",
+    "fr": "Compare des architectures de chauffage et de refroidissement propres au site avec stockage chronologique, confort, étagement des équipements et économie du cycle de vie.",
+    "es": "Compara arquitecturas de calefacción y refrigeración específicas del emplazamiento con almacenamiento cronológico, confort, escalonamiento de equipos y economía de ciclo de vida.",
+    "pl": "Porównuje lokalne architektury ogrzewania i chłodzenia z chronologicznym magazynowaniem, komfortem, stopniowaniem urządzeń i ekonomią cyklu życia."
+  },
+  "description": {
+    "en": "Prototype Thermal System Optimizer integration. Building screening, explicit 2R2C state and program inputs feed a bounded project-derived topology/sizing ensemble evaluated chronologically through DiagramCompute Workers.",
+    "uk": "Прототип інтеграції оптимізатора. Скринінг будівлі, явний стан 2R2C і дані програми формують обмежений проєктний ансамбль топологій і розмірів, що хронологічно оцінюється у DiagramCompute Workers.",
+    "de": "Prototypische Integration des Optimierers. Gebäudescreening, expliziter 2R2C-Zustand und Programmdaten speisen ein begrenztes projektabgeleitetes Topologie-/Dimensionierungsensemble, das chronologisch in DiagramCompute-Workern ausgewertet wird.",
+    "nl": "Prototype-integratie. Gebouwscreening, expliciete 2R2C-toestand en programmagegevens voeden een begrensd projectafgeleid ensemble van topologieën en dimensioneringen dat chronologisch via DiagramCompute Workers wordt geëvalueerd.",
+    "fr": "Intégration prototype. Le pré-dimensionnement du bâtiment, l’état 2R2C explicite et les données de programme alimentent un ensemble borné de topologies et de dimensionnements évalué chronologiquement par DiagramCompute Workers.",
+    "es": "Integración prototipo. El cribado del edificio, el estado 2R2C explícito y los datos de programa alimentan un conjunto acotado de topologías y tamaños evaluado cronológicamente mediante DiagramCompute Workers.",
+    "pl": "Integracja prototypowa. Screening budynku, jawny stan 2R2C i dane programu zasilają ograniczony, projektowy zestaw topologii i wymiarowań oceniany chronologicznie przez DiagramCompute Workers."
+  },
+  "status": "prototype",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Prototype. Search uses editable family-specific screening priors, not quotations. Ground-source candidates require explicit borefield geometry/search choices and Rb provenance; source-water free-cooling requires an explicit temperature profile, direct-HX geometry/provenance and source-side piping/hydraulic/cost inputs; scalar pump W/kW and lumped source-water CAPEX are no longer accepted. VRF, when enabled, is comparison-only because shared reversible/heat-recovery VRF dispatch is not yet a first-class annual topology. Site capacities marked unknown remain warnings, not inferred facts. Independent validation is incomplete.",
+    "uk": "Прототип. Пошук використовує редаговані скринінгові припущення, а не комерційні пропозиції. Для ґрунтових систем потрібні явна геометрія/пошук свердловин і походження Rb; для водяного free-cooling — явний температурний профіль, геометрія/походження прямого HX та дані трубопроводів, гідравліки й вартості. VRF використовується лише для порівняння. Невідомі потужності майданчика залишаються попередженнями. Незалежна валідація не завершена.",
+    "de": "Prototyp. Die Suche nutzt editierbare Screening-Annahmen, keine Angebote. Erdquellen benötigen explizite Sondenfeldgeometrie/-suche und Rb-Herkunft; Wasserquellen-Free-Cooling benötigt ein explizites Temperaturprofil, direkte HX-Geometrie/-Herkunft sowie Leitungs-, Hydraulik- und Kostendaten. VRF dient nur dem Vergleich. Unbekannte Standortkapazitäten bleiben Warnungen. Die unabhängige Validierung ist unvollständig.",
+    "nl": "Prototype. De zoekfunctie gebruikt bewerkbare screening-aannames, geen offertes. Bodembronnen vereisen expliciete boorveldgeometrie/-zoekkeuzes en Rb-herkomst; bronwater-free-cooling vereist een expliciet temperatuurprofiel, directe HX-geometrie/-herkomst en leiding-, hydrauliek- en kostengegevens. VRF is alleen ter vergelijking. Onbekende sitecapaciteiten blijven waarschuwingen. Onafhankelijke validatie is onvolledig.",
+    "fr": "Prototype. La recherche utilise des hypothèses de pré-dimensionnement modifiables, pas des offres. Les solutions géothermiques exigent une géométrie/recherche de champ de sondes et une provenance Rb explicites; le free-cooling sur eau exige un profil de température, une géométrie/provenance d’échangeur direct et des données de tuyauterie, hydraulique et coût. Le VRF sert seulement à la comparaison. Les capacités de site inconnues restent des avertissements. La validation indépendante est incomplète.",
+    "es": "Prototipo. La búsqueda usa supuestos editables de cribado, no ofertas. Las fuentes geotérmicas requieren geometría/búsqueda explícita del campo y procedencia de Rb; el free-cooling con agua requiere perfil de temperatura, geometría/procedencia del HX directo y datos de tuberías, hidráulica y costes. VRF es solo comparativo. Las capacidades de sitio desconocidas siguen siendo advertencias. La validación independiente está incompleta.",
+    "pl": "Prototyp. Wyszukiwanie używa edytowalnych założeń screeningowych, nie ofert. Źródła gruntowe wymagają jawnej geometrii/przeszukiwania pola odwiertów i pochodzenia Rb; free-cooling z wody wymaga jawnego profilu temperatury, geometrii/pochodzenia bezpośredniego HX oraz danych rurociągów, hydrauliki i kosztów. VRF służy tylko do porównania. Nieznane moce przyłączeniowe pozostają ostrzeżeniami. Niezależna walidacja jest niepełna."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "thermal-core-browser-v0.71.js",
+    "diagram-compute.classic.js",
+    "thermal-coolprop-browser-v0.1.js",
+    "thermodynamiccycles.wasm",
+    "thermal-building-input-browser-v0.1.js",
+    "thermal-program-input-browser-v0.1.js",
+    "thermal-dynamic-building-browser-v0.1.js",
+    "thermal-family-priors-browser-v0.1.js",
+    "thermal-candidate-ensemble-browser-v0.13.js",
+    "thermaloptimizer-i18n-v0.1.js",
+    "thermal-workspace-adapter-v0.4.js",
+    "thermal-workspace-studio-controller-v0.4.browser.js"
+  ],
+  "network_access": {
+    "mode": "same-origin-data",
+    "note": "Loads only the declared same-origin JavaScript/WebAssembly dependencies; no user data are transmitted."
+  },
+  "validation": {
+    "basis": {
+      "en": "Canonical kernel deterministic suite 159/159 and scoped benchmark suite 13/13; independent validation remains false.",
+      "uk": "Канонічний детермінований набір ядра 159/159 і цільові бенчмарки 13/13; незалежна валідація залишається false.",
+      "de": "Kanonische deterministische Kernel-Suite 159/159 und abgegrenzte Benchmark-Suite 13/13; unabhängige Validierung bleibt false.",
+      "nl": "Canonieke deterministische kernelsuite 159/159 en afgebakende benchmarks 13/13; onafhankelijke validatie blijft false.",
+      "fr": "Suite déterministe canonique du noyau 159/159 et benchmarks ciblés 13/13; la validation indépendante reste false.",
+      "es": "Suite determinista canónica del núcleo 159/159 y benchmarks acotados 13/13; la validación independiente sigue en false.",
+      "pl": "Kanoniczny deterministyczny zestaw jądra 159/159 i zakresowe benchmarki 13/13; niezależna walidacja pozostaje false."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "thermaloptimizer-v071-scoped-benchmarks",
+        "reference": "Canonical Thermal System Optimizer v0.71 scoped benchmark suite: published psychrometric, terminal-emission, borefield, borehole-resistance and steam-property references plus closed-form heat-exchanger, hydraulics and economics identities.",
+        "citations": [
+          "PsychroLib API example / ASHRAE Handbook Fundamentals 2017 — 25 °C dry bulb, 80 % RH -> dew point 21.309397163661785 °C (https://psychrometrics.github.io/psychrolib/api_docs.html)",
+          "CIBSE Guide B / BS EN 1264 basic characteristic — q = 8.92 (t_fm - t_i)^1.1 (https://ierga.com/hr/wp-content/uploads/sites/2/2017/10/CIBSE-Guide-B-Heating-Ventilating-Air-Conditioning-And-Refrigeration-Fixed.pdf)",
+          "Kermi convector technical data / EN 442 logarithmic conversion — Phi = Phi_SL (Delta t_ln / 49.83)^n; Delta t_ln logarithmic mean excess (https://radiaatorikeskus.ee/wp-content/uploads/2023/10/Kermi-konvektorite-tehniline-andmeleht-ENG.pdf)",
+          "Counterflow epsilon-NTU equal-capacity limit — epsilon = NTU/(1+NTU) for C*=1; NTU=1 -> 0.5",
+          "Gnielinski 1976 internal turbulent-flow correlation — Heat Transfer 1.2.0 documented example: Re=1e5, Pr=1.2, Darcy f=0.0185 -> Nu=254.62682749359632 (https://ht.readthedocs.io/en/release/_modules/ht/conv_internal.html)",
+          "Darcy laminar friction identity — f_D = 64/Re; Re=1000 -> 0.064",
+          "pygfunction finite_line_source example — H1=H2=150 m, D1=D2=4 m, distance=5 m, alpha=1e-6 m2/s, t=4 weeks -> h=0.0110473635393 (https://pygfunction.readthedocs.io/en/stable/modules/heat_transfer.html)",
+          "ASHRAE Handbook Geothermal Energy, Example 2 — 3x2 field; T0=15 C, k=1.5 W/mK, 10 y extraction 5 W/m, g=12.3 -> Tb=8.5 C (https://handbook.ashrae.org/Handbooks/A15/SI/a15_ch34/a15_ch34_si.aspx)",
+          "ASHRAE Handbook 2023 Chapter 35 Table 5 — 25 mm DR11 HDPE single U-tube, location B, 100 mm bore, Re=4000, grout k=1.40 W/(m K) -> Rb=0.14 m K/W (https://handbook.ashrae.org/Handbooks/A23/SI/A23_Ch35/a23_ch35_si.aspx)",
+          "pygfunction g-function module uniform_temperature example — two vertical boreholes H=150 m, D=4 m, rb=0.075 m, spacing=5 m, alpha=1e-6 m2/s; t=1e7 s -> g=4.33406497 (https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html)",
+          "pygfunction 2.0 uniform_temperature time-series example — two 150 m boreholes, 5 m spacing, 12 equal segments; t=1e4..1e11 s published g-function array (https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html)",
+          "CoolProp 8.0.0 High-Level Interface saturation example — Water at 1 atm: saturated vapor h=2675529.32550072 J/kg, saturated liquid h=419057.7330939922 J/kg; latent heat=2256471.592406728 J/kg (https://coolprop.org/coolprop/HighLevelAPI.html)",
+          "Level annuity present-value identity — PV = C(1-(1+r)^-N)/r"
+        ],
+        "cases": 13,
+        "passed": 13,
+        "tolerance": "Per-case absolute or relative tolerances recorded in each benchmark case.",
+        "run_at": "2026-09-04T14:10:32Z",
+        "artifact": "benchmarks/thermaloptimizer.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "Prototype shell does not yet emit a self-contained standard-library Python reproduction of the full chronological optimizer."
+  },
+  "handoff": {
+    "provides": [],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  }
+}
+</script>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}body{font:14px/1.45 system-ui,sans-serif;margin:0;background:#f4f6f8;color:#17202a}main{max-width:1180px;margin:auto;padding:20px}.card{background:white;border:1px solid #d8dde3;border-radius:10px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.metric{border:1px solid #e1e5ea;border-radius:8px;padding:10px}.metric b{display:block;font-size:1.15rem}.muted{color:#65707b}.warn{color:#8a5a00}.ok{color:#176b35}.bad{color:#a32121}label{display:flex;flex-direction:column;gap:4px;font-weight:600}input,select,textarea,button{font:inherit;padding:8px;border:1px solid #aeb7c2;border-radius:6px;background:white;max-width:100%;min-width:0}label,.grid>*{min-width:0}input,select,textarea{width:100%}button{cursor:pointer;font-weight:600}button.primary{background:#17202a;color:white;border-color:#17202a}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}pre{white-space:pre-wrap;word-break:break-word}details summary{cursor:pointer;font-weight:600}table{border-collapse:collapse;width:100%;table-layout:fixed}td,th{padding:6px 8px;border-bottom:1px solid #e4e7eb;text-align:right;overflow-wrap:anywhere}td:first-child,th:first-child{text-align:left;width:52%}@media(max-width:430px){main{padding:10px}.card{padding:12px}.grid{grid-template-columns:1fr 1fr}.results{grid-template-columns:1fr 1fr}}
+
+.modebar{position:sticky;top:0;z-index:5;background:#f4f6f8;padding:8px 0;display:flex;gap:8px;flex-wrap:wrap}.modebar button.active{background:#17202a;color:#fff}.workspace-frame{width:100%;height:740px;border:0;border-radius:8px;background:white}.benchmark-link{display:inline-block;margin-top:6px}.mode-lazy details.expert-section{display:none}@media(max-width:760px){.workspace-frame{height:780px}}
+</style>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-compute.classic.js" defer></script>
+<script src="thermal-core-browser-v0.71.js" defer></script>
+<script src="thermal-building-input-browser-v0.1.js" defer></script>
+<script src="thermal-program-input-browser-v0.1.js" defer></script>
+<script src="thermal-dynamic-building-browser-v0.1.js" defer></script>
+<script src="thermal-family-priors-browser-v0.1.js" defer></script>
+<script src="thermal-candidate-ensemble-browser-v0.13.js" defer></script>
+<script type="module" src="thermal-coolprop-browser-v0.1.js"></script>
+<script src="thermaloptimizer-i18n-v0.1.js" defer></script>
+</head>
+<body>
+<main>
+<h1>Thermal System Optimizer</h1>
+<p class="muted">Building / room-load screening is the first exposed workflow. Values marked as presets remain editable assumptions.</p>
+<div class="modebar" id="modebar"><button type="button" class="active" data-tool-mode="lazy">Lazy mode</button><button type="button" data-tool-mode="expert">Expert mode</button><button type="button" data-tool-mode="learn">Learn / examples</button><button type="button" data-tool-mode="diagram">Process diagram</button></div>
+<section class="card" id="learning-card">
+<h2>Learn / examples</h2>
+<p class="muted">Load a complete starting case, calculate it, then change one assumption at a time. The examples are editable and are not design recommendations.</p>
+<div class="row">
+<button type="button" data-example="office">Office retrofit</button>
+<button type="button" data-example="school">Modern school</button>
+<button type="button" data-example="warehouse">Warehouse / logistics</button>
+</div>
+<details id="learnMode" style="margin-top:12px">
+<summary>Open guided learning mode</summary>
+<ol>
+<li><button type="button" class="learn-jump" data-target="building-card">1. Start with the building load</button> — establish geometry, envelope, glazing, people and ventilation.</li>
+<li><button type="button" class="learn-jump" data-target="dynamic-building-card">2. Add thermal dynamics</button> — provide Ram, Cair and Cmass explicitly; comfort limits constrain the annual trajectory.</li>
+<li><button type="button" class="learn-jump" data-target="candidate-card">3. Compare system families</button> — site energy, source availability, terminals and family priors bound the search.</li>
+<li><button type="button" class="learn-jump" data-target="robustness-card">4. Read robustness, not only the winner</button> — inspect near-optimal alternatives, physical feasibility and switching thresholds.</li>
+</ol>
+<p class="muted">Learning mode uses the same calculation path as normal mode. It only supplies explanations and starting states.</p>
+</details>
+</section>
+
+<section class="card" id="building-card">
+<h2>Building / room load</h2>
+<div class="grid">
+<label>Building use<select id="useType"></select></label>
+<label>Conditioned floor area, m²<input id="floorArea" type="number" min="1" step="10" value="1200"></label>
+<label>Storeys<input id="storeys" type="number" min="1" step="1" value="2"></label>
+<label>Storey height, m<input id="height" type="number" min="2" step="0.1" value="3"></label>
+<label>Aspect ratio L/W<input id="aspect" type="number" min="0.2" step="0.1" value="1.5"></label>
+<label>Glazing fraction<input id="glazingFraction" type="number" min="0" max="0.95" step="0.05" value="0.30"></label>
+<label>Envelope<select id="envelopePreset"><option value="legacyUninsulated">Legacy / uninsulated</option><option value="earlyInsulated" selected>Early insulated</option><option value="improvedExisting">Improved existing</option><option value="modernCode">Modern code</option><option value="highPerformance">High performance</option></select></label>
+<label>Glazing<select id="glazingPreset"><option value="single">Single</option><option value="oldDouble" selected>Old double</option><option value="modernDoubleLowE">Modern double low-e</option><option value="tripleLowE">Triple low-e</option></select></label>
+<label>Indoor design, °C<input id="indoorC" type="number" step="0.5" value="21"></label>
+<label>Outdoor design, °C<input id="outdoorC" type="number" step="0.5" value="-8"></label>
+<label>People override<input id="people" type="number" min="0" step="1" placeholder="preset density"></label>
+<label>Outdoor air override, m³/h<input id="outdoorAir" type="number" min="0" step="10" placeholder="preset / program"></label>
+</div>
+<div class="row" style="margin-top:14px"><button class="primary" id="calculate">Calculate screening load</button><span id="loadStatus">Not calculated</span></div>
+<p id="programNote" class="muted"></p>
+</section>
+<section class="card" id="load-results">
+<h2>Screening result</h2>
+<div class="results">
+<div class="metric"><span>Total H</span><b id="rH">—</b><small>W/K</small></div>
+<div class="metric"><span>Specific H</span><b id="rSpecific">—</b><small>W/(m²·K)</small></div>
+<div class="metric"><span>Design heat loss</span><b id="rHeat">—</b><small>kW</small></div>
+<div class="metric"><span>People</span><b id="rPeople">—</b><small>persons</small></div>
+<div class="metric"><span>Outdoor air</span><b id="rOA">—</b><small>m³/h</small></div>
+<div class="metric"><span>Outdoor air / person</span><b id="rOAP">—</b><small>m³/(h·person)</small></div>
+</div>
+<h3>Envelope decomposition</h3>
+<table><tbody>
+<tr><td>Opaque envelope</td><td id="rOpaque">—</td><td>W/K</td></tr>
+<tr><td>Windows</td><td id="rWindow">—</td><td>W/K</td></tr>
+<tr><td>Effective infiltration / ventilation prior</td><td id="rVent">—</td><td>W/K</td></tr>
+<tr><td>Wall / window / roof / floor area</td><td id="rAreas">—</td><td>m²</td></tr>
+<tr><td>U wall / window / roof / floor</td><td id="rU">—</td><td>W/(m²·K)</td></tr>
+<tr><td>Lighting / equipment prior</td><td id="rGains">—</td><td>W/m²</td></tr>
+</tbody></table>
+<p class="muted">The preset outdoor-air requirement is reported separately from the envelope estimator's effective ACH term; the two are not added here, avoiding an implicit double count. Cooling load is not yet exposed in this slice.</p>
+</section>
+
+
+<section class="card" id="dynamic-building-card">
+<h2>Annual building dynamics (2R2C)</h2>
+<p class="muted">Roa is derived from the screening heat-loss coefficient H. Ram and the two effective capacitances are explicit project inputs. No construction-derived value is inserted by this prototype.</p>
+<div class="grid">
+<label>Ram, K/kW<input id="dynRam" type="number" min="0.000001" step="0.005" placeholder="required, e.g. 0.07"></label>
+<label>Cair, MJ/K<input id="dynCair" type="number" min="0.001" step="1" placeholder="required, e.g. 70"></label>
+<label>Cmass, MJ/K<input id="dynCmass" type="number" min="0.001" step="10" placeholder="required, e.g. 1600"></label>
+<label>Initial air, °C<input id="dynInitialAir" type="number" step="0.5" value="21"></label>
+<label>Initial mass, °C<input id="dynInitialMass" type="number" step="0.5" value="21"></label>
+<label>Comfort min, °C<input id="dynComfortMin" type="number" step="0.5" value="20"></label>
+<label>Comfort max, °C<input id="dynComfortMax" type="number" step="0.5" value="23"></label>
+</div>
+<h3 id="candidate-card">First bounded candidate search</h3><div class="grid">
+<label>Electricity availability<select id="siteElectric"><option value="unknown" selected>Unknown</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></label>
+<label>Firm electric import, kW<input id="siteElectricFirm" type="number" min="0" step="10" placeholder="unknown"></label>
+<label>Natural gas<select id="siteGas"><option value="unknown" selected>Unknown</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select></label>
+<label>Firm gas input, kW<input id="siteGasFirm" type="number" min="0" step="10" placeholder="unknown"></label>
+<label>Delivered fuel<select id="siteFuel"><option value="unavailable" selected>Not selected</option><option value="available">Available</option><option value="unknown">Unknown</option></select></label>
+<label>Plant families<input id="searchSources" value="heatPumpOnly,hybrid,boilerOnly" title="Comma-separated: heatPumpOnly, hybrid, boilerOnly"></label>
+<label>Heat-source families<input id="searchHeatSources" value="airWater,groundSource" title="groundSource is generated only when explicit ground inputs below are enabled"></label>
+<label>Free-cooling families<input id="searchFreeCooling" value="none,sourceWater" title="sourceWater is generated only when explicit source-water inputs below are enabled"></label>
+<label>Heating terminals<input id="searchHeatTerminals" value="radiator,floor" title="Comma-separated: radiator, floor, airPlusLocalCoils"></label>
+<label>Cooling terminals<input id="searchCoolTerminals" value="fanCoil,ceiling" title="Comma-separated: fanCoil, ceiling, tabs, floor"></label>
+<label>Cooling reserve factors<input id="searchCoolingReserve" value="1.3,1.6,2.0" title="Installed mechanical cooling capacity / load-probe peak"></label>
+<label>Retain top<input id="searchRetainTop" type="number" min="1" max="12" step="1" value="3"></label>
+<label>Near-optimal band, %<input id="searchWithinPct" type="number" min="0" max="50" step="1" value="5"></label>
+<label>Cooling local step<input id="searchCoolStep" type="number" min="0" max="0.25" step="0.05" value="0.10"></label>
+</div>
+<details class="expert-section" style="margin-top:12px"><summary>Expert family priors / site sources</summary>
+<p class="muted">Terminal priors are editable screening assumptions. Ground/source-water families are suppressed unless complete explicit source records are supplied. Borefield geometry/search choices and Rb, water-temperature profile and HX geometry are never inferred.</p>
+<div class="grid">
+<label>Ground source<select id="groundEnabled"><option value="false" selected>Disabled</option><option value="true">Explicit geometry/search record</option></select></label>
+<label>Ground undisturbed, °C<input id="groundT" type="number" step="0.5" value="11"></label>
+<label>Ground effective C, MJ/K<input id="groundC" type="number" min="1" step="1000" value="36000" title="Explicit reduced-order annual-state parameter; not derived from borefield geometry"></label>
+<label>Ground recovery τ, days<input id="groundTau" type="number" min="0.01" step="10" value="180" title="Explicit reduced-order annual-state parameter; not derived from borefield geometry"></label>
+<label>Ground Tmin, °C<input id="groundMin" type="number" step="0.5" value="0"></label>
+<label>Ground Tmax, °C<input id="groundMax" type="number" step="0.5" value="28"></label>
+<label>Ground approach, K<input id="groundApproach" type="number" min="0" step="0.5" value="2"></label>
+<label>Max extraction, kW<input id="groundExtract" type="number" min="0" step="10" value="250"></label>
+<label>Max injection, kW<input id="groundInject" type="number" min="0" step="10" value="250"></label>
+<label>Ground pump, W/kW<input id="groundPump" type="number" min="0" step="1" value="12"></label>
+<label>Ground/source CAPEX, €<input id="groundCapex" type="number" min="0" step="1000" value="150000"></label>
+<label>Direct ground cooling<select id="groundDirectCooling"><option value="false" selected>No</option><option value="true">Yes</option></select></label>
+<label>Ground geometry provenance<input id="groundGeometryProvenance" placeholder="e.g. TRT / geotechnical report / project geometry record"></label>
+<label style="grid-column:1/-1">Borefield geometry / bounded search JSON<textarea id="groundGeometry" rows="6" placeholder='{"rowsChoices":[2,3],"colsChoices":[3,4],"lengthChoices_m":{"min":100,"max":140,"step":20},"spacingChoices_m":[5,6],"maxGeometries":12,"boreholeRadius_m":0.075,"buriedDepth_m":4,"groundConductivity_W_mK":2.2,"groundDiffusivity_m2_s":1.05e-6,"effectiveBoreholeResistance_mK_W":0.12,"years":25,"minWallTemp_C":0,"maxWallTemp_C":30,"minMeanFluidTemp_C":-2,"maxMeanFluidTemp_C":32,"responseBoundaryCondition":"UHE"}'></textarea></label>
+<label>Source water<select id="sourceWaterEnabled"><option value="false" selected>Disabled</option><option value="true">Explicit profile + HX</option></select></label>
+<label>Monthly water temperatures, °C<input id="sourceWaterMonthly" placeholder="12 values: Jan … Dec; fallback mode"></label>
+<label>Project hourly profile ref<input id="sourceWaterProfileRef" placeholder="e.g. river_C in project.profiles"></label>
+<label style="grid-column:1/-1">Hourly water temperatures, °C<textarea id="sourceWaterHourly" rows="3" placeholder="8760 or 8784 values; comma, semicolon or whitespace separated. Leave blank when using monthly fallback or a project profile reference."></textarea></label>
+<label>Temperature-profile provenance<input id="sourceWaterProfileProvenance" placeholder="monitoring dataset / design basis"></label>
+<label>Source-water nameplate cap, kW<input id="sourceWaterCapacity" type="number" min="0" step="10" placeholder="optional; HX geometry otherwise governs"></label>
+<label style="grid-column:1/-1">Source-side piping / hydraulics JSON<textarea id="sourceWaterHydraulics" rows="5" placeholder='{"controlMode":"proportionalToAcceptedCooling","designTemperature_C":4,"routeLength_m":120,"innerDiameter_m":0.15,"roughness_m":0.000045,"localLossK":12,"staticHead_m":3,"pumpEfficiency":0.72,"DN":150,"costMode":"buriedSourcePair","terrain":"softGround","pumpInstalledCapex_EUR":12000,"installationComplexityMultiplier":1.0,"hydraulicProvenance":"source intake/discharge hydraulic design","costProvenance":"project estimate; core pipe/HX screening priors"}'></textarea></label>
+<label>HX geometry provenance<input id="sourceWaterGeometryProvenance" placeholder="HX schedule / vendor geometry / project basis"></label>
+<p class="muted" style="grid-column:1/-1">Specify exactly one source-water temperature input: hourly series, project profile reference, or monthly fallback. Hourly length must exactly match the 8760/8784 project calendar.</p>
+<label style="grid-column:1/-1">Direct-HX geometry JSON<textarea id="sourceWaterHXGeometry" rows="5" placeholder='{"hotSide":{"fluidSpec":{"family":"water","phase":"liquid"},"mdot_kg_s":8,"hydraulicDiameter_m":0.04,"flowArea_m2":0.004,"roughness_m":0.00001},"coldSide":{"fluidSpec":{"family":"water","phase":"liquid"},"mdot_kg_s":10,"hydraulicDiameter_m":0.04,"flowArea_m2":0.004,"roughness_m":0.00001},"heatTransferArea_m2":120,"wallResistance_m2K_W":0.00004,"hotFoulingResistance_m2K_W":0,"coldFoulingResistance_m2K_W":0}'></textarea></label>
+<label>VRF screening<select id="vrfEnabled"><option value="false" selected>Disabled</option><option value="true">Comparison only</option></select></label>
+<label>VRF heat recovery<select id="vrfHR"><option value="false" selected>No</option><option value="true">Yes</option></select></label>
+</div>
+<label style="margin-top:10px">Family-prior overrides JSON<textarea id="familyPriorOverrides" rows="4" style="width:100%;font:12px/1.4 ui-monospace,monospace;padding:8px">{}</textarea></label>
+<label style="margin-top:10px">Physical switching-threshold brackets JSON<textarea id="physicalThresholdBrackets" rows="4" style="width:100%;font:12px/1.4 ui-monospace,monospace;padding:8px" placeholder='{"groundUndisturbedTemperatureOffset_K":{"min":-10,"max":5,"tolerance":0.05}}'>{}</textarea></label>
+<label style="margin-top:10px">Physical profile / source geometry variants JSON<textarea id="physicalThresholdVariants" rows="5" style="width:100%;font:12px/1.4 ui-monospace,monospace;padding:8px" placeholder='{"groundBorefieldGeometryVariant":[{"id":"large","groundGeometryId":"G01","provenance":"user variant"},{"id":"small","groundGeometryId":"G02","provenance":"user variant"}]}'>{}</textarea></label>
+<p class="muted">No physical threshold is inferred unless an explicit bracket is supplied. Each trial reruns both candidates annually and re-screens source physical feasibility.</p>
+</details>
+<div class="row" style="margin-top:14px"><button class="primary" id="compareCandidates">Generate + compare annual candidates</button><span id="comparisonStatus">Dynamics required</span></div>
+<div id="comparisonMeta" class="muted"></div>
+<div style="overflow-x:auto"><table id="comparisonTable"><thead><tr><th>Candidate</th><th>Feasible</th><th>NPC</th><th>Grid MWh/y</th><th>Gas MWh/y</th><th>Unserved kWh/y</th></tr></thead><tbody id="comparisonBody"><tr><td colspan="6" style="text-align:left">Enter Ram, Cair and Cmass to generate a project-derived ensemble.</td></tr></tbody></table></div>
+<h3>Near-optimal / robustness</h3>
+<p id="robustMeta" class="muted">Run the candidate comparison to evaluate the near-optimal set against the kernel sensitivity scenarios. Scenario weights are engineering weights, not probabilities.</p>
+<div style="overflow-x:auto"><table><thead><tr><th>Alternative</th><th>Base ΔNPC</th><th>Wins</th><th>Within band</th><th>Physical feasible</th><th>Physical issues</th><th>Mean regret</th><th>Max regret</th></tr></thead><tbody id="robustBody"><tr><td colspan="8" style="text-align:left">No robustness result yet.</td></tr></tbody></table></div>
+<h3>Physical-source thresholds</h3>
+<p id="physicalThresholdMeta" class="muted">Not requested. Supply an explicit bracket in Candidate search assumptions.</p>
+<div style="overflow-x:auto"><table><thead><tr><th>Alternative</th><th>Axis</th><th>Event</th><th>Boundary / variant</th><th>ΔNPC</th><th>Failed candidate / physical issue</th></tr></thead><tbody id="physicalThresholdBody"><tr><td colspan="6" style="text-align:left">No physical-source threshold result.</td></tr></tbody></table></div>
+</section>
+
+<section class="card" id="program-card">
+<h2>Healthcare / residential program</h2>
+<p class="muted">Shown only for use types that require an explicit room or dwelling program. Rates and provenance are project inputs; no jurisdictional ventilation values are supplied by this editor.</p>
+<div id="program-none" class="muted">Current use type does not require a special program.</div>
+<div id="program-healthcare" hidden>
+<h3>Healthcare room archetype</h3><div class="grid">
+<label>Room type<input id="hcRoomType" value="patient-room"></label><label>Count<input id="hcRoomCount" type="number" min="0" value="10"></label>
+<label>Area / room, m²<input id="hcArea" type="number" min="0" step="1" value="24"></label><label>Height, m<input id="hcHeight" type="number" min="0" step="0.1" value="3"></label>
+<label>Outdoor air, ACH<input id="hcOAACH" type="number" min="0" step="0.1" value="2"></label><label>Total supply, ACH<input id="hcTotalACH" type="number" min="0" step="0.1" value="6"></label>
+<label>Exhaust / room, m³/h<input id="hcExhaust" type="number" min="0" step="10" value="0"></label>
+<label>Pressure<select id="hcPressure"><option>none</option><option>neutral</option><option>positive</option><option>negative</option></select></label>
+<label>Direct exhaust<select id="hcDirect"><option value="false">No</option><option value="true">Yes</option></select></label><label>Recirculation allowed<select id="hcRecirc"><option value="true">Yes</option><option value="false">No</option><option value="">Unspecified</option></select></label>
+<label>Temperature min, °C<input id="hcTmin" type="number" step="0.5" value="20"></label><label>Temperature max, °C<input id="hcTmax" type="number" step="0.5" value="24"></label>
+<label>RH min, %<input id="hcRHmin" type="number" min="0" max="100" step="1" value="30"></label><label>RH max, %<input id="hcRHmax" type="number" min="0" max="100" step="1" value="60"></label>
+<label>Rule / source reference<input id="hcRuleRef" value="project-room-program"></label>
+</div></div>
+<div id="program-residential" hidden>
+<h3>Residential dwelling archetype</h3><div class="grid">
+<label>Dwellings<input id="resCount" type="number" min="1" step="1" value="12"></label><label>Floor area / dwelling, m²<input id="resArea" type="number" min="0" step="1" value="90"></label>
+<label>Bedrooms / dwelling<input id="resBedrooms" type="number" min="0" step="1" value="2"></label><label>Occupants / dwelling<input id="resOccupants" type="number" min="0" step="1" value="3"></label>
+<label>Whole-dwelling OA, m³/h<input id="resVent" type="number" min="0" step="1" value="90"></label><label>Ventilation source reference<input id="resVentRef" value="project-ventilation-rule"></label>
+<label>Local exhaust / dwelling, m³/h<input id="resLocalExhaust" type="number" min="0" step="1" value="60"></label><label>Local exhaust source reference<input id="resLocalRef" value="project-local-exhaust-rule"></label>
+<label>DHW / dwelling, L/day<input id="resDHW" type="number" min="0" step="1" value="120"></label><label>Dwelling source reference<input id="resSourceRef" value="project-dwelling-program"></label>
+</div></div>
+<h3>Annual coupling</h3><div class="grid">
+<label>Ventilation schedule<select id="progVentSchedule"><option value="continuous">Continuous</option><option value="occupied">Occupied profile</option></select></label>
+<label>Sensible OA coupling<select id="progSensible"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+<label>Exhaust replacement<select id="progExhaust"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+<label>Exhaust recovery effectiveness<input id="progRecovery" type="number" min="0" max="1" step="0.05" value="0"></label>
+<label>Enforce room T/RH constraints<select id="progRoomEnforce"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+<label>DHW coupling<select id="progDHW"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+<label>DHW cold water, °C<input id="progDHWCold" type="number" step="0.5" value="10"></label><label>DHW target, °C<input id="progDHWTarget" type="number" step="0.5" value="55"></label>
+</div>
+<div class="row" style="margin-top:14px"><button class="primary" id="resolveProgram">Resolve program + run annual case</button><span id="programStatus">Not run</span></div>
+<pre id="programOut">—</pre>
+</section>
+
+<section class="card" id="process-builder-card"><h2>Process diagram builder</h2><p class="muted">Build and edit the candidate thermal architecture directly from HVAC/process icons. Connections are typed by medium and direction; invalid links are rejected.</p><iframe class="workspace-frame" id="workspaceFrame" title="Process diagram builder"></iframe></section>
+<section class="card" id="benchmark-card"><h2>Benchmark data</h2><p class="muted">Canonical scoped benchmark results are shipped as thermaloptimizer-benchmarks.json.</p><a class="benchmark-link" href="thermaloptimizer-benchmarks.json" target="_blank" rel="noopener">thermaloptimizer-benchmarks.json</a></section>
+<details class="card"><summary>Integration diagnostics</summary><p>Canonical v0.71 kernel and the exact CoolProp provider remain separable.</p><button id="run">Run deterministic demo ranking</button> <span id="status">Not run</span><br><small>CoolProp provider: <span id="cpstatus">initialising…</span></small><pre id="out">—</pre></details>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const modeButtons=[...document.querySelectorAll('[data-tool-mode]')];
+  const setMode=(m)=>{document.body.classList.toggle('mode-lazy',m==='lazy');modeButtons.forEach(b=>b.classList.toggle('active',b.dataset.toolMode===m));if(m==='expert')document.querySelectorAll('details.expert-section').forEach(d=>d.open=true);if(m==='learn'){const d=document.getElementById('learnMode');if(d)d.open=true;document.getElementById('learning-card')?.scrollIntoView({behavior:'smooth'});}if(m==='diagram')document.getElementById('process-builder-card')?.scrollIntoView({behavior:'smooth'});};
+  modeButtons.forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.toolMode)));setMode('lazy');
+  const wf=document.getElementById('workspaceFrame');if(wf){const l=new URLSearchParams(location.search).get('lang')||document.documentElement.lang||'en';wf.src='thermal-workspace-studio.html?lang='+encodeURIComponent(l);}
+  const $=id=>document.getElementById(id), C=globalThis.ThermalCore, B=globalThis.ThermalBuildingInputs, P=globalThis.ThermalProgramInputs, D=globalThis.ThermalDynamicBuilding, F=globalThis.ThermalFamilyPriors, E=globalThis.ThermalCandidateEnsemble;
+  let last=null,screeningLast=null,annualLast=null;
+  if(!C||!B||!P||!D||!F||!E||!globalThis.DiagramCompute){$('loadStatus').textContent='FAIL: model dependency missing';$('loadStatus').className='bad';return;}
+  const presets=B.lazyPresets.base.presets;
+  for(const [id,p] of Object.entries(presets)){const o=document.createElement('option');o.value=id;o.textContent=p.label;$('useType').append(o);}
+  $('useType').value='office';
+  const buildingIds=['useType','floorArea','storeys','height','aspect','glazingFraction','envelopePreset','glazingPreset','indoorC','outdoorC','people','outdoorAir'];
+  const dynamicIds=['dynRam','dynCair','dynCmass','dynInitialAir','dynInitialMass','dynComfortMin','dynComfortMax'];
+  const searchIds=['siteElectric','siteElectricFirm','siteGas','siteGasFirm','siteFuel','searchSources','searchHeatSources','searchFreeCooling','searchHeatTerminals','searchCoolTerminals','searchCoolingReserve','searchRetainTop','searchWithinPct','searchCoolStep','groundEnabled','groundT','groundC','groundTau','groundMin','groundMax','groundApproach','groundExtract','groundInject','groundPump','groundCapex','groundDirectCooling','groundGeometryProvenance','groundGeometry','sourceWaterEnabled','sourceWaterMonthly','sourceWaterProfileRef','sourceWaterHourly','sourceWaterProfileProvenance','sourceWaterCapacity','sourceWaterHydraulics','sourceWaterGeometryProvenance','sourceWaterHXGeometry','vrfEnabled','vrfHR','familyPriorOverrides','physicalThresholdBrackets','physicalThresholdVariants'];
+   const programIds=['hcRoomType','hcRoomCount','hcArea','hcHeight','hcOAACH','hcTotalACH','hcExhaust','hcPressure','hcDirect','hcRecirc','hcTmin','hcTmax','hcRHmin','hcRHmax','hcRuleRef','resCount','resArea','resBedrooms','resOccupants','resVent','resVentRef','resLocalExhaust','resLocalRef','resDHW','resSourceRef','progVentSchedule','progSensible','progExhaust','progRecovery','progRoomEnforce','progDHW','progDHWCold','progDHWTarget'];
+  const allIds=[...buildingIds,...dynamicIds,...searchIds,...programIds];
+  const readState=()=>Object.fromEntries(allIds.filter(id=>$(id)).map(id=>[id,$(id).value]));
+  const applyState=s=>{if(!s)return;for(const id of allIds)if(s[id]!=null&&$(id))$(id).value=s[id];updateProgramVisibility();};
+  const n=id=>Number($(id).value), optional=id=>$(id).value===''?undefined:Number($(id).value);
+  const fmt=(x,d=2)=>Number.isFinite(x)?x.toLocaleString(undefined,{maximumFractionDigits:d}):'—';
+  const mwh=J=>Number.isFinite(J)?J/3.6e9:null;
+  function updateProgramVisibility(){const u=$('useType').value,h=u==='hospital'||u==='clinic',r=u==='residential';$('program-healthcare').hidden=!h;$('program-residential').hidden=!r;$('program-none').hidden=h||r;$('program-card').classList.toggle('program-required',h||r);}
+  function calculate(){
+    try{
+      const floorArea_m2=n('floorArea'),storeys=n('storeys'),storeyHeight_m=n('height'),indoor=n('indoorC'),outdoor=n('outdoorC');
+      const envelope=C.estimateEnvelopeHeatLoss({floorArea_m2,storeys,storeyHeight_m,aspectRatio:n('aspect'),glazingFraction:n('glazingFraction'),envelopePreset:$('envelopePreset').value,glazingPreset:$('glazingPreset').value,designDeltaT_K:indoor-outdoor});
+      const preset=B.lazyPresets.resolvePreset($('useType').value,{floorArea_m2,storeys,ceilingHeight_m:storeyHeight_m,...(optional('people')!==undefined?{people:optional('people')}:{ }),...(optional('outdoorAir')!==undefined?{outdoorAir_m3_h:optional('outdoorAir')}:{ })});
+      const special=preset.specialUseRequired||[],unresolved=preset.ventilationUnresolvedReason,warnings=[];if(special.length)warnings.push('Required program: '+special.join(', ')+'.');if(unresolved&&preset.outdoorAir_m3_h==null)warnings.push('Outdoor air unresolved: '+unresolved+'.');const g=preset.preset.gains||{};
+      screeningLast={kind:'building-load-screening',inputs:readState(),envelope,preset:{schema:preset.schema,presetId:preset.presetId,people:preset.people,density_p_per_100m2:preset.density_p_per_100m2,outdoorAir_m3_h:preset.outdoorAir_m3_h,outdoorAir_m3_h_person:preset.outdoorAir_m3_h_person,ventilationUnresolvedReason:preset.ventilationUnresolvedReason,specialUseRequired:special,lighting_W_m2:g.lighting_W_m2??null,equipment_W_m2:g.equipment_W_m2??null},warnings};last=screeningLast;
+      $('rH').textContent=fmt(envelope.totalHeatLoss_W_K,1);$('rSpecific').textContent=fmt(envelope.specificHeatLoss_W_m2K,2);$('rHeat').textContent=fmt(envelope.designHeatLoss_W/1000,1);$('rPeople').textContent=fmt(preset.people,1);$('rOA').textContent=fmt(preset.outdoorAir_m3_h,0);$('rOAP').textContent=fmt(preset.outdoorAir_m3_h_person,1);$('rOpaque').textContent=fmt(envelope.opaqueUA_W_K,1);$('rWindow').textContent=fmt(envelope.windowUA_W_K,1);$('rVent').textContent=fmt(envelope.ventilationInfiltration_W_K,1);const geo=envelope.geometry;$('rAreas').textContent=[geo.opaqueWallArea_m2,geo.windowArea_m2,geo.roofArea_m2,geo.groundFloorArea_m2].map(x=>fmt(x,0)).join(' / ');const u=envelope.U;$('rU').textContent=[u.wall_U,u.window_U,u.roof_U,u.floor_U].map(x=>fmt(x,2)).join(' / ');$('rGains').textContent=fmt(g.lighting_W_m2,1)+' / '+fmt(g.equipment_W_m2,1);$('programNote').textContent=warnings.join(' ');$('programNote').className=warnings.length?'warn':'muted';$('loadStatus').textContent='PASS';$('loadStatus').className='ok';updateProgramVisibility();return screeningLast;
+    }catch(e){screeningLast={kind:'building-load-screening',error:String(e&&e.stack||e),inputs:readState(),warnings:[]};last=screeningLast;$('loadStatus').textContent='FAIL';$('loadStatus').className='bad';$('programNote').textContent=e.message||String(e);$('programNote').className='bad';return screeningLast;}
+  }
+  function programState(){const u=$('useType').value;if(u==='hospital'||u==='clinic')return{roomType:$('hcRoomType').value,roomCount:n('hcRoomCount'),roomArea_m2:n('hcArea'),roomHeight_m:n('hcHeight'),outdoorACH:optional('hcOAACH'),totalACH:optional('hcTotalACH'),exhaust_m3_h:optional('hcExhaust'),pressureRelationship:$('hcPressure').value,directExhaust:$('hcDirect').value,recircAllowed:$('hcRecirc').value,temperatureMin_C:optional('hcTmin'),temperatureMax_C:optional('hcTmax'),rhMin_pct:optional('hcRHmin'),rhMax_pct:optional('hcRHmax'),ruleRef:$('hcRuleRef').value};if(u==='residential')return{dwellingCount:n('resCount'),floorAreaPerDwelling_m2:n('resArea'),bedroomsPerDwelling:n('resBedrooms'),occupantsPerDwelling:n('resOccupants'),ventilationPerDwelling_m3_h:n('resVent'),ventilationSourceRef:$('resVentRef').value,localExhaustPerDwelling_m3_h:optional('resLocalExhaust'),localExhaustSourceRef:$('resLocalRef').value,dhwPerDwelling_L_day:optional('resDHW'),dwellingSourceRef:$('resSourceRef').value};return{};}
+  function integrationState(){return{ventilationSchedule:$('progVentSchedule').value,includeSensibleOutdoorAir:$('progSensible').value,includeExhaustReplacement:$('progExhaust').value,exhaustSchedule:$('progVentSchedule').value,exhaustHeatRecoveryEffectiveness:n('progRecovery'),roomConstraintSchedule:$('progVentSchedule').value,enforceRoomConstraints:$('progRoomEnforce').value,roomConstraintDegreeHourTolerance:0,dhwEnabled:$('progDHW').value,dhwColdWater_C:n('progDHWCold'),dhwTarget_C:n('progDHWTarget'),dhwDrawProfile24:'uniform'};}
+  function dynamicState(){return{Ram_K_per_kW:$('dynRam').value,Cair_MJ_K:$('dynCair').value,Cmass_MJ_K:$('dynCmass').value,initialAir_C:$('dynInitialAir').value,initialMass_C:$('dynInitialMass').value,comfortMin_C:$('dynComfortMin').value,comfortMax_C:$('dynComfortMax').value};}
+  function candidateSearchState(){return{electricityStatus:$('siteElectric').value,electricityFirm_kW:$('siteElectricFirm').value,gasStatus:$('siteGas').value,gasFirm_kW:$('siteGasFirm').value,deliveredFuelStatus:$('siteFuel').value,sourceFamilies:$('searchSources').value,heatSourceFamilies:$('searchHeatSources').value,freeCoolingFamilies:$('searchFreeCooling').value,heatingTerminalFamilies:$('searchHeatTerminals').value,coolingTerminalFamilies:$('searchCoolTerminals').value,coolingReserveFactors:$('searchCoolingReserve').value,retainTop:n('searchRetainTop'),withinNPCFraction:n('searchWithinPct')/100,coolingReserveRefineStep:n('searchCoolStep'),familyPriorOverrides:$('familyPriorOverrides').value,physicalThresholdBrackets:$('physicalThresholdBrackets').value,physicalThresholdVariants:$('physicalThresholdVariants').value,ground:{enabled:$('groundEnabled').value==='true',undisturbedTemp_C:n('groundT'),effectiveHeatCapacity_MJ_K:n('groundC'),recoveryTimeConstant_days:n('groundTau'),minTemp_C:n('groundMin'),maxTemp_C:n('groundMax'),approach_K:n('groundApproach'),maxExtraction_kW:n('groundExtract'),maxInjection_kW:n('groundInject'),pump_W_per_kW:n('groundPump'),capex_EUR:n('groundCapex'),directCoolingEnabled:$('groundDirectCooling').value==='true',geometryProvenance:$('groundGeometryProvenance').value,borefieldGeometry:$('groundGeometry').value},sourceWater:{enabled:$('sourceWaterEnabled').value==='true',monthlyTemperature_C:$('sourceWaterMonthly').value,temperatureProfileRef:$('sourceWaterProfileRef').value,hourlyTemperature_C:$('sourceWaterHourly').value,temperatureProfileProvenance:$('sourceWaterProfileProvenance').value,maxCapacity_kW:$('sourceWaterCapacity').value,sourceSideHydraulics:$('sourceWaterHydraulics').value,geometryProvenance:$('sourceWaterGeometryProvenance').value,directHXGeometry:$('sourceWaterHXGeometry').value},vrf:{enabled:$('vrfEnabled').value==='true',heatRecovery:$('vrfHR').value==='true',retrofit:false}};}
+  function annualArgs(){return{screening:screeningLast,useType:$('useType').value,programState:programState(),integrationState:integrationState(),dynamicBuildingState:dynamicState(),candidateSearchState:candidateSearchState()};}
+  function runAnnual(){
+    try{calculate();const x=D.runCandidateCase({...annualArgs(),designIndex:0,retainTrace:false},C,B,P);annualLast=x;
+      const pr=x.program,ai=pr?.annualInputs||null,r=x.result,summary={programRequired:pr?.required??false,programResolved:pr?.resolved??true,programKind:ai?.programKind??null,mandatoryOutdoorAir_m3_h:ai?.mandatoryOutdoorAir_m3_h??null,designExhaust_m3_h:ai?.designExhaust_m3_h??ai?.localExhaustDesign_m3_h??null,dhwDaily_L:ai?.dhwDaily_L??null,issues:x.issues||[],annual:r?{design:x.designName,feasible:r.feasible,npc:r.npc,grid_MWh:mwh(r.totals.gridImport_J),gas_MWh:mwh(r.totals.gas_J),programSensible_MWh:mwh(r.totals.programSensibleAirExchange_J),programDHW_MWh:mwh(r.totals.programDHW_J),unserved_kWh:r.totals.unserved_J/3.6e6,programIntegration:r.programIntegration??null}:null};
+      $('programOut').textContent=JSON.stringify(summary,null,2);$('programStatus').textContent=x.resolved&&r?'PASS':'UNRESOLVED';$('programStatus').className=x.resolved&&r?'ok':'warn';last={kind:'annual-program-case',inputs:readState(),screening:screeningLast,program:pr,annual:summary.annual,issues:x.issues||[]};return x;
+    }catch(e){annualLast=null;$('programStatus').textContent='FAIL';$('programStatus').className='bad';$('programOut').textContent=String(e&&e.stack||e);last={kind:'annual-program-case',inputs:readState(),error:String(e&&e.stack||e),warnings:[]};return null;}
+  }
+
+  async function runComparison(){
+    try{calculate();$('comparisonStatus').textContent='RUNNING';$('comparisonStatus').className='warn';$('comparisonMeta').textContent='Generating project-sized candidates and dispatching annual cases to DiagramCompute Workers…';
+      const x=await E.run({...annualArgs(),workers:2},C,B,P,D,globalThis.DiagramCompute);if(!x.resolved){$('comparisonStatus').textContent='UNRESOLVED';$('comparisonStatus').className='warn';$('comparisonMeta').textContent=(x.issues||[]).map(i=>i.code||i.message||String(i)).join(' · ');return null;}
+      const rows=x.candidates.map(c=>`<tr><td>${c.name}</td><td>${c.feasible?'yes':'no'}</td><td>${fmt(c.npc,0)}</td><td>${fmt(c.grid_MWh,1)}</td><td>${fmt(c.gas_MWh,1)}</td><td>${fmt(c.unserved_kWh,1)}</td></tr>`).join('');$('comparisonBody').innerHTML=rows;$('comparisonStatus').textContent=x.best?'PASS':'NO FEASIBLE';$('comparisonStatus').className=x.best?'ok':'warn';const L=x.generation.loads,cd=x.traced?.coldDay,hd=x.traced?.hotDay,rb=x.robustness; if(rb){const finiteNPC=rb.analysisSet.map(a=>a.npc).filter(Number.isFinite),base=rb.nearOptimal?.[0]?.npc??(finiteNPC.length?Math.min(...finiteNPC):0),byName=Object.fromEntries(rb.robustness.candidates.map(z=>[z.name,z])),byPhysical=Object.fromEntries((rb.sourcePhysicalSummary||[]).map(z=>[z.name,z]));$('robustBody').innerHTML=rb.analysisSet.map(a=>{const z=byName[a.name]||{},sp=byPhysical[a.name]||{},issues=(sp.issueCodes||[]).join(', ')||'—';return `<tr><td>${a.name}${a.outsideNearOptimal?' *':''}</td><td>${fmt(a.npc-base,0)}</td><td>${fmt((z.winProbability||0)*100,0)}%</td><td>${fmt((z.withinProbability||0)*100,0)}%</td><td>${fmt((sp.feasibleProbability??z.feasibleProbability??0)*100,0)}%</td><td style="text-align:left">${issues}</td><td>${fmt(z.meanRegret,0)}</td><td>${fmt(z.maxRegret,0)}</td></tr>`}).join('');const physicalFailures=(rb.sourcePhysicalSummary||[]).reduce((n,z)=>n+(z.failedScenarioCount||0),0),switchNote=rb.switchingThresholds?.axisSemantics?.physicalAxesSupported===false?' Economic switching thresholds exclude physical-source stress axes.':'';$('robustMeta').textContent=`${rb.nearOptimal.length} near-optimal candidate(s) in ${(x.generation.searchState.robustNearOptimalFraction*100).toFixed(0)}% band; ${rb.analysisSet.length} sensitivity candidates; ${rb.robustness.scenarios.length} weighted scenarios; ${physicalFailures} source-physical scenario failure(s). * family representative outside near-optimal band. Weights are not calibrated probabilities.${switchNote}`;const pt=rb.physicalSwitchingThresholds;if(pt){const prs=[];for(const a of pt.alternatives||[])for(const ax of a.axes||[]){if((ax.events||[]).length)for(const ev of ax.events){const fail=(ev.failedCandidates||[]).map(f=>f.name+': '+((f.issueCodes||[]).join(', ')||'kernel/source infeasible')).join('; ')||'—';prs.push(`<tr><td>${a.name}</td><td>${ax.axis}</td><td>${ev.type}</td><td>${fmt(ev.value,3)}</td><td>${fmt(ev.deltaNPC,0)}</td><td style="text-align:left">${fail}</td></tr>`)}else prs.push(`<tr><td>${a.name}</td><td>${ax.axis}</td><td>${ax.status}</td><td>—</td><td>—</td><td style="text-align:left">No boundary inside explicit bracket</td></tr>`)}for(const a of pt.variantAlternatives||[])for(const ax of a.axes||[]){if((ax.events||[]).length)for(const ev of ax.events){const where=ev.variantId||((ev.betweenVariants||[]).join(' ↔ '))||'—',dn=Array.isArray(ev.deltaNPC)?ev.deltaNPC.map(x=>fmt(x,0)).join(' → '):fmt(ev.deltaNPC,0),fail=(ev.failedCandidates||[]).map(f=>f.name+': '+((f.issueCodes||[]).join(', ')||'kernel/source infeasible')).join('; ')||'—';prs.push(`<tr><td>${a.name}</td><td>${ax.axis}</td><td>${ev.type}</td><td>${where}</td><td>${dn}</td><td style="text-align:left">${fail}</td></tr>`)}else prs.push(`<tr><td>${a.name}</td><td>${ax.axis}</td><td>${ax.status}</td><td>${(ax.variants||[]).join(' → ')||'—'}</td><td>—</td><td style="text-align:left">No boundary across explicit variants</td></tr>`)}$('physicalThresholdBody').innerHTML=prs.join('')||'<tr><td colspan="6" style="text-align:left">No physical-source threshold result.</td></tr>';$('physicalThresholdMeta').textContent=`${Math.max(pt.alternatives?.length||0,pt.variantAlternatives?.length||0)} alternative(s) · ${Object.keys(pt.brackets||{}).length} scalar bracket(s) · ${Object.keys(pt.variantSets||{}).length} explicit profile/geometry variant set(s) · ${pt.workers} Worker(s). Variants are evaluated discretely; no interpolation.`;}else{$('physicalThresholdBody').innerHTML='<tr><td colspan="6" style="text-align:left">Not requested; no explicit physical bracket supplied.</td></tr>';$('physicalThresholdMeta').textContent='Not requested. Supply an explicit bracket in Candidate search assumptions.';}} else {$('robustBody').innerHTML='<tr><td colspan="8" style="text-align:left">No feasible robustness set.</td></tr>';$('physicalThresholdBody').innerHTML='<tr><td colspan="6" style="text-align:left">No physical-source threshold result.</td></tr>';} $('comparisonMeta').textContent=`${x.coarse.candidates.length} coarse + ${x.refinement.candidateCount} refined candidates · design heat ${fmt(L.designHeatLoad_W/1000,1)} kW · cooling probe ${fmt(L.designColdLoad_W/1000,1)} kW · retained ${x.retention.retainedCount} · ${x.coarse.worker.workers} Workers · best: ${x.best?.name||'—'}${cd?` · selected cold-day grid ${fmt(cd.grid_kWh,1)} kWh`:''}${hd?` · hot-day grid ${fmt(hd.grid_kWh,1)} kWh`:''}`;last={kind:'project-derived-candidate-ensemble',inputs:readState(),screening:screeningLast,dynamicBuilding:x.dynamicBuilding,program:x.program,generation:{loads:L,siteEnergyAvailability:x.generation.siteEnergyAvailability,eligibility:x.generation.eligibility,bufferHalfHour_m3:x.generation.bufferHalfHour_m3,candidateCount:x.candidates.length},worker:{coarse:x.coarse.worker,refinement:x.refinement.worker},searchState:x.generation.searchState,retention:x.retention,candidateComparison:x.candidates,robustness:rb,designDays:x.days,best:x.best?{index:x.best.index,name:x.best.name,npc:x.best.npc,coldDay:cd,hotDay:hd}:null,issues:x.issues||[]};return x;
+    }catch(e){$('comparisonStatus').textContent='FAIL';$('comparisonStatus').className='bad';$('comparisonMeta').textContent=e.message||String(e);last={kind:'project-derived-candidate-ensemble',inputs:readState(),error:String(e&&e.stack||e),warnings:[]};return null;}
+  }
+  $('calculate').addEventListener('click',calculate);$('compareCandidates').addEventListener('click',()=>{runComparison();});$('resolveProgram').addEventListener('click',runAnnual);$('useType').addEventListener('change',()=>{const p=B.lazyPresets.referenceProfiles[$('useType').value];if(p?.height_m?.typ)$('height').value=p.height_m.typ;calculate();});
+  const out=$('out'),status=$('status'),cpstatus=$('cpstatus');const run=()=>{try{const project=C.makeDemoProject(),designs=C.demoDesigns(),ranked=C.rankCandidates(project,designs,{retainTrace:false});if(!ranked.best)throw new Error('No feasible demo design');const d={best:ranked.best?.design?.id||ranked.best?.design?.name||ranked.best?.id||ranked.best?.name||null,npc:ranked.best?.npc??null,count:ranked.all?.length||ranked.results?.length||ranked.ranked?.length||designs.length,feasible:ranked.feasible?.length??null,infeasible:ranked.infeasible?.length??null};out.textContent=JSON.stringify(d,null,2);status.textContent='PASS';status.className='ok';}catch(e){out.textContent=String(e&&e.stack||e);status.textContent='FAIL';status.className='bad';}};$('run').addEventListener('click',run);
+  const cpReady=globalThis.__THERMAL_COOLPROP_READY__||globalThis.ThermalCoolPropProvider?.ready?.();if(cpReady){cpReady.then(()=>{const id=globalThis.ThermalCoolPropProvider.identity();cpstatus.textContent=id.version+' / '+id.gitrevision.slice(0,8);cpstatus.className='ok';}).catch(e=>{cpstatus.textContent='FAIL: '+(e&&e.message||e);cpstatus.className='bad';});if(globalThis.Diagram&&typeof Diagram.ready==='function')Diagram.ready(cpReady);}else{cpstatus.textContent='provider not loaded';cpstatus.className='bad';}
+  if(globalThis.Diagram){Diagram.init({id:'thermaloptimizer',file:'thermaloptimizer.html',title:'Thermal System Optimizer',state:{serialize:readState,deserialize:s=>{applyState(s);calculate();}},record:()=>last?{inputs:last.inputs,outputs:{kind:last.kind,envelope:last.screening?.envelope??last.envelope??null,preset:last.screening?.preset??last.preset??null,program:last.program??null,annual:last.annual??null,dynamicBuilding:last.dynamicBuilding??null,candidateComparison:last.candidateComparison??null,robustness:last.robustness??null,designDays:last.designDays??null,best:last.best??null,error:last.error??null},units:{floorArea:'m2',temperature:'degC',heatLossCoefficient:'W/K',heatLoss:'W',airflow:'m3/h',energy:'MWh'},model:{kernel:'thermal-core-v0.71',programBridge:P.schema,dynamicBuildingBridge:D.schema,candidateEnsembleBridge:E.schema,refrigerantProvider:(()=>{try{return globalThis.ThermalCoolPropProvider?.identity?.()??null;}catch(e){return null;}})()},warnings:[...(last.warnings||[]),...(last.issues||[]).map(x=>x.code||String(x)),'Prototype; independent_validation=false.']}:null,python:()=>({unsupported:'Full chronological optimizer state is not yet reproducible as one standard-library Python file.'})});}
+  calculate();
+});
+</script>
+</body></html>

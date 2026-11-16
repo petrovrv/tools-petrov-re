@@ -1,0 +1,137 @@
+{
+  "schema": "tools.petrov.re/benchmark-artifact/v1",
+  "tool": "roofstormwater",
+  "run_at": "2026-08-14T14:58:00Z",
+  "suite": "engineering-scope-routing-emergency-overflow-regression",
+  "summary": {
+    "cases": 8,
+    "passed": 8
+  },
+  "cases": [
+    {
+      "id": "normal-drain-external-boundary",
+      "kind": "scope regression",
+      "input": {
+        "external_flow_lps_each": 5,
+        "count": 4,
+        "scenario": "normal"
+      },
+      "result": {
+        "total_external_normal_boundary_lps": 20
+      },
+      "criterion": "normal drainage is an externally prescribed flow boundary; no head/diameter/network equation is used",
+      "passed": true
+    },
+    {
+      "id": "blocked-primary-boundary",
+      "kind": "failure scenario",
+      "input": {
+        "external_flow_lps_each": 5,
+        "count": 4,
+        "scenario": "blocked"
+      },
+      "result": {
+        "total_external_normal_boundary_lps": 0
+      },
+      "criterion": "blocked scenario forces the external normal-drain boundary to zero",
+      "passed": true
+    },
+    {
+      "id": "reuse-not-site-discharge",
+      "kind": "mass-routing identity",
+      "input": {
+        "tank_throttle_lps": 0.8,
+        "reuse_lps": 0.2
+      },
+      "result": {
+        "site_sewer_component_lps": 0.8,
+        "local_reuse_component_lps": 0.2
+      },
+      "criterion": "reuse is tracked separately and is not counted as sewer/site discharge",
+      "passed": true
+    },
+    {
+      "id": "tank-continuous-drawdown",
+      "kind": "post-storm routing",
+      "input": {
+        "tank_volume_m3": 6,
+        "tank_throttle_lps": 0.8,
+        "reuse_lps": 0.2
+      },
+      "result": {
+        "combined_withdrawal_lps": 1.0,
+        "drawdown_time_s": 6000
+      },
+      "criterion": "tank continues to drain after rainfall while throttle/reuse remain active",
+      "passed": true
+    },
+    {
+      "id": "circular-opening-count-scaling",
+      "kind": "emergency overflow hydraulics",
+      "input": {
+        "diameter_mm": 120,
+        "sill_mm": 90,
+        "free_surface_mm": 250,
+        "Cd": 0.62
+      },
+      "one_opening_lps": 9.669794697620125,
+      "two_openings_lps": 19.33958939524025,
+      "criterion": "two identical circular openings give exactly twice the discharge",
+      "passed": true
+    },
+    {
+      "id": "rectangular-opening-count-scaling",
+      "kind": "emergency overflow hydraulics",
+      "input": {
+        "width_mm": 300,
+        "height_mm": 120,
+        "sill_mm": 90,
+        "free_surface_mm": 250,
+        "Cd": 0.62
+      },
+      "one_opening_lps": 30.752827188874843,
+      "two_openings_lps": 61.505654377749686,
+      "criterion": "two identical rectangular openings give exactly twice the discharge",
+      "passed": true
+    },
+    {
+      "id": "circular-auto-sizing",
+      "kind": "emergency overflow sizing",
+      "input": {
+        "target_lps": 30.0,
+        "sill_mm": 90,
+        "parapet_mm": 250,
+        "current_count": 2,
+        "Cd": 0.62
+      },
+      "result": {
+        "required_count_at_d120": 4,
+        "required_diameter_mm_at_count_2": 160.38027635527334
+      },
+      "criterion": "automatic sizing finds an integer opening count and diameter meeting the target at parapet crest",
+      "passed": true
+    },
+    {
+      "id": "rectangular-auto-sizing",
+      "kind": "emergency overflow sizing",
+      "input": {
+        "target_lps": 30.0,
+        "height_mm": 120,
+        "sill_mm": 90,
+        "parapet_mm": 250,
+        "current_count": 2,
+        "Cd": 0.62
+      },
+      "result": {
+        "required_width_mm_at_count_2": 146.32800985620997
+      },
+      "criterion": "required rectangular width is solved from the hydraulic opening law for the current count/height",
+      "passed": true
+    }
+  ],
+  "notes": [
+    "Normal gravity/siphonic drainage hydraulics is intentionally outside the tool and appears only as an externally verified available-flow boundary condition.",
+    "Emergency overflow is a calculated object. Circular openings use numerical integration over the wetted circular segment; rectangular scuppers use the integrated orifice-strip law.",
+    "The target emergency flow is profile/scenario dependent; the opening capacity itself is purely hydraulic."
+  ]
+}

@@ -1,0 +1,6739 @@
+{
+ "tool": "noiseexposure",
+ "author_note": "independent reference authored without access to the tool code",
+ "reference": "Hand-built daily noise-exposure shifts (single task, equal levels, time halving, short high-level burst, order permutations, Te < / > T0, 24 h boundary, user T0) with LEX,8h, LAeq,Te, EA and energy shares computed by an own 60-digit Decimal evaluation of the energy-sum definition and cross-checked by a float partial-exposure form; EU Directive 2003/10/EC threshold states on both sides of 80/85/87 dB(A) including equality; hearing-protector scenarios (user attenuation, SNR with LCeq, simplified SNR on LAeq, HML both branches incl. two published worked examples, 4 dB derating, part-time wear energy mix) with action values compared against the unprotected and the limit against the at-ear exposure (Art. 3(2)); user criteria packs; uncertainty review; invalid and insufficient inputs; 24 seeded random shifts (ref.py).",
+ "reference_citations": [
+  "Directive 2003/10/EC of 6 February 2003 (noise), EUR-Lex CELEX 32003L0010, https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003L0010 — Art. 2 (LEX,8h, nominal eight-hour day), Art. 3(1) (87/85/80 dB(A)), Art. 3(2) (protectors for limit only), Art. 5-7 ('exceeded')",
+  "HSE L108 'Controlling noise at work', Control of Noise at Work Regulations 2005 guidance, https://www.hse.gov.uk/pubns/priced/l108.pdf — Schedule 1 Part 1 (p.30): LEP,d = LAeq,Te + 10 lg(Te/T0), T0 = 28 800 s, and LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,Ti)]",
+  "ISO 9612:2009 preview, https://cdn.standards.iteh.ai/samples/41718/ab45a73ad46f45cba775b5cb4b859a2c/ISO-9612-2009.pdf — eq. (2) LEX,8h = LAeq,Te + 10 lg(Te/T0), T0 = 8 h",
+  "ISO 4869-2:2018 preview, https://cdn.standards.iteh.ai/samples/65582/cc46f40f2f0c47ac9625316046418ec1/ISO-4869-2-2018.pdf — def. 3.8 (SNR subtracted from LC)",
+  "HSE L108 Appendix 1 real-world 4 dB derating and SNR formula L'A = LC - SNR, as reproduced by Hear4TheLongTerm, https://www.hear4thelongterm.co.uk/library/2.1.1-l108-guidance-on-real-world-protection-&-de-rating-(appendix-1)",
+  "HML PNR formula for LC-LA <= 2 dB and worked example H35/M25/L20, LA 108.7, LC 109.0 -> PNR 29.3, L'A 79.4: IMO noise-code guidance as published at https://imorules.com/GUID-223C2E09-5401-4D4E-8612-B0AF276552F6.html",
+  "HML PNR formulas for both branches (LC-LA > 2 dB: PNR = M - 0.125(M-L)(LC-LA-2)) and worked example H25/M18/L13, LC 103, LA 104 -> PNR 23.3: Essel Acoustics, https://esselacoustics.com/news/the-hml-of-a-hearing-protector-using-it-to-predict-hearing-protection-performance/",
+  "Spec specs/06.md (MVP scope, QA tests, acceptance criteria); own reference bench/noiseexposure/ref.py"
+ ],
+ "tolerance": "Levels: absolute 1e-6 dB. A level is logarithmic, so an absolute bound on dB is a relative bound (2.3e-7) on energy and holds at every scale; the model is closed-form arithmetic with no discretisation, so only floating-point error (<1e-9 dB between the two reference forms) is expected and 1e-6 dB leaves margin for display-independent round-off while being five orders below the 0.1 dB at which thresholds are compared. Energy shares: absolute 1e-6 (dimensionless fraction). EA and durations: relative 1e-6 / 1e-9. Categorical threshold, flag and refusal outcomes: exact. Random cases whose LEX lies within 0.05 dB of a threshold carry no threshold check, so display rounding cannot decide them.",
+ "cases": [
+  {
+   "id": "single-80-8h",
+   "intent": "headline/acceptance: single task over the full reference duration reproduces its own level",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 80.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 80.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; acceptance criterion: single task at T0 reproduces its level (80.0)"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 80.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.32,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "single-92-8h",
+   "intent": "headline/acceptance: single task over the full reference duration reproduces its own level",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 92.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 92.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; acceptance criterion: single task at T0 reproduces its level (92.0)"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 92.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 5.071658215875563,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "single-73p4-8h",
+   "intent": "headline/acceptance: single task over the full reference duration reproduces its own level",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 73.4,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 73.4,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; acceptance criterion: single task at T0 reproduces its level (73.4)"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 73.4,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.07000837196638568,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "single-90-4h-halving",
+   "intent": "headline: halving time lowers LEX by 10 lg 2 = 3.0103 dB",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 90.0,
+      "duration_h": 4.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 86.98970004336019,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 90.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 4.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "equal-levels-two-halves",
+   "intent": "spec test: equal levels over the day sum to the same level; shares 50/50",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 4.0
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 85.0,
+      "duration_h": 4.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.0119288512538813,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 0.5,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_B": {
+     "ref": 0.5,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    }
+   }
+  },
+  {
+   "id": "no-arithmetic-db-sum",
+   "intent": "negative: arithmetic dB addition (84+84 -> 87) must not be used; LEX = 84, upper value not exceeded",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 84.0,
+      "duration_h": 4.0
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 84.0,
+      "duration_h": 4.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 84.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 84.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.8038036580830656,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 0.5,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_B": {
+     "ref": 0.5,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "short-burst",
+   "intent": "spec test: 15 min at 110 dB(A) dominates a quiet day",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "office",
+      "laeq_dBA": 70.0,
+      "duration_h": 7.75
+     },
+     {
+      "name": "burst",
+      "laeq_dBA": 110.0,
+      "duration_h": 0.25
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 94.96194252091695,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 94.96194252091695,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 10.031,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_office": {
+     "ref": 0.0030904196989333067,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_burst": {
+     "ref": 0.9969095803010667,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "burst",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "short-burst-reversed",
+   "intent": "acceptance: task order does not change the energy total",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "burst",
+      "laeq_dBA": 110.0,
+      "duration_h": 0.25
+     },
+     {
+      "name": "office",
+      "laeq_dBA": 70.0,
+      "duration_h": 7.75
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 94.96194252091695,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 94.96194252091695,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 10.031,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_burst": {
+     "ref": 0.9969095803010667,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_office": {
+     "ref": 0.0030904196989333067,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "burst",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "three-task-mix",
+   "intent": "headline: multi-task energy sum and contributions",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "grind",
+      "laeq_dBA": 95.0,
+      "duration_h": 1.0
+     },
+     {
+      "name": "assembly",
+      "laeq_dBA": 85.0,
+      "duration_h": 3.0
+     },
+     {
+      "name": "office",
+      "laeq_dBA": 75.0,
+      "duration_h": 4.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.24014811372864,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.24014811372864,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6949808258502512,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_grind": {
+     "ref": 0.746268656716418,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_assembly": {
+     "ref": 0.22388059701492538,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_office": {
+     "ref": 0.029850746268656716,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "grind",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "three-task-mix-permuted",
+   "intent": "acceptance: permutation invariance",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "office",
+      "laeq_dBA": 75.0,
+      "duration_h": 4.0
+     },
+     {
+      "name": "grind",
+      "laeq_dBA": 95.0,
+      "duration_h": 1.0
+     },
+     {
+      "name": "assembly",
+      "laeq_dBA": 85.0,
+      "duration_h": 3.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.24014811372864,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.24014811372864,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6949808258502512,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_office": {
+     "ref": 0.029850746268656716,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_grind": {
+     "ref": 0.746268656716418,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_assembly": {
+     "ref": 0.22388059701492538,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "grind",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "four-task-construction",
+   "intent": "headline: four tasks, many short noisy tasks dominate",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "saw",
+      "laeq_dBA": 100.0,
+      "duration_h": 0.25
+     },
+     {
+      "name": "drill",
+      "laeq_dBA": 97.0,
+      "duration_h": 0.5
+     },
+     {
+      "name": "forklift",
+      "laeq_dBA": 82.0,
+      "duration_h": 5.0
+     },
+     {
+      "name": "break",
+      "laeq_dBA": 60.0,
+      "duration_h": 2.25
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 88.60385384344043,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 88.60385384344043,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 2.3202531057467675,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_saw": {
+     "ref": 0.4309874631880528,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_drill": {
+     "ref": 0.43201082880651204,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_forklift": {
+     "ref": 0.13661381928856592,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_break": {
+     "ref": 0.0003878887168692475,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "drill",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "te-shorter-than-t0",
+   "intent": "coverage: Te = 6 h < T0 gives LEX below LAeq,Te by 10 lg(6/8)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 6.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 83.750612633917,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 6.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.758946638440411,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "te-longer-than-t0",
+   "intent": "coverage: 10 h shift normalised to 8 h raises LEX by 10 lg(10/8)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 10.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 85.96910013008056,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.2649110640673518,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "t0-10h-user",
+   "intent": "boundary: user T0 = 10 h; single task over T0 reproduces its level; EU 8 h basis flagged",
+   "inputs": {
+    "T0_h": 10.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 10.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.2649110640673518,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "flag_T0_not_8h": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 2(b): LEX,8h refers to a nominal eight-hour working day; a different T0 is not the Directive metric"
+    }
+   }
+  },
+  {
+   "id": "full-24h",
+   "intent": "boundary: a 24 h task sum is still physically possible",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 80.0,
+      "duration_h": 24.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 84.77121254719663,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 80.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 24.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.96,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "two-12h-24h-total",
+   "intent": "boundary: two tasks exactly filling 24 h",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 80.0,
+      "duration_h": 12.0
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 90.0,
+      "duration_h": 12.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 92.17483944213906,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.40362689494243,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 24.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 5.28,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 0.09090909090909091,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_B": {
+     "ref": 0.9090909090909091,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "B",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "zero-db-level",
+   "intent": "boundary: 0 dB(A) is a valid level (reference pressure)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 0.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 0.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 0.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 3.2e-09,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "very-high-short",
+   "intent": "boundary: high level, 36 s",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 140.0,
+      "duration_h": 0.01
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 110.96910013008056,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 140.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 0.01,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 400.0,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "eu-79p0",
+   "intent": "below all EU values; preset source/jurisdiction shown",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 79.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 79.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 79.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.2541850351117701,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    },
+    "preset_shows_source_and_jurisdiction": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 06 acceptance: threshold preset always shows jurisdiction/source"
+    },
+    "preset_values_80_85_87": {
+     "ref": [
+      80,
+      85,
+      87
+     ],
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(c),(b),(a)"
+    }
+   }
+  },
+  {
+   "id": "eu-80p0-equal",
+   "intent": "boundary: exactly at lower action value is not 'exceeded'",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 80.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 80.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 80.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.32,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-80p2",
+   "intent": "boundary: just above lower action value",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 80.2,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 80.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 80.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.33508113537628786,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-85p0-equal",
+   "intent": "boundary: exactly at upper action value is not 'exceeded'",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.0119288512538813,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-85p2",
+   "intent": "boundary: just above upper action value",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.2,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 85.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 85.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.0596195887442914,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-87p0-equal",
+   "intent": "boundary: exactly at limit (no protector) is not 'exceeded'",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 87.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6037991476072713,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-87p2",
+   "intent": "boundary: above limit value, no protector -> limit exceeded",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 87.2,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.2,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6793838727992723,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-95-no-protector",
+   "intent": "no protector: effective exposure equals the ambient one, limit exceeded",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 95.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 95.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 10.119288512538814,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "eu-multi-task-upper",
+   "intent": "threshold state from the combined exposure, not the loudest task (86 dB task alone would exceed upper value)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 82.0,
+      "duration_h": 4.0
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 86.0,
+      "duration_h": 4.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 84.44510467445312,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 84.44510467445312,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.8905543836793738,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 0.2847472489508014,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_B": {
+     "ref": 0.7152527510491986,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "B",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "user-att-20-at-95",
+   "intent": "Art. 3(2): action values vs ambient, limit vs at-ear; 95 - 20 = 75",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 20,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 95.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 75.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; L' = L - 20"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "user-att-derating-4",
+   "intent": "real-world derating adds 4 dB to at-ear level (HSE L108 App.1 via H4TLT)",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 10,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 95.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 89.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; L' = 95 - 10 + 4 = 89 -> limit exceeded"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "snr-lceq",
+   "intent": "SNR method: L' = LC - SNR (+4 dB derating)",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 100.0,
+      "duration_h": 8.0,
+      "lceq_dBC": 104.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "snr_lceq",
+     "snr_dB": 25,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 100.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 83.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; 104 - 25 + 4 = 83 (HSE L108 App.1 as quoted by H4TLT)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "hml-imo-example",
+   "intent": "HML <=2 dB case, published worked example (IMO MSC.337(91) guidance: PNR 29.3, L' 79.4)",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 108.7,
+      "duration_h": 8.0,
+      "lceq_dBC": 109.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "hml",
+     "H_dB": 35,
+     "M_dB": 25,
+     "L_dB": 20,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 108.7,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 79.45,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; PNR = M - (H-M)/4 (LC-LA-2) = 29.25; L' = 79.45"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "hml-essel-example",
+   "intent": "HML <=2 dB case, Essel Acoustics worked example (PNR 23.25, L' 80.75) with 4 dB derating -> 84.75",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 104.0,
+      "duration_h": 8.0,
+      "lceq_dBC": 103.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "hml",
+     "H_dB": 25,
+     "M_dB": 18,
+     "L_dB": 13,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 104.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 84.75,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; PNR = 18 - 0.25*7*(-3) = 23.25; L' = 104 - 23.25 + 4"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "hml-low-frequency",
+   "intent": "HML >2 dB case (low-frequency formula, secondary source)",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0,
+      "lceq_dBC": 101.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "hml",
+     "H_dB": 30,
+     "M_dB": 22,
+     "L_dB": 15,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 95.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 76.5,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; PNR = M - (M-L)/8 (LC-LA-2) = 22 - 0.875*4 = 18.5; L' = 76.5"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "hml-diff-exactly-2",
+   "intent": "boundary: LC-LA = 2 dB, both HML branches give PNR = M",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 100.0,
+      "duration_h": 8.0,
+      "lceq_dBC": 102.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "hml",
+     "H_dB": 30,
+     "M_dB": 22,
+     "L_dB": 15,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 100.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 78.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; PNR = 22; L' = 78"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "wear-90pct",
+   "intent": "part-time wear: 10 % unprotected time dominates (30 dB protector, 90 % wear -> ~90 dB)",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 100.0,
+      "duration_h": 8.0,
+      "wear_pct": 90
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 30,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 100.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 90.0389116623691,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; 10 lg(0.9*10^7 + 0.1*10^10)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "wear-100pct",
+   "intent": "full wear companion of wear-90pct",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 100.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 30,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 100.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 70.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; L' = 70"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "wear-0pct",
+   "intent": "wear 0 %: at-ear equals ambient",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 90.0,
+      "duration_h": 8.0,
+      "wear_pct": 0
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 30,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 90.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 90.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; no protected time"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "protector-multi-task",
+   "intent": "per-task wear; unprotected quieter task",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "grind",
+      "laeq_dBA": 98.0,
+      "duration_h": 2.0,
+      "wear_pct": 100
+     },
+     {
+      "name": "bench",
+      "laeq_dBA": 80.0,
+      "duration_h": 6.0,
+      "wear_pct": 0
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 25,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 92.18113441448709,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 79.03025683779633,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; grind 73 dB at ear 2 h, bench 80 dB 6 h"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "snr-laeq-simplified",
+   "intent": "SNR applied to LAeq (simplification) must be flagged as a limitation",
+   "inputs": {
+    "T0_h": 8.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 100.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "snr_laeq",
+     "snr_dB": 25,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "ambient_LEX_dBA": {
+     "ref": 100.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation; protector never alters the exposure without protector (spec: two lines)"
+    },
+    "at_ear_LEX_dBA": {
+     "ref": 79.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "per task at-ear level (method below) mixed with ambient by wear fraction in energy: T[w 10^(0.1 L') + (1-w) 10^(0.1 L)]; 100 - 25 + 4 = 79"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    },
+    "limitation_flag_snr_simplified": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 06: 'If the user uses SNR-only simplification, report limitation explicitly'"
+    }
+   }
+  },
+  {
+   "id": "ambient-invariant-with-protector",
+   "intent": "spec: protector scenario does not modify measured exposure (compare with same tasks, method none)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 91.0,
+      "duration_h": 3.0,
+      "wear_pct": 100
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 84.0,
+      "duration_h": 5.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 20,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.98712734341234,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.98712734341234,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 2.0130877804549168,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_A": {
+     "ref": 0.7504444211626037,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_B": {
+     "ref": 0.24955557883739626,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "A",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    }
+   }
+  },
+  {
+   "id": "negative-attenuation",
+   "intent": "negative: negative attenuation must be refused or give no credit (at-ear not below ambient)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 90.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": -5,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "at_ear_not_below_ambient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "a passive protector cannot be credited with negative attenuation as a reduction; result must be refused/flagged or at-ear >= ambient (90)"
+    },
+    "ambient_LEX_dBA": {
+     "ref": 90.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    }
+   }
+  },
+  {
+   "id": "snr-lceq-missing",
+   "intent": "insufficient data: SNR/LCeq method without LCeq must not yield an at-ear estimate that clears the limit",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0,
+      "wear_pct": 100
+     }
+    ],
+    "protector": {
+     "method": "snr_lceq",
+     "snr_dB": 30,
+     "derating_dB": 4
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "at_ear_estimate_available": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "SNR method subtracts SNR from the C-weighted level (ISO 4869-2:2018 def. 3.8); no LC, no estimate"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient data must not produce a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "user-pack-override",
+   "intent": "user override values are used instead of the EU preset",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "user",
+     "lower": 83,
+     "upper": 86,
+     "limit": 88,
+     "source": "Company standard CS-12 rev 3",
+     "jurisdiction": "Company"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 87.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.6037991476072713,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "user-defined criteria pack as entered (spec: preset + user override); compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "user-defined criteria pack as entered (spec: preset + user override); compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "user-defined criteria pack as entered (spec: preset + user override); compared with effective exposure (at ear) per Art. 3(2)"
+    },
+    "pack_shows_source": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 06: threshold pack always shows jurisdiction/source"
+    }
+   }
+  },
+  {
+   "id": "user-pack-inconsistent",
+   "intent": "negative: lower > upper is not a coherent criteria set; comparison must not be presented as clear",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "user",
+     "lower": 90,
+     "upper": 85,
+     "limit": 87,
+     "source": "X",
+     "jurisdiction": "Y"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 82.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "action values ordered lower <= upper <= limit (Directive 2003/10/EC Art. 3 structure); incoherent input must be flagged"
+    }
+   }
+  },
+  {
+   "id": "user-pack-no-source",
+   "intent": "negative: user pack without source/jurisdiction flagged",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "user",
+     "lower": 80,
+     "upper": 85,
+     "limit": 87,
+     "source": "",
+     "jurisdiction": ""
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 78.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "source_missing_flagged": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 06: preset must always show jurisdiction/source; values must be source-labelled"
+    }
+   }
+  },
+  {
+   "id": "uncertainty-near-upper",
+   "intent": "result below upper value but within +U must be flagged for review",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 84.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": 3.0
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 84.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 84.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 8.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.8038036580830656,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    },
+    "review_flag_threshold_within_U": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "85 lies within LEX + U = 87; ISO 9612 treats U as the expanded uncertainty of LEX, so a non-exceedance is not established"
+    }
+   }
+  },
+  {
+   "id": "zero-duration",
+   "intent": "spec test: zero-duration task rejected",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 90.0,
+      "duration_h": 0.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 06 QA: zero-duration rejection"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "negative-duration",
+   "intent": "negative duration rejected",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 90.0,
+      "duration_h": -1.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "a duration cannot be negative"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "sum-over-24h",
+   "intent": "durations sum to 24.5 h (> one day)",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 12.0
+     },
+     {
+      "name": "B",
+      "laeq_dBA": 85.0,
+      "duration_h": 12.5
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "a daily exposure cannot contain more than 24 h"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "missing-level",
+   "intent": "task without LAeq",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": null,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "energy of a task is undefined without its level"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "non-numeric-level",
+   "intent": "task with non-numeric LAeq",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": "loud",
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "level must be a number"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "empty-task-list",
+   "intent": "no tasks: no exposure can be claimed",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "absence of data must not read as 'below action values'"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "t0-zero",
+   "intent": "reference duration 0",
+   "inputs": {
+    "T0_h": 0.0,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": 8.0
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "LEX = 10 lg(E/T0) undefined for T0 = 0"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "wear-over-100",
+   "intent": "wear 120 %",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 95.0,
+      "duration_h": 8.0,
+      "wear_pct": 120
+     }
+    ],
+    "protector": {
+     "method": "user_attenuation",
+     "attenuation_dB": 20,
+     "derating_dB": 0
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "a wear fraction lies in [0, 1]"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "nan-duration",
+   "intent": "duration not a number",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "A",
+      "laeq_dBA": 85.0,
+      "duration_h": "eight"
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "is_insufficient_or_refused": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "duration must be a number"
+    },
+    "result_is_clear": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "insufficient/invalid input must not yield a safe-looking result"
+    }
+   }
+  },
+  {
+   "id": "random-01",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 106.8,
+      "duration_h": 2.063
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 100.91409240981208,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 106.8,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 2.063,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 39.49655521846412,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-02",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 96.9,
+      "duration_h": 1.14
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 79.1,
+      "duration_h": 0.762
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 88.48605980181082,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 94.7248545457163,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 1.902,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 2.2581664904527963,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.9890286769211096,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.010971323078890418,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-03",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 77.7,
+      "duration_h": 0.783
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 77.9,
+      "duration_h": 1.336
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 99.9,
+      "duration_h": 1.645
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 105.6,
+      "duration_h": 1.387
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 99.20142652694616,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 101.11341089805981,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 5.151,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 26.62518481271967,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.0006926743763643832,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.0012375815278373571,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.24150896826140789,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.7565607758343904,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t4",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-04",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 102.3,
+      "duration_h": 0.169
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 107.1,
+      "duration_h": 2.162
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 75.1,
+      "duration_h": 2.257
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 101.6,
+      "duration_h": 2.585
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 109.4,
+      "duration_h": 0.851
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 81.2,
+      "duration_h": 1.465
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 77.4,
+      "duration_h": 1.958
+     },
+     {
+      "name": "t8",
+      "laeq_dBA": 88.4,
+      "duration_h": 0.554
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 104.51001765572539,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 102.74874316817915,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 12.001,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 90.39652669287842,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.012699743574932967,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.490641113217322,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.0003231765247669451,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.16533652095164345,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.32797278487073406,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.0008545665160549948,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.000476124944343906,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t8": {
+     "ref": 0.0016959694002016816,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t2",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-05",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 87.3,
+      "duration_h": 1.369
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 79.63313461142046,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 87.3,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 1.369,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.2940786116923504,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-06",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 86.7,
+      "duration_h": 1.858
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 66.9,
+      "duration_h": 0.208
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 80.36464523144716,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 86.24424192953057,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 2.066,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.34802825298236023,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.998829129605937,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.0011708703940630967,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-07",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 101.7,
+      "duration_h": 2.694
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 101.5,
+      "duration_h": 0.102
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 109.7,
+      "duration_h": 0.328
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 58.2,
+      "duration_h": 1.055
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 75.8,
+      "duration_h": 0.705
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 76.2,
+      "duration_h": 0.397
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 84.9,
+      "duration_h": 0.541
+     },
+     {
+      "name": "t8",
+      "laeq_dBA": 96.1,
+      "duration_h": 2.012
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 100.0166036324091,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 100.10766783021008,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 7.834,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 32.12257424391111,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.49618912450398783,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.017941131175541615,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.3811741964851229,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 8.679647930522097e-06,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.00033376344295544977,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.0002060820455808811,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.00208183792033013,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t8": {
+     "ref": 0.10206518477855064,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-08",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 60.3,
+      "duration_h": 1.215
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 64.9,
+      "duration_h": 1.22
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 56.4,
+      "duration_h": 0.447
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 85.1,
+      "duration_h": 2.003
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 65.9,
+      "duration_h": 2.6
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 109.3,
+      "duration_h": 2.577
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 95.8,
+      "duration_h": 1.148
+     },
+     {
+      "name": "t8",
+      "laeq_dBA": 65.9,
+      "duration_h": 0.789
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 104.47873749383648,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 102.71818683042842,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 11.999,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 89.74778269130677,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 5.802465161024184e-06,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 1.680335854372821e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 8.696485691796566e-07,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.002888798253922001,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 4.508266819089262e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.9775763405729161,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.01945262217684987,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t8": {
+     "ref": 1.3680855847159336e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t6",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-09",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 108.7,
+      "duration_h": 0.366
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 70.4,
+      "duration_h": 2.641
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 58.1,
+      "duration_h": 1.216
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 95.30866928149801,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 98.08335833716838,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 4.223,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 10.864679174526492,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.9989049615096823,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.0010661332449847908,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 2.8905245332855704e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-10",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 70.4,
+      "duration_h": 1.981
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 81.5,
+      "duration_h": 2.031
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 55.1,
+      "duration_h": 1.475
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 83.1,
+      "duration_h": 1.58
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 59.8,
+      "duration_h": 0.296
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 78.97601102994689,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 79.33636289509931,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 7.363,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.2527848728342788,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.03437109637464191,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.45396130250398153,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.0007552677319961488,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.5104650316148828,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.0004473017744976591,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t4",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-11",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 79.2,
+      "duration_h": 0.192
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 68.4,
+      "duration_h": 2.194
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 68.1,
+      "duration_h": 1.09
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 66.78817217886386,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 70.40827437101701,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 3.476,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.015274506801444198,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.4182096250377482,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.3974929390329335,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.18429743592931827,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-12",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 100.1,
+      "duration_h": 0.433
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 87.43397909361421,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 100.1,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 0.433,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 1.772343462630266,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-13",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 83.3,
+      "duration_h": 0.335
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 77.4,
+      "duration_h": 0.359
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 70.57619740736017,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 81.19350257273105,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 0.694,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.0365400989479254,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.7840343300700467,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.21596566992995325,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-14",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 59.3,
+      "duration_h": 1.047
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 50.46856694686899,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 59.3,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 1.047,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.00035645661039915527,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-15",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 89.5,
+      "duration_h": 1.93
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 80.4,
+      "duration_h": 2.35
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 77.1,
+      "duration_h": 2.68
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 98.8,
+      "duration_h": 0.077
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 104.9,
+      "duration_h": 0.335
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 92.12581353907031,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 92.48086014351938,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 7.372,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 5.220731187717785,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.1317910651783677,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.019742244281785257,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.010530850638932816,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.04475271465013388,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.7931831252507804,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t5",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-16",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 68.3,
+      "duration_h": 1.472
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 60.948178230095365,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 68.3,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 1.472,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 0.003980776559107988,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 1.0,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-17",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 94.2,
+      "duration_h": 0.691
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 58.6,
+      "duration_h": 0.646
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 61.9,
+      "duration_h": 2.882
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 90.4,
+      "duration_h": 2.864
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 81.9,
+      "duration_h": 2.086
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 69.8,
+      "duration_h": 1.718
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 68.0,
+      "duration_h": 1.114
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 88.21945576896309,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 86.45818128141686,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 12.001,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 2.1237116781720826,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.34232804783822207,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 8.81448522449615e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.0008407336158828773,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.5914764392983904,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.060852544161404655,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.003090207168229141,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.0013238830656257868,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t4",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-18",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 81.3,
+      "duration_h": 2.883
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 107.3,
+      "duration_h": 0.255
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 92.45611878165352,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 96.52048925906377,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 3.138,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 5.633286722597047,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.02761485563950709,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.972385144360493,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t2",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-19",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 90.7,
+      "duration_h": 1.984
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 107.0,
+      "duration_h": 0.17
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 80.2,
+      "duration_h": 2.184
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 72.8,
+      "duration_h": 0.623
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 82.5,
+      "duration_h": 1.809
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 63.6,
+      "duration_h": 0.389
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 78.2,
+      "duration_h": 0.342
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 91.55219142784544,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 91.8318996431392,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 7.501,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 4.574768489818284,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.20381330807781417,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.7449717283509629,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.01999601732007212,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.001037955935853931,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.028127390139370233,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 7.791847993270245e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.0019756816959939595,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t2",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-20",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 82.7,
+      "duration_h": 2.295
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 91.7,
+      "duration_h": 2.064
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 93.8,
+      "duration_h": 0.115
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 69.9,
+      "duration_h": 1.606
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 99.7,
+      "duration_h": 0.371
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 75.5,
+      "duration_h": 2.643
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 89.61891891744763,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 89.06226928867616,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 9.094,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 2.9311758244921484,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.058317756893777606,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.4166082003911339,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.037645750675504096,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.002141724783264343,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.47248935761903305,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.012797209637287003,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t5",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-21",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 104.2,
+      "duration_h": 2.946
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 60.6,
+      "duration_h": 1.281
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 99.86150998728712,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 102.63208737891637,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 4.227,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 30.995666330410835,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.9999810194783559,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 1.8980521644014125e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t1",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-22",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 73.0,
+      "duration_h": 0.689
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 80.9,
+      "duration_h": 2.274
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 103.2,
+      "duration_h": 2.979
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 98.93023737504576,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 100.22181077028874,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 5.942,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 25.013456885589882,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 0.00021983938346491178,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 0.004473801758187299,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.9953063588583478,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t3",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-23",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 68.4,
+      "duration_h": 0.361
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 56.6,
+      "duration_h": 0.324
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 90.1,
+      "duration_h": 1.804
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 81.7,
+      "duration_h": 2.479
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 59.2,
+      "duration_h": 1.842
+     },
+     {
+      "name": "t6",
+      "laeq_dBA": 103.6,
+      "duration_h": 2.517
+     },
+     {
+      "name": "t7",
+      "laeq_dBA": 80.0,
+      "duration_h": 1.634
+     },
+     {
+      "name": "t8",
+      "laeq_dBA": 79.9,
+      "duration_h": 0.181
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 98.75488804397818,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 97.31615637266339,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 11.142,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 24.02363842264414,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 4.1584205707379685e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 2.465847526170341e-06,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.030736735636754556,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.006105169632944239,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 2.5510022077704744e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t6": {
+     "ref": 0.9600733711645403,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t7": {
+     "ref": 0.002720653668280036,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t8": {
+     "ref": 0.0002945098221696156,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t6",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  },
+  {
+   "id": "random-24",
+   "intent": "randomized energy sum (seed 20260916) vs own Decimal reference",
+   "inputs": {
+    "T0_h": 8,
+    "criteria": {
+     "pack": "EU - Directive 2003/10/EC"
+    },
+    "tasks": [
+     {
+      "name": "t1",
+      "laeq_dBA": 56.3,
+      "duration_h": 0.615
+     },
+     {
+      "name": "t2",
+      "laeq_dBA": 65.0,
+      "duration_h": 0.191
+     },
+     {
+      "name": "t3",
+      "laeq_dBA": 63.2,
+      "duration_h": 0.911
+     },
+     {
+      "name": "t4",
+      "laeq_dBA": 60.1,
+      "duration_h": 2.973
+     },
+     {
+      "name": "t5",
+      "laeq_dBA": 99.1,
+      "duration_h": 1.469
+     }
+    ],
+    "protector": {
+     "method": "none"
+    },
+    "uncertainty_U_dB": null
+   },
+   "checks": {
+    "LEX_T0_dBA": {
+     "ref": 91.74143146989049,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "L108 Sch.1 Pt1 p.30: LEP,d = 10 lg[(1/T0) sum Ti 10^(0.1 LAeq,i)]; own Decimal evaluation"
+    },
+    "LAeq_Te_dBA": {
+     "ref": 92.87722929890738,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "dB"
+     },
+     "basis": "physics",
+     "derivation": "10 lg[(1/Te) sum Ti 10^(0.1 Li)], Te = sum Ti (ISO 9612:2009 eq.(2) rearranged)"
+    },
+    "Te_h": {
+     "ref": 6.159,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "sum of task durations"
+    },
+    "EA_Pa2h": {
+     "ref": 4.7785168890916125,
+     "tol": {
+      "rel": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "EA = p0^2 sum Ti 10^(0.1 Li), p0 = 20 uPa (definition of sound pressure level)"
+    },
+    "energy_share_t1": {
+     "ref": 2.1960487754002775e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t2": {
+     "ref": 5.0559204632798006e-05,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t3": {
+     "ref": 0.0001593254827290024,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t4": {
+     "ref": 0.0002546606101148684,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "energy_share_t5": {
+     "ref": 0.9995134942147693,
+     "tol": {
+      "abs": 1e-06
+     },
+     "basis": "physics",
+     "derivation": "Ti 10^(0.1 Li) / sum; energy fraction, not dB fraction"
+    },
+    "dominant_task": {
+     "ref": "t5",
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "task with largest energy share (no ties in corpus)"
+    },
+    "lower_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "upper_action_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with exposure WITHOUT protector"
+    },
+    "limit_exceeded": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Directive 2003/10/EC Art. 3(1)(a)-(c) values 87/85/80 dB(A); Art. 3(2) limit with protector, action values without; 'exceeded' read literally (Art. 5(4), 6(1), 7(1)) as strictly above; compared with effective exposure (at ear) per Art. 3(2)"
+    }
+   }
+  }
+ ],
+ "not_benchmarked": [
+  "Threshold behaviour inside the 0.1 dB rounding band (e.g. 80.04 dB): the Directive does not prescribe a rounding convention, so no independent expectation exists.",
+  "Peak sound pressure (Art. 3 ppeak 200/140/112 Pa): the tool does not assess it (spec: requires separate inputs).",
+  "Weekly exposure, octave-band method, CSV import (post-MVP).",
+  "EN 458 over-protection (L108 para 83: aim for 70-80 dB(A) at ear) - not a claimed tool feature.",
+  "Upper bounds on level (150 dB) and T0 (24 h): tool heuristics without a published basis.",
+  "Exports (PDF/CSV/JSON/Python), record import, locale formatting, timeline/chart rendering: not numerical claims answerable by an external reference.",
+  "The spec's 100-random-case QA target: the corpus carries 24 random shifts to stay within the 25-80 case budget of the benchmark brief."
+ ],
+ "coverage": "Covers: energy (not dB) summation and LEX over T0; acceptance criteria 'single task reproduces its level' and 'order does not change the total'; spec QA tests single task, equal levels, short high-noise burst, zero-duration rejection; per-task energy contribution and dominant task; total duration; EU 80/85/87 preset with source/jurisdiction and both sides plus equality of every threshold; Art. 3(2) split (action vs ambient, limit vs at-ear); protected estimate via user attenuation, SNR(LC), simplified SNR(LA) with limitation flag, HML both branches, derating, part-time wear; ambient invariance under a protector; user override pack; uncertainty review; invalid/insufficient inputs; 24 randomized shifts."
+}

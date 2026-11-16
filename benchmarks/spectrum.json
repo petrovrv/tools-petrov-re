@@ -1,0 +1,3011 @@
+{
+ "tool": "spectrum",
+ "file": "spectrum.html",
+ "run_at": "2026-10-17T14:25:09Z",
+ "reference": "Independent python implementation of the three analytic spectral components the tool claims to draw: the U-235 thermal-fission Watt spectrum chi(E) = C exp(-E/a) sinh(sqrt(bE)) with the evaluated parameters a = 0.988 MeV, b = 2.249 1/MeV; the Maxwellian flux phi(E) = C E exp(-E/kT); and the 1/E slowing-down flux (flat per unit lethargy) inside the sigmoid window the tool documents. The Watt normalisation constant, its mean energy and the positions of the maxima of chi(E) and of E chi(E) are each computed twice by structurally different routes — the closed forms C = 2 exp(-ab/4)/sqrt(pi a^3 b), <E> = 3a/2 + a^2 b/4, and Brent root-finding on dchi/dE — versus adaptive quadrature (scipy.integrate.quad) and scipy.optimize.minimize_scalar; the two routes agree to 3e-14 (recorded as crosscheck). The thermal fraction below the cadmium cutoff is obtained by adaptive quadrature of the same stated composite, which tests the tool trapezoid and its normalisation, not a physical prediction: the weighting of the three components is an illustrative recipe, not a slowing-down calculation, and the benchmark says so.",
+ "reference_citations": [
+  "Watt parameters for thermal-neutron-induced fission of U-235, a = 0.988 MeV and b = 2.249 1/MeV: ENDF/B evaluated Watt fission-spectrum parameters, as tabulated in the MCNP manual (LA-UR-03-1987, Appendix \"Fission spectra\") and in J.R. Lamarsh & A.J. Baratta, \"Introduction to Nuclear Engineering\", 3rd ed., Sec. 3.7.",
+  "B.E. Watt, \"Energy Spectrum of Neutrons from Thermal Fission of U-235\", Phys. Rev. 87, 1037 (1952) — the chi(E) = C exp(-E/a) sinh(sqrt(bE)) form and its mean energy 3a/2 + a^2 b/4.",
+  "J.J. Duderstadt and L.J. Hamilton, \"Nuclear Reactor Analysis\", Wiley (1976), Sec. 8-II — the three-region thermal-reactor spectrum, the 1/E slowing-down flux, the Maxwellian flux phi(E) ~ E exp(-E/kT) with its peak at kT and mean energy 2kT, and flux per unit lethargy.",
+  "CODATA 2018: k = 8.617333262e-5 eV/K."
+ ],
+ "tolerance": "Component shapes are compared as ratios to a reference energy, which removes every normalisation constant: 1e-9 relative (both sides evaluate the same closed form in double precision). Absolute per-lethargy values: 3e-4, because the tool normalises each component by its maximum on the 0.01-decade grid, which is up to 1.1e-4 below the true continuum maximum (computed in the reference). Peak positions read off the grid by parabolic interpolation: 1e-3. Mean energies: 1e-4 (Maxwellian, integrated on the plot grid) and 1e-5 (Watt, dedicated 0-20 MeV grid) against the closed forms. Thermal fraction: 2e-4 against adaptive quadrature of the same definition (measured deviation 5e-5, set by the trapezoid on 0.01-decade log spacing). Steepest logarithmic slope: 3e-3, the second-order error of a forward difference on a 0.01-decade grid at an interior extremum of the slope. Printed tiles: half of the last printed digit. Amplitudes and the ratio control: 1e-12, they are exact by construction.",
+ "total": 26,
+ "passed": 26,
+ "failed": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "shape_T300_r1",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 300,
+    "ratio": 1
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.325037489998236,
+     "ref": 0.325037489998236,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 7.59740789499583e-14,
+     "ref": 7.59740789499583e-14,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.06048205676986851,
+     "ref": 0.06048205676986851,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.49260533028346953,
+     "ref": 0.4926053302834695,
+     "rel": 1.1268889680774255e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.939893151405415,
+     "ref": 0.939893151405415,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 1.000353595416636,
+     "ref": 1.000353595416636,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.004209620055125,
+     "ref": 1.004209620055125,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700136578961501,
+     "ref": 0.6700136578961501,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.1675034286772475,
+     "ref": 0.1675034286772475,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.01970628583803546,
+     "ref": 0.019706285838035457,
+     "rel": 1.7605788226501678e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T300_r1",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 300,
+    "ratio": 1
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.18774855315124206,
+     "ref": 0.1877362242056676,
+     "rel": 0.0000656716391661922,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 0.5776212250231841,
+     "ref": 0.5775832941815002,
+     "rel": 0.00006567163916619301,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 4.3884240553083014e-14,
+     "ref": 4.388135879232229e-14,
+     "rel": 0.00006567163916605597,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.025295718048917264,
+     "ref": 0.025295716706848437,
+     "rel": 5.305518096802739e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.20602483132571386,
+     "ref": 0.20602482039502973,
+     "rel": 5.3055180995392864e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.3930962904340955,
+     "ref": 0.3930962695783018,
+     "rel": 5.305518092430215e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.41838296926910035,
+     "ref": 0.4183829470717174,
+     "rel": 5.3055180874612623e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41999569405483356,
+     "ref": 0.41999567177188724,
+     "rel": 5.3055180848513096e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.418235083260583,
+     "ref": 0.4182350610710462,
+     "rel": 5.3055180888638126e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.2802232179959241,
+     "ref": 0.28022320312863136,
+     "rel": 5.3055180885338324e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.07005581043926173,
+     "ref": 0.07005580672243823,
+     "rel": 5.3055180942813486e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.008241860098227608,
+     "ref": 0.008241859660954252,
+     "rel": 5.305518103935192e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.00006567163916619301,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T300_r1",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 300,
+    "ratio": 1
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.025851999786,
+     "ref": 0.025851999786,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.025851999786,
+     "ref": 0.025851999786,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.051703999572,
+     "ref": 0.051703999572,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.05170106331272653,
+     "ref": 0.051703999572,
+     "rel": 0.000056789789915263246,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.9998864204201694,
+     "ref": 2,
+     "rel": 0.00005678978991530137,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.05170438486458135,
+     "ref": 0.051703999572,
+     "rel": 0.0000074518912373516254,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0491649349004812,
+     "ref": 1.0491649905639897,
+     "rel": 5.3055057088087035e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.26405966680007686,
+     "ref": 0.264055301564265,
+     "rel": 0.000016531521185208253,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.134936816479063,
+     "ref": 5.136284587786353,
+     "rel": 0.00026240199199532475,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.00026240199199532475,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T300_r1",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 300,
+    "ratio": 1
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 300,
+     "ref": 300,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.0259,
+     "ref": 0.025851999786,
+     "rel": 0.0018567311773687984,
+     "ok": true,
+     "tol": 0.0019340863536242642
+    },
+    "most_probable_E_eV": {
+     "got": 0.0259,
+     "ref": 0.025851999786,
+     "rel": 0.0018567311773687984,
+     "ok": true,
+     "tol": 0.0019340863536242642
+    },
+    "mean_E_eV": {
+     "got": 0.0517,
+     "ref": 0.051703999572,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.0009670431768121321
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.264,
+     "ref": 0.264055301564265,
+     "rel": 0.0002094317513693871,
+     "ok": true,
+     "tol": 0.0018935427428951337
+    }
+   },
+   "worst_rel": 0.0018567311773687984,
+   "pass": true
+  },
+  {
+   "id": "shape_T450_r2.5",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 450,
+    "ratio": 2.5
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.10184873448803715,
+     "ref": 0.10184873448803716,
+     "rel": 1.362588143836436e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 8.326138468114392e-9,
+     "ref": 8.326138468114393e-9,
+     "rel": 1.9869489697313618e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.038414557741215244,
+     "ref": 0.038414557741215244,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.37556478727787396,
+     "ref": 0.3755647872778739,
+     "rel": 1.4780712439418897e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.9040953282796492,
+     "ref": 0.9040953282796492,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 0.9975648761626837,
+     "ref": 0.9975648761626836,
+     "rel": 1.112933154679456e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.0040335836501464,
+     "ref": 1.0040335836501464,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700220064489751,
+     "ref": 0.6700220064489751,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.16750552449762238,
+     "ref": 0.16750552449762235,
+     "rel": 1.6569946393632462e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.019706532473174398,
+     "ref": 0.019706532473174394,
+     "rel": 1.7605567883017544e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T450_r2.5",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 450,
+    "ratio": 2.5
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.23730311857380468,
+     "ref": 0.23730293241435269,
+     "rel": 7.844802004699485e-7,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 2.329956476795277,
+     "ref": 2.3299546489919867,
+     "rel": 7.844802006297595e-7,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 1.9399540250477434e-8,
+     "ref": 1.939952503193415e-8,
+     "rel": 7.844802003225404e-7,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.016069250779774544,
+     "ref": 0.01606925076393472,
+     "rel": 9.857225294373847e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.1571030647151196,
+     "ref": 0.15710306456025955,
+     "rel": 9.857226012133499e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.37819346136480286,
+     "ref": 0.37819346099200907,
+     "rel": 9.857224787950018e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.4172928469498967,
+     "ref": 0.4172928465385617,
+     "rel": 9.85722676560432e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41999878159939336,
+     "ref": 0.4199987811853911,
+     "rel": 9.85722567424021e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.41831148722385875,
+     "ref": 0.4183114868115197,
+     "rel": 9.857225172915743e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.28027790199038466,
+     "ref": 0.28027790171410844,
+     "rel": 9.857224648492566e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.07006948507081293,
+     "ref": 0.07006948500174384,
+     "rel": 9.857227262903222e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.00824346890687885,
+     "ref": 0.008243468898753076,
+     "rel": 9.857226925627052e-10,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 2.5,
+     "ref": 2.5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.0000013167315860638424,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T450_r2.5",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 450,
+    "ratio": 2.5
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.038777999679,
+     "ref": 0.038777999679,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.038777999679,
+     "ref": 0.038777999679,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.077555999358,
+     "ref": 0.077555999358,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.07754919986820609,
+     "ref": 0.077555999358,
+     "rel": 0.00008767200281346333,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.999824655994373,
+     "ref": 2,
+     "rel": 0.00008767200281345477,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.07755625655009357,
+     "ref": 0.077555999358,
+     "rel": 0.0000033162114561837945,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0489610524169903,
+     "ref": 1.048961053450906,
+     "rel": 9.856568233724418e-10,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 2.5,
+     "ref": 2.5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.417554193378341,
+     "ref": 0.41755723578939824,
+     "rel": 0.000007286213233739618,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.134720398727682,
+     "ref": 5.13606365379231,
+     "rel": 0.0002615339596962712,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.0002615339596962712,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T450_r2.5",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 450,
+    "ratio": 2.5
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 450,
+     "ref": 450,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.0388,
+     "ref": 0.038777999679,
+     "rel": 0.0005673402749526749,
+     "ok": true,
+     "tol": 0.0012893909024161761
+    },
+    "most_probable_E_eV": {
+     "got": 0.0388,
+     "ref": 0.038777999679,
+     "rel": 0.0005673402749526749,
+     "ok": true,
+     "tol": 0.0012893909024161761
+    },
+    "mean_E_eV": {
+     "got": 0.0776,
+     "ref": 0.077555999358,
+     "rel": 0.0005673402749526749,
+     "ok": true,
+     "tol": 0.0006446954512080881
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.418,
+     "ref": 0.41755723578939824,
+     "rel": 0.0010603677116615888,
+     "ok": true,
+     "tol": 0.001197440631234045
+    }
+   },
+   "worst_rel": 0.0010603677116615888,
+   "pass": true
+  },
+  {
+   "id": "shape_T600_r1",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 1
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.057012059250498584,
+     "ref": 0.057012059250498584,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 0.000002756339582670435,
+     "ref": 0.000002756339582670435,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.027689007771644725,
+     "ref": 0.027689007771644725,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.2999131485348476,
+     "ref": 0.29991314853484763,
+     "rel": 1.8509075544851562e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.8689584824951944,
+     "ref": 0.8689584824951944,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 0.9946211692421235,
+     "ref": 0.9946211692421236,
+     "rel": 1.1162270208577188e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.0038467603033883,
+     "ref": 1.0038467603033883,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700308700044812,
+     "ref": 0.6700308700044814,
+     "rel": 1.6569729460640091e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.16750774960448808,
+     "ref": 0.16750774960448808,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.01970679432268757,
+     "ref": 0.019706794322687567,
+     "rel": 1.760533395306913e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T600_r1",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 1
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.056955016263468924,
+     "ref": 0.05694877554427265,
+     "rel": 0.00010958478275665379,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 0.9989994575221529,
+     "ref": 0.9988899943791211,
+     "rel": 0.00010958478275666316,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 0.000002753581747834602,
+     "ref": 0.0000027532800302406198,
+     "rel": 0.00010958478275670113,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.011584409285522417,
+     "ref": 0.011584409134801767,
+     "rel": 1.3010646270246877e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.12547638728662822,
+     "ref": 0.12547638565409935,
+     "rel": 1.3010646215095872e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.36355115345301,
+     "ref": 0.3635511487229746,
+     "rel": 1.3010646177304503e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.4161253737790116,
+     "ref": 0.4161253683649517,
+     "rel": 1.301064615184802e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41998513732257897,
+     "ref": 0.419985131858301,
+     "rel": 1.3010646234939688e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.4183757461105405,
+     "ref": 0.41837574066720173,
+     "rel": 1.3010646293782804e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.2803246651552194,
+     "ref": 0.28032466150801444,
+     "rel": 1.3010646165951689e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.0700811797200753,
+     "ref": 0.07008117880827387,
+     "rel": 1.301064624673995e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.008244844778201376,
+     "ref": 0.008244844670930618,
+     "rel": 1.3010646352933378e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.00010958478275670113,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T600_r1",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 1
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.051703999572,
+     "ref": 0.051703999572,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.051703999572,
+     "ref": 0.051703999572,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.103407999144,
+     "ref": 0.103407999144,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.10340446913701684,
+     "ref": 0.103407999144,
+     "rel": 0.00003413669167169506,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.9999317266166565,
+     "ref": 2,
+     "rel": 0.00003413669167173783,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.10340819216219899,
+     "ref": 0.103407999144,
+     "rel": 0.0000018665693232373476,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0487869334138336,
+     "ref": 1.048786947059189,
+     "rel": 1.3010607683899537e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.2466388365463487,
+     "ref": 0.2466271718614857,
+     "rel": 0.00004729683584720949,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.1345353337063075,
+     "ref": 5.135874791148671,
+     "rel": 0.0002608041466805632,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.0002608041466805632,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T600_r1",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 1
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 600,
+     "ref": 600,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.0517,
+     "ref": 0.051703999572,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.0009670431768121321
+    },
+    "most_probable_E_eV": {
+     "got": 0.0517,
+     "ref": 0.051703999572,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.0009670431768121321
+    },
+    "mean_E_eV": {
+     "got": 0.1034,
+     "ref": 0.103407999144,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.00048352158840606605
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.247,
+     "ref": 0.2466271718614857,
+     "rel": 0.001511707472052982,
+     "ok": true,
+     "tol": 0.002027351634558812
+    }
+   },
+   "worst_rel": 0.001511707472052982,
+   "pass": true
+  },
+  {
+   "id": "shape_T600_r3",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 3
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.057012059250498584,
+     "ref": 0.05701205925049858,
+     "rel": 1.2170923125963998e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 0.0000027563395826704355,
+     "ref": 0.000002756339582670435,
+     "rel": 1.5365177654084012e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.027689007771644725,
+     "ref": 0.027689007771644725,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.2999131485348476,
+     "ref": 0.29991314853484763,
+     "rel": 1.8509075544851562e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.8689584824951944,
+     "ref": 0.8689584824951944,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 0.9946211692421235,
+     "ref": 0.9946211692421236,
+     "rel": 1.1162270208577188e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.0038467603033883,
+     "ref": 1.0038467603033883,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700308700044812,
+     "ref": 0.6700308700044814,
+     "rel": 1.6569729460640091e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.16750774960448808,
+     "ref": 0.16750774960448808,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.01970679432268757,
+     "ref": 0.019706794322687567,
+     "rel": 1.760533395306913e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T600_r3",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 3
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.17086504879040676,
+     "ref": 0.17084632663281793,
+     "rel": 0.00010958478275665379,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 2.9969983725664586,
+     "ref": 2.9966699831373633,
+     "rel": 0.00010958478275658905,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 0.000008260745243503807,
+     "ref": 0.00000825984009072186,
+     "rel": 0.0001095847827567524,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.011584409285522417,
+     "ref": 0.011584409134801767,
+     "rel": 1.3010646270246877e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.12547638728662822,
+     "ref": 0.12547638565409935,
+     "rel": 1.3010646215095872e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.36355115345301,
+     "ref": 0.3635511487229746,
+     "rel": 1.3010646177304503e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.4161253737790116,
+     "ref": 0.4161253683649517,
+     "rel": 1.301064615184802e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41998513732257897,
+     "ref": 0.419985131858301,
+     "rel": 1.3010646234939688e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.4183757461105405,
+     "ref": 0.41837574066720173,
+     "rel": 1.3010646293782804e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.2803246651552194,
+     "ref": 0.28032466150801444,
+     "rel": 1.3010646165951689e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.0700811797200753,
+     "ref": 0.07008117880827387,
+     "rel": 1.301064624673995e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.008244844778201376,
+     "ref": 0.008244844670930618,
+     "rel": 1.3010646352933378e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.0001095847827567524,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T600_r3",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 3
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.051703999572,
+     "ref": 0.051703999572,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.051703999572,
+     "ref": 0.051703999572,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.103407999144,
+     "ref": 0.103407999144,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.1034044691370169,
+     "ref": 0.103407999144,
+     "rel": 0.00003413669167115824,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.9999317266166576,
+     "ref": 2,
+     "rel": 0.00003413669167118272,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.10340819216219888,
+     "ref": 0.103407999144,
+     "rel": 0.000001866569322163714,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0487869334138336,
+     "ref": 1.048786947059189,
+     "rel": 1.3010607683899537e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.4540573722477524,
+     "ref": 0.4540355885150453,
+     "rel": 0.000047978029163660595,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.1345353337063075,
+     "ref": 5.135874791148671,
+     "rel": 0.0002608041466805632,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.0002608041466805632,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T600_r3",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": 3
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 600,
+     "ref": 600,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.0517,
+     "ref": 0.051703999572,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.0009670431768121321
+    },
+    "most_probable_E_eV": {
+     "got": 0.0517,
+     "ref": 0.051703999572,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.0009670431768121321
+    },
+    "mean_E_eV": {
+     "got": 0.1034,
+     "ref": 0.103407999144,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.00048352158840606605
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.454,
+     "ref": 0.4540355885150453,
+     "rel": 0.00007838265533689595,
+     "ok": true,
+     "tol": 0.0011012352613928007
+    }
+   },
+   "worst_rel": 0.00008028020116340825,
+   "pass": true
+  },
+  {
+   "id": "shape_T900_r0.2",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 900,
+    "ratio": 0.2
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.031913748524427084,
+     "ref": 0.03191374852442708,
+     "rel": 2.174264768238095e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 0.0009124767650803164,
+     "ref": 0.0009124767650803164,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.01736666582527599,
+     "ref": 0.01736666582527599,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.20990318823720314,
+     "ref": 0.20990318823720314,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.8025591576656346,
+     "ref": 0.8025591576656347,
+     "rel": 1.3833535061196099e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 0.9884120569358721,
+     "ref": 0.9884120569358722,
+     "rel": 1.1232390548400478e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.0034492792841672,
+     "ref": 1.0034492792841672,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700497396614725,
+     "ref": 0.6700497396614726,
+     "rel": 1.6569262830936572e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.16751248664376356,
+     "ref": 0.16751248664376356,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.019707351775213353,
+     "ref": 0.019707351775213353,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T900_r0.2",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 900,
+    "ratio": 0.2
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.0053992270957926485,
+     "ref": 0.005399215177959855,
+     "rel": 0.000002207326880063295,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 0.16918185250660947,
+     "ref": 0.16918147906778314,
+     "rel": 0.000002207326879940082,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 0.00015437450948552623,
+     "ref": 0.00015437416873127403,
+     "rel": 0.000002207326879930699,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.007267649581005677,
+     "ref": 0.007267649227039893,
+     "rel": 4.870430213528307e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.08784085750205434,
+     "ref": 0.08784085322382688,
+     "rel": 4.870430210823681e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.33585714060621796,
+     "ref": 0.33585712424853115,
+     "rel": 4.8704302023610925e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.4136333677242731,
+     "ref": 0.4136333475785496,
+     "rel": 4.8704302135575955e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41992618545904054,
+     "ref": 0.4199261650068297,
+     "rel": 4.870430213245309e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.4184827216763803,
+     "ref": 0.41848270129447235,
+     "rel": 4.870430217577852e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.2804042387120831,
+     "ref": 0.280404225055191,
+     "rel": 4.870430200895606e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.07010108132546047,
+     "ref": 0.07010107791123639,
+     "rel": 4.8704302212466086e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.008247186207925129,
+     "ref": 0.0082471858062517,
+     "rel": 4.870430208915559e-8,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 0.2,
+     "ref": 0.2,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.000002207326880063295,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T900_r0.2",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 900,
+    "ratio": 0.2
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.077555999358,
+     "ref": 0.077555999358,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.077555999358,
+     "ref": 0.077555999358,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.155111998716,
+     "ref": 0.155111998716,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.15509839767653139,
+     "ref": 0.155111998716,
+     "rel": 0.0000876852827712407,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.9998246294344575,
+     "ref": 2,
+     "rel": 0.00008768528277125487,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.1551121274776585,
+     "ref": 0.155111998716,
+     "rel": 8.301205552636112e-7,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0484911510701755,
+     "ref": 1.0484912021361226,
+     "rel": 4.8704220810333334e-8,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 0.2,
+     "ref": 0.2,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.09817517126328783,
+     "ref": 0.09817958289620164,
+     "rel": 0.00004493432120686966,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.134220431727103,
+     "ref": 5.135553481805972,
+     "rel": 0.00025957281597622015,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.00025957281597622015,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T900_r0.2",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 900,
+    "ratio": 0.2
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 900,
+     "ref": 900,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.0776,
+     "ref": 0.077555999358,
+     "rel": 0.0005673402749526749,
+     "ok": true,
+     "tol": 0.0006446954512080881
+    },
+    "most_probable_E_eV": {
+     "got": 0.0776,
+     "ref": 0.077555999358,
+     "rel": 0.0005673402749526749,
+     "ok": true,
+     "tol": 0.0006446954512080881
+    },
+    "mean_E_eV": {
+     "got": 0.1551,
+     "ref": 0.155111998716,
+     "rel": 0.00007735517625552105,
+     "ok": true,
+     "tol": 0.00032234772560404404
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.098,
+     "ref": 0.09817958289620164,
+     "rel": 0.0018291266972635094,
+     "ok": true,
+     "tol": 0.005092708537258859
+    }
+   },
+   "worst_rel": 0.0018291266972635094,
+   "pass": true
+  },
+  {
+   "id": "shape_T1200_r5",
+   "note": "shape of each per-lethargy component vs the analytic Maxwellian / windowed 1-over-E / Watt forms, as ratios to a reference energy (normalisation-free)",
+   "inputs": {
+    "T_mod": 1200,
+    "ratio": 5
+   },
+   "cmp": {
+    "thermal(1e-2)/thermal(1e-1)": {
+     "got": 0.023877198171162916,
+     "ref": 0.023877198171162912,
+     "rel": 1.4530377170231606e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "thermal(1e+0)/thermal(1e-1)": {
+     "got": 0.01660222750919416,
+     "ref": 0.016602227509194163,
+     "rel": 2.0897478666837122e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-2)/epithermal(1e+3)": {
+     "got": 0.01244235930442535,
+     "ref": 0.01244235930442535,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e-1)/epithermal(1e+3)": {
+     "got": 0.1591845601975414,
+     "ref": 0.15918456019754143,
+     "rel": 1.7436097810733275e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+0)/epithermal(1e+3)": {
+     "got": 0.7423394467289132,
+     "ref": 0.7423394467289133,
+     "rel": 1.4955732576482448e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+1)/epithermal(1e+3)": {
+     "got": 0.9819045806508763,
+     "ref": 0.9819045806508763,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+2)/epithermal(1e+3)": {
+     "got": 1.0030276474745097,
+     "ref": 1.00302764747451,
+     "rel": 2.2137436139882092e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+5)/epithermal(1e+3)": {
+     "got": 0.6700697733405429,
+     "ref": 0.6700697733405429,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+6)/epithermal(1e+3)": {
+     "got": 0.16751751590039254,
+     "ref": 0.16751751590039254,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "epithermal(1e+7)/epithermal(1e+3)": {
+     "got": 0.01970794361574763,
+     "ref": 0.019707943615747632,
+     "rel": 1.7604307276287073e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-2)/fast(1e+6)": {
+     "got": 1.938613947334707e-12,
+     "ref": 1.938613947334707e-12,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e-1)/fast(1e+6)": {
+     "got": 6.130435225717148e-11,
+     "ref": 6.130435225717148e-11,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+0)/fast(1e+6)": {
+     "got": 1.9386127241873275e-9,
+     "ref": 1.9386127241873275e-9,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+1)/fast(1e+6)": {
+     "got": 6.130396546497365e-8,
+     "ref": 6.130396546497366e-8,
+     "rel": 2.1588961987149534e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+2)/fast(1e+6)": {
+     "got": 0.0000019384904128073813,
+     "ref": 0.0000019384904128073813,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+3)/fast(1e+6)": {
+     "got": 0.00006126529686280988,
+     "ref": 0.00006126529686280988,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+5)/fast(1e+6)": {
+     "got": 0.057503315548962375,
+     "ref": 0.057503315548962396,
+     "rel": 3.6200837313453495e-16,
+     "ok": true,
+     "tol": 1e-9
+    },
+    "fast(1e+7)/fast(1e+6)": {
+     "got": 0.029807272360264075,
+     "ref": 0.02980727236026407,
+     "rel": 1.1639598920761085e-16,
+     "ok": true,
+     "tol": 1e-9
+    }
+   },
+   "worst_rel": 3.6200837313453495e-16,
+   "pass": true
+  },
+  {
+   "id": "normalisation_T1200_r5",
+   "note": "absolute per-lethargy values vs the analytic components normalised to their true maxima, and the amplitude of each weighted component",
+   "inputs": {
+    "T_mod": 1200,
+    "ratio": 5
+   },
+   "cmp": {
+    "thermal@1e-2": {
+     "got": 0.0784219447655323,
+     "ref": 0.07841380986784206,
+     "rel": 0.00010374317615666234,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e-1": {
+     "got": 3.2843863925476997,
+     "ref": 3.2840456952166344,
+     "rel": 0.00010374317615664857,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "thermal@1e+0": {
+     "got": 0.05452813011717839,
+     "ref": 0.054522473782576276,
+     "rel": 0.0001037431761565477,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-2": {
+     "got": 0.005208019449377704,
+     "ref": 0.0052080194305746605,
+     "rel": 3.6104019146622897e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e-1": {
+     "got": 0.06663015150627982,
+     "ref": 0.06663015126571821,
+     "rel": 3.61040171344589e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+0": {
+     "got": 0.31072228200558466,
+     "ref": 0.31072228088375237,
+     "rel": 3.610401837087618e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+1": {
+     "got": 0.410997466665668,
+     "ref": 0.41099746518180197,
+     "rel": 3.6104019020979075e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+2": {
+     "got": 0.41983898459296826,
+     "ref": 0.4198389830771808,
+     "rel": 3.6104018471551063e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+3": {
+     "got": 0.41857169705148906,
+     "ref": 0.418571695540277,
+     "rel": 3.610401898869497e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+5": {
+     "got": 0.2804722421700576,
+     "ref": 0.2804722411574401,
+     "rel": 3.610401819733232e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+6": {
+     "got": 0.0701180909162771,
+     "ref": 0.07011809066312262,
+     "rel": 3.6104018391407022e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "epithermal@1e+7": {
+     "got": 0.008249187404638545,
+     "ref": 0.008249187374855664,
+     "rel": 3.6104018091881486e-9,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-2": {
+     "got": 1.379527335281235e-12,
+     "ref": 1.3795255188164108e-12,
+     "rel": 0.0000013167315858667935,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e-1": {
+     "got": 4.362448223729637e-11,
+     "ref": 4.362442479563833e-11,
+     "rel": 0.0000013167315857331023,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+0": {
+     "got": 1.3795264648834709e-9,
+     "ref": 1.3795246484197929e-9,
+     "rel": 0.000001316731585840288,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+1": {
+     "got": 4.362420699404296e-8,
+     "ref": 4.362414955274734e-8,
+     "rel": 0.0000013167315857459395,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+2": {
+     "got": 0.0000013794394274966392,
+     "ref": 0.0000013794376111475659,
+     "rel": 0.0000013167315858532948,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+3": {
+     "got": 0.00004359669022425216,
+     "ref": 0.00004359663281918869,
+     "rel": 0.0000013167315858671952,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+5": {
+     "got": 0.04091964559429633,
+     "ref": 0.04091959171417746,
+     "rel": 0.0000013167315854426003,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+6": {
+     "got": 0.7116049779678263,
+     "ref": 0.7116040409763089,
+     "rel": 0.0000013167315858544086,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "fast@1e+7": {
+     "got": 0.021211003391206715,
+     "ref": 0.021210975462045353,
+     "rel": 0.0000013167315860638424,
+     "ok": true,
+     "tol": 0.0003
+    },
+    "amplitude_thermal": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_epithermal": {
+     "got": 0.42,
+     "ref": 0.42,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "amplitude_fast": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 0.00010374317615666234,
+   "pass": true
+  },
+  {
+   "id": "diagnostics_T1200_r5",
+   "note": "peak positions, mean energies, plateau flatness, the ratio control and the thermal fraction vs closed forms and adaptive quadrature",
+   "inputs": {
+    "T_mod": 1200,
+    "ratio": 5
+   },
+   "cmp": {
+    "kT": {
+     "got": 0.103407999144,
+     "ref": 0.103407999144,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_most_probable_is_kT": {
+     "got": 0.103407999144,
+     "ref": 0.103407999144,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "E_mean_2kT": {
+     "got": 0.206815998288,
+     "ref": 0.206815998288,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "peak_of_plotted_thermal_curve_vs_2kT": {
+     "got": 0.20680859193902007,
+     "ref": 0.206815998288,
+     "rel": 0.000035811296230719926,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_plotted_thermal_curve_vs_kT_is_NOT": {
+     "got": 1.9999283774075385,
+     "ref": 2,
+     "rel": 0.00003581129623075885,
+     "ok": true,
+     "tol": 0.001
+    },
+    "mean_E_of_maxwellian_flux": {
+     "got": 0.206816094890346,
+     "ref": 0.206815998288,
+     "rel": 4.6709319773758013e-7,
+     "ok": true,
+     "tol": 0.0001
+    },
+    "mean_E_watt_vs_3a2_plus_a2b4": {
+     "got": 2.030833523260916,
+     "ref": 2.030836964,
+     "rel": 0.0000016942468279373753,
+     "ok": true,
+     "tol": 0.00001
+    },
+    "peak_of_watt_chi": {
+     "got": 0.7424807200454268,
+     "ref": 0.7425503805645131,
+     "rel": 0.00009381251550008297,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_of_watt_per_lethargy": {
+     "got": 2.08643304732212,
+     "ref": 2.0866340292088035,
+     "rel": 0.00009631870460758295,
+     "ok": true,
+     "tol": 0.001
+    },
+    "plateau_flatness": {
+     "got": 1.0482388906611388,
+     "ref": 1.0482388944456056,
+     "rel": 3.610309405651471e-9,
+     "ok": true,
+     "tol": 0.001
+    },
+    "peak_ratio_thermal_fast_equals_ratio_control": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_fraction_below_0.625eV": {
+     "got": 0.5603331687642079,
+     "ref": 0.5603253259485712,
+     "rel": 0.000013996896576873295,
+     "ok": true,
+     "tol": 0.0002
+    },
+    "max_dln_u_dlnE": {
+     "got": 5.133951325964398,
+     "ref": 5.135278856614935,
+     "rel": 0.0002585118914869953,
+     "ok": true,
+     "tol": 0.003
+    }
+   },
+   "worst_rel": 0.0002585118914869953,
+   "pass": true,
+   "crosscheck": {
+    "watt_mean_closed_form_vs_quadrature": 3.258227688417204e-14,
+    "watt_norm_closed_form_vs_quadrature": 2.992647418270752e-14,
+    "watt_peak_brentq_vs_minimize": 5.8955535058936936e-9
+   }
+  },
+  {
+   "id": "readout_T1200_r5",
+   "note": "printed readout tiles, tolerance = half of the last printed digit",
+   "inputs": {
+    "T_mod": 1200,
+    "ratio": 5
+   },
+   "cmp": {
+    "T_mod_K": {
+     "got": 1200,
+     "ref": 1200,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "kT_eV": {
+     "got": 0.1034,
+     "ref": 0.103407999144,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.00048352158840606605
+    },
+    "most_probable_E_eV": {
+     "got": 0.1034,
+     "ref": 0.103407999144,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.00048352158840606605
+    },
+    "mean_E_eV": {
+     "got": 0.2068,
+     "ref": 0.206815998288,
+     "rel": 0.00007735517625538685,
+     "ok": true,
+     "tol": 0.00024176079420303303
+    },
+    "watt_mean_MeV": {
+     "got": 2.031,
+     "ref": 2.030836964,
+     "rel": 0.00008028020116340825,
+     "ok": true,
+     "tol": 0.0002462039094537576
+    },
+    "thermal_fraction": {
+     "got": 0.56,
+     "ref": 0.5603253259485712,
+     "rel": 0.0005806018994776137,
+     "ok": true,
+     "tol": 0.0008923387483040378
+    }
+   },
+   "worst_rel": 0.0005806018994776137,
+   "pass": true
+  },
+  {
+   "id": "ratio_control",
+   "note": "the \"thermalization\" control is labelled \"thermal peak height vs. fast bump\": the ratio of the two plotted peaks must equal the control value exactly",
+   "inputs": {
+    "T_mod": 600,
+    "ratio": "0.2..5"
+   },
+   "cmp": {
+    "thermal_peak_over_fast_peak@ratio=0.2": {
+     "got": 0.2,
+     "ref": 0.2,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_peak_over_fast_peak@ratio=0.5": {
+     "got": 0.5,
+     "ref": 0.5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_peak_over_fast_peak@ratio=1": {
+     "got": 1,
+     "ref": 1,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_peak_over_fast_peak@ratio=2": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_peak_over_fast_peak@ratio=3.5": {
+     "got": 3.4999999999999996,
+     "ref": 3.5,
+     "rel": 1.2688263138573217e-16,
+     "ok": true,
+     "tol": 1e-12
+    },
+    "thermal_peak_over_fast_peak@ratio=5": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "tol": 1e-12
+    }
+   },
+   "worst_rel": 1.2688263138573217e-16,
+   "pass": true
+  },
+  {
+   "id": "permalink_roundtrip",
+   "note": "state permalink reopened in a fresh page reproduces identical inputs and outputs",
+   "inputs": {
+    "T_mod": 750,
+    "ratio": 2.35
+   },
+   "cmp": {
+    "T_mod": {
+     "got": 750,
+     "ref": 750,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "ratio": {
+     "got": 2.35,
+     "ref": 2.35,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "kT": {
+     "got": 0.064629999465,
+     "ref": 0.064629999465,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "thermal_fraction_below_cutoff": {
+     "got": 0.3973443342291464,
+     "ref": 0.3973443342291464,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "E_mean_watt": {
+     "got": 2.030833523260916,
+     "ref": 2.030833523260916,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    },
+    "u_total_at_1e+0_eV": {
+     "got": 0.3496008514431959,
+     "ref": 0.3496008514431959,
+     "rel": 0,
+     "ok": true,
+     "tol": 0
+    }
+   },
+   "worst_rel": 0,
+   "pass": true
+  }
+ ],
+ "build": "2026-08-14.taxonomy1",
+ "manifest_revision": "2026-08-14.taxonomy1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_spectrum_ref.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 350 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\"."
+}

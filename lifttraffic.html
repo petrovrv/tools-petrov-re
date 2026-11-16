@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lift Traffic Design (round-trip time)</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-06.lifttraffic-2.0",
+  "id": "lifttraffic",
+  "file": "lifttraffic.html",
+  "listed": true,
+  "category": "vertical-transport",
+  "order": 20,
+  "title": {
+    "en": "Lift Traffic Design (round-trip time)",
+    "uk": "Розрахунок ліфтового транспорту (час кругового рейсу)",
+    "de": "Aufzugsverkehrsplanung (Umlaufzeit)",
+    "nl": "Liftverkeersontwerp (rondgangstijd)",
+    "fr": "Dimensionnement du trafic d’ascenseurs (temps d’aller-retour)",
+    "es": "Diseño del tráfico de ascensores (tiempo de ida y vuelta)",
+    "pl": "Projekt ruchu dźwigowego (czas cyklu)"
+  },
+  "summary": {
+    "en": "Classical up-peak lift design: round-trip time, interval, 5-minute handling capacity, %POP and an average waiting time estimate against criteria for the building use; sizing grid of cars × load × speed, zoning of tall buildings with express runs, and why one-floor trips never reach rated speed.",
+    "uk": "Класичний розрахунок ліфтів на ранковий пік: час кругового рейсу, інтервал, 5-хвилинна пропускна здатність, %POP і оцінка середнього очікування проти критеріїв для призначення будівлі; сітка підбору кабін × вантажопідйомності × швидкості, зонування висотних будівель з експресним перегоном і чому поїздка на один поверх ніколи не досягає номінальної швидкості.",
+    "de": "Klassische Aufzugsplanung für die Morgenspitze: Umlaufzeit, Intervall, 5-Minuten-Förderleistung, %POP und eine Schätzung der mittleren Wartezeit gegen die Kriterien der Gebäudenutzung; Auswahlraster Kabinen × Nennlast × Geschwindigkeit, Zonierung hoher Gebäude mit Expressfahrt und warum Fahrten über ein Geschoss nie die Nenngeschwindigkeit erreichen.",
+    "nl": "Klassiek liftontwerp voor de ochtendspits: rondgangstijd, interval, 5-minuten-transportcapaciteit, %POP en een schatting van de gemiddelde wachttijd tegen de criteria voor het gebouwgebruik; keuzeraster kooien × nominale last × snelheid, zonering van hoge gebouwen met expresrit en waarom ritten van één verdieping nooit de nominale snelheid halen.",
+    "fr": "Dimensionnement classique en pointe montante : temps d’aller-retour, intervalle, capacité de transport sur 5 minutes, %POP et estimation de l’attente moyenne face aux critères de l’usage du bâtiment ; grille de choix cabines × charge × vitesse, zonage des immeubles de grande hauteur avec trajet express, et pourquoi un trajet d’un étage n’atteint jamais la vitesse nominale.",
+    "es": "Diseño clásico de ascensores para la punta de subida: tiempo de ida y vuelta, intervalo, capacidad de transporte en 5 minutos, %POP y estimación de la espera media frente a los criterios del uso del edificio; cuadrícula de selección cabinas × carga × velocidad, zonificación de edificios altos con recorrido exprés y por qué un viaje de una planta nunca alcanza la velocidad nominal.",
+    "pl": "Klasyczny dobór dźwigów na szczyt poranny: czas cyklu, interwał, zdolność przewozowa w 5 minut, %POP i szacunek średniego czasu oczekiwania wobec kryteriów dla funkcji budynku; siatka doboru kabin × udźwigu × prędkości, podział wysokich budynków na strefy z przejazdem ekspresowym i dlaczego jazda o jedno piętro nigdy nie osiąga prędkości znamionowej."
+  },
+  "description": {
+    "en": "Enter the floors (level, use, population, entrance) and the lift group (number of cars, rated load, speed, acceleration, jerk, door and transfer times), or load one of the shared example buildings. The tool computes the up-peak round trip with the probable number of stops S and the highest reversal floor H for unequal floor populations, splits it into travel, stopping, door and passenger transfer time, and gives the interval, the 5-minute handling capacity in persons and in % of the population, the average waiting and transit time estimates and traffic lights against criteria for offices, flats, hotels and hospitals. A sizing grid lists the groups of 1–8 cars, 630–2000 kg and 1–6 m/s that meet the criteria, fewest shafts first; a zoning helper splits a tall building into two or three stacked zones with an express run and allocates the cars; a kinematics chart shows the jerk-limited speed profile. The scenario JSON is shared with the waiting-time simulator and the energy tool; CSV exports of the sizing grid and the summary.",
+    "uk": "Задайте поверхи (відмітку, призначення, кількість людей, вхід) і групу ліфтів (кількість кабін, вантажопідйомність, швидкість, прискорення, ривок, час дверей і входу-виходу) або завантажте один зі спільних прикладів будівель. Інструмент обчислює круговий рейс на ранковий пік з імовірною кількістю зупинок S і найвищим поверхом розвороту H для різної заселеності поверхів, розкладає його на час руху, зупинок, дверей і входу-виходу пасажирів і дає інтервал, 5-хвилинну пропускну здатність у людях і у % населення, оцінки середнього очікування й часу в дорозі та світлофори проти критеріїв для офісів, житла, готелів і лікарень. Сітка підбору показує групи з 1–8 кабін, 630–2000 кг і 1–6 м/с, що відповідають критеріям, починаючи з найменшої кількості шахт; помічник зонування ділить висотну будівлю на дві чи три зони з експресним перегоном і розподіляє кабіни; графік кінематики показує профіль швидкості з обмеженим ривком. JSON сценарію спільний із симулятором очікування та інструментом енергії; експорт CSV сітки підбору й зведення.",
+    "de": "Geben Sie die Geschosse (Höhe, Nutzung, Personen, Zugang) und die Aufzugsgruppe (Anzahl Kabinen, Nennlast, Geschwindigkeit, Beschleunigung, Ruck, Tür- und Ein-/Ausstiegszeiten) ein oder laden Sie eines der gemeinsamen Beispielgebäude. Das Werkzeug berechnet die Umlaufzeit der Morgenspitze mit der wahrscheinlichen Haltezahl S und dem höchsten Umkehrgeschoss H bei ungleich belegten Geschossen, zerlegt sie in Fahr-, Halte-, Tür- und Fahrgastwechselzeit und liefert das Intervall, die 5-Minuten-Förderleistung in Personen und in % der Belegung, Schätzungen der mittleren Warte- und Fahrzeit sowie Ampeln gegen Kriterien für Büro, Wohnen, Hotel und Krankenhaus. Ein Auswahlraster zeigt die Gruppen aus 1–8 Kabinen, 630–2000 kg und 1–6 m/s, die die Kriterien erfüllen, mit den wenigsten Schächten zuerst; eine Zonierungshilfe teilt ein Hochhaus in zwei oder drei übereinanderliegende Zonen mit Expressfahrt und verteilt die Kabinen; ein Kinematikdiagramm zeigt das ruckbegrenzte Geschwindigkeitsprofil. Das Szenario-JSON teilt das Werkzeug mit dem Wartezeitsimulator und dem Energiewerkzeug; CSV-Export des Auswahlrasters und der Übersicht.",
+    "nl": "Voer de verdiepingen (niveau, gebruik, bezetting, entree) en de liftgroep (aantal kooien, nominale last, snelheid, versnelling, schok, deur- en overstaptijden) in, of laad een van de gedeelde voorbeeldgebouwen. De tool berekent de rondgangstijd in de ochtendspits met het waarschijnlijke aantal stops S en de hoogste keerverdieping H bij ongelijk bezette verdiepingen, splitst die in rij-, stop-, deur- en overstaptijd en geeft het interval, de 5-minuten-transportcapaciteit in personen en in % van de bezetting, schattingen van de gemiddelde wacht- en reistijd en stoplichten tegen criteria voor kantoren, woningen, hotels en ziekenhuizen. Een keuzeraster toont de groepen van 1–8 kooien, 630–2000 kg en 1–6 m/s die aan de criteria voldoen, met de minste schachten eerst; een zoneringshulp verdeelt een hoog gebouw in twee of drie gestapelde zones met expresrit en verdeelt de kooien; een kinematicagrafiek toont het schokbegrensde snelheidsprofiel. De scenario-JSON wordt gedeeld met de wachttijdsimulator en de energietool; CSV-export van het keuzeraster en de samenvatting.",
+    "fr": "Saisissez les niveaux (cote, usage, effectif, accès) et le groupe d’ascenseurs (nombre de cabines, charge nominale, vitesse, accélération, à-coup, temps de porte et de transfert) ou chargez l’un des bâtiments d’exemple partagés. L’outil calcule l’aller-retour en pointe montante avec le nombre probable d’arrêts S et le niveau d’inversion le plus haut H pour des effectifs inégaux par étage, le décompose en temps de course, d’arrêt, de porte et de transfert des passagers, et donne l’intervalle, la capacité de transport sur 5 minutes en personnes et en % de l’effectif, des estimations de l’attente moyenne et du temps de trajet, et des feux tricolores face aux critères pour bureaux, logements, hôtels et hôpitaux. Une grille de choix liste les groupes de 1 à 8 cabines, 630 à 2000 kg et 1 à 6 m/s qui respectent les critères, le moins de gaines d’abord ; une aide au zonage découpe un immeuble de grande hauteur en deux ou trois zones superposées avec trajet express et répartit les cabines ; un graphique cinématique montre le profil de vitesse à à-coup limité. Le JSON de scénario est partagé avec le simulateur d’attente et l’outil énergie ; exports CSV de la grille et du résumé.",
+    "es": "Introduzca las plantas (cota, uso, ocupación, acceso) y el grupo de ascensores (número de cabinas, carga nominal, velocidad, aceleración, sobreaceleración, tiempos de puerta y de transferencia) o cargue uno de los edificios de ejemplo compartidos. La herramienta calcula el viaje de ida y vuelta en la punta de subida con el número probable de paradas S y la planta de inversión más alta H para ocupaciones desiguales, lo descompone en tiempo de recorrido, de parada, de puertas y de transferencia de pasajeros, y da el intervalo, la capacidad de transporte en 5 minutos en personas y en % de la población, estimaciones de la espera media y del tiempo de viaje, y semáforos frente a criterios para oficinas, viviendas, hoteles y hospitales. Una cuadrícula de selección lista los grupos de 1–8 cabinas, 630–2000 kg y 1–6 m/s que cumplen los criterios, con menos huecos primero; un asistente de zonificación divide un edificio alto en dos o tres zonas superpuestas con recorrido exprés y reparte las cabinas; un gráfico cinemático muestra el perfil de velocidad con sobreaceleración limitada. El JSON del escenario se comparte con el simulador de espera y la herramienta de energía; exportación CSV de la cuadrícula y del resumen.",
+    "pl": "Wprowadź kondygnacje (rzędną, funkcję, liczbę osób, wejście) i grupę dźwigów (liczbę kabin, udźwig, prędkość, przyspieszenie, zryw, czasy drzwi i wymiany pasażerów) albo wczytaj jeden ze wspólnych budynków przykładowych. Narzędzie liczy czas cyklu w szczycie porannym z prawdopodobną liczbą postojów S i najwyższym piętrem nawrotu H przy nierównym zaludnieniu pięter, rozkłada go na czas jazdy, zatrzymań, drzwi i wymiany pasażerów oraz podaje interwał, zdolność przewozową w 5 minut w osobach i w % populacji, szacunki średniego czasu oczekiwania i przejazdu oraz światła wobec kryteriów dla biur, mieszkań, hoteli i szpitali. Siatka doboru wymienia grupy 1–8 kabin, 630–2000 kg i 1–6 m/s spełniające kryteria, od najmniejszej liczby szybów; pomocnik stref dzieli wysoki budynek na dwie lub trzy strefy jedna nad drugą z przejazdem ekspresowym i rozdziela kabiny; wykres kinematyki pokazuje profil prędkości z ograniczonym zrywem. JSON scenariusza jest wspólny z symulatorem oczekiwania i narzędziem energii; eksport CSV siatki doboru i podsumowania."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Classical up-peak calculation: all passengers board at the main terminal, the car fills to the design load (80 % of the rated persons by default) and the floors above are reached at random in proportion to their population. It does not model down-peak, lunch or inter-floor traffic, double-deck or destination control, basement floors below the main terminal or cars of different sizes in one group (the first car in service stands for all). The waiting time is an empirical estimate valid for car loads of 50–80 %; the design criteria per building use are learning assumptions in the range commonly quoted in planning guides — use the project's or the client's criteria. Check the result with the simulator. Final design per EN 81-20 / ISO 8100-32 by a qualified lift consultant.",
+    "uk": "Класичний розрахунок ранкового піку: усі пасажири сідають на основному поверсі, кабіна заповнюється до розрахункового завантаження (за замовчуванням 80 % номінальної місткості), а верхні поверхи досягаються випадково пропорційно їхньому населенню. Не моделюються вечірній пік, обідній і міжповерховий рух, двоповерхові кабіни та керування за поверхом призначення, поверхи нижче основного й кабіни різного розміру в одній групі (усіх представляє перша робоча кабіна). Час очікування — емпірична оцінка, чинна для завантаження 50–80 %; критерії за призначенням будівлі — навчальні припущення в межах, які зазвичай наводять посібники з проєктування, — використовуйте критерії проєкту чи замовника. Перевірте результат симулятором. Остаточний проєкт — за EN 81-20 / ISO 8100-32 кваліфікованим ліфтовим консультантом.",
+    "de": "Klassische Berechnung der Morgenspitze: alle Fahrgäste steigen im Hauptzugangsgeschoss ein, die Kabine füllt sich bis zur Auslegungslast (standardmäßig 80 % der Nennpersonenzahl) und die oberen Geschosse werden zufällig im Verhältnis ihrer Belegung angefahren. Nicht modelliert sind Abend- und Mittagsspitze, Zwischengeschossverkehr, Doppeldecker und Zielwahlsteuerung, Geschosse unter dem Hauptzugang und Kabinen verschiedener Größe in einer Gruppe (die erste Kabine in Betrieb steht für alle). Die Wartezeit ist eine empirische Schätzung für Kabinenfüllungen von 50–80 %; die Kriterien je Nutzung sind Lernannahmen im Bereich der üblichen Planungsleitfäden — verwenden Sie die Kriterien des Projekts oder Bauherrn. Prüfen Sie das Ergebnis mit dem Simulator. Endgültige Auslegung nach EN 81-20 / ISO 8100-32 durch einen qualifizierten Aufzugsplaner.",
+    "nl": "Klassieke ochtendspitsberekening: alle passagiers stappen in op de hoofdentree, de kooi vult tot de ontwerpbelasting (standaard 80 % van het nominale aantal personen) en de verdiepingen erboven worden willekeurig bereikt naar verhouding van hun bezetting. Niet gemodelleerd: avond- en lunchspits, verkeer tussen verdiepingen, dubbeldekkers en bestemmingskeuze, verdiepingen onder de hoofdentree en kooien van verschillende grootte in één groep (de eerste kooi in dienst staat voor alle). De wachttijd is een empirische schatting voor kooibelastingen van 50–80 %; de criteria per gebouwgebruik zijn leeraannames binnen de bandbreedte die ontwerprichtlijnen gewoonlijk noemen — gebruik de criteria van het project of de opdrachtgever. Controleer het resultaat met de simulator. Definitief ontwerp volgens EN 81-20 / ISO 8100-32 door een gekwalificeerd liftadviseur.",
+    "fr": "Calcul classique en pointe montante : tous les passagers montent au niveau d’accès principal, la cabine se remplit jusqu’à la charge de calcul (80 % du nombre nominal de personnes par défaut) et les étages supérieurs sont desservis au hasard en proportion de leur effectif. Ne sont pas modélisés : pointes descendante et de midi, trafic interétages, cabines à double pont et manœuvre à destination, niveaux sous l’accès principal et cabines de tailles différentes dans un même groupe (la première cabine en service représente toutes les autres). L’attente est une estimation empirique valable pour un remplissage de 50 à 80 % ; les critères par usage sont des hypothèses pédagogiques dans la plage couramment citée par les guides de conception — utilisez les critères du projet ou du maître d’ouvrage. Vérifiez le résultat avec le simulateur. Conception finale selon EN 81-20 / ISO 8100-32 par un bureau d’études ascenseurs qualifié.",
+    "es": "Cálculo clásico de la punta de subida: todos los pasajeros suben en la planta de acceso principal, la cabina se llena hasta la carga de cálculo (80 % del número nominal de personas por defecto) y las plantas superiores se alcanzan al azar en proporción a su ocupación. No se modelan la punta de bajada ni la del mediodía, el tráfico entre plantas, las cabinas de dos pisos ni el control por destino, las plantas por debajo del acceso principal ni cabinas de distinto tamaño en un grupo (la primera cabina en servicio representa a todas). La espera es una estimación empírica válida para cargas del 50–80 %; los criterios por uso son supuestos didácticos dentro del rango que suelen citar las guías de diseño: use los criterios del proyecto o de la propiedad. Compruebe el resultado con el simulador. Diseño final según EN 81-20 / ISO 8100-32 por un consultor de ascensores cualificado.",
+    "pl": "Klasyczne obliczenie szczytu porannego: wszyscy pasażerowie wsiadają na kondygnacji głównego wejścia, kabina napełnia się do obciążenia obliczeniowego (domyślnie 80 % znamionowej liczby osób), a wyższe piętra są osiągane losowo proporcjonalnie do liczby osób. Nie są modelowane: szczyt wieczorny i obiadowy, ruch międzypiętrowy, kabiny dwupokładowe i sterowanie z wyborem celu, kondygnacje poniżej głównego wejścia ani kabiny różnej wielkości w jednej grupie (pierwsza czynna kabina reprezentuje wszystkie). Czas oczekiwania to szacunek empiryczny ważny dla wypełnienia 50–80 %; kryteria dla funkcji budynku to założenia dydaktyczne w zakresie zwykle podawanym w poradnikach projektowych — stosuj kryteria projektu lub inwestora. Sprawdź wynik w symulatorze. Ostateczny projekt według EN 81-20 / ISO 8100-32 wykonuje wykwalifikowany projektant dźwigów."
+  },
+  "intended_use": "education",
+  "catalog_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "tool_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "dependencies": ["vt-core.js", "vt-traffic.js"],
+  "network_access": { "mode": "none" },
+  "validation": {
+    "basis": {
+      "en": "Up-peak round-trip time with the probable stops S and highest reversal floor H for unequal floor populations (CIBSE Guide D 2020 ch. 4; Barney & Al-Sharif, Elevator Traffic Handbook, 2nd ed. 2016; ISO 8100-32:2020), jerk-limited flight times after Peters (1996), car capacity per EN 81-20:2020 (rated load / 75 kg).",
+      "uk": "Час кругового рейсу на ранковий пік з імовірною кількістю зупинок S і найвищим поверхом розвороту H для різної заселеності (CIBSE Guide D 2020, розд. 4; Barney і Al-Sharif, Elevator Traffic Handbook, 2-ге вид. 2016; ISO 8100-32:2020), час руху з обмеженим ривком за Peters (1996), місткість кабіни за EN 81-20:2020 (вантажопідйомність / 75 кг).",
+      "de": "Umlaufzeit der Morgenspitze mit wahrscheinlicher Haltezahl S und höchstem Umkehrgeschoss H bei ungleicher Belegung (CIBSE Guide D 2020, Kap. 4; Barney & Al-Sharif, Elevator Traffic Handbook, 2. Aufl. 2016; ISO 8100-32:2020), ruckbegrenzte Fahrzeiten nach Peters (1996), Personenzahl nach EN 81-20:2020 (Nennlast / 75 kg).",
+      "nl": "Rondgangstijd in de ochtendspits met waarschijnlijk aantal stops S en hoogste keerverdieping H bij ongelijke bezetting (CIBSE Guide D 2020, hfst. 4; Barney & Al-Sharif, Elevator Traffic Handbook, 2e dr. 2016; ISO 8100-32:2020), schokbegrensde rijtijden volgens Peters (1996), kooicapaciteit volgens EN 81-20:2020 (nominale last / 75 kg).",
+      "fr": "Temps d’aller-retour en pointe montante avec nombre probable d’arrêts S et niveau d’inversion le plus haut H pour des effectifs inégaux (CIBSE Guide D 2020, ch. 4 ; Barney et Al-Sharif, Elevator Traffic Handbook, 2e éd. 2016 ; ISO 8100-32:2020), temps de course à à-coup limité d’après Peters (1996), capacité de cabine selon EN 81-20:2020 (charge nominale / 75 kg).",
+      "es": "Tiempo de ida y vuelta en la punta de subida con paradas probables S y planta de inversión más alta H para ocupaciones desiguales (CIBSE Guide D 2020, cap. 4; Barney y Al-Sharif, Elevator Traffic Handbook, 2.ª ed. 2016; ISO 8100-32:2020), tiempos de recorrido con sobreaceleración limitada según Peters (1996), capacidad de cabina según EN 81-20:2020 (carga nominal / 75 kg).",
+      "pl": "Czas cyklu w szczycie porannym z prawdopodobną liczbą postojów S i najwyższym piętrem nawrotu H przy nierównym zaludnieniu (CIBSE Guide D 2020, rozdz. 4; Barney i Al-Sharif, Elevator Traffic Handbook, wyd. 2, 2016; ISO 8100-32:2020), czasy jazdy z ograniczonym zrywem według Petersa (1996), pojemność kabiny według EN 81-20:2020 (udźwig / 75 kg)."
+    },
+    "independent_validation": false,
+    "benchmarks": [{"id": "lifttraffic-ref-2026-11-06", "reference": {"en": "bench-src/ref/gen_lifttraffic.py: the CIBSE Guide D 2025 worked example (official up-peak spreadsheet, 0.5 %); S and H as expectations by enumeration (checked against the equal-population closed forms), Peters closed-form flight times, ATT/AJT and the AWT range flag; criteria, up-peak geometry, sizing order and zoning key restated from the tool (not independent); brute-force sizing grid and zoning over every split and car allocation; 2 published cases, 9 preset groups, 180 grid cases (load factors 0.4–0.9), 54 kinematic cases.", "uk": "bench-src/ref/gen_lifttraffic.py: розрахунковий приклад CIBSE Guide D 2025 (офіційна таблиця ранкового підйому, 0,5 %); S і H як математичні сподівання прямим перебором (звірено із замкненими формулами для рівної заселеності), час руху за замкненими формулами Peters, ATT/AJT і ознака меж формули AWT; критерії, геометрію підйому, порядок підбору та ключ зонування переписано з інструмента (не незалежні); сітка підбору й зонування повним перебором усіх поділів і розподілів кабін; 2 опубліковані випадки, 9 груп прикладів, 180 випадків сітки (завантаження 0,4–0,9), 54 кінематичні випадки.", "de": "bench-src/ref/gen_lifttraffic.py: das Rechenbeispiel aus CIBSE Guide D 2025 (offizielle Aufwärtsspitzen-Tabelle, 0,5 %); S und H als Erwartungswerte durch Aufzählung (geprüft gegen die geschlossenen Formeln bei gleicher Belegung), Fahrzeiten nach Peters in geschlossener Form, ATT/AJT und Gültigkeitsmarke der AWT-Formel; Kriterien, Aufwärtsgeometrie, Auswahlreihenfolge und Zonierungsschlüssel aus dem Werkzeug übernommen (nicht unabhängig); Auswahlraster und Zonierung per Vollsuche über alle Aufteilungen und Kabinenverteilungen; 2 veröffentlichte Fälle, 9 Beispielgruppen, 180 Rasterfälle (Beladung 0,4–0,9), 54 Kinematikfälle.", "nl": "bench-src/ref/gen_lifttraffic.py: het rekenvoorbeeld uit CIBSE Guide D 2025 (officiële spreadsheet voor de ochtendspits, 0,5 %); S en H als verwachtingswaarden door opsomming (gecontroleerd met de gesloten formules bij gelijke bezetting), rijtijden volgens Peters in gesloten vorm, ATT/AJT en de geldigheidsvlag van de AWT-formule; criteria, spitsgeometrie, keuzevolgorde en zoneringssleutel overgenomen uit de tool (niet onafhankelijk); keuzeraster en zonering door volledige doorzoeking van alle verdelingen en kooitoewijzingen; 2 gepubliceerde gevallen, 9 voorbeeldgroepen, 180 rastergevallen (belasting 0,4–0,9), 54 kinematicagevallen.", "fr": "bench-src/ref/gen_lifttraffic.py : l’exemple de calcul du CIBSE Guide D 2025 (feuille officielle de pointe montante, 0,5 %) ; S et H comme espérances par énumération (vérifiées sur les formules fermées à effectifs égaux), temps de course de Peters en forme fermée, ATT/AJT et indicateur de validité de la formule AWT ; critères, géométrie de pointe, ordre de sélection et clé de zonage repris de l’outil (non indépendants) ; grille de choix et zonage par recherche exhaustive sur tous les découpages et répartitions de cabines ; 2 cas publiés, 9 groupes d’exemple, 180 cas de grille (taux de charge 0,4–0,9), 54 cas cinématiques.", "es": "bench-src/ref/gen_lifttraffic.py: el ejemplo resuelto de CIBSE Guide D 2025 (hoja oficial de punta de subida, 0,5 %); S y H como esperanzas por enumeración (comprobadas con las fórmulas cerradas de ocupación igual), tiempos de recorrido de Peters en forma cerrada, ATT/AJT y el indicador de validez de la fórmula AWT; criterios, geometría de punta, orden de selección y clave de zonificación tomados de la herramienta (no independientes); cuadrícula de selección y zonificación por búsqueda exhaustiva de todos los repartos de plantas y cabinas; 2 casos publicados, 9 grupos de ejemplo, 180 casos de rejilla (carga 0,4–0,9), 54 casos cinemáticos.", "pl": "bench-src/ref/gen_lifttraffic.py: przykład obliczeniowy CIBSE Guide D 2025 (oficjalny arkusz szczytu wejściowego, 0,5 %); S i H jako wartości oczekiwane przez wyliczenie (sprawdzone wzorami zamkniętymi dla równego zaludnienia), czasy jazdy Petersa w postaci zamkniętej, ATT/AJT i znacznik zakresu wzoru AWT; kryteria, geometria szczytu, kolejność doboru i klucz podziału na strefy przejęte z narzędzia (nie niezależne); siatka doboru i strefy przez pełne przeszukanie wszystkich podziałów i przydziałów kabin; 2 przypadki opublikowane, 9 grup przykładowych, 180 przypadków siatki (obciążenie 0,4–0,9), 54 przypadki kinematyczne."}, "citations": ["CIBSE Guide D 2025 ch. 3, official up-peak calculation spreadsheet (Fig. 3.4 Example 2), https://www.cibse.org/media/rgrpbvqg/cibse-guide-4-2025-uppeak-calculation.xlsx", "CIBSE Guide D: Transportation systems in buildings, 2020, ch. 4", "G. Barney, L. Al-Sharif: Elevator Traffic Handbook — Theory and Practice, 2nd ed., Routledge 2016", "ISO 8100-32:2020 Planning and selection of passenger lifts", "EN 81-20:2020 5.4.2", "R. D. Peters: Ideal lift kinematics, Elevator Technology 6, IAEE 1996"], "cases": 245, "passed": 245, "tolerance": "published CIBSE example 0.5 %; otherwise relative 1e-9 on S, H, RTT and its parts, INT, HC5, %POP, AWT, ATT, AJT, flight time and peak speed; AWT range flag, verdicts, sizing choice and zoning split/allocation exact", "run_at": "2026-11-06", "artifact": "benchmarks/lifttraffic.json"}]
+  },
+  "report": { "pdf": true, "source_attribution": true },
+  "python_export": { "supported": false, "requires": [], "reason": "The independent reference implementation is bench-src/ref/gen_lifttraffic.py." },
+  "handoff": { "provides": [], "accepts": [] },
+  "state_codec": { "permalink": true, "record": "tools.petrov.re/calculation-record/v1" },
+  "workflow": { "entry": "calculate", "medium": "none", "lifecycle": ["concept", "basic", "detailed"] },
+  "ui": { "framework": "tools.petrov.re/ui/v1", "level": 3 }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="vt-core.js" defer></script>
+<script src="vt-traffic.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+'use strict';
+/* ===== lifttraffic page: the engine is vt-traffic.js (VTTraffic) on top of vt-core.js (VTCore); sources in _vt/traffic/ ===== */
+var TOOL = 'lifttraffic';
+var LANGS7 = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+function T7(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+var CORE = window.VTCore || null, TR = window.VTTraffic || null;
+/* ---- strings (en uk de nl fr es pl) ---- */
+var I = {
+  subtitle: T7('How many lifts, how big and how fast: the classical morning up-peak round trip, interval and handling capacity — sizing grid, zoning and kinematics.',
+    'Скільки ліфтів, якої місткості й швидкості: класичний круговий рейс ранкового піку, інтервал і пропускна здатність — сітка підбору, зонування й кінематика.',
+    'Wie viele Aufzüge, wie groß und wie schnell: klassische Umlaufzeit der Morgenspitze, Intervall und Förderleistung — Auswahlraster, Zonierung und Kinematik.',
+    'Hoeveel liften, hoe groot en hoe snel: de klassieke rondgang in de ochtendspits, interval en transportcapaciteit — keuzeraster, zonering en kinematica.',
+    'Combien d’ascenseurs, de quelle taille et à quelle vitesse : l’aller-retour classique de la pointe montante, l’intervalle et la capacité — grille de choix, zonage et cinématique.',
+    'Cuántos ascensores, de qué tamaño y a qué velocidad: el viaje clásico de la punta de subida, intervalo y capacidad — cuadrícula de selección, zonificación y cinemática.',
+    'Ile dźwigów, jak dużych i jak szybkich: klasyczny cykl szczytu porannego, interwał i zdolność przewozowa — siatka doboru, strefy i kinematyka.'),
+  'notice.t': T7('Planning aid, not a lift design', 'Допоміжний інструмент, а не проєкт ліфтів', 'Planungshilfe, keine Aufzugsauslegung', 'Planningshulp, geen liftontwerp', 'Aide à la planification, pas une conception', 'Ayuda de planificación, no un diseño', 'Pomoc w planowaniu, nie projekt dźwigów'),
+  'notice.b': T7('Classical up-peak formulas with design criteria that are learning assumptions. Final lift design per EN 81-20 / ISO 8100-32 by a qualified lift consultant; manufacturers’ group control algorithms are proprietary. Check the chosen group with the waiting-time simulator.',
+    'Класичні формули ранкового піку з критеріями, що є навчальними припущеннями. Остаточний проєкт — за EN 81-20 / ISO 8100-32 кваліфікованим ліфтовим консультантом; алгоритми групового керування виробників закриті. Перевірте обрану групу в симуляторі очікування.',
+    'Klassische Formeln der Morgenspitze mit Kriterien, die Lernannahmen sind. Endgültige Auslegung nach EN 81-20 / ISO 8100-32 durch einen qualifizierten Aufzugsplaner; die Gruppensteuerungen der Hersteller sind proprietär. Prüfen Sie die gewählte Gruppe im Wartezeitsimulator.',
+    'Klassieke ochtendspitsformules met criteria die leeraannames zijn. Definitief ontwerp volgens EN 81-20 / ISO 8100-32 door een gekwalificeerd liftadviseur; de groepsbesturingen van fabrikanten zijn niet openbaar. Controleer de gekozen groep in de wachttijdsimulator.',
+    'Formules classiques de pointe montante avec des critères qui sont des hypothèses pédagogiques. Conception finale selon EN 81-20 / ISO 8100-32 par un bureau d’études ascenseurs qualifié ; les manœuvres de groupe des constructeurs sont propriétaires. Vérifiez le groupe choisi dans le simulateur d’attente.',
+    'Fórmulas clásicas de la punta de subida con criterios que son supuestos didácticos. Diseño final según EN 81-20 / ISO 8100-32 por un consultor de ascensores cualificado; los algoritmos de control de grupo de los fabricantes son propietarios. Compruebe el grupo elegido en el simulador de espera.',
+    'Klasyczne wzory szczytu porannego z kryteriami będącymi założeniami dydaktycznymi. Ostateczny projekt według EN 81-20 / ISO 8100-32 wykonuje wykwalifikowany projektant dźwigów; algorytmy sterowania grupowego producentów są zastrzeżone. Sprawdź wybraną grupę w symulatorze oczekiwania.'),
+  footer: T7('S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ with Uᵢ = population share of floor i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_start + t_open + t_close; RTT = 2H·t_v + 2·d_express/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0.4 + (1.8·P/CC − 0.77)²) for 0.5 ≤ P/CC ≤ 0.8. Flight times jerk-limited (Peters 1996). Sources: CIBSE Guide D 2020 ch. 4; Barney & Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (rated loads).',
+    'S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ, де Uᵢ — частка населення поверху i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_старту + t_відкр + t_закр; RTT = 2H·t_v + 2·d_експрес/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) для 0,5 ≤ P/CC ≤ 0,8. Час руху з обмеженим ривком (Peters 1996). Джерела: CIBSE Guide D 2020, розд. 4; Barney і Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (вантажопідйомності).',
+    'S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ mit Uᵢ = Belegungsanteil des Geschosses i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_Start + t_auf + t_zu; RTT = 2H·t_v + 2·d_Express/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) für 0,5 ≤ P/CC ≤ 0,8. Fahrzeiten ruckbegrenzt (Peters 1996). Quellen: CIBSE Guide D 2020, Kap. 4; Barney & Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (Nennlasten).',
+    'S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ met Uᵢ = bezettingsaandeel van verdieping i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_start + t_open + t_dicht; RTT = 2H·t_v + 2·d_expres/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) voor 0,5 ≤ P/CC ≤ 0,8. Rijtijden schokbegrensd (Peters 1996). Bronnen: CIBSE Guide D 2020, hfst. 4; Barney & Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (nominale lasten).',
+    'S = N − Σ(1 − Uᵢ)ᴾ ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ avec Uᵢ = part de l’effectif de l’étage i ; t_v = d_f / v ; t_s = t_f(d_f) − t_v + t_démarrage + t_ouverture + t_fermeture ; RTT = 2H·t_v + 2·d_express/v + (S + 1)·t_s + 2P·t_p ; INT = RTT / L ; HC5 = 300·P·L / RTT ; %POP = 100·HC5 / POP ; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) pour 0,5 ≤ P/CC ≤ 0,8. Temps de course à à-coup limité (Peters 1996). Sources : CIBSE Guide D 2020, ch. 4 ; Barney et Al-Sharif, Elevator Traffic Handbook (2016) ; ISO 8100-32:2020 ; EN 81-20:2020 5.4.2 ; ISO 8100-30:2019 (charges nominales).',
+    'S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ con Uᵢ = fracción de la ocupación de la planta i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_arranque + t_apertura + t_cierre; RTT = 2H·t_v + 2·d_exprés/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) para 0,5 ≤ P/CC ≤ 0,8. Tiempos de recorrido con sobreaceleración limitada (Peters 1996). Fuentes: CIBSE Guide D 2020, cap. 4; Barney y Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (cargas nominales).',
+    'S = N − Σ(1 − Uᵢ)ᴾ; H = N − Σⱼ₌₁ᴺ⁻¹(Σᵢ≤ⱼ Uᵢ)ᴾ, gdzie Uᵢ = udział osób na piętrze i; t_v = d_f / v; t_s = t_f(d_f) − t_v + t_rozruchu + t_otwarcia + t_zamknięcia; RTT = 2H·t_v + 2·d_ekspres/v + (S + 1)·t_s + 2P·t_p; INT = RTT / L; HC5 = 300·P·L / RTT; %POP = 100·HC5 / POP; AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²) dla 0,5 ≤ P/CC ≤ 0,8. Czasy jazdy z ograniczonym zrywem (Peters 1996). Źródła: CIBSE Guide D 2020, rozdz. 4; Barney i Al-Sharif, Elevator Traffic Handbook (2016); ISO 8100-32:2020; EN 81-20:2020 5.4.2; ISO 8100-30:2019 (udźwigi).'),
+  'p.scen': T7('Scenario', 'Сценарій', 'Szenario', 'Scenario', 'Scénario', 'Escenario', 'Scenariusz'),
+  'p.bld': T7('Building', 'Будівля', 'Gebäude', 'Gebouw', 'Bâtiment', 'Edificio', 'Budynek'),
+  'p.floors': T7('Floors (lowest first)', 'Поверхи (знизу вгору)', 'Geschosse (unterstes zuerst)', 'Verdiepingen (laagste eerst)', 'Niveaux (le plus bas d’abord)', 'Plantas (la más baja primero)', 'Kondygnacje (od najniższej)'),
+  'p.group': T7('Lift group', 'Група ліфтів', 'Aufzugsgruppe', 'Liftgroep', 'Groupe d’ascenseurs', 'Grupo de ascensores', 'Grupa dźwigów'),
+  'p.motion': T7('Motion and doors', 'Рух і двері', 'Fahrt und Türen', 'Rijden en deuren', 'Mouvement et portes', 'Movimiento y puertas', 'Ruch i drzwi'),
+  'p.chart': T7('Chart', 'Графік', 'Diagramm', 'Grafiek', 'Graphique', 'Gráfico', 'Wykres'),
+  'p.design': T7('Sizing and zoning', 'Підбір і зонування', 'Auswahl und Zonierung', 'Keuze en zonering', 'Choix et zonage', 'Selección y zonificación', 'Dobór i strefy'),
+  'p.io': T7('Hand-off and export', 'Передача й експорт', 'Übergabe und Export', 'Overdracht en export', 'Transmission et export', 'Traspaso y exportación', 'Przekazanie i eksport'),
+  'f.name': T7('Building name', 'Назва будівлі', 'Gebäudename', 'Naam gebouw', 'Nom du bâtiment', 'Nombre del edificio', 'Nazwa budynku'),
+  'f.use': T7('Building use (sets the criteria)', 'Призначення (задає критерії)', 'Nutzung (bestimmt die Kriterien)', 'Gebruik (bepaalt de criteria)', 'Usage (fixe les critères)', 'Uso (fija los criterios)', 'Funkcja (wyznacza kryteria)'),
+  'f.presence': T7('People present', 'Присутні люди', 'Anwesenheit', 'Aanwezigheid', 'Présence', 'Presencia', 'Obecność'),
+  'f.presence.h': T7('share of the nominal population in the building at the peak (absence, leave, part-time)', 'частка номінального населення в будівлі під час піку (відсутні, відпустки, неповний день)', 'Anteil der Nennbelegung, der zur Spitze im Haus ist (Abwesenheit, Urlaub, Teilzeit)', 'aandeel van de nominale bezetting dat tijdens de spits aanwezig is (afwezigheid, verlof, deeltijd)', 'part de l’effectif nominal présent à la pointe (absences, congés, temps partiel)', 'fracción de la ocupación nominal presente en la punta (ausencias, vacaciones, jornada parcial)', 'udział nominalnej liczby osób obecnych w szczycie (nieobecności, urlopy, niepełny etat)'),
+  'f.floors': T7('Floors', 'Поверхи', 'Geschosse', 'Verdiepingen', 'Niveaux', 'Plantas', 'Kondygnacje'),
+  'f.fid': T7('Id', 'Код', 'Kennung', 'Code', 'Code', 'Código', 'Kod'),
+  'f.flabel': T7('Name', 'Назва', 'Name', 'Naam', 'Nom', 'Nombre', 'Nazwa'),
+  'f.level': T7('Level, m', 'Відмітка, м', 'Höhe, m', 'Niveau, m', 'Cote, m', 'Cota, m', 'Rzędna, m'),
+  'f.role': T7('Use', 'Призначення', 'Nutzung', 'Gebruik', 'Usage', 'Uso', 'Funkcja'),
+  'f.pop': T7('People', 'Люди', 'Personen', 'Personen', 'Personnes', 'Personas', 'Osoby'),
+  'f.entr': T7('Entrance share', 'Частка входу', 'Zugangsanteil', 'Aandeel entree', 'Part d’accès', 'Cuota de acceso', 'Udział wejścia'),
+  'f.group': T7('Group shown', 'Показана група', 'Angezeigte Gruppe', 'Getoonde groep', 'Groupe affiché', 'Grupo mostrado', 'Pokazana grupa'),
+  'f.n': T7('Number of cars', 'Кількість кабін', 'Anzahl Kabinen', 'Aantal kooien', 'Nombre de cabines', 'Número de cabinas', 'Liczba kabin'),
+  'f.out': T7('Cars out of service', 'Кабін поза роботою', 'Kabinen außer Betrieb', 'Kooien buiten dienst', 'Cabines hors service', 'Cabinas fuera de servicio', 'Kabiny wyłączone'),
+  'f.load': T7('Rated load', 'Вантажопідйомність', 'Nennlast', 'Nominale last', 'Charge nominale', 'Carga nominal', 'Udźwig'),
+  'f.load.h': T7('EN 81-20: persons = rated load / 75 kg, rounded down', 'EN 81-20: кількість осіб = вантажопідйомність / 75 кг, з округленням донизу', 'EN 81-20: Personen = Nennlast / 75 kg, abgerundet', 'EN 81-20: personen = nominale last / 75 kg, naar beneden afgerond', 'EN 81-20 : personnes = charge nominale / 75 kg, arrondi à l’entier inférieur', 'EN 81-20: personas = carga nominal / 75 kg, redondeado hacia abajo', 'EN 81-20: liczba osób = udźwig / 75 kg, zaokrąglona w dół'),
+  'f.speed': T7('Rated speed', 'Номінальна швидкість', 'Nenngeschwindigkeit', 'Nominale snelheid', 'Vitesse nominale', 'Velocidad nominal', 'Prędkość znamionowa'),
+  'f.accel': T7('Acceleration', 'Прискорення', 'Beschleunigung', 'Versnelling', 'Accélération', 'Aceleración', 'Przyspieszenie'),
+  'f.jerk': T7('Jerk', 'Ривок', 'Ruck', 'Schok', 'À-coup', 'Sobreaceleración', 'Zryw'),
+  'f.dopen': T7('Door opening time', 'Час відчинення дверей', 'Türöffnungszeit', 'Openingstijd deur', 'Temps d’ouverture des portes', 'Tiempo de apertura de puertas', 'Czas otwierania drzwi'),
+  'f.dclose': T7('Door closing time', 'Час зачинення дверей', 'Türschließzeit', 'Sluittijd deur', 'Temps de fermeture des portes', 'Tiempo de cierre de puertas', 'Czas zamykania drzwi'),
+  'f.start': T7('Start delay', 'Затримка старту', 'Anfahrverzögerung', 'Startvertraging', 'Retard au démarrage', 'Retardo de arranque', 'Opóźnienie rozruchu'),
+  'f.transfer': T7('Transfer time per person', 'Час входу/виходу на особу', 'Ein-/Ausstiegszeit je Person', 'Overstaptijd per persoon', 'Temps de transfert par personne', 'Tiempo de transferencia por persona', 'Czas wymiany na osobę'),
+  'f.lf': T7('Design car load', 'Розрахункове завантаження', 'Auslegungsfüllung', 'Ontwerpbelasting kooi', 'Remplissage de calcul', 'Carga de cálculo', 'Wypełnienie obliczeniowe'),
+  'f.lf.h': T7('share of the rated persons on board when the car leaves the lobby (80 % is the classical design value)', 'частка номінальної кількості осіб у кабіні, коли вона рушає з вестибюля (80 % — класичне розрахункове значення)', 'Anteil der Nennpersonenzahl beim Abfahren aus der Eingangshalle (80 % ist der klassische Auslegungswert)', 'aandeel van het nominale aantal personen bij vertrek uit de lobby (80 % is de klassieke ontwerpwaarde)', 'part du nombre nominal de personnes à bord au départ du hall (80 % est la valeur de calcul classique)', 'fracción de las personas nominales a bordo al salir del vestíbulo (80 % es el valor de cálculo clásico)', 'udział znamionowej liczby osób w kabinie przy odjeździe z holu (80 % to klasyczna wartość obliczeniowa)'),
+  'f.view': T7('Show', 'Показати', 'Anzeigen', 'Toon', 'Afficher', 'Mostrar', 'Pokaż'),
+  'f.kinN': T7('Trip length (floors)', 'Довжина поїздки (поверхів)', 'Fahrtlänge (Geschosse)', 'Ritlengte (verdiepingen)', 'Longueur du trajet (étages)', 'Longitud del viaje (plantas)', 'Długość jazdy (piętra)'),
+  'f.szload': T7('Rated load in the grid chart', 'Вантажопідйомність на графіку сітки', 'Nennlast im Rasterdiagramm', 'Nominale last in de rastergrafiek', 'Charge nominale du graphique', 'Carga nominal en el gráfico', 'Udźwig na wykresie siatki'),
+  'f.zcars': T7('Cars to share among zones', 'Кабін для розподілу між зонами', 'Kabinen für die Zonen', 'Kooien te verdelen over zones', 'Cabines à répartir entre les zones', 'Cabinas a repartir entre zonas', 'Kabiny do podziału na strefy'),
+  'f.zspeed': T7('Rated speed of upper zones', 'Швидкість верхніх зон', 'Geschwindigkeit der oberen Zonen', 'Snelheid van de hogere zones', 'Vitesse des zones hautes', 'Velocidad de las zonas altas', 'Prędkość wyższych stref'),
+  'view.rtt': T7('Round trip', 'Круговий рейс', 'Umlauf', 'Rondgang', 'Aller-retour', 'Ida y vuelta', 'Cykl'),
+  'view.kin': T7('Speed profile', 'Профіль швидкості', 'Geschwindigkeitsprofil', 'Snelheidsprofiel', 'Profil de vitesse', 'Perfil de velocidad', 'Profil prędkości'),
+  'view.sizing': T7('Sizing grid', 'Сітка підбору', 'Auswahlraster', 'Keuzeraster', 'Grille de choix', 'Cuadrícula', 'Siatka doboru'),
+  'view.zoning': T7('Zoning', 'Зонування', 'Zonierung', 'Zonering', 'Zonage', 'Zonificación', 'Strefy'),
+  'a.add': T7('Add floor', 'Додати поверх', 'Geschoss hinzufügen', 'Verdieping toevoegen', 'Ajouter un niveau', 'Añadir planta', 'Dodaj kondygnację'),
+  'a.applyBest': T7('Apply the smallest option that meets the criteria', 'Застосувати найменший варіант, що відповідає критеріям', 'Kleinste Variante übernehmen, die die Kriterien erfüllt', 'Kleinste optie toepassen die aan de criteria voldoet', 'Appliquer la plus petite option conforme', 'Aplicar la opción más pequeña que cumple', 'Zastosuj najmniejszy wariant spełniający kryteria'),
+  'a.applyZoning': T7('Apply the best zoning to the scenario', 'Застосувати найкраще зонування до сценарію', 'Beste Zonierung ins Szenario übernehmen', 'Beste zonering in het scenario zetten', 'Appliquer le meilleur zonage au scénario', 'Aplicar la mejor zonificación al escenario', 'Zastosuj najlepszy podział na strefy'),
+  'a.sim': T7('Verify in the simulator', 'Перевірити в симуляторі', 'Im Simulator prüfen', 'Controleren in de simulator', 'Vérifier dans le simulateur', 'Comprobar en el simulador', 'Sprawdź w symulatorze'),
+  'a.save': T7('Save scenario in this browser', 'Зберегти сценарій у браузері', 'Szenario im Browser speichern', 'Scenario in deze browser opslaan', 'Enregistrer le scénario dans ce navigateur', 'Guardar el escenario en este navegador', 'Zapisz scenariusz w przeglądarce'),
+  'a.csvSizing': T7('Sizing grid (CSV)', 'Сітка підбору (CSV)', 'Auswahlraster (CSV)', 'Keuzeraster (CSV)', 'Grille de choix (CSV)', 'Cuadrícula (CSV)', 'Siatka doboru (CSV)'),
+  'a.csvSummary': T7('Summary (CSV)', 'Зведення (CSV)', 'Übersicht (CSV)', 'Samenvatting (CSV)', 'Résumé (CSV)', 'Resumen (CSV)', 'Podsumowanie (CSV)'),
+  't.int': T7('Interval', 'Інтервал', 'Intervall', 'Interval', 'Intervalle', 'Intervalo', 'Interwał'),
+  't.hc5': T7('Handling capacity, % of people in 5 min', 'Пропускна здатність, % людей за 5 хв', 'Förderleistung, % der Personen in 5 min', 'Transportcapaciteit, % personen per 5 min', 'Capacité, % des personnes en 5 min', 'Capacidad, % de personas en 5 min', 'Zdolność przewozowa, % osób w 5 min'),
+  't.awt': T7('Average waiting time (estimate)', 'Середнє очікування (оцінка)', 'Mittlere Wartezeit (Schätzung)', 'Gemiddelde wachttijd (schatting)', 'Attente moyenne (estimation)', 'Espera media (estimación)', 'Średnie oczekiwanie (szacunek)'),
+  't.rtt': T7('Round-trip time', 'Час кругового рейсу', 'Umlaufzeit', 'Rondgangstijd', 'Temps d’aller-retour', 'Tiempo de ida y vuelta', 'Czas cyklu'),
+  't.hc5n': T7('Persons per 5 min', 'Осіб за 5 хв', 'Personen je 5 min', 'Personen per 5 min', 'Personnes par 5 min', 'Personas por 5 min', 'Osób na 5 min'),
+  't.P': T7('Persons per trip (P)', 'Осіб за рейс (P)', 'Personen je Fahrt (P)', 'Personen per rit (P)', 'Personnes par voyage (P)', 'Personas por viaje (P)', 'Osób na kurs (P)'),
+  't.S': T7('Probable stops (S)', 'Імовірні зупинки (S)', 'Wahrscheinliche Halte (S)', 'Waarschijnlijke stops (S)', 'Arrêts probables (S)', 'Paradas probables (S)', 'Prawdopodobne postoje (S)'),
+  't.H': T7('Highest reversal floor (H)', 'Найвищий поверх розвороту (H)', 'Höchstes Umkehrgeschoss (H)', 'Hoogste keerverdieping (H)', 'Niveau d’inversion le plus haut (H)', 'Planta de inversión más alta (H)', 'Najwyższe piętro nawrotu (H)'),
+  't.att': T7('Average transit time (estimate)', 'Середній час у кабіні (оцінка)', 'Mittlere Fahrzeit (Schätzung)', 'Gemiddelde reistijd (schatting)', 'Temps de trajet moyen (estimation)', 'Tiempo de viaje medio (estimación)', 'Średni czas przejazdu (szacunek)'),
+  't.top': T7('Lobby → top floor', 'Вестибюль → верхній поверх', 'Halle → oberstes Geschoss', 'Lobby → bovenste verdieping', 'Hall → dernier étage', 'Vestíbulo → última planta', 'Hol → najwyższe piętro'),
+  'u.s': T7('s', 'с', 's', 's', 's', 's', 's'),
+  'u.m': T7('m', 'м', 'm', 'm', 'm', 'm', 'm'),
+  'u.ms': T7('m/s', 'м/с', 'm/s', 'm/s', 'm/s', 'm/s', 'm/s'),
+  'u.ms2': T7('m/s²', 'м/с²', 'm/s²', 'm/s²', 'm/s²', 'm/s²', 'm/s²'),
+  'u.ms3': T7('m/s³', 'м/с³', 'm/s³', 'm/s³', 'm/s³', 'm/s³', 'm/s³'),
+  'u.kg': T7('kg', 'кг', 'kg', 'kg', 'kg', 'kg', 'kg'),
+  'u.pct': T7('%', '%', '%', '%', '%', '%', '%'),
+  'lg.real': T7('real trip (accelerating, braking)', 'реальна поїздка (розгін, гальмування)', 'reale Fahrt (Anfahren, Bremsen)', 'echte rit (optrekken, remmen)', 'trajet réel (accélération, freinage)', 'viaje real (aceleración, frenado)', 'rzeczywista jazda (rozruch, hamowanie)'),
+  'lg.ideal': T7('at rated speed all the way', 'весь шлях з номінальною швидкістю', 'durchgehend mit Nenngeschwindigkeit', 'de hele weg op nominale snelheid', 'à vitesse nominale tout du long', 'a velocidad nominal todo el trayecto', 'cały czas z prędkością znamionową'),
+  'lg.unreached': T7('rated speed not reached', 'номінальна швидкість не досягається', 'Nenngeschwindigkeit nicht erreicht', 'nominale snelheid niet gehaald', 'vitesse nominale non atteinte', 'velocidad nominal no alcanzada', 'prędkość znamionowa nieosiągnięta'),
+  'lg.unreach': T7('car cannot reach this speed in the building (×)', 'кабіна не досягає цієї швидкості в будівлі (×)', 'Kabine erreicht diese Geschwindigkeit im Gebäude nicht (×)', 'kooi haalt deze snelheid in het gebouw niet (×)', 'la cabine n’atteint pas cette vitesse dans le bâtiment (×)', 'la cabina no alcanza esta velocidad en el edificio (×)', 'kabina nie osiąga tej prędkości w budynku (×)'),
+  'lg.zone': T7('zone %k', 'зона %k', 'Zone %k', 'zone %k', 'zone %k', 'zona %k', 'strefa %k'),
+  'lg.express': T7('express run from the lobby', 'експресний перегін від вестибюля', 'Expressfahrt ab der Halle', 'expresrit vanaf de lobby', 'trajet express depuis le hall', 'tramo exprés desde el vestíbulo', 'przejazd ekspresowy z holu'),
+  'u.pers': T7('persons', 'осіб', 'Personen', 'personen', 'personnes', 'personas', 'osób'),
+  'u.floor': T7('floor index above the lobby', 'номер поверху над вестибюлем', 'Geschossnummer über der Halle', 'verdiepingsnummer boven de lobby', 'rang d’étage au-dessus du hall', 'número de planta sobre el vestíbulo', 'numer piętra nad holem'),
+  'm.hc5': T7('Handling capacity against the minimum', 'Пропускна здатність проти мінімуму', 'Förderleistung gegen das Minimum', 'Transportcapaciteit tegen het minimum', 'Capacité face au minimum', 'Capacidad frente al mínimo', 'Zdolność przewozowa wobec minimum'),
+  'm.int': T7('Interval against the maximum', 'Інтервал проти максимуму', 'Intervall gegen das Maximum', 'Interval tegen het maximum', 'Intervalle face au maximum', 'Intervalo frente al máximo', 'Interwał wobec maksimum'),
+  'tab.rtt': T7('Where the round trip goes', 'З чого складається круговий рейс', 'Woraus die Umlaufzeit besteht', 'Waar de rondgang uit bestaat', 'De quoi se compose l’aller-retour', 'De qué se compone la ida y vuelta', 'Z czego składa się cykl'),
+  'tab.crit': T7('Against the criteria', 'Порівняння з критеріями', 'Gegen die Kriterien', 'Tegen de criteria', 'Face aux critères', 'Frente a los criterios', 'Wobec kryteriów'),
+  'tab.groups': T7('All groups of the building', 'Усі групи будівлі', 'Alle Gruppen des Gebäudes', 'Alle groepen van het gebouw', 'Tous les groupes du bâtiment', 'Todos los grupos del edificio', 'Wszystkie grupy budynku'),
+  'tab.sizing': T7('Smallest groups that meet the criteria', 'Найменші групи, що відповідають критеріям', 'Kleinste Gruppen, die die Kriterien erfüllen', 'Kleinste groepen die aan de criteria voldoen', 'Plus petits groupes conformes', 'Grupos más pequeños que cumplen', 'Najmniejsze grupy spełniające kryteria'),
+  'tab.zoning': T7('Zoning: best split of the floors for 1, 2 and 3 zones', 'Зонування: найкращий поділ поверхів на 1, 2 і 3 зони', 'Zonierung: beste Aufteilung der Geschosse auf 1, 2 und 3 Zonen', 'Zonering: beste verdeling van de verdiepingen over 1, 2 en 3 zones', 'Zonage : meilleur découpage en 1, 2 et 3 zones', 'Zonificación: mejor reparto de plantas en 1, 2 y 3 zonas', 'Strefy: najlepszy podział pięter na 1, 2 i 3 strefy'),
+  'tab.kin': T7('Trip time against trip length', 'Час поїздки залежно від довжини', 'Fahrzeit gegen Fahrtlänge', 'Ritduur tegen ritlengte', 'Durée du trajet selon sa longueur', 'Duración del viaje según su longitud', 'Czas jazdy wobec długości'),
+  'h.part': T7('Part', 'Складова', 'Anteil', 'Onderdeel', 'Composante', 'Componente', 'Składnik'),
+  'h.pct': T7('Share', 'Частка', 'Anteil', 'Aandeel', 'Part', 'Cuota', 'Udział'),
+  'h.qty': T7('Quantity', 'Величина', 'Größe', 'Grootheid', 'Grandeur', 'Magnitud', 'Wielkość'),
+  'h.value': T7('Value', 'Значення', 'Wert', 'Waarde', 'Valeur', 'Valor', 'Wartość'),
+  'h.min': T7('Minimum / maximum', 'Мінімум / максимум', 'Minimum / Maximum', 'Minimum / maximum', 'Minimum / maximum', 'Mínimo / máximo', 'Minimum / maksimum'),
+  'h.good': T7('Good', 'Добре', 'Gut', 'Goed', 'Bon', 'Bueno', 'Dobrze'),
+  'h.light': T7('Rating', 'Оцінка', 'Bewertung', 'Beoordeling', 'Appréciation', 'Valoración', 'Ocena'),
+  'h.group': T7('Group', 'Група', 'Gruppe', 'Groep', 'Groupe', 'Grupo', 'Grupa'),
+  'h.cars': T7('Cars', 'Кабін', 'Kabinen', 'Kooien', 'Cabines', 'Cabinas', 'Kabiny'),
+  'h.load': T7('Load, kg', 'Вантаж, кг', 'Last, kg', 'Last, kg', 'Charge, kg', 'Carga, kg', 'Udźwig, kg'),
+  'h.speed': T7('Speed, m/s', 'Швидкість, м/с', 'Geschw., m/s', 'Snelheid, m/s', 'Vitesse, m/s', 'Velocidad, m/s', 'Prędkość, m/s'),
+  'h.zone': T7('Zones', 'Зони', 'Zonen', 'Zones', 'Zones', 'Zonas', 'Strefy'),
+  'h.floors': T7('Floors and cars per zone', 'Поверхи й кабіни зон', 'Geschosse und Kabinen je Zone', 'Verdiepingen en kooien per zone', 'Étages et cabines par zone', 'Plantas y cabinas por zona', 'Piętra i kabiny stref'),
+  'h.trip': T7('Floors', 'Поверхів', 'Geschosse', 'Verdiepingen', 'Étages', 'Plantas', 'Pięter'),
+  'h.time': T7('Flight, s', 'Рух, с', 'Fahrt, s', 'Rit, s', 'Course, s', 'Recorrido, s', 'Jazda, s'),
+  'h.ideal': T7('At rated speed, s', 'З номінальною швидкістю, с', 'Mit Nenngeschw., s', 'Op nominale snelheid, s', 'À vitesse nominale, s', 'A velocidad nominal, s', 'Z prędkością znamionową, s'),
+  'h.vp': T7('Peak speed, m/s', 'Пікова швидкість, м/с', 'Spitzengeschw., m/s', 'Topsnelheid, m/s', 'Vitesse de pointe, m/s', 'Velocidad punta, m/s', 'Prędkość szczytowa, m/s'),
+  'h.verdict': T7('Result', 'Результат', 'Ergebnis', 'Resultaat', 'Résultat', 'Resultado', 'Wynik'),
+  'h.int': T7('Interval, s', 'Інтервал, с', 'Intervall, s', 'Interval, s', 'Intervalle, s', 'Intervalo, s', 'Interwał, s'),
+  'h.hc5': T7('% in 5 min', '% за 5 хв', '% in 5 min', '% per 5 min', '% en 5 min', '% en 5 min', '% w 5 min'),
+  'h.awt': T7('AWT, s', 'AWT, с', 'AWT, s', 'AWT, s', 'AWT, s', 'AWT, s', 'AWT, s'),
+  'h.rtt': T7('RTT, s', 'RTT, с', 'RTT, s', 'RTT, s', 'RTT, s', 'RTT, s', 'RTT, s'),
+  'h.pop': T7('People', 'Людей', 'Personen', 'Personen', 'Personnes', 'Personas', 'Osób'),
+  'part.travel': T7('Travel at rated speed (incl. express run)', 'Рух з номінальною швидкістю (з експресним перегоном)', 'Fahrt mit Nenngeschwindigkeit (inkl. Expressfahrt)', 'Rijden op nominale snelheid (incl. expresrit)', 'Course à vitesse nominale (trajet express compris)', 'Recorrido a velocidad nominal (con tramo exprés)', 'Jazda z prędkością znamionową (z przejazdem ekspresowym)'),
+  'part.stops': T7('Stopping: braking, accelerating, start delay', 'Зупинки: гальмування, розгін, затримка старту', 'Halten: Bremsen, Anfahren, Anfahrverzögerung', 'Stoppen: remmen, optrekken, startvertraging', 'Arrêts : freinage, accélération, retard au démarrage', 'Paradas: frenado, aceleración, retardo de arranque', 'Postoje: hamowanie, rozruch, opóźnienie startu'),
+  'part.doors': T7('Doors opening and closing', 'Відчинення й зачинення дверей', 'Türen öffnen und schließen', 'Deuren openen en sluiten', 'Ouverture et fermeture des portes', 'Apertura y cierre de puertas', 'Otwieranie i zamykanie drzwi'),
+  'part.transfer': T7('Passengers boarding and leaving', 'Вхід і вихід пасажирів', 'Ein- und Aussteigen', 'In- en uitstappen', 'Montée et descente des passagers', 'Entrada y salida de pasajeros', 'Wsiadanie i wysiadanie'),
+  'part.total': T7('Round trip', 'Круговий рейс', 'Umlauf', 'Rondgang', 'Aller-retour', 'Ida y vuelta', 'Cykl'),
+  'light.green': T7('good', 'добре', 'gut', 'goed', 'bon', 'bueno', 'dobrze'),
+  'light.amber': T7('acceptable', 'прийнятно', 'ausreichend', 'aanvaardbaar', 'acceptable', 'aceptable', 'do przyjęcia'),
+  'light.red': T7('insufficient', 'недостатньо', 'ungenügend', 'onvoldoende', 'insuffisant', 'insuficiente', 'niewystarczająco'),
+  'light.grey': T7('not rated', 'без оцінки', 'nicht bewertet', 'niet beoordeeld', 'non évalué', 'sin valorar', 'bez oceny'),
+  'vd.meets': T7('meets the criteria', 'відповідає критеріям', 'erfüllt die Kriterien', 'voldoet aan de criteria', 'conforme aux critères', 'cumple los criterios', 'spełnia kryteria'),
+  'vd.marginal': T7('acceptable, not good', 'прийнятно, але не добре', 'ausreichend, nicht gut', 'aanvaardbaar, niet goed', 'acceptable, sans plus', 'aceptable, no bueno', 'do przyjęcia, nie dobrze'),
+  'vd.fails': T7('does not meet the criteria', 'не відповідає критеріям', 'erfüllt die Kriterien nicht', 'voldoet niet aan de criteria', 'non conforme aux critères', 'no cumple los criterios', 'nie spełnia kryteriów'),
+  'v.main': T7('%g: %n × %q kg at %v m/s — a car every %i s, %h % of the people in 5 min: %d.',
+    '%g: %n × %q кг, %v м/с — кабіна кожні %i с, %h % людей за 5 хв: %d.',
+    '%g: %n × %q kg mit %v m/s — alle %i s eine Kabine, %h % der Personen in 5 min: %d.',
+    '%g: %n × %q kg op %v m/s — elke %i s een kooi, %h % van de mensen per 5 min: %d.',
+    '%g : %n × %q kg à %v m/s — une cabine toutes les %i s, %h % des personnes en 5 min : %d.',
+    '%g: %n × %q kg a %v m/s — una cabina cada %i s, %h % de las personas en 5 min: %d.',
+    '%g: %n × %q kg, %v m/s — kabina co %i s, %h % osób w 5 min: %d.'),
+  'v.invalid': T7('The building data are not valid: %e', 'Дані будівлі некоректні: %e', 'Die Gebäudedaten sind ungültig: %e', 'De gebouwgegevens zijn ongeldig: %e', 'Les données du bâtiment ne sont pas valides : %e', 'Los datos del edificio no son válidos: %e', 'Dane budynku są nieprawidłowe: %e'),
+  'v.nozone': T7('No populated floor above the main entrance in this group — nothing to carry in the up-peak.', 'У цій групі немає заселених поверхів над головним входом — у ранковий пік нікого везти.', 'Kein belegtes Geschoss über dem Hauptzugang in dieser Gruppe — in der Morgenspitze ist niemand zu befördern.', 'Geen bezette verdieping boven de hoofdentree in deze groep — in de ochtendspits valt niemand te vervoeren.', 'Aucun étage occupé au-dessus de l’accès principal dans ce groupe — personne à transporter en pointe montante.', 'No hay plantas ocupadas sobre el acceso principal en este grupo: nadie que transportar en la punta de subida.', 'W tej grupie nie ma zaludnionych pięter nad głównym wejściem — w szczycie porannym nie ma kogo wieźć.'),
+  'n.awt.above': T7('The design car load is above 80 %: the waiting-time estimate is outside its range and optimistic.', 'Розрахункове завантаження понад 80 %: оцінка очікування поза межами чинності й оптимістична.', 'Die Auslegungsfüllung liegt über 80 %: die Wartezeitschätzung ist außerhalb ihres Gültigkeitsbereichs und optimistisch.', 'De ontwerpbelasting ligt boven 80 %: de wachttijdschatting valt buiten haar bereik en is optimistisch.', 'Le remplissage de calcul dépasse 80 % : l’estimation d’attente sort de son domaine et est optimiste.', 'La carga de cálculo supera el 80 %: la estimación de espera queda fuera de su rango y es optimista.', 'Wypełnienie obliczeniowe przekracza 80 %: szacunek oczekiwania jest poza zakresem i optymistyczny.'),
+  'n.awt.below': T7('The design car load is below 50 %: the waiting time is taken as 0.4 × interval (light traffic).', 'Розрахункове завантаження нижче 50 %: очікування взято як 0,4 × інтервал (слабкий рух).', 'Die Auslegungsfüllung liegt unter 50 %: die Wartezeit wird als 0,4 × Intervall angesetzt (schwacher Verkehr).', 'De ontwerpbelasting ligt onder 50 %: de wachttijd is 0,4 × interval (licht verkeer).', 'Le remplissage de calcul est inférieur à 50 % : l’attente est prise égale à 0,4 × intervalle (trafic faible).', 'La carga de cálculo es inferior al 50 %: la espera se toma como 0,4 × intervalo (tráfico ligero).', 'Wypełnienie obliczeniowe poniżej 50 %: oczekiwanie przyjęto jako 0,4 × interwał (mały ruch).'),
+  'n.mixed': T7('The cars of this group differ in load or speed; the first car in service stands for all of them.', 'Кабіни цієї групи відрізняються вантажопідйомністю чи швидкістю; усіх представляє перша робоча кабіна.', 'Die Kabinen dieser Gruppe unterscheiden sich in Last oder Geschwindigkeit; die erste Kabine in Betrieb steht für alle.', 'De kooien van deze groep verschillen in last of snelheid; de eerste kooi in dienst staat voor alle.', 'Les cabines de ce groupe diffèrent en charge ou en vitesse ; la première cabine en service les représente toutes.', 'Las cabinas de este grupo difieren en carga o velocidad; la primera cabina en servicio representa a todas.', 'Kabiny tej grupy różnią się udźwigiem lub prędkością; pierwsza czynna kabina reprezentuje wszystkie.'),
+  'n.below': T7('Floors below the main entrance (%f) are not part of the classical up-peak formula; their traffic is in the simulator.', 'Поверхи нижче головного входу (%f) не входять у класичну формулу ранкового піку; їхній рух враховує симулятор.', 'Geschosse unter dem Hauptzugang (%f) gehören nicht zur klassischen Formel der Morgenspitze; ihr Verkehr steckt im Simulator.', 'Verdiepingen onder de hoofdentree (%f) vallen buiten de klassieke ochtendspitsformule; hun verkeer zit in de simulator.', 'Les niveaux sous l’accès principal (%f) ne font pas partie de la formule classique ; leur trafic est dans le simulateur.', 'Las plantas bajo el acceso principal (%f) no forman parte de la fórmula clásica; su tráfico está en el simulador.', 'Kondygnacje poniżej głównego wejścia (%f) nie wchodzą do klasycznego wzoru; ich ruch uwzględnia symulator.'),
+  'n.speed': T7('The car cannot reach %v m/s within the %d m travel of this group: a slower drive would give the same round trip.', 'Кабіна не досягає %v м/с на висоті підйому %d м цієї групи: повільніший привод дав би той самий рейс.', 'Die Kabine erreicht %v m/s auf der Förderhöhe von %d m dieser Gruppe nicht: ein langsamerer Antrieb ergäbe dieselbe Umlaufzeit.', 'De kooi haalt %v m/s niet binnen de hefhoogte van %d m van deze groep: een tragere aandrijving gaf dezelfde rondgang.', 'La cabine n’atteint pas %v m/s sur la course de %d m de ce groupe : un entraînement plus lent donnerait le même aller-retour.', 'La cabina no alcanza %v m/s en el recorrido de %d m de este grupo: un accionamiento más lento daría la misma vuelta.', 'Kabina nie osiąga %v m/s na wysokości podnoszenia %d m tej grupy: wolniejszy napęd dałby ten sam cykl.'),
+  'n.out': T7('%o of %t cars are out of service — the result is for the cars still running.', '%o з %t кабін поза роботою — результат для кабін, що працюють.', '%o von %t Kabinen sind außer Betrieb — das Ergebnis gilt für die laufenden Kabinen.', '%o van %t kooien zijn buiten dienst — het resultaat geldt voor de kooien die rijden.', '%o cabines sur %t sont hors service — le résultat porte sur celles qui fonctionnent.', '%o de %t cabinas están fuera de servicio: el resultado es para las que funcionan.', '%o z %t kabin jest wyłączonych — wynik dotyczy kabin czynnych.'),
+  'n.crit': T7('Criteria for %u: at least %a % of the people in 5 min (good %b %), interval at most %c s (good %d s). These are learning assumptions in the range quoted by planning guides — replace them with the project’s criteria.', 'Критерії для «%u»: щонайменше %a % людей за 5 хв (добре — %b %), інтервал не більше %c с (добре — %d с). Це навчальні припущення в межах, які наводять посібники з проєктування, — замініть їх критеріями проєкту.', 'Kriterien für %u: mindestens %a % der Personen in 5 min (gut %b %), Intervall höchstens %c s (gut %d s). Das sind Lernannahmen im Bereich der Planungsleitfäden — ersetzen Sie sie durch die Projektkriterien.', 'Criteria voor %u: minstens %a % van de mensen per 5 min (goed %b %), interval hoogstens %c s (goed %d s). Dit zijn leeraannames binnen de bandbreedte van ontwerprichtlijnen — vervang ze door de projectcriteria.', 'Critères pour %u : au moins %a % des personnes en 5 min (bon : %b %), intervalle au plus %c s (bon : %d s). Ce sont des hypothèses pédagogiques dans la plage des guides de conception — remplacez-les par les critères du projet.', 'Criterios para %u: al menos %a % de las personas en 5 min (bueno: %b %), intervalo como máximo %c s (bueno: %d s). Son supuestos didácticos dentro del rango de las guías de diseño: sustitúyalos por los criterios del proyecto.', 'Kryteria dla „%u”: co najmniej %a % osób w 5 min (dobrze — %b %), interwał najwyżej %c s (dobrze — %d s). To założenia dydaktyczne w zakresie podawanym przez poradniki — zastąp je kryteriami projektu.'),
+  'n.sizing.best': T7('Smallest group that meets the criteria: %n × %q kg at %v m/s (interval %i s, %h %). Fully green from %n2 × %q2 kg at %v2 m/s.', 'Найменша група, що відповідає критеріям: %n × %q кг, %v м/с (інтервал %i с, %h %). Повністю зелена — від %n2 × %q2 кг, %v2 м/с.', 'Kleinste Gruppe, die die Kriterien erfüllt: %n × %q kg mit %v m/s (Intervall %i s, %h %). Ganz grün ab %n2 × %q2 kg mit %v2 m/s.', 'Kleinste groep die aan de criteria voldoet: %n × %q kg op %v m/s (interval %i s, %h %). Volledig groen vanaf %n2 × %q2 kg op %v2 m/s.', 'Plus petit groupe conforme : %n × %q kg à %v m/s (intervalle %i s, %h %). Entièrement vert à partir de %n2 × %q2 kg à %v2 m/s.', 'Grupo más pequeño que cumple: %n × %q kg a %v m/s (intervalo %i s, %h %). Totalmente verde desde %n2 × %q2 kg a %v2 m/s.', 'Najmniejsza grupa spełniająca kryteria: %n × %q kg, %v m/s (interwał %i s, %h %). W pełni zielona od %n2 × %q2 kg, %v2 m/s.'),
+  'n.sizing.none': T7('No group of up to 8 cars of %q kg at 1–6 m/s meets the criteria for this zone: split the building into zones.', 'Жодна група до 8 кабін %q кг і 1–6 м/с не відповідає критеріям для цієї зони: поділіть будівлю на зони.', 'Keine Gruppe bis 8 Kabinen mit %q kg und 1–6 m/s erfüllt die Kriterien dieser Zone: teilen Sie das Gebäude in Zonen.', 'Geen groep tot 8 kooien van %q kg op 1–6 m/s voldoet aan de criteria voor deze zone: deel het gebouw op in zones.', 'Aucun groupe jusqu’à 8 cabines de %q kg à 1–6 m/s n’est conforme pour cette zone : découpez le bâtiment en zones.', 'Ningún grupo de hasta 8 cabinas de %q kg a 1–6 m/s cumple los criterios en esta zona: divida el edificio en zonas.', 'Żadna grupa do 8 kabin %q kg i 1–6 m/s nie spełnia kryteriów dla tej strefy: podziel budynek na strefy.'),
+  'vd.no_cars': T7('no car in service', 'жодної кабіни в роботі', 'keine Kabine in Betrieb', 'geen kooi in bedrijf', 'aucune cabine en service', 'ninguna cabina en servicio', 'żadna kabina nie pracuje'),
+  'v.nocars': T7('%g: no car in service (%t cars, all out) — the group carries nobody; interval, handling capacity and waiting time are not defined.',
+    '%g: жодної кабіни в роботі (%t кабін, усі вимкнені) — група нікого не перевозить; інтервал, провізна здатність і очікування не визначені.',
+    '%g: keine Kabine in Betrieb (%t Kabinen, alle außer Betrieb) — die Gruppe befördert niemanden; Intervall, Förderleistung und Wartezeit sind nicht definiert.',
+    '%g: geen kooi in bedrijf (%t kooien, alle buiten dienst) — de groep vervoert niemand; interval, transportcapaciteit en wachttijd zijn niet gedefinieerd.',
+    '%g : aucune cabine en service (%t cabines, toutes à l’arrêt) — le groupe ne transporte personne ; intervalle, capacité de transport et attente ne sont pas définis.',
+    '%g: ninguna cabina en servicio (%t cabinas, todas fuera de servicio) — el grupo no transporta a nadie; intervalo, capacidad de transporte y espera no están definidos.',
+    '%g: żadna kabina nie pracuje (%t kabin, wszystkie wyłączone) — grupa nikogo nie przewozi; interwał, zdolność przewozowa i czas oczekiwania są nieokreślone.'),
+  'n.awt.adv': T7('The waiting-time light is advisory: the verdict uses only the handling capacity and the interval.',
+    'Світлофор часу очікування — довідковий: висновок враховує лише провізну здатність та інтервал.',
+    'Die Ampel der Wartezeit ist nur ein Hinweis: das Urteil stützt sich allein auf Förderleistung und Intervall.',
+    'Het wachttijdlampje is indicatief: het oordeel gebruikt alleen de transportcapaciteit en het interval.',
+    'Le voyant du temps d’attente est indicatif : le verdict ne tient compte que de la capacité de transport et de l’intervalle.',
+    'El semáforo del tiempo de espera es orientativo: el veredicto solo usa la capacidad de transporte y el intervalo.',
+    'Światło czasu oczekiwania jest pomocnicze: ocena opiera się wyłącznie na zdolności przewozowej i interwale.'),
+  'n.formula': T7('Formula vs simulation: this waiting time assumes pure up-peak at the design arrival rate (CIBSE Guide D). The simulator (liftwait) uses the traffic profile with its peaks, mixed traffic and real dispatch, so its waiting times are usually longer — verify the design there.',
+    'Формула і симуляція: це очікування передбачає чистий ранковий підйом із розрахунковою інтенсивністю (CIBSE Guide D). Симулятор (liftwait) враховує профіль трафіку з піками, змішаний трафік і реальну диспетчеризацію, тож його очікування зазвичай довші — перевірте проєкт там.',
+    'Formel und Simulation: diese Wartezeit setzt reinen Aufwärtsverkehr mit der Bemessungsankunftsrate voraus (CIBSE Guide D). Der Simulator (liftwait) nutzt das Verkehrsprofil mit Spitzen, gemischten Verkehr und echte Steuerung; seine Wartezeiten sind meist länger — prüfen Sie die Auslegung dort.',
+    'Formule en simulatie: deze wachttijd gaat uit van zuiver opwaarts spitsverkeer bij de ontwerpaankomst (CIBSE Guide D). De simulator (liftwait) gebruikt het verkeersprofiel met pieken, gemengd verkeer en echte besturing, dus zijn wachttijden zijn meestal langer — controleer het ontwerp daar.',
+    'Formule et simulation : ce temps d’attente suppose une pointe montante pure au débit de calcul (CIBSE Guide D). Le simulateur (liftwait) utilise le profil de trafic avec ses pointes, un trafic mixte et une vraie répartition ; ses attentes sont en général plus longues — vérifiez la conception là-bas.',
+    'Fórmula y simulación: esta espera supone una punta de subida pura con la llegada de diseño (CIBSE Guide D). El simulador (liftwait) usa el perfil de tráfico con sus picos, tráfico mixto y un despacho real, por lo que sus esperas suelen ser más largas — verifique allí el diseño.',
+    'Wzór a symulacja: ten czas oczekiwania zakłada czysty szczyt wejściowy przy projektowym natężeniu (CIBSE Guide D). Symulator (liftwait) używa profilu ruchu ze szczytami, ruchu mieszanego i rzeczywistego sterowania, więc jego czasy oczekiwania są zwykle dłuższe — sprawdź projekt tam.'),
+  'n.minload': T7('Hospital: the sizing grid uses only bed lifts of at least %q kg (ISO 8100-30 class III; HTM 08-02 recommends 2500 kg bed passenger lifts).',
+    'Лікарня: сітка підбору містить лише ліжкові ліфти від %q кг (ISO 8100-30, клас III; HTM 08-02 рекомендує ліжково-пасажирські ліфти 2500 кг).',
+    'Krankenhaus: das Auswahlraster enthält nur Bettenaufzüge ab %q kg (ISO 8100-30 Klasse III; HTM 08-02 empfiehlt Betten-Personenaufzüge mit 2500 kg).',
+    'Ziekenhuis: het keuzeraster bevat alleen beddenliften vanaf %q kg (ISO 8100-30 klasse III; HTM 08-02 beveelt beddenliften van 2500 kg aan).',
+    'Hôpital : la grille de dimensionnement ne contient que des ascenseurs pour lits d’au moins %q kg (ISO 8100-30 classe III ; le HTM 08-02 recommande des ascenseurs lits-personnes de 2500 kg).',
+    'Hospital: la tabla de dimensionado solo usa ascensores para camas de al menos %q kg (ISO 8100-30 clase III; HTM 08-02 recomienda ascensores de camas de 2500 kg).',
+    'Szpital: siatka doboru zawiera tylko dźwigi łóżkowe od %q kg (ISO 8100-30 klasa III; HTM 08-02 zaleca dźwigi łóżkowo-osobowe 2500 kg).'),
+  'n.zoning.best': T7('Best zoning with %c cars: %k zone(s) — %h % of the people in 5 min, longest interval %i s (%d).', 'Найкраще зонування з %c кабінами: зон — %k; %h % людей за 5 хв, найдовший інтервал %i с (%d).', 'Beste Zonierung mit %c Kabinen: %k Zone(n) — %h % der Personen in 5 min, längstes Intervall %i s (%d).', 'Beste zonering met %c kooien: %k zone(s) — %h % van de mensen per 5 min, langste interval %i s (%d).', 'Meilleur zonage avec %c cabines : %k zone(s) — %h % des personnes en 5 min, intervalle le plus long %i s (%d).', 'Mejor zonificación con %c cabinas: %k zona(s) — %h % de las personas en 5 min, intervalo más largo %i s (%d).', 'Najlepszy podział przy %c kabinach: stref — %k; %h % osób w 5 min, najdłuższy interwał %i s (%d).'),
+  'n.kin': T7('A one-floor trip (%d m) takes %t s and peaks at %p m/s; the car reaches its rated %v m/s only on trips of %f floors or more.', 'Поїздка на один поверх (%d м) триває %t с, пікова швидкість %p м/с; номінальні %v м/с кабіна досягає лише на поїздках від %f поверхів.', 'Eine Fahrt über ein Geschoss (%d m) dauert %t s mit Spitze %p m/s; ihre Nenngeschwindigkeit von %v m/s erreicht die Kabine erst ab %f Geschossen.', 'Een rit van één verdieping (%d m) duurt %t s met een top van %p m/s; de nominale %v m/s haalt de kooi pas vanaf %f verdiepingen.', 'Un trajet d’un étage (%d m) dure %t s avec une pointe à %p m/s ; la cabine n’atteint ses %v m/s nominaux qu’à partir de %f étages.', 'Un viaje de una planta (%d m) dura %t s con punta de %p m/s; la cabina solo alcanza sus %v m/s nominales en viajes de %f plantas o más.', 'Jazda o jedno piętro (%d m) trwa %t s, szczyt %p m/s; znamionowe %v m/s kabina osiąga dopiero przy jeździe o %f pięter lub więcej.'),
+  'n.kin.never': T7('Within this building the car never reaches its rated %v m/s.', 'У цій будівлі кабіна ніколи не досягає номінальних %v м/с.', 'In diesem Gebäude erreicht die Kabine ihre Nenngeschwindigkeit von %v m/s nie.', 'In dit gebouw haalt de kooi haar nominale %v m/s nooit.', 'Dans ce bâtiment, la cabine n’atteint jamais ses %v m/s nominaux.', 'En este edificio la cabina nunca alcanza sus %v m/s nominales.', 'W tym budynku kabina nigdy nie osiąga znamionowych %v m/s.'),
+  'n.origin.stored': T7('Building taken from the scenario stored in this browser (shared with the simulator and the energy tool).', 'Будівлю взято зі сценарію, збереженого в цьому браузері (спільного із симулятором та інструментом енергії).', 'Gebäude aus dem in diesem Browser gespeicherten Szenario (gemeinsam mit Simulator und Energiewerkzeug).', 'Gebouw uit het in deze browser opgeslagen scenario (gedeeld met de simulator en de energietool).', 'Bâtiment repris du scénario enregistré dans ce navigateur (partagé avec le simulateur et l’outil énergie).', 'Edificio tomado del escenario guardado en este navegador (compartido con el simulador y la herramienta de energía).', 'Budynek ze scenariusza zapisanego w tej przeglądarce (wspólnego z symulatorem i narzędziem energii).'),
+  'n.saved': T7('Scenario saved in this browser — the simulator and the energy tool open it.', 'Сценарій збережено в браузері — симулятор та інструмент енергії відкриють його.', 'Szenario im Browser gespeichert — Simulator und Energiewerkzeug öffnen es.', 'Scenario in de browser opgeslagen — simulator en energietool openen het.', 'Scénario enregistré dans le navigateur — le simulateur et l’outil énergie l’ouvriront.', 'Escenario guardado en el navegador: el simulador y la herramienta de energía lo abrirán.', 'Scenariusz zapisany w przeglądarce — symulator i narzędzie energii go otworzą.'),
+  'n.nosave': T7('Browser storage is unavailable: export the scenario JSON and import it in the other tool.', 'Сховище браузера недоступне: експортуйте JSON сценарію та імпортуйте його в іншому інструменті.', 'Browserspeicher nicht verfügbar: Szenario-JSON exportieren und im anderen Werkzeug importieren.', 'Browseropslag niet beschikbaar: exporteer de scenario-JSON en importeer die in de andere tool.', 'Stockage du navigateur indisponible : exportez le JSON du scénario et importez-le dans l’autre outil.', 'Almacenamiento del navegador no disponible: exporte el JSON del escenario e impórtelo en la otra herramienta.', 'Pamięć przeglądarki niedostępna: wyeksportuj JSON scenariusza i zaimportuj go w drugim narzędziu.'),
+  'n.applied': T7('Applied: %s.', 'Застосовано: %s.', 'Übernommen: %s.', 'Toegepast: %s.', 'Appliqué : %s.', 'Aplicado: %s.', 'Zastosowano: %s.'),
+  'n.nocore': T7('vt-core.js or vt-traffic.js did not load — the calculation is unavailable.', 'vt-core.js або vt-traffic.js не завантажився — розрахунок недоступний.', 'vt-core.js oder vt-traffic.js wurde nicht geladen — keine Berechnung möglich.', 'vt-core.js of vt-traffic.js is niet geladen — de berekening is niet beschikbaar.', 'vt-core.js ou vt-traffic.js ne s’est pas chargé — le calcul est indisponible.', 'vt-core.js o vt-traffic.js no se cargó: el cálculo no está disponible.', 'Nie wczytano vt-core.js lub vt-traffic.js — obliczenie jest niedostępne.'),
+  'n.groups': T7('The building has %n lift groups; the tiles show group %g — all groups together move %h % of the building in 5 min.', 'Будівля має %n груп ліфтів; плитки показують групу %g — усі групи разом перевозять %h % людей будівлі за 5 хв.', 'Das Gebäude hat %n Aufzugsgruppen; die Kacheln zeigen Gruppe %g — alle Gruppen zusammen befördern %h % des Gebäudes in 5 min.', 'Het gebouw heeft %n liftgroepen; de tegels tonen groep %g — alle groepen samen vervoeren %h % van het gebouw per 5 min.', 'Le bâtiment compte %n groupes ; les tuiles montrent le groupe %g — ensemble, les groupes transportent %h % du bâtiment en 5 min.', 'El edificio tiene %n grupos; los recuadros muestran el grupo %g — todos juntos trasladan el %h % del edificio en 5 min.', 'Budynek ma %n grupy dźwigów; kafelki pokazują grupę %g — wszystkie grupy razem przewożą %h % osób w 5 min.'),
+  'chart.rtt': T7('Round-trip time split into its parts, per group, with the interval and the criteria', 'Час кругового рейсу за складовими для кожної групи, з інтервалом і критеріями', 'Umlaufzeit nach Anteilen je Gruppe, mit Intervall und Kriterien', 'Rondgangstijd per onderdeel en per groep, met interval en criteria', 'Temps d’aller-retour par composante et par groupe, avec intervalle et critères', 'Tiempo de ida y vuelta por componentes y grupo, con intervalo y criterios', 'Czas cyklu w podziale na składniki dla każdej grupy, z interwałem i kryteriami'),
+  'chart.kin': T7('Jerk-limited speed profile of one trip and trip time against trip length', 'Профіль швидкості з обмеженим ривком для однієї поїздки та час поїздки залежно від довжини', 'Ruckbegrenztes Geschwindigkeitsprofil einer Fahrt und Fahrzeit gegen Fahrtlänge', 'Schokbegrensd snelheidsprofiel van één rit en ritduur tegen ritlengte', 'Profil de vitesse à à-coup limité d’un trajet et durée selon la longueur', 'Perfil de velocidad con sobreaceleración limitada de un viaje y duración según la longitud', 'Profil prędkości z ograniczonym zrywem jednej jazdy i czas jazdy wobec długości'),
+  'chart.sizing': T7('Sizing grid for the chosen rated load: number of cars × rated speed, cell = interval in s, colour = rating', 'Сітка підбору для обраної вантажопідйомності: кабін × швидкість, клітинка — інтервал у с, колір — оцінка', 'Auswahlraster für die gewählte Nennlast: Kabinen × Geschwindigkeit, Zelle = Intervall in s, Farbe = Bewertung', 'Keuzeraster voor de gekozen nominale last: kooien × snelheid, cel = interval in s, kleur = beoordeling', 'Grille pour la charge choisie : cabines × vitesse, case = intervalle en s, couleur = appréciation', 'Cuadrícula para la carga elegida: cabinas × velocidad, celda = intervalo en s, color = valoración', 'Siatka doboru dla wybranego udźwigu: kabiny × prędkość, komórka = interwał w s, kolor = ocena'),
+  'chart.zoning': T7('Best split of the floors into 1, 2 and 3 zones with the cars of each zone', 'Найкращий поділ поверхів на 1, 2 і 3 зони з кабінами кожної зони', 'Beste Aufteilung der Geschosse auf 1, 2 und 3 Zonen mit den Kabinen jeder Zone', 'Beste verdeling van de verdiepingen over 1, 2 en 3 zones met de kooien per zone', 'Meilleur découpage en 1, 2 et 3 zones avec les cabines de chaque zone', 'Mejor reparto de plantas en 1, 2 y 3 zonas con las cabinas de cada zona', 'Najlepszy podział pięter na 1, 2 i 3 strefy z kabinami każdej strefy'),
+  'c.speed': T7('speed, m/s', 'швидкість, м/с', 'Geschwindigkeit, m/s', 'snelheid, m/s', 'vitesse, m/s', 'velocidad, m/s', 'prędkość, m/s'),
+  'c.time': T7('time, s', 'час, с', 'Zeit, s', 'tijd, s', 'temps, s', 'tiempo, s', 'czas, s'),
+  'c.floors': T7('trip length, floors', 'довжина поїздки, поверхів', 'Fahrtlänge, Geschosse', 'ritlengte, verdiepingen', 'longueur du trajet, étages', 'longitud del viaje, plantas', 'długość jazdy, piętra'),
+  'c.ideal': T7('at rated speed all the way', 'весь шлях з номінальною швидкістю', 'durchgehend mit Nenngeschwindigkeit', 'de hele weg op nominale snelheid', 'à vitesse nominale tout du long', 'a velocidad nominal todo el trayecto', 'cały czas z prędkością znamionową'),
+  'c.real': T7('real (accelerating, braking)', 'реально (розгін, гальмування)', 'real (Anfahren, Bremsen)', 'echt (optrekken, remmen)', 'réel (accélération, freinage)', 'real (aceleración, frenado)', 'rzeczywiście (rozruch, hamowanie)'),
+  'c.cars': T7('cars', 'кабін', 'Kabinen', 'kooien', 'cabines', 'cabinas', 'kabin'),
+  'c.unreach': T7('speed not reached', 'швидкість не досягається', 'Geschw. nicht erreicht', 'snelheid niet gehaald', 'vitesse non atteinte', 'velocidad no alcanzada', 'prędkość nieosiągalna'),
+  'c.zones': T7('%k zone(s)', 'зон: %k', '%k Zone(n)', '%k zone(s)', '%k zone(s)', '%k zona(s)', 'stref: %k'),
+  'c.interval': T7('interval', 'інтервал', 'Intervall', 'interval', 'intervalle', 'intervalo', 'interwał'),
+  'rep.title': T7('Lift traffic design — up-peak round trip', 'Розрахунок ліфтового транспорту — круговий рейс ранкового піку', 'Aufzugsverkehrsplanung — Umlaufzeit der Morgenspitze', 'Liftverkeersontwerp — rondgang ochtendspits', 'Trafic d’ascenseurs — aller-retour en pointe montante', 'Tráfico de ascensores — ida y vuelta en punta de subida', 'Projekt ruchu dźwigowego — cykl szczytu porannego')
+};
+/* example notes written for this tool (each number is checked by _vt/traffic/test.mjs) */
+var OWN = {
+  office15_out: { label: T7('Office, 15 floors — one car out of service', 'Офіс, 15 поверхів — одна кабіна не працює', 'Büro, 15 Geschosse — eine Kabine außer Betrieb', 'Kantoor, 15 verdiepingen — één kooi buiten dienst', 'Bureaux, 15 étages — une cabine hors service', 'Oficinas, 15 plantas — una cabina fuera de servicio', 'Biurowiec, 15 kondygnacji — jedna kabina wyłączona'),
+    note: T7('Take one of six cars out for maintenance in the morning peak: the interval grows from 27 to 32 s and the group carries 10.6 % instead of 12.7 % of the people in 5 min — below the office minimum. Plan maintenance outside the peaks.',
+      'Виведіть одну з шести кабін на обслуговування в ранковий пік: інтервал зростає з 27 до 32 с, а група перевозить 10,6 % замість 12,7 % людей за 5 хв — нижче мінімуму для офісу. Плануйте обслуговування поза піками.',
+      'Nehmen Sie eine von sechs Kabinen in der Morgenspitze zur Wartung heraus: das Intervall steigt von 27 auf 32 s, die Gruppe befördert 10,6 % statt 12,7 % der Personen in 5 min — unter dem Büro-Minimum. Wartung außerhalb der Spitzen planen.',
+      'Haal in de ochtendspits één van de zes kooien uit dienst voor onderhoud: het interval stijgt van 27 naar 32 s en de groep vervoert 10,6 % in plaats van 12,7 % van de mensen per 5 min — onder het kantoorminimum. Plan onderhoud buiten de spitsen.',
+      'Retirez une cabine sur six pour maintenance en pointe du matin : l’intervalle passe de 27 à 32 s et le groupe transporte 10,6 % au lieu de 12,7 % des personnes en 5 min — sous le minimum des bureaux. Planifiez la maintenance hors pointes.',
+      'Retire una de seis cabinas por mantenimiento en la punta de la mañana: el intervalo sube de 27 a 32 s y el grupo traslada el 10,6 % en lugar del 12,7 % de las personas en 5 min, por debajo del mínimo de oficinas. Planifique el mantenimiento fuera de las puntas.',
+      'Wyłącz jedną z sześciu kabin do konserwacji w szczycie porannym: interwał rośnie z 27 do 32 s, a grupa przewozi 10,6 % zamiast 12,7 % osób w 5 min — poniżej minimum dla biur. Konserwację planuj poza szczytami.') },
+  office15_fast: { label: T7('Office, 15 floors — 6 m/s instead of 2.5 m/s', 'Офіс, 15 поверхів — 6 м/с замість 2,5 м/с', 'Büro, 15 Geschosse — 6 m/s statt 2,5 m/s', 'Kantoor, 15 verdiepingen — 6 m/s in plaats van 2,5 m/s', 'Bureaux, 15 étages — 6 m/s au lieu de 2,5 m/s', 'Oficinas, 15 plantas — 6 m/s en lugar de 2,5 m/s', 'Biurowiec, 15 kondygnacji — 6 m/s zamiast 2,5 m/s'),
+    note: T7('2.4 times the speed lifts the handling capacity only from 12.7 % to 14.2 %: on 3.75 m floors most of the round trip is stops, doors and passengers. A seventh car at 2.5 m/s gives 14.9 %, and doors closing 1 s faster give 13.6 % — as much as 4 m/s.',
+      'Швидкість у 2,4 раза більша підвищує пропускну здатність лише з 12,7 % до 14,2 %: при поверхах 3,75 м більшу частину рейсу займають зупинки, двері й пасажири. Сьома кабіна на 2,5 м/с дає 14,9 %, а двері, що зачиняються на 1 с швидше, — 13,6 %, як і 4 м/с.',
+      'Die 2,4-fache Geschwindigkeit hebt die Förderleistung nur von 12,7 % auf 14,2 %: bei 3,75 m Geschosshöhe besteht der Umlauf meist aus Halten, Türen und Fahrgastwechsel. Eine siebte Kabine mit 2,5 m/s bringt 14,9 %, und 1 s schneller schließende Türen bringen 13,6 % — so viel wie 4 m/s.',
+      'Een 2,4 keer hogere snelheid verhoogt de transportcapaciteit slechts van 12,7 % naar 14,2 %: bij verdiepingen van 3,75 m bestaat de rondgang vooral uit stops, deuren en passagiers. Een zevende kooi op 2,5 m/s geeft 14,9 %, en deuren die 1 s sneller sluiten geven 13,6 % — evenveel als 4 m/s.',
+      'Une vitesse 2,4 fois plus élevée ne fait passer la capacité que de 12,7 % à 14,2 % : avec des étages de 3,75 m, l’aller-retour est surtout fait d’arrêts, de portes et de passagers. Une septième cabine à 2,5 m/s donne 14,9 %, et des portes qui ferment 1 s plus vite donnent 13,6 % — autant que 4 m/s.',
+      'Una velocidad 2,4 veces mayor solo sube la capacidad del 12,7 % al 14,2 %: con plantas de 3,75 m la vuelta es sobre todo paradas, puertas y pasajeros. Una séptima cabina a 2,5 m/s da el 14,9 %, y unas puertas que cierran 1 s más rápido dan el 13,6 %, tanto como 4 m/s.',
+      'Prędkość 2,4 razy większa podnosi zdolność przewozową tylko z 12,7 % do 14,2 %: przy piętrach 3,75 m większość cyklu to postoje, drzwi i pasażerowie. Siódma kabina 2,5 m/s daje 14,9 %, a drzwi zamykające się o 1 s szybciej — 13,6 %, tyle co 4 m/s.') },
+  short_trip: { label: T7('Why one-floor trips are slow (speed profile)', 'Чому поїздка на один поверх повільна (профіль швидкості)', 'Warum Fahrten über ein Geschoss langsam sind (Geschwindigkeitsprofil)', 'Waarom ritten van één verdieping traag zijn (snelheidsprofiel)', 'Pourquoi un trajet d’un étage est lent (profil de vitesse)', 'Por qué un viaje de una planta es lento (perfil de velocidad)', 'Dlaczego jazda o jedno piętro jest wolna (profil prędkości)'),
+    note: T7('Over one 3.75 m floor a 2.5 m/s car peaks at 1.6 m/s and needs 4.6 s instead of 1.5 s at rated speed; it reaches 2.5 m/s only on trips of 3 floors or more. A 6 m/s drive makes this trip no faster at all.',
+      'На один поверх 3,75 м кабіна 2,5 м/с розганяється лише до 1,6 м/с і їде 4,6 с замість 1,5 с з номінальною швидкістю; 2,5 м/с вона досягає лише на поїздках від 3 поверхів. Привод 6 м/с цю поїздку зовсім не прискорює.',
+      'Über ein Geschoss von 3,75 m erreicht eine 2,5-m/s-Kabine nur 1,6 m/s und braucht 4,6 s statt 1,5 s mit Nenngeschwindigkeit; 2,5 m/s erreicht sie erst ab 3 Geschossen. Ein 6-m/s-Antrieb macht diese Fahrt überhaupt nicht schneller.',
+      'Over één verdieping van 3,75 m haalt een kooi van 2,5 m/s maar 1,6 m/s en doet ze 4,6 s in plaats van 1,5 s op nominale snelheid; 2,5 m/s haalt ze pas vanaf 3 verdiepingen. Een aandrijving van 6 m/s maakt deze rit helemaal niet sneller.',
+      'Sur un étage de 3,75 m, une cabine de 2,5 m/s plafonne à 1,6 m/s et met 4,6 s au lieu de 1,5 s à vitesse nominale ; elle n’atteint 2,5 m/s qu’à partir de 3 étages. Un entraînement de 6 m/s ne rend pas ce trajet plus rapide du tout.',
+      'En una planta de 3,75 m una cabina de 2,5 m/s llega solo a 1,6 m/s y tarda 4,6 s en lugar de 1,5 s a velocidad nominal; alcanza 2,5 m/s solo en viajes de 3 plantas o más. Un accionamiento de 6 m/s no hace este viaje nada más rápido.',
+      'Na jednym piętrze 3,75 m kabina 2,5 m/s rozpędza się tylko do 1,6 m/s i jedzie 4,6 s zamiast 1,5 s z prędkością znamionową; 2,5 m/s osiąga dopiero przy jeździe o 3 piętra lub więcej. Napęd 6 m/s w ogóle nie przyspiesza tej jazdy.') }
+};
+var EX_GROUP = { core: T7('Example buildings (shared by the three tools)', 'Приклади будівель (спільні для трьох інструментів)', 'Beispielgebäude (gemeinsam für die drei Werkzeuge)', 'Voorbeeldgebouwen (gedeeld door de drie tools)', 'Bâtiments d’exemple (communs aux trois outils)', 'Edificios de ejemplo (comunes a las tres herramientas)', 'Budynki przykładowe (wspólne dla trzech narzędzi)'),
+  own: T7('What changes the result', 'Що змінює результат', 'Was das Ergebnis ändert', 'Wat het resultaat verandert', 'Ce qui change le résultat', 'Qué cambia el resultado', 'Co zmienia wynik') };
+/* ---- learn ---- */
+var LEARN = { version: 1,
+  intro: { title: T7('What this tool does', 'Що робить цей інструмент', 'Was dieses Werkzeug tut', 'Wat deze tool doet', 'Ce que fait cet outil', 'Qué hace esta herramienta', 'Co robi to narzędzie'),
+    body: T7('It sizes a lift group for the busiest moment of an office day: the morning up-peak, when everybody arrives at the lobby and goes up. Load an example building or enter your floors and cars; the tiles answer “how often does a car come” (interval) and “how many people can the group carry in 5 minutes” (handling capacity), against criteria for the building use. Then try the sizing grid, the zoning helper and the speed profile, and send the result to the simulator to see real waiting times.',
+      'Він підбирає групу ліфтів для найнапруженішого моменту офісного дня — ранкового піку, коли всі приходять у вестибюль і їдуть угору. Завантажте приклад будівлі або введіть свої поверхи й кабіни; плитки відповідають, «як часто приходить кабіна» (інтервал) і «скільки людей група перевозить за 5 хвилин» (пропускна здатність), порівняно з критеріями для призначення будівлі. Далі спробуйте сітку підбору, зонування та профіль швидкості й передайте результат у симулятор, щоб побачити реальне очікування.',
+      'Es legt eine Aufzugsgruppe für den stärksten Moment eines Bürotags aus: die Morgenspitze, wenn alle in der Eingangshalle ankommen und nach oben fahren. Laden Sie ein Beispielgebäude oder geben Sie Geschosse und Kabinen ein; die Kacheln beantworten „wie oft kommt eine Kabine“ (Intervall) und „wie viele Personen befördert die Gruppe in 5 Minuten“ (Förderleistung), gegen die Kriterien der Nutzung. Probieren Sie dann Auswahlraster, Zonierung und Geschwindigkeitsprofil und schicken Sie das Ergebnis in den Simulator, um echte Wartezeiten zu sehen.',
+      'Ze dimensioneert een liftgroep voor het drukste moment van een kantoordag: de ochtendspits, als iedereen in de lobby aankomt en naar boven gaat. Laad een voorbeeldgebouw of voer uw verdiepingen en kooien in; de tegels beantwoorden “hoe vaak komt er een kooi” (interval) en “hoeveel mensen vervoert de groep in 5 minuten” (transportcapaciteit), tegen de criteria voor het gebruik. Probeer daarna het keuzeraster, de zonering en het snelheidsprofiel en stuur het resultaat naar de simulator voor echte wachttijden.',
+      'Il dimensionne un groupe d’ascenseurs pour le moment le plus chargé d’une journée de bureau : la pointe montante du matin, quand tout le monde arrive au hall et monte. Chargez un bâtiment d’exemple ou saisissez vos niveaux et cabines ; les tuiles répondent à « tous les combien passe une cabine » (intervalle) et « combien de personnes le groupe transporte en 5 minutes » (capacité), face aux critères de l’usage. Essayez ensuite la grille de choix, le zonage et le profil de vitesse, puis envoyez le résultat au simulateur pour voir les attentes réelles.',
+      'Dimensiona un grupo de ascensores para el momento de más tráfico de un día de oficina: la punta de subida de la mañana, cuando todos llegan al vestíbulo y suben. Cargue un edificio de ejemplo o introduzca sus plantas y cabinas; los recuadros responden «cada cuánto llega una cabina» (intervalo) y «cuántas personas traslada el grupo en 5 minutos» (capacidad), frente a los criterios del uso. Pruebe luego la cuadrícula, la zonificación y el perfil de velocidad, y envíe el resultado al simulador para ver las esperas reales.',
+      'Dobiera grupę dźwigów na najbardziej obciążoną chwilę dnia w biurze: szczyt poranny, gdy wszyscy przychodzą do holu i jadą w górę. Wczytaj budynek przykładowy albo wprowadź swoje kondygnacje i kabiny; kafelki odpowiadają, „jak często przyjeżdża kabina” (interwał) i „ile osób grupa przewozi w 5 minut” (zdolność przewozowa), wobec kryteriów dla funkcji budynku. Potem wypróbuj siatkę doboru, strefy i profil prędkości, a wynik przekaż do symulatora, by zobaczyć rzeczywiste oczekiwanie.') },
+  topics: {
+    rtt: { title: T7('Round-trip time', 'Час кругового рейсу', 'Umlaufzeit', 'Rondgangstijd', 'Temps d’aller-retour', 'Tiempo de ida y vuelta', 'Czas cyklu'),
+      body: T7('One car leaves the lobby with P people, stops S times on the way up to let them out, reverses at floor H and comes back express. RTT adds travel at rated speed over 2H floors (plus the express run of a high zone), (S + 1) stops — each costs braking, accelerating, start delay and the door opening and closing — and 2P passenger transfers (in at the lobby, out upstairs). The chart shows which part dominates: on short floors it is rarely the speed.',
+        'Кабіна рушає з вестибюля з P людьми, робить S зупинок угору, щоб їх висадити, розвертається на поверсі H і повертається без зупинок. RTT складається з руху з номінальною швидкістю на 2H поверхів (плюс експресний перегін високої зони), (S + 1) зупинок — кожна коштує гальмування, розгону, затримки старту й відчинення та зачинення дверей — і 2P входів-виходів пасажирів. Графік показує, яка складова переважає: на невисоких поверхах це рідко швидкість.',
+        'Eine Kabine fährt mit P Personen aus der Halle ab, hält S-mal auf dem Weg nach oben, kehrt im Geschoss H um und fährt express zurück. RTT addiert die Fahrt mit Nenngeschwindigkeit über 2H Geschosse (plus die Expressfahrt einer hohen Zone), (S + 1) Halte — jeder kostet Bremsen, Anfahren, Anfahrverzögerung, Öffnen und Schließen der Türen — und 2P Fahrgastwechsel. Das Diagramm zeigt, was dominiert: bei niedrigen Geschossen selten die Geschwindigkeit.',
+        'Een kooi vertrekt uit de lobby met P mensen, stopt S keer op weg naar boven, keert op verdieping H en komt express terug. RTT telt het rijden op nominale snelheid over 2H verdiepingen (plus de expresrit van een hoge zone), (S + 1) stops — elk kost remmen, optrekken, startvertraging en deuren openen en sluiten — en 2P keer in- of uitstappen. De grafiek toont wat overheerst: bij lage verdiepingen zelden de snelheid.',
+        'Une cabine quitte le hall avec P personnes, s’arrête S fois en montant, s’inverse au niveau H et redescend en express. Le RTT additionne la course à vitesse nominale sur 2H étages (plus le trajet express d’une zone haute), (S + 1) arrêts — chacun coûte freinage, accélération, retard au démarrage, ouverture et fermeture des portes — et 2P transferts de passagers. Le graphique montre ce qui domine : avec des étages courants, rarement la vitesse.',
+        'Una cabina sale del vestíbulo con P personas, para S veces al subir, invierte en la planta H y vuelve exprés. El RTT suma el recorrido a velocidad nominal sobre 2H plantas (más el tramo exprés de una zona alta), (S + 1) paradas — cada una cuesta frenado, aceleración, retardo de arranque y apertura y cierre de puertas — y 2P transferencias de pasajeros. El gráfico muestra qué domina: con plantas normales, rara vez la velocidad.',
+        'Kabina rusza z holu z P osobami, zatrzymuje się S razy w drodze w górę, zawraca na piętrze H i wraca ekspresowo. RTT sumuje jazdę z prędkością znamionową przez 2H pięter (plus przejazd ekspresowy wysokiej strefy), (S + 1) postojów — każdy to hamowanie, rozruch, opóźnienie startu oraz otwarcie i zamknięcie drzwi — i 2P wymian pasażerów. Wykres pokazuje, co dominuje: przy zwykłych piętrach rzadko prędkość.') },
+    sh: { title: T7('Probable stops S and reversal floor H', 'Імовірні зупинки S і поверх розвороту H', 'Wahrscheinliche Halte S und Umkehrgeschoss H', 'Waarschijnlijke stops S en keerverdieping H', 'Arrêts probables S et niveau d’inversion H', 'Paradas probables S y planta de inversión H', 'Prawdopodobne postoje S i piętro nawrotu H'),
+      body: T7('With P people choosing floors at random in proportion to the floor population, floor i gets no stop with probability (1 − Uᵢ)ᴾ, so S = N − Σ(1 − Uᵢ)ᴾ. The car goes no higher than floor j if everybody chose j or below — probability (U₁ + … + Uⱼ)ᴾ — which gives H. A full car with 13 people in a 15-floor office stops about 9 times and almost always reaches the top.',
+        'Якщо P людей обирають поверхи випадково пропорційно їхньому населенню, поверх i лишається без зупинки з імовірністю (1 − Uᵢ)ᴾ, тож S = N − Σ(1 − Uᵢ)ᴾ. Кабіна не підніметься вище поверху j, якщо всі обрали j або нижче, — імовірність (U₁ + … + Uⱼ)ᴾ, — звідси H. Кабіна з 13 людьми в 15-поверховому офісі зупиняється близько 9 разів і майже завжди доходить до верху.',
+        'Wählen P Personen die Geschosse zufällig im Verhältnis ihrer Belegung, bleibt Geschoss i mit der Wahrscheinlichkeit (1 − Uᵢ)ᴾ ohne Halt, also S = N − Σ(1 − Uᵢ)ᴾ. Die Kabine fährt nicht höher als j, wenn alle j oder tiefer gewählt haben — Wahrscheinlichkeit (U₁ + … + Uⱼ)ᴾ —, daraus folgt H. Eine Kabine mit 13 Personen hält in einem 15-geschossigen Büro etwa 9-mal und erreicht fast immer das oberste Geschoss.',
+        'Als P mensen willekeurig verdiepingen kiezen naar verhouding van de bezetting, krijgt verdieping i geen stop met kans (1 − Uᵢ)ᴾ, dus S = N − Σ(1 − Uᵢ)ᴾ. De kooi gaat niet hoger dan j als iedereen j of lager koos — kans (U₁ + … + Uⱼ)ᴾ — en dat geeft H. Een kooi met 13 mensen in een kantoor van 15 verdiepingen stopt ongeveer 9 keer en haalt bijna altijd de top.',
+        'Si P personnes choisissent les étages au hasard en proportion de leur effectif, l’étage i n’a pas d’arrêt avec la probabilité (1 − Uᵢ)ᴾ, d’où S = N − Σ(1 − Uᵢ)ᴾ. La cabine ne monte pas plus haut que j si tous ont choisi j ou en dessous — probabilité (U₁ + … + Uⱼ)ᴾ — ce qui donne H. Une cabine de 13 personnes dans des bureaux de 15 étages s’arrête environ 9 fois et atteint presque toujours le sommet.',
+        'Si P personas eligen plantas al azar en proporción a su ocupación, la planta i queda sin parada con probabilidad (1 − Uᵢ)ᴾ, así que S = N − Σ(1 − Uᵢ)ᴾ. La cabina no sube más allá de j si todos eligieron j o inferior — probabilidad (U₁ + … + Uⱼ)ᴾ —, de ahí H. Una cabina con 13 personas en una oficina de 15 plantas para unas 9 veces y casi siempre llega arriba.',
+        'Gdy P osób wybiera piętra losowo proporcjonalnie do ich zaludnienia, piętro i nie ma postoju z prawdopodobieństwem (1 − Uᵢ)ᴾ, więc S = N − Σ(1 − Uᵢ)ᴾ. Kabina nie wjedzie wyżej niż j, jeśli wszyscy wybrali j lub niżej — prawdopodobieństwo (U₁ + … + Uⱼ)ᴾ — stąd H. Kabina z 13 osobami w 15-kondygnacyjnym biurowcu zatrzymuje się ok. 9 razy i prawie zawsze dojeżdża na górę.') },
+    interval: { title: T7('Interval', 'Інтервал', 'Intervall', 'Interval', 'Intervalle', 'Intervalo', 'Interwał'),
+      body: T7('INT = RTT / L: with L cars evenly spread, a car leaves the lobby every INT seconds. It is the planner’s first quality measure: the waiting time follows from it. More cars shorten it in direct proportion; faster cars only shorten the travel part of RTT.',
+        'INT = RTT / L: якщо L кабін рівномірно розподілені, кабіна рушає з вестибюля кожні INT секунд. Це перша міра якості для проєктувальника: з нього випливає очікування. Більше кабін скорочує інтервал прямо пропорційно; швидші кабіни скорочують лише складову руху в RTT.',
+        'INT = RTT / L: bei L gleichmäßig verteilten Kabinen fährt alle INT Sekunden eine aus der Halle ab. Das ist das erste Gütemaß des Planers: die Wartezeit folgt daraus. Mehr Kabinen verkürzen es proportional; schnellere Kabinen verkürzen nur den Fahranteil der RTT.',
+        'INT = RTT / L: met L gelijkmatig verdeelde kooien vertrekt er elke INT seconden een uit de lobby. Het is de eerste kwaliteitsmaat van de ontwerper: de wachttijd volgt eruit. Meer kooien verkorten het evenredig; snellere kooien verkorten alleen het rijdeel van de RTT.',
+        'INT = RTT / L : avec L cabines bien réparties, une cabine quitte le hall toutes les INT secondes. C’est la première mesure de qualité du concepteur : l’attente en découle. Plus de cabines la réduisent proportionnellement ; des cabines plus rapides ne réduisent que la part de course du RTT.',
+        'INT = RTT / L: con L cabinas bien repartidas, una cabina sale del vestíbulo cada INT segundos. Es la primera medida de calidad del proyectista: de ella se deriva la espera. Más cabinas lo acortan proporcionalmente; cabinas más rápidas solo acortan la parte de recorrido del RTT.',
+        'INT = RTT / L: przy L równomiernie rozłożonych kabinach co INT sekund jedna odjeżdża z holu. To pierwsza miara jakości projektanta: z niej wynika oczekiwanie. Więcej kabin skraca go proporcjonalnie; szybsze kabiny skracają tylko składnik jazdy w RTT.') },
+    hc5: { title: T7('Handling capacity in 5 minutes', 'Пропускна здатність за 5 хвилин', 'Förderleistung in 5 Minuten', 'Transportcapaciteit in 5 minuten', 'Capacité de transport sur 5 minutes', 'Capacidad de transporte en 5 minutos', 'Zdolność przewozowa w 5 minut'),
+      body: T7('HC5 = 300·P·L / RTT persons: how many people the group lifts out of the lobby in the busiest 5 minutes. Divided by the people present above the lobby it becomes %POP — the share of the building that can arrive in 5 minutes. If the arrival rate is higher than this, queues in the lobby grow without limit; the simulator shows that.',
+        'HC5 = 300·P·L / RTT осіб: скільки людей група забирає з вестибюля за найнапруженіші 5 хвилин. Поділене на кількість присутніх над вестибюлем, це %POP — частка будівлі, що може прибути за 5 хвилин. Якщо люди приходять швидше, черга у вестибюлі росте без меж; симулятор це показує.',
+        'HC5 = 300·P·L / RTT Personen: so viele Menschen holt die Gruppe in den stärksten 5 Minuten aus der Halle. Geteilt durch die Anwesenden über der Halle ergibt das %POP — der Anteil des Gebäudes, der in 5 Minuten ankommen kann. Kommen mehr, wächst die Schlange in der Halle ohne Grenze; der Simulator zeigt das.',
+        'HC5 = 300·P·L / RTT personen: zoveel mensen haalt de groep in de drukste 5 minuten uit de lobby. Gedeeld door de aanwezigen boven de lobby wordt dat %POP — het aandeel van het gebouw dat in 5 minuten kan aankomen. Komen er meer, dan groeit de rij in de lobby onbeperkt; de simulator laat het zien.',
+        'HC5 = 300·P·L / RTT personnes : le nombre de personnes que le groupe enlève du hall pendant les 5 minutes les plus chargées. Divisé par les présents au-dessus du hall, cela donne %POP — la part du bâtiment qui peut arriver en 5 minutes. Au-delà, la file au hall grandit sans limite ; le simulateur le montre.',
+        'HC5 = 300·P·L / RTT personas: cuántas personas saca el grupo del vestíbulo en los 5 minutos de más tráfico. Dividido por los presentes sobre el vestíbulo da %POP: la parte del edificio que puede llegar en 5 minutos. Si llegan más, la cola del vestíbulo crece sin límite; el simulador lo muestra.',
+        'HC5 = 300·P·L / RTT osób: tyle osób grupa zabiera z holu w najbardziej obciążonych 5 minutach. Podzielone przez osoby obecne nad holem daje %POP — udział budynku, który może przybyć w 5 minut. Jeśli przychodzi więcej, kolejka w holu rośnie bez końca; symulator to pokazuje.') },
+    awt: { title: T7('Waiting time estimate', 'Оцінка часу очікування', 'Schätzung der Wartezeit', 'Schatting van de wachttijd', 'Estimation de l’attente', 'Estimación de la espera', 'Szacunek czasu oczekiwania'),
+      body: T7('An empirical relation for the up-peak, fitted to simulations: AWT ≈ INT·(0.4 + (1.8·P/CC − 0.77)²), valid for car loads between 50 % and 80 % of the rated persons. At 80 % load it gives about 0.85 × interval. It is an estimate for comparing options; the simulator measures the wait person by person.',
+        'Емпіричне співвідношення для ранкового піку, підібране за симуляціями: AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), чинне для завантаження від 50 % до 80 % номінальної кількості осіб. При завантаженні 80 % дає близько 0,85 × інтервалу. Це оцінка для порівняння варіантів; симулятор вимірює очікування кожної людини.',
+        'Eine empirische, an Simulationen angepasste Beziehung für die Morgenspitze: AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), gültig für Kabinenfüllungen zwischen 50 % und 80 % der Nennpersonenzahl. Bei 80 % ergibt sie etwa 0,85 × Intervall. Sie dient dem Vergleich von Varianten; der Simulator misst die Wartezeit Person für Person.',
+        'Een empirische, op simulaties gefitte relatie voor de ochtendspits: AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), geldig voor kooibelastingen tussen 50 % en 80 % van het nominale aantal personen. Bij 80 % geeft ze ongeveer 0,85 × interval. Ze dient om opties te vergelijken; de simulator meet de wachttijd per persoon.',
+        'Une relation empirique ajustée sur des simulations de pointe montante : AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), valable pour un remplissage entre 50 % et 80 % du nombre nominal de personnes. À 80 %, elle donne environ 0,85 × intervalle. C’est une estimation pour comparer des options ; le simulateur mesure l’attente personne par personne.',
+        'Una relación empírica ajustada a simulaciones de punta de subida: AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), válida para cargas entre el 50 % y el 80 % de las personas nominales. Al 80 % da cerca de 0,85 × intervalo. Es una estimación para comparar opciones; el simulador mide la espera persona a persona.',
+        'Empiryczna zależność dla szczytu porannego dopasowana do symulacji: AWT ≈ INT·(0,4 + (1,8·P/CC − 0,77)²), ważna dla wypełnienia od 50 % do 80 % znamionowej liczby osób. Przy 80 % daje ok. 0,85 × interwał. To szacunek do porównywania wariantów; symulator mierzy oczekiwanie każdej osoby.') },
+    kinematics: { title: T7('Why short trips never reach rated speed', 'Чому короткі поїздки не досягають номінальної швидкості', 'Warum kurze Fahrten nie die Nenngeschwindigkeit erreichen', 'Waarom korte ritten nooit de nominale snelheid halen', 'Pourquoi les trajets courts n’atteignent jamais la vitesse nominale', 'Por qué los viajes cortos nunca alcanzan la velocidad nominal', 'Dlaczego krótkie jazdy nie osiągają prędkości znamionowej'),
+      body: T7('Comfort limits the acceleration (about 1 m/s²) and its rate of change, the jerk (about 1.5 m/s³). To reach v and stop again the car needs v²/a + v·a/j metres — 7.9 m at 2.5 m/s, 40 m at 6 m/s. A one-floor trip is shorter, so the car accelerates, brakes and never cruises. That is why the stop time t_s in RTT is so large, and why a faster drive helps tall zones and express runs, not short hops.',
+        'Комфорт обмежує прискорення (близько 1 м/с²) і швидкість його зміни — ривок (близько 1,5 м/с³). Щоб досягти v і знову зупинитися, кабіні треба v²/a + v·a/j метрів — 7,9 м при 2,5 м/с, 40 м при 6 м/с. Поїздка на один поверх коротша, тож кабіна розганяється, гальмує й ніколи не їде рівномірно. Тому час зупинки t_s у RTT такий великий, і тому швидший привод допомагає високим зонам та експресним перегонам, а не коротким переїздам.',
+        'Der Komfort begrenzt die Beschleunigung (etwa 1 m/s²) und ihre Änderungsrate, den Ruck (etwa 1,5 m/s³). Um v zu erreichen und wieder anzuhalten, braucht die Kabine v²/a + v·a/j Meter — 7,9 m bei 2,5 m/s, 40 m bei 6 m/s. Eine Fahrt über ein Geschoss ist kürzer: die Kabine beschleunigt, bremst und fährt nie konstant. Darum ist die Haltezeit t_s in der RTT so groß, und darum hilft ein schnellerer Antrieb hohen Zonen und Expressfahrten, nicht kurzen Sprüngen.',
+        'Comfort beperkt de versnelling (ongeveer 1 m/s²) en de verandering ervan, de schok (ongeveer 1,5 m/s³). Om v te halen en weer te stoppen heeft de kooi v²/a + v·a/j meter nodig — 7,9 m bij 2,5 m/s, 40 m bij 6 m/s. Een rit van één verdieping is korter: de kooi trekt op, remt en rijdt nooit constant. Daarom is de stoptijd t_s in de RTT zo groot, en daarom helpt een snellere aandrijving hoge zones en expresritten, geen korte sprongen.',
+        'Le confort limite l’accélération (environ 1 m/s²) et sa variation, l’à-coup (environ 1,5 m/s³). Pour atteindre v et s’arrêter, la cabine a besoin de v²/a + v·a/j mètres — 7,9 m à 2,5 m/s, 40 m à 6 m/s. Un trajet d’un étage est plus court : la cabine accélère, freine et ne roule jamais à vitesse constante. D’où le temps d’arrêt t_s si important dans le RTT, et un entraînement plus rapide utile aux zones hautes et aux trajets express, pas aux sauts courts.',
+        'El confort limita la aceleración (cerca de 1 m/s²) y su variación, la sobreaceleración (cerca de 1,5 m/s³). Para alcanzar v y volver a parar la cabina necesita v²/a + v·a/j metros: 7,9 m a 2,5 m/s, 40 m a 6 m/s. Un viaje de una planta es más corto: la cabina acelera, frena y nunca va a velocidad constante. Por eso el tiempo de parada t_s del RTT es tan grande, y por eso un accionamiento más rápido ayuda a las zonas altas y los tramos exprés, no a los saltos cortos.',
+        'Komfort ogranicza przyspieszenie (ok. 1 m/s²) i tempo jego zmiany — zryw (ok. 1,5 m/s³). Aby osiągnąć v i znów stanąć, kabina potrzebuje v²/a + v·a/j metrów — 7,9 m przy 2,5 m/s, 40 m przy 6 m/s. Jazda o jedno piętro jest krótsza: kabina przyspiesza, hamuje i nigdy nie jedzie ze stałą prędkością. Dlatego czas postoju t_s w RTT jest tak duży i dlatego szybszy napęd pomaga wysokim strefom i przejazdom ekspresowym, a nie krótkim skokom.') },
+    sizing: { title: T7('Sizing grid', 'Сітка підбору', 'Auswahlraster', 'Keuzeraster', 'Grille de choix', 'Cuadrícula de selección', 'Siatka doboru'),
+      body: T7('The tool recomputes the round trip for 1–8 cars, the preferred rated loads 630–2000 kg (ISO 8100-30) and speeds 1–6 m/s, keeping your floors, door times and acceleration. An option counts only if the car can actually reach its speed within the travel. The list starts with the fewest shafts (shafts cost floor area on every storey), then the smaller car, then the slower drive.',
+        'Інструмент перераховує круговий рейс для 1–8 кабін, рекомендованих вантажопідйомностей 630–2000 кг (ISO 8100-30) і швидкостей 1–6 м/с, зберігаючи ваші поверхи, час дверей і прискорення. Варіант зараховується, лише якщо кабіна справді досягає своєї швидкості на висоті підйому. Перелік починається з найменшої кількості шахт (шахти забирають площу на кожному поверсі), далі менша кабіна, далі повільніший привод.',
+        'Das Werkzeug rechnet den Umlauf für 1–8 Kabinen, die Vorzugsnennlasten 630–2000 kg (ISO 8100-30) und 1–6 m/s neu, mit Ihren Geschossen, Türzeiten und Beschleunigungen. Eine Variante zählt nur, wenn die Kabine ihre Geschwindigkeit innerhalb der Förderhöhe tatsächlich erreicht. Die Liste beginnt mit den wenigsten Schächten (Schächte kosten Fläche in jedem Geschoss), dann kleinere Kabine, dann langsamerer Antrieb.',
+        'De tool herberekent de rondgang voor 1–8 kooien, de voorkeurslasten 630–2000 kg (ISO 8100-30) en 1–6 m/s, met uw verdiepingen, deurtijden en versnelling. Een optie telt alleen als de kooi haar snelheid binnen de hefhoogte echt haalt. De lijst begint met de minste schachten (schachten kosten vloeroppervlak op elke verdieping), dan de kleinere kooi, dan de tragere aandrijving.',
+        'L’outil recalcule l’aller-retour pour 1 à 8 cabines, les charges préférentielles de 630 à 2000 kg (ISO 8100-30) et des vitesses de 1 à 6 m/s, en gardant vos niveaux, temps de porte et accélération. Une option ne compte que si la cabine atteint réellement sa vitesse sur la course. La liste commence par le moins de gaines (elles coûtent de la surface à chaque étage), puis la plus petite cabine, puis l’entraînement le plus lent.',
+        'La herramienta recalcula la vuelta para 1–8 cabinas, las cargas preferentes de 630–2000 kg (ISO 8100-30) y velocidades de 1–6 m/s, manteniendo sus plantas, tiempos de puerta y aceleración. Una opción solo cuenta si la cabina alcanza de verdad su velocidad en el recorrido. La lista empieza por menos huecos (cada hueco cuesta superficie en todas las plantas), luego la cabina menor y luego el accionamiento más lento.',
+        'Narzędzie przelicza cykl dla 1–8 kabin, zalecanych udźwigów 630–2000 kg (ISO 8100-30) i prędkości 1–6 m/s, zachowując Twoje kondygnacje, czasy drzwi i przyspieszenie. Wariant liczy się tylko wtedy, gdy kabina rzeczywiście osiąga swoją prędkość na wysokości podnoszenia. Lista zaczyna się od najmniejszej liczby szybów (szyb zabiera powierzchnię na każdym piętrze), potem mniejsza kabina, potem wolniejszy napęd.') },
+    zoning: { title: T7('Zoning tall buildings', 'Зонування висотних будівель', 'Zonierung hoher Gebäude', 'Zonering van hoge gebouwen', 'Zonage des immeubles de grande hauteur', 'Zonificación de edificios altos', 'Strefy w wysokich budynkach'),
+      body: T7('Above about 15–20 floors one group serving everything stops too often: S grows and every round trip gets long. Splitting the floors into stacked zones, each with its own cars running express through the lower floors, cuts the stops per trip. The helper tries every split into 1, 2 or 3 zones (at least two floors each), gives each zone at least two cars (so that a zone keeps a lift when one is out of service) and then the next car always to the zone with the lowest handling capacity, and keeps the split with the best rating and the strongest weakest zone.',
+        'Вище приблизно 15–20 поверхів одна група на всі поверхи зупиняється надто часто: S зростає, і кожен рейс стає довгим. Поділ поверхів на зони одна над одною, кожна з власними кабінами, що проходять нижні поверхи експресом, зменшує кількість зупинок за рейс. Помічник перебирає всі поділи на 1, 2 чи 3 зони (щонайменше по два поверхи), дає кожній зоні щонайменше дві кабіни (щоб зона не лишилася без ліфта, коли один на обслуговуванні), а кожну наступну — зоні з найменшою пропускною здатністю, і залишає поділ із найкращою оцінкою та найсильнішою слабкою зоною.',
+        'Ab etwa 15–20 Geschossen hält eine Gruppe für alles zu oft: S wächst und jede Rundfahrt wird lang. Die Aufteilung in übereinanderliegende Zonen mit eigenen Kabinen, die die unteren Geschosse express durchfahren, senkt die Halte je Fahrt. Die Hilfe probiert jede Aufteilung in 1, 2 oder 3 Zonen (je mindestens zwei Geschosse), gibt jeder Zone mindestens zwei Kabinen (damit eine Zone bei Wartung nicht ohne Aufzug ist), jede weitere der Zone mit der geringsten Förderleistung, und behält die Aufteilung mit der besten Bewertung und der stärksten schwächsten Zone.',
+        'Boven ongeveer 15–20 verdiepingen stopt één groep voor alles te vaak: S groeit en elke rondgang wordt lang. De verdiepingen opdelen in gestapelde zones, elk met eigen kooien die express langs de lagere verdiepingen rijden, verlaagt het aantal stops per rit. De hulp probeert elke verdeling in 1, 2 of 3 zones (minstens twee verdiepingen elk), geeft elke zone minstens twee kooien (zodat een zone een lift houdt als er één in onderhoud is) en elke volgende aan de zone met de laagste capaciteit, en houdt de verdeling met de beste beoordeling en de sterkste zwakste zone.',
+        'Au-delà d’environ 15 à 20 étages, un groupe unique s’arrête trop souvent : S augmente et chaque aller-retour s’allonge. Découper les étages en zones superposées, chacune avec ses cabines qui traversent les étages bas en express, réduit les arrêts par voyage. L’aide essaie tous les découpages en 1, 2 ou 3 zones (au moins deux étages chacune), donne au moins deux cabines à chaque zone (pour qu’une zone garde un ascenseur quand l’autre est en maintenance) puis chaque cabine suivante à la zone la moins bien servie, et garde le découpage le mieux noté dont la zone la plus faible est la plus forte.',
+        'Por encima de unas 15–20 plantas un solo grupo para todo para demasiado: S crece y cada vuelta se alarga. Dividir las plantas en zonas superpuestas, cada una con sus cabinas que cruzan las plantas bajas en exprés, reduce las paradas por viaje. El asistente prueba todos los repartos en 1, 2 o 3 zonas (al menos dos plantas cada una), da al menos dos cabinas a cada zona (para que una zona no se quede sin ascensor durante el mantenimiento) y cada cabina siguiente a la zona con menos capacidad, y se queda con el reparto mejor valorado cuya zona más débil es la más fuerte.',
+        'Powyżej ok. 15–20 kondygnacji jedna grupa na wszystkie piętra zatrzymuje się za często: S rośnie i każdy cykl się wydłuża. Podział pięter na strefy jedna nad drugą, każda z własnymi kabinami przejeżdżającymi ekspresowo przez niższe piętra, zmniejsza liczbę postojów na kurs. Pomocnik sprawdza każdy podział na 1, 2 lub 3 strefy (co najmniej po dwa piętra), daje każdej strefie co najmniej dwie kabiny (by strefa nie została bez dźwigu podczas konserwacji), a każdą następną strefie o najmniejszej zdolności przewozowej, i zostawia podział z najlepszą oceną i najsilniejszą najsłabszą strefą.') },
+    criteria: { title: T7('Design criteria', 'Критерії проєктування', 'Auslegungskriterien', 'Ontwerpcriteria', 'Critères de conception', 'Criterios de diseño', 'Kryteria projektowe'),
+      body: T7('Planning guides quote handling capacities and intervals by building use: offices roughly 12–15 % in 5 min and 25–30 s, flats far less but with intervals up to about a minute, hotels and hospitals in between. The exact table values could not be checked here against the current paid editions, so the tool labels them learning assumptions. Green = good value, amber = minimum met, red = not met. Use your project’s or client’s criteria.',
+        'Посібники з проєктування наводять пропускну здатність та інтервали за призначенням будівлі: офіси — приблизно 12–15 % за 5 хв і 25–30 с, житло — значно менше, але з інтервалом до хвилини, готелі й лікарні — посередині. Точні табличні значення тут не вдалося звірити з чинними платними виданнями, тому інструмент позначає їх як навчальні припущення. Зелений — добре значення, жовтий — мінімум виконано, червоний — не виконано. Використовуйте критерії вашого проєкту чи замовника.',
+        'Planungsleitfäden nennen Förderleistungen und Intervalle je Nutzung: Büros etwa 12–15 % in 5 min und 25–30 s, Wohnbauten deutlich weniger, aber mit Intervallen bis etwa einer Minute, Hotels und Krankenhäuser dazwischen. Die genauen Tabellenwerte ließen sich hier nicht mit den aktuellen kostenpflichtigen Ausgaben abgleichen, daher kennzeichnet das Werkzeug sie als Lernannahmen. Grün = guter Wert, Gelb = Minimum erfüllt, Rot = nicht erfüllt. Verwenden Sie die Kriterien Ihres Projekts oder Bauherrn.',
+        'Ontwerprichtlijnen noemen transportcapaciteiten en intervallen per gebouwgebruik: kantoren ongeveer 12–15 % per 5 min en 25–30 s, woningen veel minder maar met intervallen tot ongeveer een minuut, hotels en ziekenhuizen ertussenin. De exacte tabelwaarden konden hier niet worden gecontroleerd tegen de huidige betaalde edities, dus de tool noemt ze leeraannames. Groen = goede waarde, oranje = minimum gehaald, rood = niet gehaald. Gebruik de criteria van uw project of opdrachtgever.',
+        'Les guides de conception citent capacités et intervalles par usage : bureaux environ 12–15 % en 5 min et 25–30 s, logements bien moins mais avec des intervalles jusqu’à environ une minute, hôtels et hôpitaux entre les deux. Les valeurs exactes des tableaux n’ont pas pu être vérifiées ici dans les éditions payantes actuelles ; l’outil les présente donc comme hypothèses pédagogiques. Vert = bonne valeur, orange = minimum atteint, rouge = non atteint. Utilisez les critères de votre projet ou du maître d’ouvrage.',
+        'Las guías de diseño citan capacidades e intervalos por uso: oficinas en torno al 12–15 % en 5 min y 25–30 s, viviendas mucho menos pero con intervalos de hasta un minuto, hoteles y hospitales en medio. Los valores exactos de las tablas no se han podido comprobar aquí con las ediciones de pago vigentes, así que la herramienta los marca como supuestos didácticos. Verde = valor bueno, ámbar = mínimo cumplido, rojo = no cumplido. Use los criterios de su proyecto o de la propiedad.',
+        'Poradniki projektowe podają zdolność przewozową i interwały według funkcji budynku: biura ok. 12–15 % w 5 min i 25–30 s, mieszkania znacznie mniej, ale z interwałem do ok. minuty, hotele i szpitale pośrodku. Dokładnych wartości tabel nie dało się tu sprawdzić w aktualnych płatnych wydaniach, więc narzędzie oznacza je jako założenia dydaktyczne. Zielony = dobra wartość, żółty = minimum spełnione, czerwony = niespełnione. Stosuj kryteria swojego projektu lub inwestora.') },
+    scenario: { title: T7('One building, three tools', 'Одна будівля — три інструменти', 'Ein Gebäude, drei Werkzeuge', 'Eén gebouw, drie tools', 'Un bâtiment, trois outils', 'Un edificio, tres herramientas', 'Jeden budynek, trzy narzędzia'),
+      body: T7('The building, the lift groups and the traffic live in one scenario file shared with the waiting-time simulator and the energy tool. “Verify in the simulator” saves it with this tool’s results and opens the simulator: the formula assumes a perfectly regular service, the simulator shows bunching, queues and the real spread of waiting times.',
+        'Будівля, групи ліфтів і рух зберігаються в одному файлі сценарію, спільному із симулятором очікування та інструментом енергії. «Перевірити в симуляторі» зберігає його з результатами цього інструмента й відкриває симулятор: формула припускає ідеально рівномірну роботу, а симулятор показує скупчення кабін, черги й реальний розкид очікування.',
+        'Gebäude, Aufzugsgruppen und Verkehr stehen in einer Szenariodatei, die der Wartezeitsimulator und das Energiewerkzeug mitnutzen. „Im Simulator prüfen“ speichert sie mit den Ergebnissen dieses Werkzeugs und öffnet den Simulator: die Formel nimmt einen völlig gleichmäßigen Betrieb an, der Simulator zeigt Pulkbildung, Schlangen und die echte Streuung der Wartezeiten.',
+        'Het gebouw, de liftgroepen en het verkeer staan in één scenariobestand, gedeeld met de wachttijdsimulator en de energietool. “Controleren in de simulator” slaat het op met de resultaten van deze tool en opent de simulator: de formule veronderstelt een volkomen regelmatige dienst, de simulator toont klontering, rijen en de echte spreiding van wachttijden.',
+        'Le bâtiment, les groupes et le trafic sont dans un fichier de scénario partagé avec le simulateur d’attente et l’outil énergie. « Vérifier dans le simulateur » l’enregistre avec les résultats de cet outil et ouvre le simulateur : la formule suppose un service parfaitement régulier, le simulateur montre les cabines qui se suivent, les files et la vraie dispersion des attentes.',
+        'El edificio, los grupos y el tráfico viven en un archivo de escenario compartido con el simulador de espera y la herramienta de energía. «Comprobar en el simulador» lo guarda con los resultados de esta herramienta y abre el simulador: la fórmula supone un servicio perfectamente regular; el simulador muestra cabinas en pelotón, colas y la dispersión real de las esperas.',
+        'Budynek, grupy dźwigów i ruch są w jednym pliku scenariusza, wspólnym z symulatorem oczekiwania i narzędziem energii. „Sprawdź w symulatorze” zapisuje go z wynikami tego narzędzia i otwiera symulator: wzór zakłada idealnie regularną obsługę, symulator pokazuje zbijanie się kabin w pary, kolejki i rzeczywisty rozrzut oczekiwania.') }
+  },
+  tour: [{ topic: 'rtt', focus: '.dgu-stage' }, { topic: 'interval', focus: '.dgu-r-results' }, { topic: 'hc5', focus: '.dgu-r-results' },
+         { topic: 'kinematics', focus: '[data-dgu-field="f-speed"]' }, { topic: 'sizing', focus: '[data-dgu-field="f-view"]' }, { topic: 'scenario' }] };
+/* ---- helpers ---- */
+function tx(k) { return I[k] || { en: k }; }
+function curLang() { var l = (window.DiagramUI && DiagramUI.current && DiagramUI.current.lang) || document.documentElement.lang || 'en'; return LANGS7.indexOf(l) >= 0 ? l : 'en'; }
+function pick(o) { var l = curLang(); return (o && o[l]) || (o && o.en) || String(o == null ? '' : o); }
+function S(k, subs) { var s = pick(tx(k)); if (subs) Object.keys(subs).sort(function (a, b) { return b.length - a.length; }).forEach(function (p) { s = s.split('%' + p).join(subs[p]); }); return s; }
+function UN(k) { return pick(tx(k)); }
+function fmt(v, d) { if (v == null || !isFinite(v)) return '—'; if (CORE) return CORE.fmt(v, curLang(), d); return Number(v).toFixed(d == null ? 1 : d); }
+function clone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function opts(prefix, keys) { return keys.map(function (k) { return { value: k, label: tx(prefix + k) }; }); }
+function coreName(dict, k) { return (dict && dict[k]) || { en: k }; }
+/* group / zone names may be 7-language objects (core presets, QA-9) or plain strings (user, zoneDoc) */
+function gname(n, id) { if (n && typeof n === 'object') return pick(n); if (CORE && CORE.groupName) return CORE.groupName({ name: n, id: id }, curLang()); return String(n || id || ''); }
+function download(name, type, text) {
+  var b = new Blob([text], { type: type }), u = URL.createObjectURL(b), el = document.createElement('a');
+  el.href = u; el.download = name; document.body.appendChild(el); el.click(); setTimeout(function () { URL.revokeObjectURL(u); el.remove(); }, 0);
+}
+var LIGHT_TONE = { green: 'ok', amber: 'warn', red: 'bad', grey: null };
+var VERDICT_TONE = { meets: 'ok', marginal: 'warn', fails: 'bad', no_cars: 'bad' };
+var DATA_COL = { green: '#2e9e5b', amber: '#d89a1c', red: '#d0473b' };
+
+/* ---- state ---- */
+var CORE_IDS = ['office15', 'office30_zoned', 'office30_onegroup', 'residential10', 'residential10_2', 'hotel20', 'hospital8', 'campus_canteen'];
+function presetDoc(id) { return CORE && CORE.PRESETS && CORE.PRESETS[id] ? CORE.preset(id) : null; }
+var DEFAULTS = { doc: presetDoc('office15'), group: 'A', lf: 0.8, view: 'rtt', kin: 1, szload: 1275, zcars: 0, zspeed: 0, origin: 'preset' };
+var state = clone(DEFAULTS), last = null, ui = null, stage = null, flash = '';
+
+function selGroup() {
+  var gs = (state.doc && state.doc.groups) || [];
+  var g = gs.filter(function (x) { return x.id === state.group; })[0] || gs[0] || null;
+  if (g) state.group = g.id;
+  return g;
+}
+function car0() { var g = selGroup(); return g && g.cars[0] ? g.cars[0] : null; }
+function inService(g) { return g.cars.filter(function (c) { return c.in_service !== false; }).length; }
+/* keep the document consistent after list edits: one group serves every floor; entrance flag follows the share */
+/* CR-15: a single group gets only the floors ADDED in this session (ids not seen when the document was adopted); an
+   imported served list that skips parking or plant floors is kept. Removed floors drop out of every group. */
+var seen = { doc: null, ids: {} };
+function syncDoc() {
+  var d = state.doc; if (!d || !d.building) return;
+  var floors = d.building.floors || [];
+  floors.forEach(function (f) { f.entrance = (+f.entrance_share || 0) > 0; if (f.attractor_share == null) f.attractor_share = 0; });
+  if (seen.doc !== d) { seen.doc = d; seen.ids = {}; floors.forEach(function (f) { seen.ids[f.id] = 1; }); }
+  var added = {}; floors.forEach(function (f) { if (!seen.ids[f.id]) { added[f.id] = 1; seen.ids[f.id] = 1; } });
+  d.groups.forEach(function (g) {
+    var sv = {}; (g.served || []).forEach(function (id) { sv[id] = 1; });
+    if (d.groups.length === 1) Object.keys(added).forEach(function (id) { sv[id] = 1; });
+    g.served = floors.filter(function (f) { return sv[f.id]; }).map(function (f) { return f.id; });
+  });
+}
+/* CR-14: state from ?s= links, stored scenarios and module state is clamped to the field ranges before use */
+var VIEWS = ['rtt', 'kin', 'sizing', 'zoning'];
+function clampN(v, lo, hi, d) { v = +v; return isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; }
+function cleanState(o) {
+  var r = {};
+  if (!o || typeof o !== 'object') return r;
+  if (o.group != null) r.group = String(o.group).slice(0, 40);
+  if (o.lf != null) r.lf = clampN(o.lf, 0.3, 1, DEFAULTS.lf);
+  if (o.view != null) r.view = VIEWS.indexOf(o.view) >= 0 ? o.view : DEFAULTS.view;
+  if (o.kin != null) r.kin = Math.round(clampN(o.kin, 1, 60, DEFAULTS.kin));
+  if (o.szload != null) r.szload = TR.loadsFor('hospital').concat(TR.LOADS).indexOf(+o.szload) >= 0 ? +o.szload : DEFAULTS.szload;
+  if (o.zcars != null) r.zcars = Math.round(clampN(o.zcars, 0, 24, 0));
+  if (o.zspeed != null) r.zspeed = clampN(o.zspeed, 0, 10, 0);
+  if (o.origin != null) r.origin = ['preset', 'stored', 'link'].indexOf(o.origin) >= 0 ? o.origin : 'preset';
+  return r;
+}
+function overFor(g) {
+  var c = g.cars.filter(function (x) { return x.in_service !== false; })[0] || g.cars[0];
+  var cc = CORE.carCapacity(c ? c.rated_load_kg : 1275);
+  return { P: Math.max(0.05, Math.min(1, +state.lf || 0.8)) * cc };
+}
+function setCars(n, out) { var g = selGroup(); if (g) TR.setGroupCars(state.doc, g.id, null, n, out); }
+function setCarField(k, v) { var g = selGroup(); if (!g || v == null || !isFinite(+v)) return; g.cars.forEach(function (c) { c[k] = +v; }); }
+function carField(k, label, unit, min, max, step, extra) {
+  return Object.assign({ id: 'f-' + k.replace(/_/g, '-'), type: 'number', label: tx(label), hint: unit, min: min, max: max, step: step,
+    get: function () { var c = car0(); return c ? c[k] : null; }, set: function (v) { setCarField(k, v); } }, extra || {});
+}
+
+/* ---- solve ---- */
+function solve() {
+  syncDoc();
+  var v = CORE.scenario.validate(state.doc);
+  if (!v.ok) return { invalid: v.errors };
+  var g = selGroup();
+  var groups = state.doc.groups.map(function (x) { return TR.analyse(state.doc, x.id, overFor(x)); }).filter(Boolean);
+  var a = groups.filter(function (r) { return r.group === g.id; })[0] || null;
+  if (!a) return { invalid: [{ path: 'groups', msg: 'no group' }] };
+  var popAll = groups.reduce(function (s, r) { return s + r.POP; }, 0), hcAll = groups.reduce(function (s, r) { return s + r.HC5; }, 0);
+  var lf = Math.max(0.05, Math.min(1, +state.lf || 0.8));
+  var sz = TR.sizing(state.doc, g.id, { load_factor: lf });
+  var zn = TR.zoning(state.doc, g.id, { load_factor: lf, cars_total: state.zcars > 0 ? state.zcars : inService(g), speed_high: state.zspeed > 0 ? state.zspeed : undefined });
+  var inp = a.inputs, nTop = Math.max(1, Math.min(12, a.N || 1));
+  var kin = TR.kinematics(inp.speed, inp.accel, inp.jerk, inp.floor_height_m, Math.max(nTop, state.kin | 0));
+  return { a: a, groups: groups, POP: popAll, HC5: hcAll, pctAll: popAll > 0 ? 100 * hcAll / popAll : null, sizing: sz, zoning: zn, kin: kin,
+    f2s: TR.floorsToSpeed(inp.speed, inp.accel, inp.jerk, inp.floor_height_m), warnings: v.warnings || [] };
+}
+
+/* ---- compute (results) ---- */
+function lightCell(l) { return { text: tx('light.' + (l || 'grey')), tone: LIGHT_TONE[l] || null }; }
+function zoneText(o) { return o.zones.map(function (q) { return (q.from_label || q.from) + '–' + (q.to_label || q.to) + ': ' + q.cars + ' × ' + fmt(q.speed, 1) + ' ' + UN('u.ms') + ', ' + fmt(q.INT, 0) + ' ' + UN('u.s'); }).join(' | '); }
+function compute() {
+  if (!CORE || !TR) return { verdict: { tone: 'bad', text: S('n.nocore') }, tiles: [] };
+  last = solve();
+  if (stage) stage.schedule();
+  mountBar();
+  if (last.invalid) return { verdict: { tone: 'bad', text: S('v.invalid', { e: last.invalid.slice(0, 3).map(function (e) { return e.path + ' ' + e.msg; }).join('; ') }) }, tiles: [] };
+  var a = last.a, c = a.criteria, L = a.lights, g = selGroup(), inp = a.inputs;
+  if (a.no_zone) return { verdict: { tone: 'warn', text: S('v.nozone') }, tiles: [] };
+  if (a.no_cars) { compute.lastVerdict = S('v.nocars', { g: gname(a.group_name, a.group), t: a.cars_total }); return { verdict: { tone: 'bad', text: compute.lastVerdict }, tiles: [
+    { label: tx('t.rtt'), value: a.RTT, precision: 1, hint: tx('u.s'), learn: 'rtt' }, { label: tx('t.int'), value: null, precision: 1, hint: tx('u.s') }, { label: tx('t.hc5'), value: null, precision: 1, hint: '%' }], notes: [S('n.out', { o: a.cars_out, t: a.cars_total })] }; }
+  var vt = S('v.main', { g: gname(a.group_name, a.group), n: a.L, q: fmt(inp.rated_load_kg, 0), v: fmt(inp.speed, 1), i: fmt(a.INT, 0), h: fmt(a.pctPOP, 1), d: S('vd.' + L.verdict) });
+  compute.lastVerdict = vt;
+  var tiles = [
+    { label: tx('t.int'), value: a.INT, precision: 1, hint: tx('u.s'), tone: LIGHT_TONE[L.int], learn: 'interval' },
+    { label: tx('t.hc5'), value: a.pctPOP, precision: 1, hint: '%', tone: LIGHT_TONE[L.hc5], learn: 'hc5' },
+    { label: tx('t.awt'), value: a.AWT_est, precision: 1, hint: tx('u.s'), tone: LIGHT_TONE[L.awt], learn: 'awt' },
+    { label: tx('t.rtt'), value: a.RTT, precision: 1, hint: tx('u.s'), learn: 'rtt' },
+    { label: tx('t.hc5n'), value: a.HC5, precision: 0, hint: function () { return pick(tx('u.pers')); }, learn: 'hc5' },
+    { label: tx('t.P'), value: a.P, precision: 1, hint: function () { return '/ ' + a.CC + ' ' + pick(tx('u.pers')); } },
+    { label: tx('t.S'), value: a.S, precision: 2, learn: 'sh' },
+    { label: tx('t.H'), value: a.H, precision: 2, hint: function () { return '/ ' + a.N; }, learn: 'sh' },
+    { label: tx('t.att'), value: a.ATT_est, precision: 1, hint: tx('u.s') },
+    { label: tx('t.top'), value: a.flight_top_s, precision: 1, hint: tx('u.s'), learn: 'kinematics' }
+  ];
+  var meters = [
+    { label: tx('m.hc5'), ratio: a.pctPOP > 0 ? c.hc5_min / a.pctPOP : 2, thresholds: [c.hc5_min / c.hc5_good, 1], text: fmt(a.pctPOP, 1) + ' % / ≥ ' + fmt(c.hc5_min, 0) + ' %', learn: 'criteria' },
+    { label: tx('m.int'), ratio: a.INT / c.int_max, thresholds: [c.int_good / c.int_max, 1], text: fmt(a.INT, 1) + ' ' + UN('u.s') + ' / ≤ ' + fmt(c.int_max, 0) + ' ' + UN('u.s'), learn: 'criteria' }
+  ];
+  var b = a.breakdown, parts = ['travel', 'stops', 'doors', 'transfer'];
+  var tables = [{ title: tx('tab.rtt'), head: [tx('h.part'), { label: 's', num: true }, { label: '%', num: true }],
+    rows: parts.map(function (k) { return { cells: [tx('part.' + k), { value: b[k], precision: 1 }, { value: 100 * b[k] / a.RTT, precision: 0 }] }; }),
+    foot: [tx('part.total'), { value: a.RTT, precision: 1 }, { value: 100, precision: 0 }] }];
+  tables.push({ title: tx('tab.crit'), head: [tx('h.qty'), { label: S('h.value'), num: true }, { label: S('h.min'), num: true }, { label: S('h.good'), num: true }, tx('h.light')], rows: [
+    { cells: [tx('t.hc5'), { value: a.pctPOP, precision: 1 }, { text: '≥ ' + fmt(c.hc5_min, 0) }, { text: '≥ ' + fmt(c.hc5_good, 0) }, lightCell(L.hc5)] },
+    { cells: [tx('t.int'), { value: a.INT, precision: 1 }, { text: '≤ ' + fmt(c.int_max, 0) }, { text: '≤ ' + fmt(c.int_good, 0) }, lightCell(L.int)] },
+    { cells: [tx('t.awt'), { value: a.AWT_est, precision: 1 }, { text: '≤ ' + fmt(c.awt_max, 0) }, { text: '≤ ' + fmt(c.awt_max * 0.8, 0) }, lightCell(L.awt)] } ] });
+  if (last.groups.length > 1) {
+    tables.push({ title: tx('tab.groups'), head: [tx('h.group'), { label: S('h.cars'), num: true }, { label: S('h.pop'), num: true }, { label: S('h.rtt'), num: true }, { label: S('h.int'), num: true }, { label: S('h.hc5'), num: true }, tx('h.verdict')],
+      rows: last.groups.map(function (r) { return { cells: [gname(r.group_name, r.group), { value: r.L, precision: 0 }, { value: r.POP, precision: 0 }, { value: r.RTT, precision: 1 }, { value: r.INT, precision: 1 }, { value: r.pctPOP, precision: 1 }, { text: tx('vd.' + r.lights.verdict), tone: VERDICT_TONE[r.lights.verdict] }], chosen: r.group === a.group }; }),
+      foot: [tx('part.total'), { value: last.groups.reduce(function (s, r) { return s + r.L; }, 0), precision: 0 }, { value: last.POP, precision: 0 }, '', '', { value: last.pctAll, precision: 1 }, ''] });
+  }
+  var sz = last.sizing;
+  tables.push({ title: tx('tab.sizing'), head: [{ label: S('h.cars'), num: true }, { label: S('h.load'), num: true }, { label: S('h.speed'), num: true }, { label: S('h.int'), num: true }, { label: S('h.hc5'), num: true }, { label: S('h.awt'), num: true }, tx('h.verdict')],
+    rows: sz.feasible.length ? sz.feasible.slice(0, 10).map(function (r) { return { cells: [{ value: r.n, precision: 0 }, { value: r.load, precision: 0 }, { value: r.speed, precision: 1 }, { value: r.INT, precision: 1 }, { value: r.pctPOP, precision: 1 }, { value: r.AWT, precision: 1 }, { text: tx('vd.' + r.lights.verdict), tone: VERDICT_TONE[r.lights.verdict] }],
+      chosen: r.n === a.L && r.load === inp.rated_load_kg && Math.abs(r.speed - inp.speed) < 1e-9 }; }) : [{ cells: [{ text: S('n.sizing.none'), wrap: true, span: 7 }] }] });
+  var zn = last.zoning;
+  if (zn.options.length) tables.push({ title: tx('tab.zoning'), head: [{ label: S('h.zone'), num: true }, { label: S('h.floors'), wrap: true }, { label: S('h.hc5'), num: true }, { label: S('h.int'), num: true }, tx('h.verdict')],
+    rows: zn.options.map(function (o) { return { cells: [{ value: o.k, precision: 0 }, { text: zoneText(o), wrap: true }, { value: o.pct_min, precision: 1 }, { value: o.INT_max, precision: 1 }, { text: tx('vd.' + o.verdict), tone: VERDICT_TONE[o.verdict] }], chosen: o === zn.best }; }) });
+  tables.push({ title: tx('tab.kin'), head: [{ label: S('h.trip'), num: true }, { label: 'm', num: true }, { label: S('h.time'), num: true }, { label: S('h.ideal'), num: true }, { label: S('h.vp'), num: true }],
+    rows: last.kin.slice(0, 10).map(function (r) { return { cells: [{ value: r.floors, precision: 0 }, { value: r.d, precision: 1 }, { value: r.t, precision: 2 }, { value: r.t_ideal, precision: 2 }, { value: r.vp, precision: 2 }], dim: !r.reached }; }) });
+  var notes = [];
+  if (flash) notes.push(flash);
+  if (state.origin === 'stored') notes.push(S('n.origin.stored'));
+  if (last.groups.length > 1) notes.push(S('n.groups', { n: last.groups.length, g: gname(a.group_name, a.group), h: fmt(last.pctAll, 1) }));
+  if (a.cars_out > 0) notes.push(S('n.out', { o: a.cars_out, t: a.cars_total }));
+  notes.push(S('n.awt.adv') + ' ' + S('n.formula'));
+  if (sz.min_load) notes.push(S('n.minload', { q: fmt(sz.min_load, 0) }));
+  if (a.awt_flag === 'above_range') notes.push(S('n.awt.above')); else if (a.awt_flag === 'below_range') notes.push(S('n.awt.below'));
+  if (a.mixed_cars) notes.push(S('n.mixed'));
+  if (a.ignored_below && a.ignored_below.length) notes.push(S('n.below', { f: a.ignored_below.join(', ') }));
+  if (!a.speed_reached) notes.push(S('n.speed', { v: fmt(inp.speed, 1), d: fmt(a.travel_m, 1) }));
+  if (sz.best) { var bg = sz.best_good || sz.best; notes.push(S('n.sizing.best', { n: sz.best.n, q: fmt(sz.best.load, 0), v: fmt(sz.best.speed, 1), i: fmt(sz.best.INT, 0), h: fmt(sz.best.pctPOP, 1), n2: bg.n, q2: fmt(bg.load, 0), v2: fmt(bg.speed, 1) })); }
+  else notes.push(S('n.sizing.none', { q: sz.loads.length > 1 ? fmt(sz.loads[0], 0) + '–' + fmt(sz.loads[sz.loads.length - 1], 0) : fmt(sz.loads[0], 0) }));
+  if (zn.best) notes.push(S('n.zoning.best', { c: zn.cars_total, k: zn.best.k, h: fmt(zn.best.pct_min, 1), i: fmt(zn.best.INT_max, 0), d: S('vd.' + zn.best.verdict) }));
+  var k1 = last.kin[0];
+  notes.push(S('n.kin', { d: fmt(k1.d, 2), t: fmt(k1.t, 1), p: fmt(k1.vp, 1), v: fmt(inp.speed, 1), f: last.f2s }) + (last.f2s > a.N ? ' ' + S('n.kin.never', { v: fmt(inp.speed, 1) }) : ''));
+  notes.push(S('n.crit', { u: pick(coreName(CORE.USES, a.use)), a: fmt(c.hc5_min, 0), b: fmt(c.hc5_good, 0), c: fmt(c.int_max, 0), d: fmt(c.int_good, 0) }));
+  return { verdict: { tone: VERDICT_TONE[L.verdict], text: vt }, tiles: tiles, meters: meters, tables: tables, notes: notes };
+}
+
+/* ---- stage drawing ---- */
+function tokens() {
+  var cs = getComputedStyle(document.documentElement);
+  return { ink: cs.getPropertyValue('--ink').trim() || '#1a1a1a', muted: cs.getPropertyValue('--muted').trim() || '#666', line: cs.getPropertyValue('--line').trim() || '#ccc',
+    bg: cs.getPropertyValue('--panel').trim() || cs.getPropertyValue('--bg').trim() || '#fff', font: cs.getPropertyValue('--font').trim() || 'system-ui, sans-serif' };
+}
+function ser(i) { return (window.DiagramUI && DiagramUI.series) ? DiagramUI.series(i) : ['#3366cc', '#dc8a2c', '#2e9e5b', '#8a5bd0', '#c04a64'][i % 5]; }
+function txt(c, s, x, y, o) { o = o || {}; c.fillStyle = o.color || c.fillStyle; c.textAlign = o.align || 'left'; c.textBaseline = o.base || 'middle'; c.font = (o.bold ? '600 ' : '') + (o.size || 12) + 'px ' + (o.font || 'system-ui, sans-serif'); c.fillText(s, x, y); }
+function niceMax(v) { var p = Math.pow(10, Math.floor(Math.log10(Math.max(v, 1e-9)))), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; }
+function draw(c, w, h, coarse) {
+  var tk = tokens();
+  c.clearRect(0, 0, w, h);
+  if (!last || last.invalid || !last.a || last.a.no_zone) { txt(c, '—', w / 2, h / 2, { color: tk.muted, align: 'center', font: tk.font }); return; }
+  var v = state.view;
+  if (v === 'kin') drawKin(c, w, h, tk, coarse);
+  else if (v === 'sizing') drawSizing(c, w, h, tk, coarse);
+  else if (v === 'zoning') drawZoning(c, w, h, tk, coarse);
+  else drawRtt(c, w, h, tk, coarse);
+}
+function drawRtt(c, w, h, tk, coarse) {
+  var rows = last.groups, parts = ['travel', 'stops', 'doors', 'transfer'];
+  var padL = coarse ? 60 : 110, padR = coarse ? 12 : 150, padT = 16, padB = 34;
+  var max = niceMax(Math.max.apply(null, rows.map(function (r) { return r.RTT; })) * 1.05);
+  var bh = Math.min(46, (h - padT - padB) / rows.length * 0.62), gap = (h - padT - padB) / rows.length;
+  var X = function (s) { return padL + (w - padL - padR) * s / max; };
+  c.strokeStyle = tk.line; c.lineWidth = 1;
+  var step = niceMax(max / (coarse ? 4 : 8));
+  for (var s = 0; s <= max + 1e-9; s += step) { c.beginPath(); c.moveTo(X(s), padT); c.lineTo(X(s), h - padB); c.stroke(); txt(c, fmt(s, 0), X(s), h - padB + 12, { color: tk.muted, align: 'center', font: tk.font }); }
+  txt(c, pick(tx('c.time')), (padL + w - padR) / 2, h - 8, { color: tk.muted, align: 'center', font: tk.font });
+  rows.forEach(function (r, i) {
+    var y = padT + gap * i + (gap - bh) / 2, x = X(0);
+    txt(c, gname(r.group_name, r.group).length > 14 && coarse ? r.group : gname(r.group_name, r.group), padL - 8, y + bh / 2, { color: tk.ink, align: 'right', font: tk.font, bold: r.group === state.group });
+    parts.forEach(function (k, j) { var ww = X(r.breakdown[k]) - X(0); c.fillStyle = ser(j); c.fillRect(x, y, ww, bh); if (ww > 34) txt(c, fmt(100 * r.breakdown[k] / r.RTT, 0) + ' %', x + ww / 2, y + bh / 2, { color: '#fff', align: 'center', font: tk.font, size: 11 }); x += ww; });
+    if (!coarse) txt(c, fmt(r.RTT, 0) + ' ' + UN('u.s') + ' · ' + pick(tx('c.interval')) + ' ' + fmt(r.INT, 0) + ' ' + UN('u.s') + ' · ' + fmt(r.pctPOP, 1) + ' %', X(r.RTT) + 8, y + bh / 2, { color: DATA_COL[r.lights.verdict === 'meets' ? 'green' : r.lights.verdict === 'marginal' ? 'amber' : 'red'], font: tk.font, bold: true });
+  });
+}
+function drawKin(c, w, h, tk, coarse) {
+  var a = last.a, inp = a.inputs, n = Math.max(1, state.kin | 0), d = n * inp.floor_height_m;
+  var pr = CORE.profile(d, inp.speed, inp.accel, inp.jerk, 240);
+  var split = !coarse, W1 = split ? w * 0.56 : w, H1 = split ? h : h * 0.55;
+  /* left: speed against time */
+  var pl = 46, pt = 22, pb = 34, pr2 = 14;
+  var tMax = niceMax(Math.max(pr.T, d / inp.speed) * 1.05), vStep = inp.speed > 4 ? 1 : 0.5, vMax = Math.ceil(inp.speed * 1.12 / vStep) * vStep;
+  var X = function (t) { return pl + (W1 - pl - pr2) * t / tMax; }, Y = function (v) { return pt + (H1 - pt - pb) * (1 - v / vMax); };
+  c.strokeStyle = tk.line; c.lineWidth = 1;
+  for (var vk = 0; vk <= vMax / vStep + 1e-9; vk++) (function (vv) { c.beginPath(); c.moveTo(pl, Y(vv)); c.lineTo(W1 - pr2, Y(vv)); c.stroke(); txt(c, fmt(vv, 1), pl - 6, Y(vv), { color: tk.muted, align: 'right', font: tk.font }); })(vk * vStep);
+  var ts = niceMax(tMax / 5); for (var t = 0; t <= tMax + 1e-9; t += ts) txt(c, fmt(t, ts < 1 ? 1 : 0), X(t), H1 - pb + 12, { color: tk.muted, align: 'center', font: tk.font });
+  txt(c, pick(tx('c.time')), (pl + W1) / 2, H1 - 8, { color: tk.muted, align: 'center', font: tk.font });
+  txt(c, pick(tx('c.speed')), pl, 10, { color: tk.muted, font: tk.font });
+  c.setLineDash([5, 4]); c.strokeStyle = tk.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(0), Y(0)); c.lineTo(X(0), Y(inp.speed)); c.lineTo(X(d / inp.speed), Y(inp.speed)); c.lineTo(X(d / inp.speed), Y(0)); c.stroke(); c.setLineDash([]);
+  c.strokeStyle = ser(0); c.lineWidth = 2.5; c.beginPath(); pr.t.forEach(function (tt, i) { var x = X(tt), y = Y(pr.v[i]); if (i) c.lineTo(x, y); else c.moveTo(x, y); }); c.stroke();
+  txt(c, n + ' × ' + fmt(inp.floor_height_m, 2) + ' ' + UN('u.m') + ': ' + fmt(pr.T, 1) + ' ' + UN('u.s') + ', ' + fmt(pr.vp, 2) + ' / ' + fmt(inp.speed, 1) + ' ' + UN('u.ms'), X(pr.T) - 4 > pl + 150 ? X(pr.T) : pl + 6, Y(pr.vp) - 12, { color: ser(0), align: X(pr.T) - 4 > pl + 150 ? 'right' : 'left', font: tk.font, bold: true });
+  /* right (or below): trip time against trip length */
+  var x0 = split ? W1 + 10 : 0, y0 = split ? 0 : H1 + 6, W2 = split ? w - W1 - 10 : w, H2 = split ? h : h - H1 - 6;
+  var rows = last.kin, nMax = rows.length;
+  var tStep = niceMax(Math.max(rows[nMax - 1].t, 1) / 4), tm = Math.ceil(Math.max(rows[nMax - 1].t, 1) * 1.02 / tStep) * tStep;
+  var X2 = function (k) { return x0 + 40 + (W2 - 54) * (k - 0.5) / nMax; }, Y2 = function (t) { return y0 + 20 + (H2 - 54) * (1 - t / tm); };
+  c.strokeStyle = tk.line; c.lineWidth = 1;
+  for (var tq = 0; tq <= tm / tStep + 1e-9; tq++) (function (tt) { c.beginPath(); c.moveTo(x0 + 40, Y2(tt)); c.lineTo(x0 + W2 - 14, Y2(tt)); c.stroke(); txt(c, fmt(tt, 0), x0 + 34, Y2(tt), { color: tk.muted, align: 'right', font: tk.font }); })(tq * tStep);
+  rows.forEach(function (r) { if (nMax <= 12 || r.floors % 2 === 1) txt(c, String(r.floors), X2(r.floors), Y2(0) + 12, { color: tk.muted, align: 'center', font: tk.font }); });
+  txt(c, pick(tx('c.floors')), x0 + W2 / 2, y0 + H2 - 8, { color: tk.muted, align: 'center', font: tk.font });
+  c.setLineDash([5, 4]); c.strokeStyle = tk.muted; c.lineWidth = 1.5; c.beginPath(); rows.forEach(function (r, i) { var x = X2(r.floors), y = Y2(r.t_ideal); if (i) c.lineTo(x, y); else c.moveTo(x, y); }); c.stroke(); c.setLineDash([]);
+  rows.forEach(function (r) { c.fillStyle = r.reached ? ser(0) : DATA_COL.amber; c.beginPath(); c.arc(X2(r.floors), Y2(r.t), r.floors === n ? 6 : 4, 0, 2 * Math.PI); c.fill(); });
+}
+function szLoad() { var l = TR.loadsFor(state.doc && state.doc.building && state.doc.building.use); return l.indexOf(+state.szload) >= 0 ? +state.szload : (l.indexOf(1275) >= 0 ? 1275 : l[0]); }
+function drawSizing(c, w, h, tk, coarse) {
+  var sz = last.sizing, q = szLoad(), rows = sz.rows.filter(function (r) { return r.load === q; });
+  if (!rows.length) { txt(c, '—', w / 2, h / 2, { color: tk.muted, align: 'center' }); return; }
+  var cars = TR.CARS, speeds = TR.SPEEDS, pl = 56, pt = 26, pb = 34, prr = 10;
+  var cw = (w - pl - prr) / speeds.length, ch = (h - pt - pb) / cars.length;
+  var inp = last.a.inputs;
+  txt(c, fmt(q, 0) + ' ' + UN('u.kg') + ' · CC ' + CORE.carCapacity(q) + ' ' + UN('u.pers'), pl, 12, { color: tk.ink, font: tk.font, bold: true });
+  rows.forEach(function (r) {
+    var i = speeds.indexOf(r.speed), j = cars.indexOf(r.n); if (i < 0 || j < 0) return;
+    var x = pl + i * cw, y = pt + (cars.length - 1 - j) * ch;
+    c.fillStyle = !r.reach_ok ? tk.line : DATA_COL[r.lights.verdict === 'meets' ? 'green' : r.lights.verdict === 'marginal' ? 'amber' : 'red'];
+    c.globalAlpha = r.reach_ok ? 0.85 : 0.5; c.fillRect(x + 1, y + 1, cw - 2, ch - 2); c.globalAlpha = 1;
+    if (cw > 30 && ch > 16) txt(c, r.reach_ok ? fmt(r.INT, 0) : '×', x + cw / 2, y + ch / 2, { color: r.reach_ok ? '#fff' : tk.muted, align: 'center', font: tk.font, size: coarse ? 10 : 12, bold: true });
+    if (r.n === last.a.L && r.load === inp.rated_load_kg && Math.abs(r.speed - inp.speed) < 1e-9) { c.strokeStyle = tk.ink; c.lineWidth = 3; c.strokeRect(x + 2, y + 2, cw - 4, ch - 4); }
+  });
+  speeds.forEach(function (s, i) { txt(c, fmt(s, 1), pl + (i + 0.5) * cw, h - pb + 12, { color: tk.muted, align: 'center', font: tk.font }); });
+  cars.forEach(function (n, j) { txt(c, String(n), pl - 8, pt + (cars.length - 1 - j + 0.5) * ch, { color: tk.muted, align: 'right', font: tk.font }); });
+  txt(c, pick(tx('c.speed')), (pl + w) / 2, h - 8, { color: tk.muted, align: 'center', font: tk.font });
+  c.save(); c.translate(12, pt + (h - pt - pb) / 2); c.rotate(-Math.PI / 2); txt(c, pick(tx('c.cars')), 0, 0, { color: tk.muted, align: 'center', font: tk.font }); c.restore();
+}
+function drawZoning(c, w, h, tk, coarse) {
+  var zn = last.zoning; if (!zn.options.length) { txt(c, '—', w / 2, h / 2, { color: tk.muted, align: 'center' }); return; }
+  var z = TR.zoneOf(state.doc, state.group), F = z.floors, top = F[F.length - 1].level_m, bot = z.mainLevel;
+  var pt = 30, pb = 28, cols = zn.options.length, colW = (w - 40) / cols;
+  var Y = function (lv) { return pt + (h - pt - pb) * (1 - (lv - bot) / Math.max(1, top - bot)); };
+  var lvOf = {}; F.forEach(function (f) { lvOf[f.id] = f.level_m; });
+  zn.options.forEach(function (o, ci) {
+    var x = 40 + ci * colW, bw = Math.min(54, colW * 0.28);
+    txt(c, S('c.zones', { k: o.k }) + (o === zn.best ? ' ★' : ''), x + colW / 2, 12, { color: tk.ink, align: 'center', font: tk.font, bold: o === zn.best });
+    o.zones.forEach(function (q, i) {
+      var y1 = Y(lvOf[q.to]) - 4, y0 = Y(lvOf[q.from]) + 4, xx = x + 8 + i * (bw + 4);
+      if (i > 0) { c.setLineDash([3, 3]); c.strokeStyle = ser(i); c.lineWidth = 2; c.beginPath(); c.moveTo(xx + bw / 2, Y(bot)); c.lineTo(xx + bw / 2, y0); c.stroke(); c.setLineDash([]); }
+      c.fillStyle = ser(i); c.globalAlpha = 0.85; c.fillRect(xx, y1, bw, Math.max(4, y0 - y1)); c.globalAlpha = 1;
+      if (!coarse || o.k < 3) { txt(c, q.cars + '×', xx + bw / 2, (y0 + y1) / 2 - 8, { color: '#fff', align: 'center', font: tk.font, bold: true }); txt(c, fmt(q.INT, 0) + ' ' + UN('u.s'), xx + bw / 2, (y0 + y1) / 2 + 8, { color: '#fff', align: 'center', font: tk.font, size: 11 }); }
+    });
+    txt(c, fmt(o.pct_min, 1) + ' % · ' + fmt(o.INT_max, 0) + ' ' + UN('u.s'), x + colW / 2, h - 10, { color: DATA_COL[o.verdict === 'meets' ? 'green' : o.verdict === 'marginal' ? 'amber' : 'red'], align: 'center', font: tk.font, bold: true });
+  });
+  c.strokeStyle = tk.line; c.lineWidth = 1; c.beginPath(); c.moveTo(34, Y(bot)); c.lineTo(w - 4, Y(bot)); c.stroke();
+  txt(c, z.mainId, 30, Y(bot), { color: tk.muted, align: 'right', font: tk.font, size: 11 }); txt(c, F[F.length - 1].id, 30, Y(top), { color: tk.muted, align: 'right', font: tk.font, size: 11 });
+}
+/* the legend and the caption follow the chosen view */
+var chromeSig = '';
+function legendItems() {
+  if (state.view === 'kin') return [{ label: tx('lg.real'), series: 0 }, { label: tx('lg.unreached'), color: DATA_COL.amber, shape: 'dot' }, { label: tx('lg.ideal'), color: '#888', dash: true }];
+  if (state.view === 'sizing') return ['meets', 'marginal', 'fails'].map(function (k, i) { return { label: tx('vd.' + k), color: DATA_COL[['green', 'amber', 'red'][i]], shape: 'dot' }; }).concat([{ label: tx('lg.unreach'), color: '#bbb', shape: 'dot' }]);
+  if (state.view === 'zoning') return [1, 2, 3].map(function (k) { return { label: zoneLabel(k), series: k - 1, shape: 'dot' }; }).concat([{ label: tx('lg.express'), color: '#888', dash: true }]);
+  return ['travel', 'stops', 'doors', 'transfer'].map(function (k, i) { return { label: tx('part.' + k), series: i, shape: 'dot' }; });
+}
+function zoneLabel(k) { var o = {}; LANGS7.forEach(function (l) { o[l] = I['lg.zone'][l].split('%k').join(String(k)); }); return o; }
+function viewChrome(st) {
+  if (!st) return;
+  var sig = state.view + '|' + curLang();
+  if (sig === chromeSig && st.legendNode) return;
+  chromeSig = sig;
+  try { if (st.legend) st.legend({ items: legendItems() }); } catch (e) { /* legend is decoration */ }
+  var cap = st.node && st.node.querySelector('.dgu-stage-cap'); if (cap) cap.textContent = pick(caption());
+}
+function caption() { return tx('chart.' + (['rtt', 'kin', 'sizing', 'zoning'].indexOf(state.view) >= 0 ? state.view : 'rtt')); }
+function a11yText() {
+  if (!last || last.invalid || !last.a) return '';
+  var a = last.a;
+  if (state.view === 'kin') { var k = last.kin[Math.max(0, Math.min(last.kin.length - 1, (state.kin | 0) - 1))]; return k.floors + ' × ' + fmt(a.inputs.floor_height_m, 2) + ' m: ' + fmt(k.t, 1) + ' s, ' + fmt(k.vp, 2) + ' m/s'; }
+  if (state.view === 'sizing') return S('tab.sizing') + ': ' + last.sizing.feasible.slice(0, 5).map(function (r) { return r.n + ' × ' + r.load + ' kg ' + fmt(r.speed, 1) + ' m/s'; }).join('; ');
+  if (state.view === 'zoning') return last.zoning.options.map(function (o) { return o.k + ': ' + zoneText(o); }).join('; ');
+  return last.groups.map(function (r) { return gname(r.group_name, r.group) + ': RTT ' + fmt(r.RTT, 0) + ' s, ' + ['travel', 'stops', 'doors', 'transfer'].map(function (k) { return pick(tx('part.' + k)) + ' ' + fmt(r.breakdown[k], 0) + ' s'; }).join(', '); }).join('; ');
+}
+
+/* ---- scenario module, exports, hand-off ---- */
+function summary() {
+  if (!last || !last.a) return {};
+  var a = last.a;
+  return { group: a.group, cars: a.L, rated_load_kg: a.inputs.rated_load_kg, speed: a.inputs.speed, RTT_s: a.RTT, INT_s: a.INT, HC5_persons: a.HC5, HC5_pct: a.pctPOP, AWT_est_s: a.AWT_est, verdict: a.lights.verdict, building_HC5_pct: last.pctAll };
+}
+function payload() {
+  var res = !last || !last.a ? {} : { groups: last.groups.map(function (r) { return { group: r.group, N: r.N, POP: r.POP, P: r.P, S: r.S, H: r.H, RTT: r.RTT, INT: r.INT, HC5: r.HC5, pctPOP: r.pctPOP, AWT_est: r.AWT_est, ATT_est: r.ATT_est, breakdown: r.breakdown, verdict: r.lights.verdict }; }),
+    sizing_best: last.sizing.best ? { n: last.sizing.best.n, load: last.sizing.best.load, speed: last.sizing.best.speed } : null,
+    zoning_best: last.zoning.best ? { k: last.zoning.best.k, zones: last.zoning.best.zones.map(function (q) { return { from: q.from, to: q.to, cars: q.cars, speed: q.speed, INT: q.INT, pctPOP: q.pctPOP }; }) } : null };
+  return { state: { group: state.group, lf: state.lf, zcars: state.zcars, zspeed: state.zspeed }, results: res, summary: summary() };
+}
+function stampedDoc() { try { return CORE.scenario.withModule(state.doc, TOOL, payload()); } catch (e) { return clone(state.doc); } }
+function saveScenario() {
+  var r = CORE.scenario.save(stampedDoc());
+  flash = r.ok ? S('n.saved') : S('n.nosave');
+  return r.ok;
+}
+function sizingCSV() {
+  var cols = [{ key: 'n', label: 'cars' }, { key: 'load', label: 'rated_load_kg' }, { key: 'speed', label: 'speed_m_s' }, { key: 'CC', label: 'persons_rated' }, { key: 'P', label: 'P_persons' }, { key: 'S', label: 'S' }, { key: 'H', label: 'H' },
+    { key: 'RTT', label: 'RTT_s' }, { key: 'INT', label: 'INT_s' }, { key: 'HC5', label: 'HC5_persons' }, { key: 'pctPOP', label: 'HC5_pct' }, { key: 'AWT', label: 'AWT_est_s' }, { key: 'verdict', label: 'verdict' }, { key: 'reach_ok', label: 'speed_reached' }];
+  return CORE.csv(last.sizing.rows.map(function (r) { var o = Object.assign({}, r); o.verdict = r.lights.verdict; return o; }), cols);
+}
+function summaryCSV() {
+  var cols = ['group', 'cars', 'rated_load_kg', 'speed_m_s', 'floors_N', 'population', 'P', 'S', 'H', 'RTT_s', 'travel_s', 'stops_s', 'doors_s', 'transfer_s', 'INT_s', 'HC5_persons', 'HC5_pct', 'AWT_est_s', 'ATT_est_s', 'verdict'];
+  return CORE.csv(last.groups.map(function (r) { return [r.group, r.L, r.inputs.rated_load_kg, r.inputs.speed, r.N, r.POP, r.P, r.S, r.H, r.RTT, r.breakdown.travel, r.breakdown.stops, r.breakdown.doors, r.breakdown.transfer, r.INT, r.HC5, r.pctPOP, r.AWT_est, r.ATT_est, r.lights.verdict]; }), cols);
+}
+function applyBest() {
+  if (!last || !last.sizing || !last.sizing.best) return;
+  var b = last.sizing.best;
+  TR.setGroupCars(state.doc, state.group, { rated_load_kg: b.load, speed: b.speed }, b.n, 0);
+  flash = S('n.applied', { s: b.n + ' × ' + fmt(b.load, 0) + ' kg, ' + fmt(b.speed, 1) + ' m/s' });
+}
+function applyZoning() {
+  if (!last || !last.zoning || !last.zoning.best) return;
+  var o = last.zoning.best, d = TR.zoneDoc(state.doc, state.group, o);
+  if (!d || !CORE.scenario.validate(d).ok) return;
+  state.doc = d; state.group = d.groups[0].id;
+  flash = S('n.applied', { s: zoneText(o) });
+}
+function openSim() {
+  var ok = saveScenario();
+  if (ok) { var l = curLang(); location.href = 'liftwait.html' + (l !== 'en' ? '?lang=' + l : ''); }
+}
+
+/* ---- record + report ---- */
+function record() {
+  if (!last || !last.a || last.invalid) return null;
+  var a = last.a, b = state.doc.building;
+  return {
+    inputs: { building: { name: b.name, use: b.use, presence: b.presence, floors: b.floors.map(function (f) { return { id: f.id, level_m: f.level_m, role: f.role, population: f.population, entrance_share: f.entrance_share }; }) },
+      group: a.group, car: clone(a.inputs), load_factor: state.lf },
+    outputs: { S: a.S, H: a.H, RTT_s: a.RTT, INT_s: a.INT, HC5_persons: a.HC5, HC5_pct: a.pctPOP, AWT_est_s: a.AWT_est, ATT_est_s: a.ATT_est, breakdown_s: clone(a.breakdown), verdict: a.lights.verdict,
+      groups: payload().results.groups, sizing_best: payload().results.sizing_best, zoning_best: payload().results.zoning_best },
+    units: { RTT_s: 's', INT_s: 's', HC5_persons: 'persons per 5 min', HC5_pct: '% of the population above the main terminal per 5 min', AWT_est_s: 's', level_m: 'm', speed: 'm/s', accel: 'm/s²', jerk: 'm/s³' },
+    model: { version: 'vt-traffic ' + TR.version + ' / vt-core ' + CORE.version, equations: [pick(I.footer)], ranges: [], notes: [S('n.crit', { u: pick(coreName(CORE.USES, a.use)), a: a.criteria.hc5_min, b: a.criteria.hc5_good, c: a.criteria.int_max, d: a.criteria.int_good })] },
+    warnings: [a.awt_flag !== 'ok' ? a.awt_flag : null, a.mixed_cars ? 'mixed_cars' : null, a.speed_reached ? null : 'speed_not_reached'].filter(Boolean)
+  };
+}
+function reportProfile() {
+  if (!last || !last.a) return null;
+  var a = last.a;
+  return { title: S('rep.title'),
+    project: [{ label: S('f.name'), text: (CORE.buildingName ? CORE.buildingName(state.doc, curLang()) : state.doc.building.name) || '—' }, { label: S('f.use'), text: pick(coreName(CORE.USES, a.use)) }],
+    executive: { text: [compute.lastVerdict || ''], results: [{ label: S('t.int'), value: fmt(a.INT, 1) + ' s' }, { label: S('t.hc5'), value: fmt(a.pctPOP, 1) + ' %' }, { label: S('t.awt'), value: fmt(a.AWT_est, 1) + ' s' }] },
+    results: ['travel', 'stops', 'doors', 'transfer'].map(function (k) { return { label: S('part.' + k), text: fmt(a.breakdown[k], 1) + ' s (' + fmt(100 * a.breakdown[k] / a.RTT, 0) + ' %)' }; }),
+    checks: [{ status: a.lights.hc5 === 'red' ? 'fail' : a.lights.hc5 === 'amber' ? 'attention' : 'pass', title: S('t.hc5'), actual: fmt(a.pctPOP, 1) + ' %' },
+             { status: a.lights.int === 'red' ? 'fail' : a.lights.int === 'amber' ? 'attention' : 'pass', title: S('t.int'), actual: fmt(a.INT, 1) + ' s' }],
+    method: { equations: [pick(I.footer)], notes: [S('notice.b')], references: ['CIBSE Guide D: Transportation systems in buildings, 2020, ch. 4', 'G. Barney, L. Al-Sharif: Elevator Traffic Handbook, 2nd ed., Routledge 2016', 'ISO 8100-32:2020', 'EN 81-20:2020', 'R. D. Peters: Ideal lift kinematics, Elevator Technology 6, IAEE 1996'] } };
+}
+
+/* ---- examples ---- */
+function examples() {
+  var list = [];
+  CORE_IDS.forEach(function (k) {
+    var p = CORE.PRESETS[k]; if (!p) return;
+    list.push({ id: k, group: EX_GROUP.core, label: p.name, note: p.aha, apply: function (t) { t.doc = CORE.preset(k); t.group = t.doc.groups[0].id; t.view = k === 'office30_zoned' || k === 'office30_onegroup' ? 'zoning' : 'rtt'; t.origin = 'preset'; t.zcars = 0; t.zspeed = 0; t.lf = 0.8; flash = ''; } });
+  });
+  list.push({ id: 'office15_out', group: EX_GROUP.own, label: OWN.office15_out.label, note: OWN.office15_out.note, apply: function (t) { t.doc = CORE.preset('office15'); TR.setGroupCars(t.doc, 'A', null, 6, 1); t.group = 'A'; t.view = 'rtt'; t.origin = 'preset'; t.lf = 0.8; t.zcars = 0; t.zspeed = 0; flash = ''; } });
+  list.push({ id: 'office15_fast', group: EX_GROUP.own, label: OWN.office15_fast.label, note: OWN.office15_fast.note, apply: function (t) { t.doc = CORE.preset('office15'); t.doc.groups[0].cars.forEach(function (c) { c.speed = 6; }); t.group = 'A'; t.view = 'sizing'; t.szload = 1275; t.origin = 'preset'; t.lf = 0.8; t.zcars = 0; t.zspeed = 0; flash = ''; } });
+  list.push({ id: 'short_trip', group: EX_GROUP.own, label: OWN.short_trip.label, note: OWN.short_trip.note, apply: function (t) { t.doc = CORE.preset('office15'); t.group = 'A'; t.view = 'kin'; t.kin = 1; t.origin = 'preset'; t.lf = 0.8; t.zcars = 0; t.zspeed = 0; flash = ''; } });
+  return list;
+}
+
+/* ---- the shared scenario bar of vt-core.js ---- */
+var barBox = null, bar = null, barSig = '';
+function mountBar() {
+  if (!barBox || !CORE || !CORE.ui || typeof CORE.ui.scenarioBar !== 'function') return;
+  var sig = curLang() + '|' + JSON.stringify([state.doc.building && state.doc.building.name, state.doc.building.floors.length, state.doc.groups.length, Object.keys(state.doc.modules || {})]);
+  if (bar && sig === barSig && barBox.contains(bar.element || barBox.firstChild)) return;
+  barSig = sig;
+  if (bar && typeof bar.refresh === 'function' && barBox.firstChild) { try { bar.refresh(state.doc); return; } catch (e) { /* rebuild below */ } }
+  try { if (bar && bar.destroy) bar.destroy(); } catch (e) { /* gone */ }
+  try {
+    bar = CORE.ui.scenarioBar({ mount: barBox, toolId: TOOL, lang: curLang, doc: state.doc, getDoc: stampedDoc, syncTabs: false,
+      onChange: function (d) { state.doc = CORE.scenario.normalize(d); state.group = state.doc.groups[0] ? state.doc.groups[0].id : 'A'; state.origin = 'stored'; flash = ''; if (ui) { ui.sync(); ui.run(); } },
+      onUse: function (k, mod, d) { state.doc = CORE.scenario.normalize(d); if (k === TOOL && mod && mod.state) { var cs = cleanState(mod.state); ['group', 'lf', 'zcars', 'zspeed'].forEach(function (x) { if (cs[x] != null) state[x] = cs[x]; }); } selGroup(); flash = ''; if (ui) { ui.sync(); ui.run(); } } });
+  } catch (e) { bar = null; }
+  if (barBox) Array.prototype.forEach.call(barBox.querySelectorAll('input[type=file]'), function (f) { if (!f.getAttribute('aria-label')) f.setAttribute('aria-label', 'JSON'); });
+}
+
+/* ---- interface ---- */
+function buildInterface() {
+  var hasBar = !!(CORE && CORE.ui && typeof CORE.ui.scenarioBar === 'function');
+  var roles = CORE.ENUMS.role, uses = CORE.ENUMS.use;
+  ui = DiagramUI.app({
+    id: TOOL, mount: '#app', layout: 'calculator', compute: 'live', state: state, defaults: DEFAULTS,
+    subtitle: tx('subtitle'), learn: LEARN, footer: tx('footer'),
+    notices: [{ id: 'genre', tone: 'warn', sticky: false, title: tx('notice.t'), text: tx('notice.b') }],
+    panels: [
+      { id: 'scen', slot: 'inputs', title: tx('p.scen'), visible: hasBar, learn: 'scenario', render: hasBar ? function (box) { barBox = box; mountBar(); } : undefined },
+      { id: 'bld', slot: 'inputs', title: tx('p.bld'), learn: 'criteria', fields: [
+        { id: 'f-name', key: 'doc.building.name', type: 'text', label: tx('f.name') },
+        { id: 'f-use', key: 'doc.building.use', type: 'select', label: tx('f.use'), learn: 'criteria', options: uses.map(function (u) { return { value: u, label: coreName(CORE.USES, u) }; }) },
+        { id: 'f-presence', type: 'number', label: tx('f.presence'), hint: tx('f.presence.h'), min: 10, max: 100, step: 5,
+          get: function () { return Math.round(100 * (state.doc.building.presence == null ? 1 : state.doc.building.presence)); }, set: function (v) { if (isFinite(+v)) state.doc.building.presence = Math.max(0, Math.min(1, +v / 100)); } } ] },
+      { id: 'floors', slot: 'inputs', title: tx('p.floors'), collapsible: true, collapsed: true, fields: [
+        { id: 'f-floors', key: 'doc.building.floors', type: 'list', label: tx('f.floors'), minRows: 2, maxRows: 120, addLabel: tx('a.add'),
+          row: [{ key: 'id', type: 'text', label: tx('f.fid'), width: '64px' }, { key: 'label', type: 'text', label: tx('f.flabel'), width: '56px' },
+                { key: 'level_m', type: 'number', label: tx('f.level'), step: 0.05, width: '84px' },
+                { key: 'role', type: 'select', label: tx('f.role'), options: roles.map(function (r) { return { value: r, label: coreName(CORE.ROLES, r) }; }), width: '150px' },
+                { key: 'population', type: 'number', label: tx('f.pop'), min: 0, step: 5, width: '76px' },
+                { key: 'entrance_share', type: 'number', label: tx('f.entr'), min: 0, max: 1, step: 0.05, width: '76px' }],
+          newRow: function (rows) { var lastRow = rows[rows.length - 1] || { level_m: -3.75 }, n = rows.length, id = 'F' + n; while (rows.some(function (r) { return r.id === id; })) id = 'F' + (++n);
+            return { id: id, label: String(n), level_m: Math.round(((+lastRow.level_m || 0) + 3.75) * 100) / 100, role: 'office', population: 0, entrance: false, entrance_share: 0, attractor_share: 0 }; } } ] },
+      { id: 'group', slot: 'inputs', title: tx('p.group'), learn: 'interval', fields: [
+        { id: 'f-group', type: 'select', label: tx('f.group'), visible: function () { return state.doc.groups.length > 1; },
+          options: function () { return state.doc.groups.map(function (g) { return { value: g.id, label: g.id + ' — ' + gname(g.name, g.id) }; }); },
+          get: function () { return state.group; }, set: function (v) { state.group = v; } },
+        { id: 'f-n', type: 'number', label: tx('f.n'), min: 1, max: 16, step: 1, get: function () { var g = selGroup(); return g ? g.cars.length : null; },
+          set: function (v) { var g = selGroup(); if (g && isFinite(+v)) setCars(+v, g.cars.length - inService(g)); } },
+        { id: 'f-out', type: 'number', label: tx('f.out'), min: 0, max: 15, step: 1, get: function () { var g = selGroup(); return g ? g.cars.length - inService(g) : 0; },
+          set: function (v) { var g = selGroup(); if (g && isFinite(+v)) setCars(g.cars.length, +v); } },
+        carField('rated_load_kg', 'f.load', tx('u.kg'), 100, 5000, 25, { hint: tx('f.load.h') }),
+        carField('speed', 'f.speed', tx('u.ms'), 0.1, 10, 0.1, { learn: 'kinematics' }),
+        { id: 'f-lf', type: 'number', label: tx('f.lf'), hint: tx('f.lf.h'), min: 30, max: 100, step: 5, learn: 'awt',
+          get: function () { return Math.round(100 * (+state.lf || 0.8)); }, set: function (v) { if (isFinite(+v)) state.lf = Math.max(0.3, Math.min(1, +v / 100)); } } ] },
+      { id: 'motion', slot: 'inputs', title: tx('p.motion'), learn: 'rtt', collapsible: true, collapsed: false, fields: [
+        carField('accel', 'f.accel', tx('u.ms2'), 0.1, 3, 0.1, { learn: 'kinematics' }),
+        carField('jerk', 'f.jerk', tx('u.ms3'), 0.1, 10, 0.1),
+        carField('door_open_s', 'f.dopen', tx('u.s'), 0, 30, 0.1),
+        carField('door_close_s', 'f.dclose', tx('u.s'), 0, 30, 0.1),
+        carField('start_delay_s', 'f.start', tx('u.s'), 0, 10, 0.1),
+        { id: 'f-transfer', key: 'doc.traffic.transfer_s', type: 'number', label: tx('f.transfer'), hint: tx('u.s'), min: 0.3, max: 10, step: 0.1 } ] },
+      { id: 'chart', slot: 'inputs', title: tx('p.chart'), fields: [
+        { id: 'f-view', key: 'view', type: 'segmented', label: tx('f.view'), options: opts('view.', ['rtt', 'kin', 'sizing', 'zoning']), learn: 'sizing' },
+        { id: 'f-kin', key: 'kin', type: 'number', label: tx('f.kinN'), min: 1, max: 60, step: 1, visible: function () { return state.view === 'kin'; }, learn: 'kinematics' },
+        { id: 'f-szload', key: 'szload', type: 'select', label: tx('f.szload'), visible: function () { return state.view === 'sizing'; },
+          options: function () { return TR.loadsFor(state.doc.building.use).map(function (q) { return { value: q, label: q + ' kg (' + CORE.carCapacity(q) + ')' }; }); }, get: function () { return szLoad(); }, set: function (v) { state.szload = +v; } } ] },
+      { id: 'design', slot: 'inputs', title: tx('p.design'), learn: 'zoning', collapsible: true, collapsed: true, fields: [
+        { id: 'f-zcars', type: 'number', label: tx('f.zcars'), min: 1, max: 24, step: 1, learn: 'zoning',
+          get: function () { var g = selGroup(); return state.zcars > 0 ? state.zcars : (g ? inService(g) : 1); }, set: function (v) { state.zcars = isFinite(+v) && +v >= 1 ? Math.round(+v) : 0; } },
+        { id: 'f-zspeed', type: 'number', label: tx('f.zspeed'), hint: tx('u.ms'), min: 0.5, max: 10, step: 0.5,
+          get: function () { var c = car0(); return state.zspeed > 0 ? state.zspeed : (c ? c.speed : 2.5); }, set: function (v) { state.zspeed = isFinite(+v) && +v > 0 ? +v : 0; } } ],
+        actionsAlign: 'start', actions: [
+          { label: tx('a.applyBest'), run: function () { applyBest(); ui.sync(); ui.run(); } },
+          { label: tx('a.applyZoning'), run: function () { applyZoning(); ui.sync(); ui.run(); } } ] },
+      { id: 'io', slot: 'inputs', title: tx('p.io'), learn: 'scenario', actionsAlign: 'end', actions: [
+        { label: tx('a.sim'), run: function () { openSim(); if (ui) ui.run(); } },
+        { label: tx('a.save'), run: function () { saveScenario(); ui.run(); } },
+        { label: tx('a.csvSizing'), run: function () { if (last && last.sizing) download('lifttraffic-sizing.csv', 'text/csv', sizingCSV()); } },
+        { label: tx('a.csvSummary'), run: function () { if (last && last.groups) download('lifttraffic-summary.csv', 'text/csv', summaryCSV()); } },
+        ui ? ui.resetAction() : null ].filter(Boolean) }
+    ],
+    on: { compute: function () { return compute(); }, rebuild: function (app) { stage = (app && app.stages && app.stages[0]) || stage; } }
+  });
+  ui.panel({ id: 'reset', slot: 'inputs', actionsAlign: 'end', actions: [ui.resetAction()] });
+  ui.examples(examples());
+  stage = ui.stage({ caption: caption, minHeight: 360, a11y: a11yText,
+    render: function (size, st) { var c = st.canvas(); draw(c, size.w, size.h, size.density === 'coarse'); if (st.cv) st.cv.setAttribute('aria-label', pick(caption()) + '. ' + a11yText()); viewChrome(st); } });
+  viewChrome(stage);
+  window.__lifttraffic = { state: state, ui: ui, get last() { return last; }, sizingCSV: sizingCSV, summaryCSV: summaryCSV, payload: payload, stampedDoc: stampedDoc, strings: function () { return { I: I, LEARN: LEARN, OWN: OWN, EX_GROUP: EX_GROUP }; } };
+  ui.ready();
+}
+function degrade() {
+  var h = document.createElement('h1'); h.textContent = 'Lift Traffic Design (round-trip time)';
+  var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The record and the export are still available from the bar at the bottom of the page.';
+  var m = document.getElementById('app'); m.appendChild(h); m.appendChild(p);
+  if (CORE && TR) last = solve();
+}
+function installData() {
+  if (!window.Diagram) return;
+  Diagram.init({ id: TOOL, file: 'lifttraffic.html',
+    state: { serialize: function () { return state; },
+             deserialize: function (o) { if (!o || typeof o !== 'object') return; var d = o.doc && CORE && CORE.scenario.validate(o.doc).ok ? CORE.scenario.normalize(o.doc) : state.doc;
+               var cs = cleanState(o); Object.keys(cs).forEach(function (k) { state[k] = cs[k]; }); state.doc = d; if (ui) { ui.sync(); ui.run(); } else if (CORE && TR) last = solve(); } },
+    record: record, report: { profile: reportProfile }, handoff: { provides: [], accepts: [] } });
+}
+/* boot: a building stored by one of the three tools in this browser wins over the built-in example */
+(function adoptStored() {
+  if (!CORE || /[?&](s|in)=/.test(location.search)) return;
+  try { var d = CORE.scenario.load(); if (d && d.groups && d.groups.length && d.building && d.building.floors && d.building.floors.length && CORE.scenario.validate(d).ok) { state.doc = CORE.scenario.normalize(d); state.group = state.doc.groups[0].id; state.origin = 'stored'; var m = d.modules && d.modules[TOOL]; if (m && m.state) { var cs = cleanState(m.state); ['lf', 'zcars', 'zspeed'].forEach(function (x) { if (cs[x] != null) state[x] = cs[x]; }); } } } catch (e) { /* storage blocked: the example stays */ }
+})();
+if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && CORE && TR) buildInterface(); else degrade();
+installData();
+});
+</script>
+</body>
+</html>

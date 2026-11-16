@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cost &amp; Schedule Risk (Monte Carlo)</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-15.riskcontingency-1.1",
+  "id": "riskcontingency",
+  "file": "riskcontingency.html",
+  "listed": true,
+  "category": "tendering",
+  "order": 60,
+  "title": {
+    "en": "Cost & Schedule Risk (Monte Carlo)",
+    "uk": "Ризики вартості та строків (Монте-Карло)",
+    "de": "Kosten- & Terminrisiko (Monte Carlo)",
+    "nl": "Kosten- & planningsrisico (Monte Carlo)",
+    "fr": "Risques coûts & délais (Monte-Carlo)",
+    "es": "Riesgo de coste y plazo (Monte Carlo)",
+    "pl": "Ryzyko kosztów i terminów (Monte Carlo)"
+  },
+  "summary": {
+    "en": "How much contingency for P50 / P80, and which risks drive it? Simulates three-point cost ranges, risk events and a schedule of parallel paths together, with rank correlation, time-dependent cost and capped delay damages; gives the confidence of the base estimate, the contingency at any P, the S-curves, the joint cost-schedule confidence and a tornado of the drivers.",
+    "uk": "Скільки резерву потрібно для P50 / P80 і які ризики його формують? Моделює разом тризначні діапазони вартості, ризикові події та графік із паралельних шляхів, з ранговою кореляцією, вартістю часу й обмеженими штрафами за затримку; показує довіру до базового кошторису, резерв для будь-якого P, S-криві, спільну довіру вартості й строку та торнадо чинників.",
+    "de": "Wie viel Reserve für P50 / P80, und welche Risiken treiben sie? Simuliert Dreipunkt-Kostenbereiche, Risikoereignisse und einen Terminplan mit parallelen Pfaden gemeinsam, mit Rangkorrelation, zeitabhängigen Kosten und gedeckelten Verzugsstrafen; nennt die Konfidenz der Basisschätzung, die Reserve bei jedem P, die S-Kurven, die gemeinsame Kosten-Termin-Konfidenz und einen Tornado der Treiber.",
+    "nl": "Hoeveel onvoorzien voor P50 / P80, en welke risico’s bepalen het? Simuleert driepunts-kostenbereiken, risicogebeurtenissen en een planning met parallelle paden samen, met rangcorrelatie, tijdgebonden kosten en geplafonneerde vertragingsboetes; geeft de betrouwbaarheid van de basisraming, het onvoorzien bij elke P, de S-curves, de gezamenlijke kost-planningbetrouwbaarheid en een tornado van de drijvers.",
+    "fr": "Quelle provision pour aléas à P50 / P80, et quels risques la déterminent ? Simule ensemble les fourchettes de coût à trois points, les événements à risque et un planning à chemins parallèles, avec corrélation de rang, coûts liés au temps et pénalités de retard plafonnées ; donne la confiance de l’estimation de base, la provision à tout P, les courbes en S, la confiance conjointe coût-délai et une tornade des facteurs.",
+    "es": "¿Cuánta contingencia para P50 / P80 y qué riesgos la determinan? Simula a la vez rangos de coste de tres puntos, eventos de riesgo y un plazo con caminos paralelos, con correlación de rangos, costes dependientes del plazo y penalizaciones por demora con tope; da la confianza de la estimación base, la contingencia a cualquier P, las curvas S, la confianza conjunta coste-plazo y un tornado de los factores.",
+    "pl": "Ile rezerwy na P50 / P80 i które ryzyka ją kształtują? Symuluje razem trzypunktowe zakresy kosztów, zdarzenia ryzyka i harmonogram ze ścieżkami równoległymi, z korelacją rang, kosztami czasowymi i karami za zwłokę z limitem; podaje ufność kosztorysu bazowego, rezerwę dla dowolnego P, krzywe S, łączną ufność kosztu i terminu oraz tornado czynników."
+  },
+  "description": {
+    "en": "For the owner setting a budget (life-cycle stage 0), the contractor pricing a tender and the equipment supplier pricing an offer (stage 5). Cost lines and activities get PERT, triangular, uniform or fixed ranges; risk events occur with a probability and then cost money and delay a path; one rank correlation for all cost lines and one for all activities (Iman–Conover). Duration = common activities + the longest parallel chain + delays; cost = lines + risk costs + time-dependent cost × (duration − plan) + delay damages beyond the contract duration up to the cap — the integrated cost-schedule analysis of AACE RP 57R-09, range estimating after 41R-08 and contingency after 40R-08 (method by structure). At least 10 000 iterations in a Web Worker: base estimate confidence, contingency at P50/P80/P90 and your P, the share from estimate uncertainty and from risk events, Σ EMV versus the needed contingency, duration P-values and path criticality (merge bias), joint confidence (JCL), expected delay damages, tornado of cost and duration. Exports CSV (with the risk register), JSON and the tender project file (risks block + module).",
+    "uk": "Для замовника, що формує бюджет (етап життєвого циклу 0), підрядника, що оцінює тендер, і постачальника обладнання, що оцінює пропозицію (етап 5). Статті витрат і роботи мають діапазони PERT, трикутні, рівномірні чи фіксовані; ризикові події стаються з певною імовірністю, а тоді коштують гроші й затримують шлях; одна рангова кореляція для всіх статей і одна для всіх робіт (Іман–Коновер). Тривалість = спільні роботи + найдовший паралельний ланцюг + затримки; вартість = статті + вартість ризиків + вартість часу × (тривалість − план) + штрафи понад контрактний строк до обмеження — інтегрований аналіз вартості й графіка за AACE RP 57R-09, оцінка діапазонами за 41R-08 і резерв за 40R-08 (метод за структурою). Щонайменше 10 000 ітерацій у Web Worker: довіра до базового кошторису, резерв на P50/P80/P90 і ваш P, частка невизначеності кошторису й ризикових подій, Σ EMV проти потрібного резерву, P-значення тривалості й критичність шляхів (ефект злиття), спільна довіра (JCL), очікувані штрафи, торнадо вартості й тривалості. Експорт CSV (з реєстром ризиків), JSON і файлу тендерного проєкту (блок risks + модуль).",
+    "de": "Für den Bauherrn, der ein Budget festlegt (Lebenszyklus-Phase 0), den Auftragnehmer, der ein Angebot kalkuliert, und den Ausrüstungslieferanten, der ein Angebot bepreist (Phase 5). Kostenpositionen und Vorgänge erhalten PERT-, Dreiecks-, Gleich- oder feste Bereiche; Risikoereignisse treten mit einer Wahrscheinlichkeit ein und kosten dann Geld und verzögern einen Pfad; eine Rangkorrelation für alle Positionen und eine für alle Vorgänge (Iman–Conover). Dauer = gemeinsame Vorgänge + längste parallele Kette + Verzüge; Kosten = Positionen + Risikokosten + zeitabhängige Kosten × (Dauer − Plan) + Verzugsstrafen über die Vertragsdauer bis zur Obergrenze — die integrierte Kosten-Termin-Analyse nach AACE RP 57R-09, Bereichsschätzung nach 41R-08 und Reserve nach 40R-08 (Methode nach Struktur). Mindestens 10 000 Iterationen im Web Worker: Konfidenz der Basisschätzung, Reserve bei P50/P80/P90 und Ihrem P, Anteil aus Schätzunsicherheit und Risikoereignissen, Σ EMV gegenüber der nötigen Reserve, P-Werte der Dauer und Pfadkritikalität (merge bias), gemeinsame Konfidenz (JCL), erwartete Verzugsstrafen, Tornado für Kosten und Dauer. Export als CSV (mit Risikoregister), JSON und in die Vergabeprojektdatei (Block risks + Modul).",
+    "nl": "Voor de opdrachtgever die een budget vastlegt (fase 0 van de levenscyclus), de aannemer die een offerte raamt en de uitrustingsleverancier die een aanbod prijst (fase 5). Kostenposten en activiteiten krijgen PERT-, driehoeks-, uniforme of vaste bereiken; risicogebeurtenissen treden op met een kans en kosten dan geld en vertragen een pad; één rangcorrelatie voor alle posten en één voor alle activiteiten (Iman–Conover). Duur = gemeenschappelijke activiteiten + langste parallelle keten + vertragingen; kost = posten + risicokosten + tijdgebonden kosten × (duur − planning) + vertragingsboetes na de contractuele termijn tot het plafond — de geïntegreerde kost-planninganalyse van AACE RP 57R-09, raming met bereiken volgens 41R-08 en onvoorzien volgens 40R-08 (methode naar structuur). Minstens 10 000 iteraties in een Web Worker: betrouwbaarheid van de basisraming, onvoorzien bij P50/P80/P90 en uw P, aandeel van ramingsonzekerheid en risicogebeurtenissen, Σ EMV tegenover het nodige onvoorzien, P-waarden van de duur en kritikaliteit van de paden (merge bias), gezamenlijke betrouwbaarheid (JCL), verwachte vertragingsboetes, tornado van kost en duur. Export als CSV (met risicoregister), JSON en naar het aanbestedingsprojectbestand (blok risks + module).",
+    "fr": "Pour le maître d’ouvrage qui fixe un budget (étape 0 du cycle de vie), l’entrepreneur qui chiffre une offre et le fournisseur d’équipements qui prix une proposition (étape 5). Postes de coût et activités reçoivent des fourchettes PERT, triangulaires, uniformes ou fixes ; les événements à risque surviennent avec une probabilité puis coûtent de l’argent et retardent un chemin ; une corrélation de rang pour tous les postes et une pour toutes les activités (Iman–Conover). Durée = activités communes + plus longue chaîne parallèle + retards ; coût = postes + coûts des risques + coûts liés au temps × (durée − planning) + pénalités au-delà du délai contractuel jusqu’au plafond — l’analyse intégrée coût-délai de l’AACE RP 57R-09, l’estimation par fourchettes selon 41R-08 et la provision selon 40R-08 (méthode par structure). Au moins 10 000 itérations dans un Web Worker : confiance de l’estimation de base, provision à P50/P80/P90 et à votre P, part de l’incertitude d’estimation et des événements à risque, Σ EMV face à la provision nécessaire, valeurs P de la durée et criticité des chemins (biais de convergence), confiance conjointe (JCL), pénalités attendues, tornade du coût et de la durée. Exports CSV (avec registre des risques), JSON et fichier de projet de marché (bloc risks + module).",
+    "es": "Para el promotor que fija un presupuesto (etapa 0 del ciclo de vida), el contratista que valora una licitación y el proveedor de equipos que cotiza una oferta (etapa 5). Partidas y actividades reciben rangos PERT, triangulares, uniformes o fijos; los eventos de riesgo ocurren con una probabilidad y entonces cuestan dinero y retrasan un camino; una correlación de rangos para todas las partidas y otra para todas las actividades (Iman–Conover). Duración = actividades comunes + cadena paralela más larga + retrasos; coste = partidas + costes de riesgos + costes dependientes del plazo × (duración − plan) + penalizaciones más allá del plazo contractual hasta el tope — el análisis integrado coste-plazo de AACE RP 57R-09, la estimación por rangos según 41R-08 y la contingencia según 40R-08 (método por estructura). Al menos 10 000 iteraciones en un Web Worker: confianza de la estimación base, contingencia a P50/P80/P90 y a su P, parte de la incertidumbre de estimación y de los eventos de riesgo, Σ EMV frente a la contingencia necesaria, valores P de la duración y criticidad de los caminos (sesgo de convergencia), confianza conjunta (JCL), penalizaciones esperadas, tornado de coste y duración. Exporta CSV (con el registro de riesgos), JSON y el archivo del proyecto de licitación (bloque risks + módulo).",
+    "pl": "Dla zamawiającego ustalającego budżet (etap 0 cyklu życia), wykonawcy wyceniającego przetarg i dostawcy urządzeń wyceniającego ofertę (etap 5). Pozycje kosztów i czynności mają zakresy PERT, trójkątne, jednostajne lub stałe; zdarzenia ryzyka występują z pewnym prawdopodobieństwem, a wtedy kosztują i opóźniają ścieżkę; jedna korelacja rang dla wszystkich pozycji i jedna dla wszystkich czynności (Iman–Conover). Czas = czynności wspólne + najdłuższy łańcuch równoległy + opóźnienia; koszt = pozycje + koszty ryzyk + koszty czasowe × (czas − plan) + kary po terminie umownym do limitu — zintegrowana analiza kosztu i czasu wg AACE RP 57R-09, kosztorysowanie zakresami wg 41R-08 i rezerwa wg 40R-08 (metoda wg struktury). Co najmniej 10 000 iteracji w Web Workerze: ufność kosztorysu bazowego, rezerwa przy P50/P80/P90 i Twoim P, udział niepewności kosztorysu i zdarzeń ryzyka, Σ EMV wobec potrzebnej rezerwy, wartości P czasu i krytyczność ścieżek (efekt scalania), ufność łączna (JCL), oczekiwane kary, tornado kosztu i czasu. Eksport CSV (z rejestrem ryzyk), JSON i do pliku projektu przetargowego (blok risks + moduł)."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Engineering and commercial analysis, not legal advice. The result is only as good as the ranges, probabilities and correlations entered (learning assumptions, editable); the confidence level is company policy. Risk events are independent; one correlation per group; paths are parallel chains between common activities, not a full CPM network; time cost applies symmetrically around the plan.",
+    "uk": "Інженерно-комерційний аналіз, не юридична консультація. Результат не кращий за введені діапазони, імовірності й кореляції (навчальні припущення, редаговані); рівень довіри — політика компанії. Ризикові події незалежні; одна кореляція на групу; шляхи — паралельні ланцюги між спільними роботами, не повна мережа CPM; вартість часу діє симетрично навколо плану.",
+    "de": "Technisch-kaufmännische Analyse, keine Rechtsberatung. Das Ergebnis ist nur so gut wie die eingegebenen Bereiche, Wahrscheinlichkeiten und Korrelationen (Lernannahmen, änderbar); das Konfidenzniveau ist Firmenpolitik. Risikoereignisse sind unabhängig; eine Korrelation je Gruppe; Pfade sind parallele Ketten zwischen gemeinsamen Vorgängen, kein vollständiges CPM-Netz; zeitabhängige Kosten wirken symmetrisch um den Plan.",
+    "nl": "Technisch-commerciële analyse, geen juridisch advies. Het resultaat is maar zo goed als de ingevoerde bereiken, kansen en correlaties (leeraannames, aanpasbaar); het betrouwbaarheidsniveau is bedrijfsbeleid. Risicogebeurtenissen zijn onafhankelijk; één correlatie per groep; paden zijn parallelle ketens tussen gemeenschappelijke activiteiten, geen volledig CPM-netwerk; tijdgebonden kosten werken symmetrisch rond de planning.",
+    "fr": "Analyse technique et commerciale, pas un avis juridique. Le résultat ne vaut que ce que valent les fourchettes, probabilités et corrélations saisies (hypothèses pédagogiques, modifiables) ; le niveau de confiance est une politique interne. Événements à risque indépendants ; une corrélation par groupe ; les chemins sont des chaînes parallèles entre activités communes, pas un réseau CPM complet ; les coûts liés au temps jouent symétriquement autour du planning.",
+    "es": "Análisis técnico y comercial, no asesoramiento jurídico. El resultado vale lo que valen los rangos, probabilidades y correlaciones introducidos (supuestos didácticos, editables); el nivel de confianza es política de empresa. Eventos de riesgo independientes; una correlación por grupo; los caminos son cadenas paralelas entre actividades comunes, no una red CPM completa; los costes dependientes del plazo actúan de forma simétrica alrededor del plan.",
+    "pl": "Analiza techniczno-handlowa, nie porada prawna. Wynik jest tyle wart, co wprowadzone zakresy, prawdopodobieństwa i korelacje (założenia dydaktyczne, edytowalne); poziom ufności to polityka firmy. Zdarzenia ryzyka są niezależne; jedna korelacja na grupę; ścieżki to równoległe łańcuchy między czynnościami wspólnymi, nie pełna sieć CPM; koszty czasowe działają symetrycznie wokół planu."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "tnd-core.js",
+    "tnd-risk.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python reference (bench-src/ref/gen_riskcontingency.py, numpy) that samples PERT as a beta distribution, triangular and uniform ranges, Bernoulli risk events and its own Iman–Conover reordering, takes the maximum over parallel paths, applies time cost and capped delay damages, and uses 400 000 runs per case; deterministic values (base, plan duration, EMV, analytic means) exact, Monte Carlo values within 4 standard errors of the page’s own 10 000-run sample plus 0.3 %; hand cases with analytic answers; preset findings checked in page and reference."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "riskcontingency-monte-carlo",
+        "reference": "bench-src/ref/gen_riskcontingency.py — independent numpy Monte Carlo of the published method (PERT beta, triangular, uniform, Bernoulli events, own Iman–Conover, max over parallel paths, time cost, capped or AUR art. 86 delay damages, covariance shares of the cost variance), 400 000 runs per case",
+        "citations": [
+          "AACE International RP 40R-08, 41R-08, 57R-09 (method by structure)",
+          "IEC 31010:2019 Monte Carlo simulation; ISO 31000:2018",
+          "R. L. Iman, W. J. Conover, Commun. Statist. B 11(3), 1982, 311-334",
+          "D. Vose, Risk Analysis: A Quantitative Guide, 3rd ed., Wiley 2008"
+        ],
+        "tolerance": "base, plan duration, EMV and analytic means relative 1e-9; Monte Carlo mean, P50, P80, P90, sd, confidence values, JCL, expected damages and path criticality within 4 SE of a 10 000-run sample + 0.3 %; covariance shares within 4 × their spread over 10 000-run batches + 0.003; max model (40/30/40) in the Web Worker < 2 s",
+        "artifact": "benchmarks/riskcontingency.json",
+        "cases": 57,
+        "passed": 57,
+        "run_at": "2026-11-15T10:23:34Z"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "The simulation is exported as the calculation record and CSV; an independent Python reference of the same method lives in bench-src/ref/gen_riskcontingency.py."
+  },
+  "handoff": {
+    "provides": [],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="tnd-core.js" defer></script>
+<script src="tnd-risk.js" defer></script>
+<style>
+/* the three lists are cards at every width (the input column is narrow): name on its own line, the numbers in a grid underneath, each with its label */
+.dgu-app #f-items-c .dgu-list-h,.dgu-app #f-acts-c .dgu-list-h,.dgu-app #f-risks-c .dgu-list-h{display:none}
+.dgu-app #f-items-c .dgu-list-cl,.dgu-app #f-acts-c .dgu-list-cl,.dgu-app #f-risks-c .dgu-list-cl{display:block}
+.dgu-app #f-items-c .dgu-list-row,.dgu-app #f-acts-c .dgu-list-row,.dgu-app #f-risks-c .dgu-list-row{padding:var(--sp-2);border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2);align-items:end}
+.dgu-app #f-items-c .dgu-list-row,.dgu-app #f-acts-c .dgu-list-row,.dgu-app #f-risks-c .dgu-list-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dgu-app #f-items-c .dgu-list-row>.dgu-list-c:first-child,.dgu-app #f-acts-c .dgu-list-row>.dgu-list-c:first-child{grid-column:1/3}
+.dgu-app #f-risks-c .dgu-list-row>.dgu-list-c:first-child{grid-column:1/-1}
+.dgu-app #f-items-c .dgu-list-a,.dgu-app #f-acts-c .dgu-list-a,.dgu-app #f-risks-c .dgu-list-a{grid-column:1/-1;justify-content:flex-end}
+/* the printed record starts with the results — no project bar buttons or lifecycle strip */
+@media print{.tnd-project-bar,.tnd-lifecycle,[data-tnd="use-msg"]{display:none!important}
+.dgu-table-wrap{overflow:visible!important}.dgu-table{width:100%!important;font-size:8pt}.dgu-table th,.dgu-table td{white-space:normal!important;overflow-wrap:break-word}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* page code of riskcontingency.html (source: _tnd/riskcontingency/page.js) */
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  var TOOL = 'riskcontingency';
+  function lib() { return window.TndRisk || null; }
+  function core() { return window.TndCore || null; }
+  var MAXI = 40, MAXA = 30, MAXR = 40;
+
+  /* the state keeps probabilities and confidence in percent, money in euro, durations in days; defaults = the be-sewer preset */
+  var DEFAULTS = {
+    iterations: 10000, seed: 20261115, q: 80, rhoCost: 0.3, rhoTime: 0.3, timeCost: 2600, ld: 0, ldCap: 0, ldMode: 'aur86', ldM: 6200000, ldCapPct: 5, targetCost: 0, targetDays: 230,
+    items: [], acts: [], risks: [], tenderRef: '', preparedBy: ''
+  };
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null, ui = null, stage = null;
+
+  function nz(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+  function engineInput(s) {
+    function rg(o, a, b, c) { return { min: nz(o[a]), ml: nz(o[b]), max: nz(o[c]) }; }
+    return {
+      iterations: +s.iterations || 10000, seed: +s.seed || 1, q: (+s.q || 80) / 100,
+      rhoCost: +s.rhoCost || 0, rhoTime: +s.rhoTime || 0, timeCost: +s.timeCost || 0, ld: +s.ld || 0, ldCap: +s.ldCap || 0,
+      ldMode: s.ldMode === 'aur86' ? 'aur86' : 'linear', ldM: +s.ldM || 0, ldCapPct: s.ldCapPct == null || s.ldCapPct === '' ? 5 : +s.ldCapPct,
+      targetCost: +s.targetCost > 0 ? +s.targetCost : null, targetDays: +s.targetDays > 0 ? +s.targetDays : null,
+      items: (s.items || []).slice(0, MAXI).map(function (x, k) { return Object.assign({ id: 'I' + (k + 1), name: x.name, dist: x.dist }, rg(x, 'min', 'ml', 'max')); }),
+      activities: (s.acts || []).slice(0, MAXA).map(function (x, k) { return Object.assign({ id: 'A' + (k + 1), name: x.name, dist: x.dist, path: x.path || '' }, rg(x, 'min', 'ml', 'max')); }),
+      risks: (s.risks || []).slice(0, MAXR).map(function (x, k) {
+        return { id: 'R' + (k + 1), name: x.name, p: (+x.p || 0) / 100, dist: x.dist, path: x.path || '', owner: x.owner || '',
+                 cost: rg(x, 'cmin', 'cml', 'cmax'), time: rg(x, 'tmin', 'tml', 'tmax') };
+      })
+    };
+  }
+
+  /* Web Worker (tnd-risk.js is its own worker script), results cached by input; main-thread fallback */
+  var cache = {}, cacheKeys = [], worker = null, workerFailed = false, seq = 0, pend = {}, pendN = 0, callId = 0, waiters = [];
+  function scriptUrl(name) {
+    var s = document.querySelector('script[src*="' + name + '"]');
+    return s ? s.src : name;
+  }
+  function remember(key, r) { cache[key] = r; cacheKeys.push(key); if (cacheKeys.length > 12) delete cache[cacheKeys.shift()]; }
+  function settle() { if (pendN > 0) return; var w = waiters; waiters = []; w.forEach(function (f) { f(); }); }
+  function getWorker() {
+    if (worker || workerFailed || typeof Worker === 'undefined') return worker;
+    try {
+      worker = new Worker(scriptUrl('tnd-risk.js'));
+      worker.onmessage = function (e) { var d = e.data || {}, cb = pend[d.id]; if (cb) { delete pend[d.id]; pendN--; cb(d); } settle(); };
+      worker.onerror = function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        workerFailed = true; try { worker.terminate(); } catch (e) { /* gone */ } worker = null;
+        Object.keys(pend).forEach(function (id) { var cb = pend[id]; delete pend[id]; pendN--; cb({ ok: false, fallback: true }); });
+        settle();
+      };
+    } catch (e) { workerFailed = true; worker = null; }
+    return worker;
+  }
+  function runMain(inp) {
+    var B = lib();
+    if (!B) return { ok: false, errors: [{ code: 'engine' }] };
+    try { var r = B.analyse(inp); r.via = 'main'; return r; } catch (e) { return { ok: false, errors: [{ code: 'exception', where: String(e && e.message || e) }] }; }
+  }
+  function solve(s, sync) {
+    var inp = engineInput(s), key = JSON.stringify(inp);
+    if (cache[key]) return cache[key];
+    if (!sync && worker && pendN > 0) {
+      /* review R-2: a newer input supersedes the running job; drop it (its promise never resolves, the newer call owns the result) */
+      try { worker.terminate(); } catch (e) { /* gone */ }
+      worker = null; pend = {}; pendN = 0;
+    }
+    var w = sync ? null : getWorker();
+    if (!w) { var r = runMain(inp); remember(key, r); return r; }
+    return new Promise(function (resolve) {
+      var id = ++seq; pendN++;
+      pend[id] = function (d) {
+        var res = d.ok ? d.result : (d.fallback ? runMain(inp) : { ok: false, errors: [{ code: 'exception', where: d.error }] });
+        if (d.ok) res.via = 'worker';
+        remember(key, res); resolve(res);
+      };
+      w.postMessage({ id: id, input: inp, coreUrl: scriptUrl('tnd-core.js') });
+    });
+  }
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var LANGS = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  function TF(fn) { var o = {}; LANGS.forEach(function (l) { o[l] = fn(l); }); return o; }
+  function lang() { try { var l = window.DiagramUI && DiagramUI.domainLang ? DiagramUI.domainLang() : 'en'; return LANGS.indexOf(l) >= 0 ? l : 'en'; } catch (e) { return 'en'; } }
+  var COMMA = { en: false, uk: true, de: true, nl: true, fr: true, es: true, pl: true };
+  function nf(v, l, d) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.fmt) return C.fmt(v, l, d == null ? 2 : d);
+    var s = v.toFixed(d == null ? 2 : d); return COMMA[l] ? s.replace('.', ',') : s;
+  }
+  function eur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    var C = core(); if (C && C.money) return C.money(v, 'EUR', l, 0);
+    return nf(v, l, 0) + ' €';
+  }
+  function keur(v, l) {
+    if (v == null || !isFinite(v)) return '—';
+    if (Math.abs(v) >= 1e6) return nf(v / 1e6, l, 2) + ' M€';
+    if (Math.abs(v) >= 1e3) return nf(v / 1e3, l, 0) + ' k€';
+    return eur(v, l);
+  }
+  function pc(f, l, d) { return f == null || !isFinite(f) ? '—' : nf(100 * f, l, d == null ? 1 : d) + ' %'; }
+  var DAY = T('d', 'дн', 'T', 'd', 'j', 'd', 'dni');
+  function dd(v, l, d) { return v == null || !isFinite(v) ? '—' : nf(v, l, d == null ? 0 : d) + ' ' + DAY[l]; }
+  function str(v, l) { return v && typeof v === 'object' ? (v[l] != null ? v[l] : v.en) : v; }
+  function P(q) { return 'P' + Math.round(100 * q); }
+
+  var DIST = {
+    pert: T('PERT', 'PERT', 'PERT', 'PERT', 'PERT', 'PERT', 'PERT'),
+    triangular: T('triangular', 'трикутний', 'Dreieck', 'driehoek', 'triangulaire', 'triangular', 'trójkątny'),
+    uniform: T('uniform', 'рівномірний', 'Gleichverteilung', 'uniform', 'uniforme', 'uniforme', 'jednostajny'),
+    fixed: T('fixed', 'фіксований', 'fest', 'vast', 'fixe', 'fijo', 'stały')
+  };
+  function distOptions() { return ['pert', 'triangular', 'uniform', 'fixed'].map(function (d) { return [d, DIST[d]]; }); }
+  function distOptions3() { return ['pert', 'triangular', 'uniform'].map(function (d) { return [d, DIST[d]]; }); }
+
+  var S = {
+    subtitle: T('How much contingency for P50 / P80, and which risks drive it?', 'Скільки резерву потрібно для P50 / P80 і які ризики його формують?', 'Wie viel Reserve für P50 / P80, und welche Risiken treiben sie?', 'Hoeveel onvoorzien voor P50 / P80, en welke risico’s bepalen het?', 'Quelle provision pour aléas à P50 / P80, et quels risques la déterminent ?', '¿Cuánta contingencia para P50 / P80 y qué riesgos la determinan?', 'Ile rezerwy na P50 / P80 i które ryzyka ją kształtują?'),
+    pProject: T('Tender project', 'Тендерний проєкт', 'Vergabeprojekt', 'Aanbestedingsproject', 'Projet de marché', 'Proyecto de licitación', 'Projekt przetargowy'),
+    pSim: T('Simulation', 'Моделювання', 'Simulation', 'Simulatie', 'Simulation', 'Simulación', 'Symulacja'),
+    pItems: T('Cost estimate: three-point ranges', 'Кошторис: тризначні діапазони', 'Kostenschätzung: Dreipunktbereiche', 'Kostenraming: driepuntsbereiken', 'Estimation des coûts : fourchettes à trois points', 'Estimación de costes: rangos de tres puntos', 'Kosztorys: zakresy trzypunktowe'),
+    pActs: T('Schedule: activities and parallel paths', 'Графік: роботи й паралельні шляхи', 'Terminplan: Vorgänge und parallele Pfade', 'Planning: activiteiten en parallelle paden', 'Planning : activités et chemins parallèles', 'Plazo: actividades y caminos paralelos', 'Harmonogram: czynności i ścieżki równoległe'),
+    pRisks: T('Risk events (risk register)', 'Ризикові події (реєстр ризиків)', 'Risikoereignisse (Risikoregister)', 'Risicogebeurtenissen (risicoregister)', 'Événements à risque (registre des risques)', 'Eventos de riesgo (registro de riesgos)', 'Zdarzenia ryzyka (rejestr ryzyk)'),
+    pLink: T('Correlation, time cost and delay damages', 'Кореляція, вартість часу та штрафи за затримку', 'Korrelation, zeitabhängige Kosten und Verzugsstrafen', 'Correlatie, tijdgebonden kosten en vertragingsboetes', 'Corrélation, coûts liés au temps et amendes pour retard', 'Correlación, costes dependientes del plazo y penalizaciones por demora', 'Korelacja, koszty czasowe i kary za zwłokę'),
+    pTarget: T('Targets', 'Цілі', 'Zielwerte', 'Doelen', 'Objectifs', 'Objetivos', 'Cele'),
+    pRec: T('Record', 'Запис', 'Protokoll', 'Verslag', 'Procès-verbal', 'Registro', 'Protokół'),
+    iterations: T('Iterations', 'Ітерації', 'Iterationen', 'Iteraties', 'Itérations', 'Iteraciones', 'Iteracje'),
+    seed: T('Random seed', 'Початкове число генератора', 'Startwert des Zufallsgenerators', 'Startwaarde', 'Graine aléatoire', 'Semilla aleatoria', 'Ziarno generatora'),
+    seedHint: T('Same seed, same numbers: the record can be reproduced', 'Те саме число — ті самі результати: запис можна відтворити', 'Gleicher Startwert, gleiche Zahlen: das Protokoll ist reproduzierbar', 'Zelfde startwaarde, zelfde cijfers: het verslag is reproduceerbaar', 'Même graine, mêmes chiffres : le procès-verbal est reproductible', 'Misma semilla, mismos números: el registro es reproducible', 'To samo ziarno, te same liczby: protokół jest odtwarzalny'),
+    q: T('Confidence for the contingency', 'Рівень довіри для резерву', 'Konfidenzniveau der Reserve', 'Betrouwbaarheid voor de post onvoorzien', 'Niveau de confiance de la provision', 'Nivel de confianza de la contingencia', 'Poziom ufności rezerwy'),
+    qHint: T('P80 is common owner practice (company policy, not a rule of law)', 'P80 — поширена практика замовників (політика компанії, не норма права)', 'P80 ist verbreitete Bauherrenpraxis (Firmenpolitik, keine Rechtsnorm)', 'P80 is gangbare praktijk van opdrachtgevers (bedrijfsbeleid, geen rechtsregel)', 'P80 est une pratique courante des maîtres d’ouvrage (politique interne, pas une règle de droit)', 'P80 es práctica habitual de los promotores (política de empresa, no norma jurídica)', 'P80 to częsta praktyka inwestorów (polityka firmy, nie przepis prawa)'),
+    items: T('Cost lines', 'Статті витрат', 'Kostenpositionen', 'Kostenposten', 'Postes de coût', 'Partidas de coste', 'Pozycje kosztów'),
+    acts: T('Activities', 'Роботи', 'Vorgänge', 'Activiteiten', 'Activités', 'Actividades', 'Czynności'),
+    risks: T('Risk events', 'Ризикові події', 'Risikoereignisse', 'Risicogebeurtenissen', 'Événements à risque', 'Eventos de riesgo', 'Zdarzenia ryzyka'),
+    cName: T('Name', 'Назва', 'Bezeichnung', 'Omschrijving', 'Libellé', 'Nombre', 'Nazwa'),
+    cDist: T('Distribution', 'Розподіл', 'Verteilung', 'Verdeling', 'Loi', 'Distribución', 'Rozkład'),
+    cMin: T('Min', 'Мін', 'Min', 'Min', 'Min', 'Mín', 'Min'),
+    cMl: T('Most likely', 'Найімовірніше', 'Wahrscheinlich', 'Meest waarschijnlijk', 'Plus probable', 'Más probable', 'Najbardziej prawd.'),
+    cMax: T('Max', 'Макс', 'Max', 'Max', 'Max', 'Máx', 'Maks'),
+    cPath: T('Path', 'Шлях', 'Pfad', 'Pad', 'Chemin', 'Camino', 'Ścieżka'),
+    cP: T('Prob. %', 'Імов. %', 'Wahrsch. %', 'Kans %', 'Prob. %', 'Prob. %', 'Prawd. %'),
+    cCmin: T('Cost min €', 'Вартість мін €', 'Kosten min €', 'Kost min €', 'Coût min €', 'Coste mín €', 'Koszt min €'),
+    cCml: T('Cost likely €', 'Вартість імов. €', 'Kosten wahrsch. €', 'Kost waarsch. €', 'Coût probable €', 'Coste probable €', 'Koszt prawd. €'),
+    cCmax: T('Cost max €', 'Вартість макс €', 'Kosten max €', 'Kost max €', 'Coût max €', 'Coste máx €', 'Koszt maks €'),
+    cTmin: T('Delay min', 'Затримка мін', 'Verzug min', 'Vertraging min', 'Retard min', 'Retraso mín', 'Opóźn. min'),
+    cTml: T('Delay likely', 'Затримка імов.', 'Verzug wahrsch.', 'Vertraging waarsch.', 'Retard probable', 'Retraso probable', 'Opóźn. prawd.'),
+    cTmax: T('Delay max', 'Затримка макс', 'Verzug max', 'Vertraging max', 'Retard max', 'Retraso máx', 'Opóźn. maks'),
+    cOwner: T('Owner', 'Власник', 'Verantwortlich', 'Eigenaar', 'Responsable', 'Responsable', 'Właściciel'),
+    addItem: T('Add cost line', 'Додати статтю', 'Position hinzufügen', 'Post toevoegen', 'Ajouter un poste', 'Añadir partida', 'Dodaj pozycję'),
+    addAct: T('Add activity', 'Додати роботу', 'Vorgang hinzufügen', 'Activiteit toevoegen', 'Ajouter une activité', 'Añadir actividad', 'Dodaj czynność'),
+    addRisk: T('Add risk event', 'Додати ризик', 'Risiko hinzufügen', 'Risico toevoegen', 'Ajouter un risque', 'Añadir riesgo', 'Dodaj ryzyko'),
+    itemsHint: T('In euro. The base estimate is the sum of the most likely values.', 'У євро. Базовий кошторис — сума найімовірніших значень.', 'In Euro. Die Basisschätzung ist die Summe der wahrscheinlichsten Werte.', 'In euro. De basisraming is de som van de meest waarschijnlijke waarden.', 'En euros. L’estimation de base est la somme des valeurs les plus probables.', 'En euros. La estimación base es la suma de los valores más probables.', 'W euro. Kosztorys bazowy to suma wartości najbardziej prawdopodobnych.'),
+    actsHint: T('In days. Empty path = common activity in series with everything; activities with the same path letter form one chain, chains run in parallel.', 'У днях. Порожній шлях — спільна робота, послідовна до всього; роботи з однаковою літерою шляху утворюють ланцюг, ланцюги йдуть паралельно.', 'In Tagen. Leerer Pfad = gemeinsamer Vorgang in Reihe mit allem; Vorgänge mit gleichem Pfadbuchstaben bilden eine Kette, Ketten laufen parallel.', 'In dagen. Leeg pad = gemeenschappelijke activiteit in serie met alles; activiteiten met dezelfde padletter vormen één keten, ketens lopen parallel.', 'En jours. Chemin vide = activité commune en série avec tout ; les activités de même lettre forment une chaîne, les chaînes sont parallèles.', 'En días. Camino vacío = actividad común en serie con todo; las actividades con la misma letra forman una cadena, las cadenas van en paralelo.', 'W dniach. Pusta ścieżka = czynność wspólna, szeregowo ze wszystkim; czynności z tą samą literą tworzą łańcuch, łańcuchy biegną równolegle.'),
+    risksHint: T('Probability in %, cost in euro, delay in days; the delay hits the named path (empty = project end). Leave cost or delay empty if the risk has none.', 'Імовірність у %, вартість у євро, затримка в днях; затримка діє на вказаний шлях (порожньо — кінець проєкту). Залиште вартість чи затримку порожніми, якщо їх немає.', 'Wahrscheinlichkeit in %, Kosten in Euro, Verzug in Tagen; der Verzug trifft den genannten Pfad (leer = Projektende). Kosten oder Verzug leer lassen, wenn es keine gibt.', 'Kans in %, kost in euro, vertraging in dagen; de vertraging treft het genoemde pad (leeg = einde project). Laat kost of vertraging leeg als er geen is.', 'Probabilité en %, coût en euros, retard en jours ; le retard touche le chemin indiqué (vide = fin du projet). Laissez coût ou retard vides s’il n’y en a pas.', 'Probabilidad en %, coste en euros, retraso en días; el retraso afecta al camino indicado (vacío = fin del proyecto). Deje vacío el coste o el retraso si no lo hay.', 'Prawdopodobieństwo w %, koszt w euro, opóźnienie w dniach; opóźnienie trafia w podaną ścieżkę (puste = koniec projektu). Zostaw koszt lub opóźnienie puste, jeśli ich nie ma.'),
+    rhoCost: T('Rank correlation between cost lines', 'Рангова кореляція між статтями витрат', 'Rangkorrelation zwischen Kostenpositionen', 'Rangcorrelatie tussen kostenposten', 'Corrélation de rang entre postes de coût', 'Correlación de rangos entre partidas', 'Korelacja rang między pozycjami kosztów'),
+    rhoCostHint: T('Common drivers (market, productivity, design maturity) move lines together; 0 = independent', 'Спільні чинники (ринок, продуктивність, зрілість проєкту) рухають статті разом; 0 — незалежні', 'Gemeinsame Treiber (Markt, Produktivität, Planungsreife) bewegen Positionen gemeinsam; 0 = unabhängig', 'Gemeenschappelijke drijvers (markt, productiviteit, maturiteit van het ontwerp) bewegen posten samen; 0 = onafhankelijk', 'Des facteurs communs (marché, productivité, maturité des études) font bouger les postes ensemble ; 0 = indépendants', 'Factores comunes (mercado, productividad, madurez del diseño) mueven las partidas a la vez; 0 = independientes', 'Wspólne czynniki (rynek, wydajność, dojrzałość projektu) poruszają pozycje razem; 0 = niezależne'),
+    rhoTime: T('Rank correlation between activities', 'Рангова кореляція між роботами', 'Rangkorrelation zwischen Vorgängen', 'Rangcorrelatie tussen activiteiten', 'Corrélation de rang entre activités', 'Correlación de rangos entre actividades', 'Korelacja rang między czynnościami'),
+    timeCost: T('Time-dependent cost', 'Вартість часу (залежні від тривалості витрати)', 'Zeitabhängige Kosten', 'Tijdgebonden kosten', 'Coûts liés au temps', 'Costes dependientes del plazo', 'Koszty zależne od czasu'),
+    timeCostHint: T('Site overheads, plant, owner’s team per day; applied to the duration above or below the deterministic plan', 'Накладні на майданчику, техніка, команда замовника за день; застосовується до тривалості понад або менше детермінованого плану', 'Baustellengemeinkosten, Geräte, Bauherrenteam je Tag; auf die Dauer über oder unter dem deterministischen Plan angewandt', 'Werfkosten, materieel, team van de opdrachtgever per dag; toegepast op de duur boven of onder de deterministische planning', 'Frais de chantier, matériel, équipe du maître d’ouvrage par jour ; appliqués à la durée au-delà ou en deçà du planning déterministe', 'Gastos de obra, maquinaria, equipo del promotor por día; se aplican a la duración por encima o por debajo del plan determinista', 'Koszty budowy, sprzęt, zespół inwestora za dzień; stosowane do czasu powyżej lub poniżej planu deterministycznego'),
+    ld: T('Delay damages per day', 'Штраф за затримку за день', 'Verzugsstrafe je Tag', 'Vertragingsboete per dag', 'Amendes pour retard par jour', 'Penalización por demora por día', 'Kara za zwłokę za dzień'),
+    ldHint: T('Liquidated damages beyond the contract duration (Targets); 0 = none', 'Заздалегідь визначені збитки понад контрактний строк (Цілі); 0 — немає', 'Pauschalierter Verzugsschaden über die Vertragsdauer hinaus (Zielwerte); 0 = keine', 'Forfaitaire vertragingsboete na de contractuele termijn (Doelen); 0 = geen', 'Amendes pour retard (dommages-intérêts forfaitaires en contrat privé) au-delà du délai contractuel (Objectifs) ; 0 = aucune', 'Penalización pactada más allá del plazo contractual (Objetivos); 0 = ninguna', 'Kary umowne po terminie umownym (Cele); 0 = brak'),
+    ldCap: T('Cap of delay damages', 'Обмеження штрафів', 'Obergrenze der Verzugsstrafe', 'Plafond van de vertragingsboete', 'Plafond des amendes pour retard', 'Tope de la penalización', 'Limit kar'),
+    ldCapHint: T('0 = no cap', '0 — без обмеження', '0 = keine Obergrenze', '0 = geen plafond', '0 = pas de plafond', '0 = sin tope', '0 = bez limitu'),
+    targetCost: T('Budget or bid price to test', 'Бюджет чи ціна пропозиції для перевірки', 'Zu prüfendes Budget oder Angebotspreis', 'Te toetsen budget of offerteprijs', 'Budget ou prix d’offre à tester', 'Presupuesto o precio de oferta a comprobar', 'Budżet lub cena oferty do sprawdzenia'),
+    targetDays: T('Contract duration', 'Контрактний строк', 'Vertragsdauer', 'Contractuele uitvoeringstermijn', 'Délai contractuel', 'Plazo contractual', 'Termin umowny'),
+    targetHint: T('0 = not set', '0 — не задано', '0 = nicht gesetzt', '0 = niet ingesteld', '0 = non défini', '0 = sin definir', '0 = nie ustawiono'),
+    tenderRef: T('Tender reference', 'Номер тендеру', 'Vergabenummer', 'Referentie van de opdracht', 'Référence du marché', 'Referencia de la licitación', 'Numer postępowania'),
+    preparedBy: T('Prepared by', 'Підготував', 'Erstellt von', 'Opgesteld door', 'Établi par', 'Preparado por', 'Sporządził'),
+    /* results */
+    vCont: T('contingency', 'резерв', 'Reserve', 'onvoorzien', 'provision pour aléas', 'contingencia', 'rezerwa'),
+    vOfBase: T('of the base estimate', 'від базового кошторису', 'der Basisschätzung', 'van de basisraming', 'de l’estimation de base', 'de la estimación base', 'kosztorysu bazowego'),
+    vBaseIs: T('the base estimate is', 'базовий кошторис —', 'die Basisschätzung liegt bei', 'de basisraming is', 'l’estimation de base est à', 'la estimación base está en', 'kosztorys bazowy to'),
+    vDur: T('duration', 'тривалість', 'Dauer', 'duur', 'durée', 'duración', 'czas'),
+    tCost: T('cost', 'вартість', 'Kosten', 'kost', 'coût', 'coste', 'koszt'),
+    tCont: T('Contingency', 'Резерв', 'Reserve', 'Onvoorzien', 'Provision pour aléas', 'Contingencia', 'Rezerwa'),
+    tBase: T('Confidence of the base estimate', 'Довіра до базового кошторису', 'Konfidenz der Basisschätzung', 'Betrouwbaarheid van de basisraming', 'Confiance de l’estimation de base', 'Confianza de la estimación base', 'Ufność kosztorysu bazowego'),
+    tDur: T('duration', 'тривалість', 'Dauer', 'duur', 'durée', 'duración', 'czas'),
+    tSched: T('Schedule contingency', 'Резерв часу', 'Terminreserve', 'Tijdsmarge', 'Marge de délai', 'Margen de plazo', 'Rezerwa czasu'),
+    tJcl: T('Joint confidence (cost and time)', 'Спільна довіра (вартість і час)', 'Gemeinsame Konfidenz (Kosten und Zeit)', 'Gezamenlijke betrouwbaarheid (kost en tijd)', 'Confiance conjointe (coût et délai)', 'Confianza conjunta (coste y plazo)', 'Ufność łączna (koszt i czas)'),
+    tLd: T('Expected delay damages', 'Очікувані штрафи', 'Erwartete Verzugsstrafen', 'Verwachte vertragingsboetes', 'Amendes pour retard attendues', 'Penalizaciones esperadas', 'Oczekiwane kary'),
+    tTc: T('Confidence of the budget / bid price', 'Довіра до бюджету / ціни', 'Konfidenz des Budgets / Angebotspreises', 'Betrouwbaarheid van budget / offerteprijs', 'Confiance du budget / prix d’offre', 'Confianza del presupuesto / precio', 'Ufność budżetu / ceny'),
+    tTd: T('Confidence of the contract duration', 'Довіра до контрактного строку', 'Konfidenz der Vertragsdauer', 'Betrouwbaarheid van de contractuele termijn', 'Confiance du délai contractuel', 'Confianza del plazo contractual', 'Ufność terminu umownego'),
+    hDet: T('plan', 'план', 'Plan', 'planning', 'planning', 'plan', 'plan'),
+    hProbAny: T('probability of any damages', 'імовірність будь-якого штрафу', 'Wahrscheinlichkeit einer Strafe', 'kans op een boete', 'probabilité d’une amende', 'probabilidad de penalización', 'prawdopodobieństwo kary'),
+    tabLevels: T('Confidence levels', 'Рівні довіри', 'Konfidenzniveaus', 'Betrouwbaarheidsniveaus', 'Niveaux de confiance', 'Niveles de confianza', 'Poziomy ufności'),
+    hLevel: T('Level', 'Рівень', 'Niveau', 'Niveau', 'Niveau', 'Nivel', 'Poziom'),
+    hCost: T('Cost', 'Вартість', 'Kosten', 'Kost', 'Coût', 'Coste', 'Koszt'),
+    hPct: T('% of base', '% бази', '% der Basis', '% van basis', '% de la base', '% de la base', '% bazy'),
+    hDur: T('Duration', 'Тривалість', 'Dauer', 'Duur', 'Durée', 'Duración', 'Czas'),
+    lBase: T('Base estimate (sum of most likely)', 'Базовий кошторис (сума найімовірніших)', 'Basisschätzung (Summe der wahrscheinlichsten Werte)', 'Basisraming (som meest waarschijnlijke)', 'Estimation de base (somme des plus probables)', 'Estimación base (suma de los más probables)', 'Kosztorys bazowy (suma najbardziej prawd.)'),
+    lMean: T('Mean', 'Середнє', 'Mittelwert', 'Gemiddelde', 'Moyenne', 'Media', 'Średnia'),
+    lEmv: T('Base + Σ EMV of the risk register', 'База + Σ EMV реєстру ризиків', 'Basis + Σ EMV des Risikoregisters', 'Basis + Σ EMV van het risicoregister', 'Base + Σ EMV du registre des risques', 'Base + Σ EMV del registro de riesgos', 'Baza + Σ EMV rejestru ryzyk'),
+    lTarget: T('Budget / bid price', 'Бюджет / ціна', 'Budget / Angebotspreis', 'Budget / offerteprijs', 'Budget / prix d’offre', 'Presupuesto / precio', 'Budżet / cena'),
+    hConf: T('Confidence', 'Довіра', 'Konfidenz', 'Betrouwbaarheid', 'Confiance', 'Confianza', 'Ufność'),
+    tabSplit: T('What the contingency covers', 'Що покриває резерв', 'Was die Reserve abdeckt', 'Wat de post onvoorzien dekt', 'Ce que couvre la provision', 'Qué cubre la contingencia', 'Co pokrywa rezerwa'),
+    sEst: T('Estimate uncertainty (ranges of the cost lines)', 'Невизначеність кошторису (діапазони статей)', 'Schätzunsicherheit (Bereiche der Positionen)', 'Ramingsonzekerheid (bereiken van de posten)', 'Incertitude d’estimation (fourchettes des postes)', 'Incertidumbre de la estimación (rangos de las partidas)', 'Niepewność kosztorysu (zakresy pozycji)'),
+    sRisk: T('Risk events, delay cost and damages', 'Ризикові події, вартість затримки та штрафи', 'Risikoereignisse, Verzugskosten und Strafen', 'Risicogebeurtenissen, vertragingskosten en boetes', 'Événements à risque, coûts de retard et amendes', 'Eventos de riesgo, coste del retraso y penalizaciones', 'Zdarzenia ryzyka, koszt opóźnienia i kary'),
+    sEmv: T('For comparison: Σ EMV of the risk register', 'Для порівняння: Σ EMV реєстру ризиків', 'Zum Vergleich: Σ EMV des Risikoregisters', 'Ter vergelijking: Σ EMV van het risicoregister', 'Pour comparaison : Σ EMV du registre', 'Para comparar: Σ EMV del registro', 'Dla porównania: Σ EMV rejestru'),
+    hItem: T('Item', 'Позиція', 'Position', 'Post', 'Élément', 'Concepto', 'Pozycja'),
+    hValue: T('Value', 'Значення', 'Wert', 'Waarde', 'Valeur', 'Valor', 'Wartość'),
+    tabReg: T('Risk register with expected values', 'Реєстр ризиків з очікуваними значеннями', 'Risikoregister mit Erwartungswerten', 'Risicoregister met verwachte waarden', 'Registre des risques avec valeurs attendues', 'Registro de riesgos con valores esperados', 'Rejestr ryzyk z wartościami oczekiwanymi'),
+    hRisk: T('Risk', 'Ризик', 'Risiko', 'Risico', 'Risque', 'Riesgo', 'Ryzyko'),
+    hP: T('p', 'p', 'p', 'p', 'p', 'p', 'p'),
+    hMeanC: T('Mean cost if it occurs', 'Середня вартість, якщо станеться', 'Mittlere Kosten bei Eintritt', 'Gemiddelde kost als het optreedt', 'Coût moyen s’il survient', 'Coste medio si ocurre', 'Średni koszt, gdy wystąpi'),
+    hEmv: T('EMV', 'EMV', 'EMV', 'EMV', 'EMV', 'EMV', 'EMV'),
+    hMeanT: T('Mean delay if it occurs', 'Середня затримка, якщо станеться', 'Mittlerer Verzug bei Eintritt', 'Gemiddelde vertraging als het optreedt', 'Retard moyen s’il survient', 'Retraso medio si ocurre', 'Średnie opóźnienie, gdy wystąpi'),
+    hShare: T('Share of cost variance', 'Частка дисперсії вартості', 'Anteil an der Kostenvarianz', 'Aandeel in de kostvariantie', 'Part de la variance du coût', 'Parte de la varianza del coste', 'Udział w wariancji kosztu'),
+    tabTorC: T('Drivers of the cost (tornado)', 'Чинники вартості (торнадо)', 'Treiber der Kosten (Tornado)', 'Drijvers van de kost (tornado)', 'Facteurs du coût (tornade)', 'Factores del coste (tornado)', 'Czynniki kosztu (tornado)'),
+    tabTorT: T('Drivers of the duration (tornado)', 'Чинники тривалості (торнадо)', 'Treiber der Dauer (Tornado)', 'Drijvers van de duur (tornado)', 'Facteurs de la durée (tornade)', 'Factores de la duración (tornado)', 'Czynniki czasu (tornado)'),
+    hInput: T('Input', 'Вхідна величина', 'Eingangsgröße', 'Invoer', 'Entrée', 'Entrada', 'Wielkość wejściowa'),
+    hKind: T('Kind', 'Тип', 'Art', 'Soort', 'Type', 'Tipo', 'Rodzaj'),
+    hRho: T('Rank correlation (Spearman)', 'Рангова кореляція (Спірмен)', 'Rangkorrelation (Spearman)', 'Rangcorrelatie (Spearman)', 'Corrélation de rang (Spearman)', 'Correlación de rangos (Spearman)', 'Korelacja rang (Spearman)'),
+    hShareV: T('Share of cost variance', 'Частка дисперсії вартості', 'Anteil an der Kostenvarianz', 'Aandeel in de kostvariantie', 'Part de la variance du coût', 'Cuota de la varianza del coste', 'Udział w wariancji kosztu'),
+    ldMode: T('Delay damages model', 'Модель штрафів за затримку', 'Modell der Verzugsstrafe', 'Model van de vertragingsboete', 'Modèle des amendes pour retard', 'Modelo de penalización por demora', 'Model kar za zwłokę'),
+    ldModeLin: T('€ per day with a cap (contract clause, FIDIC / private)', '€ за день з обмеженням (умова договору, FIDIC / приватний)', '€ je Tag mit Obergrenze (Vertragsklausel, FIDIC / privat)', '€ per dag met plafond (contractclausule, FIDIC / privaat)', '€ par jour avec plafond (clause contractuelle, FIDIC / privé)', '€ por día con tope (cláusula contractual, FIDIC / privado)', '€ za dzień z limitem (klauzula umowna, FIDIC / prywatne)'),
+    ldModeAur: T('Belgian public works: AUR art. 86 (quadratic)', 'Бельгійські публічні роботи: AUR ст. 86 (квадратична)', 'Belgische öffentliche Bauaufträge: AUR Art. 86 (quadratisch)', 'Belgische overheidsopdrachten voor werken: AUR art. 86 (kwadratisch)', 'Marchés publics de travaux belges : RGE art. 86 (quadratique)', 'Obras públicas belgas: AUR art. 86 (cuadrática)', 'Belgijskie zamówienia publiczne na roboty: AUR art. 86 (kwadratowa)'),
+    ldM: T('Contract amount M', 'Сума договору M', 'Auftragssumme M', 'Opdrachtbedrag M', 'Montant du marché M', 'Importe del contrato M', 'Wartość umowy M'),
+    ldMHint: T('Initial contract amount (bid price); 0 = base estimate. R = 0.45·M·n²/N², N = 0.7 × days of the contract period (§3)', 'Початкова сума договору (ціна пропозиції); 0 — базовий кошторис. R = 0,45·M·n²/N², N = 0,7 × днів строку (§3)', 'Ursprüngliche Auftragssumme (Angebotspreis); 0 = Basisschätzung. R = 0,45·M·n²/N², N = 0,7 × Tage der Ausführungsfrist (§3)', 'Oorspronkelijk opdrachtbedrag (inschrijvingsprijs); 0 = basisraming. R = 0,45·M·n²/N², N = 0,7 × dagen van de uitvoeringstermijn (§3)', 'Montant initial du marché (prix de l’offre) ; 0 = estimation de base. R = 0,45·M·n²/N², N = 0,7 × jours du délai d’exécution (§3)', 'Importe inicial del contrato (precio ofertado); 0 = estimación base. R = 0,45·M·n²/N², N = 0,7 × días del plazo de ejecución (§3)', 'Początkowa wartość umowy (cena oferty); 0 = kosztorys bazowy. R = 0,45·M·n²/N², N = 0,7 × dni terminu wykonania (§3)'),
+    ldCapPct: T('Cap, % of M', 'Обмеження, % від M', 'Obergrenze, % von M', 'Plafond, % van M', 'Plafond, % de M', 'Tope, % de M', 'Limit, % M'),
+    ldCapPctHint: T('5 % (art. 86 §6); up to 10 % if the period is an award criterion', '5 % (ст. 86 §6); до 10 %, якщо строк — критерій оцінки', '5 % (Art. 86 §6); bis 10 %, wenn die Frist Zuschlagskriterium ist', '5 % (art. 86 §6); tot 10 % als de termijn een gunningscriterium is', '5 % (art. 86 §6) ; jusqu’à 10 % si le délai est un critère d’attribution', '5 % (art. 86 §6); hasta 10 % si el plazo es criterio de adjudicación', '5 % (art. 86 §6); do 10 %, gdy termin jest kryterium oceny'),
+    hShareR: T('Squared-correlation share (ranking only)', 'Частка квадрата кореляції (лише ранжування)', 'Anteil der quadrierten Korrelation (nur Rangfolge)', 'Aandeel kwadratische correlatie (alleen rangschikking)', 'Part de la corrélation au carré (classement seulement)', 'Cuota de la correlación al cuadrado (solo clasificación)', 'Udział kwadratu korelacji (tylko ranking)'),
+    kTime: T('schedule', 'графік', 'Terminplan', 'planning', 'planning', 'plazo', 'harmonogram'),
+    nmTime: T('Time-related cost (time cost × delay + damages)', 'Витрати від часу (вартість часу × затримка + штрафи)', 'Zeitabhängige Kosten (Zeitkosten × Verzug + Strafen)', 'Tijdgebonden kosten (tijdkost × vertraging + boetes)', 'Coûts liés au temps (coût du temps × retard + amendes)', 'Costes del plazo (coste del tiempo × retraso + penalizaciones)', 'Koszty czasu (koszt dnia × opóźnienie + kary)'),
+    nShare: T('Share of cost variance = Cov(part, total) / Var(total) for the parts that add up to the total cost: cost lines, direct risk costs and the time-related cost (activities and risk delays act through it, so their own share shows “—”). The shares add up to 100 % also with correlated lines. Duration is a maximum of paths, not a sum, so its last column only ranks the inputs.', 'Частка дисперсії вартості = Cov(складова, сума) / Var(сума) для складових, що дають загальну вартість: статті витрат, прямі витрати ризиків і витрати від часу (роботи й затримки ризиків діють через них, тому їхня власна частка — «—»). Частки дають разом 100 % і за корельованих статей. Тривалість — максимум шляхів, а не сума, тому її остання колонка лише ранжує вхідні величини.', 'Anteil an der Kostenvarianz = Cov(Teil, Summe) / Var(Summe) für die Teile, die die Gesamtkosten ergeben: Kostenpositionen, direkte Risikokosten und zeitabhängige Kosten (Vorgänge und Risikoverzüge wirken über diese, daher steht bei ihnen „—“). Die Anteile ergeben auch bei korrelierten Positionen 100 %. Die Dauer ist ein Maximum von Pfaden, keine Summe; ihre letzte Spalte ordnet die Eingaben nur.', 'Aandeel in de kostvariantie = Cov(deel, totaal) / Var(totaal) voor de delen die samen de totale kost vormen: kostenposten, directe risicokosten en de tijdgebonden kosten (activiteiten en risicovertragingen werken via die laatste, daarom staat bij hen “—”). De aandelen tellen ook bij gecorreleerde posten op tot 100 %. De duur is een maximum van paden, geen som; de laatste kolom rangschikt daar alleen.', 'Part de la variance du coût = Cov(composante, total) / Var(total) pour les composantes qui forment le coût total : postes, coûts directs des risques et coûts liés au temps (les activités et les retards des risques agissent à travers eux, d’où « — » pour leur part propre). Les parts font 100 % même avec des postes corrélés. La durée est un maximum de chemins, pas une somme : sa dernière colonne ne fait que classer les entrées.', 'Cuota de la varianza del coste = Cov(parte, total) / Var(total) para las partes que suman el coste total: partidas, costes directos de los riesgos y costes del plazo (las actividades y los retrasos de los riesgos actúan a través de estos, por eso su cuota propia es «—»). Las cuotas suman el 100 % también con partidas correlacionadas. La duración es un máximo de caminos, no una suma: su última columna solo ordena los datos.', 'Udział w wariancji kosztu = Cov(część, suma) / Var(suma) dla części składających się na koszt całkowity: pozycji kosztów, bezpośrednich kosztów ryzyk i kosztów czasu (czynności i opóźnienia ryzyk działają przez te ostatnie, stąd „—” przy ich własnym udziale). Udziały dają razem 100 % także przy skorelowanych pozycjach. Czas to maksimum ścieżek, a nie suma, więc jego ostatnia kolumna tylko porządkuje dane.'),
+    nLdNoDur: T('Delay damages are set but there is no contract duration (Targets): no damages were counted.', 'Штрафи задано, але контрактного строку (Цілі) немає: штрафи не враховано.', 'Verzugsstrafen sind gesetzt, aber es gibt keine Vertragsdauer (Zielwerte): es wurden keine Strafen gerechnet.', 'Er is een vertragingsboete ingesteld maar geen contractuele termijn (Doelen): er zijn geen boetes gerekend.', 'Des amendes pour retard sont définies mais pas de délai contractuel (Objectifs) : aucune amende n’a été comptée.', 'Hay penalización por demora pero ningún plazo contractual (Objetivos): no se contó ninguna penalización.', 'Ustawiono kary za zwłokę, ale brak terminu umownego (Cele): kar nie naliczono.'),
+    nIterCap: T('{a} iterations reduced to {b} for this model size (iterations × inputs ≤ 2 million keeps the run near 2 s).', '{a} ітерацій зменшено до {b} для такого розміру моделі (ітерації × вхідні величини ≤ 2 млн тримають розрахунок близько 2 с).', '{a} Iterationen für diese Modellgröße auf {b} reduziert (Iterationen × Eingaben ≤ 2 Mio. halten die Rechnung bei etwa 2 s).', '{a} iteraties verlaagd tot {b} voor deze modelgrootte (iteraties × invoer ≤ 2 miljoen houdt de berekening rond 2 s).', '{a} itérations réduites à {b} pour cette taille de modèle (itérations × entrées ≤ 2 millions maintient le calcul vers 2 s).', '{a} iteraciones reducidas a {b} para este tamaño de modelo (iteraciones × datos ≤ 2 millones mantiene el cálculo en unos 2 s).', '{a} iteracji zmniejszono do {b} dla tej wielkości modelu (iteracje × dane ≤ 2 mln utrzymują obliczenie w ok. 2 s).'),
+    nAur: T('Delay fines per AUR art. 86 (KB 14.01.2013, ejustice text read 15.11.2026): R = 0.45·M·n²/N² with M = {M}, N = {N} working days (0.7 × {D} days, §3), total capped at {cap} (§6); totals under 75 € are neglected.', 'Штрафи за затримку за AUR ст. 86 (KB 14.01.2013, текст ejustice прочитано 15.11.2026): R = 0,45·M·n²/N², M = {M}, N = {N} робочих днів (0,7 × {D} дн, §3), сума не більше {cap} (§6); суми до 75 € не враховуються.', 'Verzugsstrafen nach AUR Art. 86 (KB 14.01.2013, Text auf ejustice gelesen am 15.11.2026): R = 0,45·M·n²/N² mit M = {M}, N = {N} Arbeitstage (0,7 × {D} Tage, §3), Summe höchstens {cap} (§6); Summen unter 75 € entfallen.', 'Vertragingsboetes volgens AUR art. 86 (KB 14.01.2013, tekst op ejustice gelezen op 15.11.2026): R = 0,45·M·n²/N² met M = {M}, N = {N} werkdagen (0,7 × {D} dagen, §3), totaal begrensd op {cap} (§6); totalen onder 75 € vervallen.', 'Amendes pour retard selon les RGE art. 86 (AR 14.01.2013, texte ejustice lu le 15.11.2026) : R = 0,45·M·n²/N² avec M = {M}, N = {N} jours ouvrables (0,7 × {D} jours, §3), total plafonné à {cap} (§6) ; les totaux inférieurs à 75 € sont négligés.', 'Penalizaciones por demora según el AUR art. 86 (KB 14.01.2013, texto de ejustice leído el 15.11.2026): R = 0,45·M·n²/N² con M = {M}, N = {N} días hábiles (0,7 × {D} días, §3), total limitado a {cap} (§6); los totales inferiores a 75 € se desprecian.', 'Kary za zwłokę wg AUR art. 86 (KB 14.01.2013, tekst z ejustice odczytany 15.11.2026): R = 0,45·M·n²/N², M = {M}, N = {N} dni roboczych (0,7 × {D} dni, §3), suma ograniczona do {cap} (§6); sumy poniżej 75 € pomija się.'),
+    errException: T('Calculation error', 'Помилка розрахунку', 'Rechenfehler', 'Rekenfout', 'Erreur de calcul', 'Error de cálculo', 'Błąd obliczeń'),
+    se2: T('2 standard errors', '2 стандартні похибки', '2 Standardfehler', '2 standaardfouten', '2 erreurs types', '2 errores típicos', '2 błędy standardowe'),
+    fCost: T('cost', 'вартість', 'Kosten', 'kost', 'coût', 'coste', 'koszt'),
+    fDelay: T('delay', 'затримка', 'Verzug', 'vertraging', 'retard', 'retraso', 'opóźnienie'),
+    usePct: T('probabilities above 1 read as percent', 'імовірності понад 1 прочитано як відсотки', 'Wahrscheinlichkeiten über 1 als Prozent gelesen', 'kansen boven 1 gelezen als procent', 'probabilités supérieures à 1 lues en pour cent', 'probabilidades mayores que 1 leídas como porcentaje', 'prawdopodobieństwa powyżej 1 odczytano jako procenty'),
+    useClamp: T('probabilities outside 0–100 % capped', 'імовірності поза 0–100 % обмежено', 'Wahrscheinlichkeiten außerhalb 0–100 % begrenzt', 'kansen buiten 0–100 % begrensd', 'probabilités hors 0–100 % plafonnées', 'probabilidades fuera de 0–100 % limitadas', 'prawdopodobieństwa spoza 0–100 % przycięto'),
+    useFixed: T('fixed impacts taken as min = most likely = max', 'фіксовані впливи взято як мін = найімовірніше = макс', 'feste Auswirkungen als Min = wahrscheinlich = Max übernommen', 'vaste impact overgenomen als min = meest waarschijnlijk = max', 'impacts fixes repris comme min = plus probable = max', 'impactos fijos tomados como mín = más probable = máx', 'stałe skutki przyjęto jako min = najbardziej prawd. = maks'),
+    useSkipped: T('skipped (no usable data)', 'пропущено (немає придатних даних)', 'übersprungen (keine verwertbaren Daten)', 'overgeslagen (geen bruikbare gegevens)', 'ignorés (pas de données exploitables)', 'omitidos (sin datos utilizables)', 'pominięto (brak użytecznych danych)'),
+    kItem: T('cost line', 'стаття', 'Position', 'post', 'poste', 'partida', 'pozycja'),
+    kAct: T('activity', 'робота', 'Vorgang', 'activiteit', 'activité', 'actividad', 'czynność'),
+    kRisk: T('risk event', 'ризик', 'Risiko', 'risico', 'risque', 'riesgo', 'ryzyko'),
+    tabPaths: T('Parallel paths: criticality', 'Паралельні шляхи: критичність', 'Parallele Pfade: Kritikalität', 'Parallelle paden: kritikaliteit', 'Chemins parallèles : criticité', 'Caminos paralelos: criticidad', 'Ścieżki równoległe: krytyczność'),
+    hPathDays: T('Plan (most likely)', 'План (найімовірніше)', 'Plan (wahrscheinlich)', 'Planning (meest waarschijnlijk)', 'Planning (plus probable)', 'Plan (más probable)', 'Plan (najbardziej prawd.)'),
+    hCrit: T('Longest in % of runs', 'Найдовший у % прогонів', 'Längster in % der Läufe', 'Langste in % van de runs', 'Le plus long dans % des tirages', 'El más largo en % de las iteraciones', 'Najdłuższa w % przebiegów'),
+    common: T('common', 'спільний', 'gemeinsam', 'gemeenschappelijk', 'commun', 'común', 'wspólna'),
+    end: T('project end', 'кінець проєкту', 'Projektende', 'einde project', 'fin du projet', 'fin del proyecto', 'koniec projektu'),
+    /* notes */
+    nBaseOpt: T('The base estimate (sum of the most likely values) lies below the median: three-point ranges of real estimates are skewed to the right, so “most likely” added up is an optimistic number, not a P50.', 'Базовий кошторис (сума найімовірніших значень) нижчий за медіану: діапазони реальних кошторисів скошені вправо, тож сума «найімовірніших» — оптимістичне число, а не P50.', 'Die Basisschätzung (Summe der wahrscheinlichsten Werte) liegt unter dem Median: Dreipunktbereiche echter Schätzungen sind rechtsschief, die Summe der „wahrscheinlichsten“ ist eine optimistische Zahl, kein P50.', 'De basisraming (som van de meest waarschijnlijke waarden) ligt onder de mediaan: driepuntsbereiken van echte ramingen zijn rechtsscheef, dus de som van “meest waarschijnlijk” is optimistisch, geen P50.', 'L’estimation de base (somme des valeurs les plus probables) est sous la médiane : les fourchettes réelles sont asymétriques à droite, la somme des « plus probables » est optimiste, ce n’est pas un P50.', 'La estimación base (suma de los valores más probables) queda por debajo de la mediana: los rangos reales son asimétricos a la derecha, así que la suma de los «más probables» es optimista, no un P50.', 'Kosztorys bazowy (suma wartości najbardziej prawdopodobnych) leży poniżej mediany: zakresy rzeczywistych kosztorysów są prawoskośne, więc suma „najbardziej prawdopodobnych” jest optymistyczna, to nie P50.'),
+    nEmv: T('Adding the expected values (EMV = p × mean impact) of the risk register to the base does not reach the chosen confidence: EMV is an average, while contingency has to cover the spread.', 'Додавання очікуваних значень (EMV = p × середній вплив) реєстру ризиків до бази не досягає обраного рівня довіри: EMV — це середнє, а резерв має покривати розкид.', 'Die Erwartungswerte (EMV = p × mittlere Auswirkung) des Risikoregisters zur Basis addiert erreichen das gewählte Konfidenzniveau nicht: EMV ist ein Mittelwert, die Reserve muss die Streuung abdecken.', 'De verwachte waarden (EMV = p × gemiddelde impact) van het risicoregister bij de basis optellen haalt de gekozen betrouwbaarheid niet: EMV is een gemiddelde, de post onvoorzien moet de spreiding dekken.', 'Ajouter à la base les valeurs attendues (EMV = p × impact moyen) du registre n’atteint pas la confiance choisie : l’EMV est une moyenne, la provision doit couvrir la dispersion.', 'Sumar a la base los valores esperados (EMV = p × impacto medio) del registro no alcanza la confianza elegida: el EMV es una media y la contingencia debe cubrir la dispersión.', 'Dodanie do bazy wartości oczekiwanych (EMV = p × średni wpływ) z rejestru nie daje wybranej ufności: EMV to średnia, a rezerwa ma pokryć rozrzut.'),
+    nJoint: T('Cost and duration at the same confidence do not hold together as often: the joint confidence (both met) is lower. Owners who need both often set the joint confidence level (JCL) instead.', 'Вартість і тривалість з однаковим рівнем довіри разом виконуються рідше: спільна довіра (обидва виконано) нижча. Замовники, яким потрібні обидва, часто задають спільний рівень довіри (JCL).', 'Kosten und Dauer auf gleichem Konfidenzniveau halten seltener gemeinsam: die gemeinsame Konfidenz (beides eingehalten) ist niedriger. Bauherren, die beides brauchen, setzen oft ein gemeinsames Konfidenzniveau (JCL).', 'Kost en duur op dezelfde betrouwbaarheid worden minder vaak samen gehaald: de gezamenlijke betrouwbaarheid (beide gehaald) is lager. Opdrachtgevers die beide nodig hebben, leggen vaak een gezamenlijk betrouwbaarheidsniveau (JCL) vast.', 'Coût et durée au même niveau de confiance sont moins souvent tenus ensemble : la confiance conjointe (les deux tenus) est plus basse. Les maîtres d’ouvrage qui ont besoin des deux fixent souvent un niveau de confiance conjoint (JCL).', 'Coste y plazo al mismo nivel de confianza se cumplen juntos con menos frecuencia: la confianza conjunta (ambos) es menor. Los promotores que necesitan ambos suelen fijar un nivel de confianza conjunto (JCL).', 'Koszt i czas na tym samym poziomie ufności rzadziej są dotrzymane razem: ufność łączna (oba) jest niższa. Inwestorzy, którym potrzebne są oba, często ustalają łączny poziom ufności (JCL).'),
+    nMerge: T('Merge bias: several parallel paths are each critical in part of the runs. Where they join, the later one sets the date, so the deterministic plan is optimistic even when every activity is estimated fairly.', 'Ефект злиття: кілька паралельних шляхів почергово стають критичними. У точці злиття дату визначає пізніший, тож детермінований план оптимістичний, навіть якщо кожна робота оцінена чесно.', 'Zusammenführungseffekt (merge bias): mehrere parallele Pfade sind je in einem Teil der Läufe kritisch. Wo sie zusammenlaufen, bestimmt der spätere den Termin; der deterministische Plan ist optimistisch, auch wenn jeder Vorgang fair geschätzt ist.', 'Samenloopeffect (merge bias): meerdere parallelle paden zijn elk in een deel van de runs kritiek. Waar ze samenkomen, bepaalt de laatste de datum, dus de deterministische planning is optimistisch, ook als elke activiteit eerlijk geraamd is.', 'Biais de convergence : plusieurs chemins parallèles sont chacun critiques dans une partie des tirages. À leur jonction, le plus tardif fixe la date ; le planning déterministe est optimiste même si chaque activité est estimée honnêtement.', 'Sesgo de convergencia: varios caminos paralelos son críticos en parte de las iteraciones. Donde se unen, el más tardío fija la fecha, así que el plan determinista es optimista aunque cada actividad esté bien estimada.', 'Efekt scalania (merge bias): kilka ścieżek równoległych bywa krytycznych w części przebiegów. W punkcie połączenia datę wyznacza późniejsza, więc plan deterministyczny jest optymistyczny, nawet gdy każda czynność oszacowana uczciwie.'),
+    nCorrAdj: T('The correlation could not be reached exactly with these inputs; it was reduced until the matrix was valid.', 'Кореляцію з такими даними неможливо досягти точно; її зменшено, доки матриця не стала допустимою.', 'Die Korrelation war mit diesen Eingaben nicht genau erreichbar; sie wurde verringert, bis die Matrix gültig war.', 'De correlatie kon met deze invoer niet exact bereikt worden; ze is verlaagd tot de matrix geldig was.', 'La corrélation ne pouvait pas être atteinte exactement avec ces données ; elle a été réduite jusqu’à une matrice valide.', 'La correlación no podía alcanzarse exactamente con estos datos; se redujo hasta que la matriz fue válida.', 'Korelacji nie dało się dokładnie osiągnąć przy tych danych; zmniejszono ją do uzyskania poprawnej macierzy.'),
+    nRiskPath: T('A risk names a path that has no activity; its delay is added at the project end.', 'Ризик вказує шлях без робіт; його затримку додано в кінці проєкту.', 'Ein Risiko nennt einen Pfad ohne Vorgang; sein Verzug wird am Projektende addiert.', 'Een risico noemt een pad zonder activiteit; de vertraging wordt aan het einde van het project opgeteld.', 'Un risque désigne un chemin sans activité ; son retard est ajouté en fin de projet.', 'Un riesgo indica un camino sin actividades; su retraso se suma al final del proyecto.', 'Ryzyko wskazuje ścieżkę bez czynności; jego opóźnienie dodano na końcu projektu.'),
+    nMethod: T('Method: Monte Carlo of the cost lines, activities and risk events with Iman–Conover rank correlation; integrated cost and schedule (time-dependent cost and delay damages follow the simulated duration), after the structure of AACE RP 41R-08 and 57R-09 and IEC 31010 (Monte Carlo simulation).', 'Метод: Монте-Карло статей витрат, робіт і ризикових подій з ранговою кореляцією Імана–Коновера; інтегровані вартість і графік (вартість часу та штрафи йдуть за змодельованою тривалістю) за структурою AACE RP 41R-08 і 57R-09 та IEC 31010 (моделювання Монте-Карло).', 'Methode: Monte-Carlo der Kostenpositionen, Vorgänge und Risikoereignisse mit Rangkorrelation nach Iman–Conover; integrierte Kosten- und Terminanalyse (zeitabhängige Kosten und Verzugsstrafen folgen der simulierten Dauer), nach der Struktur von AACE RP 41R-08 und 57R-09 sowie IEC 31010 (Monte-Carlo-Simulation).', 'Methode: Monte Carlo van de kostenposten, activiteiten en risicogebeurtenissen met rangcorrelatie volgens Iman–Conover; geïntegreerde kost en planning (tijdgebonden kosten en boetes volgen de gesimuleerde duur), naar de structuur van AACE RP 41R-08 en 57R-09 en IEC 31010 (Monte-Carlosimulatie).', 'Méthode : Monte-Carlo des postes, activités et événements à risque avec corrélation de rang d’Iman–Conover ; coût et délai intégrés (coûts liés au temps et pénalités suivent la durée simulée), selon la structure des AACE RP 41R-08 et 57R-09 et de l’IEC 31010 (simulation de Monte-Carlo).', 'Método: Monte Carlo de partidas, actividades y eventos de riesgo con correlación de rangos de Iman–Conover; coste y plazo integrados (costes dependientes del plazo y penalizaciones siguen la duración simulada), según la estructura de AACE RP 41R-08 y 57R-09 e IEC 31010 (simulación de Monte Carlo).', 'Metoda: Monte Carlo pozycji kosztów, czynności i zdarzeń ryzyka z korelacją rang Imana–Conovera; zintegrowany koszt i harmonogram (koszty czasowe i kary podążają za symulowanym czasem), wg struktury AACE RP 41R-08 i 57R-09 oraz IEC 31010 (symulacja Monte Carlo).'),
+    nAssume: T('Ranges, probabilities, correlations and the confidence level are your judgement or company policy (learning assumptions); the result is only as good as the ranges entered. Optimistic ranges give optimistic contingency.', 'Діапазони, імовірності, кореляції та рівень довіри — ваше судження чи політика компанії (навчальні припущення); результат не кращий за введені діапазони. Оптимістичні діапазони дають оптимістичний резерв.', 'Bereiche, Wahrscheinlichkeiten, Korrelationen und das Konfidenzniveau sind Ihre Einschätzung oder Firmenpolitik (Lernannahmen); das Ergebnis ist nur so gut wie die eingegebenen Bereiche. Optimistische Bereiche ergeben optimistische Reserven.', 'Bereiken, kansen, correlaties en het betrouwbaarheidsniveau zijn uw inschatting of bedrijfsbeleid (leeraannames); het resultaat is maar zo goed als de ingevoerde bereiken. Optimistische bereiken geven een optimistische post onvoorzien.', 'Fourchettes, probabilités, corrélations et niveau de confiance relèvent de votre jugement ou de la politique interne (hypothèses pédagogiques) ; le résultat ne vaut que ce que valent les fourchettes. Des fourchettes optimistes donnent une provision optimiste.', 'Rangos, probabilidades, correlaciones y nivel de confianza son su criterio o política de empresa (supuestos didácticos); el resultado vale lo que valen los rangos. Rangos optimistas dan contingencia optimista.', 'Zakresy, prawdopodobieństwa, korelacje i poziom ufności to Twoja ocena lub polityka firmy (założenia dydaktyczne); wynik jest tyle wart, co wprowadzone zakresy. Optymistyczne zakresy dają optymistyczną rezerwę.'),
+    nDisclaimer: T('Engineering and commercial analysis, not legal advice.', 'Інженерно-комерційний аналіз, не юридична консультація.', 'Technisch-kaufmännische Analyse, keine Rechtsberatung.', 'Technisch-commerciële analyse, geen juridisch advies.', 'Analyse technique et commerciale, pas un avis juridique.', 'Análisis técnico y comercial, no asesoramiento jurídico.', 'Analiza techniczno-handlowa, nie porada prawna.'),
+    nRun: T('runs, seed', 'прогонів, початкове число', 'Läufe, Startwert', 'runs, startwaarde', 'tirages, graine', 'iteraciones, semilla', 'przebiegów, ziarno'),
+    nWorker: T('computed in a Web Worker', 'обчислено у Web Worker', 'im Web Worker berechnet', 'berekend in een Web Worker', 'calculé dans un Web Worker', 'calculado en un Web Worker', 'obliczone w Web Workerze'),
+    nMain: T('computed on the page (no Web Worker available)', 'обчислено на сторінці (Web Worker недоступний)', 'auf der Seite berechnet (kein Web Worker verfügbar)', 'berekend op de pagina (geen Web Worker beschikbaar)', 'calculé dans la page (pas de Web Worker)', 'calculado en la página (sin Web Worker)', 'obliczone na stronie (brak Web Workera)'),
+    errValue: T('Check the inputs: every range needs min ≤ most likely ≤ max, probabilities 0–100 %, durations ≥ 0, and at least one cost line or risk.', 'Перевірте дані: кожен діапазон потребує мін ≤ найімовірніше ≤ макс, імовірності 0–100 %, тривалості ≥ 0 і хоча б одну статтю чи ризик.', 'Eingaben prüfen: jeder Bereich braucht min ≤ wahrscheinlich ≤ max, Wahrscheinlichkeiten 0–100 %, Dauern ≥ 0 und mindestens eine Position oder ein Risiko.', 'Controleer de invoer: elk bereik vraagt min ≤ meest waarschijnlijk ≤ max, kansen 0–100 %, duren ≥ 0 en minstens één post of risico.', 'Vérifiez les données : chaque fourchette exige min ≤ plus probable ≤ max, probabilités 0–100 %, durées ≥ 0 et au moins un poste ou un risque.', 'Revise los datos: cada rango requiere mín ≤ más probable ≤ máx, probabilidades 0–100 %, duraciones ≥ 0 y al menos una partida o un riesgo.', 'Sprawdź dane: każdy zakres wymaga min ≤ najbardziej prawd. ≤ maks, prawdopodobieństw 0–100 %, czasów ≥ 0 i co najmniej jednej pozycji lub ryzyka.'),
+    errEngine: T('The calculation engine (tnd-risk.js) did not load.', 'Розрахунковий модуль (tnd-risk.js) не завантажився.', 'Das Rechenmodul (tnd-risk.js) wurde nicht geladen.', 'De rekenmodule (tnd-risk.js) is niet geladen.', 'Le moteur de calcul (tnd-risk.js) n’a pas été chargé.', 'El motor de cálculo (tnd-risk.js) no se cargó.', 'Moduł obliczeniowy (tnd-risk.js) nie załadował się.'),
+    errRow: T('Row', 'Рядок', 'Zeile', 'Rij', 'Ligne', 'Fila', 'Wiersz'),
+    /* stage */
+    stageCap: T('Cost S-curve with histogram, duration S-curve and drivers of the cost', 'S-крива вартості з гістограмою, S-крива тривалості та чинники вартості', 'S-Kurve der Kosten mit Histogramm, S-Kurve der Dauer und Kostentreiber', 'S-curve van de kost met histogram, S-curve van de duur en kostendrijvers', 'Courbe en S du coût avec histogramme, courbe en S de la durée et facteurs du coût', 'Curva S del coste con histograma, curva S de la duración y factores del coste', 'Krzywa S kosztu z histogramem, krzywa S czasu i czynniki kosztu'),
+    axConf: T('confidence', 'довіра', 'Konfidenz', 'betrouwbaarheid', 'confiance', 'confianza', 'ufność'),
+    mkBase: T('base', 'база', 'Basis', 'basis', 'base', 'base', 'baza'),
+    mkPlan: T('plan', 'план', 'Plan', 'planning', 'planning', 'plan', 'plan'),
+    mkTarget: T('target', 'ціль', 'Ziel', 'doel', 'objectif', 'objetivo', 'cel'),
+    /* project */
+    save: T('Save to project', 'Зберегти в проєкт', 'Im Projekt speichern', 'Opslaan in project', 'Enregistrer dans le projet', 'Guardar en el proyecto', 'Zapisz w projekcie'),
+    useReg: T('Use the project’s risk register', 'Взяти реєстр ризиків проєкту', 'Risikoregister des Projekts übernehmen', 'Risicoregister van het project gebruiken', 'Reprendre le registre des risques du projet', 'Usar el registro de riesgos del proyecto', 'Użyj rejestru ryzyk projektu'),
+    useNone: T('The project has no saved analysis of this tool and no risk register.', 'У проєкті немає збереженого аналізу цього інструмента й реєстру ризиків.', 'Das Projekt enthält keine gespeicherte Analyse dieses Werkzeugs und kein Risikoregister.', 'Het project bevat geen bewaarde analyse van deze tool en geen risicoregister.', 'Le projet ne contient ni analyse enregistrée de cet outil ni registre des risques.', 'El proyecto no tiene un análisis guardado de esta herramienta ni registro de riesgos.', 'Projekt nie zawiera zapisanej analizy tego narzędzia ani rejestru ryzyk.'),
+    useTaken: T('Taken from the project', 'Взято з проєкту', 'Aus dem Projekt übernommen', 'Overgenomen uit het project', 'Repris du projet', 'Tomado del proyecto', 'Pobrano z projektu'),
+    useRisks: T('risk events taken from the project’s register', 'ризикових подій взято з реєстру проєкту', 'Risikoereignisse aus dem Projektregister übernommen', 'risicogebeurtenissen overgenomen uit het projectregister', 'événements repris du registre du projet', 'eventos tomados del registro del proyecto', 'zdarzeń pobrano z rejestru projektu'),
+    computing: T('Simulating…', 'Моделювання…', 'Simulation läuft…', 'Simulatie loopt…', 'Simulation en cours…', 'Simulando…', 'Symulacja…')
+  };
+
+  /* names of the preset lines (state keeps the text in the page language) */
+  var NM = {
+    sewer: T('Collector sewer DN1200, 1.2 km (trench and pipe jacking)', 'Колектор DN1200, 1,2 км (траншея й мікротунелювання)', 'Sammelkanal DN1200, 1,2 km (offene Bauweise und Rohrvortrieb)', 'Rioleringscollector DN1200, 1,2 km (sleuf en persing)', 'Collecteur d’égouttage DN1200, 1,2 km (tranchée et fonçage)', 'Colector DN1200, 1,2 km (zanja e hinca de tubería)', 'Kolektor DN1200, 1,2 km (wykop i przecisk)'),
+    dewater: T('Dewatering and groundwater lowering', 'Водовідлив і зниження рівня ґрунтових вод', 'Wasserhaltung und Grundwasserabsenkung', 'Bemaling en grondwaterverlaging', 'Rabattement de nappe et épuisement', 'Agotamiento y rebajamiento del nivel freático', 'Odwodnienie i obniżenie zwierciadła wód'),
+    pscivil: T('Pumping station civil works (caisson)', 'Насосна станція: будівельна частина (кесон)', 'Pumpwerk Rohbau (Senkkasten)', 'Pompstation burgerlijke bouwkunde (caisson)', 'Station de pompage, génie civil (caisson)', 'Estación de bombeo, obra civil (cajón)', 'Pompownia, część budowlana (keson)'),
+    psme: T('Pumps, electrical and telemetry', 'Насоси, електрика й телеметрія', 'Pumpen, Elektrotechnik und Fernwirktechnik', 'Pompen, elektriciteit en telemetrie', 'Pompes, électricité et télégestion', 'Bombas, electricidad y telemetría', 'Pompy, elektryka i telemetria'),
+    roads: T('Road reinstatement and traffic management', 'Відновлення дороги й організація руху', 'Straßenwiederherstellung und Verkehrssicherung', 'Wegherstel en verkeersmaatregelen', 'Réfection de voirie et signalisation', 'Reposición de firme y gestión del tráfico', 'Odtworzenie nawierzchni i organizacja ruchu'),
+    utilities: T('Diversion of utilities', 'Перекладання інженерних мереж', 'Umlegung von Versorgungsleitungen', 'Verleggen van nutsleidingen', 'Déplacement des impétrants', 'Desvío de servicios afectados', 'Przebudowa sieci uzbrojenia'),
+    prelims: T('Site set-up and preliminaries (fixed part)', 'Облаштування майданчика й загальні витрати (фіксована частина)', 'Baustelleneinrichtung und Gemeinkosten (fester Teil)', 'Werfinrichting en algemene kosten (vast deel)', 'Installation de chantier et frais généraux (partie fixe)', 'Implantación de obra y gastos generales (parte fija)', 'Zaplecze budowy i koszty ogólne (część stała)'),
+    mob: T('Mobilisation and site permits', 'Мобілізація та дозволи на майданчику', 'Mobilisierung und Baustellengenehmigungen', 'Werfinrichting en vergunningen ter plaatse', 'Mobilisation et autorisations de chantier', 'Movilización y permisos de obra', 'Mobilizacja i pozwolenia na budowie'),
+    sewerw: T('Sewer works', 'Прокладання колектора', 'Kanalbau', 'Rioleringswerken', 'Travaux d’égouttage', 'Obras del colector', 'Roboty kanalizacyjne'),
+    pswork: T('Pumping station', 'Насосна станція', 'Pumpwerk', 'Pompstation', 'Station de pompage', 'Estación de bombeo', 'Pompownia'),
+    reinst: T('Reinstatement and handover', 'Відновлення й передання', 'Wiederherstellung und Übergabe', 'Herstel en oplevering', 'Réfection et réception', 'Reposición y entrega', 'Odtworzenie i odbiór'),
+    contam: T('Contaminated soil found (soil management)', 'Забруднений ґрунт (поводження з ґрунтом)', 'Kontaminierter Boden (Bodenmanagement)', 'Verontreinigde grond (grondverzet)', 'Terres polluées (gestion des terres)', 'Suelo contaminado (gestión de tierras)', 'Zanieczyszczony grunt (gospodarka gruntem)'),
+    archeo: T('Archaeological find', 'Археологічна знахідка', 'Archäologischer Fund', 'Archeologische vondst', 'Découverte archéologique', 'Hallazgo arqueológico', 'Znalezisko archeologiczne'),
+    permit: T('Late groundwater discharge permit', 'Запізнення дозволу на скид ґрунтових вод', 'Verspätete Einleitgenehmigung für Grundwasser', 'Laattijdige lozingsvergunning bemalingswater', 'Retard de l’autorisation de rejet des eaux de rabattement', 'Retraso del permiso de vertido del agua freática', 'Opóźnione pozwolenie na zrzut wód z odwodnienia'),
+    boiler: T('Biomass boiler island', 'Котельний острів на біомасі', 'Biomassekesselinsel', 'Biomassaketeleiland', 'Îlot chaudière biomasse', 'Isla de caldera de biomasa', 'Wyspa kotłowa na biomasę'),
+    turbine: T('Steam turbine-generator', 'Паротурбінна установка з генератором', 'Dampfturbosatz', 'Stoomturbine-generator', 'Groupe turbo-alternateur vapeur', 'Turbogenerador de vapor', 'Turbozespół parowy'),
+    bop: T('Balance of plant (water, fuel handling)', 'Допоміжні системи (вода, паливоподача)', 'Nebenanlagen (Wasser, Brennstoffversorgung)', 'Balance of plant (water, brandstofbehandeling)', 'Auxiliaires (eau, manutention combustible)', 'Sistemas auxiliares (agua, manejo de combustible)', 'Instalacje pomocnicze (woda, nawęglanie)'),
+    civil: T('Civil and structural works', 'Будівельні й конструктивні роботи', 'Bau- und Stahlbauarbeiten', 'Burgerlijke bouwkunde en structuur', 'Génie civil et structures', 'Obra civil y estructuras', 'Roboty budowlane i konstrukcyjne'),
+    mech: T('Mechanical erection and piping', 'Механомонтаж і трубопроводи', 'Mechanische Montage und Rohrleitungen', 'Mechanische montage en piping', 'Montage mécanique et tuyauteries', 'Montaje mecánico y tuberías', 'Montaż mechaniczny i rurociągi'),
+    ei: T('Electrical, instrumentation and control', 'Електрика, КВП і автоматика', 'Elektro-, Mess- und Leittechnik', 'Elektriciteit, instrumentatie en sturing', 'Électricité, instrumentation et contrôle-commande', 'Electricidad, instrumentación y control', 'Elektryka, AKPiA i sterowanie'),
+    eng: T('Engineering and project management', 'Проєктування й управління проєктом', 'Engineering und Projektmanagement', 'Engineering en projectmanagement', 'Ingénierie et gestion de projet', 'Ingeniería y gestión del proyecto', 'Projektowanie i zarządzanie projektem'),
+    commiss: T('Commissioning and performance tests', 'Пусконалагодження й випробування', 'Inbetriebnahme und Leistungsnachweise', 'Indienststelling en prestatietesten', 'Mise en service et essais de performance', 'Puesta en marcha y pruebas de prestaciones', 'Rozruch i próby gwarancyjne'),
+    indirects: T('Site indirects and insurances (fixed)', 'Непрямі витрати майданчика й страхування (фіксовано)', 'Baustellengemeinkosten und Versicherungen (fest)', 'Indirecte werfkosten en verzekeringen (vast)', 'Frais indirects de chantier et assurances (fixe)', 'Indirectos de obra y seguros (fijo)', 'Koszty pośrednie budowy i ubezpieczenia (stałe)'),
+    engp: T('Engineering and procurement', 'Проєктування й закупівлі', 'Engineering und Beschaffung', 'Engineering en aankoop', 'Ingénierie et approvisionnements', 'Ingeniería y compras', 'Projektowanie i zakupy'),
+    boilerd: T('Boiler manufacture and delivery', 'Виготовлення й постачання котла', 'Kesselfertigung und Lieferung', 'Fabricage en levering ketel', 'Fabrication et livraison de la chaudière', 'Fabricación y entrega de la caldera', 'Produkcja i dostawa kotła'),
+    civilw: T('Civil works', 'Будівельні роботи', 'Bauarbeiten', 'Bouwkundige werken', 'Génie civil', 'Obra civil', 'Roboty budowlane'),
+    erect: T('Erection', 'Монтаж', 'Montage', 'Montage', 'Montage', 'Montaje', 'Montaż'),
+    comm: T('Commissioning', 'Пусконалагодження', 'Inbetriebnahme', 'Indienststelling', 'Mise en service', 'Puesta en marcha', 'Rozruch'),
+    soil: T('Poor ground: piling redesign', 'Слабкі ґрунти: перепроєктування паль', 'Schlechter Baugrund: Pfahlgründung neu planen', 'Slechte grond: herontwerp van de palen', 'Mauvais sol : refonte des pieux', 'Terreno deficiente: rediseño del pilotaje', 'Słaby grunt: przeprojektowanie pali'),
+    grid: T('Late grid connection', 'Запізнення приєднання до мережі', 'Verspäteter Netzanschluss', 'Laattijdige netaansluiting', 'Raccordement au réseau tardif', 'Conexión a la red tardía', 'Opóźnione przyłączenie do sieci'),
+    perf: T('Performance shortfall: retrofit', 'Недосягнення гарантованих показників: доробка', 'Leistungsunterschreitung: Nachrüstung', 'Prestatietekort: aanpassing', 'Performances non atteintes : modification', 'Prestaciones no alcanzadas: modificación', 'Niedotrzymanie parametrów: modernizacja'),
+    core: T('Core steel (grain-oriented)', 'Електротехнічна сталь осердя', 'Kernblech (kornorientiert)', 'Kernplaat (korrelgeoriënteerd)', 'Tôles magnétiques à grains orientés', 'Chapa magnética de grano orientado', 'Blacha rdzeniowa (anizotropowa)'),
+    copper: T('Copper windings', 'Мідні обмотки', 'Kupferwicklungen', 'Koperwikkelingen', 'Enroulements cuivre', 'Devanados de cobre', 'Uzwojenia miedziane'),
+    tank: T('Tank and fabrication', 'Бак і металоконструкції', 'Kessel und Stahlbau', 'Kuip en staalbouw', 'Cuve et chaudronnerie', 'Cuba y calderería', 'Kadź i konstrukcje stalowe'),
+    bushings: T('Bushings and on-load tap changer (bought in)', 'Вводи й РПН (покупні)', 'Durchführungen und Stufenschalter (Zukauf)', 'Doorvoeringen en regelschakelaar (aangekocht)', 'Traversées et changeur de prises en charge (achetés)', 'Pasatapas y cambiador de tomas en carga (comprados)', 'Przepusty i podobciążeniowy przełącznik zaczepów (zakup)'),
+    labour: T('Assembly labour', 'Складальні роботи', 'Montagestunden', 'Assemblage-uren', 'Main-d’œuvre d’assemblage', 'Mano de obra de montaje', 'Robocizna montażowa'),
+    fat: T('Factory acceptance test', 'Заводські приймальні випробування', 'Werksabnahmeprüfung', 'Fabrieksacceptatietest', 'Essais de réception en usine', 'Pruebas de aceptación en fábrica', 'Odbiór fabryczny'),
+    transport: T('Heavy transport (exceptional load)', 'Важке транспортування (негабарит)', 'Schwertransport (Sondertransport)', 'Zwaar transport (uitzonderlijk vervoer)', 'Transport lourd (convoi exceptionnel)', 'Transporte pesado (especial)', 'Transport ciężki (ponadnormatywny)'),
+    docs: T('Documentation and engineering (fixed)', 'Документація й інжиніринг (фіксовано)', 'Dokumentation und Engineering (fest)', 'Documentatie en engineering (vast)', 'Documentation et ingénierie (fixe)', 'Documentación e ingeniería (fijo)', 'Dokumentacja i inżynieria (stałe)'),
+    design: T('Design and drawing approval', 'Проєктування й погодження креслень', 'Konstruktion und Zeichnungsfreigabe', 'Ontwerp en goedkeuring tekeningen', 'Études et approbation des plans', 'Diseño y aprobación de planos', 'Projekt i zatwierdzenie rysunków'),
+    corew: T('Core cutting and windings', 'Розкрій осердя й намотування', 'Kernschnitt und Wicklungen', 'Kernsnijden en wikkelingen', 'Découpe du noyau et bobinage', 'Corte del núcleo y bobinado', 'Cięcie rdzenia i nawijanie'),
+    tankf: T('Tank fabrication', 'Виготовлення бака', 'Kesselfertigung', 'Fabricage kuip', 'Fabrication de la cuve', 'Fabricación de la cuba', 'Produkcja kadzi'),
+    oltc: T('Tap changer and bushings procurement', 'Закупівля РПН і вводів', 'Beschaffung Stufenschalter und Durchführungen', 'Aankoop regelschakelaar en doorvoeringen', 'Approvisionnement changeur et traversées', 'Compra del cambiador y pasatapas', 'Zakup przełącznika i przepustów'),
+    assy: T('Active part assembly and drying', 'Складання активної частини й сушіння', 'Montage Aktivteil und Trocknung', 'Assemblage actief deel en droging', 'Assemblage de la partie active et séchage', 'Montaje de la parte activa y secado', 'Montaż części aktywnej i suszenie'),
+    fatt: T('Factory acceptance test', 'Заводські випробування', 'Werksabnahme', 'Fabrieksacceptatietest', 'Essais en usine', 'Pruebas en fábrica', 'Próby fabryczne'),
+    ship: T('Shipping and delivery to site', 'Відвантаження й доставка', 'Versand und Anlieferung', 'Verzending en levering op de werf', 'Expédition et livraison sur site', 'Envío y entrega en obra', 'Wysyłka i dostawa na budowę'),
+    fatfail: T('FAT failure: rework and retest', 'Невдалі заводські випробування: доробка й повтор', 'Nicht bestandene Werksabnahme: Nacharbeit und Wiederholung', 'Gefaalde FAT: herstel en hertest', 'Échec des essais en usine : reprise et nouvel essai', 'FAT fallida: reparación y repetición', 'Negatywny odbiór fabryczny: poprawki i powtórka'),
+    shipping: T('Transport permit or convoy slot delayed', 'Затримка дозволу на перевезення чи конвою', 'Verzögerte Transportgenehmigung oder Konvoifenster', 'Vertraagde vervoersvergunning of konvooislot', 'Retard d’autorisation de transport ou de créneau de convoi', 'Retraso del permiso de transporte o del convoy', 'Opóźnione zezwolenie na przewóz lub termin konwoju'),
+    building: T('Building shell and finishes', 'Каркас і оздоблення будівлі', 'Rohbau und Ausbau', 'Ruwbouw en afwerking', 'Gros œuvre et parachèvement', 'Estructura y acabados', 'Stan surowy i wykończenie'),
+    hvac: T('HVAC and plumbing', 'ОВК і сантехніка', 'HLK und Sanitär', 'HVAC en sanitair', 'HVAC et sanitaire', 'Climatización y fontanería', 'HVAC i instalacje sanitarne'),
+    elec: T('Electrical and lighting', 'Електрика й освітлення', 'Elektro und Beleuchtung', 'Elektriciteit en verlichting', 'Électricité et éclairage', 'Electricidad e iluminación', 'Elektryka i oświetlenie'),
+    site: T('External works', 'Зовнішні роботи', 'Außenanlagen', 'Omgevingswerken', 'Abords', 'Urbanización exterior', 'Zagospodarowanie terenu'),
+    fees: T('Design fees and studies (fixed)', 'Проєктні роботи й дослідження (фіксовано)', 'Planungshonorare und Studien (fest)', 'Erelonen en studies (vast)', 'Honoraires d’études (fixe)', 'Honorarios de proyecto y estudios (fijo)', 'Honoraria projektowe i opracowania (stałe)'),
+    design2: T('Design and building permit', 'Проєкт і дозвіл на будівництво', 'Planung und Baugenehmigung', 'Ontwerp en omgevingsvergunning', 'Études et permis d’urbanisme', 'Proyecto y licencia de obras', 'Projekt i pozwolenie na budowę'),
+    tender: T('Tender procedure and award', 'Тендер і присудження', 'Vergabeverfahren und Zuschlag', 'Plaatsingsprocedure en gunning', 'Procédure de passation et attribution', 'Licitación y adjudicación', 'Postępowanie i udzielenie zamówienia'),
+    works: T('Construction', 'Будівництво', 'Bauausführung', 'Uitvoering der werken', 'Exécution des travaux', 'Ejecución de las obras', 'Realizacja robót'),
+    asbestos: T('Asbestos in the existing building', 'Азбест в існуючій будівлі', 'Asbest im Bestandsgebäude', 'Asbest in het bestaande gebouw', 'Amiante dans le bâtiment existant', 'Amianto en el edificio existente', 'Azbest w istniejącym budynku'),
+    appeal: T('Appeal against the award decision', 'Оскарження рішення про присудження', 'Nachprüfungsantrag gegen die Zuschlagsentscheidung', 'Beroep tegen de gunningsbeslissing', 'Recours contre la décision d’attribution', 'Recurso contra la adjudicación', 'Odwołanie od wyboru oferty'),
+    lowbids: T('Market: offers above the estimate', 'Ринок: пропозиції вищі за кошторис', 'Markt: Angebote über der Schätzung', 'Markt: offertes boven de raming', 'Marché : offres au-dessus de l’estimation', 'Mercado: ofertas por encima de la estimación', 'Rynek: oferty powyżej kosztorysu'),
+    subsidy: T('Subsidy conditions: extra requirements', 'Умови субсидії: додаткові вимоги', 'Förderbedingungen: Zusatzanforderungen', 'Subsidievoorwaarden: extra eisen', 'Conditions de subside : exigences supplémentaires', 'Condiciones de subvención: requisitos adicionales', 'Warunki dotacji: dodatkowe wymagania'),
+    scope: T('User scope changes', 'Зміни обсягу на вимогу користувачів', 'Leistungsänderungen der Nutzer', 'Wijzigingen door de gebruikers', 'Modifications demandées par les utilisateurs', 'Cambios de alcance de los usuarios', 'Zmiany zakresu na życzenie użytkowników')
+  };
+
+  function reasonCode(e) { return e && e.code ? e.code : String(e); }
+
+  /* ---- results ---- */
+  function nameOf(id, R) {
+    if (id === 'TIME') return S.nmTime[lang()];
+    var k = +id.slice(1) - 1, L = lang();
+    var arr = id[0] === 'I' ? state.items : (id[0] === 'A' ? state.acts : state.risks);
+    var x = arr && arr[k];
+    return x && x.name ? x.name : id;
+  }
+  /* error location 'R1.cost' -> 'row name — cost' in the page language (review R-12) */
+  function whereName(w) {
+    var L = lang(), m = /^([IAR])(\d+)(?:\.(cost|time))?$/.exec(String(w));
+    if (m) return nameOf(m[1] + m[2]) + (m[3] ? ' — ' + (m[3] === 'cost' ? S.fCost[L] : S.fDelay[L]) : '');
+    if (w === 'timeCost') return S.timeCost[L];
+    return String(w);
+  }
+  function kindOf(id) { return id === 'TIME' ? S.kTime : (id[0] === 'I' ? S.kItem : (id[0] === 'A' ? S.kAct : S.kRisk)); }
+
+  function view(R) {
+    if (!R || !R.ok) {
+      var e = R && R.errors && R.errors[0];
+      var where = e && e.where ? ' (' + whereName(e.where) + ')' : '';
+      return { verdict: { tone: 'bad', text: e && e.code === 'engine' ? S.errEngine : (e && e.code === 'exception' ? TF(function (l) { return S.errException[l] + ': ' + (e.where || ''); }) : TF(function (l) { return S.errValue[l] + where; })) }, tiles: [], notes: [] };
+    }
+    var n = R.input, det = R.det, q = n.q, at = R.atQ, sched = !!R.dur, LG = lang();
+    var tiles = [], tables = [], notes = [];
+    var verdict = { tone: R.pBase < 0.5 ? 'warn' : 'ok', text: TF(function (l) {
+      var t = P(q) + ' ' + S.vCont[l] + ' ' + keur(at.contingency, l) + ' (' + pc(at.pct, l, 1) + ' ' + S.vOfBase[l] + ' ' + keur(det.base, l) + ') → ' + P(q) + ' ' + S.tCost[l] + ' ' + keur(at.value, l) +
+        ' · ' + S.vBaseIs[l] + ' P' + nf(100 * R.pBase, l, 0);
+      if (sched) t += ' · ' + P(q) + ' ' + S.vDur[l] + ' ' + dd(R.dur.pq, l) + ' (' + S.hDet[l] + ' ' + dd(det.D, l) + ')';
+      return t + '.';
+    }) };
+    function tile(label, value, hint, learn, tn, headline) { tiles.push({ label: label, value: str(value, LG), hint: str(hint || '', LG), learn: learn, tone: tn || null, headline: headline !== false }); }
+    tile(TF(function (l) { return P(q) + ' ' + S.tCost[l]; }), keur(at.value, LG), TF(function (l) { return S.lMean[l] + ' ' + keur(R.cost.stats.mean, l); })[LG], 'contingency');
+    tile(TF(function (l) { return S.tCont[l] + ' ' + P(q); }), keur(at.contingency, LG), pc(at.pct, LG, 1) + ' · ' + S.vOfBase[LG], 'contingency', at.pct > 0.15 ? 'warn' : null);
+    tile(S.tBase, 'P' + nf(100 * R.pBase, LG, 0), S.mkBase[LG] + ' ' + keur(det.base, LG), 'ranges', R.pBase < 0.5 ? 'warn' : 'ok');
+    if (sched) {
+      tile(TF(function (l) { return P(q) + ' ' + S.tDur[l]; }), dd(R.dur.pq, LG), S.hDet[LG] + ' ' + dd(det.D, LG) + ' · P' + nf(100 * R.pDet, LG, 0), 'schedule', null, false);
+      tile(S.tSched, dd(R.dur.pq - det.D, LG, 0), P(q) + ' − ' + S.hDet[LG], 'schedule', null, false);
+      tile(S.tJcl, pc(R.joint, LG, 0), P(q) + ' & ' + P(q), 'contingency', R.joint < q - 0.02 ? 'warn' : null, false);
+    }
+    if (det.damages && n.targetDays != null) tile(S.tLd, keur(R.ld.mean, LG), S.hProbAny[LG] + ' ' + pc(R.ld.pAny, LG, 0), 'schedule', R.ld.pAny > 0.5 ? 'warn' : null, false);
+    if (R.pTargetCost != null) tile(S.tTc, 'P' + nf(100 * R.pTargetCost, LG, 0), keur(n.targetCost, LG), 'contingency', R.pTargetCost < q ? 'warn' : 'ok', false);
+    if (R.pTargetDays != null) tile(S.tTd, 'P' + nf(100 * R.pTargetDays, LG, 0), dd(n.targetDays, LG), 'schedule', R.pTargetDays < q ? 'warn' : 'ok', false);
+
+    /* 1 confidence levels */
+    var lv = [];
+    lv.push({ cells: [S.lBase, { text: TF(function (l) { return eur(det.base, l); }), num: true }, { text: '—', num: true }, { text: '—', num: true }, { text: TF(function (l) { return 'P' + nf(100 * R.pBase, l, 0); }), num: true }, { text: sched ? TF(function (l) { return dd(det.D, l); }) : '—', num: true }] });
+    lv.push({ dim: true, cells: [S.lMean, { text: TF(function (l) { return eur(R.cost.stats.mean, l); }), num: true }, { text: TF(function (l) { return eur(R.cost.stats.mean - det.base, l); }), num: true }, { text: TF(function (l) { return pc((R.cost.stats.mean - det.base) / Math.abs(det.base || 1), l, 1); }), num: true }, { text: '—', num: true }, { text: sched ? TF(function (l) { return dd(R.dur.stats.mean, l, 1); }) : '—', num: true }] });
+    R.contingency.forEach(function (c) {
+      var dq = sched ? (c.p === 0.5 ? R.dur.stats.p50 : c.p === 0.8 ? R.dur.stats.p80 : c.p === 0.9 ? R.dur.stats.p90 : R.dur.pq) : null;
+      lv.push({ chosen: c.p === q, cells: [P(c.p), { text: TF(function (l) { return eur(c.value, l); }), num: true }, { text: TF(function (l) { return eur(c.contingency, l); }), num: true }, { text: TF(function (l) { return pc(c.pct, l, 1); }), num: true }, { text: P(c.p), num: true }, { text: sched ? TF(function (l) { return dd(dq, l); }) : '—', num: true }] });
+    });
+    if (det.emv > 0) lv.push({ tone: R.pBaseEmv < q ? 'warn' : null, cells: [S.lEmv, { text: TF(function (l) { return eur(det.base + det.emv, l); }), num: true }, { text: TF(function (l) { return eur(det.emv, l); }), num: true }, { text: TF(function (l) { return pc(det.emv / Math.abs(det.base || 1), l, 1); }), num: true }, { text: TF(function (l) { return 'P' + nf(100 * R.pBaseEmv, l, 0); }), num: true }, { text: '—', num: true }] });
+    if (R.pTargetCost != null) lv.push({ tone: R.pTargetCost < q ? 'warn' : 'ok', cells: [S.lTarget, { text: TF(function (l) { return eur(n.targetCost, l); }), num: true }, { text: TF(function (l) { return eur(n.targetCost - det.base, l); }), num: true }, { text: TF(function (l) { return pc((n.targetCost - det.base) / Math.abs(det.base || 1), l, 1); }), num: true }, { text: TF(function (l) { return 'P' + nf(100 * R.pTargetCost, l, 0); }), num: true }, { text: '—', num: true }] });
+    tables.push({ title: S.tabLevels, head: [S.hLevel, { label: S.hCost, num: true }, { label: S.tCont, num: true }, { label: S.hPct, num: true }, { label: S.hConf, num: true }, { label: S.hDur, num: true }], rows: lv });
+
+    /* 2 split */
+    tables.push({ title: TF(function (l) { return S.tabSplit[l] + ' (' + P(q) + ')'; }), head: [S.hItem, { label: S.hValue, num: true }], rows: [
+      { cells: [S.sEst, { text: TF(function (l) { return eur(R.split.estimate, l); }), num: true }] },
+      { cells: [S.sRisk, { text: TF(function (l) { return eur(R.split.risk, l); }), num: true }] },
+      { chosen: true, cells: [TF(function (l) { return S.tCont[l] + ' ' + P(q); }), { text: TF(function (l) { return eur(at.contingency, l); }), num: true }] },
+      { dim: true, cells: [S.sEmv, { text: TF(function (l) { return eur(det.emv, l); }), num: true }] }
+    ] });
+
+    /* 3 risk register */
+    var share = {};
+    R.tornadoCost.forEach(function (t) { share[t.name] = t.share; });
+    if (det.register.length) tables.push({ title: S.tabReg, head: [S.hRisk, { label: S.hP, num: true }, { label: S.hMeanC, num: true }, { label: S.hEmv, num: true }, { label: S.hMeanT, num: true }, S.cPath, { label: S.hShare, num: true }],
+      rows: det.register.map(function (g) { return { cells: [g.name || g.id, { text: TF(function (l) { return pc(g.p, l, 0); }), num: true }, { text: TF(function (l) { return eur(g.meanCost, l); }), num: true }, { text: TF(function (l) { return eur(g.emv, l); }), num: true },
+        { text: TF(function (l) { return g.meanDelay ? dd(g.meanDelay, l, 1) : '—'; }), num: true }, g.meanDelay ? (g.path || S.end) : '—', { text: TF(function (l) { return pc(share[g.id] || 0, l, 1); }), num: true }] }; }) });
+
+    /* 4–5 tornado */
+    function torRows(list) {
+      return list.filter(function (t) { return Math.abs(t.rho) > 0.005 || Math.abs(t.share || 0) > 0.0005; }).slice(0, 12).map(function (t) {
+        return { cells: [nameOf(t.name, R), kindOf(t.name), { text: TF(function (l) { return nf(t.rho, l, 2); }), num: true }, { text: TF(function (l) { return pc(t.share, l, 1); }), num: true }] };
+      });
+    }
+    var hT = [S.hInput, S.hKind, { label: S.hRho, num: true }, { label: S.hShareV, num: true }], hTT = [S.hInput, S.hKind, { label: S.hRho, num: true }, { label: S.hShareR, num: true }];
+    tables.push({ title: S.tabTorC, head: hT, rows: torRows(R.tornadoCost) });
+    if (sched && R.tornadoTime.length) tables.push({ title: S.tabTorT, head: hTT, rows: torRows(R.tornadoTime) });
+
+    /* 6 paths */
+    var paths = Object.keys(R.criticality);
+    if (paths.length) tables.push({ title: S.tabPaths, head: [S.cPath, { label: S.hPathDays, num: true }, { label: S.hCrit, num: true }],
+      rows: paths.map(function (p) { return { tone: p === det.critical ? null : (R.criticality[p] >= 0.1 ? 'warn' : null), cells: [p, { text: TF(function (l) { return dd(det.common + det.pathDays[p], l); }), num: true }, { text: TF(function (l) { return pc(R.criticality[p], l, 0); }), num: true }] }; }) });
+
+    if (R.flags.indexOf('base-optimistic') >= 0) notes.push(S.nBaseOpt);
+    if (R.flags.indexOf('emv-short') >= 0) notes.push(S.nEmv);
+    if (R.flags.indexOf('merge') >= 0) notes.push(S.nMerge);
+    if (R.flags.indexOf('joint') >= 0) notes.push(S.nJoint);
+    if (R.flags.indexOf('corr-adjusted') >= 0) notes.push(S.nCorrAdj);
+    if (R.flags.indexOf('risk-path') >= 0) notes.push(S.nRiskPath);
+    if (R.flags.indexOf('ld-no-duration') >= 0) notes.push(S.nLdNoDur);
+    if (R.flags.indexOf('iter-capped') >= 0) {
+      var wc = (R.warnings || []).filter(function (w) { return w.code === 'iter-capped'; })[0] || {};
+      notes.push(TF(function (l) { return S.nIterCap[l].replace('{a}', nf(wc.from, l, 0)).replace('{b}', nf(wc.to, l, 0)); }));
+    }
+    if (det.damages && det.damages.mode === 'aur86') notes.push(TF(function (l) { return S.nAur[l].replace('{M}', eur(det.damages.M, l)).replace('{N}', nf(det.damages.N, l, 0)).replace('{D}', nf(n.targetDays, l, 0)).replace('{cap}', eur(det.damages.cap, l)); }));
+    notes.push(S.nShare);
+    notes.push(TF(function (l) { return nf(n.iterations, l, 0) + ' ' + S.nRun[l] + ' ' + n.seed + ' · ' + (R.via === 'worker' ? S.nWorker[l] : S.nMain[l]) + ' · ' + nf(R.ms, l, 0) + ' ms · ±' + keur(2 * R.cost.se, l) + ' (' + S.se2[l] + ')'; }));
+    notes.push(S.nMethod);
+    notes.push(S.nAssume);
+    notes.push(S.nDisclaimer);
+    return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+  }
+
+  function computeView(s) {
+    var my = ++callId, r = solve(s);
+    if (r && typeof r.then === 'function') {
+      return r.then(function (res) { if (my === callId) last = res; if (stage) stage.schedule(); return view(last); });
+    }
+    last = r;
+    if (stage) stage.schedule();
+    return view(r);
+  }
+
+  /* ---- stage: cost S-curve with histogram (top), duration S-curve (middle), cost tornado (bottom) ---- */
+  function renderStage(size, st) {
+    var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#888', lineC = cs.getPropertyValue('--line').trim() || '#ccc', ink = cs.getPropertyValue('--ink').trim() || '#111';
+    var badC = cs.getPropertyValue('--bad').trim() || '#c0392b', okC = cs.getPropertyValue('--ok').trim() || '#1e8449';
+    var font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+    ctx.clearRect(0, 0, w, h);
+    var R = last;
+    if (!R || !R.ok) return;
+    var l = lang(), fs = coarse ? 10 : 11, n = R.input, sched = !!R.dur;
+    ctx.font = fs + 'px ' + font;
+    var Lm = coarse ? 50 : 64, Rm = coarse ? 8 : 16;
+    var torN = Math.min(8, R.tornadoCost.filter(function (t) { return Math.abs(t.rho) > 0.005; }).length);
+    var hTor = Math.max(90, torN * (coarse ? 18 : 22) + 30), hRest = h - hTor - 10;
+    var hCost = sched ? Math.round(hRest * 0.6) : hRest, hDur = sched ? hRest - hCost : 0;
+    function curve(y0, hh, cdf, hist, marks, fmtX, label) {
+      var top = y0 + 12, ph = hh - 46, pw = w - Lm - Rm;
+      if (ph < 30 || pw < 60) return;
+      var xmin = cdf[1], xmax = cdf[99];
+      marks.forEach(function (m) { if (m.v != null && isFinite(m.v)) { xmin = Math.min(xmin, m.v); xmax = Math.max(xmax, m.v); } });
+      var pad = (xmax - xmin) * 0.04 || 1; xmin -= pad; xmax += pad;
+      function X(v) { return Lm + (v - xmin) / (xmax - xmin) * pw; }
+      function Y(p) { return top + ph - p * ph; }
+      /* histogram behind, scaled to its own maximum */
+      var hm = Math.max.apply(null, hist.counts) || 1;
+      ctx.fillStyle = DiagramUI.series(0); ctx.globalAlpha = 0.18;
+      hist.counts.forEach(function (c, k) { var a = X(hist.edges[k]), b = X(hist.edges[k + 1]); if (b < Lm || a > Lm + pw) return; ctx.fillRect(Math.max(Lm, a), Y(0.92 * c / hm), Math.max(1, Math.min(b, Lm + pw) - Math.max(Lm, a) - 0.5), 0.92 * c / hm * ph); });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = muted; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(Lm, top); ctx.lineTo(Lm, top + ph); ctx.lineTo(Lm + pw, top + ph); ctx.stroke();
+      ctx.fillStyle = muted; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      [0, 0.2, 0.5, 0.8, 1].forEach(function (p) { ctx.strokeStyle = lineC; ctx.beginPath(); ctx.moveTo(Lm, Y(p)); ctx.lineTo(Lm + pw, Y(p)); ctx.stroke(); ctx.fillText(nf(100 * p, l, 0) + ' %', Lm - 4, Y(p)); });
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var tk = DiagramUI.ticks(xmin, xmax, pw, size.density) || [xmin, xmax];
+      tk.forEach(function (v) { if (v < xmin || v > xmax) return; ctx.fillText(fmtX(v), X(v), top + ph + 4); });
+      ctx.fillText(label, Lm + pw / 2, top + ph + fs + 8);
+      /* S-curve */
+      ctx.strokeStyle = DiagramUI.series(0); ctx.lineWidth = 2.2; ctx.beginPath();
+      cdf.forEach(function (v, k) { var x = X(v), y = Y(k / 100); if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.stroke();
+      marks.forEach(function (m, k) {
+        if (m.v == null || !isFinite(m.v)) return;
+        var x = X(m.v);
+        ctx.strokeStyle = m.col; ctx.setLineDash(m.dash || []); ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, top + ph); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = m.col; ctx.textAlign = x > Lm + pw - 90 ? 'right' : 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(m.label, x + (ctx.textAlign === 'left' ? 3 : -3), top + k * (fs + 2));
+      });
+    }
+    var q = n.q;
+    curve(0, hCost, R.cost.cdf, R.cost.hist, [
+      { v: R.det.base, label: S.mkBase[l] + ' P' + nf(100 * R.pBase, l, 0), col: muted, dash: [4, 3] },
+      { v: R.cost.pq, label: P(q) + ' ' + keur(R.cost.pq, l), col: ink },
+      { v: n.targetCost, label: S.mkTarget[l] + (R.pTargetCost != null ? ' P' + nf(100 * R.pTargetCost, l, 0) : ''), col: R.pTargetCost != null && R.pTargetCost < q ? badC : okC, dash: [1, 3] }
+    ], function (v) { return keur(v, l); }, S.hCost[l] + ' (€)');
+    if (sched) curve(hCost, hDur, R.dur.cdf, R.dur.hist, [
+      { v: R.det.D, label: S.mkPlan[l] + ' P' + nf(100 * R.pDet, l, 0), col: muted, dash: [4, 3] },
+      { v: R.dur.pq, label: P(q) + ' ' + dd(R.dur.pq, l), col: ink },
+      { v: n.targetDays, label: S.mkTarget[l] + (R.pTargetDays != null ? ' P' + nf(100 * R.pTargetDays, l, 0) : ''), col: R.pTargetDays != null && R.pTargetDays < q ? badC : okC, dash: [1, 3] }
+    ], function (v) { return nf(v, l, 0); }, S.hDur[l] + ' (' + DAY[l] + ')');
+    /* tornado */
+    var y0 = hRest + 16, bars = R.tornadoCost.slice(0, torN), rh = coarse ? 18 : 22;
+    var labW = coarse ? Math.round(w * 0.38) : Math.min(300, Math.round(w * 0.4)), x0 = labW + 8, bw = w - x0 - Rm, xm = x0 + bw / 2;
+    ctx.fillStyle = ink; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(S.tabTorC[l] + ' — ρ', 4, hRest);
+    bars.forEach(function (b, k) {
+      var yy = y0 + k * rh, nm = String(nameOf(b.name, R));
+      ctx.fillStyle = ink; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      var maxc = Math.floor(labW / (fs * 0.55));
+      ctx.fillText(nm.length > maxc ? nm.slice(0, maxc - 1) + '…' : nm, labW, yy + rh / 2);
+      var len = b.rho * bw / 2;
+      ctx.fillStyle = b.rho >= 0 ? DiagramUI.series(0) : DiagramUI.series(1); ctx.globalAlpha = 0.8;
+      ctx.fillRect(len >= 0 ? xm : xm + len, yy + 3, Math.max(1, Math.abs(len)), rh - 6); ctx.globalAlpha = 1;
+      ctx.fillStyle = muted; ctx.textAlign = len >= 0 ? 'left' : 'right';
+      ctx.fillText(nf(b.rho, l, 2), len >= 0 ? xm + len + 3 : xm + len - 3, yy + rh / 2);
+    });
+    ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(xm, y0 - 2); ctx.lineTo(xm, y0 + bars.length * rh + 2); ctx.stroke();
+  }
+
+  /* ---- examples (presets): numbers come from TndRisk.PRESETS, each aha is a test in _tnd/riskcontingency/test.mjs and in the bench ---- */
+  var EXT = {
+    'be-sewer': { group: 'be',
+      label: T('Contractor, Belgian public works: collector sewer and pumping station 5.6 M€', 'Підрядник, бельгійські публічні роботи: колектор і насосна станція 5,6 млн €', 'Auftragnehmer, belgische öffentliche Bauleistung: Sammelkanal und Pumpwerk 5,6 Mio. €', 'Aannemer, Belgische overheidsopdracht voor werken: rioleringscollector en pompstation 5,6 M€', 'Entrepreneur, marché public de travaux belge : collecteur et station de pompage 5,6 M€', 'Contratista, obra pública belga: colector y estación de bombeo 5,6 M€', 'Wykonawca, belgijskie zamówienie na roboty: kolektor i pompownia 5,6 mln €'),
+      aha: T('The sum of the most likely values (5.64 M€) is only P12; P80 needs +564 k€ (10.0 %). Dewatering — 6.7 % of the estimate — carries 25 % of the cost variance, close to the 2.1 M€ sewer line (30 %): price the groundwater, not the pipe. Delay fines under AUR art. 86 add only 2.5 k€ on average: 1 run in 10 is late.', 'Сума найімовірніших значень (5,64 млн €) — лише P12; для P80 потрібно +564 тис. € (10,0 %). Водовідлив — 6,7 % кошторису — дає 25 % дисперсії вартості, близько до колектора за 2,1 млн € (30 %): оцінюйте ґрунтові води, а не трубу. Штрафи за AUR ст. 86 додають у середньому лише 2,5 тис. €: запізнюється 1 прогін із 10.', 'Die Summe der wahrscheinlichsten Werte (5,64 Mio. €) ist nur P12; P80 braucht +564 k€ (10,0 %). Die Wasserhaltung — 6,7 % der Schätzung — trägt 25 % der Kostenvarianz, nahe am Kanal mit 2,1 Mio. € (30 %): das Grundwasser kalkulieren, nicht das Rohr. Verzugsstrafen nach AUR Art. 86 kosten im Mittel nur 2,5 k€: 1 Lauf von 10 ist verspätet.', 'De som van de meest waarschijnlijke waarden (5,64 M€) is maar P12; P80 vraagt +564 k€ (10,0 %). De bemaling — 6,7 % van de raming — draagt 25 % van de kostvariantie, dicht bij de collector van 2,1 M€ (30 %): prijs het grondwater, niet de buis. Vertragingsboetes volgens AUR art. 86 kosten gemiddeld maar 2,5 k€: 1 run op 10 is te laat.', 'La somme des valeurs les plus probables (5,64 M€) n’est que P12 ; P80 demande +564 k€ (10,0 %). Le rabattement de nappe — 6,7 % de l’estimation — porte 25 % de la variance du coût, près du collecteur de 2,1 M€ (30 %) : chiffrez la nappe, pas le tuyau. Les amendes pour retard des RGE art. 86 n’ajoutent que 2,5 k€ en moyenne : 1 tirage sur 10 est en retard.', 'La suma de los valores más probables (5,64 M€) es solo P12; P80 necesita +564 k€ (10,0 %). El agotamiento — 6,7 % de la estimación — aporta el 25 % de la varianza del coste, cerca del colector de 2,1 M€ (30 %): presupueste el agua freática, no el tubo. Las penalizaciones del AUR art. 86 añaden de media solo 2,5 k€: 1 iteración de cada 10 se retrasa.', 'Suma wartości najbardziej prawdopodobnych (5,64 mln €) to tylko P12; P80 wymaga +564 tys. € (10,0 %). Odwodnienie — 6,7 % kosztorysu — niesie 25 % wariancji kosztu, blisko kolektora za 2,1 mln € (30 %): wyceniaj wodę gruntową, nie rurę. Kary wg AUR art. 86 dodają średnio tylko 2,5 tys. €: 1 przebieg na 10 się spóźnia.') },
+    'epc-fidic': { group: 'epc',
+      label: T('Contractor, private EPC (FIDIC Yellow): biomass CHP plant 48 M€', 'Підрядник, приватний EPC (FIDIC Yellow): ТЕЦ на біомасі 48 млн €', 'Auftragnehmer, privates EPC (FIDIC Yellow): Biomasse-KWK 48 Mio. €', 'Aannemer, private EPC (FIDIC Yellow): biomassa-WKK 48 M€', 'Entrepreneur, EPC privé (FIDIC Yellow) : cogénération biomasse 48 M€', 'Contratista, EPC privado (FIDIC Yellow): cogeneración de biomasa 48 M€', 'Wykonawca, prywatne EPC (FIDIC Yellow): elektrociepłownia na biomasę 48 mln €'),
+      aha: T('With a rank correlation of 0.6 between the cost lines (common market and productivity drivers) the P80 contingency is 3.32 M€ (6.9 %). Set the correlation to 0 and it shows only 2.55 M€ (5.3 %): assuming independence hides 0.77 M€.', 'За рангової кореляції 0,6 між статтями (спільні чинники ринку й продуктивності) резерв P80 — 3,32 млн € (6,9 %). Поставте кореляцію 0 — і буде лише 2,55 млн € (5,3 %): припущення про незалежність ховає 0,77 млн €.', 'Mit einer Rangkorrelation von 0,6 zwischen den Positionen (gemeinsame Markt- und Produktivitätstreiber) beträgt die P80-Reserve 3,32 Mio. € (6,9 %). Korrelation auf 0 gesetzt zeigt nur 2,55 Mio. € (5,3 %): die Unabhängigkeitsannahme versteckt 0,77 Mio. €.', 'Met een rangcorrelatie van 0,6 tussen de posten (gemeenschappelijke markt- en productiviteitsdrijvers) is de P80-post onvoorzien 3,32 M€ (6,9 %). Zet de correlatie op 0 en er blijft maar 2,55 M€ (5,3 %): de onafhankelijkheidsaanname verbergt 0,77 M€.', 'Avec une corrélation de rang de 0,6 entre postes (facteurs communs de marché et de productivité), la provision P80 est de 3,32 M€ (6,9 %). Mettez la corrélation à 0 : il ne reste que 2,55 M€ (5,3 %) — l’hypothèse d’indépendance cache 0,77 M€.', 'Con una correlación de rangos de 0,6 entre partidas (factores comunes de mercado y productividad) la contingencia P80 es 3,32 M€ (6,9 %). Con correlación 0 solo aparecen 2,55 M€ (5,3 %): suponer independencia oculta 0,77 M€.', 'Przy korelacji rang 0,6 między pozycjami (wspólne czynniki rynku i wydajności) rezerwa P80 to 3,32 mln € (6,9 %). Ustaw korelację na 0, a zostanie tylko 2,55 mln € (5,3 %): założenie niezależności ukrywa 0,77 mln €.') },
+    'equip-trafo': { group: 'eq',
+      label: T('Supplier: power transformer offer (period from the reserved factory slot), three parallel chains, delay damages', 'Постачальник: пропозиція силового трансформатора (строк від зарезервованого слоту на заводі), три паралельні ланцюги, штрафи', 'Lieferant: Angebot Leistungstransformator (Frist ab reserviertem Fertigungsslot), drei parallele Ketten, Verzugsstrafen', 'Leverancier: offerte vermogenstransformator (termijn vanaf het gereserveerde fabrieksslot), drie parallelle ketens, vertragingsboetes', 'Fournisseur : offre de transformateur de puissance (délai à partir du créneau usine réservé), trois chaînes parallèles, pénalités', 'Proveedor: oferta de transformador de potencia (plazo desde el hueco de fábrica reservado), tres cadenas paralelas, penalizaciones', 'Dostawca: oferta transformatora mocy (termin od zarezerwowanego okna produkcyjnego), trzy łańcuchy równoległe, kary'),
+      aha: T('The plan finishes in 215 days, 5 days inside the 220-day contract period — yet only 13 % of runs make it, and the expected delay damages are 97 k€ (cap 180 k€). Core/windings, tank and the bought-in tap changer each take about 125 days; with one chain alone the chance would be 35 %. The 220 days count from the reserved factory slot; lead times from the order are currently well over a year.', 'План завершується за 215 днів, на 5 днів раніше контрактних 220 — але вкладається лише 13 % прогонів, а очікувані штрафи — 97 тис. € (обмеження 180 тис. €). Осердя/обмотки, бак і покупний РПН — по ≈125 днів; з одним ланцюгом шанс був би 35 %. 220 днів рахуються від зарезервованого слоту на заводі; строки від замовлення нині значно перевищують рік.', 'Der Plan endet nach 215 Tagen, 5 Tage innerhalb der Vertragsdauer von 220 Tagen — doch nur 13 % der Läufe schaffen es, die erwarteten Verzugsstrafen betragen 97 k€ (Obergrenze 180 k€). Kern/Wicklungen, Kessel und zugekaufter Stufenschalter dauern je rund 125 Tage; mit nur einer Kette wären es 35 %. Die 220 Tage zählen ab dem reservierten Fertigungsslot; Lieferzeiten ab Bestellung liegen derzeit deutlich über einem Jahr.', 'De planning eindigt na 215 dagen, 5 dagen binnen de contractuele 220 — toch haalt maar 13 % van de runs het en de verwachte boete is 97 k€ (plafond 180 k€). Kern/wikkelingen, kuip en de aangekochte regelschakelaar duren elk ±125 dagen; met één keten zou het 35 % zijn. De 220 dagen lopen vanaf het gereserveerde fabrieksslot; levertijden vanaf de bestelling liggen nu ruim boven een jaar.', 'Le planning se termine en 215 jours, 5 jours avant le délai contractuel de 220 — pourtant seuls 13 % des tirages le tiennent et les pénalités attendues atteignent 97 k€ (plafond 180 k€). Noyau/enroulements, cuve et changeur acheté durent chacun ≈125 jours ; avec une seule chaîne ce serait 35 %. Les 220 jours courent à partir du créneau usine réservé ; les délais depuis la commande dépassent aujourd’hui largement un an.', 'El plan termina en 215 días, 5 dentro del plazo contractual de 220; aun así solo el 13 % de las iteraciones lo cumple y la penalización esperada es de 97 k€ (tope 180 k€). Núcleo/devanados, cuba y cambiador comprado duran ≈125 días cada uno; con una sola cadena sería el 35 %. Los 220 días cuentan desde el hueco de fábrica reservado; los plazos desde el pedido superan hoy con creces un año.', 'Plan kończy się po 215 dniach, 5 dni przed terminem umownym 220 — a jednak mieści się tylko 13 % przebiegów, oczekiwane kary to 97 tys. € (limit 180 tys. €). Rdzeń/uzwojenia, kadź i kupowany przełącznik trwają po ok. 125 dni; z jednym łańcuchem szansa wyniosłaby 35 %. 220 dni liczy się od zarezerwowanego okna produkcyjnego; terminy od zamówienia przekraczają dziś znacznie rok.') },
+    'client-budget': { group: 'be',
+      label: T('Owner, Belgian municipality: school renovation and extension, budget 4.5 M€', 'Замовник, бельгійська громада: реконструкція й розширення школи, бюджет 4,5 млн €', 'Bauherr, belgische Gemeinde: Schulsanierung und Erweiterung, Budget 4,5 Mio. €', 'Aanbestedende overheid, Belgische gemeente: renovatie en uitbreiding van een school, budget 4,5 M€', 'Pouvoir adjudicateur, commune belge : rénovation et extension d’école, budget 4,5 M€', 'Poder adjudicador, municipio belga: rehabilitación y ampliación de escuela, presupuesto 4,5 M€', 'Zamawiający, gmina w Belgii: przebudowa i rozbudowa szkoły, budżet 4,5 mln €'),
+      aha: T('Contingency = Σ expected values of the risk register (212 k€) reaches only P32. P80 needs 555 k€ — 2.6 × the register’s EMV — because the budget must cover the spread, not the average, and the ranges of the estimate add their own share.', 'Резерв = Σ очікуваних значень реєстру ризиків (212 тис. €) дає лише P32. Для P80 потрібно 555 тис. € — у 2,6 раза більше EMV реєстру, — бо бюджет має покривати розкид, а не середнє, і діапазони кошторису додають свою частку.', 'Reserve = Σ Erwartungswerte des Risikoregisters (212 k€) erreicht nur P32. P80 braucht 555 k€ — das 2,6-Fache des Register-EMV —, weil das Budget die Streuung decken muss, nicht den Mittelwert, und die Bereiche der Schätzung ihren eigenen Anteil beitragen.', 'Onvoorzien = Σ verwachte waarden van het risicoregister (212 k€) haalt maar P32. P80 vraagt 555 k€ — 2,6 × de EMV van het register — omdat het budget de spreiding moet dekken, niet het gemiddelde, en de bereiken van de raming hun eigen deel toevoegen.', 'Provision = Σ valeurs attendues du registre (212 k€) n’atteint que P32. P80 demande 555 k€ — 2,6 × l’EMV du registre — car le budget doit couvrir la dispersion et non la moyenne, et les fourchettes de l’estimation ajoutent leur part.', 'Contingencia = Σ valores esperados del registro (212 k€) solo llega a P32. P80 necesita 555 k€ — 2,6 × el EMV del registro — porque el presupuesto debe cubrir la dispersión, no la media, y los rangos de la estimación añaden su parte.', 'Rezerwa = Σ wartości oczekiwanych rejestru (212 tys. €) daje tylko P32. P80 wymaga 555 tys. € — 2,6 × EMV rejestru — bo budżet musi pokryć rozrzut, a nie średnią, a zakresy kosztorysu dokładają swoją część.') }
+  };
+  var GROUP = {
+    be: T('Belgian public tenders', 'Бельгійські публічні закупівлі', 'Belgische öffentliche Vergaben', 'Belgische overheidsopdrachten', 'Marchés publics belges', 'Licitaciones públicas belgas', 'Belgijskie zamówienia publiczne'),
+    epc: T('Private EPC', 'Приватні EPC', 'Private EPC', 'Private EPC', 'EPC privés', 'EPC privados', 'Prywatne EPC'),
+    eq: T('Equipment suppliers', 'Постачальники обладнання', 'Ausrüstungslieferanten', 'Uitrustingsleveranciers', 'Fournisseurs d’équipements', 'Proveedores de equipos', 'Dostawcy urządzeń')
+  };
+  function applyPreset(t, p) {
+    var keep = { tenderRef: t.tenderRef, preparedBy: t.preparedBy }, l = lang();
+    function nm(k) { return NM[k] ? NM[k][l] : k; }
+    t.iterations = p.iterations; t.seed = p.seed; t.q = Math.round(100 * p.q); t.rhoCost = p.rhoCost; t.rhoTime = p.rhoTime; t.timeCost = p.timeCost;
+    t.ld = p.ld; t.ldCap = p.ldCap; t.ldMode = p.ldMode || 'linear'; t.ldM = p.ldM || 0; t.ldCapPct = p.ldCapPct == null ? 5 : p.ldCapPct; t.targetCost = p.targetCost || 0; t.targetDays = p.targetDays || 0;
+    t.items = p.items.map(function (x) { return { name: nm(x.key), dist: x.dist, min: x.min, ml: x.ml, max: x.max }; });
+    t.acts = p.activities.map(function (x) { return { name: nm(x.key), path: x.path, dist: x.dist, min: x.min, ml: x.ml, max: x.max }; });
+    t.risks = p.risks.map(function (x) {
+      var c = x.cost || {}, d = x.time || {};
+      return { name: nm(x.key), p: +(100 * x.p).toFixed(6), dist: x.dist, cmin: x.cost ? c.min : null, cml: x.cost ? c.ml : null, cmax: x.cost ? c.max : null,
+               tmin: x.time ? d.min : null, tml: x.time ? d.ml : null, tmax: x.time ? d.max : null, path: x.path || '', owner: '' };
+    });
+    t.tenderRef = keep.tenderRef; t.preparedBy = keep.preparedBy;
+  }
+  function buildExamples() {
+    var B = lib();
+    if (!B) return [];
+    return B.PRESETS.map(function (p) {
+      var x = EXT[p.id];
+      return { id: p.id, group: GROUP[x.group], label: x.label, note: x.aha, apply: function (t) { applyPreset(t, p); } };
+    });
+  }
+
+  function buildLearn() {
+    return {
+      version: 1,
+      intro: {
+        title: T('Contingency from ranges, risks and the schedule', 'Резерв із діапазонів, ризиків і графіка', 'Reserve aus Bereichen, Risiken und Terminplan', 'Onvoorzien uit bereiken, risico’s en planning', 'La provision à partir des fourchettes, des risques et du planning', 'Contingencia a partir de rangos, riesgos y plazo', 'Rezerwa z zakresów, ryzyk i harmonogramu'),
+        body: T('Life-cycle stage 5 (estimate, risk and margin before submission) for the contractor and the supplier, stage 0 (business case and budget) for the owner. Give each cost line and activity a range, list the risk events, and the tool simulates the project thousands of times: how likely the base estimate is, how much contingency a chosen confidence needs, when the work really finishes and which inputs drive it.',
+                'Етап життєвого циклу 5 (кошторис, ризик і маржа перед поданням) для підрядника й постачальника, етап 0 (обґрунтування й бюджет) для замовника. Задайте діапазон кожній статті й роботі, перелічіть ризикові події — інструмент тисячі разів моделює проєкт: наскільки імовірний базовий кошторис, скільки резерву потрібно для обраного рівня довіри, коли робота справді завершиться і які вхідні дані це визначають.',
+                'Lebenszyklus-Phase 5 (Kalkulation, Risiko und Marge vor der Abgabe) für Auftragnehmer und Lieferant, Phase 0 (Bedarf und Budget) für den Bauherrn. Geben Sie jeder Position und jedem Vorgang einen Bereich, listen Sie die Risikoereignisse auf, und das Werkzeug simuliert das Projekt tausendfach: wie wahrscheinlich die Basisschätzung ist, wie viel Reserve ein gewähltes Konfidenzniveau braucht, wann die Arbeit wirklich endet und welche Eingaben das treiben.',
+                'Fase 5 van de levenscyclus (raming, risico en marge vóór indiening) voor aannemer en leverancier, fase 0 (behoefte en budget) voor de opdrachtgever. Geef elke post en activiteit een bereik, lijst de risicogebeurtenissen op, en de tool simuleert het project duizenden keren: hoe waarschijnlijk de basisraming is, hoeveel onvoorzien een gekozen betrouwbaarheid vraagt, wanneer het werk echt klaar is en welke invoer dat bepaalt.',
+                'Étape 5 du cycle de vie (estimation, risques et marge avant remise) pour l’entrepreneur et le fournisseur, étape 0 (besoin et budget) pour le maître d’ouvrage. Donnez une fourchette à chaque poste et activité, listez les événements à risque, et l’outil simule le projet des milliers de fois : probabilité de l’estimation de base, provision nécessaire à la confiance choisie, date réelle de fin et facteurs déterminants.',
+                'Etapa 5 del ciclo de vida (estimación, riesgo y margen antes de ofertar) para el contratista y el proveedor, etapa 0 (necesidad y presupuesto) para el promotor. Dé un rango a cada partida y actividad, liste los eventos de riesgo y la herramienta simula el proyecto miles de veces: qué probabilidad tiene la estimación base, cuánta contingencia exige la confianza elegida, cuándo termina realmente la obra y qué datos lo determinan.',
+                'Etap 5 cyklu życia (kosztorys, ryzyko i marża przed złożeniem oferty) dla wykonawcy i dostawcy, etap 0 (potrzeba i budżet) dla zamawiającego. Nadaj zakres każdej pozycji i czynności, wypisz zdarzenia ryzyka, a narzędzie tysiące razy symuluje projekt: jak prawdopodobny jest kosztorys bazowy, ile rezerwy wymaga wybrany poziom ufności, kiedy praca naprawdę się kończy i co o tym decyduje.')
+      },
+      topics: {
+        ranges: { title: T('Three-point ranges and the base estimate', 'Тризначні діапазони й базовий кошторис', 'Dreipunktbereiche und Basisschätzung', 'Driepuntsbereiken en de basisraming', 'Fourchettes à trois points et estimation de base', 'Rangos de tres puntos y estimación base', 'Zakresy trzypunktowe i kosztorys bazowy'),
+          body: T('Each line gets a minimum, a most likely value and a maximum. PERT (a beta distribution with weight 4 on the most likely value, mean (min + 4·ml + max)/6) is the usual choice; triangular gives more weight to the tails; uniform says “anywhere in between”. Real ranges are skewed to the right — there is more room to overrun than to save — so the sum of the most likely values, the usual “base estimate”, sits well below the median. The confidence of the base tells you how often it would hold.',
+                  'Кожна стаття має мінімум, найімовірніше значення й максимум. PERT (бета-розподіл з вагою 4 на найімовірнішому, середнє (мін + 4·імов + макс)/6) — звичайний вибір; трикутний дає більшу вагу хвостам; рівномірний означає «будь-де між». Реальні діапазони скошені вправо — перевитратити легше, ніж зекономити, — тож сума найімовірніших значень, звичний «базовий кошторис», лежить помітно нижче медіани. Довіра до бази показує, як часто її буде дотримано.',
+                  'Jede Position erhält Minimum, wahrscheinlichsten Wert und Maximum. PERT (Betaverteilung mit Gewicht 4 auf dem wahrscheinlichsten Wert, Mittelwert (min + 4·wahrsch. + max)/6) ist die übliche Wahl; die Dreiecksverteilung gewichtet die Ränder stärker; die Gleichverteilung sagt „irgendwo dazwischen“. Echte Bereiche sind rechtsschief — es gibt mehr Raum zum Überschreiten als zum Sparen —, daher liegt die Summe der wahrscheinlichsten Werte, die übliche „Basisschätzung“, deutlich unter dem Median. Die Konfidenz der Basis zeigt, wie oft sie hält.',
+                  'Elke post krijgt een minimum, een meest waarschijnlijke waarde en een maximum. PERT (bètaverdeling met gewicht 4 op de meest waarschijnlijke waarde, gemiddelde (min + 4·mw + max)/6) is de gebruikelijke keuze; driehoek geeft de staarten meer gewicht; uniform zegt “ergens daartussen”. Echte bereiken zijn rechtsscheef — er is meer ruimte om te overschrijden dan om te besparen — dus de som van de meest waarschijnlijke waarden, de gebruikelijke “basisraming”, ligt duidelijk onder de mediaan. De betrouwbaarheid van de basis zegt hoe vaak ze standhoudt.',
+                  'Chaque poste reçoit un minimum, une valeur la plus probable et un maximum. PERT (loi bêta avec un poids 4 sur la valeur la plus probable, moyenne (min + 4·pp + max)/6) est le choix habituel ; la loi triangulaire donne plus de poids aux extrêmes ; l’uniforme dit « n’importe où entre les deux ». Les fourchettes réelles sont asymétriques à droite — on dépasse plus facilement qu’on n’économise — : la somme des valeurs les plus probables, l’« estimation de base » usuelle, est nettement sous la médiane. La confiance de la base indique combien de fois elle tient.',
+                  'Cada partida recibe un mínimo, un valor más probable y un máximo. PERT (distribución beta con peso 4 en el más probable, media (mín + 4·mp + máx)/6) es la elección habitual; la triangular da más peso a las colas; la uniforme dice «en cualquier punto intermedio». Los rangos reales son asimétricos a la derecha —hay más margen para pasarse que para ahorrar—, por lo que la suma de los más probables, la «estimación base» habitual, queda claramente por debajo de la mediana. La confianza de la base indica con qué frecuencia se cumple.',
+                  'Każda pozycja dostaje minimum, wartość najbardziej prawdopodobną i maksimum. PERT (rozkład beta z wagą 4 na wartości najbardziej prawdopodobnej, średnia (min + 4·np + maks)/6) to zwykły wybór; trójkątny daje większą wagę ogonom; jednostajny mówi „gdziekolwiek pomiędzy”. Rzeczywiste zakresy są prawoskośne — łatwiej przekroczyć niż zaoszczędzić — więc suma wartości najbardziej prawdopodobnych, zwykły „kosztorys bazowy”, leży wyraźnie poniżej mediany. Ufność bazy mówi, jak często zostanie dotrzymana.') },
+        events: { title: T('Risk events and their expected value', 'Ризикові події та їхнє очікуване значення', 'Risikoereignisse und ihr Erwartungswert', 'Risicogebeurtenissen en hun verwachte waarde', 'Événements à risque et valeur attendue', 'Eventos de riesgo y su valor esperado', 'Zdarzenia ryzyka i ich wartość oczekiwana'),
+          body: T('A risk event either happens (probability p) or not; if it happens it costs a range of money and may delay a path. Its expected monetary value EMV = p × mean impact is what a risk register usually shows. Adding the EMVs to the base gives the mean effect of the risks, not a confidence level: in most runs no or few risks occur, in some several hit at once. The simulation keeps that spread.',
+                  'Ризикова подія або стається (імовірність p), або ні; якщо стається, вона коштує певний діапазон грошей і може затримати шлях. Її очікувана грошова вартість EMV = p × середній вплив — те, що зазвичай показує реєстр ризиків. Сума EMV, додана до бази, дає середній ефект ризиків, а не рівень довіри: у більшості прогонів ризиків немає чи мало, а в деяких кілька стаються разом. Моделювання зберігає цей розкид.',
+                  'Ein Risikoereignis tritt ein (Wahrscheinlichkeit p) oder nicht; tritt es ein, kostet es einen Geldbereich und kann einen Pfad verzögern. Sein erwarteter Geldwert EMV = p × mittlere Auswirkung ist, was ein Risikoregister meist zeigt. Die EMV zur Basis addiert ergeben die mittlere Wirkung der Risiken, kein Konfidenzniveau: in den meisten Läufen treten keine oder wenige Risiken ein, in manchen mehrere zugleich. Die Simulation behält diese Streuung.',
+                  'Een risicogebeurtenis treedt op (kans p) of niet; treedt ze op, dan kost ze een bereik aan geld en kan ze een pad vertragen. De verwachte monetaire waarde EMV = p × gemiddelde impact is wat een risicoregister meestal toont. De EMV’s bij de basis optellen geeft het gemiddelde effect van de risico’s, geen betrouwbaarheid: in de meeste runs treden geen of weinig risico’s op, in sommige meerdere tegelijk. De simulatie houdt die spreiding.',
+                  'Un événement à risque survient (probabilité p) ou non ; s’il survient, il coûte une fourchette d’argent et peut retarder un chemin. Sa valeur monétaire attendue EMV = p × impact moyen est ce qu’affiche d’ordinaire un registre des risques. Ajouter les EMV à la base donne l’effet moyen des risques, pas un niveau de confiance : dans la plupart des tirages peu ou pas de risques surviennent, dans certains plusieurs à la fois. La simulation conserve cette dispersion.',
+                  'Un evento de riesgo ocurre (probabilidad p) o no; si ocurre, cuesta un rango de dinero y puede retrasar un camino. Su valor monetario esperado EMV = p × impacto medio es lo que suele mostrar un registro de riesgos. Sumar los EMV a la base da el efecto medio de los riesgos, no un nivel de confianza: en la mayoría de las iteraciones ocurren pocos o ninguno, en algunas varios a la vez. La simulación conserva esa dispersión.',
+                  'Zdarzenie ryzyka albo wystąpi (prawdopodobieństwo p), albo nie; jeśli wystąpi, kosztuje zakres pieniędzy i może opóźnić ścieżkę. Jego oczekiwana wartość pieniężna EMV = p × średni wpływ to to, co zwykle pokazuje rejestr ryzyk. Suma EMV dodana do bazy daje średni efekt ryzyk, a nie poziom ufności: w większości przebiegów nie występuje żadne lub niewiele ryzyk, w niektórych kilka naraz. Symulacja zachowuje ten rozrzut.') },
+        schedule: { title: T('Parallel paths, merge bias and the cost of time', 'Паралельні шляхи, ефект злиття та вартість часу', 'Parallele Pfade, Zusammenführungseffekt und Kosten der Zeit', 'Parallelle paden, samenloopeffect en de kost van tijd', 'Chemins parallèles, biais de convergence et coût du temps', 'Caminos paralelos, sesgo de convergencia y coste del tiempo', 'Ścieżki równoległe, efekt scalania i koszt czasu'),
+          body: T('Activities without a path run in series; activities with the same path letter form a chain, and chains run in parallel between the common activities. Where chains join, the latest sets the date, so with several chains of similar length the finish is later than any single chain suggests (merge bias). Duration then feeds the cost: time-dependent cost (site overheads, plant, the owner’s team) per day of difference to the plan, and delay damages beyond the contract duration up to their cap. That is the integrated cost-schedule analysis of AACE RP 57R-09. Belgian public works contracts do not count damages per day: AUR art. 86 sets delay fines R = 0.45·M·n²/N² (N = working days of the period, 0.7 × calendar days), capped at 5 % of M; choose that model in the damages panel.',
+                  'Роботи без шляху йдуть послідовно; роботи з однаковою літерою шляху утворюють ланцюг, а ланцюги йдуть паралельно між спільними роботами. Де ланцюги сходяться, дату визначає найпізніший, тож за кількох ланцюгів схожої довжини завершення пізніше, ніж показує будь-який окремий ланцюг (ефект злиття). Тривалість далі впливає на вартість: вартість часу (накладні майданчика, техніка, команда замовника) за кожен день відхилення від плану та штрафи понад контрактний строк до їх обмеження. Це інтегрований аналіз вартості й графіка за AACE RP 57R-09. Бельгійські публічні договори на роботи не рахують штрафи за день: AUR ст. 86 встановлює штрафи R = 0,45·M·n²/N² (N — робочі дні строку, 0,7 × календарних), не більше 5 % від M; оберіть цю модель на панелі штрафів.',
+                  'Vorgänge ohne Pfad laufen in Reihe; Vorgänge mit gleichem Pfadbuchstaben bilden eine Kette, Ketten laufen parallel zwischen den gemeinsamen Vorgängen. Wo Ketten zusammenlaufen, bestimmt die späteste den Termin; bei mehreren ähnlich langen Ketten liegt das Ende später, als jede einzelne Kette vermuten lässt (merge bias). Die Dauer wirkt dann auf die Kosten: zeitabhängige Kosten (Baustellengemeinkosten, Geräte, Bauherrenteam) je Tag Abweichung vom Plan und Verzugsstrafen über die Vertragsdauer hinaus bis zur Obergrenze. Das ist die integrierte Kosten-Termin-Analyse nach AACE RP 57R-09. Belgische öffentliche Bauaufträge rechnen Strafen nicht je Tag: AUR Art. 86 setzt Verzugsstrafen R = 0,45·M·n²/N² fest (N = Arbeitstage der Frist, 0,7 × Kalendertage), höchstens 5 % von M; wählen Sie dieses Modell im Strafenfeld.',
+                  'Activiteiten zonder pad lopen in serie; activiteiten met dezelfde padletter vormen een keten, ketens lopen parallel tussen de gemeenschappelijke activiteiten. Waar ketens samenkomen, bepaalt de laatste de datum; met meerdere ketens van gelijke lengte ligt het einde later dan elke keten afzonderlijk doet vermoeden (merge bias). De duur werkt dan door in de kost: tijdgebonden kosten (werfkosten, materieel, team van de opdrachtgever) per dag verschil met de planning, en vertragingsboetes na de contractuele termijn tot het plafond. Dat is de geïntegreerde kost-planninganalyse van AACE RP 57R-09. Belgische overheidsopdrachten voor werken rekenen boetes niet per dag: AUR art. 86 legt vertragingsboetes R = 0,45·M·n²/N² op (N = werkdagen van de termijn, 0,7 × kalenderdagen), begrensd op 5 % van M; kies dat model bij de boetes.',
+                  'Les activités sans chemin sont en série ; les activités de même lettre forment une chaîne, les chaînes sont parallèles entre les activités communes. À la jonction, la plus tardive fixe la date : avec plusieurs chaînes de longueur voisine, la fin est plus tardive que ne le suggère chaque chaîne (biais de convergence). La durée se répercute ensuite sur le coût : coûts liés au temps (frais de chantier, matériel, équipe du maître d’ouvrage) par jour d’écart au planning, et pénalités au-delà du délai contractuel jusqu’au plafond. C’est l’analyse intégrée coût-délai de l’AACE RP 57R-09. Les marchés publics de travaux belges ne comptent pas les amendes par jour : les RGE art. 86 fixent les amendes pour retard R = 0,45·M·n²/N² (N = jours ouvrables du délai, 0,7 × jours calendrier), plafonnées à 5 % de M ; choisissez ce modèle dans le panneau des amendes.',
+                  'Las actividades sin camino van en serie; las de la misma letra forman una cadena y las cadenas van en paralelo entre las actividades comunes. Donde se unen, la más tardía fija la fecha; con varias cadenas de duración similar el final es más tarde de lo que sugiere cualquiera de ellas (sesgo de convergencia). La duración repercute luego en el coste: costes dependientes del plazo (gastos de obra, maquinaria, equipo del promotor) por día de diferencia con el plan, y penalizaciones más allá del plazo contractual hasta su tope. Es el análisis integrado coste-plazo de AACE RP 57R-09. Los contratos públicos de obras belgas no cuentan la penalización por día: el AUR art. 86 fija R = 0,45·M·n²/N² (N = días hábiles del plazo, 0,7 × días naturales), con tope del 5 % de M; elija ese modelo en el panel de penalizaciones.',
+                  'Czynności bez ścieżki biegną szeregowo; czynności z tą samą literą tworzą łańcuch, a łańcuchy biegną równolegle między czynnościami wspólnymi. Tam, gdzie się łączą, datę wyznacza najpóźniejszy; przy kilku łańcuchach podobnej długości koniec wypada później, niż sugeruje każdy z osobna (efekt scalania). Czas wpływa następnie na koszt: koszty czasowe (koszty budowy, sprzęt, zespół inwestora) za każdy dzień różnicy wobec planu oraz kary po terminie umownym do limitu. To zintegrowana analiza kosztu i czasu wg AACE RP 57R-09. Belgijskie zamówienia publiczne na roboty nie liczą kar za dzień: AUR art. 86 ustala kary R = 0,45·M·n²/N² (N = dni robocze terminu, 0,7 × dni kalendarzowych), do 5 % M; wybierz ten model w panelu kar.') },
+        corr: { title: T('Correlation: lines that move together', 'Кореляція: статті, що рухаються разом', 'Korrelation: Positionen, die sich gemeinsam bewegen', 'Correlatie: posten die samen bewegen', 'Corrélation : des postes qui bougent ensemble', 'Correlación: partidas que se mueven juntas', 'Korelacja: pozycje, które poruszają się razem'),
+          body: T('If steel prices, labour productivity or design maturity push one line up, they push others up too. Treating the lines as independent lets overruns and savings cancel out and makes the total look narrower than it is. One rank correlation for all cost lines (and one for all activities) is applied with the Iman–Conover method, which reorders the samples without changing any single range. Values of 0.3–0.6 are common judgement for lines with shared drivers.',
+                  'Якщо ціни на сталь, продуктивність праці чи зрілість проєкту підвищують одну статтю, вони підвищують і інші. Якщо вважати статті незалежними, перевитрати й економія взаємно гасяться, і підсумок виглядає вужчим, ніж є. Одна рангова кореляція для всіх статей (і одна для всіх робіт) застосовується методом Імана–Коновера, який переставляє вибірки, не змінюючи жодного окремого діапазону. Значення 0,3–0,6 — звичне експертне судження для статей зі спільними чинниками.',
+                  'Wenn Stahlpreise, Arbeitsproduktivität oder Planungsreife eine Position anheben, heben sie auch andere. Wer die Positionen als unabhängig behandelt, lässt Überschreitungen und Einsparungen sich aufheben, und die Summe wirkt schmaler, als sie ist. Eine Rangkorrelation für alle Positionen (und eine für alle Vorgänge) wird nach Iman–Conover angewandt, das die Stichproben umordnet, ohne einen einzelnen Bereich zu ändern. Werte von 0,3–0,6 sind übliche Einschätzungen für Positionen mit gemeinsamen Treibern.',
+                  'Als staalprijzen, arbeidsproductiviteit of de maturiteit van het ontwerp één post doen stijgen, doen ze ook andere stijgen. Wie de posten onafhankelijk behandelt, laat overschrijdingen en besparingen tegen elkaar wegvallen en het totaal smaller lijken dan het is. Eén rangcorrelatie voor alle posten (en één voor alle activiteiten) wordt toegepast met de methode van Iman–Conover, die de steekproeven herschikt zonder een afzonderlijk bereik te wijzigen. Waarden van 0,3–0,6 zijn gangbare inschattingen voor posten met gemeenschappelijke drijvers.',
+                  'Si le prix de l’acier, la productivité ou la maturité des études poussent un poste à la hausse, ils en poussent d’autres aussi. Traiter les postes comme indépendants laisse dépassements et économies se compenser et fait paraître le total plus étroit qu’il n’est. Une corrélation de rang pour tous les postes (et une pour toutes les activités) est appliquée par la méthode d’Iman–Conover, qui réordonne les tirages sans modifier aucune fourchette. Des valeurs de 0,3 à 0,6 sont un jugement courant pour des postes aux facteurs communs.',
+                  'Si el precio del acero, la productividad o la madurez del diseño suben una partida, suben también otras. Tratar las partidas como independientes deja que sobrecostes y ahorros se compensen y el total parece más estrecho de lo que es. Se aplica una correlación de rangos para todas las partidas (y otra para todas las actividades) con el método de Iman–Conover, que reordena las muestras sin cambiar ningún rango individual. Valores de 0,3–0,6 son un criterio habitual para partidas con factores comunes.',
+                  'Jeśli ceny stali, wydajność pracy lub dojrzałość projektu podnoszą jedną pozycję, podnoszą też inne. Traktowanie pozycji jako niezależnych pozwala przekroczeniom i oszczędnościom się znosić, a suma wygląda na węższą, niż jest. Jedna korelacja rang dla wszystkich pozycji (i jedna dla wszystkich czynności) jest stosowana metodą Imana–Conovera, która przestawia próbki, nie zmieniając żadnego zakresu. Wartości 0,3–0,6 to typowa ocena eksperta dla pozycji o wspólnych czynnikach.') },
+        contingency: { title: T('P-values, contingency and joint confidence', 'P-значення, резерв і спільна довіра', 'P-Werte, Reserve und gemeinsame Konfidenz', 'P-waarden, onvoorzien en gezamenlijke betrouwbaarheid', 'Valeurs P, provision et confiance conjointe', 'Valores P, contingencia y confianza conjunta', 'Wartości P, rezerwa i ufność łączna'),
+          body: T('P80 is the cost not exceeded in 80 % of the runs. Contingency at P80 = P80 − base estimate: the money to hold for the uncertainty you have described, split here into estimate uncertainty and risk events with delay cost. Which confidence to fund is a policy choice: owners often budget at P80 or P90 for the project and keep the difference to P50 as a central reserve; a contractor may price at P50–P70 and carry the rest as risk. Cost and duration at the same P hold together less often — the joint confidence level (JCL) is the share of runs in which both are met.',
+                  'P80 — вартість, яку не перевищено у 80 % прогонів. Резерв P80 = P80 − базовий кошторис: гроші, які треба тримати під описану невизначеність; тут він поділений на невизначеність кошторису та ризикові події з вартістю затримки. Який рівень довіри фінансувати — рішення політики: замовники часто закладають P80 чи P90 і тримають різницю до P50 як центральний резерв; підрядник може ціноутворювати на P50–P70 і нести решту як ризик. Вартість і тривалість з однаковим P разом виконуються рідше — спільний рівень довіри (JCL) — частка прогонів, де виконано обидва.',
+                  'P80 sind die Kosten, die in 80 % der Läufe nicht überschritten werden. Reserve bei P80 = P80 − Basisschätzung: das Geld für die beschriebene Unsicherheit, hier aufgeteilt in Schätzunsicherheit und Risikoereignisse mit Verzugskosten. Welches Konfidenzniveau finanziert wird, ist eine Grundsatzentscheidung: Bauherren budgetieren oft P80 oder P90 und halten die Differenz zu P50 zentral; ein Auftragnehmer kalkuliert vielleicht bei P50–P70 und trägt den Rest als Risiko. Kosten und Dauer beim gleichen P halten seltener gemeinsam — die gemeinsame Konfidenz (JCL) ist der Anteil der Läufe, in denen beides eingehalten wird.',
+                  'P80 is de kost die in 80 % van de runs niet overschreden wordt. Onvoorzien bij P80 = P80 − basisraming: het geld om aan te houden voor de beschreven onzekerheid, hier gesplitst in ramingsonzekerheid en risicogebeurtenissen met vertragingskosten. Welke betrouwbaarheid men financiert, is een beleidskeuze: opdrachtgevers budgetteren vaak op P80 of P90 en houden het verschil met P50 centraal aan; een aannemer prijst misschien op P50–P70 en draagt de rest als risico. Kost en duur op dezelfde P worden minder vaak samen gehaald — de gezamenlijke betrouwbaarheid (JCL) is het aandeel runs waarin beide gehaald worden.',
+                  'P80 est le coût non dépassé dans 80 % des tirages. Provision à P80 = P80 − estimation de base : l’argent à réserver pour l’incertitude décrite, ventilé ici entre incertitude d’estimation et événements à risque avec coûts de retard. Le niveau de confiance à financer est un choix de politique : les maîtres d’ouvrage budgètent souvent à P80 ou P90 et gardent l’écart avec P50 en réserve centrale ; un entrepreneur peut chiffrer à P50–P70 et porter le reste comme risque. Coût et durée au même P tiennent moins souvent ensemble — la confiance conjointe (JCL) est la part des tirages où les deux sont tenus.',
+                  'P80 es el coste no superado en el 80 % de las iteraciones. Contingencia a P80 = P80 − estimación base: el dinero que reservar para la incertidumbre descrita, dividido aquí en incertidumbre de estimación y eventos de riesgo con coste del retraso. Qué confianza financiar es una decisión de política: los promotores suelen presupuestar a P80 o P90 y guardar la diferencia con P50 como reserva central; un contratista puede ofertar a P50–P70 y asumir el resto como riesgo. Coste y plazo al mismo P se cumplen juntos con menos frecuencia: la confianza conjunta (JCL) es la proporción de iteraciones en que se cumplen ambos.',
+                  'P80 to koszt nieprzekroczony w 80 % przebiegów. Rezerwa przy P80 = P80 − kosztorys bazowy: pieniądze na opisaną niepewność, rozbite tu na niepewność kosztorysu i zdarzenia ryzyka z kosztem opóźnienia. Jaki poziom ufności finansować, to decyzja polityki: inwestorzy często budżetują P80 lub P90 i trzymają różnicę do P50 jako rezerwę centralną; wykonawca może wyceniać na P50–P70 i nieść resztę jako ryzyko. Koszt i czas przy tym samym P rzadziej są dotrzymane razem — ufność łączna (JCL) to udział przebiegów, w których dotrzymano obu.') },
+        tornado: { title: T('Tornado: what drives the result', 'Торнадо: що визначає результат', 'Tornado: was das Ergebnis treibt', 'Tornado: wat het resultaat bepaalt', 'Tornade : ce qui pilote le résultat', 'Tornado: qué determina el resultado', 'Tornado: co decyduje o wyniku'),
+          body: T('For every input the tool computes the rank correlation ρ between its sampled values and the total cost (or duration): the length of the bar ranks the drivers. For the cost the table also gives each part’s share of the variance, Cov(part, total)/Var(total): cost lines, direct risk costs and the time-related cost add up to exactly 100 %, even when the lines are correlated (ρ² shares would overstate small correlated lines). That is where the contingency comes from. A wide range on a small line can matter more than a narrow range on a big one. Spend the remaining bid time on the top bars: firm quotes, a site investigation, a clause that moves the risk.', 'Для кожної вхідної величини інструмент рахує рангову кореляцію ρ між її змодельованими значеннями й загальною вартістю (чи тривалістю): довжина смуги ранжує чинники. Для вартості таблиця також дає частку кожної складової в дисперсії, Cov(складова, сума)/Var(сума): статті витрат, прямі витрати ризиків і витрати від часу дають разом рівно 100 %, навіть коли статті корельовані (частки ρ² завищували б малі корельовані статті). Саме звідси береться резерв. Широкий діапазон малої статті може важити більше, ніж вузький діапазон великої. Витрачайте залишок часу на тендер на верхні смуги: тверді комерційні пропозиції, вишукування на майданчику, пункт договору, що переносить ризик.', 'Für jede Eingabe berechnet das Werkzeug die Rangkorrelation ρ zwischen ihren Stichprobenwerten und den Gesamtkosten (oder der Dauer): die Balkenlänge ordnet die Treiber. Für die Kosten gibt die Tabelle zusätzlich den Varianzanteil jedes Teils an, Cov(Teil, Summe)/Var(Summe): Kostenpositionen, direkte Risikokosten und zeitabhängige Kosten ergeben zusammen genau 100 %, auch bei korrelierten Positionen (ρ²-Anteile würden kleine korrelierte Positionen überzeichnen). Daher kommt die Reserve. Ein breiter Bereich bei einer kleinen Position kann mehr zählen als ein schmaler bei einer großen. Verwenden Sie die restliche Angebotszeit auf die oberen Balken: feste Angebote, eine Baugrunderkundung, eine Klausel, die das Risiko verlagert.', 'Voor elke invoer berekent de tool de rangcorrelatie ρ tussen de gesimuleerde waarden en de totale kost (of duur): de lengte van de balk rangschikt de drijvers. Voor de kost geeft de tabel ook het aandeel van elk deel in de variantie, Cov(deel, totaal)/Var(totaal): kostenposten, directe risicokosten en tijdgebonden kosten tellen samen op tot precies 100 %, ook als de posten gecorreleerd zijn (ρ²-aandelen zouden kleine gecorreleerde posten overschatten). Daar komt het onvoorzien vandaan. Een breed bereik op een kleine post kan zwaarder wegen dan een smal bereik op een grote. Besteed de resterende offertetijd aan de bovenste balken: vaste prijsoffertes, een terreinonderzoek, een clausule die het risico verschuift.', 'Pour chaque entrée, l’outil calcule la corrélation de rang ρ entre ses valeurs tirées et le coût total (ou la durée) : la longueur de la barre classe les facteurs. Pour le coût, le tableau donne aussi la part de chaque composante dans la variance, Cov(composante, total)/Var(total) : postes, coûts directs des risques et coûts liés au temps font exactement 100 %, même quand les postes sont corrélés (des parts en ρ² surestimeraient les petits postes corrélés). C’est de là que vient la provision. Une large fourchette sur un petit poste peut peser plus qu’une fourchette étroite sur un gros. Consacrez le temps d’offre restant aux barres du haut : offres fermes, reconnaissance de sol, clause qui transfère le risque.', 'Para cada dato la herramienta calcula la correlación de rangos ρ entre sus valores simulados y el coste total (o la duración): la longitud de la barra ordena los factores. Para el coste la tabla da además la cuota de cada parte en la varianza, Cov(parte, total)/Var(total): partidas, costes directos de los riesgos y costes del plazo suman exactamente el 100 %, también con partidas correlacionadas (las cuotas ρ² sobrestimarían las partidas pequeñas correlacionadas). De ahí sale la contingencia. Un rango amplio en una partida pequeña puede pesar más que uno estrecho en una grande. Dedique el tiempo de oferta que queda a las barras superiores: precios firmes, un estudio geotécnico, una cláusula que traslade el riesgo.', 'Dla każdej wielkości wejściowej narzędzie liczy korelację rang ρ między jej wylosowanymi wartościami a kosztem całkowitym (lub czasem): długość paska porządkuje czynniki. Dla kosztu tabela podaje też udział każdej części w wariancji, Cov(część, suma)/Var(suma): pozycje kosztów, bezpośrednie koszty ryzyk i koszty czasu dają razem dokładnie 100 %, także przy skorelowanych pozycjach (udziały ρ² zawyżałyby małe skorelowane pozycje). Stąd bierze się rezerwa. Szeroki zakres małej pozycji może ważyć więcej niż wąski zakres dużej. Pozostały czas na ofertę poświęć górnym paskom: wiążące oferty, badanie gruntu, klauzula przenosząca ryzyko.') }
+      },
+      tour: [
+        { topic: 'ranges', focus: '[data-dgu-field="f-items"]' },
+        { topic: 'events', focus: '[data-dgu-field="f-risks"]' },
+        { topic: 'schedule', focus: '[data-dgu-field="f-acts"]' },
+        { topic: 'corr', focus: '[data-dgu-field="f-rhoCost"]' },
+        { topic: 'contingency', focus: '.dgu-r-results' },
+        { topic: 'tornado', focus: '.dgu-stage' }
+      ]
+    };
+  }
+
+  /* ---- project bar (tnd-core.js) ---- */
+  var bar = null, useMsg = null;
+  function riskBlock() {
+    return (state.risks || []).map(function (x, k) {
+      var hasC = x.cml != null || x.cmax != null, hasT = x.tml != null || x.tmax != null;
+      var o = { id: 'R' + (k + 1), title: x.name || '', kind: hasC && hasT ? 'both' : (hasT ? 'time' : 'cost'), p: (+x.p || 0) / 100, owner: x.owner || '' };
+      o.impact = hasC ? { dist: x.dist || 'pert', min: x.cmin, ml: x.cml, max: x.cmax } : { dist: 'fixed', min: 0, ml: 0, max: 0 };
+      if (hasT) o.delay = { dist: x.dist || 'pert', min: x.tmin, ml: x.tml, max: x.tmax, unit: 'd', path: x.path || '' };
+      return o;
+    });
+  }
+  function projectPayload() {
+    if (!last || !last.ok) return null;
+    var R = last, at = R.atQ;
+    return {
+      state: JSON.parse(JSON.stringify(state)),
+      results: { base: R.det.base, mean: R.cost.stats.mean, p50: R.cost.stats.p50, p80: R.cost.stats.p80, p90: R.cost.stats.p90, confidence: R.input.q, contingency: at.contingency, contingency_pct: at.pct,
+                 p_base: R.pBase, emv: R.det.emv, duration_plan: R.dur ? R.det.D : null, duration_p50: R.dur ? R.dur.stats.p50 : null, duration_p80: R.dur ? R.dur.stats.p80 : null,
+                 joint_confidence: R.joint, expected_delay_damages: R.ld.mean, iterations: R.input.iterations, seed: R.input.seed },
+      summary: { text: P(R.input.q) + ' contingency ' + Math.round(at.contingency) + ' EUR (' + (100 * at.pct).toFixed(1) + ' %), base at P' + Math.round(100 * R.pBase) },
+      blocks: { risks: riskBlock() }
+    };
+  }
+  function showUse(text, tone) {
+    if (!useMsg) return;
+    useMsg.textContent = text; useMsg.style.display = text ? '' : 'none';
+    useMsg.style.borderColor = tone === 'bad' ? 'var(--bad,#c0392b)' : (tone === 'warn' ? 'var(--warn,#d68910)' : 'var(--line,#e2e7ee)');
+  }
+  /* a tender/v1 risks[] row -> a risk event row; log collects what was changed (review R-7): fixed or one-value impacts become min = ml = max,
+     p in (1, 100] is read as percent, other p outside 0..1 is capped */
+  function fromBlock(x, log) {
+    if (!x || typeof x !== 'object') return null;
+    log = log || { pct: [], clamp: [], fixed: [], skipped: [] };
+    var imp = x.impact && typeof x.impact === 'object' ? x.impact : {}, del = x.delay && typeof x.delay === 'object' ? x.delay : {};
+    var name = String(x.title || x.name || x.id || '').slice(0, 120), p = typeof x.p === 'number' && isFinite(x.p) ? x.p : 0;
+    if (p > 1 && p <= 100) { p = p / 100; log.pct.push(name); } else if (p < 0 || p > 1) { p = Math.max(0, Math.min(1, p)); log.clamp.push(name); }
+    var g = function (o, k) { return typeof o[k] === 'number' && isFinite(o[k]) ? o[k] : null; };
+    var dist = ['pert', 'triangular', 'uniform'].indexOf(imp.dist || imp.type) >= 0 ? (imp.dist || imp.type) : 'pert';
+    function three(o) {
+      var mn = g(o, 'min'), ml = g(o, 'ml'), mx = g(o, 'max');
+      if (o.dist === 'fixed' || o.type === 'fixed' || (ml != null && (mn == null || mx == null))) {
+        var v = ml != null ? ml : (mn != null ? mn : mx);
+        if (v == null || v === 0) return null;
+        log.fixed.push(name);
+        return [v, v, v];
+      }
+      if (ml == null && mx == null) return null;
+      if (ml == null && mn != null && mx != null) ml = (mn + mx) / 2;
+      return [mn, ml, mx];
+    }
+    var c3 = three(imp), t3 = three(del);
+    if (!c3 && !t3) { log.skipped.push(name || '?'); return null; }
+    return { name: name, p: Math.max(0, Math.min(100, +(100 * p).toFixed(6))), dist: dist,
+             cmin: c3 ? c3[0] : null, cml: c3 ? c3[1] : null, cmax: c3 ? c3[2] : null,
+             tmin: t3 ? t3[0] : null, tml: t3 ? t3[1] : null, tmax: t3 ? t3[2] : null, path: typeof del.path === 'string' ? del.path.slice(0, 12) : '', owner: String(x.owner || '').slice(0, 60) };
+  }
+  /* "Use": restore our own module state, or take the tender project's risk register as risk events */
+  function useProject(doc, moduleId) {
+    var L = lang();
+    if (!doc || typeof doc !== 'object') { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    var mod = doc.modules && doc.modules[TOOL];
+    if ((moduleId === TOOL || !moduleId) && mod && mod.state && typeof mod.state === 'object') {
+      var clean = sanitize(mod.state);
+      if (clean.items || clean.risks) {
+        var d = JSON.parse(JSON.stringify(DEFAULTS)); applyPreset(d, lib().PRESETS[0]);
+        Object.keys(d).forEach(function (k) { state[k] = d[k]; });
+        Object.keys(clean).forEach(function (k) { state[k] = clean[k]; });
+        if (ui) { ui.sync(); ui.run(); }
+        showUse(S.useTaken[L] + ': ' + (mod.summary && mod.summary.text || TOOL), 'ok');
+        return { ok: true, from: 'module' };
+      }
+    }
+    var log = { pct: [], clamp: [], fixed: [], skipped: [] };
+    var rs = Array.isArray(doc.risks) ? doc.risks.map(function (x) { return fromBlock(x, log); }).filter(Boolean).slice(0, MAXR) : [];
+    if (!rs.length) { showUse(S.useNone[L], 'warn'); return { ok: false }; }
+    var extra = [];
+    if (log.pct.length) extra.push(S.usePct[L] + ': ' + log.pct.join(', '));
+    if (log.clamp.length) extra.push(S.useClamp[L] + ': ' + log.clamp.join(', '));
+    if (log.fixed.length) extra.push(S.useFixed[L] + ': ' + log.fixed.join(', '));
+    if (log.skipped.length) extra.push(log.skipped.length + ' ' + S.useSkipped[L] + ': ' + log.skipped.join(', '));
+    state.risks = rs;
+    if (doc.tender && typeof doc.tender.reference === 'string' && doc.tender.reference) state.tenderRef = doc.tender.reference.slice(0, 200);
+    if (ui) { ui.sync(); ui.run(); }
+    showUse(rs.length + ' ' + S.useRisks[L] + (extra.length ? '. ' + extra.join('. ') + '.' : ''), extra.length ? 'warn' : 'ok');
+    return { ok: true, from: 'risks', log: log };
+  }
+  function mountBar(box) {
+    var C = core();
+    if (!C || !C.ui || typeof C.ui.projectBar !== 'function') return;
+    try {
+      var lc = document.createElement('div'); box.appendChild(lc);
+      if (typeof C.ui.lifecycle === 'function') C.ui.lifecycle({ mount: lc, toolId: TOOL, role: 'contractor', lang: lang });
+      var bx = document.createElement('div'); box.appendChild(bx);
+      var stored = null; try { stored = C.project.load(); } catch (e) { stored = null; }
+      bar = C.ui.projectBar({ mount: bx, toolId: TOOL, lang: lang, doc: stored || C.project.empty({ role: 'contractor', lang: lang() }),
+        getDoc: function () { var p = projectPayload(), d = bar ? bar.getDoc() : C.project.empty(); return p ? C.project.withModule(d, TOOL, p) : d; },
+        onChange: function () { },
+        onUse: function (id, mod, doc) { useProject(doc, id); } });
+      if (bar && bar.element) {
+        var css = 'min-height:var(--ctl-h,32px);padding:0 10px;border:1px solid var(--line,#e2e7ee);border-radius:var(--radius-sm,8px);background:var(--panel-2,#f9fafc);color:var(--ink,#12161d);cursor:pointer;font:inherit';
+        var b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('data-tnd', 'save-module'); b.textContent = '↥ ' + S.save[lang()]; b.style.cssText = css;
+        b.addEventListener('click', function () { var p = projectPayload(); if (p && bar) bar.commit(p); });
+        var u = document.createElement('button');
+        u.type = 'button'; u.setAttribute('data-tnd', 'use-risks'); u.textContent = S.useReg[lang()]; u.style.cssText = css;
+        u.addEventListener('click', function () { if (bar) useProject(bar.getDoc(), 'risks'); });
+        var head = bar.element.firstChild; if (head) { head.appendChild(b); head.appendChild(u); }
+        useMsg = document.createElement('div');
+        useMsg.setAttribute('role', 'status'); useMsg.setAttribute('data-tnd', 'use-msg');
+        useMsg.style.cssText = 'display:none;margin-top:6px;padding:6px 8px;border:1px solid var(--line,#e2e7ee);border-left-width:4px;border-radius:var(--radius-sm,8px);font-size:0.92em';
+        bar.element.appendChild(useMsg);
+      }
+    } catch (e) { bar = null; }
+  }
+
+  function rangeProblem(r) {
+    if (r.dist === 'fixed') return r.ml == null ? '' : '';
+    if (r.min == null || r.ml == null || r.max == null) return '';
+    return r.min <= r.ml && r.ml <= r.max ? '' : 'min ≤ ml ≤ max';
+  }
+  function buildInterface() {
+    applyPreset(DEFAULTS, lib().PRESETS[0]); applyPreset(state, lib().PRESETS[0]);
+    var num = function (key, label, w, extra) { return Object.assign({ key: key, type: 'number', label: label, width: w || '86px' }, extra || {}); };
+    ui = DiagramUI.app({
+      id: TOOL, mount: '#app', layout: 'calculator', compute: 'live',
+      state: state, defaults: function () { var d = JSON.parse(JSON.stringify(DEFAULTS)); applyPreset(d, lib().PRESETS[0]); return d; },
+      subtitle: S.subtitle,
+      notices: [{ id: 'genre', tone: 'warn', sticky: false,
+        title: T('Engineering and commercial analysis, not legal advice', 'Інженерно-комерційний аналіз, не юридична консультація', 'Technisch-kaufmännische Analyse, keine Rechtsberatung', 'Technisch-commerciële analyse, geen juridisch advies', 'Analyse technique et commerciale, pas un avis juridique', 'Análisis técnico y comercial, no asesoramiento jurídico', 'Analiza techniczno-handlowa, nie porada prawna'),
+        text: T('The contingency is only as good as the ranges and risks you enter; the confidence level is a company policy, not a standard.', 'Резерв не кращий за введені діапазони й ризики; рівень довіри — політика компанії, а не стандарт.', 'Die Reserve ist nur so gut wie die eingegebenen Bereiche und Risiken; das Konfidenzniveau ist Firmenpolitik, keine Norm.', 'De post onvoorzien is maar zo goed als de ingevoerde bereiken en risico’s; het betrouwbaarheidsniveau is bedrijfsbeleid, geen norm.', 'La provision ne vaut que ce que valent les fourchettes et risques saisis ; le niveau de confiance est une politique interne, pas une norme.', 'La contingencia vale lo que valen los rangos y riesgos introducidos; el nivel de confianza es política de empresa, no una norma.', 'Rezerwa jest tyle warta, co wprowadzone zakresy i ryzyka; poziom ufności to polityka firmy, nie norma.') }],
+      learn: buildLearn(),
+      panels: [
+        { id: 'project', slot: 'inputs', title: S.pProject, collapsible: true, collapsed: true,
+          visible: !!(core() && core().ui), render: function (box) { mountBar(box); } },
+        { id: 'items', slot: 'inputs', title: S.pItems, fields: [
+          { id: 'f-items', key: 'items', type: 'list', label: S.items, hint: S.itemsHint, learn: 'ranges',
+            row: [ { key: 'name', type: 'text', label: S.cName, width: '190px' }, { key: 'dist', type: 'select', label: S.cDist, options: distOptions, width: '96px' },
+                   num('min', S.cMin), num('ml', S.cMl), num('max', S.cMax) ],
+            newRow: function () { return { name: '', dist: 'pert', min: 0, ml: 0, max: 0 }; }, minRows: 0, maxRows: MAXI, reorder: false, addLabel: S.addItem }
+        ] },
+        { id: 'risks', slot: 'inputs', title: S.pRisks, fields: [
+          { id: 'f-risks', key: 'risks', type: 'list', label: S.risks, hint: S.risksHint, learn: 'events',
+            row: [ { key: 'name', type: 'text', label: S.cName, width: '170px' }, num('p', S.cP, '58px', { min: 0, max: 100 }), { key: 'dist', type: 'select', label: S.cDist, options: distOptions3, width: '92px' },
+                   { key: 'path', type: 'text', label: S.cPath, width: '48px' },
+                   num('cmin', S.cCmin, '78px'), num('cml', S.cCml, '78px'), num('cmax', S.cCmax, '78px'), num('tmin', S.cTmin, '58px', { min: 0 }), num('tml', S.cTml, '58px', { min: 0 }), num('tmax', S.cTmax, '58px', { min: 0 }), { key: 'owner', type: 'text', label: S.cOwner, width: '96px' } ],
+            newRow: function () { return { name: '', p: 20, dist: 'pert', cmin: null, cml: null, cmax: null, tmin: null, tml: null, tmax: null, path: '', owner: '' }; }, minRows: 0, maxRows: MAXR, reorder: false, addLabel: S.addRisk }
+        ] },
+        { id: 'acts', slot: 'inputs', title: S.pActs, collapsible: true, fields: [
+          { id: 'f-acts', key: 'acts', type: 'list', label: S.acts, hint: S.actsHint, learn: 'schedule',
+            row: [ { key: 'name', type: 'text', label: S.cName, width: '170px' }, { key: 'path', type: 'text', label: S.cPath, width: '48px' },
+                   num('min', S.cMin, '62px', { min: 0 }), num('ml', S.cMl, '62px', { min: 0 }), num('max', S.cMax, '62px', { min: 0 }), { key: 'dist', type: 'select', label: S.cDist, options: distOptions, width: '96px' } ],
+            newRow: function () { return { name: '', path: '', dist: 'pert', min: 0, ml: 0, max: 0 }; }, minRows: 0, maxRows: MAXA, reorder: true, addLabel: S.addAct }
+        ] },
+        { id: 'link', slot: 'inputs', title: S.pLink, collapsible: true, fields: [
+          { id: 'f-rhoCost', key: 'rhoCost', type: 'number', unit: '–', min: -0.95, max: 0.95, step: 0.05, precision: 2, label: S.rhoCost, hint: S.rhoCostHint, learn: 'corr' },
+          { id: 'f-rhoTime', key: 'rhoTime', type: 'number', unit: '–', min: -0.95, max: 0.95, step: 0.05, precision: 2, label: S.rhoTime, learn: 'corr' },
+          { id: 'f-timeCost', key: 'timeCost', type: 'number', unit: '€/d', min: 0, max: 1e7, step: 'any', precision: 0, label: S.timeCost, hint: S.timeCostHint, learn: 'schedule' },
+          { id: 'f-ldMode', key: 'ldMode', type: 'select', label: S.ldMode, learn: 'schedule', options: function () { return [['linear', S.ldModeLin], ['aur86', S.ldModeAur]]; } },
+          { id: 'f-ldM', key: 'ldM', type: 'number', unit: '€', min: 0, max: 1e11, step: 'any', precision: 0, label: S.ldM, hint: S.ldMHint, learn: 'schedule', visible: function (c) { return c.state.ldMode === 'aur86'; } },
+          { id: 'f-ldCapPct', key: 'ldCapPct', type: 'number', unit: '%', min: 0, max: 10, step: 0.5, precision: 1, label: S.ldCapPct, hint: S.ldCapPctHint, learn: 'schedule', visible: function (c) { return c.state.ldMode === 'aur86'; } },
+          { id: 'f-ld', visible: function (c) { return c.state.ldMode !== 'aur86'; }, key: 'ld', type: 'number', unit: '€/d', min: 0, max: 1e8, step: 'any', precision: 0, label: S.ld, hint: S.ldHint, learn: 'schedule' },
+          { id: 'f-ldCap', visible: function (c) { return c.state.ldMode !== 'aur86'; }, key: 'ldCap', type: 'number', unit: '€', min: 0, max: 1e10, step: 'any', precision: 0, label: S.ldCap, hint: S.ldCapHint, learn: 'schedule' }
+        ] },
+        { id: 'target', slot: 'inputs', title: S.pTarget, fields: [
+          { id: 'f-q', key: 'q', type: 'number', unit: '%', min: 50, max: 99, step: 1, precision: 0, label: S.q, hint: S.qHint, learn: 'contingency' },
+          { id: 'f-targetCost', key: 'targetCost', type: 'number', unit: '€', min: 0, max: 1e11, step: 'any', precision: 0, label: S.targetCost, hint: S.targetHint, learn: 'contingency' },
+          { id: 'f-targetDays', key: 'targetDays', type: 'number', unit: 'd', min: 0, max: 20000, step: 'any', precision: 0, label: S.targetDays, hint: S.targetHint, learn: 'schedule' }
+        ] },
+        { id: 'sim', slot: 'inputs', title: S.pSim, collapsible: true, collapsed: true, fields: [
+          { id: 'f-iterations', key: 'iterations', type: 'number', unit: '–', min: 1000, max: 100000, step: 1000, precision: 0, label: S.iterations, learn: 'contingency' },
+          { id: 'f-seed', key: 'seed', type: 'number', unit: '–', min: 1, max: 4294967295, step: 1, precision: 0, label: S.seed, hint: S.seedHint, learn: 'contingency' }
+        ] },
+        { id: 'record', slot: 'inputs', title: S.pRec, collapsible: true, collapsed: true, fields: [
+          { id: 'f-ref', key: 'tenderRef', type: 'text', label: S.tenderRef },
+          { id: 'f-by', key: 'preparedBy', type: 'text', label: S.preparedBy }
+        ] }
+      ],
+      on: { compute: computeView }
+    });
+
+    ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end',
+      actions: [ { label: T('CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV', 'CSV'), run: function () { var t = csvText(); if (t) download('riskcontingency.csv', 'text/csv', t); } },
+                 { label: T('JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON', 'JSON'), run: function () { var r = buildRecord(); if (r) download('riskcontingency.json', 'application/json', JSON.stringify(r, null, 2)); } },
+                 ui.resetAction() ] });
+    ui.examples(buildExamples());
+    stage = ui.stage({
+      caption: S.stageCap, minHeight: 560,
+      a11y: function () {
+        var l = lang();
+        if (!last || !last.ok) return '';
+        var R = last, q = R.input.q;
+        return S.stageCap[l] + '. ' + S.mkBase[l] + ' ' + keur(R.det.base, l) + ' P' + nf(100 * R.pBase, l, 0) + '; ' + P(q) + ' ' + keur(R.cost.pq, l) + (R.dur ? '; ' + P(q) + ' ' + dd(R.dur.pq, l) : '') + '; ' +
+          R.tornadoCost.slice(0, 5).map(function (t) { return nameOf(t.name, R) + ' ρ ' + nf(t.rho, l, 2); }).join('; ') + '.';
+      },
+      render: renderStage
+    });
+    ui.ready();
+    window.__riskcontingency = { ui: ui, state: state, solve: solve, engineInput: engineInput, last: function () { return last; }, csv: csvText, record: buildRecord,
+      projectPayload: projectPayload, useProject: useProject, sanitize: sanitize,
+      whenReady: function () { return new Promise(function (res) { if (pendN === 0) res(); else waiters.push(res); }).then(function () { return new Promise(function (r) { setTimeout(r, 30); }); }); },
+      applyPreset: function (id) { var p = lib().PRESETS.filter(function (x) { return x.id === id; })[0]; if (!p) return false; applyPreset(state, p); ui.sync(); ui.run(); return true; },
+      analyse: function (inp) { return lib().analyse(inp); } };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1'); h.textContent = 'Cost & Schedule Risk (Monte Carlo)';
+    var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The export, the calculation record and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h); host.appendChild(p);
+    if (lib()) { applyPreset(state, lib().PRESETS[0]); last = solve(state, true); }
+  }
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1' && lib()) buildInterface();
+    else degrade();
+    installData();
+  }
+
+  /* ======================================================= 3. the data layer */
+  function csvText() {
+    var R = last;
+    if (!R || !R.ok) return '';
+    var n = R.input, det = R.det, rows = [];
+    function add(sec, item, v, unit) { rows.push([sec, item, v == null ? '' : v, unit || '']); }
+    add('result', 'base_estimate', det.base, 'EUR'); add('result', 'mean_cost', R.cost.stats.mean, 'EUR'); add('result', 'sd_cost', R.cost.stats.sd, 'EUR');
+    R.contingency.forEach(function (c) { add('result', P(c.p) + '_cost', c.value, 'EUR'); add('result', P(c.p) + '_contingency', c.contingency, 'EUR'); add('result', P(c.p) + '_contingency_pct', c.pct, 'fraction of base'); });
+    add('result', 'confidence_of_base', R.pBase, 'fraction'); add('result', 'sum_emv', det.emv, 'EUR'); add('result', 'confidence_of_base_plus_emv', R.pBaseEmv, 'fraction');
+    add('result', 'contingency_estimate_uncertainty', R.split.estimate, 'EUR at ' + P(n.q)); add('result', 'contingency_risk_events_delay', R.split.risk, 'EUR at ' + P(n.q));
+    if (R.dur) {
+      add('schedule', 'duration_plan', det.D, 'd'); add('schedule', 'duration_mean', R.dur.stats.mean, 'd'); add('schedule', 'duration_P50', R.dur.stats.p50, 'd'); add('schedule', 'duration_P80', R.dur.stats.p80, 'd');
+      add('schedule', 'duration_P90', R.dur.stats.p90, 'd'); add('schedule', 'confidence_of_plan', R.pDet, 'fraction'); add('schedule', 'joint_confidence', R.joint, 'fraction');
+      if (R.pTargetDays != null) add('schedule', 'confidence_of_contract_duration', R.pTargetDays, 'fraction');
+      add('schedule', 'expected_delay_damages', R.ld.mean, 'EUR'); add('schedule', 'probability_of_damages', R.ld.pAny, 'fraction');
+      Object.keys(R.criticality).forEach(function (p) { add('schedule', 'criticality_path_' + p, R.criticality[p], 'fraction'); });
+    }
+    if (R.pTargetCost != null) add('result', 'confidence_of_target_cost', R.pTargetCost, 'fraction');
+    (state.items || []).forEach(function (x, k) { add('cost_line', x.name || 'I' + (k + 1), x.ml, (x.dist || 'pert') + ' ' + x.min + ' / ' + x.ml + ' / ' + x.max + ' EUR'); });
+    (state.acts || []).forEach(function (x, k) { add('activity', x.name || 'A' + (k + 1), x.ml, (x.dist || 'pert') + ' ' + x.min + ' / ' + x.ml + ' / ' + x.max + ' d, path ' + (x.path || 'common')); });
+    det.register.forEach(function (g, k) {
+      var x = state.risks[k] || {};
+      add('risk_register', g.name || g.id, g.emv, 'EMV EUR; p ' + g.p + '; cost ' + [x.cmin, x.cml, x.cmax].join(' / ') + ' EUR; delay ' + [x.tmin, x.tml, x.tmax].join(' / ') + ' d; path ' + (g.path || 'end') + '; owner ' + (x.owner || ''));
+    });
+    R.tornadoCost.forEach(function (t) { add('tornado_cost', nameOf(t.name, R), t.rho, 'rank correlation; share of cost variance Cov(part,total)/Var(total) ' + (t.share == null ? 'n/a (acts through the time-related cost)' : t.share.toFixed(4))); });
+    R.tornadoTime.forEach(function (t) { add('tornado_duration', nameOf(t.name, R), t.rho, 'rank correlation; squared-correlation share (ranking only) ' + t.share.toFixed(4)); });
+    if (det.damages) add('schedule', 'delay_damages_model', det.damages.mode === 'aur86' ? 'AUR art. 86: R = 0.45 M n^2/N^2, M ' + det.damages.M + ', N ' + det.damages.N + ' wd, cap ' + det.damages.cap : 'linear EUR/day, cap ' + (det.damages.cap || 'none'));
+    add('simulation', 'iterations', n.iterations); add('simulation', 'seed', n.seed); add('simulation', 'rank_correlation_cost', n.rhoCost); add('simulation', 'rank_correlation_time', n.rhoTime);
+    var C = core(), cols = ['section', 'item', 'value', 'unit_or_note'];
+    if (C && C.csv) return C.csv(rows, cols);
+    return cols.join(',') + '\r\n' + rows.map(function (x) { return x.map(function (v) { v = String(v); if (/^[=+\-@\t\r]/.test(v) && isNaN(+v)) v = '\'' + v; return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n') + '\r\n';
+  }
+  function download(name, type, text) {
+    var a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: type }));
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function buildRecord() {
+    if (!last) return null;
+    var inputs = {}, outputs = {}, units = {}, warnings = [], R = last;
+    inputs.tender_reference = state.tenderRef; inputs.prepared_by = state.preparedBy;
+    inputs.iterations = state.iterations; inputs.seed = state.seed; inputs.confidence = state.q; units.confidence = '%';
+    inputs.cost_lines = (state.items || []).map(function (x) { return x.name + ' [' + x.dist + '] ' + x.min + ' / ' + x.ml + ' / ' + x.max; }).join('; '); units.cost_lines = 'EUR';
+    inputs.activities = (state.acts || []).map(function (x) { return x.name + ' [' + (x.path || 'common') + ', ' + x.dist + '] ' + x.min + ' / ' + x.ml + ' / ' + x.max; }).join('; '); units.activities = 'd';
+    inputs.risk_events = (state.risks || []).map(function (x) { return x.name + ' p ' + x.p + ' % cost ' + [x.cmin, x.cml, x.cmax].join('/') + ' delay ' + [x.tmin, x.tml, x.tmax].join('/') + (x.path ? ' path ' + x.path : ''); }).join('; ');
+    inputs.rank_correlation_cost = state.rhoCost; inputs.rank_correlation_time = state.rhoTime;
+    inputs.time_dependent_cost = state.timeCost; units.time_dependent_cost = 'EUR/d';
+    inputs.delay_damages_model = state.ldMode === 'aur86' ? 'AUR art. 86 (KB 14.01.2013)' : 'linear EUR/day with cap';
+    if (state.ldMode === 'aur86') { inputs.contract_amount_M = state.ldM; units.contract_amount_M = 'EUR'; inputs.damages_cap_pct_of_M = state.ldCapPct; units.damages_cap_pct_of_M = '%'; }
+    inputs.delay_damages = state.ld; units.delay_damages = 'EUR/d'; inputs.delay_damages_cap = state.ldCap; units.delay_damages_cap = 'EUR';
+    inputs.target_cost = state.targetCost; units.target_cost = 'EUR'; inputs.contract_duration = state.targetDays; units.contract_duration = 'd';
+    if (R.ok) {
+      outputs.base_estimate = R.det.base; outputs.mean_cost = R.cost.stats.mean; units.base_estimate = units.mean_cost = 'EUR';
+      R.contingency.forEach(function (c) { outputs[P(c.p) + '_cost'] = c.value; outputs[P(c.p) + '_contingency'] = c.contingency; units[P(c.p) + '_cost'] = units[P(c.p) + '_contingency'] = 'EUR'; });
+      outputs.confidence_of_base = R.pBase; outputs.sum_emv = R.det.emv; outputs.confidence_of_base_plus_emv = R.pBaseEmv;
+      if (R.dur) { outputs.duration_plan = R.det.D; outputs.duration_P50 = R.dur.stats.p50; outputs.duration_P80 = R.dur.stats.p80; outputs.joint_confidence = R.joint; outputs.expected_delay_damages = R.ld.mean; units.duration_plan = units.duration_P50 = units.duration_P80 = 'd'; }
+      outputs.tornado_cost = R.tornadoCost.slice(0, 8).map(function (t) { return nameOf(t.name, R) + ' ' + t.rho.toFixed(2); }).join('; ');
+      outputs.computed_in = R.via; outputs.ms = R.ms;
+      if (R.flags.length) warnings.push('flags: ' + R.flags.join(', '));
+    } else warnings.push('invalid input: ' + JSON.stringify(R.errors || []));
+    warnings.push('Engineering and commercial analysis, not legal advice. Ranges, probabilities, correlations and the confidence level are judgement or company policy (learning assumptions).');
+    return {
+      inputs: inputs, outputs: outputs, units: units,
+      model: {
+        equations: ['base B = sum of most likely cost values + delay damages of the plan', 'D0 = sum common ml + max over paths sum ml',
+                    'D = sum common + max over paths (sum activities + delays of path risks) + delays at the end',
+                    'cost = sum cost lines + sum risk costs + time cost x (D - D0) + damages(D); damages = min(cap, damages/day x max(0, D - contract duration)) or AUR art. 86: min(pct x M, 0.45 M n^2/N^2), n = D - contract duration, N = floor(0.7 x contract duration)',
+                    'tornado: Spearman rank correlation with the output; cost share = Cov(part, total)/Var(total) over cost lines, direct risk costs and time-related cost (sums to 1); duration share = rho^2/sum rho^2 (ranking only)',
+                    'contingency(q) = P_q(cost) - B; EMV = sum p x E[cost impact]; JCL = P(cost <= C_q and D <= D_q)',
+                    'PERT: beta with a = 1 + 4 (ml - min)/(max - min), b = 1 + 4 (max - ml)/(max - min); rank correlation by Iman-Conover (1982)'],
+        assumptions: ['independent risk events', 'one rank correlation for all cost lines and one for all activities', 'paths are chains between common activities (no general network logic)', 'time cost applies both ways around the plan'],
+        ranges: ['up to 40 cost lines, 30 activities, 40 risk events; 1 000 - 100 000 iterations'],
+        sources: ['KB 14.01.2013 (AUR) art. 86 (ejustice text, read 15.11.2026)', 'AACE RP 40R-08, 41R-08, 57R-09 (structure)', 'ISO 31000:2018, IEC 31010:2019 (Monte Carlo simulation)', 'Iman & Conover 1982', 'Vose, Risk Analysis 2008']
+      },
+      warnings: warnings
+    };
+  }
+  var LIM = { iterations: [1000, 100000], seed: [1, 4294967295], q: [50, 99], rhoCost: [-0.95, 0.95], rhoTime: [-0.95, 0.95], timeCost: [0, 1e7], ld: [0, 1e8], ldCap: [0, 1e10], ldM: [0, 1e11], ldCapPct: [0, 10], targetCost: [0, 1e11], targetDays: [0, 20000] };
+  var DISTS = ['pert', 'triangular', 'uniform', 'fixed'];
+  function fin(v, lo, hi) { return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi; }
+  function numOrNull(v) { v = typeof v === 'string' && v.trim() !== '' ? +v : v; return typeof v === 'number' && isFinite(v) && Math.abs(v) <= 1e12 ? v : null; }
+  /* permalink / project import: known keys only, numbers within the field limits, lists rebuilt */
+  function sanitize(o) {
+    var out = {};
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+    Object.keys(LIM).forEach(function (k) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) return;
+      var v = o[k]; v = typeof v === 'string' && v.trim() !== '' ? +v : v;
+      if (fin(v, LIM[k][0], LIM[k][1])) out[k] = v;
+    });
+    function rows(v, max, f) { return Array.isArray(v) ? v.slice(0, max).filter(function (x) { return x && typeof x === 'object'; }).map(f) : null; }
+    var it = rows(o.items, MAXI, function (x) { return { name: String(x.name == null ? '' : x.name).slice(0, 120), dist: DISTS.indexOf(x.dist) >= 0 ? x.dist : 'pert', min: numOrNull(x.min), ml: numOrNull(x.ml), max: numOrNull(x.max) }; });
+    if (it) out.items = it;
+    var ac = rows(o.acts, MAXA, function (x) { return { name: String(x.name == null ? '' : x.name).slice(0, 120), path: String(x.path == null ? '' : x.path).slice(0, 12), dist: DISTS.indexOf(x.dist) >= 0 ? x.dist : 'pert', min: numOrNull(x.min), ml: numOrNull(x.ml), max: numOrNull(x.max) }; });
+    if (ac) out.acts = ac;
+    var rk = rows(o.risks, MAXR, function (x) {
+      var p = numOrNull(x.p);
+      return { name: String(x.name == null ? '' : x.name).slice(0, 120), p: p == null ? 0 : Math.max(0, Math.min(100, p)), dist: ['pert', 'triangular', 'uniform'].indexOf(x.dist) >= 0 ? x.dist : 'pert',
+               cmin: numOrNull(x.cmin), cml: numOrNull(x.cml), cmax: numOrNull(x.cmax), tmin: numOrNull(x.tmin), tml: numOrNull(x.tml), tmax: numOrNull(x.tmax),
+               path: String(x.path == null ? '' : x.path).slice(0, 12), owner: String(x.owner == null ? '' : x.owner).slice(0, 60) };
+    });
+    if (rk) out.risks = rk;
+    ['tenderRef', 'preparedBy'].forEach(function (k) { if (typeof o[k] === 'string') out[k] = o[k].slice(0, 200); });
+    if (o.ldMode === 'aur86' || o.ldMode === 'linear') out.ldMode = o.ldMode;
+    return out;
+  }
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: TOOL, file: 'riskcontingency.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { var c = sanitize(o); Object.keys(c).forEach(function (k) { state[k] = c[k]; }); if (ui) { ui.sync(); ui.run(); } else last = solve(state, true); }
+        },
+        record: buildRecord
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+</script>
+</body>
+</html>

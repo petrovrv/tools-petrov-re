@@ -1,0 +1,8289 @@
+{
+ "tool": "rwa-calculator",
+ "file": "RWA_calculator.html",
+ "reference": "Large-fire plume Mf = 0.188 P Y^1.5 (BR258 / Thomas), the natural-ventilator area derived from the steady two-orifice buoyancy balance and solved both in closed form and by a scipy root find on the mass balance, the ideal-gas smoke volume flow, and the BR258 plugholing form - all implemented in python for this benchmark.",
+ "reference_citations": [
+  "BRE Report BR258, G.O. Hansell and H.P. Morgan, \"Design approaches for smoke control in atrium buildings\": large-fire plume Mf = Ce P Y^(3/2) kg/s with Ce = 0.188 for large spaces (0.337 for small rooms), P the perimeter of the fire and Y the height from the base of the fire to the smoke layer; critical exhaust rate MCRIT = beta (g D^5 T0 U/T^2)^(1/2) with beta = 1.3 near a wall and 1.8 away from a wall.",
+  "Smoke Control Association, \"Guidance for the design of smoke ventilation systems for single storey buildings\" (SVAIND3.394, 1994): section 12.4 \"The design inlet velocity shall not exceed 5.0 m/s\"; section 15.3 \"the preferred aerodynamic area of inlet should be at least equal to the aerodynamic area of extract\". https://groupscs.co.uk/wp-content/uploads/2020/10/SCA-guidance-for-smoke-ventilation-of-single-story-buildings-1994.pdf",
+  "Belgian Royal Decree basic standards, annex 6, as quoted in the Belgian RWA guide \"Gids voor CE-gekeurde Rook en Warmte Afvoersystemen\": aerodynamic RWA area = 2 % of the roof area for a single smoke compartment of at most 2000 m2, with the smoke layer at most 30 % of the height, no goods stacked above 70 % of the height and inlet openings below the smoke layer. https://www.plastiekvw.be/Assets/Documents/Producten/Dak/1.1-Lichtkoepels/1.1.3-Opengaande-systemen/Technische-fiche/Doc-RWA-rook-en-warmte-afvoersystemen.pdf",
+  "The natural-ventilator area equation Av Cv = (Mf/rho0) sqrt((Tc^2 + Sk^2 T0 Tc)/(2 g db theta T0)) is derived in /root/bench/ref/gen_rwa.py from the two-orifice buoyancy balance; it is not quoted from a standard, and the derivation is reproduced in the docstring of that file.",
+  "scipy 1.17.1 (brentq, xtol 1e-14) for the second, network-based solution.",
+  "NBN S 21-208-1 \"Brandbeveiliging van gebouwen - Ontwerp en berekening van rook- en warmteafvoerinstallaties (RWA) - Deel 1\" is a paid national standard; its text could NOT be obtained for this pass. Nothing here is claimed to be benchmarked against it."
+ ],
+ "tolerance": "Everything graded here is a closed form evaluated on both sides, so the criterion is 1e-9 relative - three to six orders below the two or three decimals the page prints. Counts (hatches, reservoirs) and boolean outcomes must match exactly. Two quantities are deliberately recorded rather than graded, because the references disagree and the governing standard could not be read: the plugholing coefficient (the tool uses beta = 2, BR258 gives 1.3 near a wall and 1.8 away from one) and the basis on which the mechanical inlet area is sized (the hot extract volume flow rather than a mass balance on the incoming air, which is conservative by exactly Tc/T0). The natural-ventilator area is graded against a first-principles derivation of the two-orifice buoyancy balance solved in closed form, and cross-checked against the same balance solved numerically by scipy.brentq on the mass flow: the two agree to 8e-16 wherever the model keeps Tc - T0 = theta, and separate by up to 24 % in the sprinklered cases where the tool's averaged smoke temperature breaks that identity - those cases are flagged, not graded.",
+ "not_benchmarked": [
+  "NBN S 21-208-1 itself. It is a paid Belgian national standard and its text could not be obtained for this pass. No claim of conformity with it is made anywhere in this artifact, and the following items transcribed from the original workbook are therefore unverified: the section 4 fire-geometry tables (low-pile usage categories 1-4, the rack formulas Af = 2/3 hst (b + 0.18 hst) and their 9-81 m2 / 12-36 m clamps, the bulk stacking table), the 250 / 500 kW/m2 general fuel powers, the material table, the sprinkler caps theta <= 1.5 T_spr - t0 and Tc = (T_spr + t0 + theta)/2, the 1.4 db^2 critical ventilator area, L <= min(db, 3) m, spacing >= 3 db, the 60 m reservoir length, the 300 degC smoke temperature ceiling, the one-ventilator-per-400 m2 rule and the 3 % geometric variant of the simplified method.",
+  "The plume coefficient itself is not re-derived: Ce = 0.188 is checked against its published value for a large space (BR258) and its faithful application is graded, but the correlation is empirical and its scatter is not quantified here.",
+  "The plugholing coefficient beta = 2. BR258 gives 1.3 (near a wall) and 1.8 (away from a wall); the value in the tool is at or beyond the permissive end of that range and the standard that would settle it was not available.",
+  "The sprinkler temperature model. Both the cap on theta and the averaged Tc are transcriptions with no obtainable source, and they are mutually inconsistent in the thermodynamic sense (Tc - T0 is not theta), which is why the vent area in those cases differs from a pure buoyancy balance by up to 24 %. Recorded and disclosed, not graded.",
+  "Everything outside a steady single-zone design fire: fire growth, wind, make-up air momentum disturbing the plume, sprinkler-smoke interaction, duct and fan design, compartment leakage, tenability and evacuation timing."
+ ],
+ "run_notes": [
+  "Driven through the tool's own permalink codec; numbers read back from Diagram.record.build() and the checklist from the engine result.",
+  "The natural-ventilator equation the tool implements, Av Cv = (Mf/rho0) sqrt((Tc^2 + Sk^2 T0 Tc)/(2 g db theta T0)), was re-derived from scratch for this benchmark out of the two-orifice buoyancy balance and came out identical, which is the strongest statement this pass can make about it without the standard in hand.",
+  "Baseline before this pass: the \"AvCv hatch < 1.4 db^2\" checklist item tested only that 1.4 db^2 was positive and therefore always passed, whatever hatch was chosen; the largest-dimension check in the detailed method looked at the length only and ignored the width, so a 20 x 70 m reservoir passed; the hatch count used floor(x) + 1 and so added a spurious extra hatch whenever the requirement was an exact multiple of one hatch; a failed inlet iteration fell back to the equal-inlet area silently; the \"critical velocity\" row was labelled a velocity while carrying m3/s; and ?lang= was ignored entirely - the interface was hardcoded to English. The inlet-influence loop stopped at an absolute residual of 1e-3 m2 on the vent area and gave up after 200 sweeps; it is now solved in closed form, which is exact and refuses only when there is genuinely no steady solution."
+ ],
+ "crosscheck": "closed-form two-orifice solution vs scipy.brentq on the same mass balance: 8e-16 relative over all cases where Tc - T0 = theta; up to 24 % in the sprinklered cases, where the tool's averaged smoke temperature breaks that identity. Those cases are counted as flagged, never as passed.",
+ "total": 45,
+ "passed": 45,
+ "failed": 0,
+ "flagged": 9,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "natural/low1",
+   "group": "natural",
+   "note": "Low-pile usage category 1, default hall.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/low2",
+   "group": "natural",
+   "note": "Low-pile usage category 2, default hall.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low2",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 20,
+     "ref": 20,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 18,
+     "ref": 18,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 32.30346619172624,
+     "ref": 32.30346619172624,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 32.30346619172624,
+     "ref": 32.30346619172623,
+     "abs": 7.105427357601002e-15,
+     "rel": 2.199586668325051e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 4000,
+     "ref": 4000,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 123.8257212479726,
+     "ref": 123.8257212479726,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 123.8257212479726,
+     "ref": 123.8257212479726,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 411.97572124797256,
+     "ref": 411.97572124797256,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 7.21757445815176,
+     "ref": 7.21757445815176,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 7.217574458151758,
+     "ref": 7.217574458151758,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 7.217574458151758,
+     "ref": 7.217574458151758,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 7.217574458151758,
+     "ref": 7.21757445815176,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 7.21757445815176,
+     "ref": 7.217574458151761,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.2305774257679988e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 6,
+     "ref": 6,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 8.1,
+     "ref": 7.21757445815176,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.199586668325051e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/low3",
+   "group": "natural",
+   "note": "Low-pile usage category 3, default hall.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low3",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 24,
+     "ref": 24,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 43.07128825563499,
+     "ref": 43.07128825563499,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 43.07128825563499,
+     "ref": 43.07128825563498,
+     "abs": 7.105427357601002e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 7200,
+     "ref": 7200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 167.16472368476298,
+     "ref": 167.16472368476298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 167.16472368476298,
+     "ref": 167.16472368476298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 455.31472368476295,
+     "ref": 455.31472368476295,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 8.972745048935824,
+     "ref": 8.972745048935824,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 8.972745048935826,
+     "ref": 8.972745048935826,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 8.972745048935826,
+     "ref": 8.972745048935826,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 8.972745048935826,
+     "ref": 8.972745048935824,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 8.972745048935824,
+     "ref": 8.972745048935828,
+     "abs": 3.552713678800501e-15,
+     "rel": 3.9594501564734134e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 7,
+     "ref": 7,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 9.45,
+     "ref": 8.972745048935824,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 3.9594501564734134e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/low4",
+   "group": "natural",
+   "note": "Low-pile usage category 4, default hall.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low4",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 81,
+     "ref": 81,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345247,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345246,
+     "abs": 1.4210854715202004e-14,
+     "rel": 2.199586668325051e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 16200,
+     "ref": 16200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 538.8970855271446,
+     "ref": 538.8970855271446,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 12.609647961831,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 12.609647961831,
+     "ref": 12.609647961830998,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527058e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 13.499999999999998,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.199586668325051e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/Y3",
+   "group": "natural",
+   "note": "Smoke-free height 3.0 m in a 10 m hall - the plume and the layer depth both move.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 3,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 11.722519865626163,
+     "ref": 11.722519865626163,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 11.722519865626163,
+     "ref": 11.722519865626163,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 153.55060350787917,
+     "ref": 153.55060350787917,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 153.55060350787917,
+     "ref": 153.55060350787917,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 441.7006035078791,
+     "ref": 441.7006035078791,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 7,
+     "ref": 7,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 68.6,
+     "ref": 68.6,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 21,
+     "ref": 21,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 2.20410496775751,
+     "ref": 2.204104967757511,
+     "abs": 8.881784197001252e-16,
+     "rel": 4.0296557228114733e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 2.204104967757511,
+     "ref": 2.2041049677575106,
+     "abs": 4.440892098500626e-16,
+     "rel": 2.0148278614057372e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 2.204104967757511,
+     "ref": 2.2041049677575106,
+     "abs": 4.440892098500626e-16,
+     "rel": 2.0148278614057372e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 2.204104967757511,
+     "ref": 2.20410496775751,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 2.20410496775751,
+     "ref": 2.20410496775751,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 2,
+     "ref": 2,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 2.6999999999999997,
+     "ref": 2.20410496775751,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 4.0296557228114733e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/Y4",
+   "group": "natural",
+   "note": "Smoke-free height 4.0 m in a 10 m hall - the plume and the layer depth both move.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 18.048000000000002,
+     "ref": 18.048000000000002,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 18.048000000000002,
+     "ref": 18.048000000000002,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 99.73404255319149,
+     "ref": 99.73404255319149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 99.73404255319149,
+     "ref": 99.73404255319149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 387.8840425531915,
+     "ref": 387.8840425531915,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 6,
+     "ref": 6,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 50.4,
+     "ref": 50.39999999999999,
+     "abs": 7.105427357601002e-15,
+     "rel": 1.4098070153970243e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 18,
+     "ref": 18,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.10177735493691,
+     "ref": 4.10177735493691,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 4.101777354936912,
+     "ref": 4.101777354936912,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 4.101777354936912,
+     "ref": 4.101777354936912,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 4.101777354936912,
+     "ref": 4.10177735493691,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.10177735493691,
+     "ref": 4.1017773549369085,
+     "abs": 1.7763568394002505e-15,
+     "rel": 4.3307002932819437e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.10177735493691,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 4.3307002932819437e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/Y5",
+   "group": "natural",
+   "note": "Smoke-free height 5.0 m in a 10 m hall - the plume and the layer depth both move.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 25.222846786197632,
+     "ref": 25.222846786197632,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 25.222846786197632,
+     "ref": 25.222846786197632,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 71.3638716223337,
+     "ref": 71.3638716223337,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 71.3638716223337,
+     "ref": 71.3638716223337,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 359.5138716223337,
+     "ref": 359.5138716223337,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 35,
+     "ref": 35,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 15,
+     "ref": 15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 6.9953211538619,
+     "ref": 6.9953211538619,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 6.9953211538619,
+     "ref": 6.9953211538619,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 6.9953211538619,
+     "ref": 6.9953211538619,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 6.9953211538619,
+     "ref": 6.9953211538619,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 6.9953211538619,
+     "ref": 6.995321153861902,
+     "abs": 1.7763568394002505e-15,
+     "rel": 2.5393499459557745e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 6,
+     "ref": 6,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 8.1,
+     "ref": 6.9953211538619,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.5393499459557745e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/Y6",
+   "group": "natural",
+   "note": "Smoke-free height 6.0 m in a 10 m hall - the plume and the layer depth both move.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 6,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 54.28833649785412,
+     "ref": 54.28833649785412,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 54.28833649785412,
+     "ref": 54.28833649785412,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 342.4383364978541,
+     "ref": 342.4383364978541,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 4,
+     "ref": 4,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 22.4,
+     "ref": 22.4,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 11.351466246226767,
+     "ref": 11.35146624622677,
+     "abs": 3.552713678800501e-15,
+     "rel": 3.1297398959199863e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 11.351466246226773,
+     "ref": 11.35146624622677,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.5648699479599932e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 11.351466246226773,
+     "ref": 11.35146624622677,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.5648699479599932e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 11.351466246226773,
+     "ref": 11.351466246226767,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 11.351466246226767,
+     "ref": 11.351466246226774,
+     "abs": 7.105427357601002e-15,
+     "rel": 6.259479791839971e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 9,
+     "ref": 9,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 12.149999999999999,
+     "ref": 11.351466246226767,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 6.259479791839971e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/Y7",
+   "group": "natural",
+   "note": "Smoke-free height 7.0 m in a 10 m hall - the plume and the layer depth both move.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 7,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 41.78170470433202,
+     "ref": 41.78170470433202,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 41.78170470433202,
+     "ref": 41.781704704332014,
+     "abs": 7.105427357601002e-15,
+     "rel": 1.7006073370827055e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 43.08105695393927,
+     "ref": 43.08105695393927,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 43.08105695393927,
+     "ref": 43.08105695393927,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 331.23105695393923,
+     "ref": 331.23105695393923,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 12.6,
+     "ref": 12.599999999999998,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4098070153970243e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 18.073070201720682,
+     "ref": 18.073070201720682,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 18.07307020172068,
+     "ref": 18.07307020172068,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 18.07307020172068,
+     "ref": 18.07307020172068,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 18.07307020172068,
+     "ref": 18.073070201720682,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 18.073070201720682,
+     "ref": 18.073070201720668,
+     "abs": 1.4210854715202004e-14,
+     "rel": 7.862999787301796e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 14,
+     "ref": 14,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 18.9,
+     "ref": 18.073070201720682,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 7.862999787301796e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/hc6",
+   "group": "natural",
+   "note": "Ceiling height 6.0 m.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 6,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 1.5,
+     "ref": 1.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 3.15,
+     "ref": 3.1499999999999995,
+     "abs": 4.440892098500626e-16,
+     "rel": 1.4098070153970243e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 1.5,
+     "ref": 1.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 4.5,
+     "ref": 4.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 10.342093512138167,
+     "ref": 10.342093512138165,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.7175988955383169e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 10.342093512138165,
+     "ref": 10.342093512138167,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.7175988955383166e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 10.342093512138165,
+     "ref": 10.342093512138167,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.7175988955383166e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 10.342093512138165,
+     "ref": 10.342093512138167,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 10.342093512138167,
+     "ref": 10.342093512138163,
+     "abs": 3.552713678800501e-15,
+     "rel": 3.435197791076634e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 8,
+     "ref": 8,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 10.799999999999999,
+     "ref": 10.342093512138167,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 3.435197791076634e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/hc8",
+   "group": "natural",
+   "note": "Ceiling height 8.0 m.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 8,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 3.5,
+     "ref": 3.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 17.15,
+     "ref": 17.15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 10.5,
+     "ref": 10.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 6.770489480526405,
+     "ref": 6.770489480526406,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.3118378253961475e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 6.770489480526406,
+     "ref": 6.770489480526405,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.3118378253961477e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 6.770489480526406,
+     "ref": 6.770489480526405,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.3118378253961477e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 6.770489480526406,
+     "ref": 6.770489480526405,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 6.770489480526405,
+     "ref": 6.770489480526405,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 6,
+     "ref": 6,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 8.1,
+     "ref": 6.770489480526405,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/hc14",
+   "group": "natural",
+   "note": "Ceiling height 14.0 m.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 14,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 9.5,
+     "ref": 9.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 126.35,
+     "ref": 126.35,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 28.5,
+     "ref": 28.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.109531248985837,
+     "ref": 4.109531248985838,
+     "abs": 8.881784197001252e-16,
+     "rel": 2.1612645479196988e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 4.109531248985839,
+     "ref": 4.109531248985838,
+     "abs": 8.881784197001252e-16,
+     "rel": 2.1612645479196988e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 4.109531248985839,
+     "ref": 4.109531248985838,
+     "abs": 8.881784197001252e-16,
+     "rel": 2.1612645479196988e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 4.109531248985839,
+     "ref": 4.109531248985837,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.109531248985837,
+     "ref": 4.109531248985839,
+     "abs": 1.7763568394002505e-15,
+     "rel": 4.322529095839397e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.109531248985837,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 4.322529095839397e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/hc20",
+   "group": "natural",
+   "note": "Ceiling height 20.0 m.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 20,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 15.5,
+     "ref": 15.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 336.34999999999997,
+     "ref": 336.34999999999997,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 46.5,
+     "ref": 46.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 3.217275418341661,
+     "ref": 3.217275418341661,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 3.2172754183416616,
+     "ref": 3.2172754183416616,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 3.2172754183416616,
+     "ref": 3.2172754183416616,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 3.2172754183416616,
+     "ref": 3.217275418341661,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 3.217275418341661,
+     "ref": 3.217275418341662,
+     "abs": 8.881784197001252e-16,
+     "rel": 2.7606539826731244e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 3,
+     "ref": 3,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 4.05,
+     "ref": 3.217275418341661,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.7606539826731244e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/tamb-5",
+   "group": "natural",
+   "note": "Ambient temperature -5 degC.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": -5,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 351.73236184238147,
+     "ref": 351.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.27843909072916,
+     "ref": 5.27843909072916,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.278439090729161,
+     "ref": 5.278439090729161,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.278439090729161,
+     "ref": 5.278439090729161,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.278439090729161,
+     "ref": 5.27843909072916,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.27843909072916,
+     "ref": 5.278439090729163,
+     "abs": 3.552713678800501e-15,
+     "rel": 6.730614141291018e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 5.27843909072916,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 6.730614141291018e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/tamb+0",
+   "group": "natural",
+   "note": "Ambient temperature 0 degC.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 0,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 356.73236184238147,
+     "ref": 356.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.309259921003078,
+     "ref": 5.309259921003079,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6728855488625646e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.30925992100308,
+     "ref": 5.309259921003079,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6728855488625646e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.30925992100308,
+     "ref": 5.309259921003079,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6728855488625646e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.30925992100308,
+     "ref": 5.309259921003078,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.309259921003078,
+     "ref": 5.309259921003077,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.672885548862565e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 5.309259921003078,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.672885548862565e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/tamb+25",
+   "group": "natural",
+   "note": "Ambient temperature 25 degC.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 25,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 381.73236184238147,
+     "ref": 381.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.461508092570345,
+     "ref": 5.461508092570345,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.461508092570345,
+     "ref": 5.461508092570345,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.461508092570345,
+     "ref": 5.461508092570345,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.461508092570345,
+     "ref": 5.461508092570345,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.461508092570345,
+     "ref": 5.461508092570345,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 5.461508092570345,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/tamb+35",
+   "group": "natural",
+   "note": "Ambient temperature 35 degC.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 35,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 391.73236184238147,
+     "ref": 391.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.521534311665586,
+     "ref": 5.521534311665586,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.521534311665587,
+     "ref": 5.521534311665587,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.521534311665587,
+     "ref": 5.521534311665587,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.521534311665587,
+     "ref": 5.521534311665586,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.521534311665586,
+     "ref": 5.521534311665586,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 5.521534311665586,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/inlet5",
+   "group": "natural",
+   "note": "Supplementary geometric inlet 5 m2 at Ci = 0.5 - drives the inlet-resistance term.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 5,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/inlet15",
+   "group": "natural",
+   "note": "Supplementary geometric inlet 15 m2 at Ci = 0.5 - drives the inlet-resistance term.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 15,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.609044239295297,
+     "ref": 4.609044239295297,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 7.5,
+     "ref": 7.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 7.5,
+     "ref": 4.609044239295297,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.609044239295297,
+     "ref": 4.609044239295297,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.609044239295297,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/inlet40",
+   "group": "natural",
+   "note": "Supplementary geometric inlet 40 m2 at Ci = 0.5 - drives the inlet-resistance term.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 40,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.119857210408695,
+     "ref": 4.119857210408695,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 20,
+     "ref": 20,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 20,
+     "ref": 4.119857210408695,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.119857210408695,
+     "ref": 4.119857210408695,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.119857210408695,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/inlet100",
+   "group": "natural",
+   "note": "Supplementary geometric inlet 100 m2 at Ci = 0.5 - drives the inlet-resistance term.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 100,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.064095438693657,
+     "ref": 4.064095438693657,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 50,
+     "ref": 50,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 50,
+     "ref": 4.064095438693657,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.064095438693657,
+     "ref": 4.064095438693657,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.064095438693657,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/res2",
+   "group": "natural",
+   "note": "2 equal smoke reservoirs: the inlet of one reservoir is fed through the vents of the others, so the area is a self-consistent solution.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 2,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 10,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.383181128531123,
+     "ref": 4.383181128531127,
+     "abs": 3.552713678800501e-15,
+     "rel": 8.105331663515059e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 9.383181128531179,
+     "ref": 9.383181128531128,
+     "abs": 5.1514348342607263e-14,
+     "rel": 5.490072890735243e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 9.383181128531179,
+     "ref": 4.383181128531123,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.383181128531123,
+     "ref": 4.3831811285311275,
+     "abs": 4.440892098500626e-15,
+     "rel": 1.0131664579393822e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.383181128531123,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 5.490072890735243e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/res3",
+   "group": "natural",
+   "note": "3 equal smoke reservoirs: the inlet of one reservoir is fed through the vents of the others, so the area is a self-consistent solution.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 3,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 10,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.205387657645733,
+     "ref": 4.205387657645736,
+     "abs": 2.6645352591003757e-15,
+     "rel": 6.336003897895202e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 13.410775315291588,
+     "ref": 13.410775315291472,
+     "abs": 1.1546319456101628e-13,
+     "rel": 8.609732983100596e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 13.410775315291588,
+     "ref": 4.205387657645733,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.205387657645733,
+     "ref": 4.205387657645736,
+     "abs": 2.6645352591003757e-15,
+     "rel": 6.336003897895202e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.205387657645733,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 8.609732983100596e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/res5",
+   "group": "natural",
+   "note": "5 equal smoke reservoirs: the inlet of one reservoir is fed through the vents of the others, so the area is a self-consistent solution.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 5,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 10,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 4.111066138407966,
+     "ref": 4.111066138407966,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 21.444264553632063,
+     "ref": 21.444264553631864,
+     "abs": 1.9895196601282805e-13,
+     "rel": 9.27763064642536e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 21.444264553632063,
+     "ref": 4.111066138407966,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 4.111066138407966,
+     "ref": 4.111066138407967,
+     "abs": 8.881784197001252e-16,
+     "rel": 2.1604576277726275e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 4.111066138407966,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 9.27763064642536e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/rack_none",
+   "group": "natural",
+   "note": "High racks, no sprinklers.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 6,
+    "Y": 4.5,
+    "fireScenario": "rack",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 81,
+     "ref": 81,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345247,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345246,
+     "abs": 1.4210854715202004e-14,
+     "rel": 2.199586668325051e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 16200,
+     "ref": 16200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 538.8970855271446,
+     "ref": 538.8970855271446,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 12.609647961831,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 12.609647961831,
+     "ref": 12.609647961830998,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527058e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 13.499999999999998,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.199586668325051e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/rack_roof",
+   "group": "natural",
+   "note": "High racks, sprinklers under the roof.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 6,
+    "Y": 4.5,
+    "fireScenario": "rack",
+    "reekb": 1.5,
+    "sprinklers": "onderdak",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 20.64,
+     "ref": 20.64,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 4128,
+     "ref": 4128,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 87,
+     "ref": 87,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler cap replaces Qc/(Mf c) here"
+    },
+    "smoke_temperature": {
+     "got": 358.15,
+     "ref": 358.15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.142467414481065,
+     "ref": 5.142467414481065,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.142467414481065,
+     "ref": 5.142467414481065,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.142467414481065,
+     "ref": 5.142467414481065,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.142467414481065,
+     "ref": 5.142467414481065,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.142467414481065,
+     "ref": 6.391307471669924,
+     "rel": 0.1953966481388136,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler temperature model sets Tc so that Tc - T0 is not theta, so the published vent equation and a pure buoyancy balance on Tc are no longer the same equation; the gap is recorded, not graded"
+    },
+    "hatch_count_rounds_up": {
+     "got": 4,
+     "ref": 4,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 5.3999999999999995,
+     "ref": 5.142467414481065,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "natural/rack_inrack",
+   "group": "natural",
+   "note": "High racks, in-rack sprinklers (convective fraction 0.5).",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 6,
+    "Y": 4.5,
+    "fireScenario": "rack",
+    "reekb": 1.5,
+    "sprinklers": "inrekken",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 10.32,
+     "ref": 10.32,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.5,
+     "ref": 0.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1290,
+     "ref": 1290,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 59.900692653706734,
+     "ref": 59.900692653706734,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler cap replaces Qc/(Mf c) here"
+    },
+    "smoke_temperature": {
+     "got": 344.60034632685336,
+     "ref": 344.60034632685336,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 6.0150570038403295,
+     "ref": 6.0150570038403295,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 6.015057003840329,
+     "ref": 6.015057003840329,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 6.015057003840329,
+     "ref": 6.015057003840329,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 6.015057003840329,
+     "ref": 6.0150570038403295,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 6.0150570038403295,
+     "ref": 6.360836665762737,
+     "rel": 0.054360720152361416,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler temperature model sets Tc so that Tc - T0 is not theta, so the published vent equation and a pure buoyancy balance on Tc are no longer the same equation; the gap is recorded, not graded"
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 6.0150570038403295,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "natural/bulk_low",
+   "group": "natural",
+   "note": "Bulk stacking 2.5 m with sprinklers.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 2.5,
+    "Y": 4.5,
+    "fireScenario": "bulk",
+    "reekb": 1.5,
+    "sprinklers": "onderdak",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 24,
+     "ref": 24,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 43.07128825563499,
+     "ref": 43.07128825563499,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 43.07128825563499,
+     "ref": 43.07128825563498,
+     "abs": 7.105427357601002e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 7200,
+     "ref": 7200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 87,
+     "ref": 87,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler cap replaces Qc/(Mf c) here"
+    },
+    "smoke_temperature": {
+     "got": 358.15,
+     "ref": 358.15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 10.28493482896213,
+     "ref": 10.28493482896213,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 10.28493482896213,
+     "ref": 10.28493482896213,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 10.28493482896213,
+     "ref": 10.28493482896213,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 10.28493482896213,
+     "ref": 10.28493482896213,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 10.28493482896213,
+     "ref": 12.78261494333985,
+     "rel": 0.19539664813881372,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler temperature model sets Tc so that Tc - T0 is not theta, so the published vent equation and a pure buoyancy balance on Tc are no longer the same equation; the gap is recorded, not graded"
+    },
+    "hatch_count_rounds_up": {
+     "got": 8,
+     "ref": 8,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 10.799999999999999,
+     "ref": 10.28493482896213,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "natural/bulk_mid",
+   "group": "natural",
+   "note": "Bulk stacking 3.5 m with sprinklers.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3.5,
+    "Y": 4.5,
+    "fireScenario": "bulk",
+    "reekb": 1.5,
+    "sprinklers": "onderdak",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 81,
+     "ref": 81,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345247,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345246,
+     "abs": 1.4210854715202004e-14,
+     "rel": 2.199586668325051e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 16200,
+     "ref": 16200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 87,
+     "ref": 87,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler cap replaces Qc/(Mf c) here"
+    },
+    "smoke_temperature": {
+     "got": 358.15,
+     "ref": 358.15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 15.427402243443197,
+     "ref": 15.427402243443195,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.1514296518425327e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 15.427402243443193,
+     "ref": 15.427402243443195,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.1514296518425327e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 15.427402243443193,
+     "ref": 15.427402243443195,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.1514296518425327e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 15.427402243443193,
+     "ref": 15.427402243443197,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 15.427402243443197,
+     "ref": 19.17392241500977,
+     "rel": 0.19539664813881347,
+     "ok": true,
+     "graded": false,
+     "note": "the sprinkler temperature model sets Tc so that Tc - T0 is not theta, so the published vent equation and a pure buoyancy balance on Tc are no longer the same equation; the gap is recorded, not graded"
+    },
+    "hatch_count_rounds_up": {
+     "got": 12,
+     "ref": 12,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 16.2,
+     "ref": 15.427402243443197,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.199586668325051e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "natural/hs",
+   "group": "natural",
+   "note": "High storage without sprinklers, fixed 9x9 m fire.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "hs",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 81,
+     "ref": 81,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 36,
+     "ref": 36,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345247,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 64.60693238345247,
+     "ref": 64.60693238345246,
+     "abs": 1.4210854715202004e-14,
+     "rel": 2.199586668325051e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 16200,
+     "ref": 16200,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 250.74708552714452,
+     "ref": 250.74708552714452,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 538.8970855271446,
+     "ref": 538.8970855271446,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 12.609647961831,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831001,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527053e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 12.609647961831003,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 12.609647961831,
+     "ref": 12.609647961830998,
+     "abs": 1.7763568394002505e-15,
+     "rel": 1.4087283362527058e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 13.499999999999998,
+     "ref": 12.609647961831,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 2.199586668325051e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "natural/big",
+   "group": "natural",
+   "note": "Large reservoir 40 x 45 m.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 1800,
+    "glen": 45,
+    "gbre": 40,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 1800,
+     "ref": 1800,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 83.58236184238149,
+     "ref": 83.58236184238149,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "aerodynamic_area": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "area_at_equal_inlet": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "abs": 8.881784197001252e-16,
+     "rel": 1.6444757428407316e-16,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_not_below_extract": {
+     "got": 5.400982188802927,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "SCA guidance 15.3: the aerodynamic inlet area should be at least equal to the aerodynamic extract area"
+    },
+    "two_orifice_balance": {
+     "got": 5.400982188802926,
+     "ref": 5.400982188802926,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-8
+    },
+    "hatch_count_rounds_up": {
+     "got": 5,
+     "ref": 5,
+     "rel": 0,
+     "ok": true,
+     "note": "number of hatches must be the ceiling, never the ceiling plus one"
+    },
+    "hatch_area_covers_requirement": {
+     "got": 6.749999999999999,
+     "ref": 5.400982188802926,
+     "rel": 0,
+     "ok": true,
+     "note": "the installed aerodynamic area must reach the requirement"
+    },
+    "critical_area_check_compares": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true,
+     "note": "the AvCv < 1.4 db^2 checklist item must compare the chosen hatch, not merely test that 1.4 db^2 is positive"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "mech/Y3.5",
+   "group": "mechanical",
+   "note": "Mechanical extraction, smoke-free height 3.5 m; fuel power doubles to 500 kW/m2.",
+   "inputs": {
+    "method": "mechanical",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 3.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 14.772063362983522,
+     "ref": 14.772063362983522,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 14.772063362983522,
+     "ref": 14.772063362983522,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 3600,
+     "ref": 3600,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 243.70326010251463,
+     "ref": 243.70326010251463,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 243.70326010251463,
+     "ref": 243.70326010251463,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 531.8532601025146,
+     "ref": 531.8532601025146,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 6.5,
+     "ref": 6.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 59.15,
+     "ref": 59.15,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 19.5,
+     "ref": 19.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "smoke_volume_flow": {
+     "got": 22.257597008484673,
+     "ref": 22.257597008484673,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "ideal_gas_identity": {
+     "got": 22.257597008484673,
+     "ref": 22.257597008484673,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "make_up_air_flow": {
+     "got": 12.058827235088588,
+     "ref": 12.058827235088588,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 8.90303880339387,
+     "ref": 8.90303880339387,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area_mass_balance": {
+     "got": 4.823530894035435,
+     "ref": 4.823530894035435,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_velocity_at_5ms": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "critical_flow": {
+     "got": 22.257597008484673,
+     "ref": 22.257597008484673,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "plugholing_coefficient": {
+     "got": 2,
+     "ref": 1.8,
+     "rel": 0.11111111111111108,
+     "ok": true,
+     "graded": false,
+     "note": "the tool uses beta = 2 in M_crit = beta (g D^5 T0 U/T^2)^(1/2); BR258 gives 1.3 near a wall and 1.8 away from a wall, and NBN S 21-208-1 could not be consulted. The references disagree, so this is flagged and not graded"
+    },
+    "inlet_sizing_basis": {
+     "got": 1.8457513798456175,
+     "ref": 1.8457513798456173,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the inlet is sized on the hot extract volume flow rather than on a mass balance of the incoming air; that is conservative by exactly Tc/T0, which is what this ratio shows. Recorded, not graded, because the governing NBN text was not available"
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "mech/Y4.5",
+   "group": "mechanical",
+   "note": "Mechanical extraction, smoke-free height 4.5 m; fuel power doubles to 500 kW/m2.",
+   "inputs": {
+    "method": "mechanical",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 3600,
+     "ref": 3600,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 167.16472368476298,
+     "ref": 167.16472368476298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 167.16472368476298,
+     "ref": 167.16472368476298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 455.31472368476295,
+     "ref": 455.31472368476295,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "smoke_volume_flow": {
+     "got": 27.778887428757297,
+     "ref": 27.778887428757297,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "ideal_gas_identity": {
+     "got": 27.778887428757297,
+     "ref": 27.778887428757297,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "make_up_air_flow": {
+     "got": 17.580117655361217,
+     "ref": 17.580117655361217,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 11.111554971502919,
+     "ref": 11.111554971502919,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area_mass_balance": {
+     "got": 7.032047062144487,
+     "ref": 7.032047062144487,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_velocity_at_5ms": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "critical_flow": {
+     "got": 27.778887428757297,
+     "ref": 27.778887428757297,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "plugholing_coefficient": {
+     "got": 2,
+     "ref": 1.8,
+     "rel": 0.11111111111111108,
+     "ok": true,
+     "graded": false,
+     "note": "the tool uses beta = 2 in M_crit = beta (g D^5 T0 U/T^2)^(1/2); BR258 gives 1.3 near a wall and 1.8 away from a wall, and NBN S 21-208-1 could not be consulted. The references disagree, so this is flagged and not graded"
+    },
+    "inlet_sizing_basis": {
+     "got": 1.5801309168306885,
+     "ref": 1.5801309168306887,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the inlet is sized on the hot extract volume flow rather than on a mass balance of the incoming air; that is conservative by exactly Tc/T0, which is what this ratio shows. Recorded, not graded, because the governing NBN text was not available"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "mech/Y6.0",
+   "group": "mechanical",
+   "note": "Mechanical extraction, smoke-free height 6.0 m; fuel power doubles to 500 kW/m2.",
+   "inputs": {
+    "method": "mechanical",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 6,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 3600,
+     "ref": 3600,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 108.57667299570824,
+     "ref": 108.57667299570824,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 108.57667299570824,
+     "ref": 108.57667299570824,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 396.7266729957082,
+     "ref": 396.7266729957082,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 4,
+     "ref": 4,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 22.4,
+     "ref": 22.4,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "smoke_volume_flow": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "ideal_gas_identity": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "make_up_air_flow": {
+     "got": 27.066361761888245,
+     "ref": 27.066361761888245,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 14.90605261411373,
+     "ref": 14.90605261411373,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area_mass_balance": {
+     "got": 10.826544704755298,
+     "ref": 10.826544704755298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_velocity_at_5ms": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "critical_flow": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "plugholing_coefficient": {
+     "got": 2,
+     "ref": 1.8,
+     "rel": 0.11111111111111108,
+     "ok": true,
+     "graded": false,
+     "note": "the tool uses beta = 2 in M_crit = beta (g D^5 T0 U/T^2)^(1/2); BR258 gives 1.3 near a wall and 1.8 away from a wall, and NBN S 21-208-1 could not be consulted. The references disagree, so this is flagged and not graded"
+    },
+    "inlet_sizing_basis": {
+     "got": 1.3768060836221003,
+     "ref": 1.3768060836221006,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the inlet is sized on the hot extract volume flow rather than on a mass balance of the incoming air; that is conservative by exactly Tc/T0, which is what this ratio shows. Recorded, not graded, because the governing NBN text was not available"
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "mech/rack",
+   "group": "mechanical",
+   "note": "Mechanical extraction with high racks under roof sprinklers.",
+   "inputs": {
+    "method": "mechanical",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 6,
+    "Y": 4.5,
+    "fireScenario": "rack",
+    "reekb": 1.5,
+    "sprinklers": "onderdak",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 20.64,
+     "ref": 20.64,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 21.535644127817495,
+     "ref": 21.53564412781749,
+     "abs": 3.552713678800501e-15,
+     "rel": 1.649690001243788e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 8256,
+     "ref": 8256,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 383.3644329837231,
+     "ref": 383.3644329837231,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 383.3644329837231,
+     "ref": 383.3644329837231,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 506.3322164918615,
+     "ref": 506.3322164918615,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 42.349999999999994,
+     "ref": 42.349999999999994,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 16.5,
+     "ref": 16.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "smoke_volume_flow": {
+     "got": 30.891479918885143,
+     "ref": 30.891479918885143,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "ideal_gas_identity": {
+     "got": 30.891479918885143,
+     "ref": 30.891479918885143,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "make_up_air_flow": {
+     "got": 17.580117655361217,
+     "ref": 17.580117655361217,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 12.356591967554056,
+     "ref": 12.356591967554056,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area_mass_balance": {
+     "got": 7.032047062144487,
+     "ref": 7.032047062144487,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_velocity_at_5ms": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "critical_flow": {
+     "got": 30.891479918885143,
+     "ref": 30.891479918885143,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "plugholing_coefficient": {
+     "got": 2,
+     "ref": 1.8,
+     "rel": 0.11111111111111108,
+     "ok": true,
+     "graded": false,
+     "note": "the tool uses beta = 2 in M_crit = beta (g D^5 T0 U/T^2)^(1/2); BR258 gives 1.3 near a wall and 1.8 away from a wall, and NBN S 21-208-1 could not be consulted. The references disagree, so this is flagged and not graded"
+    },
+    "inlet_sizing_basis": {
+     "got": 1.7571827745683204,
+     "ref": 1.7571827745683206,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the inlet is sized on the hot extract volume flow rather than on a mass balance of the incoming air; that is conservative by exactly Tc/T0, which is what this ratio shows. Recorded, not graded, because the governing NBN text was not available"
+    }
+   },
+   "worst_rel": 1.649690001243788e-16,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "mech/tall",
+   "group": "mechanical",
+   "note": "Mechanical extraction in a 20 m hall.",
+   "inputs": {
+    "method": "mechanical",
+    "buildingType": "storage",
+    "hc": 20,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 6,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "fire_area": {
+     "got": 9,
+     "ref": 9,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "fire_perimeter": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "convective_fraction": {
+     "got": 0.8,
+     "ref": 0.8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_mass_flow": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "plume_law_identity": {
+     "got": 33.156293158313105,
+     "ref": 33.156293158313105,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "convective_heat": {
+     "got": 3600,
+     "ref": 3600,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise": {
+     "got": 108.57667299570824,
+     "ref": 108.57667299570824,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "temperature_rise_identity": {
+     "got": 108.57667299570824,
+     "ref": 108.57667299570824,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "smoke_temperature": {
+     "got": 396.7266729957082,
+     "ref": 396.7266729957082,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "layer_depth": {
+     "got": 14,
+     "ref": 14,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "critical_vent_area": {
+     "got": 274.4,
+     "ref": 274.4,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "max_vent_length": {
+     "got": 3,
+     "ref": 3,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "min_vent_spacing": {
+     "got": 42,
+     "ref": 42,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "smoke_volume_flow": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "ideal_gas_identity": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "make_up_air_flow": {
+     "got": 27.066361761888245,
+     "ref": 27.066361761888245,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "inlet_area": {
+     "got": 14.90605261411373,
+     "ref": 14.90605261411373,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_area_mass_balance": {
+     "got": 10.826544704755298,
+     "ref": 10.826544704755298,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "inlet_velocity_at_5ms": {
+     "got": 5,
+     "ref": 5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "critical_flow": {
+     "got": 37.265131535284326,
+     "ref": 37.265131535284326,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "plugholing_coefficient": {
+     "got": 2,
+     "ref": 1.8,
+     "rel": 0.11111111111111108,
+     "ok": true,
+     "graded": false,
+     "note": "the tool uses beta = 2 in M_crit = beta (g D^5 T0 U/T^2)^(1/2); BR258 gives 1.3 near a wall and 1.8 away from a wall, and NBN S 21-208-1 could not be consulted. The references disagree, so this is flagged and not graded"
+    },
+    "inlet_sizing_basis": {
+     "got": 1.3768060836221003,
+     "ref": 1.3768060836221006,
+     "rel": 0,
+     "ok": true,
+     "graded": false,
+     "note": "the inlet is sized on the hot extract volume flow rather than on a mass balance of the incoming air; that is conservative by exactly Tc/T0, which is what this ratio shows. Recorded, not graded, because the governing NBN text was not available"
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": true
+  },
+  {
+   "id": "simplified/2pct",
+   "group": "simplified",
+   "note": "Simplified 2 % aerodynamic rule, conditions met. Aerodynamic 2 % / geometric 3 % of the floor area, with the applicability conditions of the Royal Decree annex 6.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "2pct",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "required_area": {
+     "got": 8,
+     "ref": 8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "percentage_of_floor": {
+     "got": 0.02,
+     "ref": 0.02,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "applicability": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "simplified/3pct",
+   "group": "simplified",
+   "note": "Simplified 3 % geometric rule. Aerodynamic 2 % / geometric 3 % of the floor area, with the applicability conditions of the Royal Decree annex 6.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "3pct",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "required_area": {
+     "got": 12,
+     "ref": 12,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "percentage_of_floor": {
+     "got": 0.03,
+     "ref": 0.03,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "applicability": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "simplified/2pct_na",
+   "group": "simplified",
+   "note": "Simplified 2 % rule outside its conditions (2500 m2) - must be refused. Aerodynamic 2 % / geometric 3 % of the floor area, with the applicability conditions of the Royal Decree annex 6.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "2pct",
+    "hc": 10,
+    "area": 2500,
+    "glen": 50,
+    "gbre": 50,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "required_area": {
+     "got": 50,
+     "ref": 50,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "percentage_of_floor": {
+     "got": 0.02,
+     "ref": 0.02,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "applicability": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "simplified/2pct_stack",
+   "group": "simplified",
+   "note": "Simplified 2 % rule with goods stacked above 70 % of the height - must be refused. Aerodynamic 2 % / geometric 3 % of the floor area, with the applicability conditions of the Royal Decree annex 6.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "2pct",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 8,
+    "Y": 4.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "required_area": {
+     "got": 8,
+     "ref": 8,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 1e-9
+    },
+    "percentage_of_floor": {
+     "got": 0.02,
+     "ref": 0.02,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "applicability": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "layer_depth": {
+     "got": 5.5,
+     "ref": 5.5,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "refusal/bulk_too_high",
+   "group": "refusal",
+   "note": "Bulk stacking above the height the fire table covers must be refused, not extrapolated.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 6,
+    "Y": 4.5,
+    "fireScenario": "bulk",
+    "reekb": 1.5,
+    "sprinklers": "onderdak",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "refused": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "names_the_reason": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "consistency/thin_layer",
+   "group": "consistency",
+   "note": "A 0.1 m smoke layer is a degenerate design: the area must stay finite and positive and the per-ventilator limit must shrink with the layer.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 9.9,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "finite_positive": {
+     "got": 207.16942202142585,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "critical_area_shrinks": {
+     "got": 0.0139999999999999,
+     "ref": 0.013999999999999999,
+     "abs": 9.8879238130678e-17,
+     "rel": 7.0628027236198585e-15,
+     "ok": true,
+     "tol_abs": 1e-9,
+     "tol_rel": 0.000001
+    },
+    "no_error": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 7.0628027236198585e-15,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "refusal/negative_layer",
+   "group": "refusal",
+   "note": "A smoke-free height above the ceiling gives a negative layer depth and must be refused.",
+   "inputs": {
+    "method": "natural",
+    "buildingType": "storage",
+    "hc": 10,
+    "area": 400,
+    "glen": 20,
+    "gbre": 20,
+    "reservoirs": 1,
+    "poort": 3,
+    "hst": 3,
+    "Y": 10.5,
+    "fireScenario": "low1",
+    "reekb": 1.5,
+    "sprinklers": "geen",
+    "sprinklerTemp": "68",
+    "tAmb": 15,
+    "Ci": 0.5,
+    "Ai": 0,
+    "hw": 1.5,
+    "hl": 1.5,
+    "cv": 0.6,
+    "mesh": "none"
+   },
+   "cmp": {
+    "refused": {
+     "got": false,
+     "ref": false,
+     "rel": 0,
+     "ok": true
+    },
+    "names_the_reason": {
+     "got": true,
+     "ref": true,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "invariance/perimeter_scaling",
+   "group": "invariance",
+   "note": "Mf scales linearly with the fire perimeter at a fixed smoke-free height.",
+   "inputs": {
+    "fireScenario": "low4"
+   },
+   "cmp": {
+    "mass_flow_ratio": {
+     "got": 2.9999999999999996,
+     "ref": 3,
+     "abs": 4.440892098500626e-16,
+     "rel": 1.4802973661668753e-16,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    }
+   },
+   "worst_rel": 1.4802973661668753e-16,
+   "pass": true,
+   "flagged": false
+  },
+  {
+   "id": "consistency/reservoirs",
+   "group": "consistency",
+   "note": "Splitting a hall into reservoirs leaves the plume and the temperatures of the design fire untouched and changes only the inlet path, so the area per reservoir may only rise.",
+   "inputs": {
+    "reservoirs": 4
+   },
+   "cmp": {
+    "same_mass_flow": {
+     "got": 21.535644127817495,
+     "ref": 21.535644127817495,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "same_temperature": {
+     "got": 371.73236184238147,
+     "ref": 371.73236184238147,
+     "abs": 0,
+     "rel": 0,
+     "ok": true,
+     "tol_abs": 1e-12,
+     "tol_rel": 1e-9
+    },
+    "area_per_reservoir_falls": {
+     "got": 4.106569842098997,
+     "ref": 4.339521284051173,
+     "rel": 0,
+     "ok": true
+    },
+    "total_area_rises": {
+     "got": 16.42627936839599,
+     "ref": 4.339521284051173,
+     "rel": 0,
+     "ok": true
+    },
+    "inlet_is_larger": {
+     "got": 22.319709526296577,
+     "ref": 10,
+     "rel": 0,
+     "ok": true
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "flagged": false
+  }
+ ],
+ "build": "2026-10-16.RWA_calculator-bench-rerun-1",
+ "manifest_revision": "2026-10-16.RWA_calculator-bench-rerun-1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_rwa.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 1 744 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\".",
+ "run_at": "2026-10-16T09:28:22Z"
+}

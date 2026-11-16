@@ -1,0 +1,1400 @@
+{
+ "schema": "tools.petrov.re/ui-migration-map/v1",
+ "revision": "2026-08-17a",
+ "framework": "tools.petrov.re/ui/v1",
+ "basis": "UI_AUDIT.md (2026-08-15) + static classification of the deployed catalogue",
+ "read_me_first": "These are priors, not facts about the file you are about to edit. The tool may have changed since the audit. Step 1 of PORTING_PLAYBOOK.md re-derives every field below from the current source and records any disagreement; where they differ, the source wins and this map is corrected.",
+ "legend": {
+  "archetype": "calculator | studio | wizard | reference — the DiagramUI.app({layout}) value",
+  "compute": "live | run — whether a result follows every edit or an explicit action",
+  "stage": "what occupies the stage slot: canvas2d | svg | scene3d | table | none",
+  "effort": "S = under a day, M = one to three days, L = more than three days",
+  "wave": "1 = broken on mobile, 2 = horizontal overflow, 3 = wizards and editors, 4 = the rest",
+  "traps": "defects found in the audit that the port must not carry over"
+ },
+ "waves": {
+  "1": "Unusable below 768px today: a fixed multi-column grid plus overflow:hidden makes regions unreachable, not merely cramped. Adopting the shell is the fix.",
+  "2": "Horizontal overflow at 390px from an inner min-width or an un-breakpointed inner grid.",
+  "3": "Wizards and graph/scene editors: the archetypes exist for them and the win is large.",
+  "4": "Everything else, by traffic."
+ },
+ "tools": [
+  {
+   "file": "cfd.html",
+   "id": "cfd",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "scene3d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "palette / room / environment",
+    "stage": "3-D viewport",
+    "detail": "PROPERTIES + LEGEND",
+    "dock": "stage log + run controls",
+    "results": "result strip"
+   },
+   "delete": [
+    "top bar (title, tabs, undo/redo, EN, Run/Results/Guide) — keep Run as the primary action in inputs",
+    "the 5-track grid and body{overflow:hidden}"
+   ],
+   "traps": [
+    "bootEditor() is awaited inside one try/catch: when WebGPU is missing everything after it is skipped, including setLanguage() and the room wiring — the banner is English while the UI stays Russian, all 16 numeric inputs are empty and the preset select is empty. Split the WebGPU failure from the rest of boot and use ui.fail for the viewport only",
+    "zero media queries; the right PROPERTIES panel is unreachable at 390px",
+    "no units on any of the 16 numeric fields",
+    "labels clipped by a 2-column grid"
+   ],
+   "deps": [
+    "diagram-scene3d.js"
+   ],
+   "notes": "The WebGPU fallback is the interesting case for ui.fail: the tool still has a usable form and log while the viewport is dead."
+  },
+  {
+   "file": "debrisrunout.html",
+   "id": "debrisrunout",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "scene3d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "OBJECT PALETTE + PRESETS + SCENE OBJECTS",
+    "stage": "3-D viewport with view tabs",
+    "detail": "PROPERTIES",
+    "dock": "TRAJECTORY / EVENT LOG",
+    "results": "RESULTS + ENSEMBLE/BARRIER"
+   },
+   "delete": [
+    "top bar actions that duplicate the shared bar",
+    "the 5-track grid, body{overflow:hidden} and @media(max-width:980px){.bottom>section:last-child{display:none}}"
+   ],
+   "traps": [
+    "at 390px the PROPERTIES panel and three of four bottom panels are unreachable, and the ENSEMBLE results panel is display:none — a region may never be hidden without a replacement",
+    "Angle renders as -35.52338329811103 in an input box: use ui.fmt and a field precision",
+    "result tiles show — with no statement of what to press"
+   ],
+   "deps": [
+    "diagram-scene3d.js"
+   ],
+   "notes": "Presets already carry prose descriptions — they map straight onto ui.examples({label, note})."
+  },
+  {
+   "file": "heat2d.html",
+   "id": "heat2d",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "canvas2d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "TOOLS palette + SHAPES list",
+    "stage": "#center canvas + timeline",
+    "detail": "Shape/Domain/Solve tabs",
+    "dock": "play bar + export row",
+    "results": "cell/step/characteristic-time status line"
+   },
+   "delete": [
+    "own header strip with Language/Examples/New/Open/Save/Self-test/?",
+    "bottom export row (PNG, CSV, PDF report) — duplicates the shared bar",
+    "#left/#right fixed widths and the flex frame",
+    "html,body{overflow:hidden}"
+   ],
+   "traps": [
+    "zero media queries; at 390px #center collapses to zero width and the canvas, timeline and the primary Compute are unreachable",
+    "shape editor with Del but no undo — register ui.history",
+    "Steady state and Compute sit adjacent, similarly weighted, with no explanation of the difference"
+   ],
+   "deps": [],
+   "notes": "Keeps its own solver. The Examples list becomes ui.examples(); the right-panel shortcut cheatsheet becomes the shortcut router's own sheet."
+  },
+  {
+   "file": "outdoornoise.html",
+   "id": "outdoornoise",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "scene3d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "SCENE palette / presets / objects",
+    "stage": "3-D editor",
+    "detail": "INSPECTOR",
+    "dock": "PATH INSPECTOR",
+    "results": "RESULTS"
+   },
+   "delete": [
+    "topbar (New/Learn/Save case/LIVE|FINAL/LT/Fit scene/Calculate map) — Learn, undo/redo and Fit are framework furniture; Calculate map becomes the primary action. CORRECTED for framework v3.1: Load case is NOT deleted — it becomes ui.importAction() on the Scene panel (spec §8.12). The port report says deleting it 'would make every already-saved .json scene unopenable'.",
+    "the .workspace grid and html,body{overflow:hidden}"
+   ],
+   "traps": [
+    "its 8-step tour is the only real onboarding on the site and it cannot be advanced: the shared badge covers Prev/Next. Port the steps into learn.tour and delete the tour code",
+    "at 390px INSPECTOR, RESULTS and the primary Calculate map are off-screen and unscrollable",
+    "result cards truncate their own values (RECEIVER R = 5…, DOMINANT … Refer…)",
+    "11 focusable controls with no accessible name",
+    "LIVE|FINAL and Calculate map are two mechanisms for one question — express it as compute:'run' plus a live preview flag"
+   ],
+   "deps": [
+    "diagram-scene3d.js"
+   ],
+   "notes": "Highest-value port on the site: the richest affordances, currently defeated by the chrome."
+  },
+  {
+   "file": "probabilisticrisk.html",
+   "id": "probabilisticrisk",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "svg",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "presets, fault trees, event trees, Markov, palette, basic events",
+    "stage": "model canvas",
+    "detail": "FAULT TREE inspector",
+    "dock": "Cut Sets / Importance / Sensitivity tabs",
+    "results": "TOP event probability"
+   },
+   "delete": [
+    "the 54px non-wrapping .topbar",
+    "Import JSON / OpenPSA XML / Export / PDF Report — the first two become panel actions via ui.importAction() (spec §8.12), the last two are the shared bar"
+   ],
+   "traps": [
+    "at 1440px Import/Export/PDF are pushed past the viewport with overflow:hidden and are unreachable",
+    "the headline KPI wraps mid-number inside the 54px bar (TOP 2.120e- / 4)",
+    "@media(max-width:820px) hides .left and .kpi outright: the model column and the tool's single answer both disappear",
+    "default model has overlapping nodes on first load",
+    "hard-coded dark theme"
+   ],
+   "deps": [],
+   "notes": "Keep the worker; ui.setState('computing') covers the wait that the topbar hides today."
+  },
+  {
+   "file": "roomacoustics.html",
+   "id": "roomacoustics",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "scene3d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "geometry / sources / surfaces",
+    "stage": "plan view + Edit/3D/Rays/Map tabs",
+    "detail": "ROOM SUMMARY / SELECTED RECEIVER / AURALIZATION",
+    "dock": "RIR-ETC / EDC / Spectrum / Band table / Reflections charts",
+    "results": "RT60, Lp, C50, C80"
+   },
+   "delete": [
+    "header (New / Project JSON / undo / redo / Live calculation / EN) — undo, redo, language and the live chip are framework furniture. CORRECTED for framework v3.1: Load is NOT deleted — it becomes ui.importAction() (spec §8.12); the shared bar exports and has never imported.",
+    "the .workspace 5-track grid and html,body{overflow:hidden}"
+   ],
+   "traps": [
+    "axes(ctx,w,h,x0,y0,x1,y1) is called as (xmin,xmax,ymin,ymax) at all three call sites: the RIR x-axis renders 0.00 0.00 0.00 0.00 and the y-axis 1.0/1.1/1.1/1.1 — fix the call sites before porting the charts",
+    "minimum layout width ~997px with overflow:hidden: the whole results column is unreachable at 390px",
+    "receiver tooltip is drawn over the chart tab bar instead of anchored to the marker"
+   ],
+   "deps": [
+    "diagram-scene3d.js"
+   ],
+   "notes": "Already on the 3-D runtime, so the studio archetype maps almost one to one. Charts move into dock as a ui.tabs group."
+  },
+  {
+   "file": "thermodynamiccycles.html",
+   "id": "thermodynamiccycles",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "L",
+   "wave": 1,
+   "slots": {
+    "inputs": "working fluid, cycle family, cycle type, parameters, isolines",
+    "stage": "T-s chart",
+    "results": "KPI strip along the bottom today"
+   },
+   "delete": [
+    "352px fixed rail and .app{height:100vh;overflow:hidden}",
+    "top strip Export Excel / PNG / PDF and the language select",
+    "the tool's own KPI strip markup"
+   ],
+   "traps": [
+    "zero media queries in 1.1MB; at 390px the chart column is ~38px wide and unreachable",
+    "the three ISOLINES checkboxes sit under the shared bar and cannot be clicked",
+    "no title or description; the h1 is smaller than other tools' panel headings",
+    "Diagram.init is called only from boot() after the 6.5MB CoolProp WASM resolves — must become unconditional with ui.fail on the WASM path"
+   ],
+   "deps": [
+    "thermodynamiccycles.wasm"
+   ],
+   "notes": "Isolines become toggle fields in an inputs panel; the axes select becomes a segmented field above the stage."
+  },
+  {
+   "file": "moleculeconstructor.html",
+   "id": "moleculeconstructor",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 1,
+   "slots": {
+    "inputs": "atom palette",
+    "stage": "drawing canvas",
+    "detail": "info panel",
+    "results": "WHAT YOU CAN BUILD list"
+   },
+   "delete": [
+    "gradient header with Language and Simple|Advanced",
+    "toolbar row (Fill with hydrogen / Erase / Clear / How to play)",
+    "fixed .left 112px and .right 326px rails",
+    ".app{height:100vh}"
+   ],
+   "traps": [
+    "zero media queries; 438px of fixed rails on a 390px viewport leave the canvas at zero width — there is no drawing surface on a phone",
+    "direct-manipulation editor with no undo",
+    "'How to play' becomes learn.intro plus a tour"
+   ],
+   "deps": [],
+   "notes": "Simple|Advanced becomes a segmented field, not header chrome."
+  },
+  {
+   "file": "cablesizing.html",
+   "id": "cablesizing",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "none",
+   "effort": "M",
+   "wave": 2,
+   "slots": {
+    "inputs": "1 CIRCUIT / 2 CABLE CONSTRUCTION / 3 INSTALLATION CONDITIONS",
+    "results": "SELECTED CONDUCTOR hero, 5 KPI tiles, criteria bars, neighbouring sections table, calculation record"
+   },
+   "delete": [
+    "header (Cu logo, title, 6 language pills, home, Theme)",
+    "Print calculation — the shared bar owns the PDF",
+    "the sticky right column and its own scroll CSS — the framework's results region is already sticky; if the column genuinely needs its own scrollbar, declare app.scrollRegion('results') (spec §4.6) rather than re-adding overflow to a panel"
+   ],
+   "traps": [
+    "+342px overflow at 390px: table{min-width:690px} inside .scroll with no min-width:0 on the grid items",
+    "Reset is at the very bottom of the results column, below a QA disclosure — it belongs in the inputs footer"
+   ],
+   "deps": [],
+   "notes": "Best affordances in its batch (unit boxes, disabled-control explanation, failure reasons in the comparison table). Keep all of it; only the chrome changes."
+  },
+  {
+   "file": "decayheat.html",
+   "id": "decayheat",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 2,
+   "slots": {
+    "inputs": "Fuel / Irradiation / Spectrum collapsible cards",
+    "stage": "Decay heat + Emission/dose charts",
+    "results": "derived values"
+   },
+   "delete": [
+    "header with LANGUAGE and six full-name buttons plus the bare theme glyph",
+    "the aside splitter and #panel-toggle — CORRECTED for framework v3.1: both are re-declared, not dropped. The splitter becomes app.resizable({region:'detail', min:240, max:680}) (spec §4.6) and #panel-toggle becomes ui.panel({collapsible:true}) (§5.1); delete the localStorage keys 'sfst.panel' and 'sfst.collapsed', which the framework now namespaces as dgu.decayheat.layout.* and dgu.decayheat.panel.*",
+    "the duplicate blue PDF report in the chart card header"
+   ],
+   "traps": [
+    "+69px overflow at 390px from table#valid-table.vtab",
+    "<h1 id=\"app-title\">…</h1> ships a literal ellipsis until JS fills it — the framework writes the h1 from the manifest instead",
+    "#panel-toggle has an empty title, no aria-label and a ~14px hit area",
+    "chart legend ellipsised inside the plot while the same names appear again below",
+    "status pill is Prototype · 203/205 — two failing benchmark cases and nothing in the body says which results are affected"
+   ],
+   "deps": [],
+   "notes": "The 'Sum 100.000 % / Normalise to 100 %' check is the best validation feedback on the site; keep it as a panel action plus a field validate."
+  },
+  {
+   "file": "electricalnetwork.html",
+   "id": "electricalnetwork",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 2,
+   "slots": {
+    "inputs": "SOURCE & TRANSFORMER, DESIGN LIMITS",
+    "stage": "one-line diagram",
+    "detail": "bus/load/cable inspector",
+    "results": "KPI strip + FEEDER RESULTS table"
+   },
+   "delete": [
+    "header (logo, title, EN, home, Theme)",
+    "the 310px/1fr/350px grid"
+   ],
+   "traps": [
+    "+405px horizontal overflow at 390px: svg#oneLine and table{min-width:720px} inside a plain .scroll that is not a flex item — put the table in ui.results({tables}) which wraps it in .dgu-table-wrap",
+    "the same table breaks the desktop layout: the 7th KPI tile is cut mid-word and FEEDER RESULTS loses its last column",
+    "@media(max-width:820px){.brand small{display:none}} hides the only statement of what the tool does exactly where it is most needed",
+    "dark by its own CSS while cablesizing ships the identical Theme button and renders light"
+   ],
+   "deps": [],
+   "notes": "Pairs with cablesizing: same defect, same fix, port them together."
+  },
+  {
+   "file": "klimaatcalculator.html",
+   "id": "klimaatcalculator",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 2,
+   "slots": {
+    "inputs": "five accordion groups",
+    "stage": "heat-load stacked bar",
+    "results": "verdict banner, 4 KPI cards, advisory notes, strategy cards"
+   },
+   "delete": [
+    "header (logo, title, chip, 7 language pills, Report (PDF), Dark)",
+    "the .inputs{max-height:calc(100vh - 28px);overflow:auto} scroll trap"
+   ],
+   "traps": [
+    "overflow at 390px: .grid2{1fr 1fr} has no breakpoint and inputs keep min-width:auto",
+    "KPI row is ragged because one value wraps to two lines",
+    "this is one of two tools that measured slightly worse after level 0 — the inner-scroll panel is the reason, and the shell removes it"
+   ],
+   "deps": [],
+   "notes": "The computed/indicative provenance chips are worth keeping as field hints."
+  },
+  {
+   "file": "steam_tables.html",
+   "id": "steam_tables",
+   "archetype": "calculator",
+   "compute": "run",
+   "stage": "none",
+   "effort": "S",
+   "wave": 2,
+   "slots": {
+    "inputs": "two property selectors + values",
+    "results": "computed properties table + checkpoints"
+   },
+   "delete": [
+    "the per-field unit selects AND the global unit chip row — one page-level unit control replaces both",
+    "Export CSV / PDF report / Saturation table (CSV) — the first two are the shared bar; the saturation table stays as a panel action"
+   ],
+   "traps": [
+    "+334px overflow at 390px: .row{grid-template-columns:1fr 1fr} has no breakpoint of its own even though .wrap does",
+    "three enabled export buttons sit under an empty results table — with compute:'run' the framework disables exports until a result exists"
+   ],
+   "deps": [],
+   "notes": "Smallest wave-2 port and a good first one: it exercises compute:'run', the unit registry and the pending state with almost no layout work."
+  },
+  {
+   "file": "luchtgroepselector.html",
+   "id": "luchtgroepselector",
+   "archetype": "wizard",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "L",
+   "wave": 3,
+   "slots": {
+    "nav": "16 numbered steps",
+    "inputs": "one question card per step",
+    "stage": "COMPOSITION OF THE UNIT schematic",
+    "results": "8 metric tiles + CHECKS"
+   },
+   "delete": [
+    "header (langsel, Example, Open, Save, Clear, Report/PDF, contrast button) — Example and Clear become ui.examples and ui.resetAction, the rest is the shared bar",
+    "the .navitem span:not(.n){display:none} mobile rule"
+   ],
+   "traps": [
+    "Diagram.init runs inside LANGDATA.ensureThen(lang, …), which only calls back on success: Dutch is inlined, so a language-pack failure costs the toolbar for the other five languages only",
+    "at 390px the step names are stripped and the nav becomes a strip of bare digits 1..9 with 10-16 off-screen — the wizard archetype forbids this and substitutes a labelled dropdown",
+    "a fully populated zero state before any input, including 0.16 x 0.16 x 5.8 m ≈ 560 kg",
+    "six identical '? Why this question' links on one screen become one learn topic each"
+   ],
+   "deps": [
+    "luchtgroepselector-lang-en.json",
+    "luchtgroepselector-lang-de.json",
+    "luchtgroepselector-lang-fr.json",
+    "luchtgroepselector-lang-ru.json",
+    "luchtgroepselector-lang-uk.json"
+   ],
+   "notes": "The richest affordance set on the site. Port the question metadata into fields with learn topics and the tool shrinks considerably."
+  },
+  {
+   "file": "nuclideatlas.html",
+   "id": "nuclideatlas",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "L",
+   "wave": 3,
+   "slots": {
+    "inputs": "search + property/filter selects + toggles",
+    "stage": "N-Z chart",
+    "detail": "nuclide detail card",
+    "dock": "8 analysis tabs",
+    "results": "decay graph output"
+   },
+   "delete": [
+    "header (title, 6 language buttons, Fit chart, theme) — Fit belongs to the stage, the rest is framework furniture",
+    "the app-shell grid with html,body{overflow:hidden}"
+   ],
+   "traps": [
+    "fitAtlas() takes Math.min of both axes into a pane whose height changed after layout: the nuclide band draws ~170px wide inside a 1140px canvas, about 85% of the card empty. ui.stage measures after layout settles and calls fit() then",
+    "#legend is absolutely positioned over the data and its min/max labels touch (10⁻⁹ s10¹⁹ s / stable)",
+    "nuclide-data.js is 8MB and loaded synchronously in <head> with no defer: the page is blank while it downloads, and if it fails the whole IIFE aborts with document.body.innerHTML = '…missing', which would also erase an already-built toolbar. Load it with defer, render the shell first, and use ui.fail",
+    "two parallel ways to load a scenario in the same card (chips and a select plus a Load button)",
+    "the only tool using UA for Ukrainian in its own switcher"
+   ],
+   "deps": [
+    "nuclide-data.js",
+    "neutron-data/"
+   ],
+   "notes": "The 8MB synchronous script is the single biggest first-paint defect on the site."
+  },
+  {
+   "file": "regelkring.html",
+   "id": "regelkring",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "L",
+   "wave": 3,
+   "slots": {
+    "nav": "11 tabs",
+    "inputs": "PROCESS / SCENARIO / PROCESS PARAMETERS",
+    "stage": "process diagram + temperature chips",
+    "dock": "play controls + time slider",
+    "results": "loop response"
+   },
+   "delete": [
+    "header with six language buttons and the theme glyph",
+    "body{padding-bottom:76px} — the framework publishes the safe area now",
+    "the model chip row above the tabs: fold it into the tabs or into a field"
+   ],
+   "traps": [
+    "Diagram.init is reached only through window.__RK.onReady, which silently drops every queued callback if regelkring-data.json fails — the toolbar disappears with the data",
+    "11 tabs wrap to five rows at 390px: roughly 330px of an 844px viewport is navigation before the first panel",
+    "play controls sit below the diagram they drive and above two dense paragraphs, so on a 900px screen the animated charts are off-screen"
+   ],
+   "deps": [
+    "regelkring-data.json",
+    "regelkring-help.json"
+   ],
+   "notes": "regelkring-help.json is 175KB of per-field help that already has the shape of learn.topics — port it directly rather than rewriting it."
+  },
+  {
+   "file": "verwarmenkoelenselector.html",
+   "id": "verwarmenkoelenselector",
+   "archetype": "wizard",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "L",
+   "wave": 3,
+   "slots": {
+    "nav": "15 numbered steps",
+    "inputs": "current step form",
+    "stage": "installation make-up diagram",
+    "results": "persistent live results rail"
+   },
+   "delete": [
+    "header (Language, Example, Open, Save, Clear, Report/PDF, theme)",
+    "the Report nav item at the foot of the step list — three routes to one PDF",
+    "the bare-digit mobile nav rule"
+   ],
+   "traps": [
+    "Dutch strings leak into the English UI in the results rail (seizoen ≈ 3.80, 0.0 kW beschikbaar, expansie 0 l, bijstook) — every derived string must go through the dictionary",
+    "placeholder 0.0 kW and real computed values (COP 2.52) share the rail with no visual distinction: use the pending state",
+    "'? Why this question' appears under two fields out of six"
+   ],
+   "deps": [],
+   "notes": "Same shape as luchtgroepselector; do them in the same week and share the field vocabulary."
+  },
+  {
+   "file": "ductnetwork.html",
+   "id": "ductnetwork",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 3,
+   "slots": {
+    "inputs": "element palette",
+    "stage": "duct network canvas",
+    "detail": "element inspector",
+    "results": "solver convergence report",
+    "footer": "Equations"
+   },
+   "delete": [
+    "the site-name h1",
+    "header Load example / Save JSON / Export CSV — CORRECTED for framework v3.1: Load JSON is NOT deleted, it becomes ui.importAction() (spec §8.12). Load example becomes ui.examples()."
+   ],
+   "traps": [
+    "no language switcher at all while the manifest lists six catalog languages and tool_languages is [en] — decide: either localise or set tool_languages honestly; the framework will then show no switcher",
+    "same fixed-height canvas and missing fit control as hydraulicnetwork",
+    "destructive Delete selected sits in the same row as the create buttons"
+   ],
+   "deps": [],
+   "notes": "Do immediately after hydraulicnetwork."
+  },
+  {
+   "file": "hydraulicnetwork.html",
+   "id": "hydraulicnetwork",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 3,
+   "slots": {
+    "inputs": "element palette (Select/Node/Pipe/Pump/Valve/HX)",
+    "stage": "network canvas",
+    "detail": "element inspector",
+    "results": "solver status + residuals",
+    "footer": "Model / Equations"
+   },
+   "delete": [
+    "the h1 that is the site name with the tool demoted to a subtitle",
+    "header Save JSON / Export CSV — the shared bar owns JSON and CSV export. CORRECTED for framework v3.1: it does NOT own import; Load JSON becomes ui.importAction() (spec §8.12).",
+    "the tool strip that mixes modes with actions and a destructive Delete selected"
+   ],
+   "traps": [
+    "graph editor with Delete selected and no undo — register ui.history",
+    "the network is already solved on load while Solve network is the only primary button, and nothing marks the result stale after an edit: compute:'run' plus the stale state expresses this correctly",
+    "#canvas{height:520px} with a 1000x620 viewBox and no fit control: at 390px the graph draws at ~37% in one corner of an empty box",
+    "canvas legend sits under the shared bar"
+   ],
+   "deps": [],
+   "notes": "ductnetwork is the same tool with different quantities — port one, copy the structure."
+  },
+  {
+   "file": "relativity.html",
+   "id": "relativity",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 3,
+   "slots": {
+    "inputs": "presets + experiment list",
+    "stage": "Minkowski diagram",
+    "detail": "light-clock geometry",
+    "results": "Frame & event results"
+   },
+   "delete": [
+    "header (EN, Simple view, Reset) — Reset moves to the inputs footer, Simple view becomes a segmented field",
+    "the first-run coach popover and its scheduler"
+   ],
+   "traps": [
+    "scheduleFirstRunOnboarding() opens 900ms after load on top of the header and the centre panel title, and Back is enabled on step 1 — port the six steps into learn.tour, which fixes both",
+    "two unlabelled sliders in the light-clock panel with no label, no value readout and no unit",
+    "Start route sits under the shared bar"
+   ],
+   "deps": [],
+   "notes": "12 named presets with one-line descriptions map straight onto ui.examples."
+  },
+  {
+   "file": "roofstormwater.html",
+   "id": "roofstormwater",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "scene3d",
+   "effort": "M",
+   "wave": 3,
+   "slots": {
+    "inputs": "MODEL / objects / scene objects / roof params",
+    "stage": "3-D scene + storm timeline",
+    "detail": "OBJECT INSPECTOR",
+    "dock": "two charts",
+    "results": "RESULTS + mass balance"
+   },
+   "delete": [
+    "header (Learn, rules chip, jurisdiction select, language) — Learn is framework furniture, the jurisdiction select is a field",
+    "the opaque HUD drawn over the scene"
+   ],
+   "traps": [
+    "25 focusable controls with no accessible name — the worst on the site",
+    "@media(max-width:900px){.chartgrid>div+div{display:none}} deletes the second chart on mobile instead of stacking it",
+    "the Scenario select is clipped to 'Retenti' by a clamp() column",
+    "Run storm and Size tank float over the canvas as two equal primary buttons",
+    "uses diagram-scene-editor.js, the older monolithic editor, not diagram-scene3d.js"
+   ],
+   "deps": [
+    "roofstormwater.js",
+    "diagram-scene-editor.js"
+   ],
+   "notes": "Consider moving it onto diagram-scene3d.js in the same pass; it is the only consumer of the old file."
+  },
+  {
+   "file": "smrselector.html",
+   "id": "smrselector",
+   "archetype": "wizard",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 3,
+   "slots": {
+    "nav": "1. Site | 2. Requirement | 3. Result | Catalogue",
+    "inputs": "site picker + heavy module access + cooling water",
+    "stage": "world map",
+    "results": "screening result"
+   },
+   "delete": [
+    "the step chip row (the archetype renders it)",
+    "the language select"
+   ],
+   "traps": [
+    "steps 2 and 3 are disabled with opacity .45 and no explanation of what unlocks them",
+    "no forward action visible in a 1440x900 viewport — the wizard archetype puts the primary action at the foot of inputs",
+    "the world map is a low-resolution raster stretched to 530x260; at 330px wide picking a country by click is impractical"
+   ],
+   "deps": [
+    "smr-data.json",
+    "smr-change-log.json",
+    "smr-update-status.json"
+   ],
+   "notes": "Read SMR_UPDATING.md before touching the data. The freshness banner is good and stays, as a footer note."
+  },
+  {
+   "file": "gasdynamics.html",
+   "id": "gasdynamics",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "7 tabs",
+    "inputs": "reservoir / nozzle geometry / viscous nozzle",
+    "stage": "nozzle canvas + M(x), p(x) charts",
+    "results": "OPERATING POINT tiles + operating map"
+   },
+   "delete": [
+    "header Self-check — it duplicates the benchmark chip in the shared bar",
+    "the gas bar: it is two fields"
+   ],
+   "traps": [
+    "the Transition Re input is completely covered by the shared bar",
+    "white toolbar pills on a near-black page: the tool is dark by its own CSS while the chrome keys off prefers-color-scheme",
+    "the tab strip shows 4.5 of 7 tabs at 390px with no scroll affordance",
+    "the nozzle wall is drag-editable with no undo"
+   ],
+   "deps": [],
+   "notes": "The state chip row (CHOKED · M*=1, shock x/L, BL off) is a good pattern — express it as a results verdict plus tiles."
+  },
+  {
+   "file": "gesloten-atmosfeer.html",
+   "id": "gesloten-atmosfeer",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "closure scale / volume & crew / metabolic load",
+    "stage": "object layout + air path + time slider",
+    "results": "END-OF-RUN STATE + THRESHOLD CROSSINGS"
+   },
+   "delete": [
+    "the .col{max-height:calc(100vh - 58px);overflow:auto} scroll traps — three independently scrolling panes on desktop and three stacked scroll traps at 390px"
+   ],
+   "traps": [
+    "the shipped default preset trips the 60 000-step integrator cap, so a warning banner is the first thing on screen",
+    "the platform select clips to 'Diesel-electric submarir' with no ellipsis and no title",
+    "one of the two tools that measured slightly worse after level 0 — the inner-scroll panels are the reason",
+    "no loading indicator for a multi-thousand-step RK4 run: use ui.setState('computing')"
+   ],
+   "deps": [
+    "gesloten-atmosfeer-data.json"
+   ],
+   "notes": "The provenance badges are real buttons with title and aria-label — the only tooltip mechanism in their batch. Keep them as learn topics."
+  },
+  {
+   "file": "heat_exchangers.html",
+   "id": "heat_exchangers",
+   "archetype": "calculator",
+   "compute": "run",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "Process / Geometry / Results / Charts / Validation / Database / Help",
+    "inputs": "mode + hot side + cold side + wall & fouling",
+    "stage": "unit schematic",
+    "results": "duty, area, effectiveness"
+   },
+   "delete": [
+    "the header 'Tools' link that collides with the shared bar's Tools button",
+    "the SI|US toggle and the theme button — both framework furniture now",
+    "the .sticky-run bar (the framework renders one below md)",
+    "#btnCsv, a display:none dead control. CORRECTED for framework v3.1: #btnLoad is the case-file import and is re-declared as ui.importAction() (spec §8.12) — the port that deleted it reported that 'a user holding old case files genuinely cannot open them any more'."
+   ],
+   "traps": [
+    "the OPTIONS card renders ~200px of nothing for the default plate type — the framework refuses to draw an empty panel",
+    "Calculate silently jumps to the Results tab, so inputs and results are never visible together; the calculator archetype shows both",
+    "#btnSave is relabelled ⇩ PDF and calls buildReport()",
+    "row 2 leaves two empty auto-fit columns"
+   ],
+   "deps": [],
+   "notes": "Only tool with a working unit-system toggle; its mapping is the reference for the unit registry."
+  },
+  {
+   "file": "hydraulicsolutions.html",
+   "id": "hydraulicsolutions",
+   "archetype": "reference",
+   "compute": "live",
+   "stage": "none",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "problem chips",
+    "inputs": "design point",
+    "stage": "none",
+    "results": "the library"
+   },
+   "delete": [
+    "the Language select"
+   ],
+   "traps": [
+    "fields in the same visual row do not align because labels wrap and no label height is normalised — the field component fixes this by construction",
+    "~110px of empty space between the field grid and the Load slider",
+    "the page's own copy says navigation runs from the problem, but 11 fields come first"
+   ],
+   "deps": [],
+   "notes": "Reference archetype with a small input panel; the chip cloud becomes nav."
+  },
+  {
+   "file": "kernnormenwijzer.html",
+   "id": "kernnormenwijzer",
+   "archetype": "reference",
+   "compute": "live",
+   "stage": "none",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "filters",
+    "results": "the register + hierarchy chart"
+   },
+   "delete": [
+    "nothing much — this tool has almost no chrome of its own"
+   ],
+   "traps": [
+    "563 of 992 focusable controls are under 32px at 390px — the worst tap-target count on the site",
+    "the only interactive control is a search input created deep below the fold; nothing at the top says the page is filterable",
+    "no language control at all while the manifest lists six catalog languages — set tool_languages honestly and the framework shows nothing",
+    "11 sections with no table of contents",
+    "the sticky warn bar takes 17% of a 390px viewport permanently"
+   ],
+   "deps": [],
+   "notes": "The reference archetype's nav slot is exactly the missing table of contents."
+  },
+  {
+   "file": "luchtbalans.html",
+   "id": "luchtbalans",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "mode pills + element palette",
+    "stage": "network canvas",
+    "detail": "selected block",
+    "results": "KPI grid"
+   },
+   "delete": [
+    "the header Language select",
+    "the action row that mixes create with a red Delete selected"
+   ],
+   "traps": [
+    "at 390px the SVG scales to ~340px wide and node text renders at about 4px — unreadable, and the editor needs pointer drags on 44x20px targets",
+    "all numeric results are below a full-viewport canvas",
+    "every node carries a permanently visible red delete cross: ten destructive controls on screen at once",
+    "no undo",
+    "54 fixed or sticky elements — the most on the site"
+   ],
+   "deps": [],
+   "notes": "Consider a read-only stage below md with editing on wider screens; state it in copy rather than hiding controls."
+  },
+  {
+   "file": "mollier.html",
+   "id": "mollier",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "chart type / units / ambient / start conditions / add process",
+    "stage": "psychrometric chart",
+    "results": "state table"
+   },
+   "delete": [
+    "the two full-width Export Excel / Export PDF buttons above the chart",
+    "the SI/IP segmented control (page-level units now)",
+    "the .app{height:100vh} frame and .side internal scroll"
+   ],
+   "traps": [
+    "dark-only, hard-coded, with no prefers-color-scheme and no toggle: it ignores a light-mode user while its siblings adapt",
+    "at 920px the chart — the point of the tool — ends up below a 900px form",
+    "curve labels clipped at the plot frame; the badge covers the state table's right columns",
+    "no reset, no presets"
+   ],
+   "deps": [],
+   "notes": ""
+  },
+  {
+   "file": "neutron_transport.html",
+   "id": "neutron_transport",
+   "archetype": "studio",
+   "compute": "run",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "drawing tools + materials + shapes",
+    "stage": "geometry canvas",
+    "detail": "MODEL / RUN parameters",
+    "dock": "spectrum chart",
+    "results": "tallies"
+   },
+   "delete": [
+    "the run bar (Validation presets, Clear, Slow, Fast, Stop, Report, Validation, lang, theme) — Report and Validation are the shared bar, the rest becomes inputs and the primary action",
+    "the three simultaneous prototype indicators: the badge chip, the bar chip and the fixed badge"
+   ],
+   "traps": [
+    "@media(max-width:900px) pins the header to 44px with no wrap and no overflow-x: everything after Clear, including the entire run control set, is clipped and unreachable",
+    "Temperature and Pressure are the only bare unitless numeric fields in their batch",
+    "the Role select truncates to 'material regi…'",
+    "aside.left and aside.right add two more in-panel scrollbars"
+   ],
+   "deps": [
+    "neutron-data/",
+    "nsim_core.wasm"
+   ],
+   "notes": "Declares its dependencies honestly; keep SERVER_DATA behaviour and use ui.fail if the WASM is missing."
+  },
+  {
+   "file": "normenwijzer.html",
+   "id": "normenwijzer",
+   "archetype": "reference",
+   "compute": "live",
+   "stage": "none",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "scenario + facet filters",
+    "results": "the register"
+   },
+   "delete": [
+    "the Language select",
+    "two of the three reset buttons (scen_restore, task_clear, f_reset) — one Reset, one scope"
+   ],
+   "traps": [
+    "Diagram.init sits in the fetch success branch; .catch(fail) returns and the toolbar never exists",
+    "the whole desktop first viewport is prose: the first real control is at y≈772",
+    "two competing entry points (ready-made scenario vs set the facets by hand), both fully expanded, side by side",
+    "muted 13px text on tinted card backgrounds is the lowest-contrast body copy in its batch"
+   ],
+   "deps": [
+    "normenwijzer-data.json"
+   ],
+   "notes": "kernnormenwijzer is the same shape; port together."
+  },
+  {
+   "file": "operatingpoint.html",
+   "id": "operatingpoint",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "preset chips + schematic + sliders",
+    "stage": "HEAD-FLOW chart",
+    "results": "operating point tiles + head breakdown + WHAT CHANGED"
+   },
+   "delete": [
+    "header (Pump|Fan, Engineering|Explore, Pin baseline, Reset, EN) — the first two are segmented fields, Reset moves to the inputs footer",
+    "Send state → Moody and Send state → Water Hammer: the shared bar's Send to… already does this"
+   ],
+   "traps": [
+    "those two Send state buttons sit under the shared bar, next to the button that replaces them",
+    "about 40% of the viewport below the chart is empty on desktop",
+    "hard-coded dark"
+   ],
+   "deps": [],
+   "notes": "Pin baseline is a good idea with no equivalent in the framework; keep it as a panel action."
+  },
+  {
+   "file": "periodictable.html",
+   "id": "periodictable",
+   "archetype": "reference",
+   "compute": "live",
+   "stage": "table",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "search + COLOUR BY + LAYOUT",
+    "stage": "the table",
+    "results": "element card"
+   },
+   "delete": [
+    "the 'Язык / Lang' select — hard-coded Russian in an English UI, offering a 7th language the site does not have"
+   ],
+   "traps": [
+    "ru is offered but never written into the shared diagram_lang key: either add ru site-wide or drop it",
+    "at 390px .ptable.std{min-width:900px} inside .ptable-scroll is a silent horizontal drag with no affordance, and the 46px cell floor slices the name and mass lines",
+    "the bottom row (Ac-Lr) is cut by the viewport at 1440x900 and the legend is below the fold"
+   ],
+   "deps": [],
+   "notes": "The one tool where a horizontal scroller is legitimate; it needs the affordance, not the removal."
+  },
+  {
+   "file": "reactorstand.html",
+   "id": "reactorstand",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "preset / console mode / time multiplier / strip window",
+    "stage": "reactor mimic",
+    "dock": "strip charts",
+    "results": "instrument readouts"
+   },
+   "delete": [
+    "the teal header with six language buttons and the theme glyph",
+    "the WHAT THIS IS prose card — it is learn.intro"
+   ],
+   "traps": [
+    "430px of prose before any control, and the mimic is below the fold on first load",
+    "the simulation is already running at page load with only a Stop offered and no start affordance",
+    "the mimic gets its own horizontal scroller at 760px — the only deliberate handling of an unreflowable drawing on the site, worth generalising into ui.stage"
+   ],
+   "deps": [],
+   "notes": "The honesty line (requested ×10 / achieved ×10 / sampled every 0.30 s) is a good results note; keep it."
+  },
+  {
+   "file": "solargaincalculator.html",
+   "id": "solargaincalculator",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "scene3d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "location / surface / dimensions",
+    "stage": "3-D scene + chip strip",
+    "nav": "Instant/Day/Month/Year + Average/Clear-sky",
+    "results": "5 KPI tiles + monthly bar chart"
+   },
+   "delete": [
+    "header (source badge, language, theme, Open report)",
+    "aside.panel{max-height:52%} internal scroll"
+   ],
+   "traps": [
+    "a stuck 'Computing…' line beside already-final KPI tiles, showing a different GHI (1 174 vs 1 171 kWh/m²) — one number, one state",
+    "h1{white-space:nowrap} with no min-width: the title runs under the language select at 390px",
+    "tilt and azimuth sliders sit under the shared bar"
+   ],
+   "deps": [],
+   "notes": "The two GHI values are a genuine correctness question, not only a UI one; resolve before porting."
+  },
+  {
+   "file": "stress_transformation.html",
+   "id": "stress_transformation",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "2D Stress / Engineering cases / Strain rosette / Mohr-Coulomb / 3D Stress",
+    "inputs": "stress state + presets",
+    "stage": "physical element + Mohr circle",
+    "results": "6 derived tiles + failure assessment"
+   },
+   "delete": [
+    "the dark header band on a light body",
+    "the three per-field unit selects and the global Stress unit select — one page-level control"
+   ],
+   "traps": [
+    "the 6 result tiles render above both diagrams and above the plane finder that produces them",
+    "Find is the only primary-styled button on a page that updates live",
+    "tab strip cut at 'Mohr-Cou' with no scroll cue",
+    "no reset"
+   ],
+   "deps": [],
+   "notes": "'How this model works' is already learn content; move it into topics."
+  },
+  {
+   "file": "ventilation.html",
+   "id": "ventilation",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "location & climate / geometry / envelope / heat sources",
+    "stage": "room cross-section",
+    "results": "tiles + temperature-by-height + opening velocities"
+   },
+   "delete": [
+    "the orange gradient ☀ Auto: worst hot conditions button — it is a preset, not the primary action"
+   ],
+   "traps": [
+    "one media query at 1200px and nothing else: the Season/Outdoor row keeps desktop widths at 390px and overflows its label",
+    "the ☀ button is the loudest control on a live tool that has no primary action",
+    "a stray × delete-source button floats with nothing to anchor it",
+    "in-canvas annotations overlap the artwork"
+   ],
+   "deps": [],
+   "notes": ""
+  },
+  {
+   "file": "wallthermalcalculator.html",
+   "id": "wallthermalcalculator",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "nav": "Assembly / Glazing / Doors / Climate / Report tabs",
+    "inputs": "boundary conditions + layer list",
+    "stage": "cross-section + Glaser diagram",
+    "results": "R / U / fRsi tiles"
+   },
+   "delete": [
+    "header (Presets, Save project, Print/PDF) — Presets becomes ui.examples(). CORRECTED for framework v3.1: Open project is NOT deleted, it becomes ui.importAction() (spec §8.12).",
+    "the results table that repeats the three tiles verbatim"
+   ],
+   "traps": [
+    "layer thickness labels are positioned like an axis scale so they read as cumulative positions",
+    "the interstitial-condensation tile is rendered in failure red with no statement of whether 'yes' is acceptable",
+    "layer drag editor with no undo",
+    "Report tab clipped to 'Repo' with no scroll affordance"
+   ],
+   "deps": [],
+   "notes": "The dew-point drag marker is a genuine direct-manipulation stage; ui.history applies."
+  },
+  {
+   "file": "waterhammer.html",
+   "id": "waterhammer",
+   "archetype": "calculator",
+   "compute": "run",
+   "stage": "canvas2d",
+   "effort": "M",
+   "wave": 4,
+   "slots": {
+    "inputs": "15 presets + pipe & liquid",
+    "stage": "schematic + x-t pressure map",
+    "dock": "playback bar",
+    "results": "6 KPI tiles"
+   },
+   "delete": [
+    "the site-name h1",
+    "header Save case / Export CSV — CORRECTED for framework v3.1: Load case is NOT deleted, it becomes ui.importAction() (spec §8.12)."
+   ],
+   "traps": [
+    "15 presets in a 2-column list fill the first screen so the tool looks like a list of case names — ui.examples with notes, collapsed",
+    "on mobile the KPI tiles come before the schematic and before any input",
+    "vapour-pressure and atmospheric-pressure inputs sit under the shared bar"
+   ],
+   "deps": [],
+   "notes": "Its 'Presets change inputs only. Press Run transient to solve.' is exactly the compute:'run' contract; the framework states it for every such tool."
+  },
+  {
+   "file": "RWA_calculator.html",
+   "id": "RWA_calculator",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "svg",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "nav": "Natural|Mechanical + scenario tabs",
+    "inputs": "numbered input cards",
+    "stage": "section diagram",
+    "results": "RESULT hero"
+   },
+   "delete": [
+    "the sticky header with NL/FR/EN pills and the blue Export PDF"
+   ],
+   "traps": [
+    "two stacked tab strips consume the whole first screen before any input",
+    "no uk localisation while the manifest lists six catalog languages",
+    "the shared bar covers a select and a label in card 2"
+   ],
+   "deps": [],
+   "notes": "Scenario tabs are effectively presets; consider ui.examples plus one segmented field."
+  },
+  {
+   "file": "beam_diagrams.html",
+   "id": "beam_diagrams",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "BEAM / LOADS",
+    "stage": "beam sketch + shear + moment",
+    "results": "reactions and extrema"
+   },
+   "delete": [
+    "the gradient banner with the Language select"
+   ],
+   "traps": [
+    "load positions are clamped with clamp(p.x,0,L) while the load list prints the raw value: enter x=99 on a 6m beam and the list says 99 while the diagram solves 6, with no message. The field commit path announces a clamp and writes it back",
+    "shear chart y-label collides with a data label"
+   ],
+   "deps": [],
+   "notes": "Load example / Clear all is the only correct preset+reset pair in its batch; it maps directly."
+  },
+  {
+   "file": "doppler.html",
+   "id": "doppler",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "temperature",
+    "stage": "broadened line chart",
+    "results": "KPI tiles"
+   },
+   "delete": [
+    "the six language pills"
+   ],
+   "traps": [
+    "a single range input with no numeric entry: you cannot type an exact temperature",
+    "results sit below the chart and below the fold — the calculator archetype puts them in the results column",
+    "axis tick labels render at about 4px at 390px",
+    "no media queries at all"
+   ],
+   "deps": [],
+   "notes": "With spectrum, xenon and kinetics this is a four-tool family with one shape; port them together and they become one template."
+  },
+  {
+   "file": "fourier_series.html",
+   "id": "fourier_series",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "CONTROLS",
+    "stage": "reconstruction + harmonic spectrum",
+    "results": "none today — add coefficient tiles"
+   },
+   "delete": [
+    "the EXPORT panel entirely",
+    "the header Language select"
+   ],
+   "traps": [
+    "button{background:var(--accent)} is the default, so the export buttons are the loudest controls on the page while the real interaction is an unstyled slider",
+    "#btnXlsx is labelled 'Data (CSV)' and downloads a .csv — id, label and format disagree",
+    "on mobile EXPORT renders before the charts it exports"
+   ],
+   "deps": [],
+   "notes": "Tiny port; good for validating the tokens pass."
+  },
+  {
+   "file": "iron_carbon_diagram.html",
+   "id": "iron_carbon_diagram",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "carbon %, temperature, alloy %",
+    "stage": "phase diagram",
+    "results": "current point + alloy analysis + invariant points"
+   },
+   "delete": [
+    "the two full-width export bars",
+    "the gradient header band"
+   ],
+   "traps": [
+    "<button id=\"btnEval\" class=\"ghost\">↵</button> has no label, title or aria-label",
+    "the tool does not live-update: only click on ↵ and Enter are bound, so typing a value and clicking away silently does nothing. Declare compute:'live' and bind the fields properly",
+    "invalid input is a silent no-op (if(isNaN(c)||c<0||c>CEM) return)",
+    "zero media queries; the 920x640 canvas renders at 39% at 390px",
+    "the shared bar covers the page's only role=status element"
+   ],
+   "deps": [],
+   "notes": "Four separate audit findings in one small file; a satisfying port."
+  },
+  {
+   "file": "kinetics.html",
+   "id": "kinetics",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "two sliders",
+    "stage": "power response + inhour relation",
+    "results": "reactivity and period tiles"
+   },
+   "delete": [
+    "the language pill bar"
+   ],
+   "traps": [
+    "zero buttons of its own: no numeric entry, no reset, no presets",
+    "the four-row shared bar covers the lower 40% of the chart at 390px",
+    "the chart caption is longer than the page lead and arrives after the user has already changed things — move it to learn.intro"
+   ],
+   "deps": [],
+   "notes": "Same family as doppler/spectrum/xenon."
+  },
+  {
+   "file": "moodydiagram.html",
+   "id": "moodydiagram",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "FLUID / PIPE / FLOW",
+    "stage": "Moody chart",
+    "results": "6 result cards"
+   },
+   "delete": [
+    "header language select and sun-icon theme button",
+    "aside{position:sticky;max-height:100vh;overflow-y:auto} — the archetype makes the column sticky already; where an independent scrollbar is genuinely wanted, declare app.scrollRegion('inputs') (spec §4.6), never overflow on a panel"
+   ],
+   "traps": [
+    "multi-sentence theory blocks interleaved between form fields: at 390px the user reads three paragraphs before any output. Move them into learn topics — this tool is the clearest case for it on the site",
+    "on-chart annotation overlaps the operating-point marker",
+    "the badge cuts the last result card's explanatory line mid-sentence"
+   ],
+   "deps": [],
+   "notes": "Good first level-3 port: small, live, one stage, and the learn payoff is obvious."
+  },
+  {
+   "file": "ontvochtiging.html",
+   "id": "ontvochtiging",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "S1 outdoor air / S2 room requirement / S3 moisture load",
+    "stage": "P1 process paths chart",
+    "results": "R1 ranking of the four methods"
+   },
+   "delete": [
+    "the Language select"
+   ],
+   "traps": [
+    "one media query at 1280px and nothing below it",
+    "the shared bar covers the whole S3 section at 390px",
+    "label wrapping plus inline provenance badges break row alignment",
+    "no reset, no presets, no worked example anywhere in the file"
+   ],
+   "deps": [],
+   "notes": "Units in every label are already complete — moving them into the unit slot is mechanical."
+  },
+  {
+   "file": "procesklimaat.html",
+   "id": "procesklimaat",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "none",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "industry + comparison + badge filters",
+    "results": "attention points + LIVE RESULT tiles"
+   },
+   "delete": [
+    "the Language select"
+   ],
+   "traps": [
+    "'Show all categories' is styled as the filled primary button inside a row of secondary filters — the reset of a filter is the loudest control on the row",
+    "at 390px the shared bar lands exactly on 'Selected industry', the control step 1 tells you to use first"
+   ],
+   "deps": [],
+   "notes": "Best 'what is this and what do I do first' copy on the site — move it into learn.intro verbatim and it becomes the pending-state text."
+  },
+  {
+   "file": "reactionbuilder.html",
+   "id": "reactionbuilder",
+   "archetype": "studio",
+   "compute": "live",
+   "stage": "none",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "nav": "Reactions / Decays / Validation",
+    "inputs": "PARTICLES palette + WORKED EXAMPLES",
+    "stage": "initial state → final state builder",
+    "results": "KINEMATICS"
+   },
+   "delete": [
+    "the header Check|Reference segmented control or the Check button — one of the two must be renamed",
+    "the theme button and the language select"
+   ],
+   "traps": [
+    "'Check' labels two different things on one screen and the hint says 'press Check' while a control called Check is already pressed",
+    "ships a complete ru: string table that no <option> exposes",
+    "half the desktop viewport is empty below the right column",
+    "particle chips are ~34px tall — below the 44px tap target"
+   ],
+   "deps": [],
+   "notes": "Empty-state handling is already correct (Check disabled until particles are added, √s shown as —); keep it."
+  },
+  {
+   "file": "spectrum.html",
+   "id": "spectrum",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "two sliders",
+    "stage": "flux spectrum",
+    "results": "readout tiles"
+   },
+   "delete": [
+    "the language pill bar"
+   ],
+   "traps": [
+    "H = cssW*0.52 with fixed-px label fonts: at 390px the plot is ~185px tall and the legend, ticks and annotations collide into illegibility",
+    "no presets, no reset — the only way back to defaults is a reload",
+    "readout tiles sit exactly in the shared-chrome band"
+   ],
+   "deps": [],
+   "notes": "Same family as doppler/xenon/kinetics."
+  },
+  {
+   "file": "xenon.html",
+   "id": "xenon",
+   "archetype": "calculator",
+   "compute": "live",
+   "stage": "canvas2d",
+   "effort": "S",
+   "wave": 4,
+   "slots": {
+    "inputs": "two sliders + reactivity|concentration toggle",
+    "stage": "transient chart",
+    "results": "readout tiles"
+   },
+   "delete": [
+    "the language pill bar"
+   ],
+   "traps": [
+    "the y-axis is labelled |Xe reactivity worth| and plotted positive while the tiles report −2 159 pcm and the annotation says peak −4 123 pcm: one quantity, two signs, one screen",
+    "same fixed-aspect canvas problem as spectrum",
+    "no reset, no presets"
+   ],
+   "deps": [],
+   "notes": "Same family as doppler/spectrum/kinetics."
+  }
+ ],
+ "framework_revision_note": "Corrected for diagram-ui.js 2026-08-17.v3 / UI_FRAMEWORK_SPEC.md revision 2026-08-17a. Only entries the release made FACTUALLY WRONG were touched; the cards are otherwise unchanged and still date from the 2026-08-15 audit. The clearest case is file import: the shared bar owns export and has never owned import, so every 'delete Load JSON / Load case / Open project' instruction was wrong and is corrected to ui.importAction() (spec §8.12). See PORTING_PLAYBOOK.md §4.3a for the full list of deletions that the framework now hosts — collapsible panels, notices, splitters, region scrolling, transports, meters, legends, rich tables, grouped options and example selects — which this map does not repeat per card."
+}

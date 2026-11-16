@@ -1,0 +1,542 @@
+{
+ "tool": "protectioncoordination",
+ "file": "protectioncoordination.html",
+ "reference": "Independent closed-form complex-impedance implementation of selected IEC 60909-0:2016 kernels, the EasyPower/Parise legacy CCM equation set, and three Schneider Electric published cross-checks, written from the standard and the published documents by bench-src/gen_protectioncoordination.py; no Protection Coordination Studio code is imported and the generator never reads the artifact or the page.",
+ "reference_citations": [
+  "IEC 60909-0:2016, 4.2 eq. (29) - I_k'' = c U_n/(sqrt(3)|Z_k|)",
+  "IEC 60909-0:2016, 4.2 eq. (31)/(34) - I_k2'' = c U_n/|Z_1+Z_2| = (sqrt(3)/2) I_k3'' when Z_2 = Z_1",
+  "IEC 60909-0:2016, 4.2 eq. (52) - I_k1'' = sqrt(3) c U_n/|Z_1+Z_2+Z_0|",
+  "IEC 60909-0:2016, 4.3.1.2 eq. (55)-(56) and method C - i_p = kappa sqrt(2) I_k'', kappa = 1.02 + 0.98 exp(-3 R/X), R/X = (R_c/X_c)(f_c/f) at f_c = 0.4 f",
+  "IEC 60909-0:2016, 6.1 eq. (5)-(6) - network feeder impedance and its referral",
+  "IEC 60909-0:2016, 6.2 eq. (7)-(9) - two-winding transformer Z_T, R_T, X_T",
+  "IEC 60909-0:2016, 6.6 eq. (18) - Z_G = x_d'' U_rG^2/S_rG; the K_G correction is NOT applied, see reference_limits",
+  "EasyPower 11.1 Help, TCC Options, Characteristic Current Method - i_dc(0.5 cycle) and equivalent X/R equations; cites G. Parise, IEEE Trans. Industry Applications 31(1), 1995",
+  "Schneider Electric 0100DB2301 Electrical Distribution Fundamentals Design Guide, System Protection - delta-wye secondary L-N fault gives 57.7% of maximum three-phase primary fault current",
+  "Schneider Electric 0100DB2301, System Protection, Add a Generator / Figure 55 - bus 02 19.318 kA before and 24.672 kA after adding the 15 MW generator (926.2 A rated, x_d'' = 19%)",
+  "Schneider Electric FA405803 - 400 kVA / 410 V / u_kr 4% transformer, I_k'' = I_rT/u_kr on a stiff primary"
+ ],
+ "reference_limits": [
+  "IEC 60909-0:2016 6.1 eq. (6) writes Z_Q = c U_nQ^2/S_kQ″, so eq. (29) at the feeder terminals returns the quoted I_kQ″. The tool uses Z_Q = U_nQ^2/S_kQ″ and applies c only in the equivalent voltage source, which makes its terminal current c x the quoted value: 13 777.68 A against 13 121.60 A for the 250 MVA / 11 kV feeder of analytic_source_3ph. The tool's own regression test asserts the factor c, so this is a declared convention and not a slip. The cases here take Z_Q = U_nQ^2/S_kQ″ as a stated case input and grade only eq. (29)/(31)/(34)/(52)/(55)/(56) on it; the mapping (U_n, S_kQ″) -> Z_Q is NOT established by this benchmark. The four cases that run at c = 1 are unaffected, because there the two conventions coincide.",
+  "The generator impedance correction K_G of IEC 60909-0:2016 6.6 eq. (18) is not applied by the tool and cannot be computed from its generator inputs, which carry no rated power factor. The generator branch reference is Z_G = x_d″ U^2/S_rG as entered, so K_G is NOT established.",
+  "The six networks are the fixtures of the tool's own regression tests. A fixture is an input, not a reference: every reference value above is computed in this file from the cited clause, and none of them is read back from the tool."
+ ],
+ "tolerance": "The tolerances of the 2026-08-12 artifact are kept unchanged so that a verdict can be compared with it: current KPIs +-0.005 kA, kappa +-0.0005, CCM X/R +-0.005, the L-L/3-phase ratio +-0.0008 absolute, the 57.7% transformer ratio +-0.002 absolute, and the Schneider generator increment 0.5% relative because the published diagram values and generator data are rounded. No tolerance was widened; the observed deviation is recorded next to every graded value.",
+ "total": 6,
+ "passed": 6,
+ "failed": 0,
+ "flagged": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "analytic_source_3ph",
+   "note": "Closed-form one-source IEC equivalent-voltage-source kernel.",
+   "inputs": {
+    "U_V": 11000,
+    "Sk_MVA": 250,
+    "c": 1.05,
+    "X_over_R": 10,
+    "Z_Q_ohm": 0.484
+   },
+   "cmp": {
+    "Ik_kA": {
+     "got": 13.777676878388794,
+     "ref": 13.777676878388798,
+     "rel": 2.5786013927886264e-16,
+     "abs": 3.552713678800501e-15,
+     "channel": "record",
+     "channels": {
+      "record": 13.777676878388794,
+      "dom": 13.78,
+      "page_fn": 13.777676878388794
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (29)",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 13.78,
+      "difference": 0.002323121611205181,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "kappa": {
+     "got": 1.7460018562680837,
+     "ref": 1.7460018562680837,
+     "rel": 0,
+     "abs": 0,
+     "channel": "record",
+     "channels": {
+      "record": 1.7460018562680837,
+      "dom": 1.746,
+      "page_fn": 1.7460018562680837
+     },
+     "clause": "IEC 60909-0:2016 4.3.1.2 eq. (56), method C R/X at f_c=0.4f",
+     "ok": true,
+     "tol_abs": 0.0005,
+     "channel_agreement": {
+      "dom": 1.746,
+      "difference": 0.0000018562680836886614,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "ip_kA": {
+     "got": 34.02010848257206,
+     "ref": 34.02010848257207,
+     "rel": 2.0885963256822044e-16,
+     "abs": 7.105427357601002e-15,
+     "channel": "record",
+     "channels": {
+      "record": 34.02010848257206,
+      "dom": 34.02,
+      "page_fn": 34.02010848257206
+     },
+     "clause": "IEC 60909-0:2016 4.3.1.2 eq. (55)",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 34.02,
+      "difference": 0.00010848257205964273,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "ccm_xr": {
+     "got": 10,
+     "ref": 10,
+     "rel": 0,
+     "abs": 0,
+     "channel": "record",
+     "channels": {
+      "record": 10,
+      "dom": 10,
+      "page_fn": null
+     },
+     "clause": "EasyPower 11.1 / Parise CCM, single branch",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 10,
+      "difference": 0,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 2.5786013927886264e-16,
+   "pass": true,
+   "reference_intermediates": {
+    "methodC_RX": 0.0999999999999999
+   }
+  },
+  {
+   "id": "analytic_source_ll",
+   "note": "For Z2=Z1, IEC line-line current is sqrt(3)/2 of three-phase current.",
+   "inputs": {
+    "U_V": 11000,
+    "Sk_MVA": 250,
+    "c": 1.05,
+    "X_over_R": 10,
+    "Z_Q_ohm": 0.484
+   },
+   "cmp": {
+    "Ik_kA": {
+     "got": 11.931818181818178,
+     "ref": 11.931818181818182,
+     "rel": 2.977512416518515e-16,
+     "abs": 3.552713678800501e-15,
+     "channel": "record",
+     "channels": {
+      "record": 11.931818181818178,
+      "dom": 11.93,
+      "page_fn": 11.931818181818178
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (31)/(34)",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 11.93,
+      "difference": 0.0018181818181783882,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "ratio_to_3ph": {
+     "got": 0.8660254037844385,
+     "ref": 0.8660254037844386,
+     "rel": 1.2819751242557095e-16,
+     "abs": 1.1102230246251565e-16,
+     "channel": "record",
+     "channels": {
+      "record": 0.8660254037844385,
+      "dom": 0.8657474600870827,
+      "page_fn": 0.8660254037844385
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (34), Z_2 = Z_1",
+     "ok": true,
+     "tol_abs": 0.0008,
+     "channel_agreement": {
+      "dom": 0.8657474600870827,
+      "difference": 0.00027794369735578695,
+      "printed_step": 0.002,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 2.977512416518515e-16,
+   "pass": true
+  },
+  {
+   "id": "transformer_referral",
+   "note": "Finite utility source impedance referred through 11 kV/410 V ratio and added to 4% transformer impedance.",
+   "inputs": {
+    "U1_V": 11000,
+    "U2_V": 410,
+    "Sk_MVA": 10000,
+    "X_over_R": 10,
+    "Sn_kVA": 400,
+    "uk_pct": 4,
+    "Pk_kW": 0,
+    "c": 1,
+    "Z_Qt_ohm": 0.000016809999999999997,
+    "Z_T_ohm": 0.016810000000000002
+   },
+   "cmp": {
+    "Ik_kA": {
+     "got": 14.067715912586536,
+     "ref": 14.067715912586536,
+     "rel": 0,
+     "abs": 0,
+     "channel": "record",
+     "channels": {
+      "record": 14.067715912586536,
+      "dom": 14.07,
+      "page_fn": 14.067715912586536
+     },
+     "clause": "IEC 60909-0:2016 6.1 eq. (5) + 6.2 eq. (7)-(9) + 4.2 eq. (29)",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 14.07,
+      "difference": 0.0022840874134644196,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 0,
+   "pass": true,
+   "crosscheck_ungraded": {
+    "name": "Schneider FA405803 stiff-primary approximation I_rT/u_kr",
+    "published_kA": 14.081713882673801,
+    "closed_form_kA": 14.067715912586536,
+    "relative_difference": 0.0009940530111528334,
+    "graded": false
+   }
+  },
+  {
+   "id": "parallel_sources",
+   "note": "Independent phasor sum of two source currents at a common 11 kV bus; CCM is evaluated from the two branch magnitudes/XR values.",
+   "inputs": {
+    "U_V": 11000,
+    "c": 1,
+    "utility_Sk_MVA": 250,
+    "utility_XR": 3,
+    "generator_Sn_kVA": 1000,
+    "generator_xd_pct": 12,
+    "generator_XR": 18,
+    "Z_utility_ohm": 0.484,
+    "Z_generator_ohm": 14.52
+   },
+   "cmp": {
+    "Ik_kA": {
+     "got": 13.544060707176193,
+     "ref": 13.54406070717619,
+     "rel": 2.6230786730881454e-16,
+     "abs": 3.552713678800501e-15,
+     "channel": "record",
+     "channels": {
+      "record": 13.544060707176193,
+      "dom": 13.54,
+      "page_fn": 13.544060707176193
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (29) on the parallel equivalent",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 13.54,
+      "difference": 0.004060707176194001,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "utility_kA": {
+     "got": 13.121597027036957,
+     "ref": 13.12159702703695,
+     "rel": 5.415062924856115e-16,
+     "abs": 7.105427357601002e-15,
+     "channel": "record",
+     "channels": {
+      "record": 13.121597027036957,
+      "dom": 13.12,
+      "page_fn": 13.121597027036952
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (29) on the feeder branch alone",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 13.12,
+      "difference": 0.0015970270369578543,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "generator_kA": {
+     "got": 0.43738656756789535,
+     "ref": 0.43738656756789834,
+     "rel": 6.853439014271021e-15,
+     "abs": 2.9976021664879227e-15,
+     "channel": "record",
+     "channels": {
+      "record": 0.43738656756789535,
+      "dom": 0.437,
+      "page_fn": 0.43738656756789834
+     },
+     "clause": "IEC 60909-0:2016 4.2 eq. (29) on the generator branch alone",
+     "ok": true,
+     "tol_abs": 0.0005,
+     "channel_agreement": {
+      "dom": 0.437,
+      "difference": 0.0003865675678953462,
+      "printed_step": 0.001,
+      "consistent": true
+     }
+    },
+    "ccm_xr": {
+     "got": 3.1314661952453817,
+     "ref": 3.131466195245382,
+     "rel": 1.4181510581986777e-16,
+     "abs": 4.440892098500626e-16,
+     "channel": "record",
+     "channels": {
+      "record": 3.1314661952453817,
+      "dom": 3.13,
+      "page_fn": null
+     },
+     "clause": "EasyPower 11.1 / Parise CCM over the two branches",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 3.13,
+      "difference": 0.0014661952453818294,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "kappa": {
+     "got": 1.3958661595022808,
+     "ref": 1.3958661595022805,
+     "rel": 1.5907299092644029e-16,
+     "abs": 2.220446049250313e-16,
+     "channel": "record",
+     "channels": {
+      "record": 1.3958661595022808,
+      "dom": 1.396,
+      "page_fn": 1.3958661595022808
+     },
+     "clause": "IEC 60909-0:2016 4.3.1.2 eq. (56), method C on the 0.4f parallel equivalent",
+     "ok": true,
+     "tol_abs": 0.0005,
+     "channel_agreement": {
+      "dom": 1.396,
+      "difference": 0.00013384049771913986,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    },
+    "ip_kA": {
+     "got": 26.736691694099473,
+     "ref": 26.73669169409946,
+     "rel": 5.315113357251379e-16,
+     "abs": 1.4210854715202004e-14,
+     "channel": "record",
+     "channels": {
+      "record": 26.736691694099473,
+      "dom": 26.74,
+      "page_fn": 26.736691694099473
+     },
+     "clause": "IEC 60909-0:2016 4.3.1.2 eq. (55)",
+     "ok": true,
+     "tol_abs": 0.005,
+     "channel_agreement": {
+      "dom": 26.74,
+      "difference": 0.0033083059005249993,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 6.853439014271021e-15,
+   "pass": true,
+   "reference_intermediates": {
+    "branch_xr": [
+     3,
+     18
+    ],
+    "ccm_sum_ac": 13558.98359460485,
+    "ccm_sum_dc": 7031.423245308874,
+    "methodC_RX": 0.31943981680453826
+   }
+  },
+  {
+   "id": "dyn_primary_577",
+   "note": "Schneider 0100DB2301 states a secondary L-N fault on a delta-wye transformer produces 57.7% of the maximum three-phase primary phase current.",
+   "inputs": {
+    "vector_group": "Dyn11",
+    "secondary_fault": "L-G",
+    "c": 1,
+    "U1_V": 11000,
+    "U2_V": 400,
+    "Sn_kVA": 1000,
+    "uk_pct": 6,
+    "Pk_kW": 0,
+    "Sk_MVA": 100000000,
+    "device": "QHV577 on the 11 kV side",
+    "I_LG_primary_A": 505.05044921228506,
+    "I_3ph_primary_A": 874.7729900638535
+   },
+   "cmp": {
+    "primary_phase_ratio": {
+     "got": 0.5773503011054557,
+     "ref": 0.5773502691896258,
+     "rel": 5.5279838896813786e-8,
+     "abs": 3.191582986783459e-8,
+     "channel": "page_fn",
+     "channels": {
+      "record": null,
+      "dom": 0.5771428571428572,
+      "page_fn": 0.5773503011054557
+     },
+     "clause": "Schneider Electric 0100DB2301, System Protection: secondary L-N fault gives 57.7% of the maximum three-phase primary phase current",
+     "ok": true,
+     "tol_abs": 0.002,
+     "ref_exact": 0.577350301105455,
+     "ref_exact_note": "(1/sqrt3) x 3|Z_1| / |2 Z_1 + Z_0| for the finite feeder of this case; the published 57.7% is its Z_Q -> 0 limit",
+     "abs_to_ref_exact": 6.661338147750939e-16,
+     "channel_agreement": {
+      "dom": 0.5771428571428572,
+      "difference": 0.00020744396259853026,
+      "printed_step": 0.002,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 5.5279838896813786e-8,
+   "pass": true,
+   "reference_intermediates": {
+    "Z1_ohm": 0.009600001592059506,
+    "Z0_ohm": 0.0096,
+    "I_3ph_secondary_A": 24056.257226755974,
+    "I_LG_secondary_A": 24056.258556581968
+   },
+   "notes": [
+    "primary_phase_ratio: Diagram.record.build() carries no per-device current, so the graded channel is deviceCurrentForFault(QHV577, fault).phase; the dom channel is the trip timeline, which prints integer amps."
+   ]
+  },
+  {
+   "id": "schneider_generator_increment",
+   "note": "Schneider 0100DB2301 Add a Generator / Figure 55 publishes 19.318 kA before and 24.672 kA after the 15 MW generator; the branch increment is therefore 5.354 kA. Only the generator increment is graded; the total remains an explicit convention cross-check.",
+   "inputs": {
+    "published_before_kA": 19.318,
+    "published_after_kA": 24.672,
+    "U_V": 11000,
+    "c": 1.1,
+    "generator_rated_A": 926.2,
+    "generator_Sn_kVA": 17646.480037673235,
+    "generator_xd_pct": 19,
+    "generator_XR": 1000,
+    "utility_Sk_MVA": 3810.512,
+    "utility_U_V": 110000,
+    "transformer_Sn_kVA": 45000,
+    "transformer_uk_pct": 12.5
+   },
+   "cmp": {
+    "generator_kA": {
+     "got": 5.362210526315791,
+     "ref": 5.353999999999999,
+     "rel": 0.0015335312506148467,
+     "abs": 0.008210526315791888,
+     "channel": "page_fn",
+     "channels": {
+      "record": null,
+      "dom": 5.36,
+      "page_fn": 5.362210526315791
+     },
+     "clause": "Schneider Electric 0100DB2301 Figure 55 published branch increment 24.672-19.318 kA",
+     "ok": true,
+     "tol_rel": 0.005,
+     "ref_closed_form": 5.36221052631579,
+     "ref_closed_form_note": "c I_rG / x_d″ from IEC 6.6 Z_G (no K_G); equals 1.1 x 926.2 / 0.19 A",
+     "rel_to_ref_closed_form": 1.6563661858132328e-16,
+     "channel_agreement": {
+      "dom": 5.36,
+      "difference": 0.002210526315790773,
+      "printed_step": 0.01,
+      "consistent": true
+     }
+    }
+   },
+   "worst_rel": 0.0015335312506148467,
+   "pass": true,
+   "crosscheck_ungraded": {
+    "name": "Schneider 0100DB2301 Figure 55 bus 02 total",
+    "published_before_kA": 19.318,
+    "published_after_kA": 24.672,
+    "closed_form_utility_kA": 18.990475933273085,
+    "closed_form_total_kA": 24.35268471420701,
+    "relative_difference_before": 0.016954346553831448,
+    "relative_difference_after": 0.012942415928704152,
+    "graded": false
+   },
+   "notes": [
+    "generator_kA: the record CCM inversion is singular here (both branches are entered with the same X/R), so this quantity is graded on the page function and not on the record surface"
+   ]
+  }
+ ],
+ "graded_quantities": 15,
+ "channels": {
+  "record": "Diagram.record.build().outputs, the published calculation-record surface, double precision.",
+  "dom": "the printed strings of #kFault / #kIp / #kCCM / #ccmTable / #timeline, read with a separator-tolerant parser. This is the channel the 2026-08-12 artifact graded on.",
+  "page_fn": "a read through one of the page's own pure functions (calc.fault.sources, deviceCurrentForFault), used where the record surface carries no counterpart."
+ },
+ "environment": "Chromium (Playwright) on Linux, http://127.0.0.1:8332 origin, ?lang=en. Every case state is driven in through the page's own project-import control (#fileImport) and nothing is written into page state. References generated by python3 bench-src/gen_protectioncoordination.py.",
+ "reference_generator": {
+  "file": "/home/claude/wp/page-rerun/drv-pc/ref/protectioncoordination_ref.json",
+  "mtime_ms": 1792106088599.14
+ },
+ "framework_smoke": {
+  "diagram": true,
+  "record": true,
+  "permalink": true,
+  "toolbar": true,
+  "number_locale": true
+ },
+ "crosscheck": "Three published cross-checks are carried un-graded beside the graded closed forms, because each needs a convention the published source does not expose: Schneider FA405803 I_rT/u_kr for transformer_referral (0.099 % from the closed form that includes the finite feeder), and Schneider 0100DB2301 Figure 55 bus 02 before and after for schneider_generator_increment (1.70 % and 1.29 % from the closed form). The graded Figure-55 quantity is the branch increment alone.",
+ "not_benchmarked": [
+  "Generic circuit-breaker, fuse and relay TCC shapes, the automatic grading optimizer and the protection-zone visualization: they are engineering models/UI workflows rather than a single standard reference curve.",
+  "User-imported manufacturer TCC and selectivity/back-up datasets: parsing/applicability logic has self-tests, but correctness of proprietary manufacturer tables depends on the user-provided source and is not independently benchmarked here.",
+  "CT ALF/knee-voltage/saturation screening beyond its algebraic self-tests.",
+  "The IEC 60909-0:2016 mu/q breaking-current screening over arbitrary multi-source networks, the conservative idc source-branch envelope, and the full IEC 60909 d.c. component equation (64). The latter is not yet implemented.",
+  "Steady-state synchronous-generator IEC equations (84)/(85): the tool currently uses explicit user/vendor IkP data as a screen; converter/UPS stationary and unbalanced-fault control behavior remains vendor-specific.",
+  "IEC m+n thermal-equivalent/Joule-integral calculation: the current cable check is a branch-current I^2 t / user Ithr,1s screening only.",
+  "IT first-fault capacitive current, arc-flash, differential/distance/directional protection and proprietary manufacturer back-up/selectivity tables not supplied by the user.",
+  "Equation-level changes between IEC 60909-0:2016 and IEC 60909-0:2026 have not been independently reconciled; 2016 equation-set features are labelled explicitly in the tool.",
+  "The network feeder impedance convention of IEC 60909-0:2016 6.1 eq. (6) and the generator correction K_G of 6.6 eq. (18): see reference_limits.",
+  "The TCC canvas, including the --tcc-ink/--tcc-grid tokens this page gained on 2026-10-15; no pixel is graded here."
+ ],
+ "build": "2026-10-03.protectioncoordination-number-locale-1",
+ "manifest_revision": "2026-10-03.protectioncoordination-number-locale-1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/gen_protectioncoordination.py from the clauses and published documents this artifact cites. That generator reads no page, no artifact and nothing it writes, so no case reuses a stored value and none carries ref_source \"recorded\". The six networks are the fixtures of the page's own regression tests; a fixture is an input, not a reference.",
+ "run_at": "2026-10-15T23:15:02Z"
+}

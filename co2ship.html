@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CO2 shipping: liquefaction, fleet and cost</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-19.2",
+  "id": "co2ship",
+  "file": "co2ship.html",
+  "listed": true,
+  "category": "ccus",
+  "order": 50,
+  "title": {
+    "en": "CO2 shipping: liquefaction, fleet and cost",
+    "uk": "Морське транспортування CO2: зрідження, флот і вартість",
+    "de": "CO2-Schiffstransport: Verflüssigung, Flotte und Kosten",
+    "nl": "CO2-scheepstransport: vloeibaarmaking, vloot en kosten",
+    "fr": "Transport maritime de CO2 : liquéfaction, flotte et coût",
+    "es": "Transporte marítimo de CO2: licuefacción, flota y coste",
+    "pl": "Transport morski CO2: skraplanie, flota i koszty"
+  },
+  "summary": {
+    "en": "Screening calculator for CO2 transport by ship, from liquefaction energy to fleet size and levelised cost.",
+    "uk": "Скринінговий калькулятор для транспортування CO2 суднами: від енергії зрідження до розміру флоту та приведеної вартості.",
+    "de": "Screening-Rechner für den CO2-Transport per Schiff, von der Verflüssigungsenergie bis zu Flottengröße und Gestehungskosten.",
+    "nl": "Screeningtool voor CO2-transport per schip, van vloeibaarmakingsenergie tot vlootomvang en genormaliseerde kosten.",
+    "fr": "Outil de pré-dimensionnement du transport de CO2 par navire, de l'énergie de liquéfaction à la taille de flotte et au coût actualisé.",
+    "es": "Calculadora de evaluación preliminar del transporte de CO2 por barco, desde la energía de licuefacción hasta el tamaño de la flota y el coste nivelado.",
+    "pl": "Kalkulator wstępnej oceny transportu CO2 statkami, od energii skraplania po wielkość floty i koszt uśredniony."
+  },
+  "description": {
+    "en": "Estimates liquefaction energy for low-pressure (LP, 7 bar) and medium-pressure (MP, 15 bar) CO2 shipping using either a closed refrigeration cycle or an open CO2 cycle, based on Span-Wagner properties. Computes round-trip time, fleet size, buffer storage, boil-off, fuel consumption, levelised cost in EUR/t and the break-even distance against a pipeline.",
+    "uk": "Оцінює енергоспоживання зрідження для транспортування CO2 при низькому (LP, 7 бар) і середньому (MP, 15 бар) тиску із замкненим холодильним циклом або відкритим циклом на CO2, на основі властивостей за рівнянням Span-Wagner. Розраховує тривалість рейсу туди й назад, розмір флоту, буферне зберігання, випаровування (boil-off), витрату палива, приведену вартість у EUR/т і відстань беззбитковості порівняно з трубопроводом.",
+    "de": "Ermittelt den Energiebedarf der Verflüssigung für den Niederdruck- (LP, 7 bar) und Mitteldrucktransport (MP, 15 bar) von CO2 mit geschlossenem Kältekreislauf oder offenem CO2-Kreislauf auf Basis von Span-Wagner-Stoffdaten. Berechnet Umlaufzeit, Flottengröße, Pufferspeicher, Boil-off, Brennstoffverbrauch, Gestehungskosten in EUR/t und die Break-even-Distanz gegenüber einer Pipeline.",
+    "nl": "Schat de energie voor vloeibaarmaking bij lagedruk- (LP, 7 bar) en middendruktransport (MP, 15 bar) van CO2 met een gesloten koelcyclus of een open CO2-cyclus, op basis van Span-Wagner-stofeigenschappen. Berekent rondreistijd, vlootomvang, bufferopslag, boil-off, brandstofverbruik, genormaliseerde kosten in EUR/t en de break-evenafstand ten opzichte van een pijpleiding.",
+    "fr": "Estime l'énergie de liquéfaction pour le transport de CO2 en basse pression (LP, 7 bar) et moyenne pression (MP, 15 bar), par cycle frigorifique fermé ou cycle CO2 ouvert, à partir des propriétés Span-Wagner. Calcule la durée d'aller-retour, la taille de la flotte, le stockage tampon, l'évaporation (boil-off), la consommation de carburant, le coût actualisé en EUR/t et la distance d'équilibre par rapport à un pipeline.",
+    "es": "Estima la energía de licuefacción para el transporte de CO2 a baja presión (LP, 7 bar) y media presión (MP, 15 bar) mediante un ciclo de refrigeración cerrado o un ciclo abierto de CO2, a partir de propiedades Span-Wagner. Calcula el tiempo de viaje de ida y vuelta, el tamaño de la flota, el almacenamiento intermedio, el boil-off, el consumo de combustible, el coste nivelado en EUR/t y la distancia de equilibrio frente a una tubería.",
+    "pl": "Szacuje zapotrzebowanie energii na skraplanie CO2 do transportu niskociśnieniowego (LP, 7 bar) i średniociśnieniowego (MP, 15 bar) w zamkniętym obiegu chłodniczym lub otwartym obiegu CO2, na podstawie właściwości wg Span-Wagnera. Oblicza czas rejsu w obie strony, wielkość floty, magazyn buforowy, odparowanie (boil-off), zużycie paliwa, uśredniony koszt w EUR/t oraz odległość progu opłacalności względem rurociągu."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Screening-level results based on indicative cost correlations (EUR 2025, ±40 %) and a generic ship table of 7.5–40 kt capacity. No route or weather simulation, and impurities are not considered.",
+    "uk": "Результати скринінгового рівня на основі орієнтовних кореляцій вартості (EUR 2025, ±40 %) та типової таблиці суден місткістю 7,5–40 тис. т. Моделювання маршруту й погодних умов, а також вплив домішок не враховуються.",
+    "de": "Ergebnisse auf Screening-Niveau mit indikativen Kostenkorrelationen (EUR 2025, ±40 %) und einer generischen Schiffstabelle von 7,5–40 kt. Keine Routen- oder Wettersimulation, Verunreinigungen werden nicht berücksichtigt.",
+    "nl": "Resultaten op screeningniveau met indicatieve kostencorrelaties (EUR 2025, ±40 %) en een generieke scheepstabel van 7,5–40 kt. Geen route- of weersimulatie en geen rekening met onzuiverheden.",
+    "fr": "Résultats de niveau screening fondés sur des corrélations de coût indicatives (EUR 2025, ±40 %) et une table générique de navires de 7,5 à 40 kt. Aucune simulation d'itinéraire ou de météo, impuretés non prises en compte.",
+    "es": "Resultados de nivel preliminar basados en correlaciones de coste indicativas (EUR 2025, ±40 %) y una tabla genérica de buques de 7,5–40 kt. No incluye simulación de rutas ni meteorología, ni el efecto de impurezas.",
+    "pl": "Wyniki na poziomie wstępnej oceny oparte na orientacyjnych korelacjach kosztowych (EUR 2025, ±40 %) i ogólnej tabeli statków 7,5–40 kt. Brak symulacji trasy i pogody oraz uwzględnienia zanieczyszczeń."
+  },
+  "intended_use": "education",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "co2ship was compared with CoolProp 8 HEOS combined with an independent re-implementation of the documented liquefaction, logistics and cost equations (bench-src/ref/gen_co2ship.py) over 13 cases, with a relative tolerance of 1e-6 on full-precision record outputs and exact agreement on fleet size (benchmark driver bench-src/run_co2ship.mjs). The cost correlations themselves are indicative; the benchmark verifies the implementation, not the accuracy of the cost estimates."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "coolprop-heos-co2ship",
+        "reference": "Reference values generated by bench-src/ref/gen_co2ship.py using CoolProp 8 HEOS and an independent re-implementation of the documented equations, written independently of the tool code.",
+        "citations": [
+          "Span R., Wagner W. (1996) J. Phys. Chem. Ref. Data 25:1509",
+          "Bell I.H. et al. (2014) CoolProp, Ind. Eng. Chem. Res. 53:2498"
+        ],
+        "cases": 13,
+        "passed": 13,
+        "tolerance": "Relative 1e-6 on full-precision outputs, since both sides evaluate the same closed-form equations on Span-Wagner states and only EOS solver round-off remains; fleet count must match exactly.",
+        "run_at": "2026-10-19T18:12:17Z",
+        "artifact": "benchmarks/co2ship.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "No bare-python3 standard-library export is offered because the liquefaction cycle states are computed with the Span-Wagner CO2 equation of state from the shared CCUS core library, which cannot be reasonably reproduced in a standard-library-only script; to reproduce the calculation in Python, use CoolProp (HEOS backend) for the CO2 properties."
+  },
+  "handoff": {
+    "provides": [
+      "mdot",
+      "L",
+      "E",
+      "p",
+      "T",
+      "Q"
+    ],
+    "accepts": [
+      "mdot",
+      "p",
+      "T",
+      "L"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script type="application/json" id="diagram-handoff-catalog">
+[{"f":"co2storage.html","t":"CO2 storage","a":["mdot","p","T"]},{"f":"ccuscost.html","t":"CCUS cost & payback","a":["mdot","E","Q","L","p","T"]},{"f":"co2compressor.html","t":"CO2 compressor","a":["mdot","p","T"]},{"f":"co2props.html","t":"CO2 properties","a":["p","T"]},{"f":"co2pipeline.html","t":"CO2 pipeline","a":["mdot","p","T","L"]}]
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ccus-core.js?v=0f1890deb639" defer></script>
+<script src="ccus-ship.js?v=5cd4b09340b3" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* co2ship — CO2 shipping (liquefaction, logistics, cost, break-even vs pipeline).
+   Model: ccus-ship.js (CCUS.ship) on ccus-core.js. Content generated by Claude; assembled from _ccus/ship/page chunks. */
+window.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+  function T(en, uk, de, nl, fr, es, pl) { if (en && typeof en === 'object') return en; return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+  var state = null, last = null, stage = null, ui = null;
+/* ---- p02a_panels.js ---- */
+var PANELS_A = [
+  {
+    id: 'level', slot: 'inputs',
+    title: T('Detail level', 'Рівень деталізації', 'Detailgrad', 'Detailniveau', 'Niveau de détail', 'Nivel de detalle', 'Poziom szczegółów'),
+    fields: [
+      { id: 'f-level', key: 'level', type: 'segmented',
+        options: [
+          { value: 'simple', label: T('Simple', 'Простий', 'Einfach', 'Eenvoudig', 'Simple', 'Simple', 'Prosty') },
+          { value: 'full', label: T('Full', 'Повний', 'Vollständig', 'Volledig', 'Complet', 'Completo', 'Pełny') }
+        ],
+        label: T('Detail level', 'Рівень деталізації', 'Detailgrad', 'Detailniveau', 'Niveau de détail', 'Nivel de detalle', 'Poziom szczegółów') }
+    ]
+  },
+  {
+    id: 'route', slot: 'inputs',
+    title: T('Route and volume', 'Маршрут і обсяг', 'Route und Menge', 'Route en volume', 'Trajet et volume', 'Ruta y volumen', 'Trasa i wolumen'),
+    fields: [
+      { id: 'f-mdot', key: 'mdot', type: 'number', unit: 'kg/s', display: 't/h',
+        label: T('CO₂ flow rate', 'Витрата CO₂', 'CO₂-Massenstrom', 'CO₂-debiet', 'Débit de CO₂', 'Caudal de CO₂', 'Przepływ CO₂'),
+        min: 1, max: 500, precision: 1, required: true, learn: 'volume' },
+      { id: 'f-hours', key: 'hours', type: 'number', unit: 'h/y',
+        label: T('Operating hours', 'Години роботи', 'Betriebsstunden', 'Bedrijfsuren', 'Heures de fonctionnement', 'Horas de operación', 'Godziny pracy'),
+        min: 1000, max: 8760, required: true,
+        visible: function (ctx) { return ctx.state.level === 'full'; } },
+      { id: 'f-L', key: 'L', type: 'number', unit: 'm', display: 'km',
+        label: T('One-way distance', 'Відстань в один бік', 'Einfache Strecke', 'Enkele afstand', 'Distance aller', 'Distancia de ida', 'Odległość w jedną stronę'),
+        min: 10e3, max: 10000e3, required: true, learn: 'roundtrip' },
+      { id: 'f-mode', key: 'mode', type: 'segmented', learn: 'lpmp',
+        options: [
+          { value: 'LP', label: T('LP 7 bar', 'НТ 7 бар', 'ND 7 bar', 'LD 7 bar', 'BP 7 bar', 'BP 7 bar', 'NC 7 bar') },
+          { value: 'MP', label: T('MP 15 bar', 'СТ 15 бар', 'MD 15 bar', 'MD 15 bar', 'MP 15 bar', 'MP 15 bar', 'SC 15 bar') }
+        ],
+        label: T('Pressure mode', 'Режим тиску', 'Druckstufe', 'Drukniveau', 'Mode de pression', 'Modo de presión', 'Tryb ciśnienia') },
+      { id: 'f-cycle', key: 'cycle', type: 'segmented', learn: 'cycle',
+        options: [
+          { value: 'closed', label: T('Closed NH3 refrigeration', 'Замкнене NH3-охолодження', 'Geschlossene NH3-Kälte', 'Gesloten NH3-koeling', 'Froid NH3 fermé', 'Refrigeración NH3 cerrada', 'Zamknięte chłodzenie NH3') },
+          { value: 'open', label: T('Open CO2 cycle', 'Відкритий цикл CO2', 'Offener CO2-Zyklus', 'Open CO2-cyclus', 'Cycle CO2 ouvert', 'Ciclo CO2 abierto', 'Otwarty cykl CO2') }
+        ],
+        label: T('Liquefaction cycle', 'Цикл зрідження', 'Verflüssigungszyklus', 'Vloeibaarmakingscyclus', 'Cycle de liquéfaction', 'Ciclo de licuefacción', 'Cykl skraplania') }
+    ]
+  }
+];
+/* ---- p02b_ship.js ---- */
+var F = function(ctx){return ctx.state.level==='full';};
+var PANEL_SHIP = { id:'ship', slot:'inputs', collapsible:true,
+  title:T('Ships and ports','Судна і порти','Schiffe und Häfen','Schepen en havens','Navires et ports','Buques y puertos','Statki i porty'),
+  fields:[
+    { id:'f-cargo', key:'cargo', type:'number', unit:'t', label:T('Ship cargo size','Вантажність судна','Ladungsgröße Schiff','Ladingsgrootte schip','Taille de cargaison','Tamaño de carga','Ładowność statku'), min:1000, max:60000, learn:'shipsize' },
+    { id:'f-speedKn', key:'speedKn', type:'number', unit:'kn', label:T('Speed (0 = table)','Швидкість (0 = таблиця)','Geschwindigkeit (0 = Tabelle)','Snelheid (0 = tabel)','Vitesse (0 = tableau)','Velocidad (0 = tabla)','Prędkość (0 = tabela)'), min:0, max:25, visible:F },
+    { id:'f-fuelTpd', key:'fuelTpd', type:'number', unit:'t/d', label:T('Fuel use at sea (0 = table)','Паливо в морі (0 = таблиця)','Treibstoff auf See (0 = Tabelle)','Brandstof op zee (0 = tabel)','Carburant en mer (0 = tableau)','Combustible en mar (0 = tabla)','Paliwo na morzu (0 = tabela)'), min:0, max:200, visible:F },
+    { id:'f-loadRate', key:'loadRate', type:'number', unit:'m3/h', label:T('Loading rate','Швидкість завантаження','Laderate','Laadsnelheid','Débit de chargement','Tasa de carga','Wydajność załadunku'), min:200, max:10000 },
+    { id:'f-portH', key:'portH', type:'number', unit:'h', label:T('Port time per call','Час у порту за захід','Hafenzeit pro Anlauf','Havenduur per aanloop','Temps au port par escale','Tiempo en puerto por escala','Czas w porcie na zawinięcie'), min:0, max:72, visible:F },
+    { id:'f-weather', key:'weather', type:'number', unit:'-', label:T('Weather/delay margin','Запас на погоду/затримки','Wetter-/Verzögerungsmarge','Weer-/vertragingsmarge','Marge météo/retard','Margen clima/retraso','Margines pogody/opóźnień'), min:0, max:0.5, precision:2, visible:F },
+    { id:'f-bufferFactor', key:'bufferFactor', type:'number', unit:'-', label:T('Buffer size × cargo','Розмір буфера × вантаж','Puffergröße × Ladung','Buffergrootte × lading','Taille tampon × cargaison','Tamaño búfer × carga','Rozmiar bufora × ładunek'), min:1, max:3, precision:2, visible:F, learn:'buffer' },
+    { id:'f-bufferDays', key:'bufferDays', type:'number', unit:'d', label:T('Extra buffer days','Додаткові дні буфера','Zusätzliche Puffertage','Extra bufferdagen','Jours tampon en plus','Días de búfer extra','Dodatkowe dni bufora'), min:0, max:10, visible:F },
+    { id:'f-boiloff', key:'boiloff', type:'number', unit:'1/d', label:T('Boil-off per day','Випаровування за добу','Boil-off pro Tag','Boil-off per dag','Évaporation par jour','Evaporación por día','Odparowanie na dobę'), min:0, max:0.01, precision:4, visible:F, learn:'boiloff' }
+  ]
+};
+/* ---- p02c_liq.js ---- */
+var PANEL_LIQ = { id:'liq', slot:'inputs', collapsible:true, collapsed:true, learn:'cycle', title:T('Liquefaction plant','Установка зрідження','Verflüssigungsanlage','Vloeibaarmakingsinstallatie','Usine de liquéfaction','Planta de licuefacción','Instalacja skraplania'), fields:[
+{ id:'f-pIn', key:'pIn', type:'number', unit:'Pa', display:'bar', label:T('Inlet pressure','Тиск на вході','Eintrittsdruck','Inlaatdruk','Pression d\'entrée','Presión de entrada','Ciśnienie wlotowe'), min:1e5, max:30e5, visible:F },
+{ id:'f-TIn', key:'TIn', type:'number', unit:'K', display:'degC', label:T('Inlet temperature','Температура на вході','Eintrittstemperatur','Inlaattemperatuur','Température d\'entrée','Temperatura de entrada','Temperatura wlotowa'), min:273.15, max:333.15, visible:F },
+{ id:'f-Tic', key:'Tic', type:'number', unit:'K', display:'degC', label:T('Intercooler outlet','Вихід проміжного охолоджувача','Zwischenkühler-Austritt','Uitlaat tussenkoeler','Sortie refroidisseur intermédiaire','Salida del interenfriador','Wylot chłodnicy międzystopniowej'), min:283.15, max:323.15, visible:F },
+{ id:'f-etaIs', key:'etaIs', type:'number', unit:'-', label:T('Isentropic efficiency','Ізентропний ККД','Isentroper Wirkungsgrad','Isentroop rendement','Rendement isentropique','Eficiencia isentrópica','Sprawność izentropowa'), min:0.6, max:0.92, precision:2, visible:F },
+{ id:'f-rmax', key:'rmax', type:'number', unit:'-', label:T('Max stage pressure ratio','Макс. ступінь стиснення ступеня','Max. Stufendruckverhältnis','Max. drukverhouding per trap','Rapport de pression max. par étage','Relación de presión máx. por etapa','Maks. stosunek ciśnień stopnia'), min:1.5, max:4, precision:1, visible:F },
+{ id:'f-Tcw', key:'Tcw', type:'number', unit:'K', display:'degC', label:T('Cooling water outlet','Вихід охолоджувальної води','Kühlwasser-Austritt','Uitlaat koelwater','Sortie eau de refroidissement','Salida agua de refrigeración','Wylot wody chłodzącej'), min:278.15, max:318.15, visible:F },
+{ id:'f-fCarnot', key:'fCarnot', type:'number', unit:'-', label:T('Carnot fraction','Частка Карно','Carnot-Anteil','Carnot-fractie','Fraction de Carnot','Fracción de Carnot','Udział Carnota'), min:0.3, max:0.7, precision:2, visible:F },
+{ id:'f-dTapp', key:'dTapp', type:'number', unit:'K', label:T('Evaporator approach','Температурний напір випарника','Verdampfer-Grädigkeit','Naderingstemperatuur verdamper','Approche évaporateur','Aproximación del evaporador','Różnica temperatur parownika'), min:1, max:15, visible:F },
+{ id:'f-Tcond', key:'Tcond', type:'number', unit:'K', display:'degC', label:T('Refrigerant condensing temp.','Темп. конденсації холодоагенту','Kondensationstemp. Kältemittel','Condensatietemp. koudemiddel','Temp. condensation frigorigène','Temp. condensación refrigerante','Temp. skraplania czynnika'), min:293.15, max:328.15, visible:F },
+{ id:'f-etaMotor', key:'etaMotor', type:'number', unit:'-', label:T('Motor efficiency','ККД двигуна','Motorwirkungsgrad','Motorrendement','Rendement moteur','Eficiencia del motor','Sprawność silnika'), min:0.85, max:0.99, precision:2, visible:F },
+{ id:'f-dehyE', key:'dehyE', type:'number', unit:'J/kg', label:T('Dehydration energy','Енергія осушення','Trocknungsenergie','Droogenergie','Énergie de déshydratation','Energía de deshidratación','Energia osuszania'), min:0, max:20000, visible:F },
+{ id:'f-pHighOpen', key:'pHighOpen', type:'number', unit:'Pa', display:'bar', label:T('Open-cycle high pressure','Високий тиск відкритого циклу','Hochdruck offener Kreislauf','Hoge druk open cyclus','Haute pression cycle ouvert','Alta presión ciclo abierto','Wysokie ciśnienie obiegu otwartego'), min:30e5, max:90e5, visible:F }
+] };
+/* ---- p02d_econ.js ---- */
+var PANEL_ECON = { id:'econ', slot:'inputs', collapsible:true, collapsed:true, learn:'cost',
+  title:T('Economics','Економіка','Wirtschaftlichkeit','Economie','Économie','Economía','Ekonomia'),
+  fields:[
+    { id:'f-elecPrice', key:'elecPrice', type:'number', unit:'EUR/MWh', label:T('Electricity price','Ціна електроенергії','Strompreis','Elektriciteitsprijs','Prix de l\'électricité','Precio de electricidad','Cena energii'), min:0, max:400 },
+    { id:'f-co2Price', key:'co2Price', type:'number', unit:'EUR/t', label:T('CO2 price (losses, fuel)','Ціна CO2 (втрати, паливо)','CO2-Preis (Verluste, Kraftstoff)','CO2-prijs (verliezen, brandstof)','Prix CO2 (pertes, carburant)','Precio CO2 (pérdidas, combustible)','Cena CO2 (straty, paliwo)'), min:0, max:400 },
+    { id:'f-rate', key:'rate', type:'number', unit:'-', label:T('Discount rate','Ставка дисконтування','Diskontsatz','Disconteringsvoet','Taux d\'actualisation','Tasa de descuento','Stopa dyskontowa'), min:0, max:0.2, precision:3 },
+    { id:'f-life', key:'life', type:'number', unit:'y', label:T('Lifetime','Термін служби','Lebensdauer','Levensduur','Durée de vie','Vida útil','Okres eksploatacji'), min:5, max:50 },
+    { id:'f-pipeKind', key:'pipeKind', type:'segmented', options:['onshore','offshore'], learn:'breakeven', label:T('Pipeline for break-even','Трубопровід для беззбитковості','Pipeline für Break-even','Pijpleiding voor break-even','Pipeline pour seuil de rentabilité','Tubería para punto de equilibrio','Rurociąg dla progu rentowności') },
+    { id:'f-fuelPrice', key:'fuelPrice', type:'number', unit:'EUR/t', visible:F, label:T('Ship fuel price','Ціна суднового палива','Schiffskraftstoffpreis','Scheepsbrandstofprijs','Prix du carburant navire','Precio combustible buque','Cena paliwa statku'), min:0, max:2000 },
+    { id:'f-liqCapexRef', key:'liqCapexRef', type:'number', unit:'EUR/(t/y)', visible:F, label:T('Liquefaction CAPEX at 1 Mt/y','CAPEX зрідження при 1 Мт/р','Verflüssigungs-CAPEX bei 1 Mt/a','Vloeibaarmakings-CAPEX bij 1 Mt/j','CAPEX liquéfaction à 1 Mt/an','CAPEX licuefacción a 1 Mt/a','CAPEX skraplania przy 1 Mt/r'), min:10, max:150 },
+    { id:'f-bufferCapex', key:'bufferCapex', type:'number', unit:'EUR/t', visible:F, label:T('Buffer tank CAPEX','CAPEX буферного резервуара','Puffertank-CAPEX','Buffertank-CAPEX','CAPEX réservoir tampon','CAPEX tanque intermedio','CAPEX zbiornika buforowego'), min:200, max:5000 },
+    { id:'f-jettyCapex', key:'jettyCapex', type:'number', unit:'EUR', visible:F, label:T('Jetty CAPEX per terminal','CAPEX причалу на термінал','Anleger-CAPEX pro Terminal','Steiger-CAPEX per terminal','CAPEX appontement par terminal','CAPEX muelle por terminal','CAPEX nabrzeża na terminal'), min:0, max:100e6 },
+    { id:'f-portFee', key:'portFee', type:'number', unit:'EUR', visible:F, label:T('Port fee per call','Портовий збір за захід','Hafengebühr pro Anlauf','Havengeld per aanloop','Frais portuaires par escale','Tasa portuaria por escala','Opłata portowa za zawinięcie'), min:0, max:500000 },
+    { id:'f-shipOm', key:'shipOm', type:'number', unit:'-', visible:F, label:T('Ship O&M share of CAPEX','Частка O&M судна від CAPEX','Schiffs-O&M-Anteil am CAPEX','Scheeps-O&M-aandeel van CAPEX','Part O&M navire du CAPEX','Cuota O&M buque sobre CAPEX','Udział O&M statku w CAPEX'), min:0, max:0.1, precision:3 }
+  ] };
+/* ---- p03_compute.js ---- */
+function compute(s){
+  var inp = {}; for (var k in s) if (k !== 'level' && Object.prototype.hasOwnProperty.call(s, k)) inp[k] = s[k];
+  last = CCUS.ship.solve(inp);
+  if (!last || !last.ok) {
+    var e = last && last.error ? last.error : '?';
+    return {verdict:{tone:'bad', text:T('Cannot compute: '+e,'Неможливо обчислити: '+e,'Berechnung nicht möglich: '+e,'Kan niet berekenen: '+e,'Calcul impossible : '+e,'No se puede calcular: '+e,'Nie można obliczyć: '+e)}, tiles:[]};
+  }
+  var r = last, f = DiagramUI.fmt, lbe = r.breakEven && r.breakEven.Lbe;
+  var tone = r.perTonne < 40 ? 'ok' : (r.perTonne < 70 ? 'warn' : 'bad');
+  var X = f(r.perTonne,{precision:1}), N = f(r.fleet,{precision:0}), Y = lbe ? f(lbe,{precision:0}) : '';
+  var a = ['Shipping costs about '+X+' EUR/t with '+N+' ships','Перевезення коштує близько '+X+' EUR/t з '+N+' суднами',
+    'Schifftransport kostet etwa '+X+' EUR/t mit '+N+' Schiffen','Scheepvaart kost ongeveer '+X+' EUR/t met '+N+' schepen',
+    'Le transport maritime coûte environ '+X+' EUR/t avec '+N+' navires','El transporte marítimo cuesta unos '+X+' EUR/t con '+N+' buques',
+    'Transport statkami kosztuje ok. '+X+' EUR/t przy '+N+' statkach'];
+  var b = [' — pipeline is cheaper below '+Y+' km',' — трубопровід дешевший до '+Y+' км',' — Pipeline ist unter '+Y+' km günstiger',
+    ' — pijpleiding is goedkoper onder '+Y+' km',' — le pipeline est moins cher en dessous de '+Y+' km',
+    ' — la tubería es más barata por debajo de '+Y+' km',' — rurociąg jest tańszy poniżej '+Y+' km'];
+  var verdictText = T.apply(null, a.map(function(x,i){ return x + (lbe ? b[i] : ''); }));
+  var tiles = [
+    {label:T('Levelised cost','Нормована вартість','Gestehungskosten','Genormaliseerde kosten','Coût actualisé','Coste nivelado','Koszt uśredniony'), value:r.perTonne, hint:'EUR/t', precision:1, learn:'cost', tone:tone},
+    {label:T('Liquefaction energy','Енергія зрідження','Verflüssigungsenergie','Vloeibaarmakingsenergie','Énergie de liquéfaction','Energía de licuefacción','Energia skraplania'), value:r.liq.kWh_t, hint:'kWh/t', precision:0, learn:'cycle'},
+    {label:T('Fleet','Флот','Flotte','Vloot','Flotte','Flota','Flota'), value:r.fleet, hint:T('ships','суден','Schiffe','schepen','navires','buques','statków'), precision:0, learn:'roundtrip'},
+    {label:T('Round trip','Рейс туди й назад','Rundreise','Rondreis','Aller-retour','Viaje redondo','Rejs w obie strony'), value:r.RT/24, hint:'d', precision:1},
+    {label:T('Break-even distance','Відстань беззбитковості','Break-even-Distanz','Break-evenafstand','Distance d’équilibre','Distancia de equilibrio','Dystans progowy'), value:(lbe == null ? NaN : lbe), hint:'km', precision:0, learn:'breakeven'},
+    {label:T('Electric power','Електрична потужність','Elektrische Leistung','Elektrisch vermogen','Puissance électrique','Potencia eléctrica','Moc elektryczna'), value:r.P_el/1e6, hint:'MW', precision:1, headline:false},
+    {label:T('Buffer per terminal','Буфер на термінал','Puffer je Terminal','Buffer per terminal','Stock tampon par terminal','Búfer por terminal','Bufor na terminal'), value:r.logistics.buffer, hint:'t', precision:0, learn:'buffer', headline:false},
+    {label:T('Boil-off loss','Втрати на випаровування','Boil-off-Verlust','Boil-offverlies','Perte par évaporation','Pérdida por evaporación','Straty odparowania'), value:100*r.logistics.lossFrac, hint:T('% per trip','% за рейс','% pro Fahrt','% per reis','% par voyage','% por viaje','% na rejs'), precision:2, learn:'boiloff', headline:false},
+    {label:T('Total CAPEX','Загальний CAPEX','Gesamt-CAPEX','Totale CAPEX','CAPEX total','CAPEX total','Całkowity CAPEX'), value:r.costs.capex.total/1e6, hint:'MEUR', precision:0, headline:false}
+  ];
+  var util = r.logistics.util;
+  var meters = [{label:T('Fleet utilisation','Завантаження флоту','Flottenauslastung','Vlootbenutting','Utilisation de la flotte','Utilización de la flota','Wykorzystanie floty'), ratio:util, text:f(100*util,{precision:0})+' %'}];
+  var tItem = T('Item','Стаття','Posten','Post','Poste','Partida','Pozycja');
+  var tTotal = T('Total','Разом','Summe','Totaal','Total','Total','Suma');
+  var t1 = {title:T('Cost breakdown','Структура витрат','Kostenaufschlüsselung','Kostenopbouw','Répartition des coûts','Desglose de costes','Struktura kosztów'),
+    head:[tItem,{label:'EUR/t',num:true},{label:'%',num:true}],
+    rows:(r.breakdown||[]).map(function(x){ return [x.label,{value:x.value,precision:2},{value:100*x.value/r.perTonne,precision:1}]; }),
+    foot:[tTotal,{value:r.perTonne,precision:2},{value:100,precision:1}]};
+  var bs = r.costs.byStage || {};
+  var t2 = {title:T('By stage','За етапами','Nach Stufe','Per fase','Par étape','Por etapa','Według etapu'),
+    head:[T('Stage','Етап','Stufe','Fase','Étape','Etapa','Etap'),{label:'EUR/t',num:true}],
+    rows:[
+      [T('Liquefaction','Зрідження','Verflüssigung','Vloeibaarmaking','Liquéfaction','Licuefacción','Skraplanie'),{value:bs.liquefaction,precision:2}],
+      [T('Terminals','Термінали','Terminals','Terminals','Terminaux','Terminales','Terminale'),{value:bs.terminals,precision:2}],
+      [T('Shipping','Перевезення','Schifffahrt','Scheepvaart','Transport maritime','Transporte marítimo','Żegluga'),{value:bs.shipping,precision:2}]
+    ]};
+  var cop = (r.liq.COP != null && isFinite(r.liq.COP)) ? {value:r.liq.COP,precision:2} : '—';
+  var t3 = {title:T('Liquefaction','Зрідження','Verflüssigung','Vloeibaarmaking','Liquéfaction','Licuefacción','Skraplanie'),
+    head:[T('Quantity','Величина','Größe','Grootheid','Grandeur','Magnitud','Wielkość'),{label:T('Value','Значення','Wert','Waarde','Valeur','Valor','Wartość'),num:true},T('Unit','Одиниця','Einheit','Eenheid','Unité','Unidad','Jednostka')],
+    rows:[
+      [T('Liquid temperature','Температура рідини','Flüssigkeitstemperatur','Vloeistoftemperatuur','Température du liquide','Temperatura del líquido','Temperatura cieczy'),{value:r.liq.TLiq-273.15,precision:1},'°C'],
+      [T('Density','Густина','Dichte','Dichtheid','Masse volumique','Densidad','Gęstość'),{value:r.liq.rhoL,precision:0},'kg/m³'],
+      [T('Compression','Стиснення','Verdichtung','Compressie','Compression','Compresión','Sprężanie'),{value:r.liq.wComp/3600,precision:1},'kWh/t'],
+      [T('Refrigeration','Охолодження','Kühlung','Koeling','Réfrigération','Refrigeración','Chłodzenie'),{value:r.liq.wRef/3600,precision:1},'kWh/t'],
+      ['COP',cop,'—'],
+      [T('Liquid yield','Вихід рідини','Flüssigausbeute','Vloeistofopbrengst','Rendement liquide','Rendimiento líquido','Wydajność cieczy'),{value:r.liq.yield,precision:3},'—']
+    ]};
+  var notes = (r.warnings||[]).map(function(w){ return typeof w === 'string' ? w : String((w && (w.text || w.message)) || w); });
+  if (stage) stage.schedule();
+  return {verdict:{tone:tone, text:verdictText}, tiles:tiles, meters:meters, tables:[t1,t2,t3], notes:notes};
+}
+/* ---- p04_examples.js ---- */
+function P(id, open){ return function(t){ var d=CCUS.ship.defaults, k; for(k in d){ if(d.hasOwnProperty(k) && k!=='level') t[k]=d[k]; } t.cycle=open?'open':'closed'; t.Tcw=298.15; var p=CCUS.ship.presets[id].inp; for(k in p){ if(p.hasOwnProperty(k)) t[k]=p[k]; } }; }
+var G_TYP=T('Typical','Типові','Typisch','Typisch','Typiques','Típicos','Typowe'),
+    G_CYC=T('Cycle','Цикл','Zyklus','Cyclus','Cycle','Ciclo','Cykl'),
+    G_SCL=T('Scale','Масштаб','Maßstab','Schaal','Échelle','Escala','Skala');
+var EXAMPLES=[
+ {id:'nl_lp_1mt',group:G_TYP,
+  label:T('Northern Lights-like LP, 1.5 Mt/y, 1000 km','НТ як Northern Lights, 1,5 Мт/рік, 1000 км','ND wie Northern Lights, 1,5 Mt/a, 1000 km','LD zoals Northern Lights, 1,5 Mt/j, 1000 km','BP type Northern Lights, 1,5 Mt/an, 1000 km','BP tipo Northern Lights, 1,5 Mt/año, 1000 km','NC jak Northern Lights, 1,5 Mt/rok, 1000 km'),
+  note:'LP 7 bar a/-49.4 °C, near triple point; ~7.5 kt class',apply:P('nl_lp_1mt')},
+ {id:'mp_short_1mt',group:G_TYP,
+  label:T('MP 15 bar, 1 Mt/y, 500 km','СТ 15 бар, 1 Мт/рік, 500 км','MD 15 bar, 1 Mt/a, 500 km','MD 15 bar, 1 Mt/j, 500 km','MP 15 bar, 1 Mt/an, 500 km','MP 15 bar, 1 Mt/año, 500 km','SC 15 bar, 1 Mt/rok, 500 km'),
+  note:'MP 15 bar a/-28.5 °C; proven small-ship technology',apply:P('mp_short_1mt')},
+ {id:'open_lp',group:G_CYC,
+  label:T('Open CO2 cycle, LP, 1 Mt/y','Відкритий цикл CO2, НТ, 1 Мт/рік','Offener CO2-Kreislauf, ND, 1 Mt/a','Open CO2-cyclus, LD, 1 Mt/j','Cycle CO2 ouvert, BP, 1 Mt/an','Ciclo CO2 abierto, BP, 1 Mt/año','Otwarty obieg CO2, NC, 1 Mt/rok'),
+  note:'CO2 as own refrigerant; no external refrigerant loop',apply:P('open_lp',true)},
+ {id:'lp_long_3mt',group:G_SCL,
+  label:T('LP 20 kt ships, 3 Mt/y, 2500 km','НТ, судна 20 кт, 3 Мт/рік, 2500 км','ND-Schiffe 20 kt, 3 Mt/a, 2500 km','LD-schepen 20 kt, 3 Mt/j, 2500 km','Navires BP 20 kt, 3 Mt/an, 2500 km','Buques BP 20 kt, 3 Mt/año, 2500 km','Statki NC 20 kt, 3 Mt/rok, 2500 km'),
+  note:'Long haul; LP lowers tank wall mass per t CO2',apply:P('lp_long_3mt')},
+ {id:'large_lp_5mt',group:G_SCL,
+  label:T('LP 40 kt ships, 5 Mt/y, 1500 km','НТ, судна 40 кт, 5 Мт/рік, 1500 км','ND-Schiffe 40 kt, 5 Mt/a, 1500 km','LD-schepen 40 kt, 5 Mt/j, 1500 km','Navires BP 40 kt, 5 Mt/an, 1500 km','Buques BP 40 kt, 5 Mt/año, 1500 km','Statki NC 40 kt, 5 Mt/rok, 1500 km'),
+  note:'Economies of scale; larger terminal buffer storage',apply:P('large_lp_5mt')}
+];
+/* ---- p04b_notice.js ---- */
+var FML = 'w = (w_comp + Q_ref/COP)/η_motor + w_dehy; COP = f·T_ev/(T_cond − T_ev); RT = 2L/v·(1+m) + 2(t_load + t_port); fleet = ceil(trips/trips per ship); LCOT = (CRF·CAPEX + O&M + energy + fuel + fees + CO2)/t. ';
+var NOTICE = {id:'genre', tone:'warn', sticky:true,
+  title: T('What this number is',
+    'Що означає це число',
+    'Was diese Zahl bedeutet',
+    'Wat dit getal betekent',
+    'Ce que représente ce chiffre',
+    'Qué representa esta cifra',
+    'Co oznacza ta liczba'),
+  text: T('A screening estimate with indicative EUR 2025 cost correlations (±40 %). It is not a feasibility study: charter rates, port tariffs and liquefaction CAPEX vary strongly by project.',
+    'Попередня оцінка з орієнтовними кореляціями витрат у EUR 2025 (±40 %). Це не техніко-економічне обґрунтування: ставки фрахту, портові тарифи та CAPEX зрідження суттєво різняться залежно від проєкту.',
+    'Eine Screening-Schätzung mit indikativen Kostenkorrelationen in EUR 2025 (±40 %). Sie ist keine Machbarkeitsstudie: Charterraten, Hafentarife und Verflüssigungs-CAPEX variieren stark je nach Projekt.',
+    'Een screeningsraming met indicatieve kostencorrelaties in EUR 2025 (±40 %). Het is geen haalbaarheidsstudie: chartertarieven, havengelden en CAPEX voor vloeibaarmaking variëren sterk per project.',
+    'Une estimation de présélection fondée sur des corrélations de coûts indicatives en EUR 2025 (±40 %). Ce n’est pas une étude de faisabilité : les taux d’affrètement, les tarifs portuaires et le CAPEX de liquéfaction varient fortement selon le projet.',
+    'Una estimación preliminar con correlaciones de costes indicativas en EUR 2025 (±40 %). No es un estudio de viabilidad: las tarifas de fletamento, las tasas portuarias y el CAPEX de licuefacción varían mucho según el proyecto.',
+    'Szacunek wstępny z orientacyjnymi korelacjami kosztów w EUR 2025 (±40 %). Nie jest to studium wykonalności: stawki czarterowe, opłaty portowe i CAPEX skraplania znacznie różnią się w zależności od projektu.')};
+var FOOTER = T(FML + 'Properties: Span–Wagner (CCUS.core). Screening level.',
+  FML + 'Властивості: Span–Wagner (CCUS.core). Рівень попередньої оцінки.',
+  FML + 'Stoffwerte: Span–Wagner (CCUS.core). Screening-Niveau.',
+  FML + 'Stofeigenschappen: Span–Wagner (CCUS.core). Screeningniveau.',
+  FML + 'Propriétés : Span–Wagner (CCUS.core). Niveau de présélection.',
+  FML + 'Propiedades: Span–Wagner (CCUS.core). Nivel de cribado.',
+  FML + 'Właściwości: Span–Wagner (CCUS.core). Poziom wstępnej oceny.');
+/* ---- p05_stage.js ---- */
+var STAGE_DEF = {
+  caption: T('Round-trip schedule and ship vs pipeline cost', 'Графік рейсів і вартість судно/трубопровід', 'Umlaufplan und Kosten Schiff vs. Pipeline', 'Rondreisschema en kosten schip vs pijpleiding', 'Planning des rotations et coût navire vs pipeline', 'Calendario de rotación y coste buque vs tubería', 'Harmonogram rejsów i koszt statek vs rurociąg'),
+  minHeight: 300,
+  a11y: function () {
+    if (!last || !last.ok) return 'No shipping result available.';
+    var lg = last.logistics || {}, g = lg.gantt || [], n = 0, e0 = 0, i;
+    for (i = 0; i < g.length; i++) { n = Math.max(n, g[i].ship + 1); if (g[i].ship === 0) e0 = Math.max(e0, g[i].t0 + g[i].dt); }
+    var fleet = lg.fleet != null ? lg.fleet : n;
+    var rt = lg.roundTripH != null ? lg.roundTripH / 24 : e0 / 24;
+    var be = last.breakEven && last.breakEven.Lbe != null ? 'break-even with pipeline at ' + DiagramUI.fmt(last.breakEven.Lbe, { precision: 0 }) + ' km' : 'no break-even distance within the range';
+    return 'Fleet of ' + fleet + ' ships, round trip of ' + DiagramUI.fmt(rt, { precision: 1 }) + ' days, ' + be + '.';
+  },
+  render: function (size, st) {
+    var TT = function () { var o = T.apply(null, arguments), l = (window.DiagramUI && DiagramUI.lang) ? DiagramUI.lang() : 'en'; return o[l] || o.en; };
+    var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#777', line = cs.getPropertyValue('--line').trim() || '#ddd';
+    ctx.font = '12px sans-serif'; ctx.clearRect(0, 0, w, h);
+    if (!last || !last.ok) return;
+    var stack = w < 560, PA, PB, M = { l: 48, r: 14, t: 30, b: 38 };
+    if (stack) { PA = { x: 0, y: 0, w: w, h: h / 2 }; PB = { x: 0, y: h / 2, w: w, h: h / 2 }; }
+    else { PA = { x: 0, y: 0, w: w / 2, h: h }; PB = { x: w / 2, y: 0, w: w / 2, h: h }; }
+    function prec(m) { return m >= 20 ? 0 : (m >= 2 ? 1 : 2); }
+    function frame(P, xmax, ymax, xt, yt, yTicks) {
+      var x0 = P.x + M.l, x1 = P.x + P.w - M.r, y0 = P.y + P.h - M.b, y1 = P.y + M.t, i, v, px;
+      var sx = function (v) { return x0 + (x1 - x0) * v / (xmax || 1); };
+      var sy = function (v) { return y0 - (y0 - y1) * v / (ymax || 1); };
+      ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.fillStyle = muted; ctx.setLineDash([]);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var tx = DiagramUI.ticks(0, xmax, x1 - x0, size.density);
+      for (i = 0; i < tx.length; i++) {
+        v = tx[i]; if (v < 0 || v > xmax) continue; px = sx(v);
+        ctx.beginPath(); ctx.moveTo(px, y0); ctx.lineTo(px, y0 + 4); ctx.stroke();
+        ctx.fillText(DiagramUI.fmt(v, { precision: prec(xmax) }), px, y0 + 6);
+      }
+      ctx.fillText(xt, (x0 + x1) / 2, y0 + 21);
+      if (yTicks) {
+        var ty = DiagramUI.ticks(0, ymax, y0 - y1, size.density);
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (i = 0; i < ty.length; i++) {
+          v = ty[i]; if (v < 0 || v > ymax) continue; px = sy(v);
+          ctx.beginPath(); ctx.moveTo(x0 - 4, px); ctx.lineTo(x1, px); ctx.stroke();
+          ctx.fillText(DiagramUI.fmt(v, { precision: prec(ymax) }), x0 - 6, px);
+        }
+      }
+      ctx.beginPath(); ctx.moveTo(x0, y1); ctx.lineTo(x0, y0); ctx.lineTo(x1, y0); ctx.stroke();
+      ctx.save(); ctx.translate(P.x + 11, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(yt, 0, 0); ctx.restore();
+      return { x0: x0, x1: x1, y0: y0, y1: y1, sx: sx, sy: sy };
+    }
+    // (A) Gantt
+    var g = (last.logistics && last.logistics.gantt) || [], n = 1, tmax = 0, i, b;
+    for (i = 0; i < g.length; i++) { n = Math.max(n, g[i].ship + 1); tmax = Math.max(tmax, g[i].t0 + g[i].dt); }
+    var dmax = tmax / 24 || 1;
+    var A = frame(PA, dmax, 1, TT('Time (days)', 'Час (дні)', 'Zeit (Tage)', 'Tijd (dagen)', 'Temps (jours)', 'Tiempo (días)', 'Czas (dni)'), TT('Ship', 'Судно', 'Schiff', 'Schip', 'Navire', 'Buque', 'Statek'), false);
+    var col = { load: DiagramUI.series(0), sail: DiagramUI.series(1), unload: DiagramUI.series(2), 'return': DiagramUI.series(3), port: muted };
+    var rh = (A.y0 - A.y1) / n, bh = rh * (coarse ? 0.7 : 0.6);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = muted;
+    for (i = 0; i < n; i++) ctx.fillText('S' + (i + 1), A.x0 - 6, A.y1 + rh * (i + 0.5));
+    for (i = 0; i < g.length; i++) {
+      b = g[i]; ctx.fillStyle = col[b.kind] || muted;
+      var bx = A.sx(b.t0 / 24), bw = Math.max(1, A.sx((b.t0 + b.dt) / 24) - bx);
+      ctx.fillRect(bx, A.y1 + rh * b.ship + (rh - bh) / 2, bw, bh);
+    }
+    var leg = [['load', TT('load', 'завант.', 'Laden', 'laden', 'charg.', 'carga', 'załad.')], ['sail', TT('sail', 'рейс', 'Fahrt', 'varen', 'trajet', 'travesía', 'rejs')],
+      ['unload', TT('unload', 'розвант.', 'Löschen', 'lossen', 'décharg.', 'descarga', 'rozład.')], ['return', TT('return', 'повер.', 'Rückfahrt', 'retour', 'retour', 'regreso', 'powrót')],
+      ['port', TT('port', 'порт', 'Hafen', 'haven', 'port', 'puerto', 'port')]];
+    var lx = A.x0, ly = PA.y + 12; ctx.textAlign = 'left';
+    for (i = 0; i < leg.length; i++) {
+      ctx.fillStyle = col[leg[i][0]]; ctx.fillRect(lx, ly - 4, 8, 8);
+      ctx.fillStyle = muted; ctx.fillText(leg[i][1], lx + 11, ly); lx += 16 + ctx.measureText(leg[i][1]).width;
+    }
+    // (B) Break-even
+    var be = last.breakEven || {}, pts = be.pts || [], xm = 0, ym = 0, Lc = last.inputs.L / 1000;
+    for (i = 0; i < pts.length; i++) { xm = Math.max(xm, pts[i].Lkm); ym = Math.max(ym, pts[i].ship, pts[i].pipe); }
+    xm = Math.max(xm, Lc) || 1; ym = Math.max(ym, last.perTonne || 0) * 1.05 || 1;
+    var B = frame(PB, xm, ym, TT('Distance (km)', 'Відстань (км)', 'Entfernung (km)', 'Afstand (km)', 'Distance (km)', 'Distancia (km)', 'Odległość (km)'), 'EUR/t', true);
+    function curve(k, c, dash) {
+      ctx.strokeStyle = c; ctx.lineWidth = coarse ? 2.5 : 2; ctx.setLineDash(dash); ctx.beginPath();
+      for (var j = 0; j < pts.length; j++) ctx[j ? 'lineTo' : 'moveTo'](B.sx(pts[j].Lkm), B.sy(pts[j][k]));
+      ctx.stroke();
+    }
+    curve('ship', DiagramUI.series(0), []); curve('pipe', DiagramUI.series(1), [6, 4]);
+    if (be.Lbe != null && be.Lbe <= xm) {
+      var bxp = B.sx(be.Lbe); ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(bxp, B.y0); ctx.lineTo(bxp, B.y1); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = muted; ctx.textAlign = bxp > (B.x0 + B.x1) / 2 ? 'right' : 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(DiagramUI.fmt(be.Lbe, { precision: 0 }) + ' km', bxp + (ctx.textAlign === 'left' ? 4 : -4), B.y1 + 2);
+    }
+    ctx.setLineDash([]); ctx.fillStyle = DiagramUI.series(0); ctx.beginPath();
+    ctx.arc(B.sx(Lc), B.sy(last.perTonne), coarse ? 6 : 4, 0, 2 * Math.PI); ctx.fill();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.font = '12px sans-serif';
+    ctx.fillStyle = DiagramUI.series(0); ctx.fillText(TT('ship', 'судно', 'Schiff', 'schip', 'navire', 'buque', 'statek'), B.x1, PB.y + 10);
+    ctx.fillStyle = DiagramUI.series(1); ctx.fillText(TT('pipeline', 'трубопровід', 'Pipeline', 'pijpleiding', 'pipeline', 'tubería', 'rurociąg'), B.x1, PB.y + 23);
+  }
+};
+/* ---- p07a_learn.js ---- */
+var LEARN_A = {
+  intro: {
+    title: T("About this tool", "Про інструмент", "Über dieses Tool", "Over deze tool", "À propos de l’outil", "Acerca de la herramienta", "O narzędziu"),
+    body: T(
+      "The tool estimates liquefaction energy, round trip, fleet, buffer, boil-off, levelised EUR/t and break-even distance versus a pipeline for CO2 shipping.",
+      "Інструмент оцінює енергію зрідження, рейс туди й назад, флот, буфер, випаровування, нормовану вартість EUR/т і відстань беззбитковості порівняно з трубопроводом для морського транспортування CO2.",
+      "Das Tool schätzt Verflüssigungsenergie, Rundreise, Flotte, Puffer, Boil-off, Stückkosten in EUR/t und Break-even-Distanz gegenüber einer Pipeline für den CO2-Schiffstransport.",
+      "De tool schat vloeibaarmakingsenergie, rondreis, vloot, buffer, boil-off, genivelleerde EUR/t en break-evenafstand ten opzichte van een pijpleiding voor CO2-scheepvaart.",
+      "L’outil estime l’énergie de liquéfaction, l’aller-retour, la flotte, le tampon, l’évaporation, le coût actualisé en EUR/t et la distance d’équilibre face à un pipeline pour le transport maritime de CO2.",
+      "La herramienta estima la energía de licuefacción, el viaje de ida y vuelta, la flota, el búfer, la evaporación, el coste nivelado en EUR/t y la distancia de equilibrio frente a una tubería para el transporte marítimo de CO2.",
+      "Narzędzie szacuje energię skraplania, rejs w obie strony, flotę, bufor, odparowanie, uśredniony koszt EUR/t i odległość progu opłacalności względem rurociągu dla transportu morskiego CO2."
+    )
+  },
+  volume: {
+    title: T("Annual volume and trips", "Річний обсяг і рейси", "Jahresmenge und Fahrten", "Jaarvolume en reizen", "Volume annuel et rotations", "Volumen anual y viajes", "Roczny wolumen i rejsy"),
+    body: T("Annual tonnes = flow × operating hours; trips per year = tonnes / cargo size.", "Річні тонни = потік × години роботи; рейсів на рік = тонни / розмір вантажу.", "Jahrestonnen = Durchfluss × Betriebsstunden; Fahrten pro Jahr = Tonnen / Ladungsgröße.", "Jaarlijkse ton = debiet × bedrijfsuren; reizen per jaar = ton / ladinggrootte.", "Tonnes annuelles = débit × heures de fonctionnement ; rotations par an = tonnes / taille de cargaison.", "Toneladas anuales = caudal × horas de operación; viajes al año = toneladas / tamaño de carga.", "Roczne tony = przepływ × godziny pracy; rejsy rocznie = tony / wielkość ładunku.")
+  }
+};
+/* ---- p07b_learn.js ---- */
+var LEARN_B = {
+  roundtrip: { title: T("Round trip & fleet size", "Рейс і розмір флоту", "Umlauf & Flottengröße", "Rondreis & vlootomvang", "Rotation et taille de flotte", "Viaje redondo y tamaño de flota", "Rejs i wielkość floty"),
+    body: T(
+      "A round trip is two sea legs at service speed plus a weather margin, plus loading, unloading and port time; fleet = trips needed / trips per ship, rounded up.",
+      "Рейс — це два морські переходи на експлуатаційній швидкості з погодним запасом плюс навантаження, розвантаження та час у порту; флот = потрібні рейси / рейси на судно, з округленням угору.",
+      "Ein Umlauf umfasst zwei Seestrecken bei Dienstgeschwindigkeit plus Wetterzuschlag sowie Lade-, Lösch- und Hafenzeit; Flotte = benötigte Fahrten / Fahrten pro Schiff, aufgerundet.",
+      "Een rondreis bestaat uit twee zeereizen op dienstsnelheid plus een weermarge, plus laad-, los- en havenverblijf; vloot = benodigde reizen / reizen per schip, naar boven afgerond.",
+      "Une rotation comprend deux trajets en mer à vitesse de service avec marge météo, plus chargement, déchargement et temps au port ; flotte = trajets requis / trajets par navire, arrondi au supérieur.",
+      "Un viaje redondo son dos tramos marítimos a velocidad de servicio más un margen meteorológico, más carga, descarga y tiempo en puerto; flota = viajes necesarios / viajes por buque, redondeado hacia arriba.",
+      "Rejs to dwa odcinki morskie przy prędkości eksploatacyjnej z zapasem pogodowym oraz załadunek, rozładunek i czas w porcie; flota = potrzebne rejsy / rejsy na statek, zaokrąglone w górę."
+    ) },
+  lpmp: { title: T("LP vs MP transport", "Транспорт LP чи MP", "LP- vs. MP-Transport", "LP- vs MP-transport", "Transport LP ou MP", "Transporte LP frente a MP", "Transport LP a MP"),
+    body: T(
+      "LP at 7 bar (about −49 °C, close to the triple point) allows bigger, cheaper tanks, while MP at 15 bar (about −28 °C) is proven but limits ship size.",
+      "LP при 7 бар (близько −49 °C, біля потрійної точки) дозволяє більші й дешевші танки, тоді як MP при 15 бар (близько −28 °C) перевірений, але обмежує розмір судна.",
+      "LP bei 7 bar (ca. −49 °C, nahe dem Tripelpunkt) erlaubt größere, günstigere Tanks, während MP bei 15 bar (ca. −28 °C) erprobt ist, aber die Schiffsgröße begrenzt.",
+      "LP op 7 bar (ongeveer −49 °C, dicht bij het tripelpunt) maakt grotere, goedkopere tanks mogelijk, terwijl MP op 15 bar (ongeveer −28 °C) beproefd is maar de scheepsgrootte beperkt.",
+      "La LP à 7 bar (environ −49 °C, près du point triple) permet des cuves plus grandes et moins chères, tandis que la MP à 15 bar (environ −28 °C) est éprouvée mais limite la taille des navires.",
+      "LP a 7 bar (unos −49 °C, cerca del punto triple) permite tanques más grandes y baratos, mientras que MP a 15 bar (unos −28 °C) está probada pero limita el tamaño del buque.",
+      "LP przy 7 bar (ok. −49 °C, blisko punktu potrójnego) pozwala na większe i tańsze zbiorniki, a MP przy 15 bar (ok. −28 °C) jest sprawdzone, ale ogranicza wielkość statku."
+    ) }
+};
+/* ---- p07c_learn.js ---- */
+var LEARN_C = {
+  cycle: {
+    title: T("Closed vs open liquefaction cycle", "Закритий і відкритий цикл зрідження", "Geschlossener vs. offener Verflüssigungskreislauf", "Gesloten vs. open vloeibaarmakingscyclus", "Cycle de liquéfaction fermé vs ouvert", "Ciclo de licuefacción cerrado vs abierto", "Zamknięty vs otwarty cykl skraplania"),
+    body: T(
+      "Closed cycle: CO2 is compressed to the liquefaction pressure and an NH3 refrigeration loop removes the heat (COP = Carnot fraction × T_ev/(T_cond − T_ev)); open cycle: CO2 is compressed to about 65 bar, cooled and throttled, and the flash vapour is recycled.",
+      "Закритий цикл: CO2 стискається до тиску зрідження, а холодильний контур NH3 відводить тепло (COP = частка Карно × T_ev/(T_cond − T_ev)); відкритий цикл: CO2 стискається до ~65 бар, охолоджується і дроселюється, а флеш-пара повертається в цикл.",
+      "Geschlossener Kreislauf: CO2 wird auf Verflüssigungsdruck verdichtet und ein NH3-Kältekreis führt die Wärme ab (COP = Carnot-Anteil × T_ev/(T_cond − T_ev)); offener Kreislauf: CO2 wird auf ca. 65 bar verdichtet, gekühlt und gedrosselt, und der Flash-Dampf wird zurückgeführt.",
+      "Gesloten cyclus: CO2 wordt gecomprimeerd tot de vloeibaarmakingsdruk en een NH3-koelcircuit voert de warmte af (COP = Carnot-fractie × T_ev/(T_cond − T_ev)); open cyclus: CO2 wordt tot ca. 65 bar gecomprimeerd, gekoeld en gesmoord, en de flashdamp wordt gerecycled.",
+      "Cycle fermé : le CO2 est comprimé à la pression de liquéfaction et une boucle frigorifique NH3 évacue la chaleur (COP = fraction de Carnot × T_ev/(T_cond − T_ev)) ; cycle ouvert : le CO2 est comprimé à environ 65 bar, refroidi et détendu, et la vapeur de flash est recyclée.",
+      "Ciclo cerrado: el CO2 se comprime a la presión de licuefacción y un circuito de refrigeración de NH3 extrae el calor (COP = fracción de Carnot × T_ev/(T_cond − T_ev)); ciclo abierto: el CO2 se comprime a unos 65 bar, se enfría y se estrangula, y el vapor flash se recicla.",
+      "Cykl zamknięty: CO2 jest sprężany do ciśnienia skraplania, a obieg chłodniczy NH3 odbiera ciepło (COP = ułamek Carnota × T_ev/(T_cond − T_ev)); cykl otwarty: CO2 jest sprężany do ok. 65 bar, chłodzony i dławiony, a para rozprężna jest zawracana.")
+  },
+  shipsize: {
+    title: T("Ship size", "Розмір судна", "Schiffsgröße", "Scheepsgrootte", "Taille du navire", "Tamaño del buque", "Wielkość statku"),
+    body: T(
+      "Larger ships cost less per tonne (CAPEX ∝ size^0.65) but need bigger buffer storage and longer loading; the table covers 7.5–40 kt.",
+      "Більші судна дешевші на тонну (CAPEX ∝ розмір^0,65), але потребують більших буферних сховищ і довшого завантаження; таблиця охоплює 7,5–40 тис. т.",
+      "Größere Schiffe kosten weniger pro Tonne (CAPEX ∝ Größe^0,65), benötigen aber größere Pufferspeicher und längere Beladung; die Tabelle umfasst 7,5–40 kt.",
+      "Grotere schepen kosten minder per ton (CAPEX ∝ grootte^0,65) maar vereisen grotere bufferopslag en langere belading; de tabel beslaat 7,5–40 kt.",
+      "Les navires plus grands coûtent moins cher par tonne (CAPEX ∝ taille^0,65) mais exigent des stockages tampons plus grands et un chargement plus long ; le tableau couvre 7,5–40 kt.",
+      "Los buques más grandes cuestan menos por tonelada (CAPEX ∝ tamaño^0,65) pero requieren mayor almacenamiento intermedio y cargas más largas; la tabla abarca 7,5–40 kt.",
+      "Większe statki kosztują mniej za tonę (CAPEX ∝ wielkość^0,65), ale wymagają większych buforów i dłuższego załadunku; tabela obejmuje 7,5–40 kt.")
+  }
+};
+/* ---- p07d_learn.js ---- */
+var LEARN_D = {
+  buffer: {
+    title: T("Buffer storage", "Буферне сховище", "Pufferspeicher", "Bufferopslag", "Stockage tampon", "Almacenamiento intermedio", "Magazyn buforowy"),
+    body: T(
+      "Intermediate tanks at both terminals hold about 1.5 cargoes, so the capture plant runs continuously while ships are away.",
+      "Проміжні резервуари на обох терміналах вміщують близько 1,5 вантажу, тож установка уловлювання працює безперервно, поки судна відсутні.",
+      "Zwischentanks an beiden Terminals fassen etwa 1,5 Ladungen, sodass die Abscheideanlage kontinuierlich läuft, während die Schiffe unterwegs sind.",
+      "Tussentanks bij beide terminals bevatten ongeveer 1,5 lading, zodat de afvanginstallatie continu draait terwijl de schepen weg zijn.",
+      "Des réservoirs intermédiaires aux deux terminaux contiennent environ 1,5 cargaison, pour que l’unité de captage fonctionne en continu pendant l’absence des navires.",
+      "Los tanques intermedios de ambas terminales almacenan unas 1,5 cargas, de modo que la planta de captura funciona sin parar mientras los buques están fuera.",
+      "Zbiorniki pośrednie w obu terminalach mieszczą około 1,5 ładunku, dzięki czemu instalacja wychwytu pracuje nieprzerwanie podczas nieobecności statków.")
+  },
+  boiloff: {
+    title: T("Boil-off", "Випаровування (boil-off)", "Boil-off-Verluste", "Boil-off-verlies", "Évaporation (boil-off)", "Evaporación (boil-off)", "Odparowanie (boil-off)"),
+    body: T(
+      "Heat leaking into the tanks evaporates about 0.1–0.3 % of the cargo per day, and the lost CO2 is charged at the CO2 price.",
+      "Тепло, що проникає в резервуари, випаровує близько 0,1–0,3 % вантажу на добу, а втрачений CO2 оплачується за ціною CO2.",
+      "In die Tanks eindringende Wärme verdampft täglich etwa 0,1–0,3 % der Ladung, und das verlorene CO2 wird zum CO2-Preis berechnet.",
+      "Warmte die de tanks binnenlekt verdampt dagelijks ongeveer 0,1–0,3 % van de lading, en de verloren CO2 wordt tegen de CO2-prijs aangerekend.",
+      "La chaleur qui pénètre dans les réservoirs évapore environ 0,1–0,3 % de la cargaison par jour, et le CO2 perdu est facturé au prix du CO2.",
+      "El calor que entra en los tanques evapora alrededor del 0,1–0,3 % de la carga al día, y el CO2 perdido se cobra al precio del CO2.",
+      "Ciepło przenikające do zbiorników odparowuje około 0,1–0,3 % ładunku dziennie, a utracony CO2 jest rozliczany po cenie CO2.")
+  }
+};
+/* ---- p07_learn.js ---- */
+var LEARN_E = {
+  cost: { title: T('Levelised cost per tonne', 'Нормована вартість за тонну', 'Annuisierte Kosten pro Tonne', 'Genormaliseerde kosten per ton', 'Coût actualisé par tonne', 'Coste nivelado por tonelada', 'Uśredniony koszt na tonę'),
+    body: T('Levelised cost per tonne = (capital recovery factor × CAPEX + O&M + electricity + fuel + port fees + CO2 cost) / tonnes per year, split into liquefaction, terminals and shipping.',
+      'Нормована вартість за тонну = (коефіцієнт повернення капіталу × CAPEX + O&M + електроенергія + паливо + портові збори + вартість CO2) / тонн на рік, з розподілом на зрідження, термінали та судноплавство.',
+      'Kosten pro Tonne = (Kapitalwiedergewinnungsfaktor × CAPEX + O&M + Strom + Brennstoff + Hafengebühren + CO2-Kosten) / Tonnen pro Jahr, aufgeteilt in Verflüssigung, Terminals und Schifffahrt.',
+      'Kosten per ton = (kapitaalterugwinningsfactor × CAPEX + O&M + elektriciteit + brandstof + havengelden + CO2-kosten) / ton per jaar, verdeeld over vloeibaarmaking, terminals en scheepvaart.',
+      'Coût par tonne = (facteur de recouvrement du capital × CAPEX + O&M + électricité + carburant + frais portuaires + coût du CO2) / tonnes par an, réparti entre liquéfaction, terminaux et transport maritime.',
+      'Coste por tonelada = (factor de recuperación de capital × CAPEX + O&M + electricidad + combustible + tasas portuarias + coste de CO2) / toneladas al año, desglosado en licuefacción, terminales y transporte marítimo.',
+      'Koszt na tonę = (współczynnik zwrotu kapitału × CAPEX + O&M + energia elektryczna + paliwo + opłaty portowe + koszt CO2) / tony rocznie, z podziałem na skraplanie, terminale i transport morski.') },
+  breakeven: { title: T('Break-even distance', 'Відстань беззбитковості', 'Break-even-Distanz', 'Break-evenafstand', 'Distance d’équilibre', 'Distancia de equilibrio', 'Odległość progu opłacalności'),
+    body: T('Pipeline cost rises almost linearly with distance while ship cost rises slowly, so beyond the break-even distance shipping is cheaper; the pipeline curve here is a simple onshore/offshore estimate (±40 %).',
+      'Вартість трубопроводу зростає майже лінійно з відстанню, а вартість суден — повільно, тож після відстані беззбитковості судноплавство дешевше; крива трубопроводу тут — проста оцінка для суші/моря (±40 %).',
+      'Pipelinekosten steigen fast linear mit der Entfernung, Schiffskosten nur langsam, daher ist der Schiffstransport jenseits der Break-even-Distanz günstiger; die Pipelinekurve ist hier eine einfache Onshore/Offshore-Schätzung (±40 %).',
+      'Pijpleidingkosten stijgen bijna lineair met de afstand, scheepskosten slechts langzaam, dus voorbij de break-evenafstand is scheepvaart goedkoper; de pijpleidingcurve is hier een eenvoudige onshore/offshore-schatting (±40 %).',
+      'Le coût d’un pipeline croît presque linéairement avec la distance, celui du navire lentement, donc au-delà de la distance d’équilibre le transport maritime est moins cher ; la courbe pipeline est ici une estimation simple terrestre/en mer (±40 %).',
+      'El coste de la tubería crece casi linealmente con la distancia y el del buque lentamente, por lo que más allá de la distancia de equilibrio el transporte marítimo es más barato; la curva de tubería es una estimación simple en tierra/mar (±40 %).',
+      'Koszt rurociągu rośnie niemal liniowo z odległością, a koszt statku powoli, więc powyżej odległości progu opłacalności transport morski jest tańszy; krzywa rurociągu to uproszczone oszacowanie dla lądu/morza (±40 %).') }
+};
+var LEARN = {
+  version: 1,
+  intro: LEARN_A.intro,
+  topics: { volume: LEARN_A.volume, roundtrip: LEARN_B.roundtrip, lpmp: LEARN_B.lpmp, cycle: LEARN_C.cycle, shipsize: LEARN_C.shipsize, buffer: LEARN_D.buffer, boiloff: LEARN_D.boiloff, cost: LEARN_E.cost, breakeven: LEARN_E.breakeven },
+  tour: [
+    { topic: 'roundtrip', focus: '[data-dgu-field="f-L"]' },
+    { topic: 'lpmp', focus: '[data-dgu-field="f-mode"]' },
+    { topic: 'cycle', focus: '[data-dgu-field="f-cycle"]' },
+    { topic: 'cost', focus: '.dgu-r-results' },
+    { topic: 'breakeven', focus: '.dgu-stage' }
+  ]
+};
+/* ---- p06_glue.js ---- */
+var DEFAULTS = (function () { var d = {}, s = CCUS.ship.defaults, k; for (k in s) if (s.hasOwnProperty(k)) d[k] = s[k]; d.level = 'simple'; return d; })();
+state = JSON.parse(JSON.stringify(DEFAULTS));
+
+function adoptStage(app) { stage = (app && app.stages && app.stages[0]) || null; }
+
+function degrade() {
+  var app = document.getElementById('app');
+  if (app) {
+    var h = document.createElement('h1'), p = document.createElement('p');
+    h.textContent = 'CO2 shipping';
+    p.textContent = 'The interactive interface could not load. Please reload the page or try another browser.';
+    app.appendChild(h); app.appendChild(p);
+  }
+  last = null;
+}
+
+function buildInterface() {
+  ui = DiagramUI.app({
+    id: 'co2ship', mount: '#app', layout: 'calculator', compute: 'live',
+    state: state, defaults: DEFAULTS,
+    subtitle: T({
+      en: 'Liquefaction, fleet and cost of CO2 transport by ship',
+      uk: 'Зрідження, флот і вартість транспортування CO2 суднами',
+      de: 'Verflüssigung, Flotte und Kosten des CO2-Transports per Schiff',
+      nl: 'Vloeibaarmaking, vloot en kosten van CO2-transport per schip',
+      fr: 'Liquéfaction, flotte et coût du transport de CO2 par navire',
+      es: 'Licuefacción, flota y coste del transporte de CO2 por barco',
+      pl: 'Skraplanie, flota i koszt transportu CO2 statkami'
+    }),
+    notices: [NOTICE], learn: LEARN,
+    panels: PANELS_A.concat([PANEL_SHIP, PANEL_LIQ, PANEL_ECON]),
+    footer: FOOTER,
+    on: { rebuild: adoptStage, compute: compute }
+  });
+  ui.panel({ id: 'io', slot: 'inputs', actionsAlign: 'end', actions: [
+    ui.importAction({
+      label: T({
+        en: 'Open a saved case…', uk: 'Відкрити збережений сценарій…',
+        de: 'Gespeicherten Fall öffnen…', nl: 'Opgeslagen case openen…',
+        fr: 'Ouvrir un cas enregistré…', es: 'Abrir un caso guardado…',
+        pl: 'Otwórz zapisany przypadek…'
+      }),
+      accept: '.json,application/json', as: 'json',
+      run: function (d) {
+        var src = (d && d.inputs) || d || {};
+        Object.keys(DEFAULTS).forEach(function (k) {
+          if (k !== 'level' && src[k] !== undefined && typeof src[k] === typeof DEFAULTS[k]) state[k] = src[k];
+        });
+        ui.sync(); ui.run();
+      }
+    }),
+    ui.resetAction()
+  ] });
+  ui.examples(EXAMPLES);
+  ui.stage(STAGE_DEF);
+  adoptStage(ui);
+  ui.ready();
+  window.__co2ship = { ui: ui, state: state };
+}
+
+function installData() {
+  if (!window.Diagram) return;
+  Diagram.init({ id: 'co2ship', file: 'co2ship.html',
+    state: {
+      serialize: function () { return state; },
+      deserialize: function (o) { o = o || {}; for (var k in o) if (o.hasOwnProperty(k)) state[k] = o[k]; if (ui) { ui.sync(); ui.run(); } }
+    },
+    record: function () {
+      if (!last || !last.ok) return null;
+      var inputs = {}, k;
+      for (k in state) if (state.hasOwnProperty(k) && k !== 'level') inputs[k] = state[k];
+      return {
+        inputs: inputs,
+        outputs: { perTonne: last.perTonne, E: last.E, P_el: last.P_el, fleet: last.fleet, RT_h: last.RT,
+          Lbe_km: last.breakEven.Lbe, TLiq: last.liq.TLiq, pLiq: last.liq.pLiq, capex: last.costs.capex.total },
+        units: { mdot: 'kg/s', L: 'm', pIn: 'Pa', TIn: 'K', perTonne: 'EUR/t', E: 'J/kg', P_el: 'W',
+          RT_h: 'h', Lbe_km: 'km', TLiq: 'K', pLiq: 'Pa', capex: 'EUR' },
+        model: {
+          equations: ['w = (w_comp + Q_ref/COP)/eta_motor + w_dehy', 'COP = f_Carnot T_ev/(T_cond - T_ev)',
+            'RT = 2L/v (1+margin) + 2(t_load + t_port)', 'fleet = ceil(trips_needed / trips_per_ship)',
+            'LCOT = (CRF CAPEX + O&M + energy + fuel + fees + CO2)/t'],
+          ranges: ['screening level, EUR 2025, +-40 %'],
+          notes: ['CCUS.ship ' + CCUS.ship.VERSION]
+        },
+        warnings: last.warnings
+      };
+    },
+    handoff: {
+      provides: ['mdot', 'L', 'E', 'p', 'T', 'Q'],
+      accepts: ['mdot', 'p', 'T', 'L'],
+      build: function () {
+        if (!last || !last.ok) return null;
+        var h = last.handoff;
+        return {
+          quantities: { mdot: { value: h.mdot, unit: 'kg/s' }, L: { value: h.L, unit: 'm' }, E: { value: h.E, unit: 'J/kg' },
+            p: { value: h.p, unit: 'Pa' }, T: { value: h.T, unit: 'K' }, Q: { value: h.Q, unit: 'W' } },
+          sets: { ship: [{ L: { value: h.L, unit: 'm' } }, { E: { value: h.E, unit: 'J/kg' } }, { mdot: { value: h.mdot, unit: 'kg/s' } }] }
+        };
+      },
+      apply: function (p) {
+        var q = (p && p.quantities) || {};
+        if (q.mdot) state.mdot = q.mdot.value;
+        if (q.L) state.L = q.L.value;
+        if (q.p) state.pIn = q.p.value;
+        if (q.T) state.TIn = q.T.value;
+        if (ui) { ui.sync(); ui.run(); }
+      }
+    }
+  });
+}
+
+function boot() {
+  if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface(); else degrade();
+  installData();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CO2 corrosion rate (de Waard-Milliams)</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-23.1",
+  "id": "co2_corrosion_rate",
+  "file": "co2_corrosion_rate.html",
+  "listed": true,
+  "category": "oil-gas-h2",
+  "order": 80,
+  "title": {
+    "en": "CO2 Corrosion Rate Calculator",
+    "uk": "Калькулятор швидкості CO2-корозії",
+    "de": "CO2-Korrosionsrate-Rechner",
+    "nl": "Calculator CO2-corrosiesnelheid",
+    "fr": "Vitesse de corrosion CO2",
+    "es": "Calculadora de corrosión CO2",
+    "pl": "Kalkulator szybkości korozji CO2"
+  },
+  "summary": {
+    "en": "Estimates CO2 corrosion rates of carbon steel in water-wet oil, gas, hydrogen-blend and CCUS pipelines using de Waard-Milliams 1991 and 1995 models.",
+    "uk": "Оцінює швидкість CO2-корозії вуглецевої сталі в трубопроводах нафти, газу, воднево-газових сумішей і CCUS з водною фазою за моделями de Waard-Milliams 1991 та 1995 років.",
+    "de": "Schätzt die CO2-Korrosionsrate von Kohlenstoffstahl in wasserbenetzten Öl-, Gas-, Wasserstoffgemisch- und CCUS-Leitungen nach den de-Waard-Milliams-Modellen von 1991 und 1995.",
+    "nl": "Schat de CO2-corrosiesnelheid van koolstofstaal in waterbevochtigde olie-, gas-, waterstofmengsel- en CCUS-leidingen met de de Waard-Milliams-modellen van 1991 en 1995.",
+    "fr": "Estime la vitesse de corrosion par le CO2 de l'acier au carbone dans les conduites de pétrole, de gaz, de mélanges hydrogène et de CCUS en présence d'eau, selon de Waard-Milliams 1991 et 1995.",
+    "es": "Estima la velocidad de corrosión por CO2 del acero al carbono en líneas de petróleo, gas, mezclas con hidrógeno y CCUS con agua libre, según de Waard-Milliams 1991 y 1995.",
+    "pl": "Szacuje szybkość korozji CO2 stali węglowej w zawodnionych rurociągach ropy, gazu, mieszanin wodorowych i CCUS według modeli de Waarda-Milliamsa z 1991 i 1995 roku."
+  },
+  "description": {
+    "en": "The 1991 model applies CO2 fugacity and a protective-scale factor, while the 1995 model combines reaction and mass-transfer resistances based on flow velocity and pipe diameter. Design rates include inhibitor efficiency and a correction factor, yielding the corrosion allowance over design life and a rate-versus-temperature chart.",
+    "uk": "Модель 1991 року враховує фугітивність CO2 і коефіцієнт захисної плівки, а модель 1995 року поєднує опір реакції та масопереносу з урахуванням швидкості потоку й діаметра труби. Проєктна швидкість враховує ефективність інгібітора та поправковий коефіцієнт і дає припуск на корозію за проєктний термін служби та графік залежності швидкості від температури.",
+    "de": "Das Modell von 1991 berücksichtigt die CO2-Fugazität und einen Schutzschichtfaktor, das Modell von 1995 kombiniert Reaktions- und Stofftransportwiderstand abhängig von Strömungsgeschwindigkeit und Rohrdurchmesser. Die Auslegungsrate berücksichtigt Inhibitorwirkungsgrad und Korrekturfaktor und liefert den Korrosionszuschlag über die Auslegungslebensdauer sowie ein Diagramm der Rate über der Temperatur.",
+    "nl": "Het model uit 1991 houdt rekening met CO2-fugaciteit en een beschermende-laagfactor, terwijl het model uit 1995 reactie- en stofoverdrachtsweerstand combineert op basis van stroomsnelheid en leidingdiameter. De ontwerpsnelheid omvat inhibitorrendement en een correctiefactor en levert de corrosietoeslag over de ontwerplevensduur en een grafiek van snelheid versus temperatuur.",
+    "fr": "Le modèle de 1991 intègre la fugacité du CO2 et un facteur de film protecteur, tandis que celui de 1995 combine les résistances de réaction et de transfert de masse selon la vitesse d'écoulement et le diamètre. La vitesse de conception tient compte de l'efficacité de l'inhibiteur et d'un facteur de correction, et fournit la surépaisseur de corrosion sur la durée de vie ainsi qu'un graphique vitesse-température.",
+    "es": "El modelo de 1991 considera la fugacidad del CO2 y un factor de capa protectora, mientras que el de 1995 combina resistencias de reacción y de transferencia de masa según la velocidad de flujo y el diámetro. La velocidad de diseño incluye la eficiencia del inhibidor y un factor de corrección, y proporciona el sobreespesor de corrosión para la vida de diseño y un gráfico de velocidad frente a temperatura.",
+    "pl": "Model z 1991 roku uwzględnia lotność CO2 i współczynnik warstwy ochronnej, a model z 1995 roku łączy opory reakcji i transportu masy zależnie od prędkości przepływu i średnicy rury. Szybkość projektowa uwzględnia skuteczność inhibitora i współczynnik korekcyjny, dając naddatek korozyjny na projektowy okres eksploatacji oraz wykres szybkości w funkcji temperatury."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Valid for 0–150 °C and CO2 partial pressures up to about 10 bar. H2S, organic acids, top-of-line corrosion, pH buffering and localized or mesa attack are not modelled. Screening tool only, not a substitute for NORSOK M-506 or a detailed corrosion study.",
+    "uk": "Діапазон застосування: 0–150 °C і парціальний тиск CO2 приблизно до 10 бар. H2S, органічні кислоти, корозія верхньої частини труби (TLC), буферизація pH та локальна корозія, зокрема меза-корозія, не моделюються. Лише для попередньої оцінки; не замінює NORSOK M-506 чи детальне дослідження корозії.",
+    "de": "Gültig für 0–150 °C und CO2-Partialdrücke bis etwa 10 bar. H2S, organische Säuren, Top-of-Line-Korrosion, pH-Pufferung sowie lokale bzw. Mesa-Korrosion werden nicht modelliert. Nur zur Vorabschätzung, kein Ersatz für NORSOK M-506 oder eine detaillierte Korrosionsstudie.",
+    "nl": "Geldig voor 0–150 °C en CO2-partiaaldrukken tot ongeveer 10 bar. H2S, organische zuren, top-of-line-corrosie, pH-buffering en lokale of mesa-aantasting worden niet gemodelleerd. Alleen voor screening, geen vervanging voor NORSOK M-506 of een gedetailleerde corrosiestudie.",
+    "fr": "Valable entre 0 et 150 °C et pour des pressions partielles de CO2 jusqu'à environ 10 bar. L'H2S, les acides organiques, la corrosion en génératrice supérieure (TLC), l'effet tampon du pH et la corrosion localisée ou de type mesa ne sont pas modélisés. Outil de présélection uniquement, ne remplaçant pas la NORSOK M-506 ni une étude de corrosion détaillée.",
+    "es": "Válido entre 0 y 150 °C y presiones parciales de CO2 de hasta unos 10 bar. No se modelan H2S, ácidos orgánicos, corrosión en la parte superior de la línea, tamponamiento del pH ni ataque localizado o tipo mesa. Herramienta solo de cribado; no sustituye a NORSOK M-506 ni a un estudio de corrosión detallado.",
+    "pl": "Zakres stosowania: 0–150 °C i ciśnienie cząstkowe CO2 do ok. 10 bar. Nie modeluje się H2S, kwasów organicznych, korozji górnej części rurociągu (TLC), buforowania pH ani korozji lokalnej, w tym typu mesa. Narzędzie wyłącznie do wstępnej oceny, nie zastępuje NORSOK M-506 ani szczegółowej analizy korozyjnej."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "ogh-integrity.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Compared case by case with an independent Python implementation written from the published equations (bench-src/ref/gen_co2_corrosion_rate.py); benchmark driver bench-src/run_co2_corrosion_rate.mjs. "
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "co2_corrosion_rate-pyref",
+        "reference": "bench-src/ref/co2_corrosion_rate_ref.json generated by bench-src/ref/gen_co2_corrosion_rate.py, independent of the tool code",
+        "citations": [
+          "de Waard C., Lotz U., Milliams D.E. (1991) Corrosion 47(12):976",
+          "de Waard C., Lotz U., Dugstad A. (1995) NACE Corrosion/95 paper 128"
+        ],
+        "cases": 20,
+        "passed": 20,
+        "tolerance": "relative 2e-3 per displayed quantity",
+        "run_at": "2026-10-23T14:58:14Z",
+        "artifact": "benchmarks/co2_corrosion_rate.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "reason": "Use the reference script bench-src/ref/gen_co2_corrosion_rate.py instead."
+  },
+  "handoff": {
+    "provides": [
+      "T",
+      "p"
+    ],
+    "accepts": [
+      "T",
+      "p"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+<script src="ogh-integrity.js?v=92a2cf8276e5" defer></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================ 1. the model */
+  function engine(){ return (window.OGH || {}).co2_corrosion_rate || null; }
+  var DEFAULTS = { level:'simple', T:333.15, P:50e5, yCO2:0.02, U:2.0, Dh:0.3, life:25, CA_avail:0, Fcorr:1 };
+  function solve(s){
+    var inp = {}, k, r, eng = engine();
+    for (k in s) { if (Object.prototype.hasOwnProperty.call(s, k) && k !== 'level') { inp[k] = s[k]; } }
+    if (!eng) { return { ok:false, error:'ogh-integrity.js did not load' }; }
+    try { r = eng.solve(inp); } catch (e) { return { ok:false, error:'Invalid input: ' + ((e && e.message) || String(e)) }; }
+    if (!r) { return { ok:false, error:'Invalid input: no result returned' }; }
+    return r;
+  }
+
+  function sig(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (v === 0 || !isFinite(v)) return 2;
+    var d = n - 1 - Math.floor(Math.log(Math.abs(v)) / Math.LN10 + 1e-12);
+    if (d < 0) d = 0;
+    if (d > 8) d = 8;
+    return d;
+  }
+  function sigv(v, n) {
+    if (n === undefined || n === null) n = 5;
+    v = +v;
+    if (!isFinite(v)) return NaN;
+    if (v === 0) return 0;
+    n = Math.max(1, Math.min(21, Math.round(n)));
+    return Number(v.toPrecision(n));
+  }
+
+  var state = JSON.parse(JSON.stringify(DEFAULTS));
+  var last = null;
+
+  /* ======================================================== 2. the interface */
+  function T(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+
+  var stage = null;
+  function LEGEND_ITEMS() {
+    return [
+      { label: T('V91 · dWM 1991 rate', 'V91 · швидкість dWM 1991', 'V91 · Rate dWM 1991', 'V91 · snelheid dWM 1991', 'V91 · vitesse dWM 1991', 'V91 · velocidad dWM 1991', 'V91 · szybkość dWM 1991'), series: 0 },
+      { label: T('V95 · dWM 1995 rate', 'V95 · швидкість dWM 1995', 'V95 · Rate dWM 1995', 'V95 · snelheid dWM 1995', 'V95 · vitesse dWM 1995', 'V95 · velocidad dWM 1995', 'V95 · szybkość dWM 1995'), series: 1 }
+    ];
+  }
+  function adoptStage(app) {
+    stage = app.stages[0] || null;
+    if (stage) stage.legend({ items: LEGEND_ITEMS() });
+  }
+
+  var ui = null;
+
+  var LANGS = ['en', 'uk', 'de', 'nl', 'fr', 'es', 'pl'];
+  /* TF: a 7-language template with {0}, {1} ... replaced by numbers formatted per language.
+     vals[i] is a number (4 significant digits), [number, decimals] or a 7-language object / string. */
+  function TF(tpl, vals) {
+    var out = {}, i, l;
+    for (i = 0; i < LANGS.length; i++) {
+      l = LANGS[i];
+      out[l] = String(tpl[l] != null ? tpl[l] : tpl.en).replace(/\{(\d+)\}/g, function (m, n) {
+        var v = vals[+n];
+        if (v && typeof v === 'object' && !Array.isArray(v)) return v[l] != null ? v[l] : v.en;
+        if (typeof v === 'string') return v;
+        var p = Array.isArray(v) ? v[1] : sig(v, 4), x = Array.isArray(v) ? v[0] : v;
+        return DiagramUI.fmt(x, { precision: p, lang: l });
+      });
+    }
+    return out;
+  }
+  /* Module warnings and errors stay English in ogh-integrity.js; translated here. Unmatched -> English.
+     Numeric groups ($n) get the decimal comma of the language. */
+  var FIELD = {
+    T: T('T (temperature)', 'T (температура)', 'T (Temperatur)', 'T (temperatuur)', 'T (température)', 'T (temperatura)', 'T (temperatura)'),
+    P: T('P (total pressure)', 'P (загальний тиск)', 'P (Gesamtdruck)', 'P (totale druk)', 'P (pression totale)', 'P (presión total)', 'P (ciśnienie całkowite)'),
+    yCO2: T('yCO2 (CO2 mole fraction)', 'yCO2 (мольна частка CO2)', 'yCO2 (CO2-Molanteil)', 'yCO2 (CO2-molfractie)', 'yCO2 (fraction molaire de CO2)', 'yCO2 (fracción molar de CO2)', 'yCO2 (udział molowy CO2)'),
+    U: T('U (liquid velocity)', 'U (швидкість рідини)', 'U (Flüssigkeitsgeschwindigkeit)', 'U (vloeistofsnelheid)', 'U (vitesse du liquide)', 'U (velocidad del líquido)', 'U (prędkość cieczy)'),
+    Dh: T('Dh (hydraulic diameter)', 'Dh (гідравлічний діаметр)', 'Dh (hydraulischer Durchmesser)', 'Dh (hydraulische diameter)', 'Dh (diamètre hydraulique)', 'Dh (diámetro hidráulico)', 'Dh (średnica hydrauliczna)'),
+    life: T('design life', 'проєктний строк', 'Auslegungslebensdauer', 'ontwerplevensduur', 'durée de vie', 'vida de diseño', 'okres eksploatacji'),
+    CA_avail: T('inhibitor efficiency', 'ефективність інгібітора', 'Inhibitorwirkungsgrad', 'inhibitorrendement', 'efficacité de l’inhibiteur', 'eficiencia del inhibidor', 'skuteczność inhibitora'),
+    Fcorr: T('correction factor', 'поправковий коефіцієнт', 'Korrekturfaktor', 'correctiefactor', 'facteur de correction', 'factor de corrección', 'współczynnik korekcyjny')
+  };
+  var WARN = [
+    [/^Corrosion allowance ([\d.]+) mm exceeds 6 mm: consider CRA or chemical inhibition$/, T('Corrosion allowance $1 mm exceeds 6 mm: consider a corrosion-resistant alloy (CRA) or chemical inhibition', 'Допуск на корозію $1 мм перевищує 6 мм: розгляньте корозійностійкий сплав (CRA) або хімічне інгібування', 'Korrosionszuschlag $1 mm übersteigt 6 mm: korrosionsbeständige Legierung (CRA) oder chemische Inhibierung erwägen', 'Corrosietoeslag $1 mm is groter dan 6 mm: overweeg een corrosiebestendige legering (CRA) of chemische inhibitie', 'Surépaisseur de corrosion de $1 mm supérieure à 6 mm : envisager un alliage résistant à la corrosion (CRA) ou une inhibition chimique', 'Sobreespesor de corrosión de $1 mm mayor que 6 mm: considere una aleación resistente a la corrosión (CRA) o inhibición química', 'Naddatek korozyjny $1 mm przekracza 6 mm: rozważ stop odporny na korozję (CRA) lub inhibitowanie chemiczne')],
+    [/^pCO2 = ([\d.]+) bar > 10 bar: outside de Waard-Milliams validity range$/, T('pCO2 = $1 bar > 10 bar: outside the de Waard-Milliams validity range, the rate is an extrapolation', 'pCO2 = $1 бар > 10 бар: поза межами застосовності de Waard-Milliams, швидкість є екстраполяцією', 'pCO2 = $1 bar > 10 bar: außerhalb des Gültigkeitsbereichs von de Waard-Milliams, die Rate ist eine Extrapolation', 'pCO2 = $1 bar > 10 bar: buiten het geldigheidsgebied van de Waard-Milliams, de snelheid is een extrapolatie', 'pCO2 = $1 bar > 10 bar : hors du domaine de validité de de Waard-Milliams, la vitesse est une extrapolation', 'pCO2 = $1 bar > 10 bar: fuera del rango de validez de de Waard-Milliams, la velocidad es una extrapolación', 'pCO2 = $1 bar > 10 bar: poza zakresem stosowalności de Waard-Milliams, szybkość jest ekstrapolacją')],
+    [/^stagnant: flow model not applicable, 1991 model governs$/, T('Stagnant liquid (U = 0): the 1995 flow model does not apply, the 1991 model governs', 'Нерухома рідина (U = 0): модель потоку 1995 не застосовується, визначає модель 1991', 'Stehende Flüssigkeit (U = 0): das Strömungsmodell von 1995 gilt nicht, das Modell von 1991 ist maßgebend', 'Stilstaande vloeistof (U = 0): het stromingsmodel van 1995 is niet van toepassing, het model van 1991 is maatgevend', 'Liquide stagnant (U = 0) : le modèle d’écoulement 1995 ne s’applique pas, le modèle 1991 gouverne', 'Líquido estancado (U = 0): el modelo de flujo de 1995 no aplica, gobierna el modelo de 1991', 'Ciecz nieruchoma (U = 0): model przepływu 1995 nie ma zastosowania, decyduje model 1991')],
+    [/^H2S, organic acids, top-of-line corrosion and pH buffering are not modelled$/, T('H2S, organic acids, top-of-line corrosion and pH buffering are not modelled', 'H2S, органічні кислоти, корозія у верхній частині труби і буферування pH не моделюються', 'H2S, organische Säuren, Top-of-Line-Korrosion und pH-Pufferung werden nicht modelliert', 'H2S, organische zuren, top-of-line-corrosie en pH-buffering worden niet gemodelleerd', 'H2S, acides organiques, corrosion en génératrice supérieure et effet tampon du pH ne sont pas modélisés', 'No se modelan H2S, ácidos orgánicos, corrosión en la parte superior de la línea ni el efecto tampón del pH', 'H2S, kwasy organiczne, korozja w górnej części rury i buforowanie pH nie są modelowane')],
+    [/^Invalid numeric value for (T|P|yCO2|U|Dh|life|CA_avail|Fcorr)$/, T('Invalid numeric value for $F', 'Некоректне числове значення: $F', 'Ungültiger Zahlenwert für $F', 'Ongeldige numerieke waarde voor $F', 'Valeur numérique invalide pour $F', 'Valor numérico no válido para $F', 'Nieprawidłowa wartość liczbowa: $F')],
+    [/^Temperature must be between 273\.15 and 423\.15 K/, T('Temperature must be between 0 and 150 °C (273.15–423.15 K, NORSOK/dWM range)', 'Температура має бути від 0 до 150 °C (273,15–423,15 K, діапазон NORSOK/dWM)', 'Die Temperatur muss zwischen 0 und 150 °C liegen (273,15–423,15 K, Bereich NORSOK/dWM)', 'De temperatuur moet tussen 0 en 150 °C liggen (273,15–423,15 K, bereik NORSOK/dWM)', 'La température doit être comprise entre 0 et 150 °C (273,15–423,15 K, domaine NORSOK/dWM)', 'La temperatura debe estar entre 0 y 150 °C (273,15–423,15 K, rango NORSOK/dWM)', 'Temperatura musi wynosić od 0 do 150 °C (273,15–423,15 K, zakres NORSOK/dWM)')],
+    [/^Total pressure must be > 0$/, T('Total pressure must be greater than 0', 'Загальний тиск має бути більшим за 0', 'Der Gesamtdruck muss größer als 0 sein', 'De totale druk moet groter zijn dan 0', 'La pression totale doit être supérieure à 0', 'La presión total debe ser mayor que 0', 'Ciśnienie całkowite musi być większe od 0')],
+    [/^CO2 mole fraction must satisfy 0 < yCO2 <= 1$/, T('CO2 mole fraction must satisfy 0 < yCO2 ≤ 1', 'Мольна частка CO2 має задовольняти 0 < yCO2 ≤ 1', 'Der CO2-Molanteil muss 0 < yCO2 ≤ 1 erfüllen', 'De CO2-molfractie moet voldoen aan 0 < yCO2 ≤ 1', 'La fraction molaire de CO2 doit vérifier 0 < yCO2 ≤ 1', 'La fracción molar de CO2 debe cumplir 0 < yCO2 ≤ 1', 'Udział molowy CO2 musi spełniać 0 < yCO2 ≤ 1')],
+    [/^Flow velocity must be >= 0$/, T('Liquid velocity must be zero or positive', 'Швидкість рідини має бути нульовою або додатною', 'Die Flüssigkeitsgeschwindigkeit muss null oder positiv sein', 'De vloeistofsnelheid moet nul of positief zijn', 'La vitesse du liquide doit être nulle ou positive', 'La velocidad del líquido debe ser cero o positiva', 'Prędkość cieczy musi być zerowa lub dodatnia')],
+    [/^Hydraulic diameter must be > 0$/, T('Hydraulic diameter must be greater than 0', 'Гідравлічний діаметр має бути більшим за 0', 'Der hydraulische Durchmesser muss größer als 0 sein', 'De hydraulische diameter moet groter zijn dan 0', 'Le diamètre hydraulique doit être supérieur à 0', 'El diámetro hidráulico debe ser mayor que 0', 'Średnica hydrauliczna musi być większa od 0')],
+    [/^Design life must be > 0$/, T('Design life must be greater than 0', 'Проєктний строк має бути більшим за 0', 'Die Auslegungslebensdauer muss größer als 0 sein', 'De ontwerplevensduur moet groter zijn dan 0', 'La durée de vie doit être supérieure à 0', 'La vida de diseño debe ser mayor que 0', 'Okres eksploatacji musi być większy od 0')],
+    [/^Inhibitor efficiency must satisfy 0 <= CA_avail < 1$/, T('Inhibitor efficiency must satisfy 0 ≤ efficiency < 1', 'Ефективність інгібітора має задовольняти 0 ≤ ефективність < 1', 'Der Inhibitorwirkungsgrad muss 0 ≤ Wirkungsgrad < 1 erfüllen', 'Het inhibitorrendement moet voldoen aan 0 ≤ rendement < 1', 'L’efficacité de l’inhibiteur doit vérifier 0 ≤ efficacité < 1', 'La eficiencia del inhibidor debe cumplir 0 ≤ eficiencia < 1', 'Skuteczność inhibitora musi spełniać 0 ≤ skuteczność < 1')],
+    [/^Correction factor must satisfy 0 < Fcorr <= 1$/, T('Correction factor must satisfy 0 < Fcorr ≤ 1', 'Поправковий коефіцієнт має задовольняти 0 < Fcorr ≤ 1', 'Der Korrekturfaktor muss 0 < Fcorr ≤ 1 erfüllen', 'De correctiefactor moet voldoen aan 0 < Fcorr ≤ 1', 'Le facteur de correction doit vérifier 0 < Fcorr ≤ 1', 'El factor de corrección debe cumplir 0 < Fcorr ≤ 1', 'Współczynnik korekcyjny musi spełniać 0 < Fcorr ≤ 1')],
+    [/^ogh-integrity\.js did not load$/, T('The calculation module ogh-integrity.js did not load', 'Модуль розрахунку ogh-integrity.js не завантажився', 'Das Rechenmodul ogh-integrity.js wurde nicht geladen', 'De rekenmodule ogh-integrity.js is niet geladen', 'Le module de calcul ogh-integrity.js ne s’est pas chargé', 'El módulo de cálculo ogh-integrity.js no se ha cargado', 'Moduł obliczeniowy ogh-integrity.js nie został załadowany')],
+    [/^no result returned$/, T('the calculation returned no result', 'розрахунок не повернув результату', 'die Berechnung lieferte kein Ergebnis', 'de berekening gaf geen resultaat', 'le calcul n’a renvoyé aucun résultat', 'el cálculo no devolvió ningún resultado', 'obliczenie nie zwróciło wyniku')],
+    [/^Unknown error$/, T('Unknown error', 'Невідома помилка', 'Unbekannter Fehler', 'Onbekende fout', 'Erreur inconnue', 'Error desconocido', 'Nieznany błąd')]
+  ];
+  function trw(w) {
+    var s = String(w), pre = '', i, m, o, l, inv = /^Invalid input: /;
+    if (inv.test(s)) { s = s.replace(inv, ''); pre = 'inv'; }
+    var P = T('Invalid input: ', 'Некоректні вхідні дані: ', 'Ungültige Eingabe: ', 'Ongeldige invoer: ', 'Entrée invalide : ', 'Entrada no válida: ', 'Nieprawidłowe dane: ');
+    for (i = 0; i < WARN.length; i++) {
+      m = WARN[i][0].exec(s);
+      if (!m) continue;
+      o = {};
+      for (l in WARN[i][1]) if (Object.prototype.hasOwnProperty.call(WARN[i][1], l)) {
+        o[l] = (pre ? P[l] : '') + WARN[i][1][l].replace(/\$F/g, function () { var f = FIELD[m[1]]; return f ? f[l] : (m[1] || ''); })
+          .replace(/\$(\d)/g, function (a, n) { var g = m[+n] != null ? m[+n] : ''; return (l !== 'en' && /^-?[\d.]+$/.test(g)) ? g.replace('.', ',') : g; });
+      }
+      return o;
+    }
+    if (pre) { o = {}; for (l in P) if (Object.prototype.hasOwnProperty.call(P, l)) o[l] = P[l] + s; return o; }
+    return String(w);
+  }
+  var SEV = { 'low': T('low', 'низька', 'niedrig', 'laag', 'faible', 'baja', 'niska'),
+    'medium': T('medium', 'середня', 'mittel', 'gemiddeld', 'moyenne', 'media', 'średnia'),
+    'high': T('high', 'висока', 'hoch', 'hoog', 'élevée', 'alta', 'wysoka'),
+    'very high': T('very high', 'дуже висока', 'sehr hoch', 'zeer hoog', 'très élevée', 'muy alta', 'bardzo wysoka') };
+  function computeView(s){
+    last = solve(s); if (stage) stage.schedule();
+    var r = last;
+    if (!r || !r.ok) { return { verdict: { tone: 'bad', text: trw((r && r.error) || 'Unknown error') }, tiles: [], notes: [] }; }
+    function fin(v){ return typeof v === 'number' && isFinite(v); }
+    var tiles = [], notes = [], meters = [], tables = [], i;
+    function add(label, v, unit, learn, head, tone){ if (!fin(v)) return; tiles.push({ label: label, value: sigv(v, 4), hint: unit, precision: sig(v, 4), tone: tone || null, learn: learn, headline: !!head }); }
+    var q = String(r.severity || '');
+    var sv = SEV[q] || q;
+    var tone = { 'low': 'ok', 'medium': 'ok', 'high': 'warn', 'very high': 'bad' }[q] || 'warn';
+    var verdict = { tone: tone, text: TF(T(
+      'Design corrosion rate {0} mm/yr ({1}), corrosion allowance {2} mm over {3} years',
+      'Розрахункова швидкість корозії {0} мм/рік ({1}), допуск на корозію {2} мм за {3} р.',
+      'Auslegungs-Korrosionsrate {0} mm/a ({1}), Korrosionszuschlag {2} mm über {3} Jahre',
+      'Ontwerp-corrosiesnelheid {0} mm/jaar ({1}), corrosietoeslag {2} mm over {3} jaar',
+      'Vitesse de corrosion de calcul {0} mm/an ({1}), surépaisseur de corrosion {2} mm sur {3} ans',
+      'Velocidad de corrosión de diseño {0} mm/año ({1}), sobreespesor de corrosión {2} mm en {3} años',
+      'Projektowa szybkość korozji {0} mm/rok ({1}), naddatek korozyjny {2} mm na {3} lat'), [[r.Vinh, sig(r.Vinh, 3)], sv, [r.CA, sig(r.CA, 3)], [+s.life || 25, 0]]) };
+    add(T('Vdes · design corrosion rate', 'Vdes · розрахункова швидкість корозії', 'Vdes · Auslegungs-Korrosionsrate', 'Vdes · ontwerp-corrosiesnelheid', 'Vdes · vitesse de corrosion de calcul', 'Vdes · velocidad de corrosión de diseño', 'Vdes · projektowa szybkość korozji'), r.Vinh, 'mm/yr', 'severity', true);
+    add(T('CA · corrosion allowance', 'CA · допуск на корозію', 'CA · Korrosionszuschlag', 'CA · corrosietoeslag', 'CA · surépaisseur de corrosion', 'CA · sobreespesor de corrosión', 'CA · naddatek korozyjny'), r.CA, 'mm', 'allowance', false, fin(r.CA) && r.CA > 6 ? 'warn' : null);
+    add(T('pCO2 · CO2 partial pressure', 'pCO2 · парціальний тиск CO2', 'pCO2 · CO2-Partialdruck', 'pCO2 · CO2-partiële druk', 'pCO2 · pression partielle de CO2', 'pCO2 · presión parcial de CO2', 'pCO2 · ciśnienie cząstkowe CO2'), r.pCO2, 'bar', 'fugacity');
+    add(T('Fscale · protective scale factor', 'Fscale · коефіцієнт захисної плівки', 'Fscale · Schutzschichtfaktor', 'Fscale · beschermende-laagfactor', 'Fscale · facteur de couche protectrice', 'Fscale · factor de capa protectora', 'Fscale · współczynnik warstwy ochronnej'), r.Fscale, '', 'scale');
+    if (s && s.level === 'full') {
+      add(T('V91 · dWM 1991 rate', 'V91 · швидкість dWM 1991', 'V91 · Rate dWM 1991', 'V91 · snelheid dWM 1991', 'V91 · vitesse dWM 1991', 'V91 · velocidad dWM 1991', 'V91 · szybkość dWM 1991'), r.V91, 'mm/yr', 'temperature');
+      add(T('V95 · dWM 1995 rate', 'V95 · швидкість dWM 1995', 'V95 · Rate dWM 1995', 'V95 · snelheid dWM 1995', 'V95 · vitesse dWM 1995', 'V95 · velocidad dWM 1995', 'V95 · szybkość dWM 1995'), r.V95s, 'mm/yr', 'flow');
+      add(T('Vr · reaction rate', 'Vr · швидкість реакції', 'Vr · Reaktionsrate', 'Vr · reactiesnelheid', 'Vr · vitesse de réaction', 'Vr · velocidad de reacción', 'Vr · szybkość reakcji'), r.Vr, 'mm/yr', 'flow');
+      add(T('Vm · mass-transfer rate', 'Vm · швидкість масопереносу', 'Vm · Stofftransportrate', 'Vm · massatransportsnelheid', 'Vm · vitesse de transfert de masse', 'Vm · velocidad de transferencia de masa', 'Vm · szybkość wymiany masy'), r.Vm, 'mm/yr', 'flow');
+      add(T('fCO2 · CO2 fugacity', 'fCO2 · фугітивність CO2', 'fCO2 · CO2-Fugazität', 'fCO2 · CO2-fugaciteit', 'fCO2 · fugacité du CO2', 'fCO2 · fugacidad del CO2', 'fCO2 · lotność CO2'), r.fCO2, 'bar', 'fugacity');
+      add(T('Tscale · scale temperature', 'Tscale · температура утворення плівки', 'Tscale · Deckschichttemperatur', 'Tscale · laagtemperatuur', 'Tscale · température de formation de couche', 'Tscale · temperatura de formación de capa', 'Tscale · temperatura tworzenia warstwy'), r.Tscale, 'K', 'scale');
+    }
+    /* result sentences */
+    var is91 = r.governing === 'dWM 1991';
+    notes.push(TF(T(
+      'Governing model: {0} (1991: {1} mm/yr, 1995 flow model: {2} mm/yr, both after the scale factor).',
+      'Визначальна модель: {0} (1991: {1} мм/рік, модель потоку 1995: {2} мм/рік, обидві з коефіцієнтом плівки).',
+      'Maßgebendes Modell: {0} (1991: {1} mm/a, Strömungsmodell 1995: {2} mm/a, beide mit Deckschichtfaktor).',
+      'Maatgevend model: {0} (1991: {1} mm/jaar, stromingsmodel 1995: {2} mm/jaar, beide na de laagfactor).',
+      'Modèle déterminant : {0} (1991 : {1} mm/an, modèle d’écoulement 1995 : {2} mm/an, tous deux après facteur de couche).',
+      'Modelo determinante: {0} (1991: {1} mm/año, modelo de flujo 1995: {2} mm/año, ambos tras el factor de capa).',
+      'Model decydujący: {0} (1991: {1} mm/rok, model przepływu 1995: {2} mm/rok, oba po współczynniku warstwy).'), [String(r.governing), [r.V91s, sig(r.V91s, 3)], [r.V95s, sig(r.V95s, 3)]]));
+    if (fin(r.Fscale) && r.Fscale < 1) {
+      notes.push(TF(T(
+        'Protective FeCO3 scale: T is above Tscale = {0} °C, the rate is multiplied by Fscale = {1}.',
+        'Захисний шар FeCO3: T вища за Tscale = {0} °C, швидкість множиться на Fscale = {1}.',
+        'Schützende FeCO3-Schicht: T liegt über Tscale = {0} °C, die Rate wird mit Fscale = {1} multipliziert.',
+        'Beschermende FeCO3-laag: T ligt boven Tscale = {0} °C, de snelheid wordt vermenigvuldigd met Fscale = {1}.',
+        'Couche protectrice FeCO3 : T dépasse Tscale = {0} °C, la vitesse est multipliée par Fscale = {1}.',
+        'Capa protectora de FeCO3: T supera Tscale = {0} °C, la velocidad se multiplica por Fscale = {1}.',
+        'Ochronna warstwa FeCO3: T przekracza Tscale = {0} °C, szybkość mnoży się przez Fscale = {1}.'), [[r.Tscale - 273.15, 1], [r.Fscale, sig(r.Fscale, 3)]]));
+    } else if (fin(r.Tscale)) {
+      notes.push(TF(T(
+        'No scale credit: T is below the scaling temperature Tscale = {0} °C, so Fscale = 1.',
+        'Без урахування плівки: T нижча за температуру утворення шару Tscale = {0} °C, тож Fscale = 1.',
+        'Keine Deckschicht-Gutschrift: T liegt unter der Deckschichttemperatur Tscale = {0} °C, daher Fscale = 1.',
+        'Geen laagkorting: T ligt onder de laagvormingstemperatuur Tscale = {0} °C, dus Fscale = 1.',
+        'Pas de crédit de couche : T est inférieure à la température de dépôt Tscale = {0} °C, donc Fscale = 1.',
+        'Sin beneficio de capa: T está por debajo de la temperatura de incrustación Tscale = {0} °C, así que Fscale = 1.',
+        'Bez ulgi za warstwę: T jest poniżej temperatury tworzenia warstwy Tscale = {0} °C, więc Fscale = 1.'), [[r.Tscale - 273.15, 1]]));
+    }
+    if (!is91 && fin(r.Vm) && fin(r.Vr) && r.Vm < r.Vr) {
+      notes.push(TF(T(
+        'Mass transfer limits the 1995 rate (Vm = {0} < Vr = {1} mm/yr): liquid velocity and diameter matter.',
+        'Масоперенос обмежує швидкість 1995 (Vm = {0} < Vr = {1} мм/рік): важливі швидкість рідини і діаметр.',
+        'Der Stofftransport begrenzt die Rate von 1995 (Vm = {0} < Vr = {1} mm/a): Flüssigkeitsgeschwindigkeit und Durchmesser zählen.',
+        'Stofoverdracht beperkt de snelheid van 1995 (Vm = {0} < Vr = {1} mm/jaar): vloeistofsnelheid en diameter tellen.',
+        'Le transfert de masse limite la vitesse 1995 (Vm = {0} < Vr = {1} mm/an) : la vitesse du liquide et le diamètre comptent.',
+        'La transferencia de masa limita la velocidad de 1995 (Vm = {0} < Vr = {1} mm/año): importan la velocidad del líquido y el diámetro.',
+        'Transport masy ogranicza szybkość 1995 (Vm = {0} < Vr = {1} mm/rok): liczą się prędkość cieczy i średnica.'), [[r.Vm, sig(r.Vm, 3)], [r.Vr, sig(r.Vr, 3)]]));
+    }
+    for (i = 0; r.warnings && i < r.warnings.length; i++) { notes.push(trw(r.warnings[i])); }
+    return { verdict: verdict, tiles: tiles, meters: meters, tables: tables, notes: notes };
+  }
+
+  function degrade() {
+    document.title = 'diagram-ui.js v1 is required';
+    var host = document.getElementById('app') || document.body;
+    var h = document.createElement('h1');
+    h.textContent = 'CO2 corrosion rate';
+    var p = document.createElement('p');
+    p.textContent = 'The interactive interface could not load. The export, the calculation record '
+                  + 'and the limitations are still available from the bar at the bottom of the page.';
+    host.appendChild(h);
+    host.appendChild(p);
+    last = solve(state);
+  }
+
+  function boot() {
+    if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface();
+    else degrade();
+    installData();
+  }
+
+  function buildInterface() {
+    ui = DiagramUI.app({
+      id: 'co2_corrosion_rate',
+      mount: '#app',
+      layout: 'calculator',
+      compute: 'live',
+      state: state,
+      defaults: DEFAULTS,
+      learn: {
+        version: 1,
+        intro: { title: T('CO2 Corrosion Screening', 'Скринінг корозії CO2', 'CO2-Korrosions-Screening', 'CO2-corrosiescreening', 'Présélection corrosion CO2', 'Cribado corrosión CO2', 'Ocena korozji CO2'),
+          body: T('Screening tool predicting the uniform CO2 corrosion rate of carbon steel in water-wet lines with the de Waard-Milliams 1991 and 1995 models (NORSOK M-506 basis), including the protective FeCO3 scale factor, and the corrosion allowance needed over the design life.',
+            'Інструмент скринінгу, що прогнозує швидкість рівномірної CO2-корозії вуглецевої сталі у змочених водою трубопроводах за моделями de Waard-Milliams 1991 і 1995 (основа NORSOK M-506), з урахуванням коефіцієнта захисного шару FeCO3, і потрібний допуск на корозію за проєктний строк.',
+            'Screening-Werkzeug zur Vorhersage der gleichmäßigen CO2-Korrosionsrate von Kohlenstoffstahl in wasserbenetzten Leitungen mit den Modellen de Waard-Milliams 1991 und 1995 (Grundlage NORSOK M-506), einschließlich des Faktors der schützenden FeCO3-Schicht, und des über die Auslegungslebensdauer nötigen Korrosionszuschlags.',
+            'Screeningtool dat de uniforme CO2-corrosiesnelheid van koolstofstaal in watergenatte leidingen voorspelt met de modellen de Waard-Milliams 1991 en 1995 (basis NORSOK M-506), inclusief de factor van de beschermende FeCO3-laag, en de corrosietoeslag die over de ontwerplevensduur nodig is.',
+            'Outil de présélection estimant la vitesse de corrosion uniforme par CO2 de l’acier au carbone en conduite mouillée par l’eau selon les modèles de Waard-Milliams 1991 et 1995 (base NORSOK M-506), y compris le facteur de couche protectrice FeCO3, et la surépaisseur de corrosion nécessaire sur la durée de vie.',
+            'Herramienta de cribado que predice la velocidad de corrosión uniforme por CO2 del acero al carbono en líneas mojadas por agua con los modelos de Waard-Milliams 1991 y 1995 (base NORSOK M-506), incluido el factor de la capa protectora de FeCO3, y el sobreespesor de corrosión necesario durante la vida de diseño.',
+            'Narzędzie przesiewowe przewidujące szybkość równomiernej korozji CO2 stali węglowej w zwilżonych wodą rurociągach według modeli de Waard-Milliams 1991 i 1995 (podstawa NORSOK M-506), z uwzględnieniem współczynnika ochronnej warstwy FeCO3, oraz naddatek korozyjny potrzebny na projektowy okres eksploatacji.') },
+        topics: {
+          method: { title: T('Calculation level and governing model', 'Рівень розрахунку і визначальна модель', 'Berechnungsstufe und maßgebendes Modell', 'Berekeningsniveau en maatgevend model', 'Niveau de calcul et modèle déterminant', 'Nivel de cálculo y modelo determinante', 'Poziom obliczeń i model decydujący'),
+            body: T('Both levels run the de Waard-Milliams 1991 equation and the flow-dependent 1995 model, both multiplied by the scale factor. The design rate is the larger of the two, so the more pessimistic model governs. Simple uses inhibitor efficiency 0 and correction factor 1; Full lets you set them and shows V91, V95, Vr, Vm, fCO2 and Tscale.',
+              'Обидва рівні виконують рівняння de Waard-Milliams 1991 і залежну від потоку модель 1995, обидві помножені на коефіцієнт захисного шару. Розрахункова швидкість — більша з двох, тож визначає песимістичніша модель. Простий рівень бере ефективність інгібітора 0 і поправковий коефіцієнт 1; Повний дозволяє їх задати і показує V91, V95, Vr, Vm, fCO2 і Tscale.',
+              'Beide Stufen rechnen die Gleichung de Waard-Milliams 1991 und das strömungsabhängige Modell von 1995, jeweils mit dem Deckschichtfaktor multipliziert. Die Auslegungsrate ist der größere Wert, das ungünstigere Modell ist maßgebend. Einfach setzt Inhibitorwirkungsgrad 0 und Korrekturfaktor 1; Vollständig lässt beide einstellen und zeigt V91, V95, Vr, Vm, fCO2 und Tscale.',
+              'Beide niveaus rekenen de vergelijking de Waard-Milliams 1991 en het stromingsafhankelijke model van 1995, elk vermenigvuldigd met de laagfactor. De ontwerpsnelheid is de grootste van de twee, dus het meest pessimistische model is maatgevend. Eenvoudig gebruikt inhibitorrendement 0 en correctiefactor 1; Volledig laat ze instellen en toont V91, V95, Vr, Vm, fCO2 en Tscale.',
+              'Les deux niveaux calculent l’équation de Waard-Milliams 1991 et le modèle 1995 dépendant de l’écoulement, chacun multiplié par le facteur de couche. La vitesse de calcul est la plus grande des deux : le modèle le plus pessimiste gouverne. Simple prend une efficacité d’inhibiteur de 0 et un facteur de correction de 1 ; Complet permet de les régler et affiche V91, V95, Vr, Vm, fCO2 et Tscale.',
+              'Ambos niveles calculan la ecuación de Waard-Milliams 1991 y el modelo de 1995 dependiente del flujo, ambos multiplicados por el factor de capa. La velocidad de diseño es la mayor de las dos, así que gobierna el modelo más pesimista. Simple usa eficiencia de inhibidor 0 y factor de corrección 1; Completo permite fijarlos y muestra V91, V95, Vr, Vm, fCO2 y Tscale.',
+              'Oba poziomy liczą równanie de Waard-Milliams 1991 i zależny od przepływu model z 1995 roku, oba pomnożone przez współczynnik warstwy. Szybkość projektowa to większa z nich, więc decyduje model bardziej pesymistyczny. Prosty przyjmuje skuteczność inhibitora 0 i współczynnik korekcyjny 1; Pełny pozwala je ustawić i pokazuje V91, V95, Vr, Vm, fCO2 i Tscale.') },
+          temperature: { title: T('Temperature Effect', 'Вплив температури', 'Temperatureinfluss', 'Temperatuurinvloed', 'Effet de la température', 'Efecto de la temperatura', 'Wpływ temperatury'),
+            body: T('In the 1991 equation log V = 5.8 − 1710/T + 0.67 log fCO2 (T in K, V in mm/yr) the rate roughly doubles every 15–20 °C. This holds only until protective iron carbonate scale forms, typically above 60–90 °C; there the curve on the chart turns down. Pitfall: use the highest temperature of the water-wet section, not an average.',
+              'У рівнянні 1991 року log V = 5,8 − 1710/T + 0,67 log fCO2 (T у K, V у мм/рік) швидкість приблизно подвоюється кожні 15–20 °C. Це діє лише доки не утвориться захисний шар карбонату заліза, зазвичай вище 60–90 °C; там крива на графіку йде вниз. Пастка: беріть найвищу температуру змоченої водою ділянки, а не середню.',
+              'In der Gleichung von 1991 log V = 5,8 − 1710/T + 0,67 log fCO2 (T in K, V in mm/a) verdoppelt sich die Rate etwa alle 15–20 °C. Das gilt nur, bis sich eine schützende Eisencarbonatschicht bildet, meist oberhalb 60–90 °C; dort knickt die Kurve im Diagramm nach unten. Falle: die höchste Temperatur des wasserbenetzten Abschnitts verwenden, keinen Mittelwert.',
+              'In de vergelijking van 1991 log V = 5,8 − 1710/T + 0,67 log fCO2 (T in K, V in mm/jaar) verdubbelt de snelheid ruwweg elke 15–20 °C. Dat geldt alleen tot een beschermende ijzercarbonaatlaag ontstaat, meestal boven 60–90 °C; daar buigt de curve in de grafiek omlaag. Valkuil: neem de hoogste temperatuur van het watergenatte deel, geen gemiddelde.',
+              'Dans l’équation de 1991 log V = 5,8 − 1710/T + 0,67 log fCO2 (T en K, V en mm/an), la vitesse double environ tous les 15 à 20 °C. Cela ne vaut que jusqu’à la formation d’un dépôt protecteur de carbonate de fer, en général au-delà de 60 à 90 °C ; la courbe du graphique s’infléchit alors. Piège : prendre la température maximale du tronçon mouillé, pas une moyenne.',
+              'En la ecuación de 1991 log V = 5,8 − 1710/T + 0,67 log fCO2 (T en K, V en mm/año) la velocidad se duplica aproximadamente cada 15–20 °C. Solo vale hasta que se forma una capa protectora de carbonato de hierro, normalmente por encima de 60–90 °C; ahí la curva del gráfico baja. Trampa: use la temperatura máxima del tramo mojado, no una media.',
+              'W równaniu z 1991 roku log V = 5,8 − 1710/T + 0,67 log fCO2 (T w K, V w mm/rok) szybkość podwaja się mniej więcej co 15–20 °C. Dotyczy to tylko sytuacji, zanim powstanie ochronna warstwa węglanu żelaza, zwykle powyżej 60–90 °C; tam krzywa na wykresie opada. Pułapka: przyjmuj najwyższą temperaturę zwilżonego odcinka, nie średnią.') },
+          fugacity: { title: T('CO2 Partial Pressure and Fugacity', 'Парціальний тиск і фугітивність CO2', 'CO2-Partialdruck und Fugazität', 'CO2-partiële druk en fugaciteit', 'Pression partielle et fugacité du CO2', 'Presión parcial y fugacidad del CO2', 'Ciśnienie cząstkowe i lotność CO2'),
+            body: T('pCO2 = yCO2·P (bar) is the driving force. At high pressure the gas is non-ideal: fCO2 = a·pCO2 with log a = P·(0.0031 − 1.4/T), so a < 1 (about 0.88 at 50 bar and 60 °C) and the 1991 rate falls below the ideal-gas value. Pitfall: yCO2 is the mole fraction in the gas phase, not the CO2 content of the liquid.',
+              'pCO2 = yCO2·P (бар) — рушійна сила. За високого тиску газ неідеальний: fCO2 = a·pCO2, log a = P·(0,0031 − 1,4/T), тож a < 1 (близько 0,88 при 50 бар і 60 °C), і швидкість за моделлю 1991 нижча за значення для ідеального газу. Пастка: yCO2 — мольна частка в газовій фазі, а не вміст CO2 у рідині.',
+              'pCO2 = yCO2·P (bar) ist die treibende Kraft. Bei hohem Druck ist das Gas nicht ideal: fCO2 = a·pCO2 mit log a = P·(0,0031 − 1,4/T), also a < 1 (etwa 0,88 bei 50 bar und 60 °C), und die Rate nach 1991 liegt unter dem Idealgaswert. Falle: yCO2 ist der Molanteil in der Gasphase, nicht der CO2-Gehalt der Flüssigkeit.',
+              'pCO2 = yCO2·P (bar) is de drijvende kracht. Bij hoge druk is het gas niet ideaal: fCO2 = a·pCO2 met log a = P·(0,0031 − 1,4/T), dus a < 1 (circa 0,88 bij 50 bar en 60 °C) en de snelheid volgens 1991 ligt onder de idealegaswaarde. Valkuil: yCO2 is de molfractie in de gasfase, niet het CO2-gehalte van de vloeistof.',
+              'pCO2 = yCO2·P (bar) est la force motrice. À haute pression le gaz n’est pas idéal : fCO2 = a·pCO2 avec log a = P·(0,0031 − 1,4/T), donc a < 1 (environ 0,88 à 50 bar et 60 °C) et la vitesse de 1991 est inférieure à celle du gaz parfait. Piège : yCO2 est la fraction molaire dans la phase gazeuse, pas la teneur en CO2 du liquide.',
+              'pCO2 = yCO2·P (bar) es la fuerza impulsora. A alta presión el gas no es ideal: fCO2 = a·pCO2 con log a = P·(0,0031 − 1,4/T), así que a < 1 (unos 0,88 a 50 bar y 60 °C) y la velocidad de 1991 queda por debajo del valor de gas ideal. Trampa: yCO2 es la fracción molar en la fase gaseosa, no el contenido de CO2 del líquido.',
+              'pCO2 = yCO2·P (bar) jest siłą napędową. Przy wysokim ciśnieniu gaz nie jest idealny: fCO2 = a·pCO2, log a = P·(0,0031 − 1,4/T), więc a < 1 (około 0,88 przy 50 bar i 60 °C), a szybkość z modelu 1991 jest niższa niż dla gazu idealnego. Pułapka: yCO2 to udział molowy w fazie gazowej, a nie zawartość CO2 w cieczy.') },
+          scale: { title: T('Protective FeCO3 Scale', 'Захисний шар FeCO3', 'Schützende FeCO3-Schicht', 'Beschermende FeCO3-laag', 'Dépôt protecteur FeCO3', 'Capa protectora FeCO3', 'Ochronna warstwa FeCO3'),
+            body: T('Above the scaling temperature Tscale = 2400/(6.7 + 0.6 log fCO2) an iron carbonate film forms and the rate is multiplied by Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Higher fCO2 lowers Tscale: about 87 °C at fCO2 ≈ 1 bar, about 66 °C at 4 bar. Pitfall: high velocity, low pH or upsets can strip the film, so do not take this credit without evidence.',
+              'Вище температури утворення шару Tscale = 2400/(6,7 + 0,6 log fCO2) утворюється плівка карбонату заліза, і швидкість множиться на Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Більша fCO2 знижує Tscale: близько 87 °C при fCO2 ≈ 1 бар, близько 66 °C при 4 бар. Пастка: висока швидкість, низький pH чи збурення можуть зірвати плівку, тож не враховуйте цей ефект без доказів.',
+              'Oberhalb der Deckschichttemperatur Tscale = 2400/(6,7 + 0,6 log fCO2) bildet sich ein Eisencarbonatfilm, und die Rate wird mit Fscale multipliziert, log Fscale = 2400/T − 2400/Tscale (≤ 1). Höhere fCO2 senkt Tscale: etwa 87 °C bei fCO2 ≈ 1 bar, etwa 66 °C bei 4 bar. Falle: hohe Geschwindigkeit, niedriger pH oder Störungen können den Film abtragen, diese Gutschrift also nicht ohne Nachweis ansetzen.',
+              'Boven de laagvormingstemperatuur Tscale = 2400/(6,7 + 0,6 log fCO2) vormt zich een ijzercarbonaatfilm en wordt de snelheid vermenigvuldigd met Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Hogere fCO2 verlaagt Tscale: circa 87 °C bij fCO2 ≈ 1 bar, circa 66 °C bij 4 bar. Valkuil: hoge snelheid, lage pH of verstoringen kunnen de film verwijderen, reken dus niet zonder bewijs op dit voordeel.',
+              'Au-delà de la température de dépôt Tscale = 2400/(6,7 + 0,6 log fCO2), un film de carbonate de fer se forme et la vitesse est multipliée par Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Une fCO2 plus élevée abaisse Tscale : environ 87 °C pour fCO2 ≈ 1 bar, environ 66 °C pour 4 bar. Piège : une vitesse élevée, un pH bas ou des incidents peuvent arracher le film ; ne comptez pas sur ce gain sans preuve.',
+              'Por encima de la temperatura de incrustación Tscale = 2400/(6,7 + 0,6 log fCO2) se forma una película de carbonato de hierro y la velocidad se multiplica por Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Una fCO2 mayor baja Tscale: unos 87 °C con fCO2 ≈ 1 bar, unos 66 °C con 4 bar. Trampa: velocidad alta, pH bajo o perturbaciones pueden arrancar la película, así que no cuente con este beneficio sin evidencia.',
+              'Powyżej temperatury tworzenia warstwy Tscale = 2400/(6,7 + 0,6 log fCO2) powstaje film węglanu żelaza, a szybkość mnoży się przez Fscale, log Fscale = 2400/T − 2400/Tscale (≤ 1). Wyższa fCO2 obniża Tscale: około 87 °C przy fCO2 ≈ 1 bar, około 66 °C przy 4 bar. Pułapka: duża prędkość, niskie pH lub zakłócenia mogą zerwać film, więc nie licz na ten efekt bez dowodów.') },
+          flow: { title: T('Flow and Mass Transfer', 'Потік і масоперенос', 'Strömung und Stofftransport', 'Stroming en stoftransport', 'Écoulement et transfert de masse', 'Flujo y transferencia de masa', 'Przepływ i transport masy'),
+            body: T('The 1995 model puts reaction and mass transfer in series: 1/V = 1/Vr + 1/Vm, with log Vr = 4.93 − 1119/T + 0.58 log pCO2 and Vm = 2.45·U^0.8/d^0.2·pCO2. Vm is usually the smaller term, so a faster liquid raises the rate and a larger diameter lowers it slightly. At U = 0 the flow model is switched off and the 1991 model governs. Pitfall: U is the velocity of the water-wetting liquid, not the gas superficial velocity.',
+              'Модель 1995 року розглядає реакцію і масоперенос послідовно: 1/V = 1/Vr + 1/Vm, де log Vr = 4,93 − 1119/T + 0,58 log pCO2, а Vm = 2,45·U^0,8/d^0,2·pCO2. Зазвичай менший член — Vm, тож швидша рідина підвищує швидкість корозії, а більший діаметр трохи її знижує. При U = 0 модель потоку вимикається і визначає модель 1991. Пастка: U — швидкість рідини, що змочує стінку, а не приведена швидкість газу.',
+              'Das Modell von 1995 schaltet Reaktion und Stofftransport in Reihe: 1/V = 1/Vr + 1/Vm, mit log Vr = 4,93 − 1119/T + 0,58 log pCO2 und Vm = 2,45·U^0,8/d^0,2·pCO2. Meist ist Vm der kleinere Term, daher erhöht schnellere Flüssigkeit die Rate und ein größerer Durchmesser senkt sie leicht. Bei U = 0 entfällt das Strömungsmodell, und das Modell von 1991 ist maßgebend. Falle: U ist die Geschwindigkeit der benetzenden Flüssigkeit, nicht die Gas-Leerrohrgeschwindigkeit.',
+              'Het model van 1995 zet reactie en stofoverdracht in serie: 1/V = 1/Vr + 1/Vm, met log Vr = 4,93 − 1119/T + 0,58 log pCO2 en Vm = 2,45·U^0,8/d^0,2·pCO2. Meestal is Vm de kleinste term, dus snellere vloeistof verhoogt de snelheid en een grotere diameter verlaagt die licht. Bij U = 0 vervalt het stromingsmodel en is het model van 1991 maatgevend. Valkuil: U is de snelheid van de bevochtigende vloeistof, niet de superficiële gassnelheid.',
+              'Le modèle de 1995 place réaction et transfert de masse en série : 1/V = 1/Vr + 1/Vm, avec log Vr = 4,93 − 1119/T + 0,58 log pCO2 et Vm = 2,45·U^0,8/d^0,2·pCO2. Vm est en général le terme le plus petit : un liquide plus rapide augmente la vitesse et un diamètre plus grand la réduit un peu. À U = 0 le modèle d’écoulement est désactivé et celui de 1991 gouverne. Piège : U est la vitesse du liquide qui mouille la paroi, pas la vitesse superficielle du gaz.',
+              'El modelo de 1995 pone reacción y transferencia de masa en serie: 1/V = 1/Vr + 1/Vm, con log Vr = 4,93 − 1119/T + 0,58 log pCO2 y Vm = 2,45·U^0,8/d^0,2·pCO2. Normalmente Vm es el término menor, así que un líquido más rápido aumenta la velocidad y un diámetro mayor la reduce algo. Con U = 0 el modelo de flujo se desactiva y gobierna el de 1991. Trampa: U es la velocidad del líquido que moja la pared, no la velocidad superficial del gas.',
+              'Model z 1995 roku łączy reakcję i transport masy szeregowo: 1/V = 1/Vr + 1/Vm, gdzie log Vr = 4,93 − 1119/T + 0,58 log pCO2, a Vm = 2,45·U^0,8/d^0,2·pCO2. Zwykle mniejszy jest Vm, więc szybsza ciecz zwiększa szybkość korozji, a większa średnica nieco ją zmniejsza. Przy U = 0 model przepływu jest wyłączony i decyduje model 1991. Pułapka: U to prędkość cieczy zwilżającej ściankę, a nie prędkość pozorna gazu.') },
+          allowance: { title: T('Corrosion Allowance', 'Допуск на корозію', 'Korrosionszuschlag', 'Corrosietoeslag', 'Surépaisseur de corrosion', 'Sobreespesor de corrosión', 'Naddatek korozyjny'),
+            body: T('CA = Vdes·(1 − inhibitor efficiency)·design life. Typical carbon-steel allowances are 3–6 mm; above about 6 mm the line is usually not viable without inhibition or a corrosion-resistant alloy (CRA). Pitfall: the allowance covers uniform loss only; pitting and mesa attack can go faster locally.',
+              'CA = Vdes·(1 − ефективність інгібітора)·проєктний строк. Типові допуски для вуглецевої сталі — 3–6 мм; понад приблизно 6 мм лінія зазвичай нежиттєздатна без інгібування або корозійностійкого сплаву (CRA). Пастка: допуск покриває лише рівномірну втрату; виразкова і мезакорозія локально можуть бути швидшими.',
+              'CA = Vdes·(1 − Inhibitorwirkungsgrad)·Auslegungslebensdauer. Übliche Zuschläge für Kohlenstoffstahl sind 3–6 mm; ab etwa 6 mm ist die Leitung ohne Inhibierung oder korrosionsbeständige Legierung (CRA) meist nicht tragbar. Falle: der Zuschlag deckt nur gleichmäßigen Abtrag; Lochfraß und Mesa-Angriff können örtlich schneller sein.',
+              'CA = Vdes·(1 − inhibitorrendement)·ontwerplevensduur. Gebruikelijke toeslagen voor koolstofstaal zijn 3–6 mm; boven circa 6 mm is de leiding zonder inhibitie of corrosiebestendige legering (CRA) meestal niet haalbaar. Valkuil: de toeslag dekt alleen uniform verlies; putcorrosie en mesa-aantasting kunnen plaatselijk sneller gaan.',
+              'CA = Vdes·(1 − efficacité de l’inhibiteur)·durée de vie. Les surépaisseurs usuelles de l’acier au carbone sont de 3 à 6 mm ; au-delà d’environ 6 mm la ligne n’est en général pas viable sans inhibition ni alliage résistant à la corrosion (CRA). Piège : la surépaisseur ne couvre que la perte uniforme ; piqûres et attaque mesa peuvent aller plus vite localement.',
+              'CA = Vdes·(1 − eficiencia del inhibidor)·vida de diseño. Los sobreespesores típicos del acero al carbono son 3–6 mm; por encima de unos 6 mm la línea no suele ser viable sin inhibición o una aleación resistente a la corrosión (CRA). Trampa: el sobreespesor cubre solo la pérdida uniforme; las picaduras y el ataque mesa pueden ir más rápido localmente.',
+              'CA = Vdes·(1 − skuteczność inhibitora)·projektowy okres eksploatacji. Typowe naddatki dla stali węglowej to 3–6 mm; powyżej około 6 mm rurociąg zwykle nie jest wykonalny bez inhibitowania lub stopu odpornego na korozję (CRA). Pułapka: naddatek pokrywa tylko ubytek równomierny; wżery i korozja typu mesa mogą lokalnie postępować szybciej.') },
+          severity: { title: T('Design Rate and Severity Classes', 'Розрахункова швидкість і класи небезпеки', 'Auslegungsrate und Schweregrade', 'Ontwerpsnelheid en ernstklassen', 'Vitesse de calcul et classes de sévérité', 'Velocidad de diseño y clases de severidad', 'Szybkość projektowa i klasy zagrożenia'),
+            body: T('The verdict classes the inhibited design rate: low < 0.1 mm/yr, medium 0.1–1 mm/yr, high 1–10 mm/yr, very high ≥ 10 mm/yr. Unmitigated de Waard-Milliams rates in wet CO2 service are often several mm/yr; they are a conservative upper bound, and field rates with scale, oil wetting or inhibitor are usually lower.',
+              'Вердикт класифікує розрахункову швидкість з урахуванням інгібітора: низька < 0,1 мм/рік, середня 0,1–1 мм/рік, висока 1–10 мм/рік, дуже висока ≥ 10 мм/рік. Без заходів захисту швидкості de Waard-Milliams у вологому CO2 часто становлять кілька мм/рік; це консервативна верхня межа, фактичні швидкості з плівкою, змочуванням нафтою чи інгібітором зазвичай нижчі.',
+              'Das Urteil ordnet die inhibierte Auslegungsrate ein: niedrig < 0,1 mm/a, mittel 0,1–1 mm/a, hoch 1–10 mm/a, sehr hoch ≥ 10 mm/a. Ungeschützte Raten nach de Waard-Milliams liegen in nassem CO2-Betrieb oft bei mehreren mm/a; sie sind eine konservative Obergrenze, Feldraten mit Deckschicht, Ölbenetzung oder Inhibitor sind meist niedriger.',
+              'Het oordeel deelt de geïnhibeerde ontwerpsnelheid in: laag < 0,1 mm/jaar, gemiddeld 0,1–1 mm/jaar, hoog 1–10 mm/jaar, zeer hoog ≥ 10 mm/jaar. Onbeschermde snelheden volgens de Waard-Milliams in nat CO2-bedrijf zijn vaak enkele mm/jaar; ze zijn een conservatieve bovengrens, veldwaarden met laag, oliebevochtiging of inhibitor liggen meestal lager.',
+              'Le verdict classe la vitesse de calcul inhibée : faible < 0,1 mm/an, moyenne 0,1–1 mm/an, élevée 1–10 mm/an, très élevée ≥ 10 mm/an. Sans protection, les vitesses de Waard-Milliams en service CO2 humide atteignent souvent plusieurs mm/an ; c’est une borne supérieure prudente, les vitesses réelles avec dépôt, mouillage par l’huile ou inhibiteur sont en général plus faibles.',
+              'El veredicto clasifica la velocidad de diseño inhibida: baja < 0,1 mm/año, media 0,1–1 mm/año, alta 1–10 mm/año, muy alta ≥ 10 mm/año. Sin mitigación, las velocidades de Waard-Milliams en servicio de CO2 húmedo suelen ser de varios mm/año; son un límite superior conservador, y las de campo con capa, mojado por aceite o inhibidor suelen ser menores.',
+              'Werdykt klasyfikuje projektową szybkość po inhibitowaniu: niska < 0,1 mm/rok, średnia 0,1–1 mm/rok, wysoka 1–10 mm/rok, bardzo wysoka ≥ 10 mm/rok. Bez ochrony szybkości de Waard-Milliams w mokrym CO2 wynoszą często kilka mm/rok; to konserwatywna górna granica, a rzeczywiste szybkości z warstwą, zwilżaniem ropą lub inhibitorem są zwykle niższe.') },
+          inhibitor: { title: T('Inhibitor Efficiency', 'Ефективність інгібітора', 'Inhibitorwirkungsgrad', 'Inhibitorrendement', 'Efficacité de l’inhibiteur', 'Eficiencia del inhibidor', 'Skuteczność inhibitora'),
+            body: T('In the Full level the design rate is multiplied by (1 − inhibitor efficiency). Efficiencies of 0.8–0.95 are typical claims; anything above 0.9 needs reliable injection (availability), monitoring and a qualified chemical. Pitfall: 0.9 sounds high but still leaves 10 % of a rate of several mm/yr.',
+              'На Повному рівні розрахункова швидкість множиться на (1 − ефективність інгібітора). Типові заявлені значення — 0,8–0,95; усе понад 0,9 потребує надійного дозування (готовності), моніторингу і кваліфікованого реагенту. Пастка: 0,9 звучить високо, але залишає 10 % від швидкості в кілька мм/рік.',
+              'In der Stufe Vollständig wird die Auslegungsrate mit (1 − Inhibitorwirkungsgrad) multipliziert. Üblich angesetzt werden 0,8–0,95; alles über 0,9 erfordert zuverlässige Dosierung (Verfügbarkeit), Überwachung und ein qualifiziertes Produkt. Falle: 0,9 klingt hoch, lässt aber 10 % einer Rate von mehreren mm/a übrig.',
+              'In het niveau Volledig wordt de ontwerpsnelheid vermenigvuldigd met (1 − inhibitorrendement). Gebruikelijke waarden zijn 0,8–0,95; alles boven 0,9 vraagt betrouwbare injectie (beschikbaarheid), monitoring en een gekwalificeerd product. Valkuil: 0,9 klinkt hoog, maar laat 10 % van een snelheid van enkele mm/jaar over.',
+              'Au niveau Complet, la vitesse de calcul est multipliée par (1 − efficacité de l’inhibiteur). Les valeurs courantes vont de 0,8 à 0,95 ; au-delà de 0,9 il faut une injection fiable (disponibilité), une surveillance et un produit qualifié. Piège : 0,9 paraît élevé mais laisse 10 % d’une vitesse de plusieurs mm/an.',
+              'En el nivel Completo la velocidad de diseño se multiplica por (1 − eficiencia del inhibidor). Los valores típicos son 0,8–0,95; por encima de 0,9 hace falta una inyección fiable (disponibilidad), monitorización y un producto cualificado. Trampa: 0,9 suena alto, pero deja el 10 % de una velocidad de varios mm/año.',
+              'Na poziomie Pełnym szybkość projektowa jest mnożona przez (1 − skuteczność inhibitora). Typowo przyjmuje się 0,8–0,95; powyżej 0,9 potrzebny jest niezawodne dozowanie (dyspozycyjność), monitoring i kwalifikowany środek. Pułapka: 0,9 brzmi wysoko, ale zostawia 10 % szybkości wynoszącej kilka mm/rok.') },
+          correction: { title: T('Correction Factor', 'Поправковий коефіцієнт', 'Korrekturfaktor', 'Correctiefactor', 'Facteur de correction', 'Factor de corrección', 'Współczynnik korekcyjny'),
+            body: T('The correction factor Fcorr (Full level, 0–1) multiplies the design rate for effects outside the base equations, such as glycol or methanol in the water phase or a raised pH from bicarbonate. 1 means no credit; take reductions from the de Waard correction charts or NORSOK M-506, not from judgement.',
+              'Поправковий коефіцієнт Fcorr (Повний рівень, 0–1) множить розрахункову швидкість для ефектів поза базовими рівняннями, як-от гліколь чи метанол у водній фазі або підвищений pH через бікарбонат. 1 означає без знижки; беріть зменшення з поправкових діаграм de Waard або NORSOK M-506, а не на око.',
+              'Der Korrekturfaktor Fcorr (Stufe Vollständig, 0–1) multipliziert die Auslegungsrate für Effekte außerhalb der Grundgleichungen, etwa Glykol oder Methanol in der Wasserphase oder einen durch Bicarbonat erhöhten pH. 1 heißt keine Gutschrift; Abminderungen aus den Korrekturdiagrammen nach de Waard oder NORSOK M-506 nehmen, nicht nach Gefühl.',
+              'De correctiefactor Fcorr (niveau Volledig, 0–1) vermenigvuldigt de ontwerpsnelheid voor effecten buiten de basisvergelijkingen, zoals glycol of methanol in de waterfase of een door bicarbonaat verhoogde pH. 1 betekent geen korting; neem reducties uit de correctiediagrammen van de Waard of NORSOK M-506, niet op gevoel.',
+              'Le facteur de correction Fcorr (niveau Complet, 0–1) multiplie la vitesse de calcul pour des effets hors des équations de base, comme du glycol ou du méthanol dans la phase aqueuse ou un pH relevé par le bicarbonate. 1 signifie aucun crédit ; prenez les réductions dans les abaques de correction de de Waard ou la NORSOK M-506, pas à l’estime.',
+              'El factor de corrección Fcorr (nivel Completo, 0–1) multiplica la velocidad de diseño por efectos fuera de las ecuaciones base, como glicol o metanol en la fase acuosa o un pH elevado por bicarbonato. 1 significa sin reducción; tome las reducciones de los gráficos de corrección de de Waard o de NORSOK M-506, no a ojo.',
+              'Współczynnik korekcyjny Fcorr (poziom Pełny, 0–1) mnoży szybkość projektową dla efektów spoza równań bazowych, np. glikolu lub metanolu w fazie wodnej albo pH podwyższonego przez wodorowęglan. 1 oznacza brak ulgi; redukcje bierz z wykresów korekcyjnych de Waard lub NORSOK M-506, a nie na oko.') },
+          validity: { title: T('Validity Range and Limits', 'Межі застосовності', 'Gültigkeitsbereich und Grenzen', 'Geldigheidsgebied en beperkingen', 'Domaine de validité et limites', 'Rango de validez y límites', 'Zakres stosowalności i ograniczenia'),
+            body: T('The equations are fitted for carbon steel with free water, 0–150 °C and pCO2 up to about 10 bar; above that the page warns and the result is an extrapolation. H2S, organic acids (acetic), top-of-line condensation, oxygen and pH buffering are not modelled. For detailed design use NORSOK M-506 or a mechanistic model.',
+              'Рівняння підібрано для вуглецевої сталі з вільною водою, 0–150 °C і pCO2 приблизно до 10 бар; вище сторінка попереджає, і результат є екстраполяцією. H2S, органічні кислоти (оцтова), конденсація у верхній частині труби, кисень і буферування pH не моделюються. Для детального проєктування використовуйте NORSOK M-506 або механістичну модель.',
+              'Die Gleichungen sind für Kohlenstoffstahl mit freiem Wasser, 0–150 °C und pCO2 bis etwa 10 bar angepasst; darüber warnt die Seite, und das Ergebnis ist eine Extrapolation. H2S, organische Säuren (Essigsäure), Top-of-Line-Kondensation, Sauerstoff und pH-Pufferung werden nicht modelliert. Für die Detailauslegung NORSOK M-506 oder ein mechanistisches Modell verwenden.',
+              'De vergelijkingen zijn gefit voor koolstofstaal met vrij water, 0–150 °C en pCO2 tot circa 10 bar; daarboven waarschuwt de pagina en is het resultaat een extrapolatie. H2S, organische zuren (azijnzuur), condensatie bovenin de leiding, zuurstof en pH-buffering worden niet gemodelleerd. Gebruik voor detailontwerp NORSOK M-506 of een mechanistisch model.',
+              'Les équations sont calées pour l’acier au carbone avec eau libre, 0–150 °C et pCO2 jusqu’à environ 10 bar ; au-delà la page avertit et le résultat est une extrapolation. H2S, acides organiques (acétique), condensation en génératrice supérieure, oxygène et effet tampon du pH ne sont pas modélisés. Pour l’étude détaillée, utilisez la NORSOK M-506 ou un modèle mécaniste.',
+              'Las ecuaciones están ajustadas para acero al carbono con agua libre, 0–150 °C y pCO2 hasta unos 10 bar; por encima la página avisa y el resultado es una extrapolación. No se modelan H2S, ácidos orgánicos (acético), condensación en la parte superior de la línea, oxígeno ni el efecto tampón del pH. Para el diseño detallado use NORSOK M-506 o un modelo mecanicista.',
+              'Równania dopasowano dla stali węglowej z wolną wodą, 0–150 °C i pCO2 do około 10 bar; powyżej strona ostrzega, a wynik jest ekstrapolacją. H2S, kwasy organiczne (octowy), kondensacja w górnej części rury, tlen i buforowanie pH nie są modelowane. Do projektu szczegółowego użyj NORSOK M-506 lub modelu mechanistycznego.') },
+          ccus: { title: T('Dense-phase CO2 (CCUS)', 'CO2 у щільній фазі (CCUS)', 'CO2 in dichter Phase (CCUS)', 'CO2 in dichte fase (CCUS)', 'CO2 en phase dense (CCUS)', 'CO2 en fase densa (CCUS)', 'CO2 w fazie gęstej (CCUS)'),
+            body: T('Dry dense-phase CO2 is not corrosive to carbon steel. If free water drops out, the model is far outside its range (pCO2 ≫ 10 bar) and returns extreme rates of tens to hundreds of mm/yr. The practical answer is strict dehydration well below water solubility and impurity limits (SO2, NO2, O2, H2S), not a corrosion allowance.',
+              'Сухий CO2 у щільній фазі не викликає корозії вуглецевої сталі. Якщо випадає вільна вода, модель працює далеко поза межами (pCO2 ≫ 10 бар) і дає екстремальні швидкості — десятки й сотні мм/рік. Практичне рішення — глибоке осушення значно нижче розчинності води та обмеження домішок (SO2, NO2, O2, H2S), а не допуск на корозію.',
+              'Trockenes CO2 in dichter Phase greift Kohlenstoffstahl nicht an. Fällt freies Wasser aus, liegt das Modell weit außerhalb seines Bereichs (pCO2 ≫ 10 bar) und liefert extreme Raten von zehn bis hunderten mm/a. Die praktische Antwort ist strenge Trocknung weit unter der Wasserlöslichkeit und Grenzwerte für Begleitstoffe (SO2, NO2, O2, H2S), kein Korrosionszuschlag.',
+              'Droog CO2 in dichte fase tast koolstofstaal niet aan. Valt er vrij water uit, dan ligt het model ver buiten zijn bereik (pCO2 ≫ 10 bar) en geeft het extreme snelheden van tientallen tot honderden mm/jaar. Het praktische antwoord is strenge droging ver onder de wateroplosbaarheid en limieten voor verontreinigingen (SO2, NO2, O2, H2S), geen corrosietoeslag.',
+              'Le CO2 sec en phase dense n’attaque pas l’acier au carbone. Si de l’eau libre se forme, le modèle est très loin de son domaine (pCO2 ≫ 10 bar) et donne des vitesses extrêmes de dizaines à centaines de mm/an. La vraie réponse est une déshydratation poussée bien en dessous de la solubilité de l’eau et des limites d’impuretés (SO2, NO2, O2, H2S), pas une surépaisseur.',
+              'El CO2 seco en fase densa no corroe el acero al carbono. Si se separa agua libre, el modelo queda muy fuera de su rango (pCO2 ≫ 10 bar) y da velocidades extremas de decenas a cientos de mm/año. La respuesta práctica es una deshidratación estricta muy por debajo de la solubilidad del agua y límites de impurezas (SO2, NO2, O2, H2S), no un sobreespesor.',
+              'Suchy CO2 w fazie gęstej nie powoduje korozji stali węglowej. Jeśli wydzieli się wolna woda, model działa daleko poza zakresem (pCO2 ≫ 10 bar) i daje skrajne szybkości rzędu dziesiątek i setek mm/rok. Praktyczną odpowiedzią jest głębokie osuszanie znacznie poniżej rozpuszczalności wody i limity zanieczyszczeń (SO2, NO2, O2, H2S), a nie naddatek korozyjny.') }
+        },
+        tour: [
+          { topic: 'method', focus: '[data-dgu-field="f-level"]' },
+          { topic: 'temperature', focus: '[data-dgu-field="f-T"]' },
+          { topic: 'fugacity', focus: '[data-dgu-field="f-yCO2"]' },
+          { topic: 'flow', focus: '[data-dgu-field="f-U"]' },
+          { topic: 'scale', focus: '.dgu-stage' },
+          { topic: 'allowance', focus: '.dgu-verdict' }
+        ]
+      },
+      panels: [
+        {
+          id: 'how', slot: 'inputs',
+          title: T('Approach', 'Підхід', 'Ansatz', 'Aanpak', 'Approche', 'Enfoque', 'Podejście'),
+          fields: [
+            { id: 'f-level', key: 'level', type: 'segmented', learn: 'method', label: T('Level', 'Рівень', 'Stufe', 'Niveau', 'Niveau', 'Nivel', 'Poziom'), options: function () { return [['simple', T('Simple', 'Простий', 'Einfach', 'Eenvoudig', 'Simple', 'Simple', 'Prosty')], ['full', T('Full', 'Повний', 'Vollständig', 'Volledig', 'Complet', 'Completo', 'Pełny')]]; } }
+          ]
+        },
+        {
+          id: 'process', slot: 'inputs',
+          title: T('Process conditions', 'Умови процесу', 'Prozessbedingungen', 'Procesomstandigheden', 'Conditions de procédé', 'Condiciones de proceso', 'Warunki procesowe'),
+          fields: [
+            { id: 'f-T', key: 'T', type: 'number', unit: 'K', display: '°C', min: 273.15, max: 423.15, precision: 1, required: true, learn: 'temperature', label: T('Temperature', 'Температура', 'Temperatur', 'Temperatuur', 'Température', 'Temperatura', 'Temperatura') },
+            { id: 'f-P', key: 'P', type: 'number', unit: 'Pa', display: 'bar', min: 1e5, max: 300e5, precision: 1, required: true, learn: 'fugacity', label: T('Total pressure', 'Загальний тиск', 'Gesamtdruck', 'Totale druk', 'Pression totale', 'Presión total', 'Ciśnienie całkowite') },
+            { id: 'f-yCO2', key: 'yCO2', type: 'number', min: 0.0001, max: 1, precision: 4, required: true, learn: 'fugacity', label: T('CO₂ mole fraction in gas', 'Мольна частка CO₂ у газі', 'CO₂-Molanteil im Gas', 'CO₂-molfractie in gas', 'Fraction molaire de CO₂ dans le gaz', 'Fracción molar de CO₂ en gas', 'Udział molowy CO₂ w gazie') }
+          ]
+        },
+        {
+          id: 'flow', slot: 'inputs',
+          title: T('Flow', 'Потік', 'Strömung', 'Stroming', 'Écoulement', 'Flujo', 'Przepływ'),
+          fields: [
+            { id: 'f-U', key: 'U', type: 'number', unit: 'm/s', min: 0, max: 20, precision: 2, required: true, learn: 'flow', label: T('Liquid velocity', 'Швидкість рідини', 'Flüssigkeitsgeschwindigkeit', 'Vloeistofsnelheid', 'Vitesse du liquide', 'Velocidad del líquido', 'Prędkość cieczy') },
+            { id: 'f-Dh', key: 'Dh', type: 'number', unit: 'm', display: 'mm', min: 0.02, max: 2, precision: 0, required: true, learn: 'flow', label: T('Hydraulic diameter', 'Гідравлічний діаметр', 'Hydraulischer Durchmesser', 'Hydraulische diameter', 'Diamètre hydraulique', 'Diámetro hidráulico', 'Średnica hydrauliczna') }
+          ]
+        },
+        {
+          id: 'design', slot: 'inputs',
+          title: T('Design', 'Проєктування', 'Auslegung', 'Ontwerp', 'Conception', 'Diseño', 'Projekt'),
+          fields: [
+            { id: 'f-life', key: 'life', type: 'number', unit: 'yr', min: 1, max: 60, precision: 0, required: true, learn: 'allowance', label: T('Design life', 'Проєктний термін служби', 'Auslegungslebensdauer', 'Ontwerplevensduur', 'Durée de vie de conception', 'Vida de diseño', 'Projektowy okres eksploatacji') },
+            { id: 'f-CA_avail', key: 'CA_avail', type: 'number', min: 0, max: 0.99, precision: 2, required: true, learn: 'inhibitor', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Inhibitor efficiency', 'Ефективність інгібітора', 'Inhibitorwirkungsgrad', 'Inhibitorrendement', 'Efficacité de l\'inhibiteur', 'Eficiencia del inhibidor', 'Skuteczność inhibitora') },
+            { id: 'f-Fcorr', key: 'Fcorr', type: 'number', min: 0.01, max: 1, precision: 2, required: true, learn: 'correction', visible: function (ctx) { return ctx.state.level === 'full'; }, label: T('Correction factor (glycol, pH)', 'Поправковий коефіцієнт (гліколь, pH)', 'Korrekturfaktor (Glykol, pH)', 'Correctiefactor (glycol, pH)', 'Facteur de correction (glycol, pH)', 'Factor de corrección (glicol, pH)', 'Współczynnik korekcyjny (glikol, pH)') }
+          ]
+        }
+      ],
+      on: {
+        rebuild: adoptStage,
+        compute: computeView
+      }
+    });
+
+    ui.panel({
+      id: 'io',
+      slot: 'inputs',
+      actionsAlign: 'end',
+      actions: [ui.resetAction()]
+    });
+
+    function exBase(t, level) { t.level = level || 'simple'; t.Dh = 0.3; t.life = 25; t.CA_avail = 0; t.Fcorr = 1; }
+    var EX = [
+      { id: 'wet_gas', label: T('Wet gas line', 'Лінія вологого газу', 'Nassgasleitung', 'Natgasleiding', 'Conduite de gaz humide', 'Línea de gas húmedo', 'Rurociąg gazu mokrego'),
+        note: T('Look at the corrosion allowance: 60 °C, 50 bar, 2 % CO2 at 2 m/s gives 4.74 mm/yr (1995 flow model governs), that is 118 mm over 25 years, about 20 times the usual 6 mm, so bare carbon steel is not viable.',
+          'Подивіться на допуск на корозію: 60 °C, 50 бар, 2 % CO2 при 2 м/с дають 4,74 мм/рік (визначає модель потоку 1995), тобто 118 мм за 25 років, приблизно у 20 разів більше звичних 6 мм, тож вуглецева сталь без захисту нежиттєздатна.',
+          'Achten Sie auf den Korrosionszuschlag: 60 °C, 50 bar, 2 % CO2 bei 2 m/s ergeben 4,74 mm/a (Strömungsmodell 1995 maßgebend), also 118 mm in 25 Jahren, etwa das 20-Fache der üblichen 6 mm; ungeschützter Kohlenstoffstahl ist nicht tragbar.',
+          'Kijk naar de corrosietoeslag: 60 °C, 50 bar, 2 % CO2 bij 2 m/s geeft 4,74 mm/jaar (stromingsmodel 1995 maatgevend), dus 118 mm in 25 jaar, circa 20 keer de gebruikelijke 6 mm; onbeschermd koolstofstaal is niet haalbaar.',
+          'Regardez la surépaisseur : 60 °C, 50 bar, 2 % de CO2 à 2 m/s donnent 4,74 mm/an (le modèle d’écoulement 1995 gouverne), soit 118 mm en 25 ans, environ 20 fois les 6 mm usuels ; l’acier au carbone nu n’est pas viable.',
+          'Fíjese en el sobreespesor: 60 °C, 50 bar, 2 % de CO2 a 2 m/s dan 4,74 mm/año (gobierna el modelo de flujo de 1995), es decir 118 mm en 25 años, unas 20 veces los 6 mm habituales; el acero al carbono sin protección no es viable.',
+          'Zwróć uwagę na naddatek korozyjny: 60 °C, 50 bar, 2 % CO2 przy 2 m/s dają 4,74 mm/rok (decyduje model przepływu 1995), czyli 118 mm w 25 lat, około 20 razy więcej niż zwykłe 6 mm; niezabezpieczona stal węglowa nie wystarczy.'),
+        apply: function (t) { exBase(t); t.T = 333.15; t.P = 50e5; t.yCO2 = 0.02; t.U = 2; } },
+      { id: 'oil_line', label: T('Oil line', 'Нафтопровід', 'Ölleitung', 'Olieleiding', 'Conduite de pétrole', 'Línea de crudo', 'Rurociąg naftowy'),
+        note: T('Look at Fscale: at 80 °C and pCO2 = 5 bar the FeCO3 scale already forms above Tscale = 66.4 °C and nearly halves the 1991 rate (Fscale = 0.535), yet the design rate of 12.5 mm/yr is still very high.',
+          'Подивіться на Fscale: при 80 °C і pCO2 = 5 бар шар FeCO3 утворюється вже вище Tscale = 66,4 °C і майже вдвічі знижує швидкість 1991 (Fscale = 0,535), проте розрахункова швидкість 12,5 мм/рік залишається дуже високою.',
+          'Achten Sie auf Fscale: bei 80 °C und pCO2 = 5 bar bildet sich die FeCO3-Schicht schon oberhalb Tscale = 66,4 °C und halbiert die Rate von 1991 fast (Fscale = 0,535), doch die Auslegungsrate von 12,5 mm/a bleibt sehr hoch.',
+          'Kijk naar Fscale: bij 80 °C en pCO2 = 5 bar vormt de FeCO3-laag zich al boven Tscale = 66,4 °C en halveert ze de snelheid van 1991 bijna (Fscale = 0,535), toch blijft de ontwerpsnelheid van 12,5 mm/jaar zeer hoog.',
+          'Regardez Fscale : à 80 °C et pCO2 = 5 bar, la couche FeCO3 se forme dès Tscale = 66,4 °C et divise presque par deux la vitesse 1991 (Fscale = 0,535), mais la vitesse de calcul de 12,5 mm/an reste très élevée.',
+          'Fíjese en Fscale: a 80 °C y pCO2 = 5 bar la capa de FeCO3 ya se forma por encima de Tscale = 66,4 °C y casi reduce a la mitad la velocidad de 1991 (Fscale = 0,535), pero la velocidad de diseño de 12,5 mm/año sigue siendo muy alta.',
+          'Zwróć uwagę na Fscale: przy 80 °C i pCO2 = 5 bar warstwa FeCO3 tworzy się już powyżej Tscale = 66,4 °C i prawie o połowę obniża szybkość 1991 (Fscale = 0,535), a mimo to szybkość projektowa 12,5 mm/rok pozostaje bardzo wysoka.'),
+        apply: function (t) { exBase(t); t.T = 353.15; t.P = 100e5; t.yCO2 = 0.05; t.U = 1; } },
+      { id: 'hot_oil_scale', label: T('Hotter oil line, 120 °C', 'Гарячіший нафтопровід, 120 °C', 'Heißere Ölleitung, 120 °C', 'Hetere olieleiding, 120 °C', 'Conduite de pétrole plus chaude, 120 °C', 'Línea de crudo más caliente, 120 °C', 'Gorętszy rurociąg naftowy, 120 °C'),
+        note: T('Look at the design rate: this line is 40 °C hotter than the oil line preset but corrodes slower, 7.96 instead of 12.5 mm/yr, because the FeCO3 scale factor falls to 0.103; without scale the 1991 rate would be 77.3 mm/yr.',
+          'Подивіться на розрахункову швидкість: ця лінія на 40 °C гарячіша за пресет «Нафтопровід», але кородує повільніше — 7,96 замість 12,5 мм/рік, бо коефіцієнт шару FeCO3 падає до 0,103; без шару швидкість 1991 становила б 77,3 мм/рік.',
+          'Achten Sie auf die Auslegungsrate: diese Leitung ist 40 °C heißer als die Vorgabe Ölleitung, korrodiert aber langsamer, 7,96 statt 12,5 mm/a, weil der FeCO3-Deckschichtfaktor auf 0,103 fällt; ohne Deckschicht läge die Rate nach 1991 bei 77,3 mm/a.',
+          'Kijk naar de ontwerpsnelheid: deze leiding is 40 °C heter dan de voorinstelling Olieleiding maar corrodeert trager, 7,96 in plaats van 12,5 mm/jaar, omdat de FeCO3-laagfactor daalt tot 0,103; zonder laag zou de snelheid volgens 1991 77,3 mm/jaar zijn.',
+          'Regardez la vitesse de calcul : cette ligne est 40 °C plus chaude que l’exemple Conduite de pétrole mais se corrode moins vite, 7,96 au lieu de 12,5 mm/an, car le facteur de couche FeCO3 tombe à 0,103 ; sans couche, la vitesse 1991 serait de 77,3 mm/an.',
+          'Fíjese en la velocidad de diseño: esta línea está 40 °C más caliente que el ejemplo Línea de crudo pero se corroe más despacio, 7,96 en vez de 12,5 mm/año, porque el factor de capa de FeCO3 baja a 0,103; sin capa la velocidad de 1991 sería de 77,3 mm/año.',
+          'Zwróć uwagę na szybkość projektową: ten rurociąg jest o 40 °C gorętszy niż przykład Rurociąg naftowy, a koroduje wolniej, 7,96 zamiast 12,5 mm/rok, bo współczynnik warstwy FeCO3 spada do 0,103; bez warstwy szybkość 1991 wyniosłaby 77,3 mm/rok.'),
+        apply: function (t) { exBase(t); t.T = 393.15; t.P = 100e5; t.yCO2 = 0.05; t.U = 1; } },
+      { id: 'inhibited_gas', label: T('Wet gas, 90 % inhibitor', 'Вологий газ, інгібітор 90 %', 'Nassgas, Inhibitor 90 %', 'Natgas, inhibitor 90 %', 'Gaz humide, inhibiteur 90 %', 'Gas húmedo, inhibidor 90 %', 'Gaz mokry, inhibitor 90 %'),
+        note: T('Look at the allowance: a 90 % efficient inhibitor cuts the wet gas rate to 0.474 mm/yr, but over 25 years that is still 11.8 mm, about twice the 6 mm limit; only 95 % efficiency brings it to 5.92 mm.',
+          'Подивіться на допуск: інгібітор з ефективністю 90 % знижує швидкість для вологого газу до 0,474 мм/рік, але за 25 років це все одно 11,8 мм, приблизно вдвічі більше межі 6 мм; лише ефективність 95 % дає 5,92 мм.',
+          'Achten Sie auf den Zuschlag: ein Inhibitor mit 90 % Wirkungsgrad senkt die Nassgasrate auf 0,474 mm/a, über 25 Jahre sind das aber immer noch 11,8 mm, etwa das Doppelte der 6-mm-Grenze; erst 95 % Wirkungsgrad ergeben 5,92 mm.',
+          'Kijk naar de toeslag: een inhibitor met 90 % rendement verlaagt de natgassnelheid tot 0,474 mm/jaar, maar over 25 jaar is dat nog steeds 11,8 mm, circa twee keer de grens van 6 mm; pas 95 % rendement geeft 5,92 mm.',
+          'Regardez la surépaisseur : un inhibiteur efficace à 90 % ramène la vitesse du gaz humide à 0,474 mm/an, mais sur 25 ans cela fait encore 11,8 mm, environ le double de la limite de 6 mm ; il faut 95 % d’efficacité pour obtenir 5,92 mm.',
+          'Fíjese en el sobreespesor: un inhibidor con 90 % de eficiencia baja la velocidad del gas húmedo a 0,474 mm/año, pero en 25 años siguen siendo 11,8 mm, unas dos veces el límite de 6 mm; solo con 95 % de eficiencia se llega a 5,92 mm.',
+          'Zwróć uwagę na naddatek: inhibitor o skuteczności 90 % obniża szybkość dla gazu mokrego do 0,474 mm/rok, ale w 25 lat to nadal 11,8 mm, około dwa razy więcej niż limit 6 mm; dopiero skuteczność 95 % daje 5,92 mm.'),
+        apply: function (t) { exBase(t, 'full'); t.T = 333.15; t.P = 50e5; t.yCO2 = 0.02; t.U = 2; t.CA_avail = 0.9; } },
+      { id: 'dead_leg', label: T('Dead leg, no flow', 'Тупикова ділянка без потоку', 'Totleitung ohne Strömung', 'Dode leiding zonder stroming', 'Bras mort sans écoulement', 'Tramo muerto sin flujo', 'Martwy odcinek bez przepływu'),
+        note: T('Look at the design rate: with the liquid standing still the 1991 model still gives 4.27 mm/yr, only 10 % below the flowing wet gas line (4.74 mm/yr), so a dead leg with free water is no safer than the main line.',
+          'Подивіться на розрахункову швидкість: за нерухомої рідини модель 1991 все одно дає 4,27 мм/рік, лише на 10 % менше, ніж у лінії вологого газу з потоком (4,74 мм/рік), тож тупикова ділянка з вільною водою не безпечніша за основну лінію.',
+          'Achten Sie auf die Auslegungsrate: bei stehender Flüssigkeit liefert das Modell von 1991 immer noch 4,27 mm/a, nur 10 % weniger als die durchströmte Nassgasleitung (4,74 mm/a); eine Totleitung mit freiem Wasser ist nicht sicherer als die Hauptleitung.',
+          'Kijk naar de ontwerpsnelheid: bij stilstaande vloeistof geeft het model van 1991 nog steeds 4,27 mm/jaar, slechts 10 % minder dan de doorstroomde natgasleiding (4,74 mm/jaar); een dode leiding met vrij water is niet veiliger dan de hoofdleiding.',
+          'Regardez la vitesse de calcul : liquide immobile, le modèle 1991 donne encore 4,27 mm/an, seulement 10 % de moins que la conduite de gaz humide en écoulement (4,74 mm/an) ; un bras mort avec eau libre n’est pas plus sûr que la ligne principale.',
+          'Fíjese en la velocidad de diseño: con el líquido quieto el modelo de 1991 sigue dando 4,27 mm/año, solo un 10 % menos que la línea de gas húmedo con flujo (4,74 mm/año); un tramo muerto con agua libre no es más seguro que la línea principal.',
+          'Zwróć uwagę na szybkość projektową: przy nieruchomej cieczy model 1991 nadal daje 4,27 mm/rok, tylko o 10 % mniej niż przepływowy rurociąg gazu mokrego (4,74 mm/rok); martwy odcinek z wolną wodą nie jest bezpieczniejszy od linii głównej.'),
+        apply: function (t) { exBase(t); t.T = 333.15; t.P = 50e5; t.yCO2 = 0.02; t.U = 0; } },
+      { id: 'low_temp_gas', label: T('Low-temperature gas', 'Низькотемпературний газ', 'Niedertemperaturgas', 'Lagetemperatuurgas', 'Gaz basse température', 'Gas a baja temperatura', 'Gaz niskotemperaturowy'),
+        note: T('Look at the governing model: at 15 °C the 1991 equation gives only 0.478 mm/yr, but the 1995 flow model gives 2.68 mm/yr, 5.6 times more, so a cold line is not automatically benign.',
+          'Подивіться на визначальну модель: при 15 °C рівняння 1991 дає лише 0,478 мм/рік, а модель потоку 1995 — 2,68 мм/рік, у 5,6 раза більше, тож холодна лінія не є безпечною автоматично.',
+          'Achten Sie auf das maßgebende Modell: bei 15 °C liefert die Gleichung von 1991 nur 0,478 mm/a, das Strömungsmodell von 1995 aber 2,68 mm/a, das 5,6-Fache; eine kalte Leitung ist nicht automatisch harmlos.',
+          'Kijk naar het maatgevende model: bij 15 °C geeft de vergelijking van 1991 slechts 0,478 mm/jaar, maar het stromingsmodel van 1995 2,68 mm/jaar, 5,6 keer zoveel; een koude leiding is niet vanzelf onschuldig.',
+          'Regardez le modèle déterminant : à 15 °C l’équation de 1991 ne donne que 0,478 mm/an, mais le modèle d’écoulement 1995 donne 2,68 mm/an, 5,6 fois plus ; une ligne froide n’est pas d’office sans risque.',
+          'Fíjese en el modelo determinante: a 15 °C la ecuación de 1991 da solo 0,478 mm/año, pero el modelo de flujo de 1995 da 2,68 mm/año, 5,6 veces más; una línea fría no es inocua por sí misma.',
+          'Zwróć uwagę na model decydujący: przy 15 °C równanie 1991 daje tylko 0,478 mm/rok, a model przepływu 1995 aż 2,68 mm/rok, 5,6 razy więcej; zimny rurociąg nie jest automatycznie bezpieczny.'),
+        apply: function (t) { exBase(t); t.T = 288.15; t.P = 70e5; t.yCO2 = 0.01; t.U = 2; } },
+      { id: 'ccus_dense', label: T('CCUS dense phase', 'CCUS, щільна фаза', 'CCUS, dichte Phase', 'CCUS, dichte fase', 'CCUS, phase dense', 'CCUS, fase densa', 'CCUS, faza gęsta'),
+        note: T('Look at the warning: with free water at pCO2 = 95 bar the model is far outside its 10 bar range and returns 165 mm/yr; for CCUS the design answer is dehydration, not a corrosion allowance.',
+          'Подивіться на попередження: з вільною водою при pCO2 = 95 бар модель далеко поза межею 10 бар і дає 165 мм/рік; для CCUS проєктне рішення — осушення, а не допуск на корозію.',
+          'Achten Sie auf die Warnung: mit freiem Wasser bei pCO2 = 95 bar liegt das Modell weit außerhalb seines 10-bar-Bereichs und liefert 165 mm/a; bei CCUS ist die Antwort Trocknung, kein Korrosionszuschlag.',
+          'Kijk naar de waarschuwing: met vrij water bij pCO2 = 95 bar ligt het model ver buiten zijn bereik van 10 bar en geeft het 165 mm/jaar; bij CCUS is het antwoord droging, geen corrosietoeslag.',
+          'Regardez l’avertissement : avec eau libre à pCO2 = 95 bar le modèle est très loin de son domaine de 10 bar et donne 165 mm/an ; pour le CCUS la réponse est la déshydratation, pas une surépaisseur.',
+          'Fíjese en el aviso: con agua libre a pCO2 = 95 bar el modelo queda muy fuera de su rango de 10 bar y da 165 mm/año; en CCUS la respuesta es la deshidratación, no un sobreespesor.',
+          'Zwróć uwagę na ostrzeżenie: z wolną wodą przy pCO2 = 95 bar model jest daleko poza zakresem 10 bar i daje 165 mm/rok; dla CCUS odpowiedzią jest osuszanie, a nie naddatek korozyjny.'),
+        apply: function (t) { exBase(t); t.T = 303.15; t.P = 100e5; t.yCO2 = 0.95; t.U = 2; } }
+    ];
+    ui.examples(EX);
+
+    function curveData() {
+      if (!last || !last.ok) return null;
+      var s = {}, k, a = [], b = [], m = 0.1, i, TK, r;
+      for (k in state) if (state.hasOwnProperty(k)) s[k] = state[k];
+      for (i = 0; i <= 27; i++) {
+        TK = 278.15 + 5 * i; s.T = TK; r = solve(s);
+        if (!r || !r.ok || !isFinite(r.V91s) || !isFinite(r.V95s)) continue;
+        a.push({ x: TK - 273.15, y: r.V91s }); b.push({ x: TK - 273.15, y: r.V95s });
+        m = Math.max(m, r.V91s, r.V95s);
+      }
+      return { series: [a, b], xMin: 5, xMax: 140, yMax: 1.15 * m, xCur: state.T - 273.15, cur: [last.V91s, last.V95s] };
+    }
+    ui.stage({
+      caption: T('Corrosion rate versus temperature (dWM 1991 and 1995, with scale factor)', 'Швидкість корозії залежно від температури (dWM 1991 і 1995, з коефіцієнтом плівки)', 'Korrosionsrate über Temperatur (dWM 1991 und 1995, mit Deckschichtfaktor)', 'Corrosiesnelheid versus temperatuur (dWM 1991 en 1995, met schaalfactor)', 'Vitesse de corrosion en fonction de la température (dWM 1991 et 1995, avec facteur de film)', 'Velocidad de corrosión frente a temperatura (dWM 1991 y 1995, con factor de capa)', 'Szybkość korozji w funkcji temperatury (dWM 1991 i 1995, ze współczynnikiem warstwy)'),
+      minHeight: 300,
+      a11y: function () {
+        var l = (ui && ui.lang) || DiagramUI.lang(), o;
+        if (!last || !last.ok) {
+          o = T('Chart of CO2 corrosion rate versus temperature; no result is available.', 'Графік швидкості CO2-корозії залежно від температури; результат недоступний.', 'Diagramm der CO2-Korrosionsrate über der Temperatur; kein Ergebnis verfügbar.', 'Grafiek van de CO2-corrosiesnelheid versus temperatuur; geen resultaat beschikbaar.', 'Graphique de la vitesse de corrosion CO2 en fonction de la température ; aucun résultat disponible.', 'Gráfico de la velocidad de corrosión por CO2 frente a la temperatura; no hay resultado disponible.', 'Wykres szybkości korozji CO2 w funkcji temperatury; brak wyniku.');
+        } else {
+          o = TF(T('Line chart of CO2 corrosion rate versus temperature from 5 to 140 °C for the de Waard-Milliams 1991 and 1995 models with the scale factor; at the operating point {0} °C the 1991 rate is {1} mm/yr and the 1995 rate {2} mm/yr.',
+            'Лінійний графік швидкості CO2-корозії залежно від температури від 5 до 140 °C за моделями de Waard-Milliams 1991 і 1995 з коефіцієнтом плівки; у робочій точці {0} °C швидкість 1991 — {1} мм/рік, 1995 — {2} мм/рік.',
+            'Liniendiagramm der CO2-Korrosionsrate über der Temperatur von 5 bis 140 °C nach den Modellen de Waard-Milliams 1991 und 1995 mit Deckschichtfaktor; im Betriebspunkt {0} °C beträgt die Rate nach 1991 {1} mm/a und nach 1995 {2} mm/a.',
+            'Lijngrafiek van de CO2-corrosiesnelheid versus temperatuur van 5 tot 140 °C volgens de modellen de Waard-Milliams 1991 en 1995 met laagfactor; in het werkpunt {0} °C is de snelheid volgens 1991 {1} mm/jaar en volgens 1995 {2} mm/jaar.',
+            'Courbes de la vitesse de corrosion CO2 en fonction de la température de 5 à 140 °C selon les modèles de Waard-Milliams 1991 et 1995 avec facteur de couche ; au point de fonctionnement {0} °C, la vitesse 1991 vaut {1} mm/an et la vitesse 1995 {2} mm/an.',
+            'Gráfico de líneas de la velocidad de corrosión por CO2 frente a la temperatura de 5 a 140 °C según los modelos de Waard-Milliams 1991 y 1995 con factor de capa; en el punto de operación {0} °C la velocidad de 1991 es {1} mm/año y la de 1995 {2} mm/año.',
+            'Wykres liniowy szybkości korozji CO2 w funkcji temperatury od 5 do 140 °C według modeli de Waard-Milliams 1991 i 1995 ze współczynnikiem warstwy; w punkcie pracy {0} °C szybkość 1991 wynosi {1} mm/rok, a 1995 {2} mm/rok.'), [[state.T - 273.15, 1], [last.V91s, sig(last.V91s, 3)], [last.V95s, sig(last.V95s, 3)]]);
+        }
+        return o[l] != null ? o[l] : o.en;
+      },
+      render: function (size, st) {
+        var ctx = st.canvas(), w = size.w, h = size.h, coarse = size.density === 'coarse';
+        var cs = getComputedStyle(document.documentElement);
+        var muted = cs.getPropertyValue('--muted').trim() || '#888', line = cs.getPropertyValue('--line').trim() || '#ccc', font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+        ctx.clearRect(0, 0, w, h);
+        var d = curveData(); if (!d) return;
+        var L = coarse ? 46 : 58, R = 14, TOP = 12, B = coarse ? 36 : 44, pw = w - L - R, ph = h - TOP - B, i, j, v, p;
+        function X(x) { return L + (x - d.xMin) / (d.xMax - d.xMin) * pw; }
+        function Y(y) { return TOP + ph - y / d.yMax * ph; }
+        ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.beginPath();
+        ctx.moveTo(L, TOP); ctx.lineTo(L, TOP + ph); ctx.lineTo(L + pw, TOP + ph); ctx.stroke();
+        ctx.fillStyle = muted; ctx.font = (coarse ? 11 : 12) + 'px ' + font;
+        var xt = DiagramUI.ticks(d.xMin, d.xMax, pw, size.density), yt = DiagramUI.ticks(0, d.yMax, ph, size.density);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        for (i = 0; i < xt.length; i++) { v = xt[i]; if (v < d.xMin || v > d.xMax) continue; ctx.beginPath(); ctx.moveTo(X(v), TOP + ph); ctx.lineTo(X(v), TOP + ph + 4); ctx.stroke(); ctx.fillText(DiagramUI.fmt(v, { precision: 3 }), X(v), TOP + ph + 6); }
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (i = 0; i < yt.length; i++) { v = yt[i]; if (v < 0 || v > d.yMax) continue; ctx.beginPath(); ctx.moveTo(L - 4, Y(v)); ctx.lineTo(L, Y(v)); ctx.stroke(); ctx.fillText(DiagramUI.fmt(v, { precision: 3 }), L - 6, Y(v)); }
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('T, °C', L + pw / 2, h - 2);
+        ctx.save(); ctx.translate(9, TOP + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'middle'; var yl = T('rate, mm/yr', 'швидкість, мм/рік', 'Rate, mm/a', 'snelheid, mm/jaar', 'vitesse, mm/an', 'velocidad, mm/año', 'szybkość, mm/rok'), ll = (ui && ui.lang) || DiagramUI.lang(); ctx.fillText(yl[ll] != null ? yl[ll] : yl.en, 0, 0); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(L, TOP, pw, ph); ctx.clip();
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = muted; ctx.beginPath(); ctx.moveTo(X(d.xCur), TOP); ctx.lineTo(X(d.xCur), TOP + ph); ctx.stroke(); ctx.setLineDash([]);
+        for (j = 0; j < d.series.length; j++) {
+          p = d.series[j]; if (!p.length) continue;
+          ctx.strokeStyle = DiagramUI.series(j); ctx.lineWidth = 2; ctx.beginPath();
+          for (i = 0; i < p.length; i++) { if (i === 0) ctx.moveTo(X(p[i].x), Y(p[i].y)); else ctx.lineTo(X(p[i].x), Y(p[i].y)); }
+          ctx.stroke();
+        }
+        for (j = 0; j < d.cur.length; j++) {
+          if (!isFinite(d.cur[j])) continue;
+          ctx.fillStyle = DiagramUI.series(j); ctx.beginPath(); ctx.arc(X(d.xCur), Y(d.cur[j]), coarse ? 3 : 4, 0, 2 * Math.PI); ctx.fill();
+        }
+        ctx.restore();
+      }
+    });
+    adoptStage(ui);
+
+    ui.ready();
+    window['__co2_corrosion_rate'] = { ui: ui, state: state, solve: solve, last: function () { return last; } };
+  }
+
+  /* ======================================================= 3. the data layer */
+  function buildRecord(){
+    if (!last) { return null; }
+    var inputs = {}, outputs = {}, units = {}, warnings, i, k;
+    var inU = [['T','K'],['P','Pa'],['yCO2','-'],['U','m/s'],['Dh','m'],['life','yr'],['CA_avail','-'],['Fcorr','-'],['level','-']];
+    for (i = 0; i < inU.length; i++) { k = inU[i][0]; inputs[k] = state[k]; units[k] = inU[i][1]; }
+    if (last.ok) {
+      var outU = [['pCO2','bar'],['fCO2','bar'],['V91','mm/yr'],['Tscale','K'],['Fscale','-'],['V91s','mm/yr'],['Vr','mm/yr'],['Vm','mm/yr'],['V95s','mm/yr'],['Vdes','mm/yr'],['Vinh','mm/yr'],['CA','mm'],['governing','-'],['severity','-']];
+      for (i = 0; i < outU.length; i++) { k = outU[i][0]; outputs[k] = last[k]; units[k] = outU[i][1]; }
+      warnings = (last.warnings && last.warnings.slice) ? last.warnings.slice() : [];
+    } else {
+      warnings = [last.error];
+    }
+    return { inputs:inputs, outputs:outputs, units:units, model:{
+      equations:['log10 Vcor = 5.8 - 1710/T + 0.67 log10 fCO2 (dWM 1991)',
+        'log10 Fscale = 2400/T - 2400/Tscale, Tscale = 2400/(6.7 + 0.6 log10 fCO2)',
+        '1/Vcor = 1/Vr + 1/Vm, log10 Vr = 4.93 - 1119/T + 0.58 log10 pCO2, Vm = 2.45 U^0.8/d^0.2 pCO2 (dWM 1995)',
+        'CA = Vdes (1 - inhibitor efficiency) life'],
+      ranges:['0-150 C, pCO2 up to 10 bar, carbon steel, free water present'],
+      notes:['H2S, organic acids, top-of-line corrosion and pH buffering not modelled'] }, warnings:warnings };
+  }
+  function posFinite(v){ return typeof v === 'number' && isFinite(v) && v > 0; }
+  var HANDOFF = {
+    provides:['T','p'],
+    accepts:['T','p'],
+    build: function(){
+      return (last && last.ok) ? { quantities:{ T:{ value:state.T, unit:'K' }, p:{ value:state.P, unit:'Pa' } } } : null;
+    },
+    apply: function(payload){
+      var q = (payload && payload.quantities) || {};
+      if (q.T && posFinite(q.T.value)) { state.T = q.T.value; }
+      if (q.p && posFinite(q.p.value)) { state.P = q.p.value; }
+      last = solve(state);
+      if (ui) { ui.sync(); ui.run(); }
+    }
+  };
+
+  function installData() {
+    if (window.Diagram) {
+      Diagram.init({
+        id: 'co2_corrosion_rate',
+        file: 'co2_corrosion_rate.html',
+        state: {
+          serialize: function () { return state; },
+          deserialize: function (o) { Object.assign(state, o || {}); last = solve(state);
+                                      if (ui) { ui.sync(); ui.run(); } }
+        },
+        record: buildRecord,
+        handoff: HANDOFF
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

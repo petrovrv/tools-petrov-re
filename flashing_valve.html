@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flashing Through Valve / Orifice</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-17.r13-provenance-enum",
+  "id": "flashing-valve-orifice",
+  "file": "flashing_valve.html",
+  "listed": true,
+  "category": "transients",
+  "order": 15,
+  "title": {
+    "en": "Flashing Through Valve / Orifice",
+    "uk": "Скипання через клапан / отвір",
+    "de": "Entspannung mit Flashverdampfung",
+    "nl": "Flashverdamping door klep / orifice",
+    "fr": "Détente avec vaporisation flash",
+    "es": "Expansión con vaporización flash",
+    "pl": "Rozprężanie z odparowaniem flash"
+  },
+  "summary": {
+    "en": "Pipe / Vessel Transients — water flashing through a valve/orifice using a homogeneous-equilibrium screening model, including equilibrium quality and critical-flow cap.",
+    "uk": "Pipe / Vessel Transients — скипання води через клапан/отвір за гомогенно-рівноважною моделлю з визначенням ступеня сухості та обмеженням критичною витратою.",
+    "de": "Pipe / Vessel Transients — Wasser-Flashverdampfung durch Ventil/Blende mit Homogeneous-Equilibrium-Screening, Dampfgehalt und kritischer Durchflussbegrenzung.",
+    "nl": "Pipe / Vessel Transients — water-flashverdamping door klep/orifice met homogeneous-equilibrium screening, dampkwaliteit en kritische-flow cap.",
+    "fr": "Pipe / Vessel Transients — flash d’eau par vanne/orifice avec modèle homogène d’équilibre, titre vapeur et plafonnement au débit critique.",
+    "es": "Pipe / Vessel Transients — flashing de agua por válvula/orificio con modelo homogéneo de equilibrio, calidad y límite de flujo crítico.",
+    "pl": "Pipe / Vessel Transients — odparowanie flash wody przez zawór/kryzę z modelem jednorodnej równowagi, stopniem suchości i ograniczeniem przepływem krytycznym."
+  },
+  "description": {
+    "en": "Compact water HEM screen using IAPWS SR1-86(1992) saturation pressure, liquid/vapour density, enthalpy and entropy. An isentropic equilibrium path estimates local two-phase density and mass flux, with the valve/orifice flow capped at the refined critical mass flux.",
+    "uk": "Компактна HEM-модель для води з тиском насичення, густинами рідини/пари, ентальпією та ентропією за IAPWS SR1-86(1992). Ізоентропічна рівноважна траєкторія оцінює локальну двофазну густину й масову витрату, а витрата через клапан/отвір обмежується уточненим критичним потоком.",
+    "de": "Kompaktes Wasser-HEM mit Sättigungsdruck, Flüssig-/Dampfdichte, Enthalpie und Entropie nach IAPWS SR1-86(1992). Ein isentroper Gleichgewichtspfad liefert lokale Zweiphasendichte und Massenfluss; der Ventil-/Blendenstrom wird auf den verfeinerten kritischen Massenfluss begrenzt.",
+    "nl": "Compacte water-HEM met verzadigingsdruk, vloeistof-/dampdichtheid, enthalpie en entropie volgens IAPWS SR1-86(1992). Een isentroop evenwichtspad schat lokale tweefasendichtheid en massaflux; de klep-/orificestroom wordt begrensd op de verfijnde kritische massaflux.",
+    "fr": "Modèle HEM compact pour l’eau utilisant IAPWS SR1-86(1992) pour la pression de saturation, les densités liquide/vapeur, l’enthalpie et l’entropie. Un chemin isentropique d’équilibre estime la densité diphasique et le flux massique locaux ; le débit de la vanne/orifice est plafonné au flux critique affiné.",
+    "es": "Modelo HEM compacto para agua que usa IAPWS SR1-86(1992) para presión de saturación, densidades de líquido/vapor, entalpía y entropía. Una trayectoria isentrópica de equilibrio estima la densidad bifásica y el flujo másico locales; el caudal de válvula/orificio se limita al flujo crítico refinado.",
+    "pl": "Kompaktowy model HEM dla wody wykorzystujący IAPWS SR1-86(1992) dla ciśnienia nasycenia, gęstości cieczy/pary, entalpii i entropii. Izentropowa ścieżka równowagi wyznacza lokalną gęstość dwufazową i strumień masy; przepływ przez zawór/kryzę jest ograniczony do doprecyzowanego strumienia krytycznego."
+  },
+  "status": "prototype",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Water only. Saturation properties use IAPWS SR1-86(1992); the compressed-liquid pressure correction remains incompressible. HEM assumes instantaneous thermal/mechanical equilibrium and no phase slip. The shared HEM core has been cross-checked against small-nozzle water experiments, but agreement is case-dependent and can materially underpredict flow in near-saturated/small-nozzle cases. Not for metastable delay, non-equilibrium flashing, cavitation coefficients, valve trim geometry or certified valve sizing.",
+    "uk": "Лише вода. Властивості насичення використовують IAPWS SR1-86(1992); поправка тиску для стисненої рідини лишається нестисливою. HEM припускає миттєву теплову/механічну рівновагу та відсутність ковзання фаз. Спільне HEM-ядро звірене з експериментами на малих водяних соплах, але збіг залежить від режиму, а для майже насичених станів і малих сопел модель може суттєво занижувати витрату. Не для метастабільної затримки, нерівноважного скипання, коефіцієнтів кавітації, геометрії внутрішніх частин клапана або сертифікованого підбору.",
+    "de": "Nur Wasser. Sättigungseigenschaften nach IAPWS SR1-86(1992); die Druckkorrektur der komprimierten Flüssigkeit bleibt inkompressibel. HEM setzt sofortiges thermisch-mechanisches Gleichgewicht und keinen Phasenschlupf voraus. Der gemeinsame HEM-Kern wurde mit Kleinstdüsen-Wasserexperimenten verglichen; die Übereinstimmung ist fallabhängig und kann bei nahezu gesättigten Zuständen bzw. kleinen Düsen den Durchfluss deutlich unterschätzen. Nicht für metastabile Verzögerung, Nichtgleichgewichts-Flash, Kavitation, Ventilinnenteilgeometrie oder zertifizierte Auslegung.",
+    "nl": "Alleen water. Verzadigingseigenschappen volgen IAPWS SR1-86(1992); de drukcorrectie voor samengeperste vloeistof blijft incompressibel. HEM veronderstelt direct thermisch/mechanisch evenwicht en geen faseslip. De gedeelde HEM-kern is vergeleken met waterproeven met kleine nozzles; de overeenkomst is gevalsafhankelijk en de stroming kan bij bijna-verzadigde toestanden of kleine nozzles duidelijk worden onderschat. Niet voor metastabiele vertraging, niet-evenwichtsflashing, cavitatiecoëfficiënten, trimgeometrie of gecertificeerde klepselectie.",
+    "fr": "Eau uniquement. Les propriétés de saturation suivent IAPWS SR1-86(1992) ; la correction de pression du liquide comprimé reste incompressible. HEM suppose un équilibre thermo-mécanique instantané et aucun glissement de phase. Le noyau HEM commun a été confronté à des essais d’eau sur petites buses ; l’accord dépend du cas et le débit peut être nettement sous-estimé près de la saturation ou pour de petites buses. Pas pour retard métastable, flashing hors équilibre, coefficients de cavitation, géométrie interne de vanne ou dimensionnement certifié.",
+    "es": "Solo agua. Las propiedades de saturación usan IAPWS SR1-86(1992); la corrección de presión del líquido comprimido sigue siendo incompresible. HEM supone equilibrio térmico/mecánico instantáneo y ausencia de deslizamiento entre fases. El núcleo HEM común se ha contrastado con ensayos de agua en toberas pequeñas; la concordancia depende del caso y el caudal puede subestimarse de forma importante cerca de la saturación o con toberas pequeñas. No sirve para retraso metaestable, flashing no equilibrado, coeficientes de cavitación, geometría interna de válvula ni dimensionamiento certificado.",
+    "pl": "Tylko woda. Właściwości nasycenia korzystają z IAPWS SR1-86(1992); korekta ciśnienia dla cieczy sprężonej pozostaje nieściśliwa. HEM zakłada natychmiastową równowagę termiczno-mechaniczną i brak poślizgu faz. Wspólny rdzeń HEM porównano z eksperymentami wodnymi na małych dyszach; zgodność zależy od przypadku, a dla stanów bliskich nasyceniu lub małych dysz model może istotnie zaniżać przepływ. Nie obejmuje opóźnienia metastabilnego, flashingu nierównowagowego, współczynników kawitacji, geometrii wnętrza zaworu ani certyfikowanego doboru."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "IAPWS SR1 saturation properties and the compressed-liquid branch are verified separately. The shared HEM critical-flow core is cross-checked against Lin–Gruen–Quapp small-nozzle water data; agreement is case-dependent and exposes the expected non-equilibrium limitation.",
+      "uk": "Властивості насичення IAPWS SR1 і гілка стисненої рідини перевірені окремо. Спільне HEM-ядро критичної течії звірене з експериментами Lin–Gruen–Quapp на малих водяних соплах; збіг залежить від режиму й показує очікуване обмеження рівноважної моделі.",
+      "de": "Die Implementierung der Sättigungseigenschaften nach IAPWS SR1-86(1992) wurde an den veröffentlichten Prüftemperaturen in QA-IAPWS-SATURATION-PROPERTIES-2026-09-04.json extern gegengeprüft. HEM-Maximierung und Übergang der komprimierten Flüssigkeit besitzen separate numerische/analytische Regressionstests; eine externe Kritikalflussvalidierung für Düse/Blende steht noch aus.",
+      "nl": "De implementatie van IAPWS SR1-86(1992)-verzadigingseigenschappen is extern gecontroleerd op de gepubliceerde verificatietemperaturen in QA-IAPWS-SATURATION-PROPERTIES-2026-09-04.json. De HEM-maximalisatie en overgang vanuit samengeperste vloeistof hebben aparte numerieke/analytische regressie-QA; externe validatie van kritische nozzle/orifice-stroming blijft open.",
+      "fr": "L’implémentation des propriétés de saturation IAPWS SR1-86(1992) est vérifiée extérieurement aux températures de contrôle publiées dans QA-IAPWS-SATURATION-PROPERTIES-2026-09-04.json. Le maximum HEM et la transition du liquide comprimé disposent de QA numériques/analytiques séparées ; la validation externe du débit critique en buse/orifice reste ouverte.",
+      "es": "La implementación de propiedades de saturación IAPWS SR1-86(1992) se contrasta externamente en las temperaturas de verificación publicadas en QA-IAPWS-SATURATION-PROPERTIES-2026-09-04.json. El maximizador HEM y la transición desde líquido comprimido tienen QA numérica/analítica separada; sigue pendiente la validación externa del flujo crítico en toberas/orificios.",
+      "pl": "Implementację właściwości nasycenia IAPWS SR1-86(1992) sprawdzono zewnętrznie w opublikowanych temperaturach weryfikacyjnych w QA-IAPWS-SATURATION-PROPERTIES-2026-09-04.json. Maksymalizator HEM i przejście z cieczy sprężonej mają oddzielne testy numeryczne/analityczne; zewnętrzna walidacja krytycznego przepływu przez dyszę/kryzę pozostaje otwarta."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "flashing-valve-hem-qa-20260911",
+        "reference": "IAPWS SR1-86(1992) saturation-property verification values, the compressed-liquid Bernoulli relation the tool states for its own liquid branch, and the recorded Lin-Gruen-Quapp water-nozzle comparison of the HEM mass flux.",
+        "citations": [
+          "IAPWS, Revised Supplementary Release on Saturation Properties of Ordinary Water Substance, SR1-86(1992), values for computer-program verification.",
+          "Lin, Gruen & Quapp water critical-flow nozzle data as recorded in QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json.",
+          "Compressed-liquid branch relation G = sqrt(2 rho_f (p0 - p)) as stated in record.model.equations of flashing_valve.html."
+        ],
+        "cases": 13,
+        "passed": 8,
+        "provenance": "mixed",
+        "tolerance": "SR1-86 figures within half a unit in the last digit the published table prints; the compressed-liquid branch to 1e-12 relative; experimental points against +/-2 sigma of the reported uncertainty. Measured on this build: worst SR1-86 deviation 3.186e-7 kg/m3 against an allowed 5.000e-7 kg/m3 on rho_g at 373.1243 K; liquid-branch closure 1.223e-16 relative.",
+        "run_at": "2026-10-17T00:00:00Z",
+        "artifact": "benchmarks/flashing_valve.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [
+      "p",
+      "T",
+      "rho",
+      "x",
+      "mdot",
+      "h"
+    ],
+    "accepts": [
+      "T",
+      "p",
+      "A"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+function T(en,uk,de,nl,fr,es,pl){return {en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+var DEFAULTS={"p0":2000000.0,"T0":453.15,"pb":200000.0,"A":0.0001,"Cd":0.8};
+var state=JSON.parse(JSON.stringify(DEFAULTS));
+var last=null, ui=null, stage=null;
+/* Shared transient-tool chart.
+   Replaces the single-extent drawStage used by the Pipe/Vessel Transients family.
+   Series carrying different units get their own axis, so a curve is never
+   flattened by an unrelated quantity sharing its scale.
+
+   spec = { x:{label,unit}, series:[{x:[],y:[],label,unit}] }
+   Series are grouped by unit; the first group takes the left axis, the second
+   the right. A third distinct unit would have nowhere to go, so the plotter
+   reports it to the caller instead of drawing it silently on the wrong scale. */
+function dgcPlot(ctx, w, h, spec, opt) {
+  opt = opt || {};
+  var density = opt.density || 'fine';
+  var css = opt.css || {};
+  var muted = css.muted || '#6b7280', line = css.line || '#d6dae0',
+      text = css.text || '#1f2430', font = css.font || 'sans-serif',
+      bg = css.bg || null;
+  var coarse = density === 'coarse';
+  var fs = opt.fontScale || 1;
+  var f1 = Math.round(11 * fs), f2 = Math.round(12 * fs);
+
+  var groups = [], skipped = [];
+  (spec.series || []).forEach(function (s) {
+    if (!s || !s.x || !s.y || !s.x.length) return;
+    var u = s.unit == null ? '' : String(s.unit);
+    var g = null;
+    for (var i = 0; i < groups.length; i++) if (groups[i].unit === u) { g = groups[i]; break; }
+    if (!g) {
+      if (groups.length >= 2) { skipped.push(s.label || u); return; }
+      g = { unit: u, series: [] }; groups.push(g);
+    }
+    g.series.push(s);
+  });
+  if (!groups.length) return { drawn: 0, skipped: skipped };
+
+  // Extents per axis group, and the shared x extent.
+  var xs = [];
+  groups.forEach(function (g) {
+    var lo = Infinity, hi = -Infinity;
+    g.series.forEach(function (s) {
+      s.x.forEach(function (v) { if (isFinite(v)) xs.push(v); });
+      s.y.forEach(function (v) { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    });
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi === lo) { var d = Math.max(1e-9, Math.abs(lo) * 0.05); lo -= d; hi += d; }
+    else { var pad = (hi - lo) * 0.06; lo -= pad; hi += pad; }
+    g.lo = lo; g.hi = hi;
+  });
+  if (!xs.length) return { drawn: 0, skipped: skipped };
+  var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs);
+  if (xmax === xmin) xmax = xmin + 1;
+
+  var hasRight = groups.length > 1;
+  var padL = (coarse ? 52 : 64) * fs, padR = (hasRight ? (coarse ? 52 : 64) : 16) * fs;
+  var padT = 12 * fs, padB = (44 + (spec.series.length > 1 ? 16 : 0)) * fs;
+  var W = w - padL - padR, H = h - padT - padB;
+  if (W <= 20 || H <= 20) return { drawn: 0, skipped: skipped };
+
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); } else ctx.clearRect(0, 0, w, h);
+
+  var X = function (v) { return padL + W * (v - xmin) / (xmax - xmin); };
+  var Yof = function (g) { return function (v) { return padT + H - H * (v - g.lo) / (g.hi - g.lo); }; };
+
+  var tick = opt.ticks || function (lo, hi) {
+    var n = 5, out = [], step = (hi - lo) / n;
+    var mag = Math.pow(10, Math.floor(Math.log(step) / Math.LN10)), norm = step / mag;
+    step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(v);
+    return out;
+  };
+  /* AGENTS §2.2.1 -- one locale map for the on-screen chart and the report figure.
+     The digits are this chart's own and are not re-rounded; only the decimal
+     separator is re-written, by the framework map that the report engine reads.
+     group:false keeps the axis label ungrouped, which is what it has always been
+     and what the English rendering must stay (NUMBER-FORMAT.md rule 2). */
+  var sepNum = function (s) {
+    try { return window.DiagramUI.num.sep(s, { digits: 'raw', group: false }); }
+    catch (e) { return s; }
+  };
+  var fmt = opt.fmt || function (v) {
+    var a = Math.abs(v);
+    if (a !== 0 && (a < 1e-3 || a >= 1e5)) return sepNum(v.toExponential(1));
+    return sepNum(String(Math.round(v * 1000) / 1000));
+  };
+
+  // Grid, drawn first so the curves sit on top of it.
+  ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.45;
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke();
+  });
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + H); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Frame.
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + H); ctx.lineTo(padL + W, padT + H); ctx.stroke();
+  if (hasRight) { ctx.beginPath(); ctx.moveTo(padL + W, padT); ctx.lineTo(padL + W, padT + H); ctx.stroke(); }
+
+  ctx.font = '400 ' + f1 + 'px ' + font;
+  ctx.fillStyle = muted;
+
+  // Left axis.
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tick(groups[0].lo, groups[0].hi).forEach(function (v) {
+    var y = Yof(groups[0])(v);
+    if (y < padT - 0.5 || y > padT + H + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(fmt(v), padL - 7, y);
+  });
+  // Right axis.
+  if (hasRight) {
+    ctx.textAlign = 'left';
+    tick(groups[1].lo, groups[1].hi).forEach(function (v) {
+      var y = Yof(groups[1])(v);
+      if (y < padT - 0.5 || y > padT + H + 0.5) return;
+      ctx.beginPath(); ctx.moveTo(padL + W, y); ctx.lineTo(padL + W + 4, y); ctx.stroke();
+      ctx.fillText(fmt(v), padL + W + 7, y);
+    });
+  }
+  // X axis.
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  tick(xmin, xmax).forEach(function (v) {
+    var x = X(v);
+    if (x < padL - 0.5 || x > padL + W + 0.5) return;
+    ctx.beginPath(); ctx.moveTo(x, padT + H); ctx.lineTo(x, padT + H + 4); ctx.stroke();
+    ctx.fillText(fmt(v), x, padT + H + 7);
+  });
+
+  // Axis titles carry the unit, so a reader never has to guess the scale.
+  ctx.fillStyle = text; ctx.font = '500 ' + f2 + 'px ' + font;
+  var xTitle = (spec.x && spec.x.label ? spec.x.label : '') + (spec.x && spec.x.unit ? ', ' + spec.x.unit : '');
+  if (xTitle) { ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText(xTitle, padL + W / 2, h - (spec.series.length > 1 ? 20 * fs : 5 * fs)); }
+  function axisTitle(g, right) {
+    var t = (g.series.length === 1 && g.series[0].label ? g.series[0].label : (g.title || '')) + (g.unit ? ', ' + g.unit : '');
+    if (!t) return;
+    // Both titles are rotated so their glyphs fall inside the canvas: after the
+    // rotation a 'top' baseline places them toward the plot, either way.
+    ctx.save(); ctx.translate(right ? w - 3 * fs : 13 * fs, padT + H / 2);
+    ctx.rotate(right ? Math.PI / 2 : -Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(t, 0, 0); ctx.restore();
+  }
+  axisTitle(groups[0], false); if (hasRight) axisTitle(groups[1], true);
+
+  // Curves.
+  var colors = opt.colors || ['#1f6feb', '#d1651a', '#2f9e44', '#9333ea', '#0891b2'];
+  var idx = 0, legend = [];
+  groups.forEach(function (g, gi) {
+    var Y = Yof(g);
+    g.series.forEach(function (s) {
+      var col = s.color || colors[idx % colors.length];
+      legend.push({ label: s.label || '', unit: g.unit, color: col, dash: gi === 1 });
+      ctx.strokeStyle = col; ctx.lineWidth = 2 * fs; ctx.lineJoin = 'round';
+      ctx.setLineDash(gi === 1 ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); var began = false;
+      for (var i = 0; i < s.x.length; i++) {
+        var xv = s.x[i], yv = s.y[i];
+        if (!isFinite(xv) || !isFinite(yv)) { began = false; continue; }
+        var px = X(xv), py = Y(yv);
+        if (!began) { ctx.moveTo(px, py); began = true; } else ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      idx++;
+    });
+  });
+
+  // Legend, only when more than one curve is on the plot.
+  if (legend.length > 1) {
+    ctx.font = '400 ' + f1 + 'px ' + font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var items = legend.map(function (l) { return { l: l, w: ctx.measureText(l.label + (l.unit ? ', ' + l.unit : '')).width + 26 * fs }; });
+    var total = items.reduce(function (a, b) { return a + b.w; }, 0);
+    var cx = padL + Math.max(0, (W - total) / 2), cy = h - 6 * fs;
+    items.forEach(function (it) {
+      ctx.strokeStyle = it.l.color; ctx.lineWidth = 2 * fs;
+      ctx.setLineDash(it.l.dash ? [6 * fs, 4 * fs] : []);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 18 * fs, cy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = text; ctx.fillText(it.l.label + (it.l.unit ? ', ' + it.l.unit : ''), cx + 22 * fs, cy);
+      cx += it.w;
+    });
+  }
+  return { drawn: idx, skipped: skipped };
+}
+
+/* Report vocabulary for this tool, in the seven catalogue languages. */
+var DGC_RT={
+en:{ckFlux:"Mass-flux closure",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v recomputed from the enthalpy and specific volume the model reports where the reported mass flux is evaluated, then compared with the reported mass flux. This is the model's own definition, so it tests arithmetic rather than physics.",
+ ckMax:"Critical mass flux against an independent scan",
+ ckMaxB:"The tool brackets the maximum of G(p) on 241 logarithmic points and refines it by golden section. An independent 2001-point scan of the same pressure range, together with probes placed either side of the reported critical pressure, must not exceed the reported value.",
+ ckIapws:"IAPWS SR1-86 verification values",
+ ckIapwsB:"Saturation pressure and the saturated liquid and vapour densities at the three verification temperatures published in SR1-86(1992), compared with the published figures. Acceptance is half a unit in the last digit each figure is printed to.",
+ ckBranch:"Continuity at flash onset",
+ ckBranchB:"The compressed-liquid branch and the two-phase branch meet at the saturation pressure of the upstream temperature. The mass flux is measured one part in 10⁹ either side of that pressure; the two branches share the same limit there, so a step would be a defect of the switch.",
+ ckSub:"Upstream subcooling margin",
+ ckSubB:"Upstream pressure against the saturation pressure of the upstream temperature. The model expects compressed liquid at the inlet, and the tool raises its own warning when the margin reaches zero.",
+ ckRhoC:"Saturated densities at the critical temperature",
+ ckRhoCB:"The property routine clamps pressure to one part in 10⁶ below the critical pressure before inverting for temperature. The saturated densities follow the cube root of the distance from the critical temperature, so that clamp is visible in the densities the routine returns there.",
+ ckExp:"Model envelope against the Lin–Gruen–Quapp nozzle data",
+ ckExpB:"Nine published water critical-flow nozzle tests, recorded in QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. The comparison is carried forward from that record and is not recomputed here, because the measurements cannot be produced from the model.",
+ rFluxAt:"mass flux at",
+ rStateAt:"state at",
+ rIapwsPts:"graded figures at 273.16 / 373.1243 / 647.096 K",
+ rScanRef:"2001-point scan and local probes",
+ rInterior:"interior maximum, refined",
+ rBoundary:"at the scan boundary",
+ rOnset:"at flash onset",
+ rRecorded:"carried forward from the recorded comparison",
+ rOutside:"of nine points outside the band",
+ rWorst:"largest deviation",
+ rJump:"relative step across the switch",
+ rBracket:"refined pressure bracket",
+ rPsat:"Saturation pressure at the upstream temperature",
+ rSubc:"Subcooling margin",
+ rRatio:"Critical-to-upstream pressure ratio",
+ rDT:"Temperature drop to the critical point",
+ rH:"Specific enthalpy at the critical point",
+ rRhoC:"Mixture density at the critical point",
+ rPcrit:"Critical pressure of the equilibrium path",
+ rGcap:"Mass flux at the critical point",
+ rAeff:"Effective flow area",
+ rDrop:"Enthalpy drop to back pressure",
+ rUpRho:"Upstream liquid density",
+ riskNonEqT:"Non-equilibrium flashing",
+ riskNonEq:"Nucleation delay and phase slip are outside the model. Against the recorded nozzle data the equilibrium path spans −65 % to +5 % of the measured mass flux, the low end on near-saturated inlets and short flow paths.",
+ riskLiqT:"Incompressible compressed-liquid branch",
+ riskLiq:"Above the saturation pressure the model carries the liquid density of the upstream temperature and corrects enthalpy by (p − p_sat)/ρ′. Compressibility and the pressure dependence of liquid density sit outside that correction, and the mass flux on this branch carries the approximation.",
+ mNote:"Water only. Saturation properties follow IAPWS SR1-86(1992). One velocity, one temperature, no nucleation delay; the compressed-liquid branch stays incompressible.",
+ title:"Flashing through a valve or orifice — homogeneous equilibrium mass flux",
+ summary:"Compressed water at {p0} bar and {T0} °C discharges to {pb} bar through a restriction of {A} mm² with discharge coefficient {Cd}. The equilibrium path carries {G} kg/(m²·s) at the governing point, so the restriction passes {mdot} kg/s. The maximum of the path is {Gc} kg/(m²·s) at {pc} bar.",
+ concPast:"The back-pressure point lies past the maximum of the equilibrium curve, so the mass flow rests on the flux at back pressure while the state figures describe the maximum. The two are quoted separately above.",
+ concAt:"The back-pressure point coincides with the maximum of the scanned curve, so the flux at back pressure and the maximum of the path are one figure and the state figures belong to that same pressure.",
+ system:"Water reaches the restriction as compressed liquid and expands at constant entropy. While pressure stays above the saturation pressure of the upstream temperature the liquid is treated as incompressible and the mass flux follows the Bernoulli relation. Below that pressure the water flashes, the equilibrium vapour fraction sets the specific volume, and the mass flux passes through a maximum.",
+ figCap:"Equilibrium mass flux and vapour quality against equilibrium pressure, from upstream pressure down to back pressure. Mass flux is read on the left axis, quality on the right.",
+ ckPlace:"Placement of the back-pressure point on the mass-flux curve",
+ ckPlaceB:"Back pressure against the pressure at which the scanned curve reaches its maximum. The tool records the case as critical-point limited when back pressure is at or below that pressure.",
+ ckCap:"Flux and state taken from the same point of the curve",
+ ckCapB:"A choked restriction passes the maximum of the equilibrium mass-flux curve, and the state at the throat is the state at that maximum. Below the critical pressure the reported flux and the reported temperature, quality, density and enthalpy must therefore come from the same point. Above it both come from the back-pressure point.",
+ rTeq:"Temperature at the critical point",
+ rMdot:"Mass flow through the restriction",
+ rCapNote:"Both figures are taken at",rCapCrit:"Maximum of the curve",rCapBack:"Value at back pressure",
+ rPast:"past the maximum",
+ rAt:"at the maximum",
+ rGratio:"Critical to back-pressure mass-flux ratio",
+ rQvB:"Volumetric flow at back pressure",
+ flowUp:"Compressed water upstream",
+ flowRestr:"Valve or orifice",
+ flowDown:"Discharge at back pressure",
+ rDecBack:"Back pressure",
+ rWhyBack:"Sets the mass flux the flow rests on and the lower end of the scanned range",
+ rDecArea:"Flow area and discharge coefficient",
+ rWhyArea:"Turns mass flux into mass flow; it leaves the equilibrium path unchanged",
+ rDecUp:"Upstream state",
+ rWhyUp:"Fixes the entropy of the expansion and with it the whole mass-flux curve"},
+uk:{ckFlux:"Замикання масового потоку",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v перераховано з ентальпії та питомого об’єму, які модель дає при тиску обчислення масового потоку, і зіставлено з наведеним масовим потоком. Це власне означення моделі, тож перевіряється арифметика, а не фізика.",
+ ckMax:"Критичний масовий потік проти незалежного сканування",
+ ckMaxB:"Інструмент локалізує максимум G(p) на 241 логарифмічній точці й уточнює його золотим перерізом. Незалежне сканування того самого діапазону на 2001 точці разом із пробами обабіч наведеного критичного тиску не повинно перевищити наведене значення.",
+ ckIapws:"Контрольні значення IAPWS SR1-86",
+ ckIapwsB:"Тиск насичення та густини насиченої рідини й пари при трьох контрольних температурах, опублікованих у SR1-86(1992), зіставлені з опублікованими числами. Прийнятність — половина одиниці останнього надрукованого розряду кожного числа.",
+ ckBranch:"Неперервність на початку скипання",
+ ckBranchB:"Гілка стисненої рідини та двофазна гілка сходяться при тиску насичення для температури перед звуженням. Масовий потік вимірюється на одну мільярдну обабіч цього тиску; обидві гілки мають там ту саму границю, тож стрибок був би дефектом перемикання.",
+ ckSub:"Запас недогріву перед звуженням",
+ ckSubB:"Тиск перед звуженням проти тиску насичення для тієї ж температури. Модель очікує на вході стиснену рідину, і інструмент сам видає попередження, коли запас сягає нуля.",
+ ckRhoC:"Густини насичення при критичній температурі",
+ ckRhoCB:"Процедура властивостей обмежує тиск на одну мільйонну нижче критичного, перш ніж шукати температуру. Густини насичення йдуть за кубічним коренем відстані до критичної температури, тому це обмеження видно в густинах, які процедура там повертає.",
+ ckExp:"Межа моделі проти даних сопел Lin–Gruen–Quapp",
+ ckExpB:"Дев’ять опублікованих випробувань критичної течії води в соплах, записані в QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. Порівняння перенесене з того запису й тут не переобчислюється, бо вимірювання не можна отримати з моделі.",
+ rFluxAt:"масовий потік при",
+ rStateAt:"стан при",
+ rIapwsPts:"оцінених величин при 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"сканування на 2001 точці та локальні проби",
+ rInterior:"внутрішній максимум, уточнений",
+ rBoundary:"на межі сканування",
+ rOnset:"на початку скипання",
+ rRecorded:"перенесено з записаного порівняння",
+ rOutside:"з дев’яти точок поза смугою",
+ rWorst:"найбільше відхилення",
+ rJump:"відносний стрибок на перемиканні",
+ rBracket:"уточнений інтервал тиску",
+ rPsat:"Тиск насичення при температурі перед звуженням",
+ rSubc:"Запас недогріву",
+ rRatio:"Відношення критичного тиску до вхідного",
+ rDT:"Падіння температури до критичної точки",
+ rH:"Питома ентальпія в критичній точці",
+ rRhoC:"Густина суміші в критичній точці",
+ rPcrit:"Критичний тиск рівноважної траєкторії",
+ rGcap:"Масовий потік у критичній точці",
+ rAeff:"Ефективна площа проходу",
+ rDrop:"Спад ентальпії до протитиску",
+ rUpRho:"Густина рідини перед звуженням",
+ riskNonEqT:"Нерівноважне скипання",
+ riskNonEq:"Затримка зародкоутворення та ковзання фаз поза моделлю. Проти записаних даних сопел рівноважна траєкторія дає від −65 % до +5 % виміряного масового потоку, нижній край — для майже насичених входів і коротких трактів.",
+ riskLiqT:"Нестислива гілка стисненої рідини",
+ riskLiq:"Вище тиску насичення модель бере густину рідини для температури перед звуженням і коригує ентальпію на (p − p_нас)/ρ′. Стисливість і залежність густини від тиску поза цією поправкою, і масовий потік на цій гілці несе це наближення.",
+ mNote:"Лише вода. Властивості насичення за IAPWS SR1-86(1992). Одна швидкість, одна температура, без затримки зародкоутворення; гілка стисненої рідини лишається нестисливою.",
+ title:"Скипання в клапані чи отворі — масовий потік у гомогенній рівноважній моделі",
+ summary:"Стиснена вода за {p0} бар і {T0} °C витікає до {pb} бар через звуження {A} мм² з коефіцієнтом витрати {Cd}. Рівноважна траєкторія несе {G} кг/(м²·с) у визначальній точці, тож звуження пропускає {mdot} кг/с. Максимум траєкторії — {Gc} кг/(м²·с) за {pc} бар.",
+ concPast:"Точка протитиску лежить за максимумом рівноважної кривої, тож витрата спирається на потік при протитиску, а величини стану описують максимум. Обидва наведені вище окремо.",
+ concAt:"Точка протитиску збігається з максимумом просканованої кривої, тож потік при протитиску й максимум траєкторії — одне число, а величини стану належать тому самому тиску.",
+ system:"Вода підходить до звуження як стиснена рідина й розширюється при сталій ентропії. Поки тиск вищий за тиск насичення для температури перед звуженням, рідина вважається нестисливою, і масовий потік іде за співвідношенням Бернуллі. Нижче цього тиску вода скипає, рівноважна частка пари задає питомий об’єм, і масовий потік проходить через максимум.",
+ figCap:"Рівноважний масовий потік і ступінь сухості залежно від рівноважного тиску, від вхідного тиску до протитиску. Потік читається на лівій осі, сухість — на правій.",
+ ckPlace:"Розміщення точки протитиску на кривій масового потоку",
+ ckPlaceB:"Протитиск проти тиску, за якого просканована крива сягає максимуму. Інструмент позначає випадок як обмежений критичною точкою, коли протитиск дорівнює цьому тиску або нижчий.",
+ ckCap:"Тиск, при якому взято кожну наведену величину",
+ ckCapB:"Запис обчислює витрату як Cd·A·min[G(p_b), G_крит]. Просканований максимум ніколи не нижчий за значення при протитиску, тож мінімум — це значення при протитиску, тоді як температура, сухість, густина та ентальпія наведені в максимумі. Відношення двох масових потоків показує, наскільки далеко ці два тиски розводять відповідь.",
+ rTeq:"Температура в критичній точці",
+ rMdot:"Витрата через звуження",
+ rCapNote:"Обидві величини взято при",rCapCrit:"Максимум кривої",rCapBack:"Значення при протитиску",
+ rPast:"за максимумом",
+ rAt:"у максимумі",
+ rGratio:"Відношення критичного потоку до потоку при протитиску",
+ rQvB:"Об’ємна витрата при протитиску",
+ flowUp:"Стиснена вода перед звуженням",
+ flowRestr:"Клапан або отвір",
+ flowDown:"Витікання при протитиску",
+ rDecBack:"Протитиск",
+ rWhyBack:"Задає масовий потік, на якому тримається витрата, і нижню межу діапазону сканування",
+ rDecArea:"Площа проходу і коефіцієнт витрати",
+ rWhyArea:"Перетворює масовий потік на витрату; рівноважну траєкторію не змінює",
+ rDecUp:"Стан перед звуженням",
+ rWhyUp:"Задає ентропію розширення, а з нею й усю криву масового потоку"},
+de:{ckFlux:"Massenfluss-Schließung",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v wird aus Enthalpie und spezifischem Volumen bei dem Druck neu berechnet, bei dem der Massenfluss ausgewertet wird, und mit dem ausgewiesenen Massenfluss verglichen. Das ist die modelleigene Definition, geprüft wird also die Arithmetik, nicht die Physik.",
+ ckMax:"Kritischer Massenfluss gegen einen unabhängigen Scan",
+ ckMaxB:"Das Werkzeug klammert das Maximum von G(p) auf 241 logarithmischen Punkten ein und verfeinert es per Goldenem Schnitt. Ein unabhängiger Scan desselben Druckbereichs mit 2001 Punkten sowie Proben beiderseits des ausgewiesenen kritischen Drucks dürfen den ausgewiesenen Wert nicht überschreiten.",
+ ckIapws:"IAPWS-SR1-86-Prüfwerte",
+ ckIapwsB:"Sättigungsdruck sowie die Dichten von gesättigter Flüssigkeit und gesättigtem Dampf bei den drei in SR1-86(1992) veröffentlichten Prüftemperaturen, verglichen mit den veröffentlichten Zahlen. Akzeptanz ist eine halbe Einheit der letzten gedruckten Stelle jeder Zahl.",
+ ckBranch:"Stetigkeit am Flashbeginn",
+ ckBranchB:"Der Zweig der komprimierten Flüssigkeit und der Zweiphasenzweig treffen sich beim Sättigungsdruck der Vortemperatur. Der Massenfluss wird ein Milliardstel beiderseits dieses Drucks gemessen; beide Zweige haben dort denselben Grenzwert, ein Sprung wäre also ein Fehler der Umschaltung.",
+ ckSub:"Unterkühlungsabstand stromauf",
+ ckSubB:"Vordruck gegen den Sättigungsdruck der Vortemperatur. Das Modell erwartet am Eintritt komprimierte Flüssigkeit; das Werkzeug gibt selbst eine Warnung aus, wenn der Abstand null erreicht.",
+ ckRhoC:"Sättigungsdichten bei der kritischen Temperatur",
+ ckRhoCB:"Die Stoffwertroutine begrenzt den Druck auf ein Millionstel unter den kritischen Druck, bevor sie nach der Temperatur auflöst. Die Sättigungsdichten folgen der Kubikwurzel des Abstands zur kritischen Temperatur, daher ist diese Begrenzung in den dort zurückgegebenen Dichten sichtbar.",
+ ckExp:"Modellgrenze gegen die Düsendaten von Lin–Gruen–Quapp",
+ ckExpB:"Neun veröffentlichte Wasser-Kritikalfluss-Düsenversuche, festgehalten in QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. Der Vergleich wird aus diesem Datensatz übernommen und hier nicht neu berechnet, da sich die Messungen aus dem Modell nicht erzeugen lassen.",
+ rFluxAt:"Massenfluss bei",
+ rStateAt:"Zustand bei",
+ rIapwsPts:"bewertete Werte bei 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"2001-Punkte-Scan und lokale Proben",
+ rInterior:"inneres Maximum, verfeinert",
+ rBoundary:"am Scanrand",
+ rOnset:"am Flashbeginn",
+ rRecorded:"aus dem festgehaltenen Vergleich übernommen",
+ rOutside:"von neun Punkten außerhalb des Bandes",
+ rWorst:"größte Abweichung",
+ rJump:"relativer Sprung an der Umschaltung",
+ rBracket:"verfeinertes Druckintervall",
+ rPsat:"Sättigungsdruck bei der Vortemperatur",
+ rSubc:"Unterkühlungsabstand",
+ rRatio:"Verhältnis kritischer Druck zu Vordruck",
+ rDT:"Temperaturabfall bis zum kritischen Punkt",
+ rH:"Spezifische Enthalpie im kritischen Punkt",
+ rRhoC:"Gemischdichte im kritischen Punkt",
+ rPcrit:"Kritischer Druck des Gleichgewichtspfads",
+ rGcap:"Massenfluss im kritischen Punkt",
+ rAeff:"Wirksame Strömungsfläche",
+ rDrop:"Enthalpiegefälle bis zum Gegendruck",
+ rUpRho:"Flüssigkeitsdichte stromauf",
+ riskNonEqT:"Nichtgleichgewichts-Flash",
+ riskNonEq:"Keimverzug und Phasenschlupf liegen außerhalb des Modells. Gegen die festgehaltenen Düsendaten spannt der Gleichgewichtspfad −65 % bis +5 % des gemessenen Massenflusses auf, das untere Ende bei nahezu gesättigten Eintritten und kurzen Strömungswegen.",
+ riskLiqT:"Inkompressibler Flüssigkeitszweig",
+ riskLiq:"Oberhalb des Sättigungsdrucks führt das Modell die Flüssigkeitsdichte der Vortemperatur mit und korrigiert die Enthalpie um (p − p_sat)/ρ′. Kompressibilität und Druckabhängigkeit der Flüssigkeitsdichte liegen außerhalb dieser Korrektur; der Massenfluss auf diesem Zweig trägt diese Näherung.",
+ mNote:"Nur Wasser. Sättigungseigenschaften nach IAPWS SR1-86(1992). Eine Geschwindigkeit, eine Temperatur, kein Keimverzug; der Flüssigkeitszweig bleibt inkompressibel.",
+ title:"Flashen durch Ventil oder Blende — Massenfluss im homogenen Gleichgewicht",
+ summary:"Komprimiertes Wasser bei {p0} bar und {T0} °C strömt über eine Drosselstelle von {A} mm² mit Ausflussbeiwert {Cd} auf {pb} bar ab. Der Gleichgewichtspfad trägt im maßgebenden Punkt {G} kg/(m²·s), die Drosselstelle führt damit {mdot} kg/s. Das Maximum des Pfads liegt bei {Gc} kg/(m²·s) und {pc} bar.",
+ concPast:"Der Gegendruckpunkt liegt jenseits des Maximums der Gleichgewichtskurve; der Massenstrom stützt sich damit auf den Fluss beim Gegendruck, während die Zustandsgrößen das Maximum beschreiben. Beide stehen oben getrennt.",
+ concAt:"Der Gegendruckpunkt fällt mit dem Maximum der gescannten Kurve zusammen; Fluss beim Gegendruck und Maximum des Pfads sind damit eine Zahl, und die Zustandsgrößen gehören zu demselben Druck.",
+ system:"Das Wasser erreicht die Drosselstelle als komprimierte Flüssigkeit und entspannt bei konstanter Entropie. Solange der Druck über dem Sättigungsdruck der Vortemperatur liegt, gilt die Flüssigkeit als inkompressibel und der Massenfluss folgt der Bernoulli-Beziehung. Darunter flasht das Wasser, der Gleichgewichts-Dampfanteil legt das spezifische Volumen fest, und der Massenfluss durchläuft ein Maximum.",
+ figCap:"Gleichgewichts-Massenfluss und Dampfgehalt über dem Gleichgewichtsdruck, vom Vordruck bis zum Gegendruck. Der Massenfluss wird an der linken Achse abgelesen, der Dampfgehalt an der rechten.",
+ ckPlace:"Lage des Gegendruckpunkts auf der Massenflusskurve",
+ ckPlaceB:"Gegendruck gegen den Druck, bei dem die gescannte Kurve ihr Maximum erreicht. Das Werkzeug führt den Fall als durch den kritischen Punkt begrenzt, wenn der Gegendruck auf oder unter diesem Druck liegt.",
+ ckCap:"Druck, bei dem jede ausgewiesene Größe genommen ist",
+ ckCapB:"Der Datensatz berechnet den Massenstrom als Cd·A·min[G(p_b), G_krit]. Das gescannte Maximum liegt nie unter dem Gegendruckwert, das Minimum ist also der Gegendruckwert, während Temperatur, Dampfgehalt, Dichte und Enthalpie im Maximum ausgewiesen werden. Das Verhältnis der beiden Massenflüsse zeigt, wie weit die beiden Drücke die Antwort auseinanderziehen.",
+ rTeq:"Temperatur im kritischen Punkt",
+ rMdot:"Massenstrom durch die Drosselstelle",
+ rCapNote:"Beide Größen genommen bei",rCapCrit:"Maximum der Kurve",rCapBack:"Wert beim Gegendruck",
+ rPast:"jenseits des Maximums",
+ rAt:"im Maximum",
+ rGratio:"Verhältnis kritischer zu Gegendruck-Massenfluss",
+ rQvB:"Volumenstrom beim Gegendruck",
+ flowUp:"Komprimiertes Wasser stromauf",
+ flowRestr:"Ventil oder Blende",
+ flowDown:"Austritt bei Gegendruck",
+ rDecBack:"Gegendruck",
+ rWhyBack:"Legt den Massenfluss fest, auf dem der Durchfluss ruht, und das untere Ende des Scanbereichs",
+ rDecArea:"Strömungsfläche und Ausflussbeiwert",
+ rWhyArea:"Wandelt Massenfluss in Massenstrom um; der Gleichgewichtspfad bleibt unverändert",
+ rDecUp:"Zustand stromauf",
+ rWhyUp:"Legt die Entropie der Entspannung fest und damit die gesamte Massenflusskurve"},
+nl:{ckFlux:"Sluiting van de massaflux",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v herberekend uit de enthalpie en het soortelijk volume die het model geeft bij de druk waar de massaflux wordt bepaald, en vergeleken met de gerapporteerde massaflux. Dit is de eigen definitie van het model, dus het toetst rekenwerk en geen fysica.",
+ ckMax:"Kritische massaflux tegen een onafhankelijke scan",
+ ckMaxB:"De tool omsluit het maximum van G(p) op 241 logaritmische punten en verfijnt het met gulden snede. Een onafhankelijke scan van hetzelfde drukbereik met 2001 punten, samen met monsters aan weerszijden van de gerapporteerde kritische druk, mag de gerapporteerde waarde niet overschrijden.",
+ ckIapws:"IAPWS SR1-86-verificatiewaarden",
+ ckIapwsB:"Verzadigingsdruk en de dichtheden van verzadigde vloeistof en damp bij de drie in SR1-86(1992) gepubliceerde verificatietemperaturen, vergeleken met de gepubliceerde getallen. Aanvaarding is een halve eenheid in het laatste gedrukte cijfer van elk getal.",
+ ckBranch:"Continuïteit bij het begin van flashen",
+ ckBranchB:"De tak voor samengeperste vloeistof en de tweefasetak komen samen bij de verzadigingsdruk van de boventemperatuur. De massaflux wordt een miljardste aan weerszijden van die druk gemeten; beide takken hebben daar dezelfde limiet, dus een sprong zou een fout van de omschakeling zijn.",
+ ckSub:"Onderkoelingsmarge bovenstrooms",
+ ckSubB:"Bovendruk tegen de verzadigingsdruk van de boventemperatuur. Het model verwacht samengeperste vloeistof aan de ingang en de tool geeft zelf een waarschuwing zodra de marge nul bereikt.",
+ ckRhoC:"Verzadigingsdichtheden bij de kritische temperatuur",
+ ckRhoCB:"De stofeigenschapsroutine begrenst de druk tot een miljoenste onder de kritische druk voordat zij naar temperatuur oplost. De verzadigingsdichtheden volgen de derdemachtswortel van de afstand tot de kritische temperatuur, dus die begrenzing is zichtbaar in de dichtheden die daar worden teruggegeven.",
+ ckExp:"Modelgrens tegen de nozzledata van Lin–Gruen–Quapp",
+ ckExpB:"Negen gepubliceerde waterproeven met kritische stroming door nozzles, vastgelegd in QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. De vergelijking wordt uit dat record overgenomen en hier niet opnieuw berekend, omdat de metingen niet uit het model zijn te produceren.",
+ rFluxAt:"massaflux bij",
+ rStateAt:"toestand bij",
+ rIapwsPts:"beoordeelde waarden bij 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"scan met 2001 punten en lokale monsters",
+ rInterior:"binnenmaximum, verfijnd",
+ rBoundary:"aan de scanrand",
+ rOnset:"bij het begin van flashen",
+ rRecorded:"overgenomen uit de vastgelegde vergelijking",
+ rOutside:"van negen punten buiten de band",
+ rWorst:"grootste afwijking",
+ rJump:"relatieve sprong bij de omschakeling",
+ rBracket:"verfijnd drukinterval",
+ rPsat:"Verzadigingsdruk bij de boventemperatuur",
+ rSubc:"Onderkoelingsmarge",
+ rRatio:"Verhouding kritische druk tot bovendruk",
+ rDT:"Temperatuurdaling tot het kritische punt",
+ rH:"Soortelijke enthalpie in het kritische punt",
+ rRhoC:"Mengseldichtheid in het kritische punt",
+ rPcrit:"Kritische druk van het evenwichtspad",
+ rGcap:"Massaflux in het kritische punt",
+ rAeff:"Effectief doorstroomoppervlak",
+ rDrop:"Enthalpieval tot de tegendruk",
+ rUpRho:"Vloeistofdichtheid bovenstrooms",
+ riskNonEqT:"Niet-evenwichtsflashing",
+ riskNonEq:"Kiemvertraging en faseslip vallen buiten het model. Tegen de vastgelegde nozzledata spant het evenwichtspad −65 % tot +5 % van de gemeten massaflux, de onderkant bij bijna verzadigde intreden en korte stroomwegen.",
+ riskLiqT:"Incompressibele vloeistoftak",
+ riskLiq:"Boven de verzadigingsdruk gebruikt het model de vloeistofdichtheid van de boventemperatuur en corrigeert de enthalpie met (p − p_sat)/ρ′. Samendrukbaarheid en de drukafhankelijkheid van de vloeistofdichtheid liggen buiten die correctie, en de massaflux op deze tak draagt die benadering.",
+ mNote:"Alleen water. Verzadigingseigenschappen volgen IAPWS SR1-86(1992). Eén snelheid, één temperatuur, geen kiemvertraging; de vloeistoftak blijft incompressibel.",
+ title:"Flashen door klep of orifice — massaflux in homogeen evenwicht",
+ summary:"Samengeperst water bij {p0} bar en {T0} °C stroomt via een vernauwing van {A} mm² met uitstroomcoëfficiënt {Cd} af naar {pb} bar. Het evenwichtspad draagt in het bepalende punt {G} kg/(m²·s), zodat de vernauwing {mdot} kg/s doorlaat. Het maximum van het pad is {Gc} kg/(m²·s) bij {pc} bar.",
+ concPast:"Het tegendrukpunt ligt voorbij het maximum van de evenwichtskromme, dus de massastroom steunt op de flux bij tegendruk terwijl de toestandsgrootheden het maximum beschrijven. Beide staan hierboven apart vermeld.",
+ concAt:"Het tegendrukpunt valt samen met het maximum van de gescande kromme, dus de flux bij tegendruk en het maximum van het pad zijn één getal, en de toestandsgrootheden horen bij diezelfde druk.",
+ system:"Het water bereikt de vernauwing als samengeperste vloeistof en expandeert bij constante entropie. Zolang de druk boven de verzadigingsdruk van de boventemperatuur blijft, geldt de vloeistof als incompressibel en volgt de massaflux de betrekking van Bernoulli. Daaronder flasht het water, bepaalt de evenwichtsdampfractie het soortelijk volume en doorloopt de massaflux een maximum.",
+ figCap:"Evenwichtsmassaflux en dampkwaliteit tegen de evenwichtsdruk, van bovendruk tot tegendruk. De massaflux wordt op de linkeras afgelezen, de kwaliteit op de rechter.",
+ ckPlace:"Ligging van het tegendrukpunt op de massafluxkromme",
+ ckPlaceB:"Tegendruk tegen de druk waarbij de gescande kromme haar maximum bereikt. De tool boekt het geval als begrensd door het kritische punt zodra de tegendruk op of onder die druk ligt.",
+ ckCap:"Druk waarbij elke gerapporteerde grootheid is genomen",
+ ckCapB:"Het record berekent de massastroom als Cd·A·min[G(p_b), G_crit]. Het gescande maximum ligt nooit onder de tegendrukwaarde, dus het minimum is de tegendrukwaarde, terwijl temperatuur, kwaliteit, dichtheid en enthalpie bij het maximum worden gerapporteerd. De verhouding van beide massafluxen laat zien hoever de twee drukken het antwoord uit elkaar leggen.",
+ rTeq:"Temperatuur in het kritische punt",
+ rMdot:"Massastroom door de vernauwing",
+ rCapNote:"Beide grootheden genomen bij",rCapCrit:"Maximum van de kromme",rCapBack:"Waarde bij tegendruk",
+ rPast:"voorbij het maximum",
+ rAt:"in het maximum",
+ rGratio:"Verhouding kritische tot tegendruk-massaflux",
+ rQvB:"Volumestroom bij tegendruk",
+ flowUp:"Samengeperst water bovenstrooms",
+ flowRestr:"Klep of orifice",
+ flowDown:"Uitstroom bij tegendruk",
+ rDecBack:"Tegendruk",
+ rWhyBack:"Bepaalt de massaflux waarop de stroom rust en de ondergrens van het scanbereik",
+ rDecArea:"Doorstroomoppervlak en uitstroomcoëfficiënt",
+ rWhyArea:"Zet massaflux om in massastroom; het evenwichtspad blijft ongewijzigd",
+ rDecUp:"Toestand bovenstrooms",
+ rWhyUp:"Legt de entropie van de expansie vast en daarmee de hele massafluxkromme"},
+fr:{ckFlux:"Fermeture du flux massique",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v recalculé à partir de l’enthalpie et du volume massique donnés par le modèle à la pression déterminante, puis comparé au flux massique rapporté. C’est la définition propre du modèle : la vérification porte sur l’arithmétique, pas sur la physique.",
+ ckMax:"Flux massique critique face à un balayage indépendant",
+ ckMaxB:"L’outil encadre le maximum de G(p) sur 241 points logarithmiques puis l’affine par section dorée. Un balayage indépendant de la même plage de pression sur 2001 points, avec des sondes de part et d’autre de la pression critique rapportée, ne doit pas dépasser la valeur rapportée.",
+ ckIapws:"Valeurs de vérification IAPWS SR1-86",
+ ckIapwsB:"Pression de saturation et masses volumiques du liquide et de la vapeur saturés aux trois températures de vérification publiées dans SR1-86(1992), comparées aux chiffres publiés. L’acceptation est d’une demi-unité du dernier chiffre imprimé de chaque valeur.",
+ ckBranch:"Continuité au début du flash",
+ ckBranchB:"La branche liquide comprimé et la branche diphasique se rejoignent à la pression de saturation de la température amont. Le flux massique est mesuré à un milliardième de part et d’autre de cette pression ; les deux branches y partagent la même limite, un saut serait donc un défaut de la commutation.",
+ ckSub:"Marge de sous-refroidissement amont",
+ ckSubB:"Pression amont face à la pression de saturation de la température amont. Le modèle attend un liquide comprimé à l’entrée et l’outil émet lui-même un avertissement dès que la marge atteint zéro.",
+ ckRhoC:"Masses volumiques de saturation à la température critique",
+ ckRhoCB:"La routine de propriétés borne la pression à un millionième sous la pression critique avant d’inverser en température. Les masses volumiques de saturation suivent la racine cubique de l’écart à la température critique : ce bornage est donc visible dans les valeurs renvoyées à cet endroit.",
+ ckExp:"Limite du modèle face aux données de buse de Lin–Gruen–Quapp",
+ ckExpB:"Neuf essais publiés d’écoulement critique d’eau en buse, consignés dans QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. La comparaison est reprise de cet enregistrement et n’est pas recalculée ici, car les mesures ne peuvent pas être produites par le modèle.",
+ rFluxAt:"flux massique à",
+ rStateAt:"état à",
+ rIapwsPts:"valeurs notées à 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"balayage à 2001 points et sondes locales",
+ rInterior:"maximum intérieur, affiné",
+ rBoundary:"à la limite du balayage",
+ rOnset:"au début du flash",
+ rRecorded:"repris de la comparaison consignée",
+ rOutside:"des neuf points hors de la bande",
+ rWorst:"écart le plus grand",
+ rJump:"saut relatif à la commutation",
+ rBracket:"intervalle de pression affiné",
+ rPsat:"Pression de saturation à la température amont",
+ rSubc:"Marge de sous-refroidissement",
+ rRatio:"Rapport pression critique sur pression amont",
+ rDT:"Chute de température jusqu’au point critique",
+ rH:"Enthalpie massique au point critique",
+ rRhoC:"Masse volumique du mélange au point critique",
+ rPcrit:"Pression critique du chemin d’équilibre",
+ rGcap:"Flux massique au point critique",
+ rAeff:"Section de passage effective",
+ rDrop:"Chute d’enthalpie jusqu’à la contre-pression",
+ rUpRho:"Masse volumique du liquide amont",
+ riskNonEqT:"Flash hors équilibre",
+ riskNonEq:"Le retard de nucléation et le glissement de phase sont hors du modèle. Face aux données de buse consignées, le chemin d’équilibre couvre −65 % à +5 % du flux massique mesuré, le bas de la plage pour des entrées proches de la saturation et des trajets courts.",
+ riskLiqT:"Branche liquide comprimé incompressible",
+ riskLiq:"Au-dessus de la pression de saturation, le modèle conserve la masse volumique du liquide à la température amont et corrige l’enthalpie de (p − p_sat)/ρ′. La compressibilité et la dépendance en pression de la masse volumique restent hors de cette correction, et le flux massique de cette branche porte l’approximation.",
+ mNote:"Eau uniquement. Propriétés de saturation selon IAPWS SR1-86(1992). Une vitesse, une température, aucun retard de nucléation ; la branche liquide reste incompressible.",
+ title:"Flash à travers une vanne ou un orifice — flux massique à l’équilibre homogène",
+ summary:"De l’eau comprimée à {p0} bar et {T0} °C se détend vers {pb} bar à travers une restriction de {A} mm² de coefficient de décharge {Cd}. Le chemin d’équilibre porte {G} kg/(m²·s) au point déterminant, la restriction laisse donc passer {mdot} kg/s. Le maximum du chemin vaut {Gc} kg/(m²·s) à {pc} bar.",
+ concPast:"Le point de contre-pression se situe au-delà du maximum de la courbe d’équilibre : le débit massique repose sur le flux à la contre-pression tandis que les grandeurs d’état décrivent le maximum. Les deux sont indiqués séparément ci-dessus.",
+ concAt:"Le point de contre-pression coïncide avec le maximum de la courbe balayée : le flux à la contre-pression et le maximum du chemin ne font qu’un, et les grandeurs d’état se rapportent à cette même pression.",
+ system:"L’eau arrive à la restriction sous forme de liquide comprimé et se détend à entropie constante. Tant que la pression reste au-dessus de la pression de saturation de la température amont, le liquide est tenu pour incompressible et le flux massique suit la relation de Bernoulli. En dessous, l’eau flashe, la fraction de vapeur d’équilibre fixe le volume massique et le flux massique passe par un maximum.",
+ figCap:"Flux massique d’équilibre et titre de vapeur en fonction de la pression d’équilibre, de la pression amont jusqu’à la contre-pression. Le flux se lit sur l’axe gauche, le titre sur l’axe droit.",
+ ckPlace:"Position du point de contre-pression sur la courbe de flux massique",
+ ckPlaceB:"Contre-pression face à la pression où la courbe balayée atteint son maximum. L’outil enregistre le cas comme limité par le point critique lorsque la contre-pression est à cette pression ou en dessous.",
+ ckCap:"Pression à laquelle chaque grandeur rapportée est prise",
+ ckCapB:"L’enregistrement calcule le débit massique comme Cd·A·min[G(p_b), G_crit]. Le maximum balayé n’est jamais inférieur à la valeur à la contre-pression : le minimum est donc cette valeur, tandis que température, titre, masse volumique et enthalpie sont rapportés au maximum. Le rapport des deux flux massiques indique de combien les deux pressions écartent la réponse.",
+ rTeq:"Température au point critique",
+ rMdot:"Débit massique à travers la restriction",
+ rCapNote:"Les deux grandeurs prises à",rCapCrit:"Maximum de la courbe",rCapBack:"Valeur à la contre-pression",
+ rPast:"au-delà du maximum",
+ rAt:"au maximum",
+ rGratio:"Rapport flux critique sur flux à la contre-pression",
+ rQvB:"Débit volumique à la contre-pression",
+ flowUp:"Eau comprimée en amont",
+ flowRestr:"Vanne ou orifice",
+ flowDown:"Refoulement à la contre-pression",
+ rDecBack:"Contre-pression",
+ rWhyBack:"Fixe le flux massique sur lequel repose le débit et la borne basse de la plage balayée",
+ rDecArea:"Section de passage et coefficient de décharge",
+ rWhyArea:"Convertit le flux massique en débit massique ; le chemin d’équilibre reste inchangé",
+ rDecUp:"État amont",
+ rWhyUp:"Fixe l’entropie de la détente et avec elle toute la courbe de flux massique"},
+es:{ckFlux:"Cierre del flujo másico",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v recalculado a partir de la entalpía y el volumen específico que el modelo da a la presión donde se evalúa el flujo másico, y comparado con el flujo másico indicado. Es la definición propia del modelo, así que comprueba la aritmética y no la física.",
+ ckMax:"Flujo másico crítico frente a un barrido independiente",
+ ckMaxB:"La herramienta acota el máximo de G(p) en 241 puntos logarítmicos y lo refina por sección áurea. Un barrido independiente del mismo rango de presión con 2001 puntos, junto con sondas a ambos lados de la presión crítica indicada, no debe superar el valor indicado.",
+ ckIapws:"Valores de verificación IAPWS SR1-86",
+ ckIapwsB:"Presión de saturación y densidades del líquido y del vapor saturados en las tres temperaturas de verificación publicadas en SR1-86(1992), comparadas con las cifras publicadas. La aceptación es media unidad del último dígito impreso de cada cifra.",
+ ckBranch:"Continuidad al inicio del flash",
+ ckBranchB:"La rama de líquido comprimido y la rama bifásica se encuentran en la presión de saturación de la temperatura aguas arriba. El flujo másico se mide a una milmillonésima a cada lado de esa presión; ambas ramas comparten allí el mismo límite, así que un salto sería un defecto de la conmutación.",
+ ckSub:"Margen de subenfriamiento aguas arriba",
+ ckSubB:"Presión aguas arriba frente a la presión de saturación de la temperatura aguas arriba. El modelo espera líquido comprimido en la entrada y la herramienta emite su propio aviso cuando el margen llega a cero.",
+ ckRhoC:"Densidades de saturación en la temperatura crítica",
+ ckRhoCB:"La rutina de propiedades limita la presión a una millonésima por debajo de la presión crítica antes de invertir en temperatura. Las densidades de saturación siguen la raíz cúbica de la distancia a la temperatura crítica, de modo que ese límite se ve en las densidades devueltas allí.",
+ ckExp:"Límite del modelo frente a los datos de tobera de Lin–Gruen–Quapp",
+ ckExpB:"Nueve ensayos publicados de flujo crítico de agua en tobera, registrados en QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. La comparación se arrastra de ese registro y no se recalcula aquí, porque las medidas no pueden generarse a partir del modelo.",
+ rFluxAt:"flujo másico a",
+ rStateAt:"estado a",
+ rIapwsPts:"valores calificados a 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"barrido de 2001 puntos y sondas locales",
+ rInterior:"máximo interior, refinado",
+ rBoundary:"en el borde del barrido",
+ rOnset:"al inicio del flash",
+ rRecorded:"arrastrado de la comparación registrada",
+ rOutside:"de nueve puntos fuera de la banda",
+ rWorst:"mayor desviación",
+ rJump:"salto relativo en la conmutación",
+ rBracket:"intervalo de presión refinado",
+ rPsat:"Presión de saturación a la temperatura aguas arriba",
+ rSubc:"Margen de subenfriamiento",
+ rRatio:"Relación presión crítica a presión aguas arriba",
+ rDT:"Caída de temperatura hasta el punto crítico",
+ rH:"Entalpía específica en el punto crítico",
+ rRhoC:"Densidad de la mezcla en el punto crítico",
+ rPcrit:"Presión crítica de la trayectoria de equilibrio",
+ rGcap:"Flujo másico en el punto crítico",
+ rAeff:"Área de paso efectiva",
+ rDrop:"Caída de entalpía hasta la contrapresión",
+ rUpRho:"Densidad del líquido aguas arriba",
+ riskNonEqT:"Flash fuera de equilibrio",
+ riskNonEq:"El retardo de nucleación y el deslizamiento de fases quedan fuera del modelo. Frente a los datos de tobera registrados, la trayectoria de equilibrio abarca de −65 % a +5 % del flujo másico medido, el extremo bajo en entradas casi saturadas y trayectos cortos.",
+ riskLiqT:"Rama de líquido comprimido incompresible",
+ riskLiq:"Por encima de la presión de saturación el modelo mantiene la densidad del líquido a la temperatura aguas arriba y corrige la entalpía en (p − p_sat)/ρ′. La compresibilidad y la dependencia de la densidad con la presión quedan fuera de esa corrección, y el flujo másico de esta rama arrastra la aproximación.",
+ mNote:"Solo agua. Propiedades de saturación según IAPWS SR1-86(1992). Una velocidad, una temperatura, sin retardo de nucleación; la rama líquida permanece incompresible.",
+ title:"Flash a través de válvula u orificio — flujo másico en equilibrio homogéneo",
+ summary:"Agua comprimida a {p0} bar y {T0} °C descarga a {pb} bar por una restricción de {A} mm² con coeficiente de descarga {Cd}. La trayectoria de equilibrio lleva {G} kg/(m²·s) en el punto determinante, de modo que la restricción deja pasar {mdot} kg/s. El máximo de la trayectoria es {Gc} kg/(m²·s) a {pc} bar.",
+ concPast:"El punto de contrapresión queda más allá del máximo de la curva de equilibrio, así que el caudal másico se apoya en el flujo en la contrapresión mientras que las magnitudes de estado describen el máximo. Ambos figuran arriba por separado.",
+ concAt:"El punto de contrapresión coincide con el máximo de la curva barrida, así que el flujo en la contrapresión y el máximo de la trayectoria son una sola cifra, y las magnitudes de estado pertenecen a esa misma presión.",
+ system:"El agua llega a la restricción como líquido comprimido y se expande a entropía constante. Mientras la presión se mantiene por encima de la presión de saturación de la temperatura aguas arriba, el líquido se trata como incompresible y el flujo másico sigue la relación de Bernoulli. Por debajo, el agua flashea, la fracción de vapor de equilibrio fija el volumen específico y el flujo másico pasa por un máximo.",
+ figCap:"Flujo másico de equilibrio y calidad del vapor frente a la presión de equilibrio, desde la presión aguas arriba hasta la contrapresión. El flujo se lee en el eje izquierdo y la calidad en el derecho.",
+ ckPlace:"Posición del punto de contrapresión en la curva de flujo másico",
+ ckPlaceB:"Contrapresión frente a la presión en la que la curva barrida alcanza su máximo. La herramienta registra el caso como limitado por el punto crítico cuando la contrapresión está en esa presión o por debajo.",
+ ckCap:"Presión a la que se toma cada magnitud indicada",
+ ckCapB:"El registro calcula el caudal másico como Cd·A·min[G(p_b), G_crit]. El máximo barrido nunca queda por debajo del valor en la contrapresión, así que el mínimo es ese valor, mientras que temperatura, calidad, densidad y entalpía se indican en el máximo. La relación entre ambos flujos másicos dice cuánto separan la respuesta las dos presiones.",
+ rTeq:"Temperatura en el punto crítico",
+ rMdot:"Caudal másico por la restricción",
+ rCapNote:"Ambas magnitudes tomadas en",rCapCrit:"Máximo de la curva",rCapBack:"Valor en la contrapresión",
+ rPast:"más allá del máximo",
+ rAt:"en el máximo",
+ rGratio:"Relación flujo crítico a flujo en contrapresión",
+ rQvB:"Caudal volumétrico en la contrapresión",
+ flowUp:"Agua comprimida aguas arriba",
+ flowRestr:"Válvula u orificio",
+ flowDown:"Descarga a la contrapresión",
+ rDecBack:"Contrapresión",
+ rWhyBack:"Fija el flujo másico en que se apoya el caudal y el extremo inferior del rango barrido",
+ rDecArea:"Área de paso y coeficiente de descarga",
+ rWhyArea:"Convierte el flujo másico en caudal másico; la trayectoria de equilibrio no cambia",
+ rDecUp:"Estado aguas arriba",
+ rWhyUp:"Fija la entropía de la expansión y con ella toda la curva de flujo másico"},
+pl:{ckFlux:"Domknięcie strumienia masy",
+ ckFluxB:"G = sqrt(2(h₀ − h))/v przeliczone z entalpii i objętości właściwej podanych przez model przy ciśnieniu, w którym wyznaczany jest strumień masy, i porównane z podanym strumieniem masy. To własna definicja modelu, więc sprawdza arytmetykę, a nie fizykę.",
+ ckMax:"Krytyczny strumień masy wobec niezależnego skanu",
+ ckMaxB:"Narzędzie ogranicza maksimum G(p) na 241 punktach logarytmicznych i uściśla je złotym podziałem. Niezależny skan tego samego zakresu ciśnień na 2001 punktach oraz próbki po obu stronach podanego ciśnienia krytycznego nie mogą przekroczyć podanej wartości.",
+ ckIapws:"Wartości weryfikacyjne IAPWS SR1-86",
+ ckIapwsB:"Ciśnienie nasycenia oraz gęstości nasyconej cieczy i pary w trzech temperaturach weryfikacyjnych opublikowanych w SR1-86(1992), porównane z opublikowanymi liczbami. Kryterium to pół jednostki ostatniej drukowanej cyfry każdej liczby.",
+ ckBranch:"Ciągłość na progu flashingu",
+ ckBranchB:"Gałąź cieczy sprężonej i gałąź dwufazowa spotykają się przy ciśnieniu nasycenia dla temperatury przed zaworem. Strumień masy mierzy się o jedną miliardową po obu stronach tego ciśnienia; obie gałęzie mają tam tę samą granicę, więc skok byłby wadą przełączenia.",
+ ckSub:"Zapas podchłodzenia przed zaworem",
+ ckSubB:"Ciśnienie przed zaworem wobec ciśnienia nasycenia dla tej samej temperatury. Model zakłada na wlocie ciecz sprężoną, a narzędzie samo zgłasza ostrzeżenie, gdy zapas osiąga zero.",
+ ckRhoC:"Gęstości nasycenia w temperaturze krytycznej",
+ ckRhoCB:"Procedura właściwości ogranicza ciśnienie do jednej milionowej poniżej ciśnienia krytycznego, zanim wyznaczy temperaturę. Gęstości nasycenia zależą od pierwiastka sześciennego odległości od temperatury krytycznej, więc to ograniczenie widać w zwracanych tam gęstościach.",
+ ckExp:"Granica modelu wobec danych dysz Lin–Gruen–Quapp",
+ ckExpB:"Dziewięć opublikowanych prób krytycznego przepływu wody przez dysze, zapisanych w QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json. Porównanie przeniesiono z tego zapisu i nie jest tu przeliczane, ponieważ pomiarów nie da się odtworzyć z modelu.",
+ rFluxAt:"strumień masy przy",
+ rStateAt:"stan przy",
+ rIapwsPts:"ocenianych wartości przy 273,16 / 373,1243 / 647,096 K",
+ rScanRef:"skan 2001-punktowy i próbki lokalne",
+ rInterior:"maksimum wewnętrzne, uściślone",
+ rBoundary:"na krańcu skanu",
+ rOnset:"na progu flashingu",
+ rRecorded:"przeniesione z zapisanego porównania",
+ rOutside:"z dziewięciu punktów poza pasmem",
+ rWorst:"największe odchylenie",
+ rJump:"względny skok na przełączeniu",
+ rBracket:"uściślony przedział ciśnienia",
+ rPsat:"Ciśnienie nasycenia w temperaturze przed zaworem",
+ rSubc:"Zapas podchłodzenia",
+ rRatio:"Stosunek ciśnienia krytycznego do wlotowego",
+ rDT:"Spadek temperatury do punktu krytycznego",
+ rH:"Entalpia właściwa w punkcie krytycznym",
+ rRhoC:"Gęstość mieszaniny w punkcie krytycznym",
+ rPcrit:"Ciśnienie krytyczne ścieżki równowagowej",
+ rGcap:"Strumień masy w punkcie krytycznym",
+ rAeff:"Efektywne pole przepływu",
+ rDrop:"Spadek entalpii do przeciwciśnienia",
+ rUpRho:"Gęstość cieczy przed zaworem",
+ riskNonEqT:"Flashing nierównowagowy",
+ riskNonEq:"Opóźnienie nukleacji i poślizg faz są poza modelem. Wobec zapisanych danych dysz ścieżka równowagowa obejmuje od −65 % do +5 % mierzonego strumienia masy, dolny kraniec przy wlotach bliskich nasycenia i krótkich drogach przepływu.",
+ riskLiqT:"Nieściśliwa gałąź cieczy sprężonej",
+ riskLiq:"Powyżej ciśnienia nasycenia model przyjmuje gęstość cieczy dla temperatury przed zaworem i koryguje entalpię o (p − p_sat)/ρ′. Ściśliwość i zależność gęstości cieczy od ciśnienia są poza tą poprawką, a strumień masy na tej gałęzi niesie to przybliżenie.",
+ mNote:"Tylko woda. Właściwości nasycenia wg IAPWS SR1-86(1992). Jedna prędkość, jedna temperatura, bez opóźnienia nukleacji; gałąź cieczy pozostaje nieściśliwa.",
+ title:"Flashing w zaworze lub kryzie — strumień masy w równowadze jednorodnej",
+ summary:"Sprężona woda o {p0} bar i {T0} °C wypływa do {pb} bar przez przewężenie {A} mm² o współczynniku wypływu {Cd}. Ścieżka równowagowa niesie {G} kg/(m²·s) w punkcie rozstrzygającym, więc przewężenie przepuszcza {mdot} kg/s. Maksimum ścieżki wynosi {Gc} kg/(m²·s) przy {pc} bar.",
+ concPast:"Punkt przeciwciśnienia leży za maksimum krzywej równowagowej, więc natężenie przepływu opiera się na strumieniu przy przeciwciśnieniu, a wielkości stanu opisują maksimum. Oba podano wyżej osobno.",
+ concAt:"Punkt przeciwciśnienia pokrywa się z maksimum przeskanowanej krzywej, więc strumień przy przeciwciśnieniu i maksimum ścieżki to jedna liczba, a wielkości stanu należą do tego samego ciśnienia.",
+ system:"Woda dochodzi do przewężenia jako ciecz sprężona i rozpręża się przy stałej entropii. Dopóki ciśnienie pozostaje powyżej ciśnienia nasycenia dla temperatury przed zaworem, ciecz traktuje się jako nieściśliwą, a strumień masy wynika z relacji Bernoulliego. Poniżej woda odparowuje, równowagowy udział pary ustala objętość właściwą, a strumień masy przechodzi przez maksimum.",
+ figCap:"Równowagowy strumień masy i stopień suchości względem ciśnienia równowagi, od ciśnienia wlotowego do przeciwciśnienia. Strumień odczytuje się na osi lewej, stopień suchości na prawej.",
+ ckPlace:"Położenie punktu przeciwciśnienia na krzywej strumienia masy",
+ ckPlaceB:"Przeciwciśnienie wobec ciśnienia, przy którym przeskanowana krzywa osiąga maksimum. Narzędzie zapisuje przypadek jako ograniczony punktem krytycznym, gdy przeciwciśnienie jest równe temu ciśnieniu lub niższe.",
+ ckCap:"Ciśnienie, przy którym wzięto każdą podaną wielkość",
+ ckCapB:"Zapis liczy natężenie przepływu jako Cd·A·min[G(p_b), G_kryt]. Przeskanowane maksimum nigdy nie jest niższe od wartości przy przeciwciśnieniu, więc minimum to właśnie ta wartość, podczas gdy temperatura, stopień suchości, gęstość i entalpia są podane w maksimum. Stosunek obu strumieni masy pokazuje, jak daleko te dwa ciśnienia rozsuwają odpowiedź.",
+ rTeq:"Temperatura w punkcie krytycznym",
+ rMdot:"Natężenie przepływu przez przewężenie",
+ rCapNote:"Obie wielkości wzięte przy",rCapCrit:"Maksimum krzywej",rCapBack:"Wartość przy przeciwciśnieniu",
+ rPast:"za maksimum",
+ rAt:"w maksimum",
+ rGratio:"Stosunek strumienia krytycznego do przy przeciwciśnieniu",
+ rQvB:"Strumień objętości przy przeciwciśnieniu",
+ flowUp:"Sprężona woda przed zaworem",
+ flowRestr:"Zawór lub kryza",
+ flowDown:"Wypływ przy przeciwciśnieniu",
+ rDecBack:"Przeciwciśnienie",
+ rWhyBack:"Ustala strumień masy, na którym opiera się przepływ, oraz dolny kraniec zakresu skanu",
+ rDecArea:"Pole przepływu i współczynnik wypływu",
+ rWhyArea:"Zamienia strumień masy na natężenie przepływu; ścieżka równowagowa pozostaje ta sama",
+ rDecUp:"Stan przed zaworem",
+ rWhyUp:"Ustala entropię rozprężania, a wraz z nią całą krzywą strumienia masy"}
+};
+var DGC_AXIS={
+ peq:{en:"Equilibrium pressure",uk:"Рівноважний тиск",de:"Gleichgewichtsdruck",nl:"Evenwichtsdruk",fr:"Pression d’équilibre",es:"Presión de equilibrio",pl:"Ciśnienie równowagi"},
+ flux:{en:"Mass flux",uk:"Масовий потік",de:"Massenfluss",nl:"Massaflux",fr:"Flux massique",es:"Flujo másico",pl:"Strumień masy"},
+ quality:{en:"Equilibrium vapour quality",uk:"Рівноважний ступінь сухості",de:"Gleichgewichts-Dampfgehalt",nl:"Evenwichtskwaliteit",fr:"Titre de vapeur d’équilibre",es:"Calidad de vapor de equilibrio",pl:"Równowagowy stopień suchości"}
+};
+function dgcLang(){try{return (window.Diagram&&Diagram.lang&&Diagram.lang())||'en';}catch(e){return 'en';}}
+function dgcRt(k){var l=dgcLang();return (DGC_RT[l]&&DGC_RT[l][k])||DGC_RT.en[k]||k;}
+function dgcLabel(k){var l=dgcLang();return (DGC_AXIS[k]&&(DGC_AXIS[k][l]||DGC_AXIS[k].en))||k;}
+var DGC_LOC={en:'en-GB',uk:'uk-UA',de:'de-DE',nl:'nl-BE',fr:'fr-BE',es:'es-ES',pl:'pl-PL'};
+function dgcNum(v,d){if(!isFinite(v))return '\u2014';
+ try{return Number(v).toLocaleString(DGC_LOC[dgcLang()]||'en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});}
+ catch(e){return Number(v).toFixed(d);}}
+/* Exponent form in the language of the document: toExponential() writes an
+   English decimal point next to a table typeset with commas. */
+function dgcExp(v,d){if(v==null||!isFinite(v))return '\u2014';
+ if(Number(v)===0)return dgcNum(0,0);
+ var e=Number(v).toExponential(d),m=e.split('e'),s=dgcNum(Number(m[0]),d);
+ return s+'\u00b710'+String(Number(m[1])).replace(/-/g,'\u207b').replace(/[0-9]/g,function(c){return '\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079'[+c];});}
+
+/* Verification computed live from the current state.
+   The water properties, the flash path and the critical-point search are the
+   tool's own functions; each check below re-expresses one of them through a
+   relation the tool already states, or against a value published in the
+   standard the tool cites. Nothing here fits or corrects the model. */
+
+/* IAPWS SR1-86(1992), values for computer-program verification. `half` is half
+   a unit in the last digit each figure is printed to, which is the acceptance
+   the published benchmark record names. At the critical temperature only the
+   saturation pressure is graded; the densities are reported by dgcCriticalRho
+   below, because the tool's pressure inverse does not evaluate at tau = 0. */
+var DGC_SR1=[
+ {id:'iapws-saturation-point-273-16-k',  T:273.16,
+  ps:611.657,  hPs:5e-4, rhoL:999.789, hRhoL:5e-4, rhoG:4.85426e-3, hRhoG:5e-9, grade:3},
+ {id:'iapws-saturation-point-373-1243-k',T:373.1243,
+  ps:101325,   hPs:0.5,  rhoL:958.365, hRhoL:5e-4, rhoG:0.597586,   hRhoG:5e-7, grade:3},
+ {id:'iapws-critical-point-647-096-k',   T:647.096,
+  ps:22.064e6, hPs:500,  rhoL:322,     hRhoL:0.5,  rhoG:322,        hRhoG:0.5,  grade:1}
+];
+function dgcIapws(k){
+  var r=DGC_SR1[k], ps=waterPsat(r.T), sat=waterSat(ps);
+  var items=[
+    {q:'p_sat',ref:r.ps,  half:r.hPs,  got:ps,       unit:'Pa',    dp:6},
+    {q:'rho_f',ref:r.rhoL,half:r.hRhoL,got:sat.rhoL, unit:'kg/m3', dp:6},
+    {q:'rho_g',ref:r.rhoG,half:r.hRhoG,got:sat.rhoG, unit:'kg/m3', dp:9}
+  ];
+  items.forEach(function(it,i){
+    it.dev=Math.abs(it.got-it.ref);
+    it.ratio=it.dev/it.half;
+    it.graded=i<r.grade;
+  });
+  var g=items.filter(function(it){return it.graded;}), worst=g[0];
+  g.forEach(function(it){if(it.ratio>worst.ratio)worst=it;});
+  return {T:r.T,id:r.id,items:items,worst:worst,pass:worst.ratio<=1};
+}
+/* Worst of the seven graded SR1-86 figures, so one number can carry the
+   verdict for the property basis of every case. */
+function dgcIapwsWorst(){
+  var w=null,n=0;
+  for(var k=0;k<DGC_SR1.length;k++){
+    var r=dgcIapws(k);
+    n+=r.items.filter(function(it){return it.graded;}).length;
+    if(!w||r.worst.ratio>w.ratio){w=r.worst;w.T=r.T;}
+  }
+  return {worst:w,graded:n};
+}
+/* What the property routine returns at the critical point. waterTsat clamps
+   pressure to one part in 1e6 below p_c before inverting, and the saturated
+   densities follow tau^(1/3), so the clamp is visible here. */
+function dgcCriticalRho(){
+  var sat=waterSat(W_PC), tau=1-sat.T/W_TC;
+  return {rhoL:sat.rhoL,rhoG:sat.rhoG,rhoC:W_RHOC,T:sat.T,tau:tau,
+          relL:(sat.rhoL-W_RHOC)/W_RHOC,relG:(sat.rhoG-W_RHOC)/W_RHOC};
+}
+/* The compressed-liquid branch as the tool states it: G = sqrt(2 rho' (p0-p)).
+   Probed strictly inside the branch, between flash onset and upstream. */
+function dgcLiquidBranch(s){
+  var ps0=waterPsat(s.T0);
+  if(!(s.p0>ps0))return null;
+  var rho0=waterSat(ps0).rhoL,out=[],worst=null;
+  for(var i=1;i<=5;i++){
+    var p=ps0+(s.p0-ps0)*(1-i/6),z=hemAtPressure(s.p0,s.T0,p),
+        gRef=Math.sqrt(2*rho0*(s.p0-p)),
+        rel=gRef>0?Math.abs(z.G-gRef)/gRef:0;
+    var row={p:p,got:z.G,ref:gRef,rel:rel,x:z.x,dT:z.T-s.T0};
+    out.push(row); if(!worst||rel>worst.rel)worst=row;
+  }
+  return {rho0:rho0,psat:ps0,probes:out,worst:worst};
+}
+/* Flash onset. Both branches have the same limit at p_sat(T0), so the step
+   measured across the switch is a property of the switch, not of the water. */
+function dgcOnsetStep(s){
+  var ps0=waterPsat(s.T0);
+  if(!(s.p0>ps0))return null;
+  var e=1e-9,a=hemAtPressure(s.p0,s.T0,ps0*(1+e)),b=hemAtPressure(s.p0,s.T0,ps0*(1-e));
+  return {p:ps0,gLiq:a.G,gTwo:b.G,rel:a.G>0?Math.abs(a.G-b.G)/a.G:null,x:b.x};
+}
+/* The critical point of the equilibrium path, probed independently. The tool
+   brackets the maximum of G(p) on 241 logarithmic points and refines it by
+   golden section; this rescans the same range on 2001 points and adds probes
+   either side of the reported pressure. A maximiser that landed correctly is
+   not beaten by any of them. */
+var DGC_GOLD=(Math.sqrt(5)-1)/2;
+function dgcCritProbe(s,pmin){
+  var lo=Math.max(Math.min(pmin,s.p0*0.999999),611.657),
+      c=hemCritical(s.p0,s.T0,Math.min(pmin,s.p0*0.999999)),
+      l0=Math.log(lo),l1=Math.log(s.p0),n=2000,best=-1,bp=0,i;
+  for(i=0;i<=n;i++){
+    var p=Math.exp(l1+(l0-l1)*i/n),g=hemAtPressure(s.p0,s.T0,p).G;
+    if(g>best){best=g;bp=p;}
+  }
+  var d=[1e-8,1e-6,1e-4,1e-3,1e-2];
+  for(i=0;i<d.length;i++){
+    var f=[1-d[i],1+d[i]],j;
+    for(j=0;j<2;j++){
+      var q=c.best.p*f[j];
+      if(q>=lo&&q<=s.p0){
+        var gq=hemAtPressure(s.p0,s.T0,q).G;
+        if(gq>best){best=gq;bp=q;}
+      }
+    }
+  }
+  var ps0=waterPsat(s.T0),
+      bracket=2*(l1-l0)/240*Math.pow(DGC_GOLD,48),
+      atLo=c.best.p<=lo*(1+1e-9),
+      atOnset=Math.abs(c.best.p-ps0)<=ps0*1e-6;
+  return {G:c.best.G,p:c.best.p,x:c.best.x,rho:c.best.rho,h:c.best.h,
+          probeG:best,probeP:bp,rel:(c.best.G-best)/c.best.G,
+          bracket:bracket,atLo:atLo,atOnset:atOnset,
+          place:atLo?'rBoundary':(atOnset?'rOnset':'rInterior')};
+}
+/* Nine published water critical-flow nozzle tests. The comparison is carried
+   in the benchmark record; it cannot be recomputed here, because the model
+   does not produce measurements. Ids, notes and verdicts are those of the
+   record. */
+var DGC_LGQ_PASS=4, DGC_LGQ_N=9;
+var DGC_LGQ_SPAN='-65 % to +5 %';
+var DGC_LGQ_SRC='QA-HEM-CRITICAL-FLOW-LIN-GRUEN-QUAPP-2026-09-04.json';
+function dgcLgqCases(){
+  var out=[],i;
+  for(i=1;i<=DGC_LGQ_N;i++){
+    out.push({id:'lin-gruen-quapp-nozzle-point-'+i,
+      note:'Lin-Gruen-Quapp nozzle point '+i,
+      pass:i<=DGC_LGQ_PASS});
+  }
+  return out;
+}
+/* One row per check: what was measured, what it was measured against, the
+   difference and the verdict. No row reports a verdict without its numbers. */
+function dgcVerify(s){
+  var out=[],ps0=waterPsat(s.T0),
+      pmin=Math.min(s.pb,s.p0*0.999999),
+      cp=dgcCritProbe(s,pmin),
+      at=hemAtPressure(s.p0,s.T0,pmin),
+      h0=hemAtPressure(s.p0,s.T0,s.p0).h,
+      /* solve() reports the maximum of the curve when the restriction is
+         choked and the back-pressure point when it is not; flux and state
+         come from the same point either way. */
+      choked=(s.pb<=cp.p),
+      gRep=choked?cp.G:at.G,
+      stG=choked?cp:at,
+      stRep=stG,
+      ratio=gRep>0?cp.G/gRep:null;
+
+  /* 1. Mass-flux closure at the pressure the reported flux is evaluated at. */
+  var gClosed=Math.sqrt(2*Math.max(0,h0-stG.h))*stG.rho,
+      relG=gRep>0?Math.abs(gClosed-gRep)/gRep:0;
+  out.push({id:'mass-flux-closure',key:'ckFlux',graded:true,
+    got:gClosed,ref:gRep,rel:relG,tol:1e-12,unit:'kg/(m2 s)',dp:4,
+    pass:relG<=1e-12,extra:{h0:h0,h:stG.h,rho:stG.rho,p:stG.p}});
+
+  /* 2. Critical point against an independent scan of the same range. */
+  out.push({id:'critical-point-maximality',key:'ckMax',graded:true,
+    got:cp.G,ref:cp.probeG,rel:cp.rel,tol:1e-12,unit:'kg/(m2 s)',dp:4,
+    pass:cp.rel>=-1e-12,extra:{p:cp.p,probeP:cp.probeP,bracket:cp.bracket,place:cp.place}});
+
+  /* 3. Property basis: the worst of the seven graded SR1-86 figures. */
+  var iw=dgcIapwsWorst();
+  out.push({id:'iapws-sr1-86-verification',key:'ckIapws',graded:true,
+    got:iw.worst.got,ref:iw.worst.ref,abs:iw.worst.dev,rel:iw.worst.ratio,
+    tol:iw.worst.half,unit:iw.worst.unit,dp:iw.worst.dp,
+    pass:iw.worst.ratio<=1,extra:{q:iw.worst.q,T:iw.worst.T,graded:iw.graded}});
+
+  /* 4. Flash onset. The step across the branch switch has no acceptance bound
+        that the tool or the standard supplies, so it is reported, not graded. */
+  var os=dgcOnsetStep(s);
+  out.push({id:'flash-onset-continuity',key:'ckBranch',graded:false,status:'info',
+    got:os?os.rel:null,ref:0,unit:'-',dp:3,
+    extra:os?{p:os.p,gLiq:os.gLiq,gTwo:os.gTwo}:null});
+
+  /* 5. Where back pressure sits on the curve. A state of the case, not a bound. */
+  out.push({id:'back-pressure-placement',key:'ckPlace',graded:false,status:'info',
+    got:s.pb/cp.p,ref:1,unit:'-',dp:4,word:(s.pb<cp.p*(1-1e-9))?'rPast':'rAt',
+    extra:{pb:s.pb,pcrit:cp.p,place:cp.place}});
+
+  /* 6. Flux and state must come from the same point of the curve: the maximum
+        when the restriction is choked, the back-pressure point when it is not.
+        The criterion is the model's own branch selection, so it holds to
+        floating point rather than to a chosen tolerance. */
+  var gExpect=choked?cp.G:at.G;
+  var relG=gExpect!==0?Math.abs(gRep-gExpect)/Math.abs(gExpect):0;
+  out.push({id:'reported-figure-pressures',key:'ckCap',graded:true,
+    got:gRep,ref:gExpect,rel:relG,tol:1e-12,unit:'kg/(m²·s)',dp:4,
+    pass:relG<=1e-12,status:relG<=1e-12?'pass':'attention',
+    extra:{pFlux:stG.p,pState:stRep.p,G:gRep,Gcrit:cp.G,ratio:ratio}});
+
+  /* 7. Inlet state against the model's own expectation of compressed liquid. */
+  var marg=s.p0-ps0;
+  out.push({id:'upstream-subcooling-margin',key:'ckSub',graded:false,
+    status:marg>0?'info':'attention',
+    got:marg,ref:0,unit:'Pa',dp:0,extra:{psat:ps0,T:s.T0}});
+
+  /* 8. What the property routine returns at the critical temperature. */
+  var cr=dgcCriticalRho();
+  out.push({id:'critical-point-saturated-densities',key:'ckRhoC',graded:false,
+    status:'attention',got:cr.rhoL,ref:cr.rhoC,rel:cr.relL,unit:'kg/m3',dp:4,
+    extra:{rhoG:cr.rhoG,relG:cr.relG,T:cr.T,tau:cr.tau}});
+
+  /* 9. The model envelope, carried from the recorded experimental record. */
+  out.push({id:'lin-gruen-quapp-envelope',key:'ckExp',graded:false,
+    status:'attention',got:DGC_LGQ_N-DGC_LGQ_PASS,ref:DGC_LGQ_N,unit:'-',dp:0,
+    provenance:'recorded',extra:{span:DGC_LGQ_SPAN,src:DGC_LGQ_SRC}});
+  return out;
+}
+
+/* The report is a separate document without the tool's stylesheet, so the
+   figure is drawn into its own canvas at print resolution rather than scraped
+   off the screen. Without this the engine falls back to the on-screen stage,
+   which carries no caption and no axis titles. */
+function dgcFigureCanvas(w,h,scale){
+  var c=document.createElement('canvas');
+  c.width=Math.round(w*scale); c.height=Math.round(h*scale);
+  var ctx=c.getContext('2d'); ctx.scale(scale,scale);
+  return {canvas:c,ctx:ctx};
+}
+/* The abscissa is a pressure, not a time: the tool sweeps the equilibrium path
+   from upstream pressure down to the lower end of the scan. Quality is carried
+   on the same pressures as the mass flux so the two curves cannot drift apart,
+   and it is a different unit, so it takes the right axis. */
+function dgcPlotSpec(){
+  if(!last||!last.series||!last.series[0]||!last.series[0].x||!last.series[0].x.length)return null;
+  var xs=last.series[0].x,ys=last.series[0].y,q=[],i;
+  for(i=0;i<xs.length;i++)q.push(hemAtPressure(state.p0,state.T0,xs[i]*1e5).x);
+  return {x:{label:dgcLabel('peq'),unit:'bar'},
+    series:[{x:xs,y:ys,label:dgcLabel('flux'),unit:'kg/(m²·s)',color:'#1f6feb'},
+            {x:xs,y:q, label:dgcLabel('quality'),unit:'',color:'#d1651a'}]};
+}
+function dgcReportFigure(ctx){
+  var spec=dgcPlotSpec(); if(!spec)return null;
+  var f=dgcFigureCanvas(720,300,2);
+  dgcPlot(f.ctx,720,300,spec,{css:{bg:'#ffffff',muted:'#5a6570',line:'#c9d0d8',text:'#17202a',
+    font:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'},fontScale:1});
+  return ctx.figure(f.canvas,{caption:dgcRt('figCap'),alt:dgcRt('figCap')});
+}
+function dgcReportProfile(rec,ctx){
+  if(!rec||!last)return null;
+  var i=rec.inputs||{},o=rec.outputs||{},u=rec.units||{};
+  var row=function(label,value,unit,note){return {label:label,value:value,unit:unit||'',note:note||''};};
+  var n=dgcNum;
+
+  var ratio=o.G>0?o.Gcrit/o.G:null;
+  var past=ratio!=null&&ratio>1+1e-9;
+  var summary=dgcRt('summary')
+    .replace('{p0}',n(i.p0/1e5,2)).replace('{T0}',n(i.T0-273.15,1))
+    .replace('{pb}',n(i.pb/1e5,2)).replace('{A}',n(i.A*1e6,2)).replace('{Cd}',n(i.Cd,2))
+    .replace('{G}',n(o.G,1)).replace('{mdot}',n(o.mdot,4))
+    .replace('{Gc}',n(o.Gcrit,1)).replace('{pc}',n(o.p_crit/1e5,3));
+
+  /* Values are shown in the units an engineer reads them in. The record keeps SI. */
+  var tiles=[
+    row(dgcRt('rMdot'),n(o.mdot,4),'kg/s'),
+    row(dgcLabel('flux'),n(o.G,1),'kg/(m²·s)'),
+    row(dgcRt('rGcap'),n(o.Gcrit,1),'kg/(m²·s)'),
+    row(dgcRt('rPcrit'),n(o.p_crit/1e5,3),'bar'),
+    row(dgcLabel('quality'),n(o.x,4),'-'),
+    row(dgcRt('rTeq'),n(o.T_eq-273.15,1),'°C',n(o.T_eq,2)+' K')
+  ];
+
+  var ps0=waterPsat(i.T0),sat0=waterSat(ps0),
+      pmin=Math.min(i.pb,i.p0*0.999999),
+      atB=hemAtPressure(i.p0,i.T0,pmin),
+      h0=hemAtPressure(i.p0,i.T0,i.p0).h;
+  var results=[
+    row(dgcRt('rSubc'),n((i.p0-ps0)/1e5,3),'bar'),
+    row(dgcRt('rRatio'),n(o.p_crit/i.p0,4),'-'),
+    row(dgcRt('rGratio'),ratio==null?'—':n(ratio,3),'-'),
+    row(dgcRt('rRhoC'),n(o.rho_eq,2),'kg/m³'),
+    row(dgcRt('rH'),n(o.h_eq/1000,2),'kJ/kg'),
+    row(dgcRt('rDrop'),n((h0-atB.h)/1000,2),'kJ/kg'),
+    row(dgcRt('rQvB'),atB.rho>0?n(o.mdot/atB.rho,5):'—','m³/s'),
+    row(dgcRt('rAeff'),n(i.A*i.Cd*1e6,3),'mm²')
+  ];
+
+  /* Symbols rather than the record's machine keys: a report never prints
+     rho_g in a table heading. */
+  var SYM={p_sat:'p_s',rho_f:'\u03c1\u2032',rho_g:'\u03c1\u2033'};
+  var UN=function(x){return String(x).replace('kg/m3','kg/m\u00b3').replace('kg/(m2 s)','kg/(m\u00b2\u00b7s)');};
+  var v=dgcVerify(state);
+  var checks=v.map(function(c){
+    var st=c.status||(c.pass?'pass':'attention'),actual,criterion,note='';
+    if(c.key==='ckFlux'){
+      actual='|\u0394G| / G = '+dgcExp(c.rel,2);
+      criterion='\u2264 '+dgcExp(c.tol,0);
+      note=dgcRt('rFluxAt')+' '+n(c.extra.p/1e5,3)+' bar: '+n(c.got,4)+' '+UN(c.unit);
+    } else if(c.key==='ckMax'){
+      actual=n(c.got,4)+' '+UN(c.unit);
+      criterion='\u2265 '+n(c.ref,4)+' '+UN(c.unit)+' ('+dgcRt('rScanRef')+')';
+      note=dgcRt('rBracket')+' '+dgcExp(c.extra.bracket,2)+' \u00b7 '+dgcRt(c.extra.place);
+    } else if(c.key==='ckIapws'){
+      actual='|\u0394| = '+dgcExp(c.abs,2)+' '+UN(c.unit)+' ('+(SYM[c.extra.q]||c.extra.q)+', '+n(c.extra.T,4)+' K)';
+      criterion='\u2264 '+dgcExp(c.tol,1)+' '+UN(c.unit);
+      note=c.extra.graded+' '+dgcRt('rIapwsPts');
+    } else if(c.key==='ckBranch'){
+      actual=c.got==null?'\u2014':dgcRt('rJump')+' '+dgcExp(c.got,2);
+      note=c.extra?n(c.extra.p/1e5,4)+' bar: '+n(c.extra.gLiq,2)+' / '+n(c.extra.gTwo,2)+' kg/(m\u00b2\u00b7s)':'';
+    } else if(c.key==='ckPlace'){
+      actual='p_b / p_crit = '+n(c.got,4)+' ('+dgcRt(c.word)+')';
+      note=dgcRt(c.extra.place);
+    } else if(c.key==='ckCap'){
+      actual='G = '+n(c.got,4)+' kg/(m\u00b2\u00b7s)';
+      criterion=dgcRt(c.extra&&c.extra.ratio!=null&&c.extra.pFlux===c.extra.pState?'rCapCrit':'rCapBack')
+        +' = '+n(c.ref,4)+' kg/(m\u00b2\u00b7s)';
+      note=dgcRt('rCapNote')+' '+n(c.extra.pFlux/1e5,3)+' bar';
+    } else if(c.key==='ckSub'){
+      actual='p\u2080 \u2212 p_sat(T\u2080) = '+n(c.got/1e5,3)+' bar';
+      criterion='> 0 bar';
+    } else if(c.key==='ckRhoC'){
+      actual='\u03c1\u2032 = '+n(c.got,4)+' kg/m\u00b3, \u03c1\u2033 = '+n(c.extra.rhoG,4)+' kg/m\u00b3';
+      criterion='\u03c1_c = '+n(c.ref,0)+' kg/m\u00b3';
+      note=n(100*c.rel,3)+' % / '+n(100*c.extra.relG,3)+' % \u00b7 \u03c4 = '+dgcExp(c.extra.tau,2);
+    } else {
+      actual=n(c.got,0)+' '+dgcRt('rOutside');
+      criterion='\u00b12\u03c3';
+      note=c.extra.span+' \u00b7 '+dgcRt('rRecorded');
+    }
+    var row={status:st,title:dgcRt(c.key),actual:actual,basis:dgcRt(c.key+'B'),detail:note};
+    if(criterion)row.criterion=criterion;
+    return row;
+  });
+  (rec.warnings||[]).forEach(function(w){checks.push({status:'attention',title:dgcRt('ckSub'),detail:w});});
+
+  /* The engine prints decisions as selection / rationale / governing data, so
+     the rationale goes in text and the figure that drives it in driver. */
+  var decisions=[
+    {label:dgcRt('rDecBack'),text:dgcRt('rWhyBack'),driver:n(i.pb/1e5,3)+' bar'},
+    {label:dgcRt('rDecArea'),text:dgcRt('rWhyArea'),driver:n(i.A*1e6,2)+' mm² · Cd '+n(i.Cd,2)},
+    {label:dgcRt('rDecUp'),text:dgcRt('rWhyUp'),driver:n(i.p0/1e5,2)+' bar / '+n(i.T0-273.15,1)+' °C'}
+  ];
+
+  var gUp='1 · '+dgcRt('flowUp'),gR='2 · '+dgcRt('flowRestr');
+  var inputs=[
+    {label:ctx.label('p0',u.p0),value:n(i.p0/1e5,3),unit:'bar',group:gUp},
+    {label:ctx.label('T0',u.T0),value:n(i.T0-273.15,2),unit:'°C',group:gUp},
+    {label:ctx.label('pb',u.pb),value:n(i.pb/1e5,3),unit:'bar',group:gR},
+    {label:ctx.label('A',u.A),value:n(i.A*1e6,3),unit:'mm²',group:gR},
+    {label:ctx.label('Cd',u.Cd),value:n(i.Cd,3),unit:'-',group:gR}
+  ];
+
+  return {
+    title:dgcRt('title'),
+    executive:{text:[summary],results:tiles,
+      conclusion:past?dgcRt('concPast'):dgcRt('concAt')},
+    system:{text:dgcRt('system'),
+      flow:[{label:dgcRt('flowUp'),detail:n(i.p0/1e5,2)+' bar / '+n(i.T0-273.15,1)+' °C'},
+            {label:dgcRt('flowRestr'),detail:n(i.A*1e6,2)+' mm² · Cd '+n(i.Cd,2)},
+            {label:dgcRt('flowDown'),detail:n(i.pb/1e5,2)+' bar'}]},
+    results:results,
+    decisions:decisions,
+    checks:checks,
+    figures:[dgcReportFigure(ctx)].filter(Boolean),
+    risks:[{status:'attention',title:dgcRt('riskNonEqT'),detail:dgcRt('riskNonEq')},
+           {status:'attention',title:dgcRt('riskLiqT'),detail:dgcRt('riskLiq')}],
+    method:{
+      equations:(rec.model&&rec.model.equations)||[],
+      ranges:(rec.model&&rec.model.ranges)||[],
+      notes:[dgcRt('mNote')]
+    },
+    inputs:inputs
+  };
+}
+
+/* Cases the published benchmark covers. They live here rather than in a
+   separate harness so the artifact is defined by the tool it describes. */
+var DGC_BENCH_STATE={p0:2000000.0,T0:453.15,pb:200000.0,A:1e-4,Cd:0.8};
+var DGC_BENCH_NOTE='Shipped default: water at 20 bar / 180 °C to 2 bar through 100 mm², Cd 0.8';
+
+function dgcCmp(o){
+  return {check:o.check,
+    got:(o.got===undefined?null:o.got),
+    ref:(o.ref===undefined?null:o.ref),
+    abs:(o.abs===undefined?null:o.abs),
+    rel:(o.rel===undefined?null:o.rel),
+    tol:(o.tol===undefined?null:o.tol),
+    unit:o.unit||'-',
+    criterion:o.criterion||null,
+    extra:o.extra||null,
+    graded:!!o.graded,
+    provenance:o.provenance||'recomputed in page',
+    status:o.status||(o.ok?'pass':'fail'),
+    ok:o.graded?!!o.ok:null};
+}
+/* Rebuilds the published benchmark record from this page. Open the tool and
+   call window.__dgcBenchmark() to reproduce benchmarks/flashing_valve.json. */
+function dgcBenchmark(){
+  var s=DGC_BENCH_STATE,cases=[],total=0,passed=0;
+  var pmin=Math.min(s.pb,s.p0*0.999999);
+  var lb=dgcLiquidBranch(s),os=dgcOnsetStep(s),cp=dgcCritProbe(s,pmin);
+
+  /* 1. The compressed-liquid branch, against the relation the tool states for
+        it in record.model.equations. The branch is algebra over one density,
+        so the acceptance is floating-point closure, not a physical band. */
+  var lbOk=lb&&lb.worst.rel<=1e-12;
+  var xMax=0,dTMax=0;
+  if(lb)lb.probes.forEach(function(r){xMax=Math.max(xMax,Math.abs(r.x));dTMax=Math.max(dTMax,Math.abs(r.dT));});
+  cases.push({id:'compressed-liquid-bernoulli-branch',
+    note:'compressed-liquid Bernoulli branch',
+    inputs:s,reference_provenance:'recomputed in page',
+    cmp:[
+      dgcCmp({check:'bernoulli-identity-on-the-liquid-branch',graded:true,ok:lbOk,
+        got:lb?lb.worst.got:null,ref:lb?lb.worst.ref:null,rel:lb?lb.worst.rel:null,
+        tol:1e-12,unit:'kg/(m2 s)',
+        criterion:'G = sqrt(2 rho_f (p0 - p)) as stated in record.model.equations; agreement to 1e-12 relative',
+        extra:lb?{rho_f:lb.rho0,p_sat_T0:lb.psat,probes:lb.probes.map(function(r){
+          return {p:r.p,got:r.got,ref:r.ref,rel:r.rel};})}:null}),
+      dgcCmp({check:'liquid-branch-state',graded:false,status:'info',
+        got:xMax,ref:0,unit:'-',
+        criterion:'the liquid branch returns quality 0 and the upstream temperature',
+        extra:{max_abs_quality:xMax,max_abs_temperature_offset_K:dTMax}}),
+      dgcCmp({check:'flash-onset-continuity',graded:false,status:'info',
+        got:os?os.rel:null,ref:0,unit:'-',
+        criterion:'reported; neither the tool nor SR1-86 supplies an acceptance bound for the step across the branch switch',
+        extra:os?{p_sat_T0:os.p,G_liquid_side:os.gLiq,G_two_phase_side:os.gTwo,offset:1e-9}:null}),
+      dgcCmp({check:'critical-point-maximality',graded:false,status:'info',
+        got:cp.G,ref:cp.probeG,rel:cp.rel,unit:'kg/(m2 s)',
+        criterion:'reported here; the graded form of this check is published in benchmarks/two_phase_critical_flow.json, which exercises the same HEM core',
+        extra:{p_crit:cp.p,probe_p:cp.probeP,log_pressure_bracket:cp.bracket,placement:cp.place}})
+    ]});
+
+  /* 2-4. IAPWS SR1-86(1992) verification values. */
+  for(var k=0;k<DGC_SR1.length;k++){
+    var r=dgcIapws(k),cmp=[];
+    cmp.push(dgcCmp({check:'sr1-86-verification-values',graded:true,ok:r.pass,
+      got:r.worst.got,ref:r.worst.ref,abs:r.worst.dev,rel:r.worst.ratio,tol:r.worst.half,
+      unit:r.worst.unit,
+      criterion:'worst graded quantity within half a unit in the last digit the SR1-86 table prints',
+      extra:{T:r.T,worst_quantity:r.worst.q,
+        quantities:r.items.map(function(it){
+          return {quantity:it.q,got:it.got,ref:it.ref,deviation:it.dev,
+                  half_unit:it.half,ratio:it.ratio,graded:it.graded};})}}));
+    if(k===2){
+      var cr=dgcCriticalRho();
+      cmp.push(dgcCmp({check:'saturated-densities-at-the-critical-temperature',
+        graded:false,status:'attention',
+        got:cr.rhoL,ref:cr.rhoC,rel:cr.relL,unit:'kg/m3',
+        criterion:'rho_f = rho_g = rho_c = 322 kg/m3 at T_c; the tool clamps pressure to p_c(1 - 1e-6) before the temperature inverse, so it does not evaluate at tau = 0 and the published value is not a bound on what it returns there',
+        extra:{rho_g:cr.rhoG,rho_g_relative:cr.relG,T_returned:cr.T,tau:cr.tau}}));
+    }
+    cases.push({id:r.id,note:'IAPWS saturation point '+r.T+' K',
+      inputs:{T:r.T},reference_provenance:'recomputed in page',cmp:cmp});
+  }
+
+  /* 5-13. The recorded experimental comparison. The measurements are external
+     and cannot be produced from the model, so the ids, notes and verdicts of
+     the QA record are carried forward unchanged and marked as recorded. */
+  dgcLgqCases().forEach(function(c){
+    cases.push({id:c.id,note:c.note,inputs:null,reference_provenance:'recorded',
+      cmp:[dgcCmp({check:'hem-mass-flux-against-measurement',graded:true,ok:c.pass,
+        got:null,ref:null,tol:null,unit:'kg/(m2 s)',provenance:'recorded',
+        status:c.pass?'pass':'fail',
+        criterion:'HEM mass flux within +/-2 sigma of the reported experimental uncertainty',
+        extra:{source:DGC_LGQ_SRC,
+          recorded_span_over_the_nine_points:DGC_LGQ_SPAN,
+          recomputed_in_page:false}})]});
+  });
+
+  cases.forEach(function(c){
+    c.pass=c.cmp.every(function(x){return !x.graded||x.ok;});
+    c.cmp.forEach(function(x){if(x.graded){total++;if(x.ok)passed++;}});
+  });
+
+  var rev='';
+  try{rev=JSON.parse(document.getElementById('diagram-tool-manifest').textContent).manifest_revision;}catch(e){}
+  var iw=dgcIapwsWorst(),crr=dgcCriticalRho();
+  var ex=function(x,n){return x==null||!isFinite(x)?'-':Number(x).toExponential(n);};
+  var pc=function(x,n){return x==null||!isFinite(x)?'-':(x*100).toFixed(n)+' %';};
+  return {
+    schema:'tools.petrov.re/benchmark/v1',
+    tool:'flashing-valve-orifice',file:'flashing_valve.html',manifest_revision:rev,build:rev,
+    reference:'IAPWS SR1-86(1992) saturation-property verification values, the compressed-liquid Bernoulli relation the tool states for its own liquid branch, and the recorded Lin-Gruen-Quapp water-nozzle comparison of the HEM mass flux. The first two are recomputed in the page; the third is carried from its QA record.',
+    reference_citations:[
+      'IAPWS, Revised Supplementary Release on Saturation Properties of Ordinary Water Substance, SR1-86(1992), values for computer-program verification.',
+      'Lin, Gruen & Quapp water critical-flow nozzle data as recorded in '+DGC_LGQ_SRC+'.',
+      'Compressed-liquid branch relation G = sqrt(2 rho_f (p0 - p)) as stated in record.model.equations of flashing_valve.html.'],
+    reference_provenance:'mixed',
+    provenance_note:'Recomputed in page, except the nine Lin-Gruen-Quapp cases, which are recorded. This record is exported by window.__dgcBenchmark() on the page itself; no external driver exists for it, and the recorded cases are carried by the page unchanged.',
+    tolerance:'SR1-86 figures within half a unit in the last digit the published table prints; the compressed-liquid branch to 1e-12 relative; experimental points against +/-2 sigma of the reported uncertainty. Measured on this build: worst SR1-86 deviation '+ex(iw.worst.dev,3)+' '+iw.worst.unit+' against an allowed '+ex(iw.worst.half,3)+' '+iw.worst.unit+' on '+iw.worst.q+' at '+iw.worst.T+' K; liquid-branch closure '+ex(lb&&lb.worst.rel,3)+' relative.',
+    /* Stamped with the revision the record describes rather than the clock,
+       so calling __dgcBenchmark() twice on the same build gives the same file. */
+    run_at:(String(rev).split('.')[0]||'2026-09-11')+'T00:00:00Z',
+    total:total,passed:passed,failed:total-passed,flagged:0,page_errors:[],
+    grading:'total counts checks that carry an acceptance criterion: one per case. The recomputed cases are graded on figures this page produces. The nine experimental cases carry the verdict of the QA record named above and are not recomputed here; they are graded because that record grades them, and their provenance is marked on every row. Items reporting the state of a solved case rather than a bound are recorded with their numbers and excluded from the count.',
+    cases:cases,
+    model_envelope:'The HEM mass flux spans '+DGC_LGQ_SPAN+' of the measured mass flux across the nine recorded nozzle points. Points 1 to 4 fall inside the reported +/-2 sigma band and points 5 to 9 fall outside it. No correction was fitted to close that gap, so the five failures stand as the edge of the model.',
+    not_benchmarked:[
+      'Nucleation delay, metastable flashing and phase slip; the model is homogeneous and at equilibrium throughout.',
+      'Discharge-geometry effects beyond the user-supplied discharge coefficient.',
+      'Real-fluid compressed-liquid behaviour; the liquid branch carries one density and an incompressible pressure correction.',
+      'Browser/Python parity, which needs a Python runtime and is not re-run in the page.'],
+    notes:[
+      'Every recomputed figure here is produced by calling window.__dgcBenchmark() on the tool, so any verdict in this record can be reproduced by opening the page.',
+      'At the critical temperature the property routine returns rho_f = '+crr.rhoL.toFixed(4)+' kg/m3 and rho_g = '+crr.rhoG.toFixed(4)+' kg/m3 against rho_c = 322 kg/m3 ('+pc(crr.relL,3)+' and '+pc(crr.relG,3)+'), because waterTsat clamps pressure to p_c(1 - 1e-6) before inverting and the saturated densities vary as tau^(1/3). Only the saturation pressure is graded at that point.',
+      'The critical-point search is graded in benchmarks/two_phase_critical_flow.json, which drives the same HEM core; it is reported without a verdict here to keep each case to a single criterion.']
+  };
+}
+try{window.__dgcVerify=dgcVerify;window.__dgcBenchmark=dgcBenchmark;}catch(e){}
+function buildLearn(){return {version:1,autostart:false,intro:{title:T("Learn this model","Як користуватися моделлю","Modell verstehen","Model leren","Comprendre le modèle","Aprender el modelo","Poznaj model"),body:T("Start with an Example, then change one input at a time. Watch which result moves, which regime is active, and whether the model limitation still fits your case.","Почніть із прикладу, потім змінюйте по одному параметру. Стежте, який результат змінюється, який режим активний і чи відповідають обмеження моделі вашому випадку.","Beginnen Sie mit einem Beispiel und ändern Sie dann jeweils nur eine Eingabe. Beobachten Sie Ergebnis, aktives Regime und Modellgrenze.","Begin met een voorbeeld en wijzig daarna één invoer tegelijk. Bekijk welk resultaat verandert, welk regime actief is en of de modelgrens nog past.","Commencez par un exemple puis modifiez une entrée à la fois. Observez le résultat, le régime actif et la limite du modèle.","Empiece con un ejemplo y cambie una entrada cada vez. Observe qué resultado cambia, qué régimen está activo y si el límite del modelo sigue siendo válido.","Zacznij od przykładu, potem zmieniaj po jednym parametrze. Obserwuj wynik, aktywny reżim i to, czy granice modelu nadal pasują do przypadku.")},topics:{'t1':{title:T("Initial state / inputs","Початковий стан / вхідні дані","Anfangszustand / Eingaben","Begintoestand / invoer","État initial / entrées","Estado inicial / entradas","Stan początkowy / dane"),body:T("These values establish the inventory and starting thermodynamic or hydraulic state.","Ці значення задають запас і початковий термодинамічний або гідравлічний стан.","Diese Werte legen Inventar und thermodynamischen bzw. hydraulischen Anfangszustand fest.","Deze waarden bepalen inventaris en thermodynamische of hydraulische begintoestand.","Ces valeurs fixent l’inventaire et l’état thermodynamique ou hydraulique initial.","Estos valores fijan el inventario y el estado termodinámico o hidráulico inicial.","Te wartości określają zapas i początkowy stan termodynamiczny lub hydrauliczny.")},'t2':{title:T("Driving mechanism / resistance","Рушійний механізм / опір","Antrieb / Widerstand","Aandrijving / weerstand","Mécanisme moteur / résistance","Mecanismo impulsor / resistencia","Mechanizm napędowy / opór"),body:T("These controls set the main driving force or flow resistance. Change them to see the characteristic timescale and flow response.","Ці параметри задають головну рушійну силу або опір потоку. Змінюйте їх, щоб побачити характерний час і реакцію витрати.","Diese Regler setzen den Hauptantrieb oder Strömungswiderstand. Änderungen zeigen Zeitskala und Durchflussreaktion.","Deze instellingen bepalen de hoofdaandrijving of stromingsweerstand. Wijzig ze om tijdschaal en stromingsrespons te zien.","Ces réglages définissent la force motrice ou la résistance principale. Leur variation montre l’échelle de temps et la réponse du débit.","Estos ajustes fijan la fuerza motriz o la resistencia principal. Cámbielos para ver la escala temporal y la respuesta del caudal.","Te ustawienia określają główną siłę napędową lub opór przepływu. Zmieniaj je, aby zobaczyć skalę czasu i odpowiedź przepływu.")},'t3':{title:T("Regime transition","Перехід режиму","Regimewechsel","Regimeovergang","Transition de régime","Transición de régimen","Przejście reżimu"),body:T("Watch for branch changes such as choked/subcritical flow, flashing/no flashing, filling/draining or packing/depacking. They change the governing equation.","Стежте за переходами choked/subcritical, flashing/no flashing, filling/draining або packing/depacking. Вони змінюють основну гілку рівнянь.","Achten Sie auf Wechsel wie gesperrt/unterkritisch, Flash/kein Flash, Füllen/Entleeren oder Packen/Entpacken. Sie ändern den maßgebenden Rechenzweig.","Let op overgangen zoals choked/subkritisch, flashing/geen flashing, vullen/ledigen of packing/depacking. Ze veranderen de bepalende rekentak.","Surveillez les transitions bloqué/sous-critique, flash/sans flash, remplissage/vidange ou stockage/déstockage. Elles changent la branche de calcul.","Vigile cambios como choked/subcrítico, flashing/sin flashing, llenado/vaciado o packing/depacking. Cambian la rama gobernante del cálculo.","Obserwuj przejścia krytyczny/podkrytyczny, flashing/brak flashingu, napełnianie/opróżnianie lub packing/depacking. Zmieniają one gałąź równań.")},'t4':{title:T("Model boundary","Межа моделі","Modellgrenze","Modelgrens","Limite du modèle","Límite del modelo","Granica modelu"),body:T("Use the stated limitation as part of the result. A numerically converged answer outside the model assumptions is not a validated design answer.","Сприймайте зазначене обмеження як частину результату. Чисельно збіжна відповідь поза припущеннями моделі не є валідованою проєктною відповіддю.","Die angegebene Einschränkung gehört zum Ergebnis. Eine numerisch konvergierte Lösung außerhalb der Modellannahmen ist keine validierte Auslegungsantwort.","De vermelde beperking hoort bij het resultaat. Een numeriek geconvergeerd antwoord buiten de modelaannames is geen gevalideerd ontwerpantwoord.","La limitation déclarée fait partie du résultat. Une solution convergée hors des hypothèses du modèle n’est pas une réponse de conception validée.","La limitación declarada forma parte del resultado. Una solución convergida fuera de las hipótesis no es una respuesta de diseño validada.","Podane ograniczenie jest częścią wyniku. Numerycznie zbieżna odpowiedź poza założeniami modelu nie jest zwalidowaną odpowiedzią projektową.")}},tour:[{topic:'t1',focus:'[data-dgu-panel=\"dgu-examples\"]'},{topic:'t2',focus:'[data-dgu-panel=\"upstream\"]'},{topic:'t3',focus:'[data-dgu-panel=\"restriction\"]'},{topic:'t4',focus:'[data-dgu-panel=\"io\"]'}]};}
+var PRESETS=[{id:'p1',label:T("Baseline","Базовий випадок","Basisfall","Basisgeval","Cas de base","Caso base","Przypadek bazowy"),note:T("Reference case for orientation.","Орієнтовний базовий випадок.","Referenzfall zur Orientierung.","Referentiegeval ter oriëntatie.","Cas de référence pour s’orienter.","Caso de referencia para orientarse.","Przypadek odniesienia."),apply:function(x){Object.assign(x,{"pb":1500000.0});}},{id:'p2',label:T("Fast / low resistance","Швидко / малий опір","Schnell / geringer Widerstand","Snel / lage weerstand","Rapide / faible résistance","Rápido / baja resistencia","Szybko / mały opór"),note:T("Moves the model toward a faster or less resistive response.","Зсуває модель до швидшої реакції або меншого опору.","Verschiebt das Modell zu schnellerer bzw. weniger widerstandsbehafteter Reaktion.","Verschuift het model naar snellere of minder weerstandrijke respons.","Déplace le modèle vers une réponse plus rapide ou moins résistive.","Lleva el modelo hacia una respuesta más rápida o menos resistiva.","Przesuwa model w stronę szybszej odpowiedzi lub mniejszego oporu."),apply:function(x){Object.assign(x,{"pb":200000.0});}},{id:'p3',label:T("Slow / high resistance","Повільно / великий опір","Langsam / hoher Widerstand","Langzaam / hoge weerstand","Lent / forte résistance","Lento / alta resistencia","Wolno / duży opór"),note:T("Moves the model toward a slower or more resistive response.","Зсуває модель до повільнішої реакції або більшого опору.","Verschiebt das Modell zu langsamerer bzw. stärker widerstandsbehafteter Reaktion.","Verschuift het model naar tragere of meer weerstandrijke respons.","Déplace le modèle vers une réponse plus lente ou plus résistive.","Lleva el modelo hacia una respuesta más lenta o más resistiva.","Przesuwa model w stronę wolniejszej odpowiedzi lub większego oporu."),apply:function(x){Object.assign(x,{"p0":5000000.0,"T0":523.15,"pb":100000.0});}},{id:'p4',label:T("Alternate regime","Інший режим","Alternatives Regime","Alternatief regime","Régime alternatif","Régimen alternativo","Alternatywny reżim"),note:T("Switches to a contrasting physical branch of this tool.","Перемикає на контрастну фізичну гілку цієї тулзи.","Wechselt auf einen kontrastierenden physikalischen Zweig des Werkzeugs.","Schakelt naar een contrasterende fysische tak van deze tool.","Passe à une branche physique contrastée de cet outil.","Cambia a una rama física contrastante de la herramienta.","Przełącza na kontrastującą gałąź fizyczną narzędzia."),apply:function(x){Object.assign(x,{"A":5e-05,"pb":200000.0});}}];
+
+
+var W_TC=647.096,W_PC=22.064e6,W_RHOC=322;
+var W_PA=[-7.85951783,1.84408259,-11.7866497,22.6807411,-15.9618719,1.80122502],W_PN=[1,1.5,3,3.5,4,7.5];
+var W_LA=[1.99274064,1.09965342,-0.510839303,-1.75493479,-45.5170352,-6.74694450e5],W_LN=[1/3,2/3,5/3,16/3,43/3,110/3];
+var W_GA=[-2.03150240,-2.68302940,-5.38626492,-17.2991605,-44.7586581,-63.9201063],W_GN=[2/6,4/6,8/6,18/6,37/6,71/6];
+function waterPsat(T){var th=T/W_TC,tau=1-th,F=0;for(var i=0;i<W_PA.length;i++)F+=W_PA[i]*Math.pow(tau,W_PN[i]);return W_PC*Math.exp(F/th);}
+function waterTsat(p){p=Math.max(611.657,Math.min(W_PC*0.999999,p));var lo=273.16,hi=W_TC-1e-5;for(var i=0;i<70;i++){var m=.5*(lo+hi);if(waterPsat(m)>p)hi=m;else lo=m;}return .5*(lo+hi);}
+function waterSat(p){var T=waterTsat(p),th=T/W_TC,tau=1-th,F=0,Ft=0,i;for(i=0;i<W_PA.length;i++){F+=W_PA[i]*Math.pow(tau,W_PN[i]);Ft+=W_PA[i]*W_PN[i]*Math.pow(tau,W_PN[i]-1);}var ps=W_PC*Math.exp(F/th),dpdT=ps*(-th*Ft-F)/(W_TC*th*th),rhoL=W_RHOC,rhoGlog=0;for(i=0;i<W_LA.length;i++)rhoL+=W_RHOC*W_LA[i]*Math.pow(tau,W_LN[i]);for(i=0;i<W_GA.length;i++)rhoGlog+=W_GA[i]*Math.pow(tau,W_GN[i]);var rhoG=W_RHOC*Math.exp(rhoGlog),d1=-5.65134998e-8,d2=2690.66631,d3=127.287297,d4=-135.003439,d5=0.981825814,alpha=1000*(-1135.905627715+d1*Math.pow(th,-19)+d2*th+d3*Math.pow(th,4.5)+d4*Math.pow(th,5)+d5*Math.pow(th,54.5)),phi=(1000/W_TC)*(2319.5246+(19/20)*d1*Math.pow(th,-20)+d2*Math.log(th)+(9/7)*d3*Math.pow(th,3.5)+(5/4)*d4*Math.pow(th,4)+(109/107)*d5*Math.pow(th,53.5)),hf=alpha+T*dpdT/rhoL,hg=alpha+T*dpdT/rhoG,sf=phi+dpdT/rhoL,sg=phi+dpdT/rhoG;return {T:T,hf:hf,hfg:hg-hf,sf:sf,sfg:sg-sf,rhoL:rhoL,rhoG:rhoG};}
+function hemAtPressure(p0,T0,p){var ps0=waterPsat(T0),sat0=waterSat(ps0),rho0=sat0.rhoL,h0=sat0.hf+Math.max(0,p0-ps0)/rho0,s0=sat0.sf;if(p>=ps0&&p<=p0){var dhL=Math.max(0,(p0-p)/rho0),vL=1/rho0,hL=h0-dhL;return {p:p,T:T0,x:0,h:hL,v:vL,rho:rho0,G:Math.sqrt(2*dhL)/vL};}var sat=waterSat(p),x=Math.max(0,Math.min(1,(s0-sat.sf)/Math.max(sat.sfg,1))),h=sat.hf+x*sat.hfg,v=(1-x)/sat.rhoL+x/sat.rhoG,dh=Math.max(0,h0-h),G=Math.sqrt(2*dh)/Math.max(v,1e-12);return {p:p,T:sat.T,x:x,h:h,v:v,rho:1/v,G:G};}
+function hemCritical(p0,T0,pmin){var n=240,arr=[],bestI=0,l0=Math.log(Math.max(pmin,611.657)),l1=Math.log(p0);for(var i=0;i<=n;i++){var lp=l1+(l0-l1)*i/n,z=hemAtPressure(p0,T0,Math.exp(lp));arr.push(z);if(z.G>arr[bestI].G)bestI=i;}var best=arr[bestI];if(bestI>0&&bestI<n){var a=Math.log(arr[bestI+1].p),b=Math.log(arr[bestI-1].p),gr=(Math.sqrt(5)-1)/2,c=b-gr*(b-a),d=a+gr*(b-a),zc=hemAtPressure(p0,T0,Math.exp(c)),zd=hemAtPressure(p0,T0,Math.exp(d));for(var k=0;k<48;k++){if(zc.G>zd.G){b=d;d=c;zd=zc;c=b-gr*(b-a);zc=hemAtPressure(p0,T0,Math.exp(c));}else{a=c;c=d;zc=zd;d=a+gr*(b-a);zd=hemAtPressure(p0,T0,Math.exp(d));}}best=zc.G>zd.G?zc:zd;if(arr[bestI].G>best.G)best=arr[bestI];}return {best:best,curve:arr};}
+
+function solve(s){var crit=hemCritical(s.p0,s.T0,Math.min(s.pb,s.p0*.999999)),at=hemAtPressure(s.p0,s.T0,Math.min(s.pb,s.p0*.999999)),useCrit=s.pb<=crit.best.p,G=useCrit?crit.best.G:at.G,mdot=s.Cd*s.A*G,st=useCrit?crit.best:at,x=[],y=[];crit.curve.forEach(function(z){x.push(z.p/1e5);y.push(z.G)});return {p:st.p,T:st.T,rho:st.rho,xq:st.x,h:st.h,mdot:mdot,G:G,Gcrit:crit.best.G,pcrit:crit.best.p,choked:useCrit,series:[{x:x,y:y}],a11y:'HEM mass flux curve.',warnings:(s.T0>=647.0?['Upstream temperature is too close to the water critical temperature for this SR1 saturation-property / HEM screening model.']:[]).concat(s.p0<waterPsat(s.T0)?['Upstream state is not compressed/subcooled liquid (p0 < psat(T0)); this flashing-liquid model is outside its intended range.']:[]).concat(s.pb>=s.p0?['Back pressure must be below upstream pressure.']:[]),notes:[useCrit?'Back pressure lies below the scanned HEM critical pressure; flow is capped at Gcrit.':'Back pressure is above the scanned critical pressure; the back-pressure point controls.']};}
+
+function degrade(){
+  document.title="Flashing Through Valve / Orifice";
+  var host=document.getElementById('app')||document.body;
+  var h=document.createElement('h1'); h.textContent="Flashing Through Valve / Orifice";
+  var p=document.createElement('p'); p.textContent='diagram-ui.js v1 is required for the interactive screen. The shared record and report runtime remains available.';
+  host.appendChild(h);host.appendChild(p);last=solve(state);
+}
+function drawStage(size,st){
+  var ctx=st.canvas(),spec=dgcPlotSpec();
+  if(!spec){ctx.clearRect(0,0,size.w,size.h);return;}
+  var cs=getComputedStyle(document.documentElement);
+  dgcPlot(ctx,size.w,size.h,spec,{
+    density:size.density,
+    css:{muted:cs.getPropertyValue('--muted').trim()||'#6b7280',
+         line:cs.getPropertyValue('--line').trim()||'#d6dae0',
+         text:cs.getPropertyValue('--text').trim()||'#1f2430',
+         font:cs.getPropertyValue('--font').trim()||'sans-serif'},
+    fontScale:1
+  });
+}
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:"flashing-valve-orifice",mount:'#app',layout:'calculator',compute:'live',state:state,defaults:DEFAULTS,
+    learn:buildLearn(),
+    subtitle:T("Pipe / Vessel Transients · HEM flashing screen","Pipe / Vessel Transients · HEM-скринінг скипання","Pipe / Vessel Transients · HEM-Flash-Screening","Pipe / Vessel Transients · HEM-flashscreening","Pipe / Vessel Transients · écran flashing HEM","Pipe / Vessel Transients · cribado HEM de flashing","Pipe / Vessel Transients · przesiew HEM flashing"),
+    notices:[{id:'family',tone:'info',sticky:false,title:T("Pipe / Vessel Transients","Перехідні процеси труб / посудин","Rohr- / Behältertransienten","Leiding- / vattransiënten","Transitoires conduite / enceinte","Transitorios de tuberías / recipientes","Stany przejściowe rur / zbiorników"),text:T("This tool is part of the Pipe / Vessel Transients family. State, report, Python export and SI handoff use the shared tools.petrov.re framework.","Це частина сімейства Pipe / Vessel Transients. Стан, звіт, Python-експорт і передавання SI-величин використовують спільний framework tools.petrov.re.","Teil der Familie Pipe / Vessel Transients. Zustand, Bericht, Python-Export und SI-Handoff nutzen das gemeinsame tools.petrov.re-Framework.","Onderdeel van Pipe / Vessel Transients. Status, rapport, Python-export en SI-handoff gebruiken het gedeelde tools.petrov.re-framework.","Fait partie de Pipe / Vessel Transients. État, rapport, export Python et transfert SI utilisent le framework commun tools.petrov.re.","Forma parte de Pipe / Vessel Transients. Estado, informe, exportación Python y transferencia SI usan el framework común de tools.petrov.re.","Narzędzie należy do rodziny Pipe / Vessel Transients. Stan, raport, eksport Python i przekazywanie SI korzystają ze wspólnego frameworka tools.petrov.re.")},
+             {id:'scope',tone:'warn',sticky:true,title:T("Model scope","Область моделі","Modellbereich","Modelbereik","Domaine du modèle","Alcance del modelo","Zakres modelu"),text:T("Water only. The same HEM core is used by Two-Phase Critical Flow so the critical cap and the dedicated critical-flow tool share assumptions.","Лише вода. Те саме HEM-ядро використовується у Two-Phase Critical Flow, тому обмеження критичною витратою й окрема тулза мають однакові припущення.","Nur Wasser. Derselbe HEM-Kern wird in Two-Phase Critical Flow verwendet; kritische Begrenzung und Spezialwerkzeug teilen damit dieselben Annahmen.","Alleen water. Dezelfde HEM-kern wordt gebruikt door Two-Phase Critical Flow, zodat de kritische cap en de aparte tool dezelfde aannames delen.","Eau uniquement. Le même noyau HEM est utilisé par Two-Phase Critical Flow afin de partager les mêmes hypothèses.","Solo agua. El mismo núcleo HEM se usa en Two-Phase Critical Flow para compartir las mismas hipótesis.","Tylko woda. Ten sam rdzeń HEM jest używany w Two-Phase Critical Flow, więc ograniczenie krytyczne i dedykowane narzędzie mają te same założenia.")}],
+    panels:[{id:"upstream",slot:'inputs',learn:'t1',title:T("Upstream water","Вода перед звуженням","Wasser stromauf","Water bovenstrooms","Eau amont","Agua aguas arriba","Woda przed zaworem"),fields:[{id:'f-p0',key:'p0',label:T("Upstream pressure","Тиск перед звуженням","Vordruck","Bovendruk","Pression amont","Presión aguas arriba","Ciśnienie przed"),type:'number',unit:"Pa",display:"bar",min:10000.0,max:22000000.0},{id:'f-T0',key:'T0',label:T("Upstream temperature","Температура перед звуженням","Vortemperatur","Boventemperatuur","Température amont","Temperatura aguas arriba","Temperatura przed"),type:'number',unit:"K",display:"degC",min:273.16,max:640}]},{id:"restriction",slot:'inputs',learn:'t2',title:T("Valve / orifice","Клапан / отвір","Ventil / Blende","Klep / orifice","Vanne / orifice","Válvula / orificio","Zawór / kryza"),fields:[{id:'f-pb',key:'pb',label:T("Back pressure","Протитиск","Gegendruck","Tegendruk","Contre-pression","Contrapresión","Przeciwciśnienie"),type:'number',unit:"Pa",display:"bar",min:612,max:22000000.0},{id:'f-A',key:'A',label:T("Flow area","Площа проходу","Strömungsfläche","Doorstroomoppervlak","Section de passage","Área de paso","Pole przepływu"),type:'number',unit:"m²",min:1e-09,max:1},{id:'f-Cd',key:'Cd',label:T("Discharge coefficient","Коефіцієнт витрати","Ausflussbeiwert","Uitstroomcoëfficiënt","Coefficient de décharge","Coeficiente de descarga","Współczynnik wypływu"),type:'number',min:0.05,max:1.2,step:0.01,precision:2}]}],
+    footer:T("HEM screen: isentropic equilibrium flash path; G = sqrt(2(h₀−h))/v; actual restriction flow is Cd·A·min[G(pb), Gcrit].","HEM-скринінг: ізоентропічна рівноважна траєкторія скипання; G = sqrt(2(h₀−h))/v; фактична витрата = Cd·A·min[G(pb), Gcrit].","HEM-Screen: isentroper Gleichgewichts-Flashpfad; G = sqrt(2(h₀−h))/v; tatsächlicher Blendenstrom = Cd·A·min[G(pb), Gkrit].","HEM-screen: isentroop evenwichts-flashpad; G = sqrt(2(h₀−h))/v; werkelijke restrictiestroom = Cd·A·min[G(pb), Gcrit].","HEM : chemin de flash isentropique à l’équilibre; G = sqrt(2(h₀−h))/v; débit réel = Cd·A·min[G(pb), Gcrit].","HEM: trayectoria de flash isentrópica en equilibrio; G = sqrt(2(h₀−h))/v; flujo real = Cd·A·min[G(pb), Gcrit].","HEM: izentropowa ścieżka flashing w równowadze; G = sqrt(2(h₀−h))/v; przepływ rzeczywisty = Cd·A·min[G(pb), Gcrit]."),
+    on:{rebuild:function(app){stage=app.stages[0]||null;},compute:function(s){last=solve(s);if(stage)stage.schedule();return {tiles:[{label:T("Mass flow","Масова витрата","Massenstrom","Massastroom","Débit massique","Caudal másico","Strumień masy"),value:last.mdot,hint:"kg/s",precision:4},{label:T("Mass flux G","Масовий потік G","Massenfluss G","Massaflux G","Flux massique G","Flujo másico G","Strumień powierzchniowy G"),value:last.G,hint:"kg/(m²·s)",precision:1},{label:T("Equilibrium vapour quality x","Рівноважний ступінь сухості x","Gleichgewichts-Dampfgehalt x","Evenwichtskwaliteit x","Titre d’équilibre x","Calidad de equilibrio x","Stopień suchości równowagowej x"),value:last.xq,hint:"—",precision:4},{label:T("Controlling pressure","Контролюючий тиск","Bestimmender Druck","Bepalende druk","Pression de contrôle","Presión controlante","Ciśnienie kontrolujące"),value:last.p/1e5,hint:"bar",precision:3},{label:T("Mixture density","Густина суміші","Gemischdichte","Mengseldichtheid","Masse volumique mélange","Densidad de mezcla","Gęstość mieszaniny"),value:last.rho,hint:"kg/m³",precision:2,headline:false}],notes:last.notes||[]};}}
+  });
+  ui.examples(PRESETS);
+  ui.panel({id:'io',slot:'inputs',learn:'t4',actionsAlign:'end',actions:[ui.importAction({label:T("Open a saved case…","Відкрити збережений випадок…","Gespeicherten Fall öffnen…","Opgeslagen geval openen…","Ouvrir un cas enregistré…","Abrir un caso guardado…","Otwórz zapisany przypadek…"),accept:'.json,application/json',as:'json',run:function(data){var src=(data&&data.inputs)||data||{};Object.keys(DEFAULTS).forEach(function(k){if(src[k]!==undefined)state[k]=src[k];});ui.sync();ui.run();}}),ui.resetAction()]});
+  stage=ui.stage({caption:T("HEM mass flux versus equilibrium pressure","Масовий потік HEM залежно від рівноважного тиску","HEM-Massenfluss über Gleichgewichtsdruck","HEM-massaflux versus evenwichtsdruk","Flux massique HEM selon pression d’équilibre","Flujo másico HEM frente a presión de equilibrio","Strumień masy HEM względem ciśnienia równowagi"),minHeight:280,a11y:function(){return last&&last.a11y||'';},render:drawStage});
+  ui.ready();
+}
+/* ---- handoff receiver bound (AGENTS.md 2.4; _docs/TZ-engineering-workflow.md 5.1)
+   -----------------------------------------------------------------------------
+   An incoming SI quantity is held to the bound this tool's own typed field
+   declares, read from that field, so the keyboard and the wire carry one number.
+   Where the field declares none, the bound is the one this tool's own model
+   states and the limitations carry it. Outside the bound the state does not
+   change and the user is told the quantity, the figure that arrived and the
+   bound; the refused name goes into neither `accepted` nor `ignored`, because
+   this tool does use that quantity (AGENTS 2.4).
+   No magnitude band is used to tell one medium from another: gasline-packing at
+   its own field maximum of 1,00e+8 Pa ships 680,67 kg/m3, inside the
+   400-2000 kg/m3 band a liquid receiver would use. The medium belongs on the
+   wire (AGENTS 2.7 W-1). */
+var HO_TXT={range:T("{q} = {v} {u} received from {f} lies outside the range this tool accepts ({lo} to {hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, лежить поза діапазоном, який приймає цей інструмент ({lo}…{hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt außerhalb des Bereichs, den dieses Werkzeug annimmt ({lo} bis {hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt buiten het bereik dat deze tool aanvaardt ({lo} tot {hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} se situe hors de la plage acceptée par cet outil ({lo} à {hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda fuera del rango que acepta esta herramienta ({lo} a {hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} leży poza zakresem przyjmowanym przez to narzędzie ({lo} do {hi} {u}) i nie zostało zastosowane."),
+ rangeLo:T("{q} = {v} {u} received from {f} is below the minimum this tool accepts ({lo} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, менше за мінімум, який приймає цей інструмент ({lo} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt unter dem Mindestwert, den dieses Werkzeug annimmt ({lo} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt onder het minimum dat deze tool aanvaardt ({lo} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} est inférieur au minimum accepté par cet outil ({lo} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} queda por debajo del mínimo que acepta esta herramienta ({lo} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} jest mniejsze od minimum przyjmowanego przez to narzędzie ({lo} {u}) i nie zostało zastosowane."),
+ rangeHi:T("{q} = {v} {u} received from {f} is above the maximum this tool accepts ({hi} {u}) and was not applied.","{q} = {v} {u}, отримане від {f}, перевищує максимум, який приймає цей інструмент ({hi} {u}), і не застосоване.","{q} = {v} {u} von {f} liegt über dem Höchstwert, den dieses Werkzeug annimmt ({hi} {u}), und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} ligt boven het maximum dat deze tool aanvaardt ({hi} {u}) en is niet toegepast.","{q} = {v} {u} reçu de {f} dépasse le maximum accepté par cet outil ({hi} {u}) et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} supera el máximo que acepta esta herramienta ({hi} {u}) y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} przekracza maksimum przyjmowane przez to narzędzie ({hi} {u}) i nie zostało zastosowane."),
+ impossible:T("{q} = {v} {u} received from {f} is not a physically possible value for this quantity and was not applied.","{q} = {v} {u}, отримане від {f}, фізично неможливе для цієї величини і не застосоване.","{q} = {v} {u} von {f} ist für diese Größe physikalisch nicht möglich und wurde nicht übernommen.","{q} = {v} {u} ontvangen van {f} is voor deze grootheid fysisch niet mogelijk en is niet toegepast.","{q} = {v} {u} reçu de {f} n'est pas une valeur physiquement possible pour cette grandeur et n'a pas été appliqué.","{q} = {v} {u} recibido de {f} no es un valor físicamente posible para esta magnitud y no se ha aplicado.","{q} = {v} {u} otrzymane od {f} nie jest fizycznie możliwą wartością tej wielkości i nie zostało zastosowane.")};
+function hoRanges(){
+ /* field bounds: T0 273,16-640 K and p0 10 kPa-22 MPa (the IF97 water range this
+    tool solves in), A 1e-9-1 m2. */
+ return {T:{lo:273.16,hi:640,u:'K'},p:{lo:1e4,hi:2.2e7,u:'Pa'},A:{lo:1e-9,hi:1,u:'m²'}};}
+function hoNum(v){if(v==null||typeof v!=='number'||!isFinite(v))return '—';if(v===0)return '0';var a=Math.abs(v);
+ if(a!==0&&(a<0.01||a>=1e6)){var e=Math.floor(Math.log10(a));return dgcNum(v/Math.pow(10,e),2)+'e'+(e<0?'':'+')+e;}
+ return dgcNum(v,a>=100?1:(a>=1?2:4));}
+function hoTxt(k){var m=HO_TXT[k];return m[dgcLang()]||m.en;}
+/* A quantity refused for range is not a quantity this tool does not use: the
+   sentence above names it, its range and the figure received, so it is kept out
+   of the `ignored` list the runtime prints as "this tool does not use them"
+   (AGENTS 2.4). HO_REF holds the refused names of the payload being applied. */
+var HO_REF=[];
+/* A bound has whichever ends the receiving field declares: two, one or none.
+   `pos` marks a quantity this tool's own validation requires strictly positive. */
+function hoOut(v,r){if(!r||typeof v!=='number'||!isFinite(v))return true;
+ if(r.pos&&!(v>0))return true;
+ if(r.lo!=null&&v<r.lo)return true;
+ if(r.hi!=null&&v>r.hi)return true;
+ return false;}
+function hoRefuse(k,v,r,from){
+ HO_REF.push(k);
+ /* The sentence follows the bound: a receiver whose own field declares only a
+    minimum states only that minimum, and a quantity held to no declared bound at
+    all is refused as a physically impossible value (AGENTS 2.4). */
+ /* A non-positive value of a strictly positive quantity is impossible whatever
+    other end the bound has; the range sentences are for a value that is possible
+    and out of bounds. */
+ var hoKey=(function(r,v){if(r&&r.pos&&!(v>0))return 'impossible';
+  var lo=r&&r.lo!=null&&isFinite(r.lo),hi=r&&r.hi!=null&&isFinite(r.hi);
+  return lo&&hi?'range':(lo?'rangeLo':(hi?'rangeHi':'impossible'));})(r,v);
+ var s=hoTxt(hoKey).split('{q}').join(k).split('{v}').join(hoNum(v))
+  .split('{lo}').join(hoNum(r?r.lo:NaN)).split('{hi}').join(hoNum(r?r.hi:NaN))
+  .split('{u}').join(r?r.u:'').split('{f}').join(from);
+ try{if(window.Diagram&&Diagram.notify)Diagram.notify(s,'warn');}catch(e){}}
+function hoApply(p){
+ var q=(p&&p.quantities)||{},from=(p&&p.from&&p.from.tool)||'?',R=hoRanges(),acc=[],ign=[];
+ HO_REF.length=0;
+ function take(k,set){var o=q[k];if(!o)return;var v=Number(o.value),r=R[k];
+  if(hoOut(v,r)){hoRefuse(k,v,r,from);return;}
+  set(v);acc.push(k);}
+ take('T',function(v){state.T0=v;});
+ take('p',function(v){state.p0=v;});
+ take('A',function(v){state.A=v;});
+ var ord=Object.keys(q);
+ ord.forEach(function(k){if(acc.indexOf(k)<0&&ign.indexOf(k)<0&&HO_REF.indexOf(k)<0)ign.push(k);});
+ acc.sort(function(a,b){return ord.indexOf(a)-ord.indexOf(b);});
+ last=solve(state);if(ui){ui.sync();ui.run();}
+ return {accepted:acc,ignored:ign};}
+function installData(){if(!window.Diagram)return;Diagram.init({
+ id:"flashing-valve-orifice",file:"flashing_valve.html",
+ state:{serialize:function(){return state;},deserialize:function(o){Object.assign(state,o||{});last=solve(state);if(ui){ui.sync();ui.run();}}},
+ record:function(){if(!last)return null;return {inputs:{"p0":state["p0"],"T0":state["T0"],"pb":state["pb"],"A":state["A"],"Cd":state["Cd"]},outputs:{"mdot":last.mdot,"G":last.G,"Gcrit":last.Gcrit,"p_control":last.p,"p_crit":last.pcrit,"T_eq":last.T,"x":last.xq,"rho_eq":last.rho,"h_eq":last.h},units:{"p0":"Pa","T0":"K","pb":"Pa","A":"m2","Cd":"-","mdot":"kg/s","G":"kg/(m2 s)","Gcrit":"kg/(m2 s)","p_control":"Pa","p_crit":"Pa","T_eq":"K","x":"-","rho_eq":"kg/m3","h_eq":"J/kg"},model:{equations:["Wagner saturation-pressure equation for water", "IAPWS SR1-86(1992) saturation density / enthalpy / entropy correlations", "compressed-liquid branch: h0 = hf(T0) + (p0-psat(T0))/rhoL and G = sqrt(2 rhoL (p0-p))", "isentropic equilibrium quality from s0 = sf + x sfg below flash onset", "G = sqrt(2(h0-h))/v", "mdot = Cd A min(G_backpressure, G_critical)"],ranges:["water only", "273.16 K < T0 < critical temperature", "homogeneous equilibrium, no slip"],notes:["IAPWS SR1-86(1992) saturation properties; compressed-liquid branch remains an incompressible approximation; use steam_tables.html for full IF97 properties"]},warnings:last.warnings||[]};},
+ python:function(){return {code:"\nW_TC=647.096; W_PC=22.064e6; W_RHOC=322.0\nW_PA=(-7.85951783,1.84408259,-11.7866497,22.6807411,-15.9618719,1.80122502); W_PN=(1,1.5,3,3.5,4,7.5)\nW_LA=(1.99274064,1.09965342,-0.510839303,-1.75493479,-45.5170352,-6.74694450e5); W_LN=(1/3,2/3,5/3,16/3,43/3,110/3)\nW_GA=(-2.03150240,-2.68302940,-5.38626492,-17.2991605,-44.7586581,-63.9201063); W_GN=(2/6,4/6,8/6,18/6,37/6,71/6)\ndef water_psat(T):\n    th=T/W_TC; tau=1-th; F=sum(a*tau**n for a,n in zip(W_PA,W_PN))\n    return W_PC*math.exp(F/th)\ndef water_tsat(p):\n    p=max(611.657,min(W_PC*0.999999,p)); lo=273.16; hi=W_TC-1e-5\n    for _ in range(70):\n        m=.5*(lo+hi)\n        if water_psat(m)>p: hi=m\n        else: lo=m\n    return .5*(lo+hi)\ndef water_sat(p):\n    T=water_tsat(p); th=T/W_TC; tau=1-th\n    F=sum(a*tau**n for a,n in zip(W_PA,W_PN)); Ft=sum(a*n*tau**(n-1) for a,n in zip(W_PA,W_PN)); ps=W_PC*math.exp(F/th)\n    dpdT=ps*(-th*Ft-F)/(W_TC*th*th)\n    rhoL=W_RHOC*(1+sum(a*tau**n for a,n in zip(W_LA,W_LN))); rhoG=W_RHOC*math.exp(sum(a*tau**n for a,n in zip(W_GA,W_GN)))\n    d1=-5.65134998e-8; d2=2690.66631; d3=127.287297; d4=-135.003439; d5=0.981825814\n    alpha=1000*(-1135.905627715+d1*th**-19+d2*th+d3*th**4.5+d4*th**5+d5*th**54.5)\n    phi=(1000/W_TC)*(2319.5246+(19/20)*d1*th**-20+d2*math.log(th)+(9/7)*d3*th**3.5+(5/4)*d4*th**4+(109/107)*d5*th**53.5)\n    hf=alpha+T*dpdT/rhoL; hg=alpha+T*dpdT/rhoG; sf=phi+dpdT/rhoL; sg=phi+dpdT/rhoG\n    return T,hf,hg-hf,sf,sg-sf,rhoL,rhoG\ndef hem_at(p0,T0,p):\n    ps0=water_psat(T0); T_sat0,hf0,hfg0,sf0,sfg0,rho0,rhog0=water_sat(ps0)\n    h0=hf0+max(0.0,p0-ps0)/rho0; s0=sf0\n    if ps0<=p<=p0:\n        dh=max(0.0,(p0-p)/rho0); v=1.0/rho0; h=h0-dh\n        return {'p':p,'T':T0,'x':0.0,'h':h,'v':v,'rho':rho0,'G':math.sqrt(2*dh)/v}\n    T,hf,hfg,sf,sfg,rhoL,rhoG=water_sat(p)\n    x=max(0.0,min(1.0,(s0-sf)/max(sfg,1.0))); h=hf+x*hfg; v=(1-x)/rhoL+x/rhoG\n    dh=max(0.0,h0-h); G=math.sqrt(2*dh)/max(v,1e-12)\n    return {'p':p,'T':T,'x':x,'h':h,'v':v,'rho':1/v,'G':G}\ndef hem_critical(p0,T0,pmin):\n    l0=math.log(max(pmin,611.657)); l1=math.log(p0); arr=[]\n    for i in range(241):\n        p=math.exp(l1+(l0-l1)*i/240); arr.append(hem_at(p0,T0,p))\n    best_i=max(range(len(arr)),key=lambda i:arr[i]['G']); best=arr[best_i]\n    if 0<best_i<240:\n        a=math.log(arr[best_i+1]['p']); b=math.log(arr[best_i-1]['p']); gr=(math.sqrt(5)-1)/2\n        c=b-gr*(b-a); d=a+gr*(b-a); zc=hem_at(p0,T0,math.exp(c)); zd=hem_at(p0,T0,math.exp(d))\n        for _ in range(48):\n            if zc['G']>zd['G']:\n                b=d; d=c; zd=zc; c=b-gr*(b-a); zc=hem_at(p0,T0,math.exp(c))\n            else:\n                a=c; c=d; zc=zd; d=a+gr*(b-a); zd=hem_at(p0,T0,math.exp(d))\n        refined=zc if zc['G']>zd['G'] else zd\n        if refined['G']>best['G']: best=refined\n    return best\n\ndef compute():\n    p0=INPUTS['p0']; T0=INPUTS['T0']; pb=INPUTS['pb']; A=INPUTS['A']; Cd=INPUTS['Cd']\n    best=hem_critical(p0,T0,min(pb,p0*0.999999)); at=hem_at(p0,T0,min(pb,p0*0.999999)); use=pb<=best['p']; G=min(at['G'],best['G']); st=best if use else at\n    return {'mdot':Cd*A*G,'G':G,'Gcrit':best['G'],'p_control':st['p'],'p_crit':best['p'],'T_eq':st['T'],'x':st['x'],'rho_eq':st['rho'],'h_eq':st['h']}\n",requires:[],basis:{kind:'reproduce',note:'Standard-library port of the same compressed-liquid/HEM equations and critical-flow search used by the browser tool.'},selftest:{tolerance:1e-7,note:'Relative tolerance for scalar outputs.'}};},
+ report:{profile:dgcReportProfile},
+ handoff:{provides:["p", "T", "rho", "x", "mdot", "h"],accepts:["T", "p", "A"],build:function(){if(!last)return null;var u=hemAtPressure(state.p0,state.T0,state.p0);return {quantities:{p:{value:state.p0,unit:'Pa'},T:{value:state.T0,unit:'K'},rho:{value:u.rho,unit:'kg/m3'},x:{value:u.x,unit:'-'},mdot:{value:last.mdot,unit:'kg/s'},h:{value:u.h,unit:'J/kg'}}};},apply:function(p){return hoApply(p);}}
+});}
+function boot(){if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

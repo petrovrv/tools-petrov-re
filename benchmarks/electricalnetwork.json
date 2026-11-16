@@ -1,0 +1,2895 @@
+{
+ "tool": "electricalnetwork",
+ "file": "electricalnetwork.html",
+ "reference": "Independent python implementation of IEC 60909-0:2016 written from the standard's own equations - network feeder Z_Q = c U_nQ^2/S_kQ'' referred by the turns ratio, two-winding transformer Z_T/R_T/X_T with the 6.3.3 impedance correction factor K_T, cable impedance with the resistance temperature correction, asynchronous-motor locked-rotor impedance eq. (26), the equivalent voltage source c U_n/sqrt3 at the fault point solved as a slack node of the nodal admittance system, kappa eq. (56) and i_p eq. (55), the line-to-line relation eq. (34) and the IEC 60364-4-41 earth fault loop; the load flow is a scipy Newton solution of the complex nodal power balance, structurally different from the tool's backward/forward sweep. Every motor-free case is cross-checked against the analytic series path impedance Z = Z_source + sum(Z_branch), which is also verified by hand for case hand_single_feeder.",
+ "reference_citations": [
+  "IEC 60909-0:2016, 6.1 eq. (3)-(5) - network feeder impedance Z_Q = c U_nQ^2/S_kQ'' and its referral Z_Qt = Z_Q/t_r^2",
+  "IEC 60909-0:2016, 6.2 eq. (7)-(9) - two-winding transformer Z_T = (u_kr/100) U_rT^2/S_rT, R_T = P_krT/(3 I_rT^2), X_T = sqrt(Z_T^2-R_T^2)",
+  "IEC 60909-0:2016, 6.3.3 - transformer impedance correction factor K_T = 0.95 c_max/(1+0.6 x_T)",
+  "IEC 60909-0:2016, 6.8 eq. (26) - asynchronous motor Z_M = (1/(I_LR/I_rM)) U_rM/(sqrt3 I_rM)",
+  "IEC 60909-0:2016, 4.2 eq. (29) - three-phase initial symmetrical current I_k'' = c U_n/(sqrt3 |Z_k|)",
+  "IEC 60909-0:2016, 4.2 eq. (34) - line-to-line current I_k2'' = c U_n/|Z_1+Z_2| = (sqrt3/2) I_k3'' when Z_2 = Z_1",
+  "IEC 60909-0:2016, 4.3.1.2 eq. (55)-(56) - i_p = kappa sqrt2 I_k'', kappa = 1.02 + 0.98 exp(-3 R/X)",
+  "IEC 60909-0:2016, Table 1 - voltage factor c for low voltage (c_max 1.05/1.10, c_min 0.95)",
+  "IEC 60364-4-41:2005, 411.4.4 - automatic disconnection in TN: Z_s I_a <= U_0, evaluated here as I_f = c_min U_0/|Z_s|"
+ ],
+ "tolerance": "Agreement to the last digit the page prints: |got-ref| <= 0.5*10^-d + 1e-9*|ref|, with d = 3 decimals for every kA/kappa figure in the selected-feeder panel, 2 decimals for current (A), voltage (V), voltage drop (%) and cable losses (kW), and 1 decimal for the source-current KPI. Both sides evaluate the same closed-form IEC 60909 expressions, so the only physical slack is double-precision round-off; the tolerance is set by the display, not by what makes the tool pass.",
+ "total": 18,
+ "passed": 18,
+ "failed": 0,
+ "flagged": 0,
+ "page_errors": [],
+ "cases": [
+  {
+   "id": "hand_single_feeder",
+   "note": "Single 95 mm2 copper feeder, R20 pinned at 0.193 ohm/km, X 0.08 ohm/km, 630 kVA / 4 % transformer, KT off - the whole chain is a hand sum of three series impedances.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 11.747,
+     "ref": 11.747418813504707,
+     "rel": 0.000035651534294963356,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 9.762,
+     "ref": 9.761940912232028,
+     "rel": 0.000006052870889503108,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 17.881,
+     "ref": 17.88138605252951,
+     "rel": 0.000021589631160369885,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.076,
+     "ref": 1.0763257474248473,
+     "rel": 0.00030264761911216905,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 11.747,
+     "ref": 11.747418813504707,
+     "rel": 0.000035651534294963356,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 9.762,
+     "ref": 9.761940912232028,
+     "rel": 0.000006052870889503108,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 8.454,
+     "ref": 8.454088820235572,
+     "rel": 0.000010506186705677265,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 17.881,
+     "ref": 17.88138605252951,
+     "rel": 0.000021589631160369885,
+     "ok": true
+    },
+    "I_A": {
+     "got": 162.83,
+     "ref": 162.8306324426724,
+     "rel": 0.000003884052176768812,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 393.97,
+     "ref": 393.9678237910438,
+     "rel": 0.000005523824091163687,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.51,
+     "ref": 1.5080440522390433,
+     "rel": 0.0012970096981269842,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 162.8,
+     "ref": 162.8306324426724,
+     "rel": 0.00018812456976220044,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 1.1,
+     "ref": 1.102084099204712,
+     "rel": 0.0018910527846431203,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205673,
+     "rel": 0.00021191242699194752,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.39104158772724,
+     "rel": 0.000051080653372163046,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.96388733078111,
+     "rel": 0.00008104703345462304,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0018910527846431203,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 11.747418813504709,
+    "IkMin_kA_seriesZ": 9.761940912232028,
+    "rel_IkMax": 1.548416237152255e-16,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 101.10208409920565,
+    "Pload_plus_loss_kW": 101.10208409920472,
+    "rel": 9.393870074868637e-15
+   }
+  },
+  {
+   "id": "hand_single_feeder_KT",
+   "note": "As above with the IEC 60909-0 6.3.3 transformer impedance correction factor KT = 0.95 cmax/(1+0.6 xT) enabled.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": true,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 11.876,
+     "ref": 11.875981025371036,
+     "rel": 0.0000015977314987812931,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 9.856,
+     "ref": 9.856167113890631,
+     "rel": 0.000016955261482516787,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 18.045,
+     "ref": 18.04504389449348,
+     "rel": 0.000002432495799767074,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.074,
+     "ref": 1.0744184313991525,
+     "rel": 0.00038944920053868716,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 11.876,
+     "ref": 11.875981025371035,
+     "rel": 0.000001597731498930869,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 9.856,
+     "ref": 9.856167113890631,
+     "rel": 0.000016955261482516787,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 8.536,
+     "ref": 8.535691104574038,
+     "rel": 0.000036188683748855975,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 18.045,
+     "ref": 18.045043894493478,
+     "rel": 0.0000024324957995701943,
+     "ok": true
+    },
+    "I_A": {
+     "got": 162.83,
+     "ref": 162.8306324426724,
+     "rel": 0.000003884052176768812,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 393.97,
+     "ref": 393.9678237910438,
+     "rel": 0.000005523824091163687,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.51,
+     "ref": 1.5080440522390433,
+     "rel": 0.0012970096981269842,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 162.8,
+     "ref": 162.8306324426724,
+     "rel": 0.00018812456976220044,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 1.1,
+     "ref": 1.102084099204712,
+     "rel": 0.0018910527846431203,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.69,
+     "ref": 23.690856017762833,
+     "rel": 0.00003613283378996599,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.89,
+     "ref": 20.886113344931182,
+     "rel": 0.00018608800041591283,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 49.17,
+     "ref": 49.16516518918457,
+     "rel": 0.00009833813833081632,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0018910527846431203,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 11.875981025371036,
+    "IkMin_kA_seriesZ": 9.85616711389063,
+    "rel_IkMax": 0,
+    "rel_IkMin": 1.845534255382392e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 101.10208409920565,
+    "Pload_plus_loss_kW": 101.10208409920472,
+    "rel": 9.393870074868637e-15
+   }
+  },
+  {
+   "id": "lv_bus_1000kVA",
+   "note": "1000 kVA / 6 % transformer, cmax = 1.10, fault at the LV busbar: Ik is the transformer plus network-feeder impedance only.",
+   "inputs": {
+    "focus": "LV",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 1000,
+     "uk": 6,
+     "Pk": 10.5,
+     "SkMax": 250,
+     "SkMin": 150,
+     "XR": 12,
+     "cMax": 1.1,
+     "cMin": 0.95,
+     "applyKT": true,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 24.45,
+     "ref": 24.450406405104715,
+     "rel": 0.000016621609390960987,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 20.508,
+     "ref": 20.507897362526293,
+     "rel": 0.000005004778007784281,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 55.541,
+     "ref": 55.540685512034855,
+     "rel": 0.00000566229894792003,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 24.45,
+     "ref": 24.450406405104715,
+     "rel": 0.000016621609390960987,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 17.76,
+     "ref": 17.76036009415166,
+     "rel": 0.000020275160511980374,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 55.541,
+     "ref": 55.54068551203488,
+     "rel": 0.000005662298947536232,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 345,
+     "ref": 345.0014722885,
+     "rel": 0.000004267484687038528,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 1.06,
+     "ref": 1.0584967226240833,
+     "rel": 0.0014202003121842341,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.45,
+     "ref": 24.450406405104715,
+     "rel": 0.000016621609390960987,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.51,
+     "ref": 20.507897362526293,
+     "rel": 0.0001025281839741613,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 55.54,
+     "ref": 55.540685512034855,
+     "rel": 0.000012342520236045283,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0014202003121842341,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 24.450406405104715,
+    "IkMin_kA_seriesZ": 20.507897362526297,
+    "rel_IkMax": 0,
+    "rel_IkMin": 1.7739404205032377e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 201.05849672262556,
+    "Pload_plus_loss_kW": 201.05849672262408,
+    "rel": 7.386929039085262e-15
+   }
+  },
+  {
+   "id": "aluminium_long_feeder",
+   "note": "180 m aluminium feeder; minimum-current case at 90 C conductor temperature exercises the resistance temperature correction.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 90,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 4.475,
+     "ref": 4.475389573650707,
+     "rel": 0.00008704798639234184,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 3.322,
+     "ref": 3.321767958840188,
+     "rel": 0.00006985471673133708,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 6.473,
+     "ref": 6.472686931726799,
+     "rel": 0.00004836759084795333,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.023,
+     "ref": 1.0226776343378907,
+     "rel": 0.00031521727989866546,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 4.475,
+     "ref": 4.475389573650707,
+     "rel": 0.00008704798639234184,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 3.322,
+     "ref": 3.321767958840188,
+     "rel": 0.00006985471673133708,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 2.877,
+     "ref": 2.8767354378327843,
+     "rel": 0.00009196610982579538,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 6.473,
+     "ref": 6.472686931726799,
+     "rel": 0.00004836759084795333,
+     "ok": true
+    },
+    "I_A": {
+     "got": 69.21,
+     "ref": 69.20563981561395,
+     "rel": 0.000063003310101045,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 392.59,
+     "ref": 392.58974420063106,
+     "rel": 6.515691576101187e-7,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.85,
+     "ref": 1.852563949842235,
+     "rel": 0.0013840007209755458,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 69.2,
+     "ref": 69.20563981561395,
+     "rel": 0.00008149358388959097,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.79,
+     "ref": 0.7880427182834295,
+     "rel": 0.002483725401122914,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205673,
+     "rel": 0.00021191242699194752,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.9638873307811,
+     "rel": 0.00008104703345432678,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.002483725401122914,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 4.475389573650706,
+    "IkMin_kA_seriesZ": 3.3217679588401885,
+    "rel_IkMax": 2.0322134795318534e-16,
+    "rel_IkMin": 1.3689919239429398e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 40.788042718284004,
+    "Pload_plus_loss_kW": 40.788042718283435,
+    "rel": 1.4150913764094622e-14
+   }
+  },
+  {
+   "id": "two_level_series",
+   "note": "Series bus + feeder: the driving-point impedance at the load is the sum of source, DB-1 feeder and load feeder impedances.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 3
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 8.345,
+     "ref": 8.344963711617082,
+     "rel": 0.000004348536934739206,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 6.698,
+     "ref": 6.69798780377966,
+     "rel": 0.000001820878254427265,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 12.184,
+     "ref": 12.184108545869709,
+     "rel": 0.000008908806852859744,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.032,
+     "ref": 1.0324150078092953,
+     "rel": 0.00040197769904166654,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 8.345,
+     "ref": 8.344963711617082,
+     "rel": 0.000004348536934739206,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 6.698,
+     "ref": 6.69798780377966,
+     "rel": 0.000001820878254427265,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 5.801,
+     "ref": 5.800627592311525,
+     "rel": 0.00006420127521530124,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 12.184,
+     "ref": 12.184108545869709,
+     "rel": 0.000008908806852859744,
+     "ok": true
+    },
+    "I_A": {
+     "got": 97.56,
+     "ref": 97.56448622025586,
+     "rel": 0.00004598210301367634,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 394.51,
+     "ref": 394.50848804843145,
+     "rel": 0.0000038324943932763805,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.37,
+     "ref": 1.3728779878921387,
+     "rel": 0.0020963173111671067,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 97.6,
+     "ref": 97.56448622025573,
+     "rel": 0.0003640031441777898,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.73,
+     "ref": 0.727774919429218,
+     "rel": 0.0030573746241860903,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205666,
+     "rel": 0.00021191242699164018,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.96388733078108,
+     "rel": 0.00008104703345388238,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0030573746241860903,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 8.344963711617083,
+    "IkMin_kA_seriesZ": 6.697987803779658,
+    "rel_IkMax": 2.179745132999954e-16,
+    "rel_IkMin": 2.7157251652793466e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 60.7277749194295,
+    "Pload_plus_loss_kW": 60.72777491942922,
+    "rel": 4.691415348386458e-15
+   }
+  },
+  {
+   "id": "motor_contribution",
+   "note": "One 90 kW motor with ILR/Ir = 6 feeding a bus fault: the motor branch is a shunt impedance IEC 60909-0 eq. (26) in parallel with the network.",
+   "inputs": {
+    "focus": "DB1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 3
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 16.072,
+     "ref": 16.071600809590908,
+     "rel": 0.0000248382481509095,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 13.016,
+     "ref": 13.015884164670412,
+     "rel": 0.000008899535991740538,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 27.083,
+     "ref": 27.083173482412178,
+     "rel": 0.0000064055422564271095,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.192,
+     "ref": 1.1915860686408377,
+     "rel": 0.00034737848155138115,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0.941,
+     "ref": 0.9409011886099324,
+     "rel": 0.0001050178183040582,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 15.131,
+     "ref": 15.13069962098098,
+     "rel": 0.00001985228882631399,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 13.016,
+     "ref": 13.015884164670412,
+     "rel": 0.000008899535991740538,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 11.272,
+     "ref": 11.272086339320172,
+     "rel": 0.000007659568741091985,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 25.304,
+     "ref": 25.30433744143472,
+     "rel": 0.000013335319903194753,
+     "ok": true
+    },
+    "I_A": {
+     "got": 157.84,
+     "ref": 157.84233708856303,
+     "rel": 0.000014806474651430021,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 395.97,
+     "ref": 395.9673488539512,
+     "rel": 0.000006695365303495017,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.01,
+     "ref": 1.0081627865122016,
+     "rel": 0.0018223381306845942,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 157.8,
+     "ref": 157.84233708856303,
+     "rel": 0.0002682239083881633,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 1.1,
+     "ref": 1.0981946655325614,
+     "rel": 0.0016439111608352304,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.06,
+     "ref": 24.05660585705575,
+     "rel": 0.00014108985134546993,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.39104158772723,
+     "rel": 0.000051080653371640386,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 49.77,
+     "ref": 49.774582209102434,
+     "rel": 0.00009205921775858934,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0018223381306845942,
+   "pass": true,
+   "power_balance": {
+    "Psrc_kW": 95.83503677079266,
+    "Pload_plus_loss_kW": 95.83503677079572,
+    "rel": 3.206267721573311e-14
+   }
+  },
+  {
+   "id": "two_motors_lv_fault",
+   "note": "Two motors on separate feeders; fault at the LV busbar. Checks that the motor contribution is the parallel sum of both motor branches and that the static load contributes nothing.",
+   "inputs": {
+    "focus": "LV",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 4
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 24.426,
+     "ref": 24.42598925010442,
+     "rel": 4.4010072508625894e-7,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 20.391,
+     "ref": 20.391041587727237,
+     "rel": 0.000002039509706255747,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 50.396,
+     "ref": 50.395911784936985,
+     "rel": 0.0000017504408570402604,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 1.311,
+     "ref": 1.3110909158987452,
+     "rel": 0.0000693437027461149,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 23.115,
+     "ref": 23.114898334205673,
+     "rel": 0.000004398279968850659,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 17.659,
+     "ref": 17.659160024596762,
+     "rel": 0.000009061846460427147,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 47.964,
+     "ref": 47.9638873307811,
+     "rel": 0.000002349042689625813,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 259.7,
+     "ref": 259.6651736698091,
+     "rel": 0.00013412014286965024,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 2.44,
+     "ref": 2.4374343997272434,
+     "rel": 0.001052582286129891,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.43,
+     "ref": 24.42598925010442,
+     "rel": 0.0001642001007416357,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 50.4,
+     "ref": 50.395911784936985,
+     "rel": 0.00008112195847274808,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.001052582286129891,
+   "pass": true,
+   "power_balance": {
+    "Psrc_kW": 161.13771192054193,
+    "Pload_plus_loss_kW": 161.1377119205413,
+    "rel": 3.934012712358234e-15
+   }
+  },
+  {
+   "id": "two_motors_motor_terminal",
+   "note": "Same network, fault at the terminals of motor M1: its own locked-rotor impedance is directly in parallel with the supply.",
+   "inputs": {
+    "focus": "M1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 4
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 8.981,
+     "ref": 8.981267012316595,
+     "rel": 0.00002972991630565053,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 6.658,
+     "ref": 6.658331014923119,
+     "rel": 0.00004971439875502255,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 13.201,
+     "ref": 13.20076920424716,
+     "rel": 0.00001748350791297382,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.039,
+     "ref": 1.039313652338908,
+     "rel": 0.00030178795227230596,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0.685,
+     "ref": 0.6854131802642823,
+     "rel": 0.0006028192573171138,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 8.342,
+     "ref": 8.341851892690814,
+     "rel": 0.000017754727738148565,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 6.658,
+     "ref": 6.658331014923118,
+     "rel": 0.00004971439875488917,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 5.766,
+     "ref": 5.766283805729245,
+     "rel": 0.000049218134036813755,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 12.171,
+     "ref": 12.171390057955092,
+     "rel": 0.00003204711649493786,
+     "ok": true
+    },
+    "I_A": {
+     "got": 130.88,
+     "ref": 130.87960077870764,
+     "rel": 0.000003050294239741226,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 391.07,
+     "ref": 391.0734308333359,
+     "rel": 0.000008772862243838881,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 2.23,
+     "ref": 2.23164229166602,
+     "rel": 0.0007359116970283361,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 259.7,
+     "ref": 259.6651736698091,
+     "rel": 0.00013412014286965024,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 2.44,
+     "ref": 2.4374343997272434,
+     "rel": 0.001052582286129891,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.43,
+     "ref": 24.42598925010442,
+     "rel": 0.0001642001007416357,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 50.4,
+     "ref": 50.395911784936985,
+     "rel": 0.00008112195847274808,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.001052582286129891,
+   "pass": true,
+   "power_balance": {
+    "Psrc_kW": 161.13771192054193,
+    "Pload_plus_loss_kW": 161.1377119205413,
+    "rel": 3.934012712358234e-15
+   }
+  },
+  {
+   "id": "deep_chain_L1",
+   "note": "Four levels of radial cable; also exercises the load-flow voltage drop accumulated along the whole path.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 800,
+     "SkMin": 200,
+     "XR": 10,
+     "cMax": 1.1,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 7
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 4.333,
+     "ref": 4.3326573877821515,
+     "rel": 0.00007907669293557586,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 3.2,
+     "ref": 3.1998529686073556,
+     "rel": 0.000045949421453759604,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 6.252,
+     "ref": 6.25181610182486,
+     "rel": 0.000029415160673990408,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.02,
+     "ref": 1.02032105580232,
+     "rel": 0.00031466154745521006,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 4.333,
+     "ref": 4.332657387782151,
+     "rel": 0.00007907669293578087,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 3.2,
+     "ref": 3.1998529686073556,
+     "rel": 0.000045949421453759604,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 2.771,
+     "ref": 2.7711539591890197,
+     "rel": 0.00005555778974651156,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 6.252,
+     "ref": 6.2518161018248595,
+     "rel": 0.00002941516067413248,
+     "ok": true
+    },
+    "I_A": {
+     "got": 41.09,
+     "ref": 41.09035930030488,
+     "rel": 0.000008744150963813022,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 390.3,
+     "ref": 390.2985457070617,
+     "rel": 0.000003726103912801116,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 2.43,
+     "ref": 2.425363573234577,
+     "rel": 0.0019116419561128856,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 247,
+     "ref": 246.96201986296802,
+     "rel": 0.00015378938450962514,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 2.25,
+     "ref": 2.251770703084735,
+     "rel": 0.0007863602996118623,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.48,
+     "ref": 24.483004071152976,
+     "rel": 0.00012270026767325002,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.11,
+     "ref": 20.110175022575188,
+     "rel": 0.000008703185078794468,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 50.72,
+     "ref": 50.716680425372864,
+     "rel": 0.00006545331041567689,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0019116419561128856,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 4.33265738778215,
+    "IkMin_kA_seriesZ": 3.199852968607356,
+    "rel_IkMax": 4.1983227399316267e-16,
+    "rel_IkMin": 1.421150769575453e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 152.2517707030798,
+    "Pload_plus_loss_kW": 152.25177070308473,
+    "rel": 3.228743311412429e-14
+   }
+  },
+  {
+   "id": "deep_chain_DB2",
+   "note": "Same network, fault at DB-2.",
+   "inputs": {
+    "focus": "DB2",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 800,
+     "SkMin": 200,
+     "XR": 10,
+     "cMax": 1.1,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 7
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 12.716,
+     "ref": 12.715683326621475,
+     "rel": 0.000024904157361427177,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 10.109,
+     "ref": 10.10919846595734,
+     "rel": 0.00001963221495827338,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 19.869,
+     "ref": 19.869293664031595,
+     "rel": 0.000014779792204025238,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.105,
+     "ref": 1.1049120936984373,
+     "rel": 0.00007955954330121294,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 12.716,
+     "ref": 12.715683326621479,
+     "rel": 0.000024904157361147774,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 10.109,
+     "ref": 10.109198465957343,
+     "rel": 0.000019632214958624808,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 8.755,
+     "ref": 8.754822683417736,
+     "rel": 0.000020253589213293127,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 19.869,
+     "ref": 19.8692936640316,
+     "rel": 0.000014779792204204038,
+     "ok": true
+    },
+    "I_A": {
+     "got": 113.07,
+     "ref": 113.07164871750652,
+     "rel": 0.000014581175079931806,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 393.7,
+     "ref": 393.6986735996738,
+     "rel": 0.0000033690749173193713,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.58,
+     "ref": 1.5753316000815545,
+     "rel": 0.0029634395185140104,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 247,
+     "ref": 246.96201986296802,
+     "rel": 0.00015378938450962514,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 2.25,
+     "ref": 2.251770703084735,
+     "rel": 0.0007863602996118623,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.48,
+     "ref": 24.483004071152976,
+     "rel": 0.00012270026767325002,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.11,
+     "ref": 20.110175022575188,
+     "rel": 0.000008703185078794468,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 50.72,
+     "ref": 50.716680425372864,
+     "rel": 0.00006545331041567689,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0029634395185140104,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 12.71568332662148,
+    "IkMin_kA_seriesZ": 10.109198465957348,
+    "rel_IkMax": 4.291525724939135e-16,
+    "rel_IkMin": 8.996704385967352e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 152.2517707030798,
+    "Pload_plus_loss_kW": 152.25177070308473,
+    "rel": 3.228743311412429e-14
+   }
+  },
+  {
+   "id": "stiff_source_high_XR",
+   "note": "Stiff 2 MVA / 6 % transformer on a 2 GVA feeder with X/R = 30: kappa is close to its 1.8-2.0 range and i_p is the dominant number.",
+   "inputs": {
+    "focus": "LV",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 2000,
+     "uk": 6,
+     "Pk": 18,
+     "SkMax": 2000,
+     "SkMin": 1500,
+     "XR": 30,
+     "cMax": 1.1,
+     "cMin": 0.95,
+     "applyKT": true,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 51.518,
+     "ref": 51.517667757544245,
+     "rel": 0.000006449097372165026,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 44.373,
+     "ref": 44.37333937355984,
+     "rel": 0.000007648141082696863,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 119.898,
+     "ref": 119.89786867142618,
+     "rel": 0.0000010953370169975682,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 51.518,
+     "ref": 51.51766775754418,
+     "rel": 0.000006449097373406333,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 38.428,
+     "ref": 38.428439148251066,
+     "rel": 0.000011427688992889395,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 119.898,
+     "ref": 119.89786867142614,
+     "rel": 0.0000010953370173531425,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 484.9,
+     "ref": 484.8611418221701,
+     "rel": 0.00008014289964304374,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.51,
+     "ref": 0.5090143784652229,
+     "rel": 0.0019363333856087597,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 51.52,
+     "ref": 51.517667757544245,
+     "rel": 0.00004527073055274635,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 44.37,
+     "ref": 44.37333937355984,
+     "rel": 0.00007525630495660364,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 119.9,
+     "ref": 119.89786867142618,
+     "rel": 0.000017776200673468765,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0019363333856087597,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 51.51766775754418,
+    "IkMin_kA_seriesZ": 44.37333937355982,
+    "rel_IkMax": 1.2710905089072364e-15,
+    "rel_IkMin": 3.279427564795295e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 300.5090143784621,
+    "Pload_plus_loss_kW": 300.5090143784652,
+    "rel": 1.0381510064815288e-14
+   }
+  },
+  {
+   "id": "resistive_small_cable",
+   "note": "Very small cable far from the transformer: R/X is large, kappa collapses towards 1.02 and Ik is set almost entirely by the cable resistance.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 0.721,
+     "ref": 0.720822110498162,
+     "rel": 0.00024678696622528243,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 0.546,
+     "ref": 0.5458703658838145,
+     "rel": 0.00023748150529403743,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 1.04,
+     "ref": 1.0397843328193968,
+     "rel": 0.00020741530122741803,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.02,
+     "ref": 1.02,
+     "rel": 0,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 0.721,
+     "ref": 0.720822110498162,
+     "rel": 0.00024678696622528243,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 0.546,
+     "ref": 0.5458703658838145,
+     "rel": 0.00023748150529403743,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 0.473,
+     "ref": 0.47273760402848974,
+     "rel": 0.0005550562706968802,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 1.04,
+     "ref": 1.0397843328193968,
+     "rel": 0.00020741530122741803,
+     "ok": true
+    },
+    "I_A": {
+     "got": 16.47,
+     "ref": 16.470479295752703,
+     "rel": 0.00002910029174609646,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 389.48,
+     "ref": 389.48490057906923,
+     "rel": 0.000012582205528196239,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 2.63,
+     "ref": 2.6287748552326917,
+     "rel": 0.0004660516152113477,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 16.5,
+     "ref": 16.470479295752703,
+     "rel": 0.0017923403270303914,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.32,
+     "ref": 0.32469616136448504,
+     "rel": 0.014463248794658191,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.11489833420567,
+     "rel": 0.00021191242699179386,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.96388733078109,
+     "rel": 0.00008104703345417863,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.014463248794658191,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 0.720822110498162,
+    "IkMin_kA_seriesZ": 0.5458703658838145,
+    "rel_IkMax": 0,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 10.324696161364521,
+    "Pload_plus_loss_kW": 10.324696161364486,
+    "rel": 3.5510977361657894e-15
+   }
+  },
+  {
+   "id": "tn_earth_loop",
+   "note": "TN earth-fault loop: Zs is the upstream loop plus phase and PE conductor of every feeder on the path; If = cmin U0 / |Zs| (IEC 60364-4-41 411.4.4).",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "TN",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 3
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 3.181,
+     "ref": 3.1809637939332256,
+     "rel": 0.000011382105902465974,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 2.434,
+     "ref": 2.4342515225334873,
+     "rel": 0.00010332643572730362,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 4.589,
+     "ref": 4.588539234318939,
+     "rel": 0.0001004166375248431,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.02,
+     "ref": 1.020001301025673,
+     "rel": 0.0000012755137387222891,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 3.181,
+     "ref": 3.1809637939332256,
+     "rel": 0.000011382105902465974,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 2.434,
+     "ref": 2.4342515225334873,
+     "rel": 0.00010332643572730362,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 2.108,
+     "ref": 2.108123657714948,
+     "rel": 0.0000586577141692662,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 4.589,
+     "ref": 4.588539234318939,
+     "rel": 0.0001004166375248431,
+     "ok": true
+    },
+    "I_A": {
+     "got": 32.47,
+     "ref": 32.471804480833974,
+     "rel": 0.000055570697804622744,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 395.11,
+     "ref": 395.1121961689704,
+     "rel": 0.0000055583426471770435,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.22,
+     "ref": 1.2219509577574001,
+     "rel": 0.0015965925187216119,
+     "ok": true
+    },
+    "If_kA": {
+     "got": 1.037,
+     "ref": 1.0368198190652027,
+     "rel": 0.00017378230188507112,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 32.5,
+     "ref": 32.471804480838266,
+     "rel": 0.0008683077399770783,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.27,
+     "ref": 0.27163751612487863,
+     "rel": 0.006028313571111456,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205677,
+     "rel": 0.00021191242699210118,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.39104158772723,
+     "rel": 0.000051080653371640386,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.963887330781105,
+     "rel": 0.0000810470334544749,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.006028313571111456,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 3.180963793933225,
+    "IkMin_kA_seriesZ": 2.434251522533487,
+    "rel_IkMax": 1.4295898361174813e-16,
+    "rel_IkMin": 1.868119817023585e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 20.27163751612824,
+    "Pload_plus_loss_kW": 20.27163751612488,
+    "rel": 1.658785228107315e-13
+   }
+  },
+  {
+   "id": "loadflow_motor_and_static",
+   "note": "Load flow: a 110 kW motor (input power P/eta) and a 90 kW static load on one sub-board. Checks branch current, bus voltage, cumulative voltage drop, cable losses and the generation = load + losses balance.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 8,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 4
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 5.946,
+     "ref": 5.946089697700186,
+     "rel": 0.000015085157598818704,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 4.758,
+     "ref": 4.7577012710944,
+     "rel": 0.00006278849565749889,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 8.678,
+     "ref": 8.677715179422087,
+     "rel": 0.00003282207032897335,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.032,
+     "ref": 1.0319506701939072,
+     "rel": 0.00004780248467068367,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 5.946,
+     "ref": 5.946089697700186,
+     "rel": 0.000015085157598818704,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 4.758,
+     "ref": 4.757701271094399,
+     "rel": 0.00006278849565768559,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 4.12,
+     "ref": 4.120290164385263,
+     "rel": 0.00007042328906138937,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 8.678,
+     "ref": 8.677715179422087,
+     "rel": 0.00003282207032897335,
+     "ok": true
+    },
+    "I_A": {
+     "got": 142.91,
+     "ref": 142.90575542471765,
+     "rel": 0.000029701919770324413,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 382.74,
+     "ref": 382.74414581197505,
+     "rel": 0.000010831810284755056,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 4.31,
+     "ref": 4.313963547006239,
+     "rel": 0.0009187715573048165,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 344.5,
+     "ref": 344.47088862042176,
+     "rel": 0.00008451042029945732,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 6.01,
+     "ref": 6.010036905623828,
+     "rel": 0.0000061406650920133665,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.11489833420567,
+     "rel": 0.00021191242699179386,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.39104158772724,
+     "rel": 0.000051080653372163046,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.963887330781105,
+     "rel": 0.0000810470334544749,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0009187715573048165,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 5.946089697700187,
+    "IkMin_kA_seriesZ": 4.7577012710944,
+    "rel_IkMax": 1.5295677462193352e-16,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 214.28960679810115,
+    "Pload_plus_loss_kW": 214.28960679809697,
+    "rel": 1.9553174573770364e-14
+   }
+  },
+  {
+   "id": "loadflow_unity_pf",
+   "note": "Unity power factor, zero cable reactance: the voltage drop is exactly R*I and the losses are exactly 3 I^2 R.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 20,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 11.758,
+     "ref": 11.757577325114303,
+     "rel": 0.00003594914785661681,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 9.363,
+     "ref": 9.363124309501892,
+     "rel": 0.000013276498077247169,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 17.041,
+     "ref": 17.04106060273111,
+     "rel": 0.0000035562769550291736,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.025,
+     "ref": 1.0248581980459088,
+     "rel": 0.00013836251138104163,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 11.758,
+     "ref": 11.757577325114305,
+     "rel": 0.00003594914785646573,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 9.363,
+     "ref": 9.363124309501892,
+     "rel": 0.000013276498077247169,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 8.109,
+     "ref": 8.108703510820268,
+     "rel": 0.00003656431380630346,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 17.041,
+     "ref": 17.041060602731115,
+     "rel": 0.0000035562769552376526,
+     "ok": true
+    },
+    "I_A": {
+     "got": 220.29,
+     "ref": 220.28928837516554,
+     "rel": 0.0000032304105192790946,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 393.13,
+     "ref": 393.130964366069,
+     "rel": 0.0000024530402243133546,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1.72,
+     "ref": 1.7172589084827479,
+     "rel": 0.0015962016581844048,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 220.3,
+     "ref": 220.28928837516554,
+     "rel": 0.00004862526414007223,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 2.23,
+     "ref": 2.2274063092932113,
+     "rel": 0.0011644443566345723,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205673,
+     "rel": 0.00021191242699194752,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.963887330781105,
+     "rel": 0.0000810470334544749,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.0015962016581844048,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 11.757577325114301,
+    "IkMin_kA_seriesZ": 9.363124309501893,
+    "rel_IkMax": 1.5470784101589337e-16,
+    "rel_IkMin": 1.9427162808250966e-16
+   },
+   "power_balance": {
+    "Psrc_kW": 152.2274063092933,
+    "Pload_plus_loss_kW": 152.2274063092932,
+    "rel": 5.317375525227551e-16
+   }
+  },
+  {
+   "id": "adiabatic_thermal",
+   "note": "Breaker instantaneous pickup at 8 In = 800 A is far below the fault current, so the clearing time is exactly t_i = 0.05 s and the adiabatic minimum section S = I sqrt(t)/k (IEC 60364-4-43 table 43A, k = 115 for PVC-insulated copper) can be checked in closed form.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.1,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "none",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 11.412,
+     "ref": 11.411786060614688,
+     "rel": 0.0000187472306417903,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 8.768,
+     "ref": 8.767575646609211,
+     "rel": 0.000048400311316777,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 16.658,
+     "ref": 16.658158505874127,
+     "rel": 0.000009515209863664532,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.032,
+     "ref": 1.0321869669671575,
+     "rel": 0.0001811367253617191,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 11.412,
+     "ref": 11.41178606061469,
+     "rel": 0.000018747230641634635,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 8.768,
+     "ref": 8.767575646609213,
+     "rel": 0.000048400311316574385,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 7.593,
+     "ref": 7.592943239565355,
+     "rel": 0.000007475419327395609,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 16.658,
+     "ref": 16.65815850587413,
+     "rel": 0.000009515209863877801,
+     "ok": true
+    },
+    "I_A": {
+     "got": 89.06,
+     "ref": 89.05786255924039,
+     "rel": 0.000024000584543442246,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 396.18,
+     "ref": 396.17519932064477,
+     "rel": 0.000012117566580325794,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 0.96,
+     "ref": 0.9562001698388087,
+     "rel": 0.003973885679011945,
+     "ok": true
+    },
+    "trip_s": {
+     "got": 0.05,
+     "ref": 0.05,
+     "rel": 0,
+     "ok": true
+    },
+    "Smin_mm2": {
+     "got": 22.2,
+     "ref": 22.189155979320855,
+     "rel": 0.0004887081189230594,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 89.1,
+     "ref": 89.05786255924039,
+     "rel": 0.0004731467783832556,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.45,
+     "ref": 0.44753915193588384,
+     "rel": 0.005498620742948369,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 24.18,
+     "ref": 24.179177569329003,
+     "rel": 0.00003401400517609866,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.39104158772724,
+     "rel": 0.000051080653372163046,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 50.18,
+     "ref": 50.18389600700971,
+     "rel": 0.00007763460631202103,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.005498620742948369,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 11.41178606061469,
+    "IkMin_kA_seriesZ": 8.767575646609211,
+    "rel_IkMax": 1.5939568038553624e-16,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 55.44753915193684,
+    "Pload_plus_loss_kW": 55.447539151935885,
+    "rel": 1.715322445190639e-14
+   }
+  },
+  {
+   "id": "tt_earth_loop",
+   "note": "TT system: the earth-fault loop is R_A + R_B plus the phase and PE conductors of the feeder, If = cmin U0/|Z| (IEC 60364-4-41 411.5).",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "TT",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 2,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 4.806,
+     "ref": 4.806306344374323,
+     "rel": 0.00006373800427464323,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 3.699,
+     "ref": 3.6994050924000694,
+     "rel": 0.00010950203882829492,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 6.933,
+     "ref": 6.933205334522345,
+     "rel": 0.000029616102861219365,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.02,
+     "ref": 1.0200174845570933,
+     "rel": 0.000017141428806844925,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 4.806,
+     "ref": 4.806306344374324,
+     "rel": 0.000063738004274828,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 3.699,
+     "ref": 3.69940509240007,
+     "rel": 0.00010950203882841495,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 3.204,
+     "ref": 3.2037787889079787,
+     "rel": 0.00006904693070174351,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 6.933,
+     "ref": 6.933205334522347,
+     "rel": 0.000029616102861475565,
+     "ok": true
+    },
+    "I_A": {
+     "got": 32.34,
+     "ref": 32.336515096319495,
+     "rel": 0.00010776992109780915,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 396.77,
+     "ref": 396.7652650192958,
+     "rel": 0.000011933959753178918,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 0.81,
+     "ref": 0.8086837451760545,
+     "rel": 0.0016276508978909177,
+     "ok": true
+    },
+    "If_kA": {
+     "got": 0.071,
+     "ref": 0.07053163344145956,
+     "rel": 0.006640517675365803,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 32.3,
+     "ref": 32.336515096319495,
+     "rel": 0.0011292217547478978,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.17,
+     "ref": 0.17265462548919544,
+     "rel": 0.015375351118881851,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205673,
+     "rel": 0.00021191242699194752,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.963887330781105,
+     "rel": 0.0000810470334544749,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.015375351118881851,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 4.806306344374323,
+    "IkMin_kA_seriesZ": 3.6994050924000694,
+    "rel_IkMax": 0,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 20.172654625489162,
+    "Pload_plus_loss_kW": 20.172654625489194,
+    "rel": 1.6653465381938008e-15
+   }
+  },
+  {
+   "id": "tn_manual_pe",
+   "note": "TN loop with an explicitly chosen 50 mm2 aluminium PE conductor and its own reactance, so the PE branch of the loop is not the phase conductor.",
+   "inputs": {
+    "focus": "L1",
+    "globals": {
+     "U": 400,
+     "HV": 20000,
+     "Sn": 630,
+     "uk": 4,
+     "Pk": 6.5,
+     "SkMax": 500,
+     "SkMin": 250,
+     "XR": 10,
+     "cMax": 1.05,
+     "cMin": 0.95,
+     "applyKT": false,
+     "vdLimit": 5,
+     "loadTemp": 70,
+     "scMaxTemp": 20,
+     "scMinTemp": 70,
+     "selMargin": 0.08,
+     "maxFaultTime": 5,
+     "earthing": "TN",
+     "ZeR": 28,
+     "ZeX": 18,
+     "adsTime": 0.4,
+     "RA": 50,
+     "RB": 1,
+     "Rcd": 300,
+     "RcdTime": 0.04,
+     "mainBreaker": {
+      "on": false,
+      "In": 1000,
+      "Isd": 4,
+      "tsd": 0.45,
+      "Ii": 0,
+      "ti": 0.05,
+      "t6": 10,
+      "Icu": 50,
+      "Icm": 80
+     }
+    },
+    "nodes": 2
+   },
+   "cmp": {
+    "IkMax_kA": {
+     "got": 10.745,
+     "ref": 10.744809486807073,
+     "rel": 0.000017730718553940803,
+     "ok": true
+    },
+    "IkMin_kA": {
+     "got": 8.87,
+     "ref": 8.869942336390029,
+     "rel": 0.000006501012947280624,
+     "ok": true
+    },
+    "ip_kA": {
+     "got": 16.184,
+     "ref": 16.184492883775732,
+     "rel": 0.000030454075964610304,
+     "ok": true
+    },
+    "kappa": {
+     "got": 1.065,
+     "ref": 1.0650877227962827,
+     "rel": 0.00008236203873655279,
+     "ok": true
+    },
+    "motorIk_kA": {
+     "got": 0,
+     "ref": 0,
+     "rel": 0,
+     "ok": true
+    },
+    "deviceIkMax_kA": {
+     "got": 10.745,
+     "ref": 10.744809486807073,
+     "rel": 0.000017730718553940803,
+     "ok": true
+    },
+    "deviceIkMin_kA": {
+     "got": 8.87,
+     "ref": 8.869942336390029,
+     "rel": 0.000006501012947280624,
+     "ok": true
+    },
+    "deviceIk2Min_kA": {
+     "got": 7.682,
+     "ref": 7.681595393416862,
+     "rel": 0.00005267220706323068,
+     "ok": true
+    },
+    "deviceIp_kA": {
+     "got": 16.184,
+     "ref": 16.184492883775732,
+     "rel": 0.000030454075964610304,
+     "ok": true
+    },
+    "I_A": {
+     "got": 97.2,
+     "ref": 97.19906381746591,
+     "rel": 0.000009631600319200918,
+     "ok": true
+    },
+    "Ull_V": {
+     "got": 395.99,
+     "ref": 395.9916529469603,
+     "rel": 0.000004174196471037483,
+     "ok": true
+    },
+    "vd_pct": {
+     "got": 1,
+     "ref": 1.0020867632599249,
+     "rel": 0.002082417747078432,
+     "ok": true
+    },
+    "If_kA": {
+     "got": 2.233,
+     "ref": 2.2331168595996798,
+     "rel": 0.00005233026618258251,
+     "ok": true
+    },
+    "rootI_A": {
+     "got": 97.2,
+     "ref": 97.19906381746591,
+     "rel": 0.000009631600319200918,
+     "ok": true
+    },
+    "loss_kW": {
+     "got": 0.46,
+     "ref": 0.4581560973014717,
+     "rel": 0.004024616739554142,
+     "ok": true
+    },
+    "lv_IkMax_kA": {
+     "got": 23.11,
+     "ref": 23.114898334205673,
+     "rel": 0.00021191242699194752,
+     "ok": true
+    },
+    "lv_IkMin_kA": {
+     "got": 20.39,
+     "ref": 20.391041587727237,
+     "rel": 0.00005108065337198883,
+     "ok": true
+    },
+    "lv_ip_kA": {
+     "got": 47.96,
+     "ref": 47.9638873307811,
+     "rel": 0.00008104703345432678,
+     "ok": true
+    }
+   },
+   "worst_rel": 0.004024616739554142,
+   "pass": true,
+   "crosscheck": {
+    "IkMax_kA_seriesZ": 10.744809486807071,
+    "IkMin_kA_seriesZ": 8.869942336390029,
+    "rel_IkMax": 1.6929005635505105e-16,
+    "rel_IkMin": 0
+   },
+   "power_balance": {
+    "Psrc_kW": 60.4581560973018,
+    "Pload_plus_loss_kW": 60.45815609730147,
+    "rel": 5.526559816447019e-15
+   }
+  }
+ ],
+ "environment": "Chromium (Playwright) on Linux, file:// origin, ?lang=en. Reference generated by python 3 with numpy/scipy (bench-src/ref/gen_electricalnetwork.py).",
+ "not_benchmarked": [
+  "The symmetrical breaking current Ib, the steady-state current Ik, the d.c. component i_DC and the m/n Joule-integral factors of IEC 60909-0 clause 4.5-4.8 - the tool does not compute them, so the motor contribution is benchmarked only as an initial symmetrical current I_kM'' with no decay.",
+  "Zero-sequence and negative-sequence networks: only the Z_2 = Z_1 line-to-line relation eq. (34) and the installation-level TN/TT earth-loop screening are exercised. IT systems are unsupported by the tool.",
+  "The current-carrying-capacity (Iz) tables and their correction factors, which the page shares with the Cable Sizing tool and which are benchmarked there.",
+  "The generic breaker time-current model (In/Isd/tsd/Ii/ti/t6) and the range-based selectivity screening: these are the page's own engineering model, not a standardised curve; only the case where the fault current exceeds the instantaneous pickup (clearing time = t_i exactly) is used, and only to check the adiabatic equation S = I sqrt(t)/k around it.",
+  "The conductor resistivity model (R20 = 18.56 Cu / 29.38 Al ohm mm2/km, alpha = 0.00393 / 0.00403 per K): every benchmark case pins R20 with the per-feeder override so the graded numbers do not depend on it. Note IEC 60909-0:2016 6.4 prescribes alpha = 0.004 1/K for copper and aluminium; the page uses the physical coefficients instead, a 0.15 % difference in R at 70 C."
+ ],
+ "crosscheck": "Every motor-free case is computed twice: once by solving the equivalent-voltage-source network with the faulted node as a slack node, and once from the analytic series impedance Z = Z_source + sum(Z_branch) along the path. Worst mutual deviation over 15 cases: 1.27e-15 relative (double-precision round-off). Case hand_single_feeder is additionally verified by hand: |Z| = 20.641 mOhm, Ik'' = 11747.4 A, i_p = 17.881 kA.",
+ "power_balance_note": "Load-flow invariant checked in the reference for every case: 3 Re(V_LV conj(I_root)) = sum(P_load/eta) + sum(3 |I|^2 R). Worst residual 1.66e-13 relative.",
+ "build": "2026-10-16.electricalnetwork-bench-rerun-1",
+ "manifest_revision": "2026-10-16.electricalnetwork-bench-rerun-1",
+ "reference_provenance": "recomputed",
+ "provenance_note": "Every reference value is recomputed by bench-src/ref/gen_electricalnetwork.py from the sources this artifact cites; that generator was re-run against this tree on 2026-10-03 and its output compared with the deployed corpus leaf by leaf at 2 658 leaves, 0 differing, so no case reuses a stored ref and none carries ref_source \"recorded\".",
+ "run_at": "2026-10-16T09:26:15Z"
+}

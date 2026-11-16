@@ -1,0 +1,334 @@
+{
+  "schema": "tools.petrov.re/benchmark/v1",
+  "tool": "thermaloptimizer",
+  "file": "thermaloptimizer.html",
+  "reference": "Canonical Thermal System Optimizer v0.71 scoped benchmark suite: published psychrometric, terminal-emission, borefield, borehole-resistance and steam-property references plus closed-form heat-exchanger, hydraulics and economics identities.",
+  "reference_citations": [
+    "PsychroLib API example / ASHRAE Handbook Fundamentals 2017 — 25 °C dry bulb, 80 % RH -> dew point 21.309397163661785 °C (https://psychrometrics.github.io/psychrolib/api_docs.html)",
+    "CIBSE Guide B / BS EN 1264 basic characteristic — q = 8.92 (t_fm - t_i)^1.1 (https://ierga.com/hr/wp-content/uploads/sites/2/2017/10/CIBSE-Guide-B-Heating-Ventilating-Air-Conditioning-And-Refrigeration-Fixed.pdf)",
+    "Kermi convector technical data / EN 442 logarithmic conversion — Phi = Phi_SL (Delta t_ln / 49.83)^n; Delta t_ln logarithmic mean excess (https://radiaatorikeskus.ee/wp-content/uploads/2023/10/Kermi-konvektorite-tehniline-andmeleht-ENG.pdf)",
+    "Counterflow epsilon-NTU equal-capacity limit — epsilon = NTU/(1+NTU) for C*=1; NTU=1 -> 0.5",
+    "Gnielinski 1976 internal turbulent-flow correlation — Heat Transfer 1.2.0 documented example: Re=1e5, Pr=1.2, Darcy f=0.0185 -> Nu=254.62682749359632 (https://ht.readthedocs.io/en/release/_modules/ht/conv_internal.html)",
+    "Darcy laminar friction identity — f_D = 64/Re; Re=1000 -> 0.064",
+    "pygfunction finite_line_source example — H1=H2=150 m, D1=D2=4 m, distance=5 m, alpha=1e-6 m2/s, t=4 weeks -> h=0.0110473635393 (https://pygfunction.readthedocs.io/en/stable/modules/heat_transfer.html)",
+    "ASHRAE Handbook Geothermal Energy, Example 2 — 3x2 field; T0=15 C, k=1.5 W/mK, 10 y extraction 5 W/m, g=12.3 -> Tb=8.5 C (https://handbook.ashrae.org/Handbooks/A15/SI/a15_ch34/a15_ch34_si.aspx)",
+    "ASHRAE Handbook 2023 Chapter 35 Table 5 — 25 mm DR11 HDPE single U-tube, location B, 100 mm bore, Re=4000, grout k=1.40 W/(m K) -> Rb=0.14 m K/W (https://handbook.ashrae.org/Handbooks/A23/SI/A23_Ch35/a23_ch35_si.aspx)",
+    "pygfunction g-function module uniform_temperature example — two vertical boreholes H=150 m, D=4 m, rb=0.075 m, spacing=5 m, alpha=1e-6 m2/s; t=1e7 s -> g=4.33406497 (https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html)",
+    "pygfunction 2.0 uniform_temperature time-series example — two 150 m boreholes, 5 m spacing, 12 equal segments; t=1e4..1e11 s published g-function array (https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html)",
+    "CoolProp 8.0.0 High-Level Interface saturation example — Water at 1 atm: saturated vapor h=2675529.32550072 J/kg, saturated liquid h=419057.7330939922 J/kg; latent heat=2256471.592406728 J/kg (https://coolprop.org/coolprop/HighLevelAPI.html)",
+    "Level annuity present-value identity — PV = C(1-(1+r)^-N)/r"
+  ],
+  "tolerance": "Per-case absolute or relative tolerances recorded in each benchmark case.",
+  "driver": "bench-src/run_thermaloptimizer.mjs",
+  "driven": "http://127.0.0.1:8321/thermaloptimizer.html?lang=en",
+  "run_at": "2026-10-17T21:37:54Z",
+  "total": 13,
+  "passed": 13,
+  "failed": 0,
+  "flagged": 0,
+  "page_errors": [],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "independent_validation": false,
+  "cases": [
+    {
+      "id": "BM-PSY-001",
+      "group": "psychrometrics",
+      "kind": "published-reference",
+      "note": "PsychroLib documents this numerical example and states that its equations implement ASHRAE Handbook—Fundamentals.",
+      "pass": true,
+      "actual": 21.30939716332975,
+      "expected": 21.309397163661785,
+      "absolute_error": 3.320366204206948e-10,
+      "tolerance": {
+        "abs": 0.000001
+      },
+      "source": {
+        "title": "PsychroLib API example / ASHRAE Handbook Fundamentals 2017",
+        "url": "https://psychrometrics.github.io/psychrolib/api_docs.html",
+        "reference": "25 °C dry bulb, 80 % RH -> dew point 21.309397163661785 °C"
+      },
+      "reference_check": {
+        "previous_expected": 21.309397163661785,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-FLOOR-001",
+      "group": "floor-emission",
+      "kind": "published-equation",
+      "note": "General-area surface limit example: 29 °C floor, 20 °C room gives about 100 W/m².",
+      "pass": true,
+      "actual": 100.00727983233375,
+      "expected": 100.00727983233375,
+      "absolute_error": 0,
+      "tolerance": {
+        "rel": 1e-12
+      },
+      "source": {
+        "title": "CIBSE Guide B / BS EN 1264 basic characteristic",
+        "url": "https://ierga.com/hr/wp-content/uploads/sites/2/2017/10/CIBSE-Guide-B-Heating-Ventilating-Air-Conditioning-And-Refrigeration-Fixed.pdf",
+        "reference": "q = 8.92 (t_fm - t_i)^1.1"
+      },
+      "reference_check": {
+        "previous_expected": 100.00727983233375,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-RAD-001",
+      "group": "radiator-emission",
+      "kind": "published-equation",
+      "note": "Reference data from an EN 442 chamber example: Phi_SL=1979 W, n=1.2803; evaluated at 40/33/20 °C with the published logarithmic law.",
+      "pass": true,
+      "actual": 471.39623610371854,
+      "expected": 471.39623610371854,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 0.000001
+      },
+      "source": {
+        "title": "Kermi convector technical data / EN 442 logarithmic conversion",
+        "url": "https://radiaatorikeskus.ee/wp-content/uploads/2023/10/Kermi-konvektorite-tehniline-andmeleht-ENG.pdf",
+        "reference": "Phi = Phi_SL (Delta t_ln / 49.83)^n; Delta t_ln logarithmic mean excess"
+      },
+      "reference_check": {
+        "previous_expected": 471.39623610371854,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-HX-001",
+      "group": "heat-exchanger",
+      "kind": "closed-form-identity",
+      "note": "",
+      "pass": true,
+      "actual": 0.5,
+      "expected": 0.5,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 1e-12
+      },
+      "source": {
+        "title": "Counterflow epsilon-NTU equal-capacity limit",
+        "reference": "epsilon = NTU/(1+NTU) for C*=1; NTU=1 -> 0.5"
+      },
+      "reference_check": {
+        "previous_expected": 0.5,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-HX-FILM-001",
+      "group": "heat-exchanger-film",
+      "kind": "published-reference",
+      "note": "Published-correlation regression for the new tube-side film model; Gnielinski validity is bounded to 0.5 < Pr <= 2000 and 2300 <= Re <= 5e6 in the cited implementation.",
+      "pass": true,
+      "actual": 254.62682749359632,
+      "expected": 254.62682749359632,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 1e-10
+      },
+      "source": {
+        "title": "Gnielinski 1976 internal turbulent-flow correlation",
+        "url": "https://ht.readthedocs.io/en/release/_modules/ht/conv_internal.html",
+        "reference": "Heat Transfer 1.2.0 documented example: Re=1e5, Pr=1.2, Darcy f=0.0185 -> Nu=254.62682749359632"
+      },
+      "reference_check": {
+        "previous_expected": 254.62682749359632,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-HYD-001",
+      "group": "hydraulics",
+      "kind": "closed-form-identity",
+      "note": "",
+      "pass": true,
+      "actual": 0.064,
+      "expected": 0.064,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 1e-12
+      },
+      "source": {
+        "title": "Darcy laminar friction identity",
+        "reference": "f_D = 64/Re; Re=1000 -> 0.064"
+      },
+      "reference_check": {
+        "previous_expected": 0.064,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-FLS-001",
+      "group": "finite-line-source",
+      "kind": "published-reference",
+      "note": "Independent numerical check of the vertical FLS primitive used for geometry-generated screening response tables.",
+      "pass": true,
+      "actual": 0.011047363539468983,
+      "expected": 0.0110473635393,
+      "absolute_error": 1.6898288324185273e-13,
+      "tolerance": {
+        "abs": 2e-8
+      },
+      "source": {
+        "title": "pygfunction finite_line_source example",
+        "url": "https://pygfunction.readthedocs.io/en/stable/modules/heat_transfer.html",
+        "reference": "H1=H2=150 m, D1=D2=4 m, distance=5 m, alpha=1e-6 m2/s, t=4 weeks -> h=0.0110473635393"
+      },
+      "reference_check": {
+        "previous_expected": 0.0110473635393,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-GROUND-001",
+      "group": "borefield-g-function",
+      "kind": "published-reference",
+      "note": "Direct check of the published g-function temperature-response relation.",
+      "pass": true,
+      "actual": 8.47464733323229,
+      "expected": 8.5,
+      "absolute_error": 0.02535266676770931,
+      "tolerance": {
+        "abs": 0.05
+      },
+      "source": {
+        "title": "ASHRAE Handbook Geothermal Energy, Example 2",
+        "url": "https://handbook.ashrae.org/Handbooks/A15/SI/a15_ch34/a15_ch34_si.aspx",
+        "reference": "3x2 field; T0=15 C, k=1.5 W/mK, 10 y extraction 5 W/m, g=12.3 -> Tb=8.5 C"
+      },
+      "reference_check": {
+        "previous_expected": 8.5,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-RB-001",
+      "group": "borehole-resistance",
+      "kind": "published-table",
+      "note": "Exact provenance-bearing table lookup; it validates the supported library point, not arbitrary borehole-resistance prediction.",
+      "pass": true,
+      "actual": 0.14,
+      "expected": 0.14,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 1e-12
+      },
+      "source": {
+        "title": "ASHRAE Handbook 2023 Chapter 35 Table 5",
+        "url": "https://handbook.ashrae.org/Handbooks/A23/SI/A23_Ch35/a23_ch35_si.aspx",
+        "reference": "25 mm DR11 HDPE single U-tube, location B, 100 mm bore, Re=4000, grout k=1.40 W/(m K) -> Rb=0.14 m K/W"
+      },
+      "reference_check": {
+        "previous_expected": 0.14,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-UBWT-001",
+      "group": "borefield-segmented-UBWT",
+      "kind": "published-reference",
+      "note": "Legacy pygfunction 2.0 numerical point uses 12 equal segments; this validates one time point, not spatial convergence.",
+      "pass": true,
+      "actual": 4.334032386204886,
+      "expected": 4.33406497,
+      "absolute_error": 0.00003258379511361653,
+      "tolerance": {
+        "abs": 0.00005
+      },
+      "source": {
+        "title": "pygfunction g-function module uniform_temperature example",
+        "url": "https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html",
+        "reference": "two vertical boreholes H=150 m, D=4 m, rb=0.075 m, spacing=5 m, alpha=1e-6 m2/s; t=1e7 s -> g=4.33406497"
+      },
+      "reference_check": {
+        "previous_expected": 4.33406497,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-UBWT-002",
+      "group": "borefield-segmented-UBWT-transient",
+      "kind": "published-reference",
+      "note": "Validates transient BC-III load redistribution and temporal superposition over eight decades of time for the published geometry.",
+      "pass": true,
+      "actual": 8.782197902235112e-8,
+      "expected": 0,
+      "absolute_error": 8.782197902235112e-8,
+      "tolerance": {
+        "abs": 2e-7
+      },
+      "source": {
+        "title": "pygfunction 2.0 uniform_temperature time-series example",
+        "url": "https://pygfunction.readthedocs.io/en/v2.0.0/gfunction.html",
+        "reference": "two 150 m boreholes, 5 m spacing, 12 equal segments; t=1e4..1e11 s published g-function array"
+      },
+      "reference_check": {
+        "previous_expected": 0,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-PH-001",
+      "group": "steam-condensation-p-h",
+      "kind": "published-reference",
+      "note": "Validates enthalpy-difference steam/condensate interface and explicitly avoids constant-cp treatment through phase change.",
+      "pass": true,
+      "actual": 2256471.592406728,
+      "expected": 2256471.592406728,
+      "absolute_error": 0,
+      "tolerance": {
+        "abs": 0.000001
+      },
+      "source": {
+        "title": "CoolProp 8.0.0 High-Level Interface saturation example",
+        "url": "https://coolprop.org/coolprop/HighLevelAPI.html",
+        "reference": "Water at 1 atm: saturated vapor h=2675529.32550072 J/kg, saturated liquid h=419057.7330939922 J/kg; latent heat=2256471.592406728 J/kg"
+      },
+      "reference_check": {
+        "previous_expected": 2256471.592406728,
+        "same": true
+      }
+    },
+    {
+      "id": "BM-ECO-001",
+      "group": "economics",
+      "kind": "closed-form-identity",
+      "note": "",
+      "pass": true,
+      "actual": 12721.73492918481,
+      "expected": 12721.734929184819,
+      "absolute_error": 9.094947017729282e-12,
+      "tolerance": {
+        "rel": 1e-12
+      },
+      "source": {
+        "title": "Level annuity present-value identity",
+        "reference": "PV = C(1-(1+r)^-N)/r"
+      },
+      "reference_check": {
+        "previous_expected": 12721.734929184819,
+        "same": true
+      }
+    }
+  ],
+  "not_benchmarked": [
+    "generic heat-pump quality factors/capacity derating",
+    "candidate topology search",
+    "8760 dispatch policy",
+    "2R2C parameter defaults",
+    "cost defaults",
+    "refrigerant property backend/state generation"
+  ],
+  "notes": [
+    "The suite is the page core's own ThermalCore.runBenchmarks(); this driver runs it in the browser and checks its expected values against the recorded corpus. Independent validation remains false."
+  ],
+  "build": "2026-09-09-audit3-live-progress-report-theme-routing",
+  "manifest_revision": "2026-09-09-audit3-live-progress-report-theme-routing",
+  "reference_provenance": "recorded",
+  "provenance_note": "Expected values are published reference figures and closed-form identities carried as literals in ThermalCore.runBenchmarks() of the page core and recorded in bench-src/ref/thermaloptimizer_ref.json (accepted 2026-09-04); every actual value is computed in this run by the core thermaloptimizer.html loaded in Chromium."
+}

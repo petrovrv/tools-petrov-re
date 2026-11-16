@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obsolescence & Last-Time-Buy</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-10-15.obsolescenceltb-1.2",
+  "id": "obsolescenceltb",
+  "file": "obsolescenceltb.html",
+  "listed": true,
+  "category": "engineering-change",
+  "order": 420,
+  "title": {
+    "en": "Obsolescence & Last-Time-Buy",
+    "uk": "Застарівання та остання закупівля",
+    "de": "Obsoleszenz & Last-Time-Buy",
+    "nl": "Obsolescentie & Last-Time-Buy",
+    "fr": "Obsolescence et dernier achat",
+    "es": "Obsolescencia y última compra",
+    "pl": "Starzenie technologiczne i ostatni zakup"
+  },
+  "summary": {
+    "en": "Sizes a last-time-buy of spares against a coverage probability and shows when a replacement programme must start.",
+    "uk": "Визначає обсяг останньої закупівлі запасних частин за заданою ймовірністю покриття та строк запуску заміни.",
+    "de": "Bemisst den Last-Time-Buy von Ersatzteilen für eine Zielabdeckung und zeigt den spätesten Start eines Ersatzprogramms.",
+    "nl": "Bepaalt een last-time-buy van reservedelen voor een doeldekking en het uiterste startmoment van een vervangingsprogramma.",
+    "fr": "Dimensionne un dernier achat de pièces de rechange selon une probabilité de couverture et indique quand lancer le remplacement.",
+    "es": "Dimensiona una última compra de repuestos para una probabilidad de cobertura e indica cuándo iniciar la sustitución.",
+    "pl": "Wyznacza ostatni zakup części zamiennych dla zadanej niezawodności pokrycia i termin rozpoczęcia programu wymiany."
+  },
+  "description": {
+    "en": "Combines obsolescence screening with a traceable spare-demand model. Stationary independent demand uses a Poisson process with explicit lead-time shortage risk; non-stationary demand can be represented by weighted empirical scenarios. The calculation reports minimum integer purchase quantity, achieved coverage, timing triggers, sensitivity and data gaps while keeping engineering approval separate.",
+    "uk": "Поєднує скринінг ризику застарівання з простежуваною моделлю попиту на запасні частини. Для стаціонарного незалежного попиту використовується процес Пуассона з явним ризиком дефіциту до поставки; нестаціонарний попит задається зваженими емпіричними сценаріями. Результат містить мінімальну цілу закупівлю, покриття, строки, чутливість і прогалини даних окремо від затвердження рішення.",
+    "de": "Verbindet Obsoleszenz-Screening mit einem nachvollziehbaren Ersatzteilbedarfsmodell. Stationärer unabhängiger Bedarf nutzt einen Poisson-Prozess mit explizitem Fehlbestandsrisiko während der Lieferzeit; nichtstationärer Bedarf kann über gewichtete empirische Szenarien abgebildet werden. Ausgegeben werden Mindestbestellmenge, Abdeckung, Termine, Sensitivität und Datenlücken getrennt von der Freigabe.",
+    "nl": "Combineert obsolescentiescreening met een traceerbaar reservedelenmodel. Stationaire onafhankelijke vraag gebruikt een Poissonproces met expliciet tekort-risico tijdens de levertijd; niet-stationaire vraag kan met gewogen empirische scenario's worden beschreven. De tool geeft minimale gehele aankoop, dekking, termijnen, gevoeligheid en datagaten, los van goedkeuring.",
+    "fr": "Combine un criblage d’obsolescence avec un modèle traçable de demande de rechanges. Une demande stationnaire et indépendante utilise un processus de Poisson avec risque explicite de rupture pendant le délai; une demande non stationnaire peut être représentée par des scénarios empiriques pondérés. Le résultat sépare quantité minimale, couverture, échéances, sensibilité, lacunes de données et approbation.",
+    "es": "Combina el cribado de obsolescencia con un modelo trazable de demanda de repuestos. La demanda estacionaria e independiente usa un proceso de Poisson con riesgo explícito de falta de stock durante el plazo; la demanda no estacionaria puede representarse mediante escenarios empíricos ponderados. Informa compra mínima, cobertura, plazos, sensibilidad y lagunas de datos por separado de la aprobación.",
+    "pl": "Łączy ocenę starzenia technologicznego z identyfikowalnym modelem zapotrzebowania na części. Dla stacjonarnego niezależnego popytu stosuje proces Poissona z jawnym ryzykiem braku zapasu w czasie dostawy; popyt niestacjonarny można opisać ważonymi scenariuszami empirycznymi. Wynik oddziela minimalny zakup, pokrycie, terminy, wrażliwość, luki danych i zatwierdzenie."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "Screening and preliminary planning model. Poisson mode is applicable only to stationary independent unit demand. Empirical mode reproduces only the supplied scenarios and does not extrapolate. Common-cause failures, repairable pools, cannibalisation, changing fleet size, ageing trends, vendor allocation risk and economic optimisation are outside the model unless represented explicitly in scenarios.",
+    "uk": "Скринінгова модель для попереднього планування. Режим Пуассона застосовний лише до стаціонарного незалежного штучного попиту. Емпіричний режим відтворює тільки задані сценарії без екстраполяції. Спільні причини відмов, ремонтний обмінний фонд, канібалізація, зміна парку, старіння, ризик розподілу постачальника та економічна оптимізація поза моделлю, якщо їх явно не внесено в сценарії.",
+    "de": "Screening- und Vorplanungsmodell. Der Poisson-Modus gilt nur für stationären unabhängigen Stückbedarf. Der empirische Modus bildet nur die vorgegebenen Szenarien ab und extrapoliert nicht. Common-Cause-Ausfälle, Reparaturpools, Kannibalisierung, Flottenänderung, Alterung, Lieferzuteilungsrisiko und wirtschaftliche Optimierung liegen außerhalb des Modells, sofern sie nicht explizit in Szenarien enthalten sind.",
+    "nl": "Screening- en voorontwerpmodel. Poisson is alleen geldig voor stationaire onafhankelijke stukvraag. De empirische modus reproduceert uitsluitend de ingevoerde scenario's en extrapoleert niet. Common-cause-falen, reparatiepools, kannibalisatie, wijzigende vlootomvang, veroudering, leveranciersallocatie en economische optimalisatie vallen buiten het model tenzij expliciet in scenario's opgenomen.",
+    "fr": "Modèle de criblage et de planification préliminaire. Le mode Poisson s’applique uniquement à une demande unitaire stationnaire et indépendante. Le mode empirique reproduit seulement les scénarios fournis, sans extrapolation. Défaillances de cause commune, pools réparables, cannibalisation, évolution du parc, vieillissement, allocation fournisseur et optimisation économique sont hors modèle sauf représentation explicite dans les scénarios.",
+    "es": "Modelo de cribado y planificación preliminar. Poisson solo aplica a demanda unitaria estacionaria e independiente. El modo empírico reproduce únicamente los escenarios suministrados y no extrapola. Fallos de causa común, pools reparables, canibalización, cambio de flota, envejecimiento, asignación del proveedor y optimización económica quedan fuera salvo representación explícita en escenarios.",
+    "pl": "Model do wstępnej oceny i planowania. Tryb Poissona dotyczy wyłącznie stacjonarnego, niezależnego popytu jednostkowego. Tryb empiryczny odtwarza tylko podane scenariusze i nie ekstrapoluje. Awarie wspólnej przyczyny, pule naprawialne, kanibalizacja, zmiana liczebności floty, starzenie, ryzyko alokacji dostawcy i optymalizacja ekonomiczna są poza modelem, o ile nie ujęto ich jawnie w scenariuszach."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "benchmarks/obsolescenceltb.reference.json"
+  ],
+  "network_access": {
+    "mode": "same-origin-data",
+    "note": "Fetches only benchmarks/obsolescenceltb.reference.json from this site, and only when the benchmark adapter window.__dgcBenchmark() is called; the interface itself loads nothing. Study data stay in the browser; nothing is transmitted."
+  },
+  "validation": {
+    "basis": {
+      "en": "Last-time-buy coverage as the joint probability of no shortage before delivery and through the planning horizon for a homogeneous Poisson demand process, the standard spare-parts formulation (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); Poisson probabilities by Loader’s saddle-point method (Loader, 2000), as in R nmath dpois_raw. Evidence: a corpus written from SPEC-obsolescenceltb.md without access to the page’s code, its numbers checked by a second independent calculation route.",
+      "uk": "Покриття останньої закупівлі як спільна ймовірність відсутності дефіциту до поставки та до кінця горизонту планування для однорідного пуассонівського процесу попиту — стандартне формулювання для запасних частин (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); ймовірності Пуассона за сідловим методом Loader (2000), як у R nmath dpois_raw. Докази: корпус, складений за SPEC-obsolescenceltb.md без доступу до коду сторінки, числа якого перевірено другим незалежним способом розрахунку.",
+      "de": "Abdeckung des Last-Time-Buy als gemeinsame Wahrscheinlichkeit ohne Fehlbestand bis zur Lieferung und bis zum Planungshorizont für einen homogenen Poisson-Bedarfsprozess, die übliche Ersatzteilformulierung (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); Poisson-Wahrscheinlichkeiten nach dem Sattelpunktverfahren von Loader (2000), wie in R nmath dpois_raw. Nachweis: ein Korpus, geschrieben nach SPEC-obsolescenceltb.md ohne Zugang zum Code der Seite, dessen Zahlen über einen zweiten unabhängigen Rechenweg geprüft sind.",
+      "nl": "Dekking van de last-time-buy als gezamenlijke kans op geen tekort vóór levering en tot de planningshorizon voor een homogeen Poisson-vraagproces, de gangbare formulering voor reservedelen (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); Poissonkansen met de zadelpuntmethode van Loader (2000), zoals in R nmath dpois_raw. Bewijs: een corpus geschreven op basis van SPEC-obsolescenceltb.md zonder toegang tot de code van de pagina, met getallen die langs een tweede onafhankelijke rekenweg zijn gecontroleerd.",
+      "fr": "Couverture du dernier achat comme probabilité conjointe d’absence de rupture avant livraison et jusqu’à l’horizon pour un processus de demande de Poisson homogène, formulation usuelle des pièces de rechange (Sherbrooke, Optimal Inventory Modeling of Systems, 2004) ; probabilités de Poisson par la méthode du point col de Loader (2000), comme dans R nmath dpois_raw. Preuves : un corpus rédigé d’après SPEC-obsolescenceltb.md sans accès au code de la page, dont les nombres sont vérifiés par une seconde voie de calcul indépendante.",
+      "es": "Cobertura de la última compra como probabilidad conjunta de no faltar stock antes de la entrega y hasta el horizonte para un proceso de demanda de Poisson homogéneo, la formulación habitual de repuestos (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); probabilidades de Poisson por el método de punto de silla de Loader (2000), como en R nmath dpois_raw. Evidencia: un corpus escrito a partir de SPEC-obsolescenceltb.md sin acceso al código de la página, con números comprobados por una segunda vía de cálculo independiente.",
+      "pl": "Pokrycie ostatniego zakupu jako łączne prawdopodobieństwo braku niedoboru przed dostawą i do końca horyzontu dla jednorodnego poissonowskiego procesu popytu, standardowe ujęcie części zamiennych (Sherbrooke, Optimal Inventory Modeling of Systems, 2004); prawdopodobieństwa Poissona metodą punktu siodłowego Loadera (2000), jak w R nmath dpois_raw. Dowody: korpus napisany na podstawie SPEC-obsolescenceltb.md bez dostępu do kodu strony, z liczbami sprawdzonymi drugą niezależną drogą obliczeń."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "obsolescenceltb-corpus-2026-10-03",
+        "reference": "Independent blind reference written from SPEC-obsolescenceltb.md rev 2026-10-02.1 only: Poisson probabilities with mpmath at 50 digits (route 1: regularized incomplete gamma, doubling+bisection, bisection for T_S) cross-checked by a second route (explicit pmf recurrence sums, direct double summation and complement formula, brute linear scan over Q, secant root of F(S; lambda t) = P*), empirical cases in exact rational arithmetic.",
+        "citations": [
+          "SPEC-obsolescenceltb.md, revision 2026-10-02.1, sections 2-12",
+          "Loader, C. (2000). Fast and accurate computation of binomial probabilities (saddle-point dpois form)",
+          "Johnson, N. L., Kemp, A. W., Kotz, S. (2005). Univariate Discrete Distributions, 3rd ed., ch. 4 (Poisson; F(k; mu) = Q(k+1, mu))",
+          "mpmath 1.x arbitrary-precision library: gammainc (regularized), loggamma, findroot"
+        ],
+        "cases": 111,
+        "passed": 111,
+        "tolerance": {
+          "en": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale exact (code lists as sorted sets); coverage and lead_coverage 1e-9 absolute; rate 1e-9 relative; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a absolute; risk 1e-9 absolute; only keys present in expected are compared",
+          "uk": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale — точно (списки кодів як відсортовані множини); coverage і lead_coverage — 1e-9 абсолютно; rate — 1e-9 відносно; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by — 1e-6 a абсолютно; risk — 1e-9 абсолютно; порівнюються лише ключі, наявні в expected",
+          "de": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale exakt (Codelisten als sortierte Mengen); coverage und lead_coverage 1e-9 absolut; rate 1e-9 relativ; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a absolut; risk 1e-9 absolut; verglichen werden nur Schlüssel, die in expected vorhanden sind",
+          "nl": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale exact (codelijsten als gesorteerde verzamelingen); coverage en lead_coverage 1e-9 absoluut; rate 1e-9 relatief; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a absoluut; risk 1e-9 absoluut; alleen sleutels die in expected aanwezig zijn worden vergeleken",
+          "fr": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale exacts (listes de codes comme ensembles triés) ; coverage et lead_coverage 1e-9 en absolu ; rate 1e-9 en relatif ; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a en absolu ; risk 1e-9 en absolu ; seules les clés présentes dans expected sont comparées",
+          "es": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale exactos (listas de códigos como conjuntos ordenados); coverage y lead_coverage 1e-9 absoluto; rate 1e-9 relativo; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a absoluto; risk 1e-9 absoluto; solo se comparan las claves presentes en expected",
+          "pl": "available, q, criterion_met, issues, warnings, actions, sensitivity_q, decision_approved, approval_stale dokładnie (listy kodów jako posortowane zbiory); coverage i lead_coverage 1e-9 bezwzględnie; rate 1e-9 względnie; stock_coverage_time, inventory_trigger, latest_order_by, replacement_start_by 1e-6 a bezwzględnie; risk 1e-9 bezwzględnie; porównywane są tylko klucze obecne w expected"
+        },
+        "run_at": "2026-10-15T20:15:00Z",
+        "artifact": "benchmarks/obsolescenceltb.json"
+      }
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": true,
+    "requires": []
+  },
+  "handoff": {
+    "provides": [],
+    "accepts": []
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "workflow": {
+    "entry": "calculate",
+    "medium": "none",
+    "lifecycle": [
+      "procurement",
+      "operations"
+    ]
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js?v=df5c42ab0abf" defer></script>
+<script src="diagram-common.js?v=3024c9590716" defer></script>
+<script src="diagram-ui.js?v=40a9a6f97a05" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+
+function T(en,uk,de,nl,fr,es,pl){return{en:en,uk:uk,de:de,nl:nl,fr:fr,es:es,pl:pl};}
+function clone(x){return JSON.parse(JSON.stringify(x));}
+function lang(){return (window.DiagramUI&&DiagramUI.current&&DiagramUI.current.lang)||document.documentElement.lang||'en';}
+var RLANG='';
+function pick(o,l){l=l||RLANG||lang();return(o&&o[l])||(o&&o.en)||String(o||'');}
+function opt(obj){return Object.keys(obj).map(function(k){return{value:k,label:obj[k]};});}
+function finite(x){return typeof x==='number'&&isFinite(x);}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+var MODEL_VERSION='2026-10-02.poisson-joint-v2';
+var STATUS={
+  confirmed:T('Confirmed','Підтверджено','Bestätigt','Bevestigd','Confirmé','Confirmado','Potwierdzone'),
+  rejected:T('Rejected','Відхилено','Abgelehnt','Afgewezen','Rejeté','Rechazado','Odrzucone'),
+  unknown:T('Unknown','Невідомо','Unbekannt','Onbekend','Inconnu','Desconocido','Nieznane'),
+  not_applicable:T('Not applicable','Не застосовується','Nicht anwendbar','Niet van toepassing','Non applicable','No aplicable','Nie dotyczy')
+};
+var CRITICALITY={
+  unknown:T('Unknown','Невідомо','Unbekannt','Onbekend','Inconnu','Desconocido','Nieznane'),
+  low:T('Low consequence','Низькі наслідки','Geringe Folge','Lage consequentie','Conséquence faible','Consecuencia baja','Niski skutek'),
+  medium:T('Medium consequence','Середні наслідки','Mittlere Folge','Middelgrote consequentie','Conséquence moyenne','Consecuencia media','Średni skutek'),
+  high:T('High consequence','Високі наслідки','Hohe Folge','Hoge consequentie','Conséquence élevée','Consecuencia alta','Wysoki skutek'),
+  safety:T('Safety-significant','Важливий для безпеки','Sicherheitsrelevant','Veiligheidsrelevant','Important pour la sûreté','Relevante para la seguridad','Istotny dla bezpieczeństwa')
+};
+var SUPPLIER={
+  unknown:T('Unknown','Невідомо','Unbekannt','Onbekend','Inconnu','Desconocido','Nieznane'),
+  active:T('Active supply','Активне постачання','Aktive Lieferung','Actieve levering','Fourniture active','Suministro activo','Aktywna dostawa'),
+  constrained:T('Constrained / allocation','Обмежене постачання','Eingeschränkt / Zuteilung','Beperkt / allocatie','Contraint / allocation','Restringido / asignación','Ograniczona dostępność'),
+  eol:T('End-of-life announced','Оголошено кінець життєвого циклу','End-of-Life angekündigt','End-of-life aangekondigd','Fin de vie annoncée','Fin de vida anunciada','Ogłoszony koniec życia'),
+  discontinued:T('Discontinued','Знято з виробництва','Abgekündigt','Uit productie','Arrêté','Descatalogado','Wycofane z produkcji')
+};
+var COMPAT={
+  unknown:T('Unknown','Невідомо','Unbekannt','Onbekend','Inconnu','Desconocido','Nieznane'),
+  dropin:T('Drop-in analogue','Прямий аналог','Drop-in-Ersatz','Drop-in alternatief','Équivalent direct','Equivalente directo','Zamiennik bezpośredni'),
+  qualified:T('Qualified with verification','Кваліфікований з перевіркою','Qualifiziert mit Prüfung','Gekwalificeerd met verificatie','Qualifié avec vérification','Cualificado con verificación','Zakwalifikowany po weryfikacji'),
+  reengineering:T('Re-engineering required','Потрібне перепроєктування','Re-Engineering erforderlich','Herontwerp vereist','Réingénierie requise','Reingeniería necesaria','Wymagane przeprojektowanie'),
+  none:T('No known analogue','Немає відомого аналога','Kein bekannter Ersatz','Geen bekend alternatief','Aucun équivalent connu','Sin equivalente conocido','Brak znanego zamiennika')
+};
+var DEMAND_MODEL={
+  poisson:T('Poisson · stationary independent demand','Пуассон · стаціонарний незалежний попит','Poisson · stationärer unabhängiger Bedarf','Poisson · stationaire onafhankelijke vraag','Poisson · demande stationnaire indépendante','Poisson · demanda estacionaria independiente','Poisson · stacjonarny niezależny popyt'),
+  empirical:T('Empirical weighted scenarios','Зважені емпіричні сценарії','Gewichtete empirische Szenarien','Gewogen empirische scenario’s','Scénarios empiriques pondérés','Escenarios empíricos ponderados','Ważone scenariusze empiryczne'),
+  unknown:T('Demand basis unknown','Основа попиту невідома','Bedarfsbasis unbekannt','Vraagbasis onbekend','Base de demande inconnue','Base de demanda desconocida','Podstawa popytu nieznana')
+};
+var RATE_SOURCE={
+  observed:T('Observed events / consumption','Спостережені відмови / споживання','Beobachtete Ereignisse / Verbrauch','Waargenomen gebeurtenissen / verbruik','Événements / consommation observés','Eventos / consumo observados','Zaobserwowane zdarzenia / zużycie'),
+  entered:T('Entered annual rate','Задана річна інтенсивність','Eingegebene Jahresrate','Ingevoerde jaarratio','Taux annuel saisi','Tasa anual introducida','Wprowadzona intensywność roczna')
+};
+var RATE_BASIS={
+  fleet:T('per fleet-year','на парк-рік','pro Flottenjahr','per vlootjaar','par année-parc','por año de flota','na rok floty'),
+  asset:T('per asset-year','на одиницю-рік','pro Anlagenjahr','per assetjaar','par équipement-an','por activo-año','na urządzenie-rok')
+};
+var APPROVAL={
+  pending:T('Pending','Очікує','Ausstehend','Open','En attente','Pendiente','Oczekuje'),
+  approved:T('Approved','Затверджено','Freigegeben','Goedgekeurd','Approuvé','Aprobado','Zatwierdzone'),
+  rejected:T('Rejected','Відхилено','Abgelehnt','Afgewezen','Rejeté','Rechazado','Odrzucone'),
+  unknown:T('Unknown','Невідомо','Unbekannt','Onbekend','Inconnu','Desconocido','Nieznane')
+};
+var APPROVAL_STALE=T("Approval stale: inputs changed after approval","Затвердження застаріло: входи змінено після затвердження","Freigabe veraltet: Eingaben nach der Freigabe geändert","Goedkeuring verouderd: invoer gewijzigd na goedkeuring","Approbation périmée : entrées modifiées après l’approbation","Aprobación caducada: entradas modificadas después de aprobar","Zatwierdzenie nieaktualne: dane zmienione po zatwierdzeniu"),APPROVAL_NOREASON=T("Approval incomplete: decision reference missing","Затвердження неповне: бракує посилання на рішення","Freigabe unvollständig: Entscheidungsreferenz fehlt","Goedkeuring onvolledig: besluitreferentie ontbreekt","Approbation incomplète : référence de décision manquante","Aprobación incompleta: falta la referencia de la decisión","Zatwierdzenie niepełne: brak odniesienia do decyzji");
+function approvalView(s){var a=approvalState(s);if(a.approved)return{text:APPROVAL.approved,tone:'ok'};if(a.stale)return{text:APPROVAL_STALE,tone:'warn'};if(s.approvalStatus==='approved')return{text:APPROVAL_NOREASON,tone:'warn'};return{text:APPROVAL[s.approvalStatus]||APPROVAL.unknown,tone:s.approvalStatus==='rejected'?'bad':'warn'};}
+var PROV_KEYS={
+  fleetCount:T('Fleet count','Кількість у парку','Flottengröße','Vlootomvang','Taille du parc','Tamaño de flota','Liczebność floty'),
+  stock:T('Current stock','Поточний запас','Aktueller Bestand','Huidige voorraad','Stock actuel','Stock actual','Bieżący zapas'),
+  leadYears:T('Lead time','Строк поставки','Lieferzeit','Levertijd','Délai','Plazo de entrega','Czas dostawy'),
+  horizonYears:T('Planning horizon','Горизонт планування','Planungshorizont','Planningshorizon','Horizon de planification','Horizonte de planificación','Horyzont planowania'),
+  targetCoverage:T('Target coverage','Цільове покриття','Zielabdeckung','Doeldekking','Couverture cible','Cobertura objetivo','Docelowe pokrycie'),
+  replacementDuration:T('Replacement duration','Тривалість заміни','Dauer Ersatzprogramm','Duur vervangingsprogramma','Durée du remplacement','Duración de sustitución','Czas programu wymiany'),
+  observedEvents:T('Observed events','Спостережені події','Beobachtete Ereignisse','Waargenomen gebeurtenissen','Événements observés','Eventos observados','Zaobserwowane zdarzenia'),
+  observationYears:T('Observation duration','Тривалість спостереження','Beobachtungsdauer','Observatieduur','Durée d’observation','Duración de observación','Okres obserwacji'),
+  annualRate:T('Entered annual rate','Задана річна інтенсивність','Eingegebene Jahresrate','Ingevoerde jaarratio','Taux annuel saisi','Tasa anual introducida','Wprowadzona intensywność roczna'),
+  lastOrderWindow:T('Time to last-order deadline','Час до останнього замовлення','Zeit bis Last-Order-Termin','Tijd tot laatste besteldatum','Temps avant dernière commande','Tiempo hasta última fecha de pedido','Czas do terminu ostatniego zamówienia')
+};
+var RANGES={
+  fleetCount:[1,1000000,'1'], stock:[0,1000000,'1'], leadYears:[0,100,'a'], horizonYears:[0.01,100,'a'],
+  targetCoverage:[0.5,0.99999,'1'], replacementDuration:[0,100,'a'], observedEvents:[0,1000000,'1'],
+  observationYears:[0.01,1000,'a'], annualRate:[0,1000,'1/a'], lastOrderWindow:[0,100,'a']
+};
+
+function defaultProv(key,source,version,status,reason){return{key:key,source:source||'',version:version||'',status:status||'unknown',reason:reason||''};}
+function makeDefaults(){return{
+  component:'', fleetCount:20, criticality:'high', supplierStatus:'eol', compatibility:'qualified',
+  demandModel:'poisson', rateSource:'observed', observedEvents:4, observationYears:4, annualRate:1, rateBasis:'fleet',
+  stationary:true, independent:true, acceptZeroRate:false,
+  stock:2, leadYears:0.5, horizonYears:5, targetCoverage:0.95, replacementDuration:2,
+  deadlineKnown:true, lastOrderWindow:0.75,
+  empiricalScenarios:[], approvalStatus:'pending', approvalReason:'', approvalFingerprint:'',
+  provenance:[
+    defaultProv('fleetCount',pick(T('Asset register','Реєстр активів','Anlagenregister','Activaregister','Registre des actifs','Registro de activos','Rejestr aktywów')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed',''),
+    defaultProv('stock',pick(T('Stores inventory','Залишки на складі','Lagerbestand','Magazijnvoorraad','Inventaire du magasin','Inventario de almacén','Stan magazynowy')),pick(T('today','сьогодні','heute','vandaag','aujourd’hui','hoy','dziś')),'confirmed',''),
+    defaultProv('leadYears',pick(T('Supplier quotation','Комерційна пропозиція постачальника','Lieferantenangebot','Offerte leverancier','Devis fournisseur','Oferta del proveedor','Oferta dostawcy')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed',''),
+    defaultProv('horizonYears',pick(T('Plant-life plan','План ресурсу установки','Anlagenlebensdauerplan','Levensduurplan installatie','Plan de durée de vie de l’installation','Plan de vida de la planta','Plan okresu eksploatacji instalacji')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed',''),
+    defaultProv('targetCoverage',pick(T('Project reliability target','Цільова надійність проєкту','Zuverlässigkeitsziel des Projekts','Betrouwbaarheidsdoel van het project','Objectif de fiabilité du projet','Objetivo de fiabilidad del proyecto','Cel niezawodności projektu')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed',''),
+    defaultProv('replacementDuration',pick(T('Replacement programme estimate','Оцінка програми заміни','Schätzung des Ersatzprogramms','Raming vervangingsprogramma','Estimation du programme de remplacement','Estimación del programa de sustitución','Szacunek programu wymiany')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed',''),
+    defaultProv('observedEvents',pick(T('Maintenance history','Історія техобслуговування','Instandhaltungshistorie','Onderhoudshistorie','Historique de maintenance','Historial de mantenimiento','Historia utrzymania')),pick(T('4-year extract','виписка за 4 роки','Auszug 4 Jahre','uittreksel 4 jaar','extrait 4 ans','extracto de 4 años','wyciąg z 4 lat')),'confirmed',''),
+    defaultProv('observationYears',pick(T('Maintenance history','Історія техобслуговування','Instandhaltungshistorie','Onderhoudshistorie','Historique de maintenance','Historial de mantenimiento','Historia utrzymania')),pick(T('window 2021–2024','період 2021–2024','Zeitraum 2021–2024','periode 2021–2024','période 2021–2024','periodo 2021–2024','okres 2021–2024')),'confirmed',''),
+    defaultProv('annualRate','','','not_applicable',pick(T('Observed-event mode selected','Обрано режим спостережених подій','Modus beobachtete Ereignisse gewählt','Modus waargenomen gebeurtenissen gekozen','Mode événements observés choisi','Modo de eventos observados seleccionado','Wybrano tryb zdarzeń zaobserwowanych'))),
+    defaultProv('lastOrderWindow',pick(T('Supplier EOL notice','Повідомлення постачальника про закінчення випуску','Abkündigungsmitteilung des Lieferanten','EOL-melding leverancier','Avis de fin de vie du fournisseur','Aviso de fin de vida del proveedor','Komunikat dostawcy o wycofaniu')),pick(T('rev A','ред. A','Rev. A','rev. A','rév. A','rev. A','wyd. A')),'confirmed','')
+  ]
+};}
+var DEFAULTS=makeDefaults();
+var state=clone(DEFAULTS),last=null,ui=null,stage=null,approvalSeen=state.approvalStatus,restoreNotes=[],restoreSig='';
+
+/* ===== Poisson numerics: Loader's saddle-point density (as in R nmath dpois_raw), recurrence sums ===== */
+var LTB_SFERR = [0, 0.08106146679532726, 0.0413406959554093, 0.02767792568499834, 0.020790672103765093, 0.016644691189821193, 0.013876128823070748,
+  0.01189670994589177, 0.010411265261972096, 0.009255462182712733, 0.00833056343336287, 0.007573675487951841, 0.00694284010720953, 0.006408994188004207,
+  0.0059513701127588475, 0.005554733551962801];
+function ltbStirlerr(n) {
+  /* log(n!) - log(sqrt(2*pi*n)*(n/e)^n) for integer n >= 1 */
+  if (n <= 15) return LTB_SFERR[n];
+  var nn = n * n, S0 = 1 / 12, S1 = 1 / 360, S2 = 1 / 1260, S3 = 1 / 1680, S4 = 1 / 1188;
+  if (n > 500) return (S0 - S1 / nn) / n;
+  if (n > 80) return (S0 - (S1 - S2 / nn) / nn) / n;
+  if (n > 35) return (S0 - (S1 - (S2 - S3 / nn) / nn) / nn) / n;
+  return (S0 - (S1 - (S2 - (S3 - S4 / nn) / nn) / nn) / nn) / n;
+}
+function ltbBd0(x, np) {
+  /* x*log(x/np) + np - x, computed without cancellation near x = np */
+  if (Math.abs(x - np) < 0.1 * (x + np)) {
+    var v = (x - np) / (x + np), s = (x - np) * v, ej = 2 * x * v, v2 = v * v, s1;
+    for (var j = 1; j < 1000; j++) { ej *= v2; s1 = s + ej / (2 * j + 1); if (s1 === s) return s1; s = s1; }
+    return s;
+  }
+  return x * Math.log(x / np) + np - x;
+}
+function poissonPmf(k, mu) {
+  if (k < 0 || Math.floor(k) !== k) return 0;
+  if (mu === 0) return k === 0 ? 1 : 0;
+  if (k === 0) return Math.exp(-mu);
+  return Math.exp(-ltbStirlerr(k) - ltbBd0(k, mu)) / Math.sqrt(2 * Math.PI * k);
+}
+var LTB_TAIL_EPS = 1e-17;
+function poissonCdf(k, mu) {
+  /* P(N <= k); below the mean summed down from k, above it as 1 - upper tail summed up from k+1 */
+  k = Math.floor(k); if (k < 0) return 0; if (mu <= 0) return 1;
+  var p, s, j;
+  if (k < mu) {
+    p = poissonPmf(k, mu); s = p; j = k;
+    while (j > 0) { p *= j / mu; j--; s += p; if (p < s * LTB_TAIL_EPS) break; }
+    return Math.min(1, s);
+  }
+  j = k + 1; p = poissonPmf(j, mu); s = p;
+  while (p > 0) { j++; p *= mu / j; s += p; if (p < s * LTB_TAIL_EPS) break; }
+  return Math.max(0, 1 - s);
+}
+function poissonJointCoverage(stock, q, rate, lead, horizon) {
+  /* P(N(lead) <= stock and N(horizon) <= stock + q), N a Poisson process of the given rate:
+     sum over i = N(lead) of pmf(i; rate*lead) * F(stock + q - i; rate*(horizon - lead)).
+     The sum runs over every i where pmf(i) >= 1e-20 of its peak; F is carried by recurrence. */
+  if (horizon <= lead) return { value: poissonCdf(stock, rate * horizon), mode: 'exact' };
+  var mu1 = rate * lead, mu2 = rate * (horizon - lead);
+  if (mu1 === 0) return { value: poissonCdf(stock + q, mu2), mode: 'exact' };
+  var mode = Math.min(stock, Math.floor(mu1)), pk = poissonPmf(mode, mu1), lo = mode, hi = mode, p;
+  p = pk; while (lo > 0) { var pn = p * lo / mu1; if (pn < 1e-20 * pk) break; p = pn; lo--; }
+  p = pk; while (hi < stock) { var pm = p * mu1 / (hi + 1); if (pm < 1e-20 * pk) break; p = pm; hi++; }
+  var n = stock + q - hi, F = poissonCdf(n, mu2), f2 = poissonPmf(n + 1, mu2), sum = 0, p1 = poissonPmf(hi, mu1);
+  for (var i = hi; i >= lo; i--) {
+    sum += p1 * F;
+    if (i > lo) { F += f2; n++; f2 *= mu2 / (n + 1); p1 *= i / mu1; }
+  }
+  return { value: Math.min(1, Math.max(0, sum)), mode: 'exact' };
+}
+
+function minPurchasePoisson(stock,rate,lead,horizon,target){
+  var leadCov=poissonCdf(stock,rate*Math.min(lead,horizon));
+  if(leadCov+1e-14<target)return{feasible:false,reason:'lead_risk',leadCoverage:leadCov,maxCoverage:leadCov};
+  if(horizon<=lead){
+    var hCov=poissonCdf(stock,rate*horizon);
+    return hCov>=target?{feasible:true,q:0,coverage:hCov,leadCoverage:hCov,coverageMode:'exact'}:{feasible:false,reason:'delivery_after_horizon',leadCoverage:hCov,maxCoverage:hCov};
+  }
+  var c0=poissonJointCoverage(stock,0,rate,lead,horizon);
+  if(c0.value>=target)return{feasible:true,q:0,coverage:c0.value,leadCoverage:leadCov,coverageMode:c0.mode};
+  var lo=0,hi=1,c;
+  while(hi<100000000){c=poissonJointCoverage(stock,hi,rate,lead,horizon);if(c.value>=target)break;hi*=2;}
+  if(hi>=100000000&&(!c||c.value<target))return{feasible:false,reason:'search_limit',leadCoverage:leadCov,maxCoverage:leadCov};
+  while(hi-lo>1){var mid=Math.floor((lo+hi)/2);c=poissonJointCoverage(stock,mid,rate,lead,horizon);if(c.value>=target)hi=mid;else lo=mid;}
+  c=poissonJointCoverage(stock,hi,rate,lead,horizon);
+  return{feasible:true,q:hi,coverage:c.value,leadCoverage:leadCov,coverageMode:c.mode};
+}
+var STOCK_TIME_CAP=1000;
+function stockCoverageTime(stock,rate,target){
+  /* longest t with P(N(t) <= stock) >= target; Infinity when the rate is 0 or the stock still meets the target at the cap */
+  if(rate===0)return Infinity;
+  if(poissonCdf(stock,rate*STOCK_TIME_CAP)>=target)return Infinity;
+  var lo=0,hi=STOCK_TIME_CAP;
+  for(var i=0;i<100;i++){var mid=(lo+hi)/2;if(poissonCdf(stock,rate*mid)>=target)lo=mid;else hi=mid;}
+  return lo;
+}
+function minPurchaseEmpirical(stock,rows,target){
+  var valid=rows.filter(function(r){return r.status==='confirmed'&&finite(r.leadDemand)&&finite(r.horizonDemand)&&finite(r.weight)&&r.weight>0&&r.leadDemand>=0&&r.horizonDemand>=r.leadDemand;});
+  if(!valid.length)return{feasible:false,reason:'no_empirical'};
+  var total=valid.reduce(function(a,r){return a+r.weight;},0);
+  var leadMass=valid.reduce(function(a,r){return a+(r.leadDemand<=stock?r.weight:0);},0)/total;
+  if(leadMass+1e-14<target)return{feasible:false,reason:'lead_risk',leadCoverage:leadMass,maxCoverage:leadMass};
+  var candidates=[0];valid.forEach(function(r){if(r.leadDemand<=stock)candidates.push(Math.max(0,Math.ceil(r.horizonDemand-stock)));});
+  candidates=Array.from(new Set(candidates)).sort(function(a,b){return a-b;});
+  for(var i=0;i<candidates.length;i++){
+    var q=candidates[i],mass=valid.reduce(function(a,r){return a+((r.leadDemand<=stock&&r.horizonDemand<=stock+q)?r.weight:0);},0)/total;
+    if(mass+1e-14>=target)return{feasible:true,q:q,coverage:mass,leadCoverage:leadMass,coverageMode:'empirical'};
+  }
+  return{feasible:false,reason:'scenario_limit',leadCoverage:leadMass,maxCoverage:leadMass};
+}
+function riskScore(s){
+  var cm={low:20,medium:50,high:80,safety:100},vm={active:10,constrained:40,eol:70,discontinued:100},am={dropin:10,qualified:30,reengineering:70,none:100};
+  if(!Object.prototype.hasOwnProperty.call(cm,s.criticality)||!Object.prototype.hasOwnProperty.call(vm,s.supplierStatus)||!Object.prototype.hasOwnProperty.call(am,s.compatibility))return null;
+  return 0.30*cm[s.criticality]+0.40*vm[s.supplierStatus]+0.30*am[s.compatibility];
+}
+function stateSignature(s){
+  return JSON.stringify({component:s.component,fleetCount:s.fleetCount,criticality:s.criticality,supplierStatus:s.supplierStatus,compatibility:s.compatibility,demandModel:s.demandModel,rateSource:s.rateSource,observedEvents:s.observedEvents,observationYears:s.observationYears,annualRate:s.annualRate,rateBasis:s.rateBasis,stationary:s.stationary,independent:s.independent,acceptZeroRate:s.acceptZeroRate,stock:s.stock,leadYears:s.leadYears,horizonYears:s.horizonYears,targetCoverage:s.targetCoverage,replacementDuration:s.replacementDuration,deadlineKnown:s.deadlineKnown,lastOrderWindow:s.lastOrderWindow,empiricalScenarios:s.empiricalScenarios,approvalStatus:s.approvalStatus,approvalReason:s.approvalReason,provenance:s.provenance});
+}
+function provRow(s,key){var rows=s.provenance||[];for(var i=0;i<rows.length;i++)if(rows[i].key===key)return rows[i];return null;}
+function checkProv(s,key,required,issues){
+  var r=provRow(s,key),label=pick(PROV_KEYS[key]);
+  if(!r){if(required)issues.push({code:'prov_missing',key:key,text:label+': '+pick(T('provenance is missing','відсутнє походження даних','Provenienz fehlt','herkomst ontbreekt','provenance absente','falta procedencia','brak pochodzenia danych'))});return false;}
+  if(r.status!=='confirmed'){
+    if(required)issues.push({code:'prov_status',key:key,text:label+': '+pick(STATUS[r.status]||STATUS.unknown)+(r.reason?' · '+r.reason:'')});
+    return !required;
+  }
+  if(!String(r.source||'').trim()||!String(r.version||'').trim()){
+    if(required)issues.push({code:'prov_source',key:key,text:label+': '+pick(T('source and date/version are required','потрібні джерело та дата/версія','Quelle und Datum/Version erforderlich','bron en datum/versie vereist','source et date/version requises','se requieren fuente y fecha/versión','wymagane źródło i data/wersja'))});
+    return false;
+  }
+  return true;
+}
+function checkRange(s,key,issues){
+  var r=RANGES[key],v=s[key];if(!r)return true;
+  if(!finite(v)||v<r[0]||v>r[1]){issues.push({code:'range',key:key,text:pick(PROV_KEYS[key])+': '+pick(T('outside allowed range','поза допустимим діапазоном','außerhalb des zulässigen Bereichs','buiten toegestaan bereik','hors plage admise','fuera del rango permitido','poza dopuszczalnym zakresem'))+' ['+r[0]+', '+r[1]+'] '+r[2]});return false;}
+  if((key==='fleetCount'||key==='stock'||key==='observedEvents')&&Math.floor(v)!==v){issues.push({code:'integer',key:key,text:pick(PROV_KEYS[key])+': '+pick(T('integer required','потрібне ціле число','Ganzzahl erforderlich','geheel getal vereist','entier requis','se requiere entero','wymagana liczba całkowita'))});return false;}
+  return true;
+}
+function annualRate(s,issues,warnings){
+  if(s.demandModel!=='poisson')return null;
+  if(!s.stationary||!s.independent){issues.push({code:'poisson_applicability',text:pick(T('Poisson mode requires stationary and independent demand; use empirical scenarios for changing or dependent demand.','Режим Пуассона потребує стаціонарного й незалежного попиту; для змінного або залежного попиту використайте емпіричні сценарії.','Poisson erfordert stationären und unabhängigen Bedarf; für veränderlichen oder abhängigen Bedarf empirische Szenarien verwenden.','Poisson vereist stationaire en onafhankelijke vraag; gebruik empirische scenario’s voor veranderlijke of afhankelijke vraag.','Poisson exige une demande stationnaire et indépendante; utilisez les scénarios empiriques pour une demande variable ou dépendante.','Poisson requiere demanda estacionaria e independiente; use escenarios empíricos para demanda variable o dependiente.','Poisson wymaga popytu stacjonarnego i niezależnego; dla popytu zmiennego lub zależnego użyj scenariuszy empirycznych.'))});return null;}
+  if(s.rateSource==='observed'){
+    if(!checkRange(s,'observedEvents',issues)||!checkRange(s,'observationYears',issues)||!checkProv(s,'observedEvents',true,issues)||!checkProv(s,'observationYears',true,issues))return null;
+    if(s.observedEvents===0&&!s.acceptZeroRate){issues.push({code:'zero_not_accepted',text:pick(T('Zero observed demand does not establish zero intensity. Confirm the zero-intensity assumption or provide a non-zero rate/scenario set.','Нуль спостереженого попиту не доводить нульову інтенсивність. Підтвердьте припущення нульової інтенсивності або задайте ненульову інтенсивність/сценарії.','Null beobachteter Bedarf belegt keine Nullrate. Nullraten-Annahme bestätigen oder eine Rate/Szenarien angeben.','Nul waargenomen vraag bewijst geen nulintensiteit. Bevestig de nulaanname of geef een niet-nulratio/scenarioset.','Zéro demande observée ne démontre pas une intensité nulle. Confirmez cette hypothèse ou fournissez un taux/des scénarios.','Cero demanda observada no demuestra intensidad cero. Confirme la hipótesis o indique una tasa/escenarios.','Brak zaobserwowanego popytu nie dowodzi zerowej intensywności. Potwierdź założenie lub podaj dodatnią intensywność/scenariusze.'))});return null;}
+    var rr=s.observedEvents/s.observationYears;
+    if(s.observedEvents===0){var upper=-Math.log(0.05)/s.observationYears;warnings.push({code:'zero_sample',upper95:upper,text:pick(T('Accepted central rate is 0, but the one-sided 95% upper rate from zero events is ','Прийнята центральна інтенсивність дорівнює 0, але одностороння верхня межа 95% за нульових подій становить ','Akzeptierte Zentralrate ist 0; die einseitige 95%-Obergrenze aus null Ereignissen beträgt ','Geaccepteerde centrale ratio is 0; de eenzijdige 95%-bovengrens uit nul gebeurtenissen is ','Le taux central accepté vaut 0; la borne supérieure unilatérale à 95 % issue de zéro événement vaut ','La tasa central aceptada es 0; el límite superior unilateral del 95 % con cero eventos es ','Przyjęta wartość centralna intensywności wynosi 0; jednostronna górna granica 95% z zerowej liczby zdarzeń wynosi '))+upper.toPrecision(4)+' /a'});}
+    return rr;
+  }
+  if(!checkRange(s,'annualRate',issues)||!checkProv(s,'annualRate',true,issues))return null;
+  return s.rateBasis==='asset'?s.annualRate*s.fleetCount:s.annualRate;
+}
+function validateCore(s,issues){
+  var keys=['fleetCount','stock','leadYears','horizonYears','targetCoverage','replacementDuration'];
+  var ok=true;keys.forEach(function(k){if(!checkRange(s,k,issues))ok=false;if(!checkProv(s,k,true,issues))ok=false;});
+  if(s.deadlineKnown){if(!checkRange(s,'lastOrderWindow',issues))ok=false;if(!checkProv(s,'lastOrderWindow',true,issues))ok=false;}
+  if(finite(s.horizonYears)&&finite(s.leadYears)&&s.horizonYears<s.leadYears)issues.push({code:'lead_beyond_horizon',text:pick(T('Lead time exceeds the planning horizon; a purchase ordered now cannot arrive inside the horizon.','Строк поставки перевищує горизонт планування; замовлення сьогодні не надійде в межах горизонту.','Lieferzeit übersteigt den Planungshorizont; eine heutige Bestellung trifft nicht innerhalb des Horizonts ein.','Levertijd is langer dan de planningshorizon; een bestelling van vandaag komt niet binnen de horizon aan.','Le délai dépasse l’horizon; une commande passée aujourd’hui n’arrivera pas dans l’horizon.','El plazo supera el horizonte; un pedido hoy no llega dentro del horizonte.','Czas dostawy przekracza horyzont; zamówienie złożone dziś nie dotrze w horyzoncie.'))});
+  return ok;
+}
+function empiricalRows(s,issues){
+  var rows=s.empiricalScenarios||[],out=[];
+  if(!rows.length){issues.push({code:'no_scenarios',text:pick(T('Add at least one empirical scenario.','Додайте щонайменше один емпіричний сценарій.','Mindestens ein empirisches Szenario hinzufügen.','Voeg minstens één empirisch scenario toe.','Ajoutez au moins un scénario empirique.','Añada al menos un escenario empírico.','Dodaj co najmniej jeden scenariusz empiryczny.'))});return out;}
+  rows.forEach(function(r,idx){
+    var good=finite(r.leadDemand)&&Math.floor(r.leadDemand)===r.leadDemand&&r.leadDemand>=0&&finite(r.horizonDemand)&&Math.floor(r.horizonDemand)===r.horizonDemand&&r.horizonDemand>=r.leadDemand&&finite(r.weight)&&r.weight>0&&r.weight<=1&&r.status==='confirmed'&&String(r.source||'').trim()&&String(r.version||'').trim();
+    if(!good)issues.push({code:'bad_scenario',text:pick(T('Empirical scenario','Емпіричний сценарій','Empirisches Szenario','Empirisch scenario','Scénario empirique','Escenario empírico','Scenariusz empiryczny'))+' '+(idx+1)+': '+pick(T('counts, positive weight, source, date/version and confirmed status are required','потрібні лічильники, додатна вага, джерело, дата/версія та підтверджений статус','Zahlen, positives Gewicht, Quelle, Datum/Version und bestätigter Status erforderlich','aantallen, positief gewicht, bron, datum/versie en bevestigde status vereist','comptages, poids positif, source, date/version et statut confirmé requis','se requieren conteos, peso positivo, fuente, fecha/versión y estado confirmado','wymagane liczności, dodatnia waga, źródło, data/wersja i status potwierdzony'))});
+    else out.push(r);
+  });
+  return out;
+}
+function deriveActions(s,issues,warnings,result){
+  var out=[],seen={};
+  function add(code,text){if(!seen[code]){seen[code]=true;out.push({code:code,text:pick(text)});}}
+  issues.forEach(function(x){
+    if(x.code==='unknown_demand'||x.code==='no_scenarios'||x.code==='bad_scenario'||x.code==='poisson_applicability')add('demand_basis',T('Establish a defensible demand basis and rerun the calculation.','Встановіть обґрунтовану основу попиту та повторіть розрахунок.','Belastbare Bedarfsbasis herstellen und Berechnung erneut ausführen.','Stel een verdedigbare vraagbasis vast en voer de berekening opnieuw uit.','Établissez une base de demande défendable et relancez le calcul.','Establezca una base de demanda defendible y vuelva a calcular.','Ustal uzasadnioną podstawę popytu i uruchom obliczenie ponownie.'));
+    else if(x.code==='prov_missing'||x.code==='prov_status'||x.code==='prov_source'||x.code==='range'||x.code==='integer')add('input_trace',T('Resolve the numeric input and its provenance before using the quantitative result.','Усуньте проблему числового входу та його походження перед використанням кількісного результату.','Numerische Eingabe und Provenienz klären, bevor das quantitative Ergebnis verwendet wird.','Los de numerieke invoer en herkomst op voordat het kwantitatieve resultaat wordt gebruikt.','Résolvez l’entrée numérique et sa provenance avant d’utiliser le résultat quantitatif.','Resuelva la entrada numérica y su procedencia antes de usar el resultado cuantitativo.','Wyjaśnij dane liczbowe i ich pochodzenie przed użyciem wyniku ilościowego.'));
+    else if(x.code==='zero_not_accepted')add('zero_basis',T('Resolve the zero-demand-rate assumption with evidence or a scenario set.','Обґрунтуйте припущення нульової інтенсивності даними або набором сценаріїв.','Nullraten-Annahme mit Nachweis oder Szenariensatz klären.','Onderbouw de nul-vraagratio met bewijs of een scenarioset.','Justifiez l’hypothèse de taux nul par des preuves ou un jeu de scénarios.','Justifique la tasa cero con evidencia o un conjunto de escenarios.','Uzasadnij zerową intensywność dowodami lub zestawem scenariuszy.'));
+    else if(x.code==='lead_risk'||x.code==='delivery_after_horizon')add('lead_gap',T('Treat the lead-time coverage gap as an immediate supply/replacement planning action.','Розгляньте прогалину покриття до поставки як негайну дію з планування постачання/заміни.','Lieferzeit-Abdeckungslücke als sofortige Beschaffungs-/Ersatzplanungsmaßnahme behandeln.','Behandel het dekkingstekort tijdens de levertijd als onmiddellijke leverings-/vervangingsactie.','Traitez l’insuffisance de couverture pendant le délai comme une action immédiate de planification approvisionnement/remplacement.','Trate el déficit de cobertura durante el plazo como una acción inmediata de planificación de suministro/sustitución.','Traktuj lukę pokrycia w czasie dostawy jako natychmiastowe działanie planistyczne dla dostaw/wymiany.'));
+  });
+  warnings.forEach(function(x){
+    if(x.code==='deadline_unknown')add('deadline',T('Confirm the supplier last-order deadline.','Підтвердьте строк останнього замовлення постачальника.','Last-Order-Termin des Lieferanten bestätigen.','Bevestig de laatste besteldatum van de leverancier.','Confirmez la date limite de dernière commande du fournisseur.','Confirme la fecha límite del último pedido del proveedor.','Potwierdź termin ostatniego zamówienia u dostawcy.'));
+    if(x.code==='risk_unknown')add('risk_context',T('Complete criticality, supplier status and replacement compatibility before using the screening index.','Заповніть критичність, статус постачальника та сумісність заміни перед використанням скринінгового індексу.','Kritikalität, Lieferstatus und Ersatzkompatibilität vervollständigen, bevor der Screeningindex verwendet wird.','Vul kritikaliteit, leveranciersstatus en vervangingscompatibiliteit aan voordat de screeningindex wordt gebruikt.','Complétez criticité, statut fournisseur et compatibilité avant d’utiliser l’indice de criblage.','Complete criticidad, estado del proveedor y compatibilidad antes de usar el índice de cribado.','Uzupełnij krytyczność, status dostawcy i kompatybilność zamiennika przed użyciem wskaźnika.'));
+  });
+  if(!approvalState(s).approved)add('approval',T('Record the engineering decision and approval evidence outside the calculation.','Зафіксуйте інженерне рішення та доказ затвердження поза розрахунком.','Engineering-Entscheidung und Freigabenachweis außerhalb der Berechnung dokumentieren.','Leg het engineeringbesluit en goedkeuringsbewijs buiten de berekening vast.','Enregistrez la décision d’ingénierie et la preuve d’approbation hors du calcul.','Registre la decisión de ingeniería y la evidencia de aprobación fuera del cálculo.','Zapisz decyzję inżynierską i dowód zatwierdzenia poza obliczeniem.'));
+  return out;
+}
+
+function solve(s){
+  var issues=[],warnings=[],risk=riskScore(s),coreOk=validateCore(s,issues),result=null,rate=null,stockTime=null,sens=[];
+  if(!finite(risk))warnings.push({code:'risk_unknown',text:pick(T('The obsolescence screening index is unavailable because one or more qualitative inputs are unknown.','Скринінговий індекс застарівання недоступний, оскільки один або кілька якісних входів невідомі.','Der Obsoleszenz-Screeningindex ist nicht verfügbar, weil qualitative Eingaben unbekannt sind.','De obsolescentie-screeningindex is niet beschikbaar omdat kwalitatieve invoer onbekend is.','L’indice de criblage d’obsolescence est indisponible car une ou plusieurs entrées qualitatives sont inconnues.','El índice de cribado de obsolescencia no está disponible porque faltan entradas cualitativas.','Wskaźnik starzenia jest niedostępny, ponieważ co najmniej jedno wejście jakościowe jest nieznane.'))});
+  if(!s.deadlineKnown&&(s.supplierStatus==='eol'||s.supplierStatus==='discontinued'))warnings.push({code:'deadline_unknown',text:pick(T('Supplier last-order deadline is not confirmed. Inventory timing therefore has no supplier-deadline constraint.','Строк останнього замовлення постачальника не підтверджено. Тому часовий розрахунок запасу не має обмеження строком постачальника.','Der Last-Order-Termin des Lieferanten ist nicht bestätigt. Die Bestandszeitplanung hat daher keine Lieferantenfrist.','De laatste besteldatum van de leverancier is niet bevestigd. De voorraadplanning heeft daarom geen leveranciersdeadline.','La date limite de dernière commande n’est pas confirmée. Le calendrier de stock n’a donc pas de contrainte fournisseur.','La fecha límite del último pedido no está confirmada. El calendario de inventario no tiene por tanto restricción de proveedor.','Termin ostatniego zamówienia u dostawcy nie jest potwierdzony. Harmonogram zapasu nie ma więc ograniczenia terminem dostawcy.'))});
+  if(restoreNotes.length&&stateSignature(s)===restoreSig)warnings.push({code:'restored_values',text:pick(T("The saved state held values outside the tool’s vocabularies; they were replaced by defaults: ","Збережений стан містив значення поза словниками інструмента; їх замінено типовими: ","Der gespeicherte Zustand enthielt Werte außerhalb der Wertelisten des Werkzeugs; sie wurden durch Vorgaben ersetzt: ","De opgeslagen toestand bevatte waarden buiten de keuzelijsten van de tool; ze zijn vervangen door standaardwaarden: ","L’état enregistré contenait des valeurs hors des listes de l’outil ; elles ont été remplacées par les valeurs par défaut : ","El estado guardado contenía valores fuera de las listas de la herramienta; se sustituyeron por los valores por defecto: ","Zapisany stan zawierał wartości spoza słowników narzędzia; zastąpiono je domyślnymi: "))+restoreNotes.join(', ')});
+  if(!coreOk)return{signature:stateSignature(s),risk:risk,available:false,issues:issues,warnings:warnings,actions:deriveActions(s,issues,warnings,null),model:s.demandModel,rate:null,result:null,coverage:null,criterionMet:false,stockCoverageTime:null,inventoryTrigger:null,latestOrderBy:null,replacementStartBy:null,sensitivity:[]};
+  if(s.demandModel==='unknown'){issues.push({code:'unknown_demand',text:pick(T('Quantitative last-time-buy is unavailable until a demand basis is supplied.','Кількісна остання закупівля недоступна, доки не задано основу попиту.','Quantitativer Last-Time-Buy ist ohne Bedarfsbasis nicht verfügbar.','Kwantitatieve last-time-buy is niet beschikbaar zonder vraagbasis.','Le dernier achat quantitatif est indisponible sans base de demande.','La última compra cuantitativa no está disponible sin base de demanda.','Ilościowy last-time-buy jest niedostępny bez podstawy popytu.'))});}
+  else if(s.demandModel==='poisson'){
+    rate=annualRate(s,issues,warnings);
+    if(rate!==null&&issues.length===0){
+      result=minPurchasePoisson(s.stock,rate,s.leadYears,s.horizonYears,s.targetCoverage);
+      stockTime=stockCoverageTime(s.stock,rate,s.targetCoverage);
+      if(rate>0&&stockTime===Infinity)warnings.push({code:'stock_time_beyond_cap',text:pick(T("Current stock meets the target for more than 1000 years at this rate; no stock-driven order or replacement date is set.","За цієї інтенсивності поточний запас забезпечує ціль понад 1000 років; дату замовлення чи заміни через запас не встановлено.","Bei dieser Rate erfüllt der aktuelle Bestand das Ziel länger als 1000 Jahre; kein bestandsbedingter Bestell- oder Ersatztermin wird gesetzt.","Bij deze ratio haalt de huidige voorraad het doel langer dan 1000 jaar; er wordt geen voorraadgedreven bestel- of vervangingsdatum gezet.","À ce taux, le stock actuel atteint la cible pendant plus de 1000 ans ; aucune date de commande ou de remplacement liée au stock n’est fixée.","Con esta tasa, el stock actual cumple el objetivo durante más de 1000 años; no se fija fecha de pedido ni de sustitución por stock.","Przy tej intensywności bieżący zapas spełnia cel dłużej niż 1000 lat; nie wyznacza się terminu zamówienia ani wymiany wynikającego z zapasu."))});
+      [0.5,0.75,1,1.25,1.5].forEach(function(f){var x=minPurchasePoisson(s.stock,rate*f,s.leadYears,s.horizonYears,s.targetCoverage);sens.push({factor:f,q:x.feasible?x.q:null,coverage:x.feasible?x.coverage:null,feasible:x.feasible});});
+    }
+  }else if(s.demandModel==='empirical'){
+    var rows=empiricalRows(s,issues);
+    if(rows.length&&issues.length===0)result=minPurchaseEmpirical(s.stock,rows,s.targetCoverage);
+  }
+  var available=!!(result&&result.feasible),coverage=available?result.coverage:null;
+  var criterion=available&&coverage+1e-14>=s.targetCoverage;
+  var latestOrder=null,replacementStart=null,inventoryTrigger=null;
+  if(stockTime!==null){
+    inventoryTrigger=isFinite(stockTime)?Math.max(0,stockTime-s.replacementDuration):null;
+    latestOrder=isFinite(stockTime)?Math.max(0,stockTime-s.leadYears):null;
+  }
+  if(s.deadlineKnown)latestOrder=latestOrder===null?s.lastOrderWindow:Math.min(latestOrder,s.lastOrderWindow);
+  if(available)replacementStart=Math.max(0,s.horizonYears-s.replacementDuration);
+  else if(stockTime!==null&&isFinite(stockTime))replacementStart=Math.max(0,stockTime-s.replacementDuration);
+  if(result&&!result.feasible){
+    var msg=result.reason==='lead_risk'?T('Current stock cannot meet the target probability through lead time; no purchase quantity arriving after that lead time can repair this gap.','Поточний запас не забезпечує цільову ймовірність до поставки; жодна кількість, що надійде після цього строку, не усуне цей ризик.','Der aktuelle Bestand erreicht die Zielwahrscheinlichkeit bis zur Lieferung nicht; keine danach eintreffende Menge kann diese Lücke beheben.','De huidige voorraad haalt de doelkans tot levering niet; geen hoeveelheid die daarna aankomt kan dit tekort herstellen.','Le stock actuel n’atteint pas la probabilité cible jusqu’à la livraison; aucune quantité arrivant ensuite ne peut corriger ce risque.','El stock actual no alcanza la probabilidad objetivo hasta la entrega; ninguna cantidad que llegue después puede corregir ese riesgo.','Bieżący zapas nie zapewnia docelowego prawdopodobieństwa do czasu dostawy; żadna późniejsza ilość nie usunie tej luki.')
+      :T('No feasible quantity was found inside the model limits.','У межах моделі не знайдено допустимої кількості.','Innerhalb der Modellgrenzen wurde keine machbare Menge gefunden.','Binnen de modelgrenzen is geen haalbare hoeveelheid gevonden.','Aucune quantité faisable n’a été trouvée dans les limites du modèle.','No se encontró una cantidad factible dentro de los límites del modelo.','W granicach modelu nie znaleziono wykonalnej ilości.');
+    issues.push({code:result.reason,text:pick(msg)});
+  }
+  return{signature:stateSignature(s),risk:risk,available:available,issues:issues,warnings:warnings,actions:deriveActions(s,issues,warnings,result),model:s.demandModel,rate:rate,result:result,coverage:coverage,criterionMet:criterion,stockCoverageTime:stockTime,inventoryTrigger:inventoryTrigger,latestOrderBy:latestOrder,replacementStartBy:replacementStart,sensitivity:sens};
+}
+
+var TX={
+ subtitle:T('Spare-demand coverage, timing and data traceability','Покриття попиту на запасні частини, строки та простежуваність даних','Ersatzteilabdeckung, Termine und Datennachweis','Reservedelendekking, timing en datatraceerbaarheid','Couverture des rechanges, échéances et traçabilité','Cobertura de repuestos, plazos y trazabilidad','Pokrycie zapotrzebowania na części, terminy i identyfikowalność danych'),
+ results:T('LTB screening result','Результат скринінгу LTB','LTB-Screening-Ergebnis','Resultaat LTB-screening','Résultat du criblage LTB','Resultado del cribado LTB','Wynik oceny LTB'),
+ scope:T('Component and obsolescence context','Компонент і контекст застарівання','Komponente und Obsoleszenzkontext','Component en obsolescentiecontext','Composant et contexte d’obsolescence','Componente y contexto de obsolescencia','Komponent i kontekst starzenia'),
+ component:T('Component / item','Компонент / позиція','Komponente / Artikel','Component / item','Composant / article','Componente / artículo','Komponent / pozycja'),
+ fleet:T('Installed fleet count','Кількість встановлених одиниць','Installierte Stückzahl','Aantal geïnstalleerde eenheden','Nombre installé','Cantidad instalada','Liczba zainstalowanych sztuk'),
+ criticality:T('Criticality','Критичність','Kritikalität','Kritikaliteit','Criticité','Criticidad','Krytyczność'),
+ supplier:T('Supplier status','Статус постачальника','Lieferstatus','Leveranciersstatus','Statut fournisseur','Estado del proveedor','Status dostawcy'),
+ compatibility:T('Replacement compatibility','Сумісність заміни','Ersatzkompatibilität','Vervangingscompatibiliteit','Compatibilité de remplacement','Compatibilidad de sustitución','Kompatybilność zamiennika'),
+ demand:T('Demand model','Модель попиту','Bedarfsmodell','Vraagmodel','Modèle de demande','Modelo de demanda','Model popytu'),
+ model:T('Statistical basis','Статистична основа','Statistische Grundlage','Statistische basis','Base statistique','Base estadística','Podstawa statystyczna'),
+ rateSource:T('Rate source','Джерело інтенсивності','Quelle der Rate','Bron van de ratio','Source du taux','Fuente de tasa','Źródło intensywności'),
+ events:T('Observed events / consumed units','Спостережені події / використані одиниці','Beobachtete Ereignisse / verbrauchte Teile','Waargenomen gebeurtenissen / verbruikte stuks','Événements observés / unités consommées','Eventos observados / unidades consumidas','Zaobserwowane zdarzenia / zużyte sztuki'),
+ obsYears:T('Observation duration','Тривалість спостереження','Beobachtungsdauer','Observatieduur','Durée d’observation','Duración de observación','Okres obserwacji'),
+ annualRate:T('Annual demand rate','Річна інтенсивність попиту','Jährliche Bedarfsrate','Jaarlijkse vraagratio','Taux annuel de demande','Tasa anual de demanda','Roczna intensywność popytu'),
+ rateBasis:T('Rate basis','База інтенсивності','Ratenbasis','Ratiobasis','Base du taux','Base de tasa','Podstawa intensywności'),
+ stationary:T('Demand is stationary over the horizon','Попит стаціонарний протягом горизонту','Bedarf ist über den Horizont stationär','Vraag is stationair over de horizon','Demande stationnaire sur l’horizon','Demanda estacionaria durante el horizonte','Popyt jest stacjonarny w horyzoncie'),
+ independent:T('Demand events are independent','Події попиту незалежні','Bedarfsereignisse sind unabhängig','Vraaggebeurtenissen zijn onafhankelijk','Événements de demande indépendants','Eventos de demanda independientes','Zdarzenia popytu są niezależne'),
+ acceptZero:T('Accept zero as the central Poisson intensity','Прийняти нуль як центральну інтенсивність Пуассона','Null als zentrale Poisson-Rate akzeptieren','Nul als centrale Poisson-intensiteit accepteren','Accepter zéro comme intensité centrale de Poisson','Aceptar cero como intensidad central de Poisson','Przyjąć zero jako centralną intensywność Poissona'),
+ scenarios:T('Empirical scenarios','Емпіричні сценарії','Empirische Szenarien','Empirische scenario’s','Scénarios empiriques','Escenarios empíricos','Scenariusze empiryczne'),
+ addScenario:T('Add scenario','Додати сценарій','Szenario hinzufügen','Scenario toevoegen','Ajouter un scénario','Añadir escenario','Dodaj scenariusz'),
+ leadDemand:T('Demand by delivery','Попит до поставки','Bedarf bis Lieferung','Vraag tot levering','Demande avant livraison','Demanda hasta entrega','Popyt do dostawy'),
+ horizonDemand:T('Demand by horizon','Попит до горизонту','Bedarf bis Horizont','Vraag tot horizon','Demande à l’horizon','Demanda hasta horizonte','Popyt do horyzontu'),
+ weight:T('Weight','Вага','Gewicht','Gewicht','Poids','Peso','Waga'),
+ source:T('Source','Джерело','Quelle','Bron','Source','Fuente','Źródło'),
+ version:T('Date / version','Дата / версія','Datum / Version','Datum / versie','Date / version','Fecha / versión','Data / wersja'),
+ credibility:T('Credibility','Достовірність','Glaubwürdigkeit','Betrouwbaarheid','Crédibilité','Credibilidad','Wiarygodność'),
+ reason:T('Reason','Причина','Begründung','Reden','Motif','Motivo','Powód'),
+ inventory:T('Inventory and planning times','Запас і планові строки','Bestand und Planungszeiten','Voorraad en planningstijden','Stock et délais de planification','Inventario y plazos de planificación','Zapas i terminy planowania'),
+ stock:T('Current usable stock','Поточний придатний запас','Aktuell nutzbarer Bestand','Huidige bruikbare voorraad','Stock utilisable actuel','Stock utilizable actual','Bieżący użyteczny zapas'),
+ lead:T('Procurement lead time','Строк поставки','Beschaffungszeit','Inkooplevertijd','Délai d’approvisionnement','Plazo de aprovisionamiento','Czas dostawy'),
+ horizon:T('Planning horizon','Горизонт планування','Planungshorizont','Planningshorizon','Horizon de planification','Horizonte de planificación','Horyzont planowania'),
+ target:T('Target no-shortage probability','Цільова ймовірність відсутності дефіциту','Zielwahrscheinlichkeit ohne Fehlbestand','Doelkans zonder tekort','Probabilité cible sans rupture','Probabilidad objetivo sin falta de stock','Docelowe prawdopodobieństwo braku niedoboru'),
+ replDuration:T('Replacement programme duration','Тривалість програми заміни','Dauer des Ersatzprogramms','Duur vervangingsprogramma','Durée du programme de remplacement','Duración del programa de sustitución','Czas programu wymiany'),
+ deadlineKnown:T('Supplier last-order deadline is known','Відомий строк останнього замовлення постачальника','Last-Order-Termin des Lieferanten ist bekannt','Laatste besteldatum leverancier is bekend','Date limite de dernière commande connue','Se conoce la fecha límite del último pedido','Znany termin ostatniego zamówienia dostawcy'),
+ lastOrder:T('Time to supplier last-order deadline','Час до строку останнього замовлення','Zeit bis zum Last-Order-Termin','Tijd tot laatste besteldatum','Temps avant date limite de dernière commande','Tiempo hasta fecha límite del último pedido','Czas do terminu ostatniego zamówienia'),
+ provenance:T('Numeric input provenance','Походження числових вхідних даних','Provenienz numerischer Eingaben','Herkomst numerieke invoer','Provenance des entrées numériques','Procedencia de entradas numéricas','Pochodzenie danych liczbowych'),
+ provenanceNote:T('Every numeric input used by the model requires a unit from the field definition, a source, a date/version and an explicit credibility status. Non-confirmed required data block the quantitative result.','Кожен числовий вхід моделі потребує одиниці з визначення поля, джерела, дати/версії та явного статусу достовірності. Непідтверджені обов’язкові дані блокують кількісний результат.','Jede numerische Modelleingabe benötigt Einheit aus der Felddefinition, Quelle, Datum/Version und expliziten Glaubwürdigkeitsstatus. Nicht bestätigte Pflichtdaten sperren das quantitative Ergebnis.','Elke numerieke modelinvoer vereist een eenheid uit de velddefinitie, bron, datum/versie en expliciete betrouwbaarheidsstatus. Niet-bevestigde verplichte data blokkeren het kwantitatieve resultaat.','Chaque entrée numérique exige l’unité définie par le champ, une source, une date/version et un statut explicite de crédibilité. Les données requises non confirmées bloquent le résultat quantitatif.','Cada entrada numérica requiere la unidad definida en el campo, fuente, fecha/versión y estado explícito de credibilidad. Los datos obligatorios no confirmados bloquean el resultado cuantitativo.','Każde wejście liczbowe wymaga jednostki z definicji pola, źródła, daty/wersji i jawnego statusu wiarygodności. Niepotwierdzone dane wymagane blokują wynik ilościowy.'),
+ parameter:T('Parameter','Параметр','Parameter','Parameter','Paramètre','Parámetro','Parametr'),
+ decision:T('Engineering decision','Інженерне рішення','Engineering-Entscheidung','Engineeringbesluit','Décision d’ingénierie','Decisión de ingeniería','Decyzja inżynierska'),
+ approval:T('Approval status','Статус затвердження','Freigabestatus','Goedkeuringsstatus','Statut d’approbation','Estado de aprobación','Status zatwierdzenia'),
+ approvalReason:T('Decision reference / rationale','Посилання / обґрунтування рішення','Entscheidungsreferenz / Begründung','Besluitreferentie / onderbouwing','Référence / justification de décision','Referencia / justificación de decisión','Odniesienie / uzasadnienie decyzji'),
+ risk:T('Obsolescence screening index','Скринінговий індекс застарівання','Obsoleszenz-Screeningindex','Obsolescentie-screeningindex','Indice de criblage d’obsolescence','Índice de cribado de obsolescencia','Wskaźnik oceny starzenia'),
+ purchase:T('Minimum LTB purchase','Мінімальна закупівля LTB','Mindest-LTB-Menge','Minimale LTB-aankoop','Achat LTB minimal','Compra LTB mínima','Minimalny zakup LTB'),
+ coverage:T('Achieved no-shortage probability','Досягнута ймовірність без дефіциту','Erreichte Wahrscheinlichkeit ohne Fehlbestand','Behaalde kans zonder tekort','Probabilité obtenue sans rupture','Probabilidad lograda sin falta','Uzyskane prawdopodobieństwo bez niedoboru'),
+ replacementStart:T('Start replacement by','Запустити заміну не пізніше','Ersatzprogramm starten bis','Vervanging starten uiterlijk','Lancer le remplacement avant','Iniciar sustitución antes de','Rozpocząć wymianę do'),
+ latestOrder:T('Place LTB order by','Розмістити LTB-замовлення не пізніше','LTB bestellen bis','LTB bestellen uiterlijk','Passer la commande LTB avant','Realizar pedido LTB antes de','Złożyć zamówienie LTB do'),
+ leadCoverage:T('Coverage through lead time','Покриття до поставки','Abdeckung bis Lieferung','Dekking tot levering','Couverture jusqu’à livraison','Cobertura hasta entrega','Pokrycie do dostawy'),
+ stockHorizon:T('Existing-stock coverage at horizon','Покриття наявним запасом на горизонті','Bestandsabdeckung am Horizont','Dekking huidige voorraad op horizon','Couverture du stock existant à l’horizon','Cobertura del stock actual en el horizonte','Pokrycie bieżącym zapasem w horyzoncie'),
+ annualDemand:T('Fleet annual demand rate','Річна інтенсивність попиту парку','Jährliche Flottenbedarfsrate','Jaarlijkse vraagratio van de vloot','Taux annuel de demande du parc','Tasa anual de demanda de la flota','Roczna intensywność popytu floty'),
+ stockTime:T('Time current stock meets target','Час, протягом якого поточний запас виконує ціль','Zeit, in der Bestand das Ziel erfüllt','Tijd waarin huidige voorraad doel haalt','Durée pendant laquelle le stock atteint la cible','Tiempo durante el que el stock cumple el objetivo','Czas, przez który bieżący zapas spełnia cel'),
+ criterion:T('Probability criterion','Ймовірнісний критерій','Wahrscheinlichkeitskriterium','Kanscriterium','Critère de probabilité','Criterio de probabilidad','Kryterium prawdopodobieństwa'),
+ calcState:T('Calculation','Розрахунок','Berechnung','Berekening','Calcul','Cálculo','Obliczenie'),
+ decisionState:T('Decision approval','Затвердження рішення','Entscheidungsfreigabe','Goedkeuring besluit','Approbation de décision','Aprobación de decisión','Zatwierdzenie decyzji'),
+ available:T('Calculated','Розраховано','Berechnet','Berekend','Calculé','Calculado','Obliczono'),
+ unavailable:T('Unavailable','Недоступно','Nicht verfügbar','Niet beschikbaar','Indisponible','No disponible','Niedostępne'),
+ met:T('Criterion met','Критерій виконано','Kriterium erfüllt','Criterium gehaald','Critère satisfait','Criterio cumplido','Kryterium spełnione'),
+ notMet:T('Criterion not met','Критерій не виконано','Kriterium nicht erfüllt','Criterium niet gehaald','Critère non satisfait','Criterio no cumplido','Kryterium niespełnione'),
+ sensitivity:T('Demand-intensity sensitivity','Чутливість до інтенсивності попиту','Sensitivität zur Bedarfsrate','Gevoeligheid voor vraagintensiteit','Sensibilité à l’intensité de demande','Sensibilidad a la intensidad de demanda','Wrażliwość na intensywność popytu'),
+ factor:T('Rate factor','Множник інтенсивності','Ratenfaktor','Ratiofactor','Facteur de taux','Factor de tasa','Mnożnik intensywności'),
+ notes:T('Findings','Висновки','Befunde','Bevindingen','Constats','Hallazgos','Ustalenia'),
+ modelBasis:T('Model applicability','Застосовність моделі','Modellanwendbarkeit','Modeltoepasbaarheid','Applicabilité du modèle','Aplicabilidad del modelo','Stosowalność modelu'),
+ learnTitle:T('Try the horizon before reading the answer','Спочатку змініть горизонт, потім читайте відповідь','Erst den Horizont ändern, dann die Antwort lesen','Wijzig eerst de horizon, lees daarna het antwoord','Modifiez d’abord l’horizon, puis lisez la réponse','Cambie primero el horizonte y luego lea la respuesta','Najpierw zmień horyzont, potem przeczytaj odpowiedź'),
+ learnBody:T('Load “Discontinued PLC”. Predict whether the LTB quantity rises or falls when the horizon changes from 5 to 10 years, then run both cases. Explanation: the horizon adds Poisson demand after the delivery point while the lead-time risk is unchanged. Correction: the minimum quantity can rise, but it cannot repair a lead-time coverage gap; when stock cannot carry the target probability to delivery, replacement or an earlier supply action must start instead.','Завантажте «Знятий з виробництва PLC». Передбачте, як зміниться LTB при горизонті 5 і 10 років, потім виконайте обидва розрахунки. Пояснення: горизонт додає попит Пуассона після поставки, а ризик до поставки не змінюється. Корекція: мінімальна кількість може зростати, але не усуває дефіцит покриття до поставки; якщо запас не тримає цільову ймовірність до поставки, потрібна заміна або раніша дія з постачання.','Laden Sie „Abgekündigte SPS“. Schätzen Sie, wie sich die LTB-Menge bei einem Horizont von 5 auf 10 Jahre ändert, und rechnen Sie beide Fälle. Erklärung: Der längere Horizont fügt Poisson-Bedarf nach der Lieferung hinzu, während das Lieferzeitrisiko gleich bleibt. Korrektur: Die Mindestmenge kann steigen, kann aber eine Lieferzeitlücke nicht heilen; trägt der Bestand die Zielwahrscheinlichkeit nicht bis zur Lieferung, muss Ersatz oder eine frühere Beschaffungsmaßnahme beginnen.','Laad “Uit productie genomen PLC”. Voorspel wat met de LTB-hoeveelheid gebeurt als de horizon van 5 naar 10 jaar gaat en voer beide gevallen uit. Uitleg: de langere horizon voegt Poissonvraag na levering toe, terwijl het risico vóór levering gelijk blijft. Correctie: de minimale hoeveelheid kan stijgen, maar kan een tekort vóór levering niet herstellen; als voorraad de doelkans niet tot levering draagt, moet vervanging of een eerdere leveringsactie starten.','Chargez « API arrêté ». Prévoyez l’évolution de la quantité LTB lorsque l’horizon passe de 5 à 10 ans, puis calculez les deux cas. Explication : l’horizon ajoute une demande de Poisson après la livraison, tandis que le risque pendant le délai reste inchangé. Correction : la quantité minimale peut augmenter mais ne corrige pas une insuffisance de couverture avant livraison; il faut alors lancer le remplacement ou une action d’approvisionnement plus tôt.','Cargue “PLC descatalogado”. Prediga cómo cambia la cantidad LTB al pasar el horizonte de 5 a 10 años y ejecute ambos casos. Explicación: el horizonte añade demanda de Poisson después de la entrega mientras el riesgo durante el plazo no cambia. Corrección: la cantidad mínima puede aumentar, pero no corrige un déficit de cobertura previo a la entrega; en ese caso debe iniciarse la sustitución o una acción de suministro anterior.','Wczytaj „Wycofany PLC”. Przewidź zmianę ilości LTB przy wydłużeniu horyzontu z 5 do 10 lat i uruchom oba przypadki. Wyjaśnienie: dłuższy horyzont dodaje popyt Poissona po dostawie, a ryzyko w czasie dostawy pozostaje bez zmian. Korekta: minimalna ilość może wzrosnąć, ale nie usuwa luki pokrycia przed dostawą; wtedy trzeba rozpocząć wymianę lub wcześniejsze działanie zakupowe.'),
+ introTitle:T('What the result means','Що означає результат','Was das Ergebnis bedeutet','Wat het resultaat betekent','Ce que signifie le résultat','Qué significa el resultado','Co oznacza wynik'),
+ introBody:T('Enter the item, demand evidence, usable stock, lead time, planning horizon and target probability. Run computes an integer last-time-buy and timing triggers only when the chosen model is applicable and every required numeric input has confirmed provenance. Approval stays a separate field.','Введіть позицію, дані попиту, придатний запас, строк поставки, горизонт і цільову ймовірність. Run обчислює цілу кількість LTB та часові тригери лише за застосовної моделі й підтвердженого походження всіх обов’язкових числових даних. Затвердження залишається окремим полем.','Artikel, Bedarfsnachweis, nutzbaren Bestand, Lieferzeit, Horizont und Zielwahrscheinlichkeit eingeben. Run berechnet eine ganzzahlige LTB-Menge und Termine nur bei anwendbarem Modell und bestätigter Provenienz aller Pflichtzahlen. Die Freigabe bleibt ein separates Feld.','Voer item, vraagevidence, bruikbare voorraad, levertijd, horizon en doelkans in. Run berekent een gehele LTB-hoeveelheid en tijdtriggers alleen bij een toepasbaar model en bevestigde herkomst van alle verplichte cijfers. Goedkeuring blijft een apart veld.','Saisissez l’article, les données de demande, le stock utilisable, le délai, l’horizon et la probabilité cible. Run calcule une quantité LTB entière et des échéances uniquement si le modèle est applicable et si la provenance de toutes les données numériques requises est confirmée. L’approbation reste séparée.','Introduzca el artículo, evidencia de demanda, stock utilizable, plazo, horizonte y probabilidad objetivo. Run calcula una cantidad LTB entera y plazos solo si el modelo aplica y toda entrada numérica obligatoria tiene procedencia confirmada. La aprobación permanece separada.','Wprowadź pozycję, dane popytu, użyteczny zapas, czas dostawy, horyzont i docelowe prawdopodobieństwo. Run wyznacza całkowitą ilość LTB i terminy tylko przy stosowalnym modelu i potwierdzonym pochodzeniu wszystkich wymaganych danych liczbowych. Zatwierdzenie pozostaje osobnym polem.'),
+ footer:T('Poisson mode: stationary independent unit demand. Coverage requires no shortage before delivery and no shortage through the planning horizon after the purchase arrives. Empirical mode uses only the weighted scenarios entered by the user. Risk index = 0.30 criticality + 0.40 supplier status + 0.30 replacement compatibility on fixed 0–100 screening scales.','Режим Пуассона: стаціонарний незалежний штучний попит. Покриття вимагає відсутності дефіциту до поставки та до кінця горизонту після надходження закупівлі. Емпіричний режим використовує лише введені користувачем зважені сценарії. Індекс ризику = 0,30 критичність + 0,40 статус постачальника + 0,30 сумісність заміни за фіксованими шкалами 0–100.','Poisson: stationärer unabhängiger Stückbedarf. Abdeckung verlangt keinen Fehlbestand bis zur Lieferung und bis zum Planungshorizont nach Eingang der Bestellung. Empirisch werden nur die eingegebenen gewichteten Szenarien verwendet. Risikoindex = 0,30 Kritikalität + 0,40 Lieferstatus + 0,30 Ersatzkompatibilität auf festen 0–100-Skalen.','Poisson: stationaire onafhankelijke stukvraag. Dekking vereist geen tekort vóór levering en tot de planningshorizon nadat de aankoop aankomt. Empirisch gebruikt alleen de ingevoerde gewogen scenario’s. Risico-index = 0,30 kritikaliteit + 0,40 leveranciersstatus + 0,30 vervangingscompatibiliteit op vaste 0–100-schalen.','Poisson : demande unitaire stationnaire indépendante. La couverture exige l’absence de rupture avant livraison et jusqu’à l’horizon après arrivée de l’achat. Le mode empirique utilise uniquement les scénarios pondérés saisis. Indice de risque = 0,30 criticité + 0,40 statut fournisseur + 0,30 compatibilité de remplacement sur des échelles fixes 0–100.','Poisson: demanda unitaria estacionaria independiente. La cobertura exige ausencia de falta antes de la entrega y hasta el horizonte después de recibir la compra. El modo empírico usa solo los escenarios ponderados introducidos. Índice de riesgo = 0,30 criticidad + 0,40 estado del proveedor + 0,30 compatibilidad de sustitución en escalas fijas 0–100.','Poisson: stacjonarny niezależny popyt jednostkowy. Pokrycie wymaga braku niedoboru przed dostawą i do końca horyzontu po otrzymaniu zakupu. Tryb empiryczny używa wyłącznie wprowadzonych ważonych scenariuszy. Wskaźnik ryzyka = 0,30 krytyczność + 0,40 status dostawcy + 0,30 kompatybilność zamiennika na stałych skalach 0–100.')
+};
+
+function newProvRow(){return defaultProv('fleetCount','','','unknown','');}
+function newScenario(){return{leadDemand:0,horizonDemand:0,weight:1,source:'',version:'',status:'unknown',reason:''};}
+function adoptStage(app){stage=app&&app.stages&&app.stages[0]||null;}
+
+function resultPayload(s,r){
+  var notes=[];
+  r.issues.forEach(function(x){notes.push(x.text);});
+  r.warnings.forEach(function(x){notes.push(x.text);});
+  var rows=[];
+  if(r.rate!==null)rows.push({cells:[TX.annualDemand,{value:r.rate,precision:4},'1/a']});
+  if(r.result&&finite(r.result.leadCoverage))rows.push({cells:[TX.leadCoverage,{value:100*r.result.leadCoverage,precision:3},'%']});
+  if(r.model==='poisson'&&r.rate!==null)rows.push({cells:[TX.stockHorizon,{value:100*poissonCdf(s.stock,r.rate*s.horizonYears),precision:3},'%']});
+  if(r.stockCoverageTime!==null&&isFinite(r.stockCoverageTime))rows.push({cells:[TX.stockTime,{value:r.stockCoverageTime,precision:3},'a']});
+  if(r.available&&r.inventoryTrigger!==null)rows.push({cells:[T("Start replacement by, without purchase","Почати заміну до, без закупівлі","Ersatz beginnen bis, ohne Kauf","Vervanging starten vóór, zonder aankoop","Lancer le remplacement avant, sans achat","Iniciar la sustitución antes de, sin compra","Rozpocząć wymianę do, bez zakupu"),{value:r.inventoryTrigger,precision:3},'a']});
+  var tiles=[];if(finite(r.risk))tiles.push({label:TX.risk,value:r.risk,precision:1,hint:'/100'});
+  if(r.available){
+    tiles.push({label:TX.purchase,value:r.result.q,precision:0,hint:pick(T('units','шт.','Stk.','st.','unités','unidades','szt.'))});
+    tiles.push({label:TX.coverage,value:100*r.coverage,precision:3,hint:'%',tone:r.criterionMet?'ok':'bad'});
+    if(r.replacementStartBy!==null)tiles.push({label:TX.replacementStart,value:r.replacementStartBy,precision:2,hint:'a'});
+    if(r.latestOrderBy!==null)tiles.push({label:TX.latestOrder,value:r.latestOrderBy,precision:2,hint:'a'});
+  }
+  var av=approvalView(s);tiles.push({label:TX.decisionState,value:pick(av.text),tone:av.tone,headline:false,learn:'states'});
+  var tables=[];
+  if(rows.length)tables.push({title:TX.results,head:[pick(T('Quantity','Величина','Größe','Grootheid','Grandeur','Magnitud','Wielkość')),pick(T('Value','Значення','Wert','Waarde','Valeur','Valor','Wartość')),pick(T('Unit','Одиниця','Einheit','Eenheid','Unité','Unidad','Jednostka'))],rows:rows});
+  if(r.sensitivity&&r.sensitivity.length){tables.push({title:TX.sensitivity,head:[TX.factor,TX.purchase,TX.coverage],rows:r.sensitivity.map(function(x){return{cells:[{value:x.factor,precision:2},x.q===null?'—':{value:x.q,precision:0},x.coverage===null?'—':{value:100*x.coverage,precision:3}]};})});}
+  if(r.actions&&r.actions.length)tables.push({title:TX.openActions,head:[TX.action],rows:r.actions.map(function(x){return{cells:[x.text]};})});
+  var verdictText;
+  if(!r.available)verdictText=T('Quantitative LTB result unavailable. Resolve the listed data/model gaps.','Кількісний результат LTB недоступний. Усуньте зазначені прогалини даних або моделі.','Quantitatives LTB-Ergebnis nicht verfügbar. Daten-/Modelllücken schließen.','Kwantitatief LTB-resultaat niet beschikbaar. Los de genoemde data-/modelgaten op.','Résultat LTB quantitatif indisponible. Résolvez les lacunes de données/modèle.','Resultado LTB cuantitativo no disponible. Resuelva las lagunas de datos/modelo.','Ilościowy wynik LTB niedostępny. Usuń wskazane luki danych/modelu.');
+  else if(r.criterionMet)verdictText=T('The calculated purchase meets the probability criterion. Engineering approval: ','Розрахована закупівля виконує ймовірнісний критерій. Інженерне затвердження: ','Die berechnete Menge erfüllt das Wahrscheinlichkeitskriterium. Engineering-Freigabe: ','De berekende aankoop voldoet aan het kanscriterium. Engineeringgoedkeuring: ','L’achat calculé satisfait le critère probabiliste. Approbation d’ingénierie : ','La compra calculada cumple el criterio probabilístico. Aprobación de ingeniería: ','Obliczony zakup spełnia kryterium prawdopodobieństwa. Zatwierdzenie inżynierskie: ');
+  else verdictText=T('A quantity was calculated, but the probability criterion is not met.','Кількість розраховано, але ймовірнісний критерій не виконано.','Eine Menge wurde berechnet, das Wahrscheinlichkeitskriterium ist jedoch nicht erfüllt.','Een hoeveelheid is berekend, maar het kanscriterium is niet gehaald.','Une quantité est calculée mais le critère probabiliste n’est pas satisfait.','Se calculó una cantidad, pero no se cumple el criterio probabilístico.','Ilość obliczono, lecz kryterium prawdopodobieństwa nie jest spełnione.');
+  var text=pick(verdictText)+(r.available&&r.criterionMet?pick(approvalView(s).text):'');
+  return{verdict:{tone:!r.available?'warn':(r.criterionMet?'ok':'bad'),text:text},tiles:tiles,tables:tables,notes:notes};
+}
+
+function buildInterface(){
+  ui=DiagramUI.app({
+    id:'obsolescenceltb',mount:'#app',layout:'calculator',compute:'run',state:state,defaults:DEFAULTS,subtitle:TX.subtitle,results:{title:TX.results},
+    notices:[{id:'scope',tone:'warn',sticky:true,title:TX.modelBasis,text:T('The tool calculates a screening risk index and a preliminary spare-demand coverage. It does not approve a life-cycle strategy or qualify a replacement item.','Інструмент розраховує скринінговий індекс ризику та попереднє покриття попиту на запасні частини. Він не затверджує стратегію життєвого циклу й не кваліфікує замінний компонент.','Das Werkzeug berechnet einen Screening-Risikoindex und eine vorläufige Ersatzteilabdeckung. Es genehmigt keine Lebenszyklusstrategie und qualifiziert keinen Ersatzartikel.','De tool berekent een screening-risico-index en voorlopige reservedelendekking. Hij keurt geen levenscyclusstrategie goed en kwalificeert geen vervangingsitem.','L’outil calcule un indice de risque de criblage et une couverture préliminaire des rechanges. Il n’approuve pas une stratégie de cycle de vie et ne qualifie pas un article de remplacement.','La herramienta calcula un índice de riesgo de cribado y una cobertura preliminar de repuestos. No aprueba una estrategia de ciclo de vida ni cualifica un artículo de sustitución.','Narzędzie oblicza wskaźnik ryzyka i wstępne pokrycie zapotrzebowania na części. Nie zatwierdza strategii cyklu życia ani kwalifikacji zamiennika.')}],
+    learn:{version:1,intro:{title:TX.introTitle,body:TX.introBody},topics:{horizon:{title:TX.learnTitle,body:TX.learnBody},'case':{title:T("Try it: can a larger purchase cover a long lead time?","Спробуйте: чи покриє більша закупівля довгий строк поставки?","Ausprobieren: Deckt ein größerer Kauf eine lange Lieferzeit?","Probeer het: dekt een grotere aankoop een lange levertijd?","Essayez : un achat plus grand couvre-t-il un long délai ?","Pruébelo: ¿cubre una compra mayor un plazo largo?","Spróbuj: czy większy zakup pokryje długi czas dostawy?"),body:T("Load “Discontinued PLC” and change the procurement lead time from 0.5 to 2 years. Before running, guess how many units the last-time-buy will need.","Завантажте «Знятий з виробництва PLC» і змініть строк поставки з 0,5 на 2 роки. Перш ніж запускати, вгадайте, скільки одиниць знадобиться для останньої закупівлі.","Laden Sie „Abgekündigte SPS“ und ändern Sie die Beschaffungszeit von 0,5 auf 2 Jahre. Schätzen Sie vor dem Rechnen, wie viele Stück der Last-Time-Buy braucht.","Laad „Uit productie genomen PLC” en verander de inkooplevertijd van 0,5 naar 2 jaar. Schat vóór het rekenen hoeveel stuks de last-time-buy nodig heeft.","Chargez « API arrêté » et passez le délai d’approvisionnement de 0,5 à 2 ans. Avant de calculer, estimez combien d’unités le dernier achat demandera.","Cargue «PLC descatalogado» y cambie el plazo de aprovisionamiento de 0,5 a 2 años. Antes de calcular, estime cuántas unidades necesitará la última compra.","Wczytaj „Wycofany PLC” i zmień czas dostawy z 0,5 na 2 lata. Przed obliczeniem oszacuj, ile sztuk będzie potrzebował ostatni zakup.")},explain:{title:T("Why no quantity appears","Чому кількість не з’являється","Warum keine Menge erscheint","Waarom er geen hoeveelheid verschijnt","Pourquoi aucune quantité n’apparaît","Por qué no aparece ninguna cantidad","Dlaczego nie pojawia się ilość"),body:T("Units bought now arrive only after the lead time. Until then the two units in stock carry the demand alone: at one event per year the probability of at most two events in two years is 67.7 %, below the 95 % target. The tool therefore reports a lead-time gap instead of a quantity; no purchase size changes that probability.","Закуплені зараз одиниці надійдуть лише після строку поставки. До того попит покривають тільки дві одиниці на складі: за однієї події на рік імовірність не більше двох подій за два роки становить 67,7 %, нижче цілі 95 %. Тому інструмент повідомляє про прогалину до поставки замість кількості; жоден обсяг закупівлі цю ймовірність не змінює.","Jetzt gekaufte Teile treffen erst nach der Lieferzeit ein. Bis dahin tragen die zwei Teile im Lager den Bedarf allein: bei einem Ereignis pro Jahr beträgt die Wahrscheinlichkeit für höchstens zwei Ereignisse in zwei Jahren 67,7 %, unter dem Ziel von 95 %. Das Werkzeug meldet daher eine Lieferzeitlücke statt einer Menge; keine Kaufmenge ändert diese Wahrscheinlichkeit.","Nu gekochte stuks komen pas na de levertijd binnen. Tot dan dragen de twee stuks in voorraad de vraag alleen: bij één gebeurtenis per jaar is de kans op hoogstens twee gebeurtenissen in twee jaar 67,7 %, onder het doel van 95 %. De tool meldt daarom een levertijdtekort in plaats van een hoeveelheid; geen aankoopgrootte verandert die kans.","Les unités achetées maintenant n’arrivent qu’après le délai. D’ici là, les deux unités en stock portent seules la demande : à un événement par an, la probabilité d’au plus deux événements en deux ans est de 67,7 %, sous la cible de 95 %. L’outil signale donc un écart pendant le délai au lieu d’une quantité ; aucune taille d’achat ne change cette probabilité.","Las unidades compradas ahora llegan solo tras el plazo. Hasta entonces las dos unidades en stock cubren solas la demanda: con un evento por año, la probabilidad de como máximo dos eventos en dos años es del 67,7 %, por debajo del objetivo del 95 %. Por eso la herramienta informa de una brecha durante el plazo en lugar de una cantidad; ningún tamaño de compra cambia esa probabilidad.","Sztuki kupione teraz dotrą dopiero po czasie dostawy. Do tego czasu popyt pokrywają same dwie sztuki z magazynu: przy jednym zdarzeniu rocznie prawdopodobieństwo co najwyżej dwóch zdarzeń w dwa lata wynosi 67,7 %, poniżej celu 95 %. Narzędzie zgłasza więc lukę w czasie dostawy zamiast ilości; żadna wielkość zakupu nie zmienia tego prawdopodobieństwa.")},fix:{title:T("What changes the answer","Що змінює відповідь","Was die Antwort ändert","Wat het antwoord verandert","Ce qui change la réponse","Qué cambia la respuesta","Co zmienia odpowiedź"),body:T("A shorter lead time, more usable stock now, or a lower target changes it. Set the lead time back to 0.5 years and the purchase returns as 7 units. Interim sources such as a spares pool or cannibalisation lie outside the model and must be entered as stock only once they are confirmed.","Її змінюють коротший строк поставки, більший придатний запас зараз або нижча ціль. Поверніть строк поставки 0,5 року, і закупівля знову становитиме 7 одиниць. Тимчасові джерела, як-от спільний фонд запчастин чи розукомплектування, лежать поза моделлю і вносяться як запас лише після підтвердження.","Eine kürzere Lieferzeit, mehr nutzbarer Bestand jetzt oder ein niedrigeres Ziel ändern sie. Setzen Sie die Lieferzeit auf 0,5 Jahre zurück, und der Kauf erscheint wieder mit 7 Stück. Zwischenquellen wie ein Ersatzteilpool oder Ausschlachten liegen außerhalb des Modells und gehen erst nach Bestätigung als Bestand ein.","Een kortere levertijd, nu meer bruikbare voorraad of een lager doel verandert het. Zet de levertijd terug op 0,5 jaar en de aankoop komt terug als 7 stuks. Tussenbronnen zoals een reservedelenpool of kannibalisatie vallen buiten het model en tellen pas als voorraad mee na bevestiging.","Un délai plus court, davantage de stock utilisable maintenant ou une cible plus basse la changent. Remettez le délai à 0,5 an et l’achat revient à 7 unités. Les sources provisoires comme un pool de rechanges ou la cannibalisation sont hors modèle et n’entrent comme stock qu’une fois confirmées.","La cambian un plazo más corto, más stock utilizable ahora o un objetivo menor. Vuelva a poner el plazo en 0,5 años y la compra reaparece con 7 unidades. Las fuentes provisionales como un pool de repuestos o la canibalización quedan fuera del modelo y solo cuentan como stock una vez confirmadas.","Zmienia ją krótszy czas dostawy, większy użyteczny zapas teraz lub niższy cel. Przywróć czas dostawy 0,5 roku, a zakup znów wyniesie 7 sztuk. Źródła przejściowe, jak pula części czy kanibalizacja, leżą poza modelem i wchodzą jako zapas dopiero po potwierdzeniu.")},timing:{title:T("Timing triggers","Часові тригери","Terminauslöser","Tijdtriggers","Déclencheurs de calendrier","Disparadores de plazo","Wyzwalacze terminów"),body:T("“Time current stock meets target” is the longest period over which the stock alone keeps the no-shortage probability at the target. The order date is that time minus the lead time, capped by the supplier’s last-order deadline when it is known. With a feasible purchase, replacement must start one programme duration before the horizon; without one, one programme duration before the stock time.","«Час, протягом якого поточний запас виконує ціль» — найдовший період, у якому лише запас тримає ймовірність відсутності дефіциту на рівні цілі. Дата замовлення — цей час мінус строк поставки, але не пізніше відомого строку останнього замовлення постачальника. Якщо закупівля можлива, заміну треба почати за тривалість програми до горизонту; якщо ні — за тривалість програми до часу запасу.","„Zeit, in der der Bestand das Ziel erfüllt“ ist der längste Zeitraum, in dem der Bestand allein die Wahrscheinlichkeit ohne Fehlbestand auf dem Ziel hält. Der Bestelltermin ist diese Zeit minus Lieferzeit, begrenzt durch den Last-Order-Termin des Lieferanten, wenn er bekannt ist. Mit machbarem Kauf beginnt der Ersatz eine Programmdauer vor dem Horizont, ohne ihn eine Programmdauer vor der Bestandszeit.","‘Tijd dat de huidige voorraad het doel haalt’ is de langste periode waarin de voorraad alleen de kans zonder tekort op het doel houdt. De besteldatum is die tijd min de levertijd, begrensd door de laatste besteldatum van de leverancier als die bekend is. Met een haalbare aankoop start de vervanging één programmaduur vóór de horizon; zonder aankoop één programmaduur vóór de voorraadtijd.","« Durée pendant laquelle le stock atteint la cible » est la plus longue période où le stock seul maintient la probabilité sans rupture à la cible. La date de commande est cette durée moins le délai, plafonnée par la date limite du fournisseur quand elle est connue. Avec un achat faisable, le remplacement démarre une durée de programme avant l’horizon ; sinon, une durée de programme avant la durée du stock.","«Tiempo en que el stock actual cumple el objetivo» es el periodo más largo en que el stock por sí solo mantiene la probabilidad sin falta en el objetivo. La fecha de pedido es ese tiempo menos el plazo, limitada por la fecha límite del proveedor cuando se conoce. Con una compra factible, la sustitución empieza una duración de programa antes del horizonte; sin ella, una duración de programa antes del tiempo del stock.","„Czas, w którym bieżący zapas spełnia cel” to najdłuższy okres, w którym sam zapas utrzymuje prawdopodobieństwo braku niedoboru na poziomie celu. Termin zamówienia to ten czas minus czas dostawy, nie później niż znany termin ostatniego zamówienia u dostawcy. Przy wykonalnym zakupie wymianę zaczyna się na czas trwania programu przed horyzontem; bez niego — na czas trwania programu przed czasem zapasu.")},states:{title:T("Three separate states","Три окремі стани","Drei getrennte Zustände","Drie afzonderlijke toestanden","Trois états distincts","Tres estados separados","Trzy odrębne stany"),body:T("Calculation says whether a quantity could be computed from confirmed inputs; the probability criterion says whether that quantity reaches the target; approval records the engineering decision. An approval holds only for the inputs it was given with: change any input afterwards and it shows as stale until it is selected again.","«Розрахунок» показує, чи вдалося обчислити кількість з підтверджених входів; «ймовірнісний критерій» — чи досягає ця кількість цілі; «затвердження» фіксує інженерне рішення. Затвердження чинне лише для входів, з якими його надано: після зміни будь-якого входу воно позначається як застаріле, доки його не оберуть знову.","„Berechnung“ sagt, ob aus bestätigten Eingaben eine Menge berechnet werden konnte; das Wahrscheinlichkeitskriterium, ob diese Menge das Ziel erreicht; die Freigabe dokumentiert die Engineering-Entscheidung. Eine Freigabe gilt nur für die Eingaben, mit denen sie erteilt wurde: Wird danach eine Eingabe geändert, erscheint sie als veraltet, bis sie erneut gewählt wird.","‘Berekening’ zegt of uit bevestigde invoer een hoeveelheid kon worden berekend; het kanscriterium of die hoeveelheid het doel haalt; de goedkeuring legt het engineeringbesluit vast. Een goedkeuring geldt alleen voor de invoer waarmee ze is gegeven: wijzig daarna een invoer en ze verschijnt als verouderd tot ze opnieuw wordt gekozen.","« Calcul » indique si une quantité a pu être calculée à partir d’entrées confirmées ; le critère de probabilité, si cette quantité atteint la cible ; l’approbation consigne la décision d’ingénierie. Une approbation ne vaut que pour les entrées avec lesquelles elle a été donnée : modifiez ensuite une entrée et elle apparaît périmée jusqu’à ce qu’elle soit de nouveau choisie.","«Cálculo» indica si se pudo calcular una cantidad con entradas confirmadas; el criterio de probabilidad, si esa cantidad alcanza el objetivo; la aprobación registra la decisión de ingeniería. Una aprobación vale solo para las entradas con las que se dio: si después cambia una entrada, aparece caducada hasta que se vuelva a seleccionar.","„Obliczenie” mówi, czy z potwierdzonych danych udało się wyznaczyć ilość; kryterium prawdopodobieństwa — czy ta ilość osiąga cel; zatwierdzenie rejestruje decyzję inżynierską. Zatwierdzenie obowiązuje tylko dla danych, z którymi je nadano: po zmianie dowolnej danej jest oznaczone jako nieaktualne, dopóki nie zostanie wybrane ponownie.")},provenance:{title:TX.provenance,body:TX.provenanceNote},basis:{title:TX.modelBasis,body:T('Use Poisson only for stationary independent event demand. Use empirical scenarios when rates change with age, campaigns, fleet phase-out, dependencies or common-cause effects. Unknown demand remains unknown.','Використовуйте Пуассон лише для стаціонарного незалежного попиту на події. Для зміни інтенсивності з віком, кампаніями, виведенням парку, залежностями або спільними причинами використовуйте емпіричні сценарії. Невідомий попит залишається невідомим.','Poisson nur für stationären unabhängigen Ereignisbedarf verwenden. Bei alters-, kampagnen-, ausphasungs-, abhängigkeit- oder common-cause-bedingten Änderungen empirische Szenarien nutzen. Unbekannter Bedarf bleibt unbekannt.','Gebruik Poisson alleen voor stationaire onafhankelijke gebeurtenisvraag. Gebruik empirische scenario’s bij veroudering, campagnes, uitfasering, afhankelijkheden of common-cause-effecten. Onbekende vraag blijft onbekend.','Utilisez Poisson uniquement pour une demande événementielle stationnaire et indépendante. Utilisez les scénarios empiriques en cas de vieillissement, campagnes, retrait du parc, dépendances ou causes communes. Une demande inconnue reste inconnue.','Use Poisson solo para demanda de eventos estacionaria e independiente. Use escenarios empíricos con envejecimiento, campañas, retirada de flota, dependencias o causa común. La demanda desconocida sigue siendo desconocida.','Stosuj Poissona tylko dla stacjonarnego, niezależnego popytu zdarzeniowego. Przy starzeniu, kampaniach, wycofywaniu floty, zależnościach lub przyczynach wspólnych użyj scenariuszy empirycznych. Nieznany popyt pozostaje nieznany.')}},tour:[{topic:'basis',focus:'[data-dgu-field="f-demand-model"]'},{topic:'provenance',focus:'[data-dgu-field="f-provenance"]'},{topic:'case',focus:'[data-dgu-field="f-lead"]'},{topic:'explain'},{topic:'fix'},{topic:'timing'},{topic:'states',focus:'[data-dgu-field="f-approval"]'}]},
+    panels:[
+      {id:'scope',slot:'inputs',title:TX.scope,fields:[
+        {id:'f-component',key:'component',type:'text',label:TX.component,required:true},
+        {id:'f-fleet',key:'fleetCount',type:'number',unit:'1',label:TX.fleet,min:1,max:1000000,step:1,precision:0,required:true},
+        {id:'f-criticality',key:'criticality',type:'select',label:TX.criticality,options:function(){return opt(CRITICALITY);}},
+        {id:'f-supplier',key:'supplierStatus',type:'select',label:TX.supplier,options:function(){return opt(SUPPLIER);}},
+        {id:'f-compat',key:'compatibility',type:'select',label:TX.compatibility,options:function(){return opt(COMPAT);}}
+      ]},
+      {id:'demand',slot:'inputs',title:TX.demand,learn:'basis',fields:[
+        {id:'f-demand-model',key:'demandModel',type:'select',label:TX.model,options:function(){return opt(DEMAND_MODEL);},required:true,learn:'basis'},
+        {id:'f-rate-source',key:'rateSource',type:'select',label:TX.rateSource,options:function(){return opt(RATE_SOURCE);},visible:function(){return state.demandModel==='poisson';}},
+        {id:'f-events',key:'observedEvents',type:'number',unit:'1',label:TX.events,min:0,max:1000000,step:1,precision:0,visible:function(){return state.demandModel==='poisson'&&state.rateSource==='observed';}},
+        {id:'f-obs-years',key:'observationYears',type:'number',unit:'a',label:TX.obsYears,min:0.01,max:1000,step:0.1,precision:2,visible:function(){return state.demandModel==='poisson'&&state.rateSource==='observed';}},
+        {id:'f-rate',key:'annualRate',type:'number',unit:'1/a',label:TX.annualRate,min:0,max:1000,step:0.01,precision:4,visible:function(){return state.demandModel==='poisson'&&state.rateSource==='entered';}},
+        {id:'f-rate-basis',key:'rateBasis',type:'select',label:TX.rateBasis,options:function(){return opt(RATE_BASIS);},visible:function(){return state.demandModel==='poisson'&&state.rateSource==='entered';}},
+        {id:'f-stationary',key:'stationary',type:'toggle',label:TX.stationary,visible:function(){return state.demandModel==='poisson';}},
+        {id:'f-independent',key:'independent',type:'toggle',label:TX.independent,visible:function(){return state.demandModel==='poisson';}},
+        {id:'f-zero',key:'acceptZeroRate',type:'toggle',label:TX.acceptZero,visible:function(){return state.demandModel==='poisson'&&state.rateSource==='observed'&&state.observedEvents===0;}},
+        {id:'f-scenarios',key:'empiricalScenarios',type:'list',label:TX.scenarios,addLabel:TX.addScenario,minRows:0,maxRows:50,reorder:true,visible:function(){return state.demandModel==='empirical';},newRow:newScenario,row:[
+          {key:'leadDemand',type:'number',label:TX.leadDemand,min:0,max:1000000,step:1,width:'120px'},
+          {key:'horizonDemand',type:'number',label:TX.horizonDemand,min:0,max:1000000,step:1,width:'120px'},
+          {key:'weight',type:'number',label:TX.weight,min:0.000001,max:1,step:0.01,width:'100px'},
+          {key:'source',type:'text',label:TX.source},{key:'version',type:'text',label:TX.version},
+          {key:'status',type:'select',label:TX.credibility,options:function(){return opt(STATUS);}},{key:'reason',type:'text',label:TX.reason}
+        ]}
+      ]},
+      {id:'inventory',slot:'inputs',title:TX.inventory,fields:[
+        {id:'f-stock',key:'stock',type:'number',unit:'1',label:TX.stock,min:0,max:1000000,step:1,precision:0,required:true},
+        {id:'f-lead',key:'leadYears',learn:'case',type:'number',unit:'a',label:TX.lead,min:0,max:100,step:0.01,precision:3,required:true},
+        {id:'f-horizon',key:'horizonYears',type:'number',unit:'a',label:TX.horizon,min:0.01,max:100,step:0.1,precision:2,required:true,learn:'horizon'},
+        {id:'f-target',key:'targetCoverage',type:'number',unit:'1',label:TX.target,min:0.5,max:0.99999,step:0.001,precision:4,required:true},
+        {id:'f-repl-duration',key:'replacementDuration',type:'number',unit:'a',label:TX.replDuration,min:0,max:100,step:0.1,precision:2,required:true},
+        {id:'f-deadline-known',key:'deadlineKnown',type:'toggle',label:TX.deadlineKnown},
+        {id:'f-last-order',key:'lastOrderWindow',type:'number',unit:'a',label:TX.lastOrder,min:0,max:100,step:0.01,precision:3,visible:function(){return state.deadlineKnown;}}
+      ]},
+      {id:'provenance',slot:'inputs',title:TX.provenance,note:TX.provenanceNote,collapsible:true,collapsed:true,learn:'provenance',fields:[
+        {id:'f-provenance',key:'provenance',type:'list',label:TX.provenance,addLabel:T('Add provenance row','Додати рядок походження','Provenienzzeile hinzufügen','Herkomstrij toevoegen','Ajouter une ligne de provenance','Añadir fila de procedencia','Dodaj wiersz pochodzenia'),minRows:0,maxRows:20,reorder:true,newRow:newProvRow,row:[
+          {key:'key',type:'select',label:TX.parameter,options:function(){return opt(PROV_KEYS);}},
+          {key:'source',type:'text',label:TX.source},{key:'version',type:'text',label:TX.version},
+          {key:'status',type:'select',label:TX.credibility,options:function(){return opt(STATUS);}},{key:'reason',type:'text',label:TX.reason}
+        ]}
+      ]},
+      {id:'decision',slot:'inputs',title:TX.decision,learn:'states',fields:[
+        {id:'f-approval',key:'approvalStatus',type:'select',label:TX.approval,options:function(){return opt(APPROVAL);}},
+        {id:'f-approval-reason',key:'approvalReason',type:'text',label:TX.approvalReason}
+      ]}
+    ],
+    footer:TX.footer,
+    on:{rebuild:adoptStage,compute:function(s){if(s.approvalStatus!=='approved')s.approvalFingerprint='';else if(approvalSeen!=='approved'&&!s.approvalFingerprint)s.approvalFingerprint=inputFingerprint(s);approvalSeen=s.approvalStatus;last=solve(s);if(stage)stage.schedule();return resultPayload(s,last);}}
+  });
+
+  ui.examples([
+    {id:'analogue',label:T('Available analogue · zero observed demand','Доступний аналог · нуль спостереженого попиту','Verfügbarer Ersatz · null beobachteter Bedarf','Beschikbaar alternatief · nul waargenomen vraag','Équivalent disponible · demande observée nulle','Equivalente disponible · demanda observada cero','Dostępny zamiennik · brak zaobserwowanego popytu'),note:T('Control case: stock 2, one-year horizon, accepted central rate 0; purchase should be 0, with an uncertainty warning.','Контроль: запас 2, горизонт 1 рік, прийнята центральна інтенсивність 0; закупівля 0 з попередженням про невизначеність.','Kontrollfall: Bestand 2, Horizont 1 Jahr, akzeptierte Zentralrate 0; Kaufmenge 0 mit Unsicherheitswarnung.','Controle: voorraad 2, horizon 1 jaar, geaccepteerde centrale ratio 0; aankoop 0 met onzekerheidswaarschuwing.','Contrôle : stock 2, horizon 1 an, taux central accepté 0; achat 0 avec alerte d’incertitude.','Control: stock 2, horizonte 1 año, tasa central aceptada 0; compra 0 con aviso de incertidumbre.','Kontrola: zapas 2, horyzont 1 rok, przyjęta intensywność 0; zakup 0 z ostrzeżeniem o niepewności.'),apply:function(t){Object.assign(t,clone(DEFAULTS),{component:pick(T('Pressure transmitter PT-17','Датчик тиску PT-17','Druckmessumformer PT-17','Druktransmitter PT-17','Transmetteur de pression PT-17','Transmisor de presión PT-17','Przetwornik ciśnienia PT-17')),fleetCount:12,criticality:'medium',supplierStatus:'active',compatibility:'dropin',observedEvents:0,observationYears:1,acceptZeroRate:true,stock:2,leadYears:0.25,horizonYears:1,targetCoverage:0.95,replacementDuration:0.5,deadlineKnown:false,lastOrderWindow:1,approvalStatus:'pending'});t.provenance=clone(DEFAULTS.provenance);t.provenance.forEach(function(r){if(r.key==='observedEvents'||r.key==='observationYears'){r.source=pick(T('Maintenance history','Історія техобслуговування','Instandhaltungshistorie','Onderhoudshistorie','Historique de maintenance','Historial de mantenimiento','Historia utrzymania'));r.version=pick(T('1-year extract','виписка за 1 рік','Auszug 1 Jahr','uittreksel 1 jaar','extrait 1 an','extracto de 1 año','wyciąg z 1 roku'));r.status='confirmed';}if(r.key==='lastOrderWindow'){r.status='not_applicable';r.reason=pick(T('No EOL deadline','Немає строку закінчення випуску','Keine Abkündigungsfrist','Geen EOL-termijn','Pas d’échéance de fin de vie','Sin plazo de fin de vida','Brak terminu wycofania'));}});}},
+    {id:'plc',label:T('Discontinued PLC','Знятий з виробництва PLC','Abgekündigte SPS','Uit productie genomen PLC','API arrêté','PLC descatalogado','Wycofany PLC'),note:T('Typical case: four events in four years, stock 2, 0.5-year lead, five-year horizon, 95% target. Independent reference gives minimum purchase 7.','Типовий випадок: 4 події за 4 роки, запас 2, поставка 0,5 року, горизонт 5 років, ціль 95%. Незалежний еталон дає мінімальну закупівлю 7.','Typischer Fall: vier Ereignisse in vier Jahren, Bestand 2, 0,5 Jahre Lieferzeit, fünf Jahre Horizont, 95 % Ziel. Unabhängige Referenz: Mindestmenge 7.','Typisch: vier gebeurtenissen in vier jaar, voorraad 2, levertijd 0,5 jaar, horizon vijf jaar, doel 95%. Onafhankelijke referentie: minimaal 7.','Cas type : quatre événements en quatre ans, stock 2, délai 0,5 an, horizon 5 ans, cible 95 %. Référence indépendante : minimum 7.','Caso típico: cuatro eventos en cuatro años, stock 2, plazo 0,5 años, horizonte 5 años, objetivo 95 %. Referencia independiente: mínimo 7.','Przypadek typowy: 4 zdarzenia w 4 lata, zapas 2, dostawa 0,5 roku, horyzont 5 lat, cel 95%. Referencja niezależna: minimum 7.'),apply:function(t){Object.assign(t,clone(DEFAULTS),{component:pick(T('PLC CPU family X','Процесорний модуль PLC сімейства X','SPS-CPU der Baureihe X','PLC-CPU uit serie X','UC d’API de la famille X','CPU de PLC de la familia X','Jednostka CPU PLC rodziny X')),fleetCount:24,criticality:'high',supplierStatus:'discontinued',compatibility:'reengineering',demandModel:'poisson',rateSource:'observed',observedEvents:4,observationYears:4,stationary:true,independent:true,acceptZeroRate:false,stock:2,leadYears:0.5,horizonYears:5,targetCoverage:0.95,replacementDuration:2,deadlineKnown:true,lastOrderWindow:0.75,approvalStatus:'pending'});t.provenance=clone(DEFAULTS.provenance);}},
+    {id:'sensor',label:T('Rare critical sensor · no demand history','Рідкісний критичний датчик · немає історії попиту','Seltener kritischer Sensor · keine Bedarfshistorie','Zeldzame kritische sensor · geen vraagehistorie','Capteur critique rare · aucun historique','Sensor crítico raro · sin historial','Rzadki krytyczny czujnik · brak historii'),note:T('Problem case: no analogue and no demand history. Quantitative LTB must remain unavailable.','Проблемний випадок: немає аналога та історії попиту. Кількісний LTB має залишатися недоступним.','Problemfall: kein Ersatz und keine Bedarfshistorie. Quantitativer LTB muss unverfügbar bleiben.','Probleemgeval: geen alternatief en geen vraagehistorie. Kwantitatieve LTB moet niet beschikbaar blijven.','Cas problématique : aucun équivalent et aucun historique. Le LTB quantitatif doit rester indisponible.','Caso problemático: sin equivalente ni historial. El LTB cuantitativo debe permanecer no disponible.','Przypadek problemowy: brak zamiennika i historii popytu. Ilościowy LTB ma pozostać niedostępny.'),apply:function(t){Object.assign(t,clone(DEFAULTS),{component:pick(T('Reactor protection sensor RS-9','Датчик захисту реактора RS-9','Reaktorschutzsensor RS-9','Reactorbeveiligingssensor RS-9','Capteur de protection du réacteur RS-9','Sensor de protección del reactor RS-9','Czujnik zabezpieczenia reaktora RS-9')),fleetCount:8,criticality:'safety',supplierStatus:'discontinued',compatibility:'none',demandModel:'unknown',stock:1,leadYears:1.5,horizonYears:10,targetCoverage:0.99,replacementDuration:4,deadlineKnown:false,approvalStatus:'pending'});t.provenance=clone(DEFAULTS.provenance);t.provenance.forEach(function(r){if(r.key==='observedEvents'||r.key==='observationYears'||r.key==='annualRate'){r.status='unknown';r.source='';r.version='';r.reason=pick(T('No usable demand history','Немає придатної історії попиту','Keine verwertbare Bedarfshistorie','Geen bruikbare vraaghistorie','Pas d’historique de demande exploitable','Sin historial de demanda utilizable','Brak użytecznej historii popytu'));}if(r.key==='lastOrderWindow'){r.status='unknown';r.source='';r.version='';r.reason=pick(T('Supplier deadline not confirmed','Строк постачальника не підтверджено','Lieferantenfrist nicht bestätigt','Termijn leverancier niet bevestigd','Échéance fournisseur non confirmée','Plazo del proveedor no confirmado','Termin dostawcy niepotwierdzony'));}});}},
+    {id:'empirical',label:T('Empirical ageing scenarios','Емпіричні сценарії старіння','Empirische Alterungsszenarien','Empirische verouderingsscenario’s','Scénarios empiriques de vieillissement','Escenarios empíricos de envejecimiento','Empiryczne scenariusze starzenia'),note:T('Weighted scenarios demonstrate a non-Poisson path without extrapolating a rate.','Зважені сценарії показують шлях без Пуассона та без екстраполяції інтенсивності.','Gewichtete Szenarien zeigen einen Nicht-Poisson-Pfad ohne Ratenextrapolation.','Gewogen scenario’s tonen een niet-Poisson-pad zonder extrapolatie van een ratio.','Les scénarios pondérés montrent une voie non-Poisson sans extrapoler un taux.','Los escenarios ponderados muestran una vía no Poisson sin extrapolar una tasa.','Ważone scenariusze pokazują ścieżkę bez Poissona i bez ekstrapolacji intensywności.'),apply:function(t){Object.assign(t,clone(DEFAULTS),{component:pick(T('Legacy I/O module','Застарілий модуль вводу-виводу','Altes E/A-Modul','Verouderde I/O-module','Module E/S ancien','Módulo de E/S heredado','Przestarzały moduł we/wy')),fleetCount:40,criticality:'high',supplierStatus:'eol',compatibility:'qualified',demandModel:'empirical',stock:1,leadYears:1,horizonYears:6,targetCoverage:0.8,replacementDuration:2,deadlineKnown:true,lastOrderWindow:0.5,approvalStatus:'pending'});t.empiricalScenarios=[{leadDemand:0,horizonDemand:2,weight:0.5,source:pick(T('Ageing review','Огляд старіння','Alterungsbewertung','Verouderingsbeoordeling','Revue de vieillissement','Revisión de envejecimiento','Przegląd starzenia')),'version':'S1','status':'confirmed',reason:''},{leadDemand:1,horizonDemand:4,weight:0.3,source:pick(T('Ageing review','Огляд старіння','Alterungsbewertung','Verouderingsbeoordeling','Revue de vieillissement','Revisión de envejecimiento','Przegląd starzenia')),'version':'S2','status':'confirmed',reason:''},{leadDemand:2,horizonDemand:7,weight:0.2,source:pick(T('Ageing review','Огляд старіння','Alterungsbewertung','Verouderingsbeoordeling','Revue de vieillissement','Revisión de envejecimiento','Przegląd starzenia')),'version':'S3','status':'confirmed',reason:''}];t.provenance=clone(DEFAULTS.provenance);}}
+,
+    {id:'fleet',label:T("Fleet-wide consumable · one million installed","Масовий витратний елемент · мільйон встановлених","Flottenweites Verbrauchsteil · eine Million installiert","Vlootbreed verbruiksonderdeel · één miljoen geïnstalleerd","Consommable de parc · un million installés","Consumible de flota · un millón instalados","Element eksploatacyjny floty · milion zainstalowanych"),note:T("Large-number case: 1,000,000 assets at 0.01 per asset-year, stock 300, one-week lead, one-year horizon. The exact Poisson sum gives a minimum purchase of 9865.","Випадок великих чисел: 1 000 000 одиниць по 0,01 на одиницю-рік, запас 300, поставка за тиждень, горизонт рік. Точна сума Пуассона дає мінімальну закупівлю 9865.","Fall mit großen Zahlen: 1 000 000 Anlagen mit 0,01 je Anlagenjahr, Bestand 300, eine Woche Lieferzeit, ein Jahr Horizont. Die exakte Poisson-Summe ergibt einen Mindestkauf von 9865.","Geval met grote aantallen: 1 000 000 assets met 0,01 per assetjaar, voorraad 300, een week levertijd, horizon een jaar. De exacte Poissonsom geeft een minimale aankoop van 9865.","Cas à grands nombres : 1 000 000 équipements à 0,01 par équipement-an, stock 300, délai d’une semaine, horizon d’un an. La somme de Poisson exacte donne un achat minimal de 9865.","Caso de números grandes: 1 000 000 de activos a 0,01 por activo-año, stock 300, plazo de una semana, horizonte de un año. La suma de Poisson exacta da una compra mínima de 9865.","Przypadek dużych liczb: 1 000 000 urządzeń po 0,01 na urządzenie-rok, zapas 300, tydzień dostawy, horyzont rok. Dokładna suma Poissona daje minimalny zakup 9865."),apply:function(t){Object.assign(t,clone(DEFAULTS),{component:pick(T("Seal kit SK-4","Ремкомплект ущільнень SK-4","Dichtungssatz SK-4","Afdichtingsset SK-4","Kit de joints SK-4","Kit de juntas SK-4","Zestaw uszczelnień SK-4")),fleetCount:1000000,criticality:'medium',supplierStatus:'eol',compatibility:'qualified',demandModel:'poisson',rateSource:'entered',annualRate:0.01,rateBasis:'asset',stationary:true,independent:true,acceptZeroRate:false,stock:300,leadYears:0.02,horizonYears:1,targetCoverage:0.95,replacementDuration:0.5,deadlineKnown:false,lastOrderWindow:1,approvalStatus:'pending'});t.provenance=clone(DEFAULTS.provenance);t.provenance.forEach(function(r){if(r.key==='annualRate'){r.source=pick(T("Fleet reliability model","Модель надійності парку","Zuverlässigkeitsmodell der Flotte","Betrouwbaarheidsmodel vloot","Modèle de fiabilité du parc","Modelo de fiabilidad de la flota","Model niezawodności floty"));r.version='R1';r.status='confirmed';r.reason='';}if(r.key==='observedEvents'||r.key==='observationYears'){r.status='not_applicable';r.source='';r.version='';r.reason=pick(T("Entered-rate mode selected","Обрано режим заданої інтенсивності","Modus eingegebene Rate gewählt","Modus ingevoerde ratio gekozen","Mode taux saisi choisi","Modo de tasa introducida seleccionado","Wybrano tryb wprowadzonej intensywności"));}if(r.key==='lastOrderWindow'){r.status='not_applicable';r.reason='—';}});}}
+  ]);
+
+  stage=ui.stage({caption:TX.sensitivity,minHeight:280,a11y:function(){if(!last||!last.sensitivity||!last.sensitivity.length)return pick(T('Run the Poisson model to draw demand-intensity sensitivity.','Виконайте модель Пуассона для графіка чутливості.','Poisson-Modell ausführen, um die Sensitivität zu zeichnen.','Voer het Poissonmodel uit voor de gevoeligheidsgrafiek.','Exécutez le modèle de Poisson pour tracer la sensibilité.','Ejecute el modelo de Poisson para dibujar la sensibilidad.','Uruchom model Poissona, aby narysować wrażliwość.'));return last.sensitivity.map(function(x){return x.factor+'×: '+(x.q===null?'unavailable':x.q);}).join('; ');},render:function(size,st){
+    var ctx=st.canvas(),w=size.w,h=size.h,cs=getComputedStyle(document.documentElement),muted=cs.getPropertyValue('--muted').trim()||'#777',line=cs.getPropertyValue('--line').trim()||'#ddd';ctx.clearRect(0,0,w,h);if(!last||!last.sensitivity||!last.sensitivity.length)return;
+    var data=last.sensitivity.filter(function(x){return x.q!==null;}),padL=44,padR=18,padT=18,padB=34,maxQ=Math.max.apply(null,data.map(function(x){return x.q;}));maxQ=Math.max(1,maxQ);ctx.font='400 11px '+(cs.getPropertyValue('--font').trim()||'sans-serif');ctx.strokeStyle=line;ctx.fillStyle=muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(padL,padT);ctx.lineTo(padL,h-padB);ctx.lineTo(w-padR,h-padB);ctx.stroke();
+    function X(f){return padL+(w-padL-padR)*(f-0.5);}
+    function Y(q){return h-padB-(h-padT-padB)*(q/maxQ);}
+    ctx.textAlign='center';last.sensitivity.forEach(function(x){ctx.fillText(DiagramUI.fmt(x.factor,{precision:2})+'×',X(x.factor),h-10);});
+    ctx.textAlign='right';ctx.fillText(String(maxQ),padL-6,padT+4);ctx.fillText('0',padL-6,h-padB+4);
+    ctx.strokeStyle=DiagramUI.series(0);ctx.fillStyle=DiagramUI.series(0);ctx.lineWidth=2;ctx.beginPath();var started=false;last.sensitivity.forEach(function(x){if(x.q===null)return;var xx=X(x.factor),yy=Y(x.q);if(started)ctx.lineTo(xx,yy);else{ctx.moveTo(xx,yy);started=true;}});ctx.stroke();last.sensitivity.forEach(function(x){if(x.q===null)return;ctx.beginPath();ctx.arc(X(x.factor),Y(x.q),4,0,Math.PI*2);ctx.fill();});
+  }});
+  adoptStage(ui);
+  ui.ready();
+  window.__obsolescenceltb={solve:solve,state:state,ui:ui,sanitize:sanitize,fingerprint:inputFingerprint};
+}
+
+function canonicalJSON(v){if(Array.isArray(v))return '['+v.map(canonicalJSON).join(',')+']';if(v&&typeof v==='object')return '{'+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+':'+canonicalJSON(v[k]);}).join(',')+'}';return JSON.stringify(v===undefined?null:v);}
+function cyrb53(str){var h1=0xdeadbeef,h2=0x41c6ce57;for(var i=0;i<str.length;i++){var ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (h2>>>0).toString(16).padStart(8,'0')+(h1>>>0).toString(16).padStart(8,'0');}
+/* an approval counts only for the inputs it was given for: status approved, a stated reason and a fingerprint equal to the current inputs */
+function inputFingerprint(s){var x=clone(s);delete x.approvalStatus;delete x.approvalReason;delete x.approvalFingerprint;return 'cyrb53:'+cyrb53(canonicalJSON(x));}
+function approvalState(s){var cur=inputFingerprint(s),isA=s.approvalStatus==='approved',fp=String(s.approvalFingerprint||''),stale=isA&&fp!==cur;return{stale:stale,approved:isA&&!!fp&&fp===cur&&!!String(s.approvalReason||'').trim()};}
+function freshLast(){return last&&last.signature===stateSignature(state)?last:null;}
+function reportLang(ctx,o){return pick(o,(ctx&&ctx.domainLang)||lang());}
+function sensitivitySvg(r){
+  if(!r||!r.sensitivity||!r.sensitivity.length)return null;
+  var pts=r.sensitivity.filter(function(x){return x.q!==null;});if(!pts.length)return null;
+  var w=720,h=260,pL=54,pR=24,pT=24,pB=44,maxQ=Math.max.apply(null,pts.map(function(x){return x.q;}));maxQ=Math.max(1,maxQ);
+  function X(f){return pL+(w-pL-pR)*(f-0.5);}
+  function Y(q){return h-pB-(h-pT-pB)*(q/maxQ);}
+  var d='',circles='',labels='';pts.forEach(function(x,i){var xx=X(x.factor),yy=Y(x.q);d+=(i?' L ':'M ')+xx.toFixed(1)+' '+yy.toFixed(1);circles+='<circle cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="4" fill="currentColor"/>';labels+='<text x="'+xx.toFixed(1)+'" y="'+(h-16)+'" text-anchor="middle">'+x.factor.toFixed(2)+'×</text>';});
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" role="img"><g fill="currentColor" font-family="sans-serif" font-size="12"><path d="M '+pL+' '+pT+' V '+(h-pB)+' H '+(w-pR)+'" fill="none" stroke="currentColor" stroke-width="1" opacity=".45"/><path d="'+d+'" fill="none" stroke="currentColor" stroke-width="2"/>'+circles+labels+'<text x="'+(pL-8)+'" y="'+(pT+4)+'" text-anchor="end">'+maxQ+'</text><text x="'+(pL-8)+'" y="'+(h-pB+4)+'" text-anchor="end">0</text></g></svg>';
+}
+function reportProfile(rec,ctx){
+  var r=freshLast();if(!r)return{};var s=state,p=function(o){return reportLang(ctx,o);};
+  var exec=[];if(finite(r.risk))exec.push({label:p(TX.risk),value:r.risk,unit:'/100'});if(r.available){exec.push({label:p(TX.purchase),value:r.result.q,unit:'1'});exec.push({label:p(TX.coverage),value:100*r.coverage,unit:'%'});if(r.replacementStartBy!==null)exec.push({label:p(TX.replacementStart),value:r.replacementStartBy,unit:'a'});if(r.latestOrderBy!==null)exec.push({label:p(TX.latestOrder),value:r.latestOrderBy,unit:'a'});}
+  var results=[];if(r.rate!==null)results.push({label:p(TX.annualDemand),value:r.rate,unit:'1/a'});if(r.result&&finite(r.result.leadCoverage))results.push({label:p(TX.leadCoverage),value:100*r.result.leadCoverage,unit:'%'});if(r.model==='poisson'&&r.rate!==null)results.push({label:p(TX.stockHorizon),value:100*poissonCdf(s.stock,r.rate*s.horizonYears),unit:'%'});if(r.stockCoverageTime!==null&&isFinite(r.stockCoverageTime))results.push({label:p(TX.stockTime),value:r.stockCoverageTime,unit:'a'});
+  var decisions=[
+    {label:p(TX.calcState),value:r.available?p(TX.available):p(TX.unavailable),driver:p(DEMAND_MODEL[s.demandModel]),basis:MODEL_VERSION},
+    {label:p(TX.criterion),value:r.available?(r.criterionMet?p(TX.met):p(TX.notMet)):p(TX.unavailable),driver:p(TX.target)+' '+((ctx&&ctx.value)?ctx.value(100*s.targetCoverage,'%'):(100*s.targetCoverage).toFixed(3)+' %'),basis:p(T('User target','Ціль користувача','Benutzerziel','Gebruikersdoel','Cible utilisateur','Objetivo del usuario','Cel użytkownika'))},
+    {label:p(TX.decisionState),value:p(approvalView(s).text),driver:s.approvalReason||'—',basis:p(T('External engineering decision','Зовнішнє інженерне рішення','Externe Engineering-Entscheidung','Extern engineeringbesluit','Décision d’ingénierie externe','Decisión de ingeniería externa','Zewnętrzna decyzja inżynierska'))}
+  ];
+  var checks=[];
+  if(r.available)checks.push({status:r.criterionMet?'pass':'fail',title:p(TX.criterion),detail:p(T('Joint no-shortage probability from now through the planning horizon.','Спільна ймовірність відсутності дефіциту від сьогодні до кінця горизонту.','Gemeinsame Wahrscheinlichkeit ohne Fehlbestand von heute bis zum Planungshorizont.','Gezamenlijke kans zonder tekort vanaf nu tot de planningshorizon.','Probabilité conjointe sans rupture jusqu’à l’horizon.','Probabilidad conjunta sin falta desde ahora hasta el horizonte.','Wspólne prawdopodobieństwo braku niedoboru od dziś do końca horyzontu.')),actual:(100*r.coverage).toFixed(4)+' %',criterion:'≥ '+(100*s.targetCoverage).toFixed(4)+' %',basis:MODEL_VERSION});
+  r.issues.forEach(function(x){checks.push({status:'fail',title:p(T('Open data/model gap','Відкрита прогалина даних/моделі','Offene Daten-/Modelllücke','Open data-/modelgat','Lacune de données/modèle','Laguna de datos/modelo','Otwarta luka danych/modelu')),detail:x.text,basis:MODEL_VERSION});});
+  r.warnings.forEach(function(x){checks.push({status:'attention',title:p(T('Model warning','Попередження моделі','Modellwarnung','Modelwaarschuwing','Avertissement du modèle','Aviso del modelo','Ostrzeżenie modelu')),detail:x.text,basis:MODEL_VERSION});});
+  var inputs=[
+    {label:p(TX.component),text:s.component||'—',group:p(TX.scope)},{label:p(TX.fleet),value:s.fleetCount,unit:'1',group:p(TX.scope)},{label:p(TX.criticality),text:p(CRITICALITY[s.criticality]),group:p(TX.scope)},{label:p(TX.supplier),text:p(SUPPLIER[s.supplierStatus]),group:p(TX.scope)},{label:p(TX.compatibility),text:p(COMPAT[s.compatibility]),group:p(TX.scope)},
+    {label:p(TX.model),text:p(DEMAND_MODEL[s.demandModel]),group:p(TX.demand)},{label:p(TX.stock),value:s.stock,unit:'1',group:p(TX.inventory)},{label:p(TX.lead),value:s.leadYears,unit:'a',group:p(TX.inventory)},{label:p(TX.horizon),value:s.horizonYears,unit:'a',group:p(TX.inventory)},{label:p(TX.target),value:s.targetCoverage,unit:'1',group:p(TX.inventory)},{label:p(TX.replDuration),value:s.replacementDuration,unit:'a',group:p(TX.inventory)}
+  ];
+  if(s.demandModel==='poisson'&&s.rateSource==='observed'){inputs.push({label:p(TX.events),value:s.observedEvents,unit:'1',group:p(TX.demand)},{label:p(TX.obsYears),value:s.observationYears,unit:'a',group:p(TX.demand)});}else if(s.demandModel==='poisson'){inputs.push({label:p(TX.annualRate),value:s.annualRate,unit:'1/a',group:p(TX.demand)},{label:p(TX.rateBasis),text:p(RATE_BASIS[s.rateBasis]),group:p(TX.demand)});}
+  (s.provenance||[]).forEach(function(x){inputs.push({label:p(PROV_KEYS[x.key]||T(x.key,x.key,x.key,x.key,x.key,x.key,x.key)),text:[x.source||'—',x.version||'—',p(STATUS[x.status]||STATUS.unknown),x.reason||''].filter(Boolean).join(' · '),group:p(TX.provenance)});});
+  var fig=(ctx&&ctx.figure&&r.sensitivity&&r.sensitivity.length)?ctx.figure(sensitivitySvg(r),{caption:p(TX.sensitivity)}):null;
+  return{
+    title:p(T('Obsolescence & Last-Time-Buy assessment','Оцінка застарівання та Last-Time-Buy','Obsoleszenz- & Last-Time-Buy-Bewertung','Beoordeling obsolescentie & Last-Time-Buy','Évaluation obsolescence et Last-Time-Buy','Evaluación de obsolescencia y Last-Time-Buy','Ocena starzenia technologicznego i Last-Time-Buy')),
+    project:[{label:p(TX.component),value:s.component||'—'},{label:p(TX.decisionState),value:p(approvalView(s).text)},{label:p(TX.model),value:p(DEMAND_MODEL[s.demandModel])},{label:p(T('Model version','Версія моделі','Modellversion','Modelversie','Version du modèle','Versión del modelo','Wersja modelu')),value:MODEL_VERSION}],
+    executive:{text:[r.available?p(T('A quantitative last-time-buy was calculated from confirmed inputs.','Кількісний Last-Time-Buy розраховано за підтвердженими входами.','Ein quantitativer Last-Time-Buy wurde aus bestätigten Eingaben berechnet.','Een kwantitatieve Last-Time-Buy is berekend uit bevestigde invoer.','Un dernier achat quantitatif a été calculé à partir d’entrées confirmées.','Se calculó una última compra cuantitativa con entradas confirmadas.','Ilościowy Last-Time-Buy obliczono z potwierdzonych danych.')):p(T('The quantitative last-time-buy is blocked by the recorded data/model gaps.','Кількісний Last-Time-Buy заблоковано зафіксованими прогалинами даних/моделі.','Der quantitative Last-Time-Buy ist durch dokumentierte Daten-/Modelllücken gesperrt.','De kwantitatieve Last-Time-Buy is geblokkeerd door vastgelegde data-/modelgaten.','Le dernier achat quantitatif est bloqué par les lacunes de données/modèle enregistrées.','La última compra cuantitativa está bloqueada por las lagunas de datos/modelo registradas.','Ilościowy Last-Time-Buy jest zablokowany przez zarejestrowane luki danych/modelu.'))],results:exec,conclusion:''},
+    results:results,decisions:decisions,checks:checks,risks:[],questions:(r.actions||[]).map(function(x){return x.text;}),figures:fig?[fig]:[],
+    method:{equations:s.demandModel==='poisson'?['D_L ~ Pois(λL)','D_H − D_L ~ Pois(λ(H−L))','P(Q) = Σ P(D_L=i) · P(D_H−D_L ≤ S+Q−i)','Q_min = min{Q ∈ Z≥0 : P(Q) ≥ P*}']:['P(Q) = Σ w_k · [L_k ≤ S] · [H_k ≤ S+Q] / Σ w_k'],ranges:[p(T('Poisson mode requires stationary independent unit demand.','Режим Пуассона потребує стаціонарного незалежного штучного попиту.','Poisson erfordert stationären unabhängigen Stückbedarf.','Poisson vereist stationaire onafhankelijke stukvraag.','Poisson exige une demande unitaire stationnaire indépendante.','Poisson requiere demanda unitaria estacionaria independiente.','Poisson wymaga stacjonarnego niezależnego popytu jednostkowego.'))],notes:[p(TX.footer)],references:['Sherbrooke, C.C. (2004), Optimal Inventory Modeling of Systems, 2nd ed.','Loader, C. (2000), Fast and accurate computation of binomial probabilities','SPEC — https://tools.petrov.re/_docs/SPEC-obsolescenceltb.md']},inputs:inputs
+  };
+}
+
+function record(){
+  var r=freshLast();if(!r)return null;var s=state;
+  var sources=(s.provenance||[]).map(function(x){return{parameter:x.key,source:x.source||'',date_version:x.version||'',credibility:x.status,reason:x.reason||''};});
+  (s.empiricalScenarios||[]).forEach(function(x,i){sources.push({parameter:'empiricalScenario['+i+']',source:x.source||'',date_version:x.version||'',credibility:x.status,reason:x.reason||''});});
+  return{
+    inputs:{component:s.component,fleet_count:s.fleetCount,criticality:s.criticality,supplier_status:s.supplierStatus,compatibility:s.compatibility,demand_model:s.demandModel,rate_source:s.rateSource,observed_events:s.observedEvents,observation_years:s.observationYears,annual_rate:s.annualRate,rate_basis:s.rateBasis,stationary:s.stationary,independent:s.independent,accept_zero_rate:s.acceptZeroRate,stock:s.stock,lead_time:s.leadYears,horizon:s.horizonYears,target_coverage:s.targetCoverage,replacement_duration:s.replacementDuration,last_order_deadline_known:s.deadlineKnown,last_order_window:s.deadlineKnown?s.lastOrderWindow:null,empirical_scenarios:s.empiricalScenarios,approval_status:s.approvalStatus,approval_reason:s.approvalReason},
+    outputs:{obsolescence_risk_index:r.risk,quantitative_available:r.available,annual_fleet_demand_rate:r.rate,min_ltb_purchase:r.available?r.result.q:null,achieved_coverage:r.available?r.coverage:null,lead_time_coverage:r.result&&finite(r.result.leadCoverage)?r.result.leadCoverage:null,stock_coverage_time:r.stockCoverageTime!==null&&isFinite(r.stockCoverageTime)?r.stockCoverageTime:null,inventory_trigger:r.inventoryTrigger,latest_order_by:r.latestOrderBy,replacement_start_by:r.replacementStartBy,criterion_met:r.available?r.criterionMet:null,decision_approved:approvalState(s).approved,approval_stale:approvalState(s).stale},
+    units:{fleet_count:'1',observed_events:'1',observation_years:'a',annual_rate:'1/a',stock:'1',lead_time:'a',horizon:'a',target_coverage:'1',replacement_duration:'a',last_order_window:'a',obsolescence_risk_index:'1',annual_fleet_demand_rate:'1/a',min_ltb_purchase:'1',achieved_coverage:'1',lead_time_coverage:'1',stock_coverage_time:'a',inventory_trigger:'a',latest_order_by:'a',replacement_start_by:'a'},
+    model:{version:MODEL_VERSION,method:s.demandModel,applicability:s.demandModel==='poisson'?'stationary independent unit demand':'supplied weighted scenarios only',equations:s.demandModel==='poisson'?['D_L ~ Poisson(lambda L)','D_H-D_L ~ Poisson(lambda(H-L))','joint no-shortage probability summed over demand at lead time']:['weighted empirical scenario coverage'],ranges:Object.keys(RANGES).map(function(k){return k+': ['+RANGES[k][0]+', '+RANGES[k][1]+'] '+RANGES[k][2];}),notes:['Risk index is a transparent 0-100 screening heuristic: 30% criticality, 40% supplier status, 30% replacement compatibility.','Calculation status, probability criterion and engineering approval are separate outputs.'],open_actions:(r.actions||[]).map(function(x){return x.text;}),sources:sources},
+    warnings:r.issues.map(function(x){return x.text;}).concat(r.warnings.map(function(x){return x.text;}))
+  };
+}
+
+var PYCORE="SFERR = [0, 0.08106146679532726, 0.0413406959554093, 0.02767792568499834, 0.020790672103765093, 0.016644691189821193, 0.013876128823070748, 0.01189670994589177, 0.010411265261972096, 0.009255462182712733, 0.00833056343336287, 0.007573675487951841, 0.00694284010720953, 0.006408994188004207, 0.0059513701127588475, 0.005554733551962801]\nTOL = 1e-14\nSTOCK_TIME_CAP = 1000.0\nRANGES = {'fleetCount': (1, 1000000), 'stock': (0, 1000000), 'leadYears': (0, 100), 'horizonYears': (0.01, 100),\n          'targetCoverage': (0.5, 0.99999), 'replacementDuration': (0, 100), 'observedEvents': (0, 1000000),\n          'observationYears': (0.01, 1000), 'annualRate': (0, 1000), 'lastOrderWindow': (0, 100)}\nINTEGER_KEYS = ('fleetCount', 'stock', 'observedEvents')\n\ndef stirlerr(n):\n    if n <= 15: return SFERR[n]\n    nn = n*n; S0 = 1/12; S1 = 1/360; S2 = 1/1260; S3 = 1/1680; S4 = 1/1188\n    if n > 500: return (S0 - S1/nn)/n\n    if n > 80: return (S0 - (S1 - S2/nn)/nn)/n\n    if n > 35: return (S0 - (S1 - (S2 - S3/nn)/nn)/nn)/n\n    return (S0 - (S1 - (S2 - (S3 - S4/nn)/nn)/nn)/nn)/n\n\ndef bd0(x, np_):\n    if abs(x - np_) < 0.1*(x + np_):\n        v = (x - np_)/(x + np_); s = (x - np_)*v; ej = 2*x*v; v2 = v*v\n        for j in range(1, 1000):\n            ej *= v2; s1 = s + ej/(2*j + 1)\n            if s1 == s: return s1\n            s = s1\n        return s\n    return x*math.log(x/np_) + np_ - x\n\ndef poisson_pmf(k, mu):\n    if k < 0 or k != math.floor(k): return 0.0\n    if mu == 0: return 1.0 if k == 0 else 0.0\n    if k == 0: return math.exp(-mu)\n    return math.exp(-stirlerr(k) - bd0(k, mu))/math.sqrt(2*math.pi*k)\n\ndef poisson_cdf(k, mu):\n    k = math.floor(k)\n    if k < 0: return 0.0\n    if mu <= 0: return 1.0\n    if k < mu:\n        p = poisson_pmf(k, mu); s = p; j = k\n        while j > 0:\n            p *= j/mu; j -= 1; s += p\n            if p < s*1e-17: break\n        return min(1.0, s)\n    j = k + 1; p = poisson_pmf(j, mu); s = p\n    while p > 0:\n        j += 1; p *= mu/j; s += p\n        if p < s*1e-17: break\n    return max(0.0, 1 - s)\n\ndef joint(stock, q, rate, lead, horizon):\n    if horizon <= lead: return poisson_cdf(stock, rate*horizon)\n    mu1 = rate*lead; mu2 = rate*(horizon - lead)\n    if mu1 == 0: return poisson_cdf(stock + q, mu2)\n    mode = min(stock, math.floor(mu1)); pk = poisson_pmf(mode, mu1); lo = hi = mode\n    p = pk\n    while lo > 0:\n        pn = p*lo/mu1\n        if pn < 1e-20*pk: break\n        p = pn; lo -= 1\n    p = pk\n    while hi < stock:\n        pm = p*mu1/(hi + 1)\n        if pm < 1e-20*pk: break\n        p = pm; hi += 1\n    n = stock + q - hi; F = poisson_cdf(n, mu2); f2 = poisson_pmf(n + 1, mu2); total = 0.0; p1 = poisson_pmf(hi, mu1)\n    for i in range(hi, lo - 1, -1):\n        total += p1*F\n        if i > lo:\n            F += f2; n += 1; f2 *= mu2/(n + 1); p1 *= i/mu1\n    return min(1.0, max(0.0, total))\n\ndef min_q_poisson(stock, rate, lead, horizon, target):\n    lead_cov = poisson_cdf(stock, rate*min(lead, horizon))\n    if lead_cov + TOL < target: return {'feasible': False, 'lead': lead_cov}\n    if horizon <= lead:\n        c = poisson_cdf(stock, rate*horizon)\n        return {'feasible': True, 'q': 0, 'coverage': c, 'lead': c} if c >= target else {'feasible': False, 'lead': c}\n    c0 = joint(stock, 0, rate, lead, horizon)\n    if c0 >= target: return {'feasible': True, 'q': 0, 'coverage': c0, 'lead': lead_cov}\n    lo = 0; hi = 1; c = None\n    while hi < 100000000:\n        c = joint(stock, hi, rate, lead, horizon)\n        if c >= target: break\n        hi *= 2\n    if hi >= 100000000 and (c is None or c < target): return {'feasible': False, 'lead': lead_cov}\n    while hi - lo > 1:\n        mid = (lo + hi)//2\n        if joint(stock, mid, rate, lead, horizon) >= target: hi = mid\n        else: lo = mid\n    return {'feasible': True, 'q': hi, 'coverage': joint(stock, hi, rate, lead, horizon), 'lead': lead_cov}\n\ndef stock_coverage_time(stock, rate, target):\n    if rate == 0: return math.inf\n    if poisson_cdf(stock, rate*STOCK_TIME_CAP) >= target: return math.inf\n    lo = 0.0; hi = STOCK_TIME_CAP\n    for _ in range(100):\n        mid = (lo + hi)/2\n        if poisson_cdf(stock, rate*mid) >= target: lo = mid\n        else: hi = mid\n    return lo\n\ndef finite(x):\n    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)\n\ndef min_q_empirical(stock, rows, target):\n    valid = [r for r in rows if r.get('status') == 'confirmed' and finite(r.get('leadDemand')) and finite(r.get('horizonDemand')) and finite(r.get('weight'))\n             and r['weight'] > 0 and r['leadDemand'] >= 0 and r['horizonDemand'] >= r['leadDemand']]\n    if not valid: return {'feasible': False}\n    total = 0.0\n    for r in valid: total += r['weight']\n    lead = 0.0\n    for r in valid: lead += r['weight'] if r['leadDemand'] <= stock else 0\n    lead = lead/total\n    if lead + TOL < target: return {'feasible': False, 'lead': lead}\n    cand = sorted(set([0] + [max(0, math.ceil(r['horizonDemand'] - stock)) for r in valid if r['leadDemand'] <= stock]))\n    for q in cand:\n        mass = 0.0\n        for r in valid: mass += r['weight'] if (r['leadDemand'] <= stock and r['horizonDemand'] <= stock + q) else 0\n        mass = mass/total\n        if mass + TOL >= target: return {'feasible': True, 'q': q, 'coverage': mass, 'lead': lead}\n    return {'feasible': False, 'lead': lead}\n\ndef prov_row(s, key):\n    for r in s.get('provenance') or []:\n        if r.get('key') == key: return r\n    return None\n\ndef check_prov(s, key, issues):\n    r = prov_row(s, key)\n    if r is None:\n        issues.append('prov_missing'); return False\n    if r.get('status') != 'confirmed':\n        issues.append('prov_status'); return False\n    if not str(r.get('source') or '').strip() or not str(r.get('version') or '').strip():\n        issues.append('prov_source'); return False\n    return True\n\ndef check_range(s, key, issues):\n    lo, hi = RANGES[key]; v = s.get(key)\n    if not finite(v) or v < lo or v > hi:\n        issues.append('range'); return False\n    if key in INTEGER_KEYS and math.floor(v) != v:\n        issues.append('integer'); return False\n    return True\n\ndef annual_rate(s, issues):\n    if s['demandModel'] != 'poisson': return None\n    if not s['stationary'] or not s['independent']:\n        issues.append('poisson_applicability'); return None\n    if s['rateSource'] == 'observed':\n        if not check_range(s, 'observedEvents', issues) or not check_range(s, 'observationYears', issues) or not check_prov(s, 'observedEvents', issues) or not check_prov(s, 'observationYears', issues): return None\n        if s['observedEvents'] == 0 and not s['acceptZeroRate']:\n            issues.append('zero_not_accepted'); return None\n        return s['observedEvents']/s['observationYears']\n    if not check_range(s, 'annualRate', issues) or not check_prov(s, 'annualRate', issues): return None\n    return s['annualRate']*s['fleetCount'] if s['rateBasis'] == 'asset' else s['annualRate']\n\ndef validate_core(s, issues):\n    ok = True\n    for k in ('fleetCount', 'stock', 'leadYears', 'horizonYears', 'targetCoverage', 'replacementDuration'):\n        if not check_range(s, k, issues): ok = False\n        if not check_prov(s, k, issues): ok = False\n    if s['deadlineKnown']:\n        if not check_range(s, 'lastOrderWindow', issues): ok = False\n        if not check_prov(s, 'lastOrderWindow', issues): ok = False\n    if finite(s.get('horizonYears')) and finite(s.get('leadYears')) and s['horizonYears'] < s['leadYears']: issues.append('lead_beyond_horizon')\n    return ok\n\ndef empirical_ok(r):\n    def isint(x): return finite(x) and math.floor(x) == x\n    return (isint(r.get('leadDemand')) and r['leadDemand'] >= 0 and isint(r.get('horizonDemand')) and r['horizonDemand'] >= r['leadDemand']\n            and finite(r.get('weight')) and 0 < r['weight'] <= 1 and r.get('status') == 'confirmed'\n            and str(r.get('source') or '').strip() != '' and str(r.get('version') or '').strip() != '')\n\ndef solve(s):\n    issues = []; rate = None; result = None; stock_time = None\n    core_ok = validate_core(s, issues)\n    out = {'annual_fleet_demand_rate': None, 'min_ltb_purchase': None, 'achieved_coverage': None, 'lead_time_coverage': None,\n           'stock_coverage_time': None, 'inventory_trigger': None, 'latest_order_by': None, 'replacement_start_by': None, 'criterion_met': None}\n    if not core_ok: return out\n    dm = s['demandModel']\n    if dm == 'unknown':\n        issues.append('unknown_demand')\n    elif dm == 'poisson':\n        rate = annual_rate(s, issues)\n        if rate is not None and not issues:\n            result = min_q_poisson(int(s['stock']), rate, s['leadYears'], s['horizonYears'], s['targetCoverage'])\n            stock_time = stock_coverage_time(int(s['stock']), rate, s['targetCoverage'])\n    elif dm == 'empirical':\n        rows = s.get('empiricalScenarios') or []\n        if not rows: issues.append('no_scenarios')\n        good = []\n        for r in rows:\n            if empirical_ok(r): good.append(r)\n            else: issues.append('bad_scenario')\n        if good and not issues: result = min_q_empirical(int(s['stock']), good, s['targetCoverage'])\n    available = bool(result and result['feasible'])\n    coverage = result['coverage'] if available else None\n    latest = None; repl = None; trig = None\n    if stock_time is not None:\n        trig = max(0, stock_time - s['replacementDuration']) if math.isfinite(stock_time) else None\n        latest = max(0, stock_time - s['leadYears']) if math.isfinite(stock_time) else None\n    if s['deadlineKnown']: latest = s['lastOrderWindow'] if latest is None else min(latest, s['lastOrderWindow'])\n    if available: repl = max(0, s['horizonYears'] - s['replacementDuration'])\n    elif stock_time is not None and math.isfinite(stock_time): repl = max(0, stock_time - s['replacementDuration'])\n    out.update({'annual_fleet_demand_rate': rate, 'min_ltb_purchase': result['q'] if available else None, 'achieved_coverage': coverage,\n                'lead_time_coverage': result.get('lead') if result else None,\n                'stock_coverage_time': stock_time if (stock_time is not None and math.isfinite(stock_time)) else None,\n                'inventory_trigger': trig, 'latest_order_by': latest, 'replacement_start_by': repl,\n                'criterion_met': (coverage + TOL >= s['targetCoverage']) if available else None})\n    return out\n\ndef compute():\n    return solve(state)\n";
+function pythonCode(){
+  var s=JSON.stringify(state);
+  return "import json, math\nstate = json.loads("+JSON.stringify(s)+")\n"+PYCORE;
+}
+function dgcPython(){return{code:pythonCode(),requires:[],covers:['annual_fleet_demand_rate','min_ltb_purchase','achieved_coverage','lead_time_coverage','stock_coverage_time','inventory_trigger','latest_order_by','replacement_start_by','criterion_met'],scope:'Poisson or weighted empirical spare-demand calculation for the current saved state, including the input checks that decide whether a quantity is available. The 0-100 obsolescence screening index, message texts and the approval binding are not reproduced.',basis:{kind:'reproduce',note:'the range and provenance checks, the Poisson density (Loader saddle-point form, as in R nmath dpois_raw), the recurrence sums for the distribution function and the joint coverage, the integer search, the stock-time bisection and the empirical scenario rule are ported line for line',deviation:'none expected beyond floating-point summation order'},selftest:{tolerance:1e-9,note:'same expressions in the same order; 1e-9 relative covers libm differences in exp and log'}};}
+
+var VOCAB={criticality:Object.keys(CRITICALITY),supplierStatus:Object.keys(SUPPLIER),compatibility:Object.keys(COMPAT),demandModel:Object.keys(DEMAND_MODEL),rateSource:Object.keys(RATE_SOURCE),rateBasis:Object.keys(RATE_BASIS),approvalStatus:Object.keys(APPROVAL)};
+function has(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
+/* restore: keys outside the state are dropped, vocabularies checked; replaced values are listed in a warning */
+function sanitize(o){
+  var x=Object.assign(clone(DEFAULTS),(o&&typeof o==='object'&&!Array.isArray(o))?clone(o):{}),n=[];
+  Object.keys(x).forEach(function(k){if(!has(DEFAULTS,k)){n.push(k);delete x[k];}});
+  Object.keys(VOCAB).forEach(function(k){if(VOCAB[k].indexOf(x[k])<0){n.push(k+'='+JSON.stringify(x[k]));x[k]=DEFAULTS[k];}});
+  ['stationary','independent','acceptZeroRate','deadlineKnown'].forEach(function(k){if(typeof x[k]!=='boolean'){n.push(k+'='+JSON.stringify(x[k]));x[k]=DEFAULTS[k];}});
+  ['component','approvalReason','approvalFingerprint'].forEach(function(k){if(typeof x[k]!=='string'){n.push(k);x[k]=x[k]==null?'':String(x[k]);}});
+  if(!Array.isArray(x.provenance)){n.push('provenance');x.provenance=[];}
+  x.provenance=x.provenance.filter(function(r){var ok=!!r&&typeof r==='object'&&has(PROV_KEYS,r.key);if(!ok)n.push('provenance.key='+JSON.stringify(r&&r.key));return ok;}).slice(0,20).map(function(r){var y=Object.assign(defaultProv(r.key),r);if(!has(STATUS,y.status)){n.push('provenance.status='+JSON.stringify(y.status));y.status='unknown';}return y;});
+  if(!Array.isArray(x.empiricalScenarios)){n.push('empiricalScenarios');x.empiricalScenarios=[];}
+  x.empiricalScenarios=x.empiricalScenarios.filter(function(r){return !!r&&typeof r==='object';}).slice(0,50).map(function(r){var y=Object.assign(newScenario(),r);if(!has(STATUS,y.status)){n.push('empiricalScenarios.status='+JSON.stringify(y.status));y.status='unknown';}return y;});
+  return{state:x,notes:n};
+}
+function installData(){
+  if(!window.Diagram)return;
+  Diagram.init({id:'obsolescenceltb',file:'obsolescenceltb.html',state:{serialize:function(){return state;},deserialize:function(o){var z=sanitize(o);Object.keys(state).forEach(function(k){delete state[k];});Object.assign(state,z.state);restoreNotes=z.notes;restoreSig=stateSignature(state);approvalSeen=state.approvalStatus;last=null;if(ui){ui.sync();ui.run();}}},record:record,python:dgcPython,handoff:{provides:[],accepts:[]},report:{profile:reportProfile}});
+}
+
+/* ---- benchmark adapter: benchmarks/obsolescenceltb.reference.json, fetched only here ----
+   A case gives `inputs` merged onto the base state of SPEC §8 (English defaults); `prov` patches
+   provenance rows by parameter key (null removes the row); approvalFingerprint "@current" stands
+   for the fingerprint of the case's own inputs. Only the expected keys are compared. */
+var BENCH={"build":"2026-10-15.obsolescenceltb-1.2","run_at":"2026-10-15T20:15:00Z","qa":{"manifest":{"status":"pass","note":"Manifest v2 accepted by catalog.php under engineering-change with no new error or warning; since revision 1.1 the manifest carries only entry, medium and lifecycle, and the node with its edges (obsolescenceltb -> changeimpact, repairreplace, equivalence) lives in workflow-map.json (AGENTS.md section 2.7)."},"localisation":{"status":"pass","note":"Opened in en, uk, de, nl, fr, es and pl: no undefined/NaN/[object Object] rendered, no console errors; the default study and its provenance sources are built in the reader's language."},"mobile_desktop":{"status":"pass","note":"Rendered at 1440 and 390 px with no root horizontal overflow, before and after a calculation."},"permalink_round_trip":{"status":"pass","note":"Each of the five examples opened from its permalink in a fresh page reproduces the state and every record output; a restored state passes through the vocabulary check and names replaced values in a warning."},"presets":{"status":"pass","note":"Five editable examples (available analogue with zero observed demand, discontinued PLC, critical sensor with no demand history, empirical ageing scenarios, one-million-unit fleet consumable) applied in all seven languages with complete records."},"learn_mode":{"status":"pass","note":"Eight topics and a seven-step tour, including the try / explanation / correction case on a two-year lead time (lead coverage 67.7 % against a 95 % target, no quantity) and the approval-binding topic."},"report_all_languages":{"status":"pass","note":"Report generated in seven languages, 4 pages each, footer URL on every page, no untranslated sentence, no duplicated line."},"python_export":{"status":"pass","note":"Exported script runs on the standard library; self-test reproduces 6 covered outputs of the record within 1e-9 relative for every example, including the input checks that decide availability."},"benchmark_regeneration_parity":{"status":"pass","note":"window.__dgcBenchmark() on the deployed page regenerates benchmarks/obsolescenceltb.json byte for byte."},"console":{"status":"pass","note":"No page errors or console errors in any QA run."}}};
+var BENCH_TOL={coverage:[1e-9,'abs'],lead_coverage:[1e-9,'abs'],rate:[1e-9,'rel'],risk:[1e-9,'abs'],stock_coverage_time:[1e-6,'abs'],inventory_trigger:[1e-6,'abs'],latest_order_by:[1e-6,'abs'],replacement_start_by:[1e-6,'abs']};
+function benchBase(){var prev=RLANG;RLANG='en';var d=makeDefaults();RLANG=prev;return d;}
+function benchState(inp){
+  var x=benchBase(),pv=null;
+  Object.keys(inp||{}).forEach(function(k){if(k==='prov')pv=inp.prov;else x[k]=clone(inp[k]);});
+  if(pv)Object.keys(pv).forEach(function(key){
+    var rows=x.provenance,i;for(i=0;i<rows.length;i++)if(rows[i].key===key)break;
+    if(pv[key]===null){if(i<rows.length)rows.splice(i,1);return;}
+    if(i===rows.length)rows.push(defaultProv(key));Object.assign(rows[i],pv[key]);
+  });
+  var z=sanitize(x);
+  if(z.state.approvalFingerprint==='@current')z.state.approvalFingerprint=inputFingerprint(z.state);
+  return z;
+}
+function codes(list){var o={};(list||[]).forEach(function(x){o[x.code]=true;});return Object.keys(o).sort();}
+function benchActual(s,a){
+  var ap=approvalState(s);
+  return{available:a.available,q:a.available?a.result.q:null,coverage:a.available?a.coverage:null,
+    lead_coverage:a.result&&finite(a.result.leadCoverage)?a.result.leadCoverage:null,rate:finite(a.rate)?a.rate:null,
+    stock_coverage_time:a.stockCoverageTime===null||a.stockCoverageTime===undefined?null:(isFinite(a.stockCoverageTime)?a.stockCoverageTime:'inf'),
+    inventory_trigger:a.inventoryTrigger,latest_order_by:a.latestOrderBy,replacement_start_by:a.replacementStartBy,
+    criterion_met:a.available?a.criterionMet:null,risk:finite(a.risk)?a.risk:null,issues:codes(a.issues),warnings:codes(a.warnings),actions:codes(a.actions),
+    sensitivity_q:(a.sensitivity||[]).map(function(x){return x.q;}),decision_approved:ap.approved,approval_stale:ap.stale};
+}
+function benchSame(k,act,exp){
+  if(exp===null||act===null||typeof exp!=='number'||typeof act!=='number'){
+    if(Array.isArray(exp))return Array.isArray(act)&&act.length===exp.length&&exp.every(function(v,i){return v===act[i];});
+    return act===exp;
+  }
+  var t=BENCH_TOL[k];if(!t)return act===exp;
+  return Math.abs(act-exp)<=(t[1]==='rel'?t[0]*Math.max(1,Math.abs(exp)):t[0]);
+}
+function benchCase(c){
+  var z=benchState(c.inputs),keepN=restoreNotes,keepS=restoreSig,a,act,bad=[];
+  restoreNotes=z.notes;restoreSig=stateSignature(z.state);
+  try{a=solve(z.state);act=benchActual(z.state,a);}finally{restoreNotes=keepN;restoreSig=keepS;}
+  Object.keys(c.expected||{}).forEach(function(k){if(!benchSame(k,act[k],c.expected[k]))bad.push(k);});
+  var shown={};Object.keys(c.expected||{}).forEach(function(k){shown[k]=act[k];});
+  return{id:c.id,group:c.group||null,pass:bad.length===0,expected:c.expected,actual:shown,mismatch:bad};
+}
+window.__dgcBenchmark=function(url){
+  return fetch(url||'benchmarks/obsolescenceltb.reference.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('reference corpus HTTP '+r.status);return r.text();}).then(function(txt){
+    var ref=JSON.parse(txt),cases=(ref.cases||[]).map(benchCase),passed=cases.filter(function(c){return c.pass;}).length;
+    return (window.crypto&&crypto.subtle?crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2);}).join('');}):Promise.resolve(null)).then(function(h){
+      return{schema:'tools.petrov.re/benchmark-artifact/v1',tool:'obsolescenceltb',file:'obsolescenceltb.html',manifest_revision:BENCH.build,build:BENCH.build,model_version:MODEL_VERSION,run_at:BENCH.run_at,
+        reference_provenance:'recorded',provenance_note:'Expected values recorded from an independently authored corpus written from SPEC-obsolescenceltb.md without the page code; this run executes the shipping build against them and re-derives nothing.',
+        reference:ref.reference,reference_citations:ref.reference_citations,reference_file:'benchmarks/obsolescenceltb.reference.json',reference_sha256:h,tolerance:ref.tolerance,
+        total:cases.length,passed:passed,failed:cases.length-passed,flagged:0,not_benchmarked:ref.not_benchmarked||[],qa:BENCH.qa,cases:cases};
+    });
+  });
+};
+window.__ltbCore={solve:solve,benchState:benchState,benchActual:benchActual,benchCase:benchCase,fingerprint:inputFingerprint,base:benchBase};
+
+function degrade(){
+  var l=document.documentElement.lang||'en',titles=T('Obsolescence & Last-Time-Buy','Застарівання та Last-Time-Buy','Obsoleszenz & Last-Time-Buy','Obsolescentie & Last-Time-Buy','Obsolescence et Last-Time-Buy','Obsolescencia y Last-Time-Buy','Starzenie technologiczne i Last-Time-Buy'),msgs=T('The interactive interface could not load. Calculation record and export remain available when the shared runtime is present.','Інтерактивний інтерфейс не завантажився. Запис розрахунку та експорт залишаються доступними за наявності спільного runtime.','Die interaktive Oberfläche konnte nicht geladen werden. Berechnungsdatensatz und Export bleiben bei vorhandenem Runtime verfügbar.','De interactieve interface kon niet laden. Berekeningsrecord en export blijven beschikbaar wanneer de gedeelde runtime aanwezig is.','L’interface interactive n’a pas pu être chargée. L’enregistrement et l’export restent disponibles si le runtime partagé est présent.','No se pudo cargar la interfaz interactiva. El registro y la exportación siguen disponibles cuando el runtime compartido está presente.','Nie udało się załadować interfejsu. Rekord obliczeń i eksport pozostają dostępne, gdy wspólny runtime jest obecny.');
+  document.title=pick(titles,l);var host=document.getElementById('app')||document.body,h=document.createElement('h1'),p=document.createElement('p');h.textContent=pick(titles,l);p.textContent=pick(msgs,l);host.appendChild(h);host.appendChild(p);
+}
+function bootLang(){
+  var l=null;try{l=new URLSearchParams(location.search).get('lang');}catch(e){}
+  if(!l){try{l=localStorage.getItem('diagram_site_lang')||localStorage.getItem('diagram_lang');}catch(e){}}
+  if(!l&&navigator.language)l=navigator.language.slice(0,2);
+  return ['en','uk','de','nl','fr','es','pl'].indexOf(l)>=0?l:'en';
+}
+function boot(){
+  /* the default study carries source names: build it in the reader's language */
+  RLANG=bootLang();var d=makeDefaults();RLANG='';
+  Object.keys(DEFAULTS).forEach(function(k){delete DEFAULTS[k];});Object.assign(DEFAULTS,d);
+  Object.keys(state).forEach(function(k){delete state[k];});Object.assign(state,clone(d));
+  if(window.DiagramUI&&DiagramUI.api==='tools.petrov.re/ui/v1')buildInterface();else degrade();installData();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MEP Maintenance Planner</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-07.mepplanner-1.3",
+  "id": "mepplanner",
+  "file": "mepplanner.html",
+  "listed": true,
+  "category": "mep-maintenance",
+  "order": 40,
+  "title": {
+    "en": "MEP Maintenance Planner",
+    "uk": "Планувальник ТО інженерних систем",
+    "de": "TGA-Wartungsplaner",
+    "nl": "Onderhoudsplanner installaties",
+    "fr": "Planificateur de maintenance des équipements techniques",
+    "es": "Planificador de mantenimiento de instalaciones",
+    "pl": "Planer konserwacji instalacji budynku"
+  },
+  "summary": {
+    "en": "Turns maintenance tasks into a 52/53-week calendar: hours per trade and week, season and shutdown windows, visit grouping, levelling within each task's tolerance, conflicts, budget and a CMMS work-order CSV.",
+    "uk": "Перетворює завдання ТО на 52/53-тижневий календар: години за фахами і тижнями, сезонні вікна та зупинки, групування виїздів, вирівнювання в межах допуску кожного завдання, конфлікти, бюджет і CSV нарядів для CMMS.",
+    "de": "Macht aus Wartungsaufgaben einen 52/53-Wochen-Kalender: Stunden je Gewerk und Woche, Saison- und Stillstandsfenster, Bündelung von Einsätzen, Glättung im Toleranzfenster jeder Aufgabe, Konflikte, Budget und CSV der Arbeitsaufträge für das CAFM/CMMS.",
+    "nl": "Zet onderhoudstaken om in een kalender van 52/53 weken: uren per vakdiscipline en week, seizoens- en stilstandvensters, bundeling van bezoeken, afvlakken binnen de tolerantie van elke taak, conflicten, budget en een CSV met werkorders voor het CMMS.",
+    "fr": "Transforme les tâches de maintenance en un calendrier de 52/53 semaines : heures par corps de métier et par semaine, fenêtres de saison et d'arrêt, regroupement des interventions, lissage dans la tolérance de chaque tâche, conflits, budget et CSV des ordres de travail pour la GMAO.",
+    "es": "Convierte las tareas de mantenimiento en un calendario de 52/53 semanas: horas por oficio y semana, ventanas de temporada y de parada, agrupación de visitas, nivelación dentro de la tolerancia de cada tarea, conflictos, presupuesto y CSV de órdenes de trabajo para el GMAO.",
+    "pl": "Zamienia zadania utrzymania w 52/53-tygodniowy kalendarz: godziny według branż i tygodni, okna sezonowe i postojowe, grupowanie wizyt, wygładzanie w tolerancji każdego zadania, konflikty, budżet i CSV zleceń dla systemu CMMS."
+  },
+  "description": {
+    "en": "Load an example, build a baseline from your site register (class routines plus statutory tasks) or use the task list of the RCM strategy tool. Each task becomes work orders on a fixed yearly grid; every work order may move only within ±10 % of its interval, statutory tests not at all. The planner places them against in-house hours per trade, season windows (chiller service in the heating season, boiler service in summer), shutdown and blackout weeks, groups tasks of one asset into one visit, and reports peaks, overloads, conflicts and the budget by month. Export the work orders as a CMMS CSV.",
+    "uk": "Завантажте приклад, сформуйте базовий план з реєстру об'єкта (типові регламенти класів плюс обов'язкові за законом завдання) або використайте перелік завдань з інструмента стратегії RCM. Кожне завдання стає нарядами на фіксованій річній сітці; кожен наряд може зміщуватися лише в межах ±10 % інтервалу, обов'язкові випробування — зовсім ні. Планувальник розміщує їх з урахуванням власних годин за фахами, сезонних вікон (сервіс чилера — в опалювальний сезон, котла — влітку), тижнів зупинки й заборони робіт, групує завдання одного обладнання в один виїзд і показує піки, перевантаження, конфлікти та бюджет за місяцями. Наряди експортуються в CSV для CMMS.",
+    "de": "Laden Sie ein Beispiel, bilden Sie einen Grundplan aus Ihrem Anlagenregister (Klassenroutinen plus gesetzliche Prüfungen) oder übernehmen Sie die Aufgabenliste des RCM-Strategiewerkzeugs. Jede Aufgabe wird zu Arbeitsaufträgen auf einem festen Jahresraster; jeder Auftrag darf sich nur um ±10 % seines Intervalls verschieben, gesetzliche Prüfungen gar nicht. Der Planer verteilt sie gegen die eigenen Stunden je Gewerk, Saisonfenster (Kältemaschinenwartung in der Heizperiode, Kesselwartung im Sommer), Stillstands- und Sperrwochen, bündelt Aufgaben einer Anlage zu einem Einsatz und zeigt Spitzen, Überlast, Konflikte und das Budget je Monat. Export der Aufträge als CSV für das CAFM/CMMS.",
+    "nl": "Laad een voorbeeld, bouw een basisplan uit uw installatieregister (klasseroutines plus wettelijke taken) of gebruik de takenlijst van de RCM-strategietool. Elke taak wordt werkorders op een vast jaarraster; elke werkorder mag alleen binnen ±10 % van het interval verschuiven, wettelijke keuringen helemaal niet. De planner plaatst ze tegen de eigen uren per vakdiscipline, seizoensvensters (koelmachine-onderhoud in het stookseizoen, ketelonderhoud in de zomer), stilstands- en blokkadeweken, bundelt taken van één installatie in één bezoek en toont pieken, overbelasting, conflicten en het budget per maand. Export van de werkorders als CSV voor het CMMS.",
+    "fr": "Chargez un exemple, construisez un plan de base depuis votre registre (gammes types par classe plus tâches réglementaires) ou reprenez la liste de tâches de l'outil de stratégie RCM. Chaque tâche devient des ordres de travail sur une grille annuelle fixe ; chaque ordre ne peut bouger que de ±10 % de son intervalle, les contrôles réglementaires pas du tout. Le planificateur les place face aux heures internes par métier, aux fenêtres saisonnières (entretien du groupe froid en saison de chauffe, de la chaudière en été), aux semaines d'arrêt et de gel, regroupe les tâches d'un même équipement en une intervention et montre pics, surcharges, conflits et budget mensuel. Export des ordres en CSV pour la GMAO.",
+    "es": "Cargue un ejemplo, genere un plan base desde su registro (rutinas por clase más tareas reglamentarias) o use la lista de tareas de la herramienta de estrategia RCM. Cada tarea se convierte en órdenes de trabajo sobre una rejilla anual fija; cada orden solo puede moverse ±10 % de su intervalo, las pruebas reglamentarias nada. El planificador las coloca frente a las horas propias por oficio, las ventanas de temporada (mantenimiento de la enfriadora en temporada de calefacción, de la caldera en verano), las semanas de parada y de bloqueo, agrupa las tareas de un equipo en una visita y muestra picos, sobrecargas, conflictos y el presupuesto mensual. Exporta las órdenes en CSV para el GMAO.",
+    "pl": "Wczytaj przykład, zbuduj plan bazowy z rejestru obiektu (typowe czynności klas plus zadania ustawowe) albo użyj listy zadań z narzędzia strategii RCM. Każde zadanie staje się zleceniami na stałej siatce rocznej; każde zlecenie może się przesunąć tylko o ±10 % interwału, próby ustawowe wcale. Planer rozmieszcza je wobec własnych godzin branż, okien sezonowych (serwis agregatu w sezonie grzewczym, kotła latem), tygodni postoju i blokady, grupuje zadania jednego urządzenia w jedną wizytę i pokazuje szczyty, przeciążenia, konflikty i budżet miesięczny. Eksport zleceń do CSV dla CMMS."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "A planning aid, not a CMMS and not a substitute for manufacturer instructions and national regulations. Baseline routine intervals and hours per class, seasons, travel time per visit, trade rates, materials share and call-out fees are stated learning assumptions; statutory intervals follow an EU baseline and national rules may be stricter. Weekly resolution: no shift rosters, permits, access restrictions or travel routing; the levelling is a deterministic heuristic, not a proven optimum.",
+    "uk": "Допоміжний інструмент планування, а не CMMS і не заміна інструкцій виробника й національних норм. Базові інтервали й трудомісткість регламентів за класами, сезони, час на виїзд, ставки фахівців, частка матеріалів і плата за виклик — заявлені навчальні припущення; інтервали обов'язкових перевірок відповідають базовому рівню ЄС, національні правила можуть бути суворішими. Роздільність — тиждень: без змінних графіків, допусків, обмежень доступу й маршрутів; вирівнювання — детермінована евристика, а не доведений оптимум.",
+    "de": "Eine Planungshilfe, kein CMMS und kein Ersatz für Herstellervorgaben und nationale Vorschriften. Grundintervalle und Stunden der Klassenroutinen, Saisons, Anfahrtszeit je Einsatz, Stundensätze, Materialanteil und Anfahrtspauschalen sind ausgewiesene Lernannahmen; gesetzliche Intervalle folgen einem EU-Grundniveau, nationale Regeln können strenger sein. Wochenauflösung: keine Schichtpläne, Freigaben, Zugangsbeschränkungen oder Tourenplanung; die Glättung ist eine deterministische Heuristik, kein bewiesenes Optimum.",
+    "nl": "Een planningshulpmiddel, geen CMMS en geen vervanging van fabrieksvoorschriften en nationale regels. Basisintervallen en uren van de klasseroutines, seizoenen, reistijd per bezoek, uurtarieven, materiaalaandeel en voorrijkosten zijn vermelde leeraannames; wettelijke intervallen volgen een EU-basisniveau, nationale regels kunnen strenger zijn. Weekresolutie: geen roosters, werkvergunningen, toegangsbeperkingen of routeplanning; het afvlakken is een deterministische heuristiek, geen bewezen optimum.",
+    "fr": "Une aide à la planification, pas une GMAO et pas un substitut aux instructions du fabricant et à la réglementation nationale. Intervalles et heures des gammes types par classe, saisons, temps de déplacement par intervention, taux horaires, part de fournitures et frais de déplacement sont des hypothèses pédagogiques déclarées ; les intervalles réglementaires suivent une base UE, les règles nationales peuvent être plus strictes. Résolution hebdomadaire : ni plannings d'équipes, ni permis, ni restrictions d'accès, ni tournées ; le lissage est une heuristique déterministe, pas un optimum démontré.",
+    "es": "Una ayuda de planificación, no un GMAO ni un sustituto de las instrucciones del fabricante y la normativa nacional. Los intervalos y horas de las rutinas por clase, las temporadas, el tiempo de desplazamiento por visita, las tarifas, la parte de materiales y los cargos por desplazamiento son supuestos didácticos declarados; los intervalos reglamentarios siguen una base UE y las normas nacionales pueden ser más estrictas. Resolución semanal: sin turnos, permisos, restricciones de acceso ni rutas; la nivelación es una heurística determinista, no un óptimo demostrado.",
+    "pl": "Pomoc w planowaniu, nie system CMMS i nie zamiennik instrukcji producenta ani przepisów krajowych. Bazowe interwały i pracochłonność czynności klas, sezony, czas dojazdu na wizytę, stawki branż, udział materiałów i opłaty za dojazd to jawne założenia dydaktyczne; interwały ustawowe odpowiadają poziomowi bazowemu UE, przepisy krajowe mogą być surowsze. Rozdzielczość tygodniowa: bez grafików zmian, pozwoleń, ograniczeń dostępu i tras; wygładzanie to deterministyczna heurystyka, a nie udowodnione optimum."
+  },
+  "intended_use": "preliminary assessment",
+  "catalog_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "tool_languages": ["en", "uk", "de", "nl", "fr", "es", "pl"],
+  "dependencies": ["mep-core.js", "mep-planner.js"],
+  "network_access": { "mode": "none" },
+  "validation": {
+    "basis": {
+      "en": "Scheduled preventive maintenance in the sense of EN 13306 on a fixed calendar grid with a work-order tolerance window; statutory intervals from MEPCore (EU baseline: F-gas Regulation (EU) 2024/573, EPBD (EU) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); resource levelling against trade capacity; equipment checklists of the US DOE O&M Best Practices Guide R3 as the typical reference for routine frequencies.",
+      "uk": "Планове попереджувальне обслуговування в розумінні EN 13306 на фіксованій календарній сітці з вікном допуску наряду; інтервали обов'язкових перевірок з MEPCore (базовий рівень ЄС: Регламент (ЄС) 2024/573 щодо F-газів, EPBD (ЄС) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); вирівнювання ресурсів щодо можливостей фахівців; чек-листи обладнання з US DOE O&M Best Practices Guide R3 як типовий орієнтир частоти регламентів.",
+      "de": "Geplante vorbeugende Instandhaltung im Sinne der EN 13306 auf einem festen Kalenderraster mit Toleranzfenster je Auftrag; gesetzliche Intervalle aus MEPCore (EU-Grundniveau: F-Gas-Verordnung (EU) 2024/573, EPBD (EU) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); Kapazitätsglättung gegen die Gewerkekapazität; Gerätechecklisten des US DOE O&M Best Practices Guide R3 als typische Referenz für Routinehäufigkeiten.",
+      "nl": "Gepland preventief onderhoud in de zin van EN 13306 op een vast kalenderraster met een tolerantievenster per werkorder; wettelijke intervallen uit MEPCore (EU-basis: F-gassenverordening (EU) 2024/573, EPBD (EU) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); afvlakken van capaciteit per vakdiscipline; checklists van de US DOE O&M Best Practices Guide R3 als typische referentie voor routinefrequenties.",
+      "fr": "Maintenance préventive systématique au sens de l'EN 13306 sur une grille calendaire fixe avec fenêtre de tolérance par ordre ; intervalles réglementaires issus de MEPCore (base UE : règlement F-gaz (UE) 2024/573, DPEB (UE) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274) ; lissage des charges face à la capacité des métiers ; listes de contrôle du US DOE O&M Best Practices Guide R3 comme référence typique des fréquences.",
+      "es": "Mantenimiento preventivo programado en el sentido de la EN 13306 sobre una rejilla de calendario fija con ventana de tolerancia por orden; intervalos reglamentarios de MEPCore (base UE: Reglamento de gases fluorados (UE) 2024/573, EPBD (UE) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); nivelación de recursos frente a la capacidad de cada oficio; listas de comprobación del US DOE O&M Best Practices Guide R3 como referencia típica de frecuencias.",
+      "pl": "Planowe utrzymanie zapobiegawcze w rozumieniu EN 13306 na stałej siatce kalendarza z oknem tolerancji zlecenia; interwały ustawowe z MEPCore (poziom bazowy UE: rozporządzenie (UE) 2024/573 w sprawie F-gazów, EPBD (UE) 2024/1275, EN 12845, EN 50172, HSE L8/HSG274); wygładzanie obciążenia wobec zdolności branż; listy kontrolne US DOE O&M Best Practices Guide R3 jako typowe odniesienie częstotliwości czynności."
+    },
+    "independent_validation": false,
+    "benchmarks": [{"id": "mepplanner-ref-2026-11-05", "reference": {"en": "bench-src/ref/gen_mepplanner.py: ISO 8601 calendar from Python datetime; independent re-implementation of the grid, tolerance, window, visit and budget rules for 6 deterministic plans; verification of 8 levelled plans of the page (calendar, tolerance, windows, grid spacing, hours, visits, travel, capacity conflicts, budget, statutory never moved, levelled never worse, each example's teaching point).", "uk": "bench-src/ref/gen_mepplanner.py: календар ISO 8601 з Python datetime; незалежна реалізація правил сітки, допуску, вікон, виїздів і бюджету для 6 детермінованих планів; перевірка 8 вирівняних планів сторінки (календар, допуск, вікна, крок сітки, години, виїзди, дорога, конфлікти можливостей, бюджет, незмінність обов’язкових перевірок, вирівняний план не гірший, навчальна суть кожного прикладу).", "de": "bench-src/ref/gen_mepplanner.py: ISO-8601-Kalender aus Python datetime; unabhängige Umsetzung der Raster-, Toleranz-, Fenster-, Einsatz- und Budgetregeln für 6 deterministische Pläne; Prüfung von 8 geglätteten Plänen der Seite (Kalender, Toleranz, Fenster, Rasterabstand, Stunden, Einsätze, Anfahrt, Kapazitätskonflikte, Budget, gesetzliche Prüfungen unverschoben, Glättung nie schlechter, Lehrpunkt jedes Beispiels).", "nl": "bench-src/ref/gen_mepplanner.py: ISO 8601-kalender uit Python datetime; onafhankelijke uitwerking van de regels voor raster, tolerantie, vensters, bezoeken en budget voor 6 deterministische plannen; controle van 8 afgevlakte plannen van de pagina (kalender, tolerantie, vensters, rasterafstand, uren, bezoeken, reistijd, capaciteitsconflicten, budget, wettelijke keuringen onverschoven, afvlakken nooit slechter, leerpunt van elk voorbeeld).", "fr": "bench-src/ref/gen_mepplanner.py : calendrier ISO 8601 issu de Python datetime ; réimplémentation indépendante des règles de grille, tolérance, fenêtres, interventions et budget pour 6 plans déterministes ; vérification de 8 plans lissés de la page (calendrier, tolérance, fenêtres, pas de grille, heures, interventions, déplacements, conflits de capacité, budget, réglementaire jamais déplacé, lissage jamais pire, point pédagogique de chaque exemple).", "es": "bench-src/ref/gen_mepplanner.py: calendario ISO 8601 de Python datetime; reimplementación independiente de las reglas de rejilla, tolerancia, ventanas, visitas y presupuesto para 6 planes deterministas; verificación de 8 planes nivelados de la página (calendario, tolerancia, ventanas, paso de rejilla, horas, visitas, desplazamientos, conflictos de capacidad, presupuesto, reglamentarias nunca movidas, nivelación nunca peor, enseñanza de cada ejemplo).", "pl": "bench-src/ref/gen_mepplanner.py: kalendarz ISO 8601 z Python datetime; niezależna implementacja reguł siatki, tolerancji, okien, wizyt i budżetu dla 6 deterministycznych planów; weryfikacja 8 wygładzonych planów strony (kalendarz, tolerancja, okna, krok siatki, godziny, wizyty, dojazdy, konflikty zdolności, budżet, próby ustawowe nieprzesunięte, wygładzanie nigdy gorsze, sedno każdego przykładu)."}, "cases": 25, "passed": 25, "tolerance": "calendar and placement exact; hours 1e-6 h; budget 0.02 EUR; weekly loads 0.011 h; levelled plans: all invariants hold", "run_at": "2026-11-07T09:55:08Z", "artifact": "benchmarks/mepplanner.json", "citations": ["ISO 8601-1:2019 Date and time — week dates", "EN 13306:2017 Maintenance — Maintenance terminology", "US DOE FEMP, Operations & Maintenance Best Practices Guide, Release 3.0 (2010), ch. 9", "Regulation (EU) 2024/573 (F-gases), Art. 5; Directive (EU) 2024/1275 (EPBD), Art. 23"]}]
+  },
+  "report": { "pdf": true, "source_attribution": true },
+  "python_export": { "supported": false, "requires": [], "reason": "A calendar heuristic over a task list; the independent reference check is bench-src/ref/gen_mepplanner.py." },
+  "handoff": { "provides": [], "accepts": [] },
+  "state_codec": { "permalink": true, "record": "tools.petrov.re/calculation-record/v1" },
+  "workflow": { "entry": "calculate", "medium": "none", "lifecycle": ["handover", "operations"] },
+  "ui": { "framework": "tools.petrov.re/ui/v1", "level": 3 }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="mep-core.js?v=a361b1796169" defer></script>
+<script src="mep-planner.js" defer></script>
+<style>.dgu-app .dgu-strip-i{flex:0 1 auto;max-width:100%}.dgu-app .dgu-btn{white-space:normal;max-width:100%;overflow-wrap:anywhere;height:auto}</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+'use strict';
+/* ===== mepplanner page: the model is mep-planner.js (MEPPlan), the register is mep-core.js (MEPCore) ===== */
+var TOOL = 'mepplanner';
+function T7(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+var CORE = window.MEPCore || null, PLAN = window.MEPPlan || null;
+var TRADES = ['hvac_mech', 'electrician', 'plumber', 'fire', 'controls', 'specialist_vendor'];
+var CONSTR = ['none', 'not_heating', 'not_cooling', 'pre_heating', 'pre_cooling', 'shutdown', 'not_shutdown'];
+
+var I18N = {
+  subtitle: T7('Tasks to a 52/53-week calendar: peaks, windows, visits, statutory dates and the budget.',
+    'Завдання — у 52/53-тижневий календар: піки, вікна, виїзди, обов’язкові дати й бюджет.',
+    'Aufgaben in einen 52/53-Wochen-Kalender: Spitzen, Fenster, Einsätze, gesetzliche Termine und Budget.',
+    'Taken naar een kalender van 52/53 weken: pieken, vensters, bezoeken, wettelijke data en budget.',
+    'Des tâches au calendrier de 52/53 semaines : pics, fenêtres, interventions, échéances réglementaires et budget.',
+    'De tareas a un calendario de 52/53 semanas: picos, ventanas, visitas, fechas reglamentarias y presupuesto.',
+    'Zadania w 52/53-tygodniowy kalendarz: szczyty, okna, wizyty, terminy ustawowe i budżet.'),
+  footer: T7('Each task gives round(N / interval in weeks), N = ISO weeks of the plan year (52 or 53), work orders per year on a fixed grid (anchor + k·interval; the anchor is the next due date, or chosen by the planner for undated routine tasks). A work order may move by at most floor(tolerance × interval) whole weeks (±10 % by default: quarterly ±1 week, annual ±5); statutory tests are never moved. Allowed weeks: heating season W40–W17 and cooling season W18–W39 by default (learning assumption), pre-season = 6 weeks before the season, shutdown and blackout weeks as entered. Week load per trade h = task hours + travel per visit; tasks of one asset (or location) and trade in one week share one visit. Levelling minimises Σ h² + 1000·overload² over trades and weeks (greedy placement of the most constrained series first, then single moves within the windows). Budget = hours × rate + travel + materials (% of labour unless given) + call-out fee per vendor visit. Planning aid, not a substitute for manufacturer instructions and national regulations.',
+    'Кожне завдання дає round(N / інтервал у тижнях), N — кількість тижнів ISO у році плану (52 або 53), нарядів на рік на фіксованій сітці (опорна дата + k·інтервал; опорна дата — найближчий термін, а для завдань без дати її вибирає планувальник). Наряд можна зсунути щонайбільше на floor(допуск × інтервал) цілих тижнів (типово ±10 %: щоквартальний ±1 тиждень, щорічний ±5); обов’язкові перевірки не зсуваються ніколи. Дозволені тижні: типово опалювальний сезон Т40–Т17 і сезон охолодження Т18–Т39 (навчальне припущення), передсезонне вікно — 6 тижнів до сезону, тижні зупинки й заборони — як введено. Навантаження фаху за тиждень h = години завдань + час на виїзд; завдання одного обладнання (або місця) й фаху в одному тижні — один виїзд. Вирівнювання мінімізує Σ h² + 1000·перевантаження² за фахами й тижнями (жадібне розміщення найобмеженіших серій спочатку, потім окремі зсуви в межах вікон). Бюджет = години × ставка + дорога + матеріали (% від праці, якщо не задано) + плата за виклик підрядника. Допоміжний інструмент, не замінює інструкцій виробника й національних норм.',
+    'Jede Aufgabe ergibt round(N / Intervall in Wochen), N = ISO-Wochen des Planjahres (52 oder 53), Aufträge pro Jahr auf einem festen Raster (Anker + k·Intervall; Anker ist der nächste Fälligkeitstermin, bei undatierten Routinen wählt ihn der Planer). Ein Auftrag darf sich höchstens um floor(Toleranz × Intervall) ganze Wochen verschieben (standardmäßig ±10 %: vierteljährlich ±1 Woche, jährlich ±5); gesetzliche Prüfungen nie. Zulässige Wochen: Heizperiode KW40–KW17 und Kühlperiode KW18–KW39 als Vorgabe (Lernannahme), Vorsaison = 6 Wochen vor Saisonbeginn, Stillstands- und Sperrwochen wie eingegeben. Wochenlast je Gewerk h = Aufgabenstunden + Anfahrt je Einsatz; Aufgaben einer Anlage (oder eines Orts) und eines Gewerks in einer Woche teilen einen Einsatz. Die Glättung minimiert Σ h² + 1000·Überlast² über Gewerke und Wochen (gierige Platzierung der am stärksten eingeschränkten Serien zuerst, dann Einzelverschiebungen in den Fenstern). Budget = Stunden × Satz + Anfahrt + Material (% der Arbeit, falls nicht angegeben) + Anfahrtspauschale je Fremdfirmeneinsatz. Planungshilfe, kein Ersatz für Herstellervorgaben und nationale Vorschriften.',
+    'Elke taak geeft round(N / interval in weken), N = ISO-weken van het planjaar (52 of 53), werkorders per jaar op een vast raster (anker + k·interval; het anker is de volgende vervaldatum, of door de planner gekozen voor ongedateerde routines). Een werkorder mag hoogstens floor(tolerantie × interval) hele weken schuiven (standaard ±10 %: per kwartaal ±1 week, jaarlijks ±5); wettelijke keuringen nooit. Toegestane weken: stookseizoen W40–W17 en koelseizoen W18–W39 standaard (leeraanname), voorseizoen = 6 weken vóór het seizoen, stilstands- en blokkadeweken zoals ingevoerd. Weeklast per discipline h = taakuren + reistijd per bezoek; taken van één installatie (of locatie) en discipline in één week delen één bezoek. Afvlakken minimaliseert Σ h² + 1000·overbelasting² over disciplines en weken (gretige plaatsing van de meest beperkte reeksen eerst, dan losse verschuivingen binnen de vensters). Budget = uren × tarief + reistijd + materiaal (% van arbeid tenzij opgegeven) + voorrijkosten per bezoek van een externe partij. Planningshulpmiddel, geen vervanging van fabrieksvoorschriften en nationale regels.',
+    'Chaque tâche donne round(N / intervalle en semaines), N = semaines ISO de l’année du plan (52 ou 53), ordres par an sur une grille fixe (ancre + k·intervalle ; l’ancre est la prochaine échéance, ou choisie par le planificateur pour les gammes non datées). Un ordre peut bouger d’au plus floor(tolérance × intervalle) semaines entières (±10 % par défaut : trimestriel ±1 semaine, annuel ±5) ; les contrôles réglementaires jamais. Semaines admises : saison de chauffe S40–S17 et saison de froid S18–S39 par défaut (hypothèse pédagogique), avant-saison = 6 semaines avant la saison, semaines d’arrêt et de gel telles que saisies. Charge hebdomadaire par métier h = heures des tâches + déplacement par intervention ; les tâches d’un même équipement (ou lieu) et métier dans la même semaine partagent une intervention. Le lissage minimise Σ h² + 1000·surcharge² sur métiers et semaines (placement glouton des séries les plus contraintes d’abord, puis déplacements unitaires dans les fenêtres). Budget = heures × taux + déplacements + fournitures (% de la main-d’œuvre sauf saisie) + frais de déplacement par intervention de prestataire. Aide à la planification, ne remplace ni les instructions du fabricant ni la réglementation nationale.',
+    'Cada tarea da round(N / intervalo en semanas), N = semanas ISO del año del plan (52 o 53), órdenes por año sobre una rejilla fija (ancla + k·intervalo; el ancla es el próximo vencimiento, o la elige el planificador en rutinas sin fecha). Una orden puede moverse como mucho floor(tolerancia × intervalo) semanas enteras (±10 % por defecto: trimestral ±1 semana, anual ±5); las pruebas reglamentarias nunca. Semanas permitidas: temporada de calefacción S40–S17 y de refrigeración S18–S39 por defecto (supuesto didáctico), pretemporada = 6 semanas antes de la temporada, semanas de parada y de bloqueo según lo introducido. Carga semanal por oficio h = horas de tareas + desplazamiento por visita; las tareas de un equipo (o ubicación) y oficio en la misma semana comparten una visita. La nivelación minimiza Σ h² + 1000·sobrecarga² en oficios y semanas (colocación voraz de las series más restringidas primero, luego movimientos individuales dentro de las ventanas). Presupuesto = horas × tarifa + desplazamientos + materiales (% de la mano de obra salvo que se indique) + cargo por visita de proveedor. Ayuda de planificación, no sustituye las instrucciones del fabricante ni la normativa nacional.',
+    'Każde zadanie daje round(N / interwał w tygodniach), N = liczba tygodni ISO roku planu (52 lub 53), zleceń rocznie na stałej siatce (kotwica + k·interwał; kotwica to najbliższy termin, a dla czynności bez daty wybiera ją planer). Zlecenie może się przesunąć najwyżej o floor(tolerancja × interwał) pełnych tygodni (domyślnie ±10 %: kwartalne ±1 tydzień, roczne ±5); próby ustawowe nigdy. Dozwolone tygodnie: domyślnie sezon grzewczy T40–T17 i chłodniczy T18–T39 (założenie dydaktyczne), przedsezon = 6 tygodni przed sezonem, tygodnie postoju i blokady jak wpisano. Obciążenie branży w tygodniu h = godziny zadań + dojazd na wizytę; zadania jednego urządzenia (lub miejsca) i branży w jednym tygodniu to jedna wizyta. Wygładzanie minimalizuje Σ h² + 1000·przeciążenie² po branżach i tygodniach (zachłanne rozmieszczenie najbardziej ograniczonych serii najpierw, potem pojedyncze przesunięcia w oknach). Budżet = godziny × stawka + dojazdy + materiały (% robocizny, jeśli nie podano) + opłata za wizytę firmy zewnętrznej. Pomoc w planowaniu, nie zastępuje instrukcji producenta i przepisów krajowych.'),
+  'notice.t': T7('What this plan is', 'Що це за план', 'Was dieser Plan ist', 'Wat dit plan is', 'Ce qu’est ce plan', 'Qué es este plan', 'Czym jest ten plan'),
+  'notice.b': T7('A weekly planning view of preventive work. Routine intervals and hours of the class library are learning assumptions; statutory tests follow an EU baseline (national rules may be stricter) and are never moved or dropped. Planning aid, not a substitute for manufacturer instructions and national regulations.',
+    'Тижневий план попереджувальних робіт. Інтервали й трудомісткість регламентів з бібліотеки класів — навчальні припущення; обов’язкові перевірки відповідають базовому рівню ЄС (національні правила можуть бути суворішими) і ніколи не зсуваються й не вилучаються. Допоміжний інструмент, не замінює інструкцій виробника й національних норм.',
+    'Eine Wochenansicht der vorbeugenden Arbeiten. Intervalle und Stunden der Klassenbibliothek sind Lernannahmen; gesetzliche Prüfungen folgen einem EU-Grundniveau (nationale Regeln können strenger sein) und werden nie verschoben oder gestrichen. Planungshilfe, kein Ersatz für Herstellervorgaben und nationale Vorschriften.',
+    'Een weekoverzicht van preventief werk. Intervallen en uren uit de klassenbibliotheek zijn leeraannames; wettelijke keuringen volgen een EU-basisniveau (nationale regels kunnen strenger zijn) en worden nooit verschoven of geschrapt. Planningshulpmiddel, geen vervanging van fabrieksvoorschriften en nationale regels.',
+    'Une vue hebdomadaire des travaux préventifs. Intervalles et heures de la bibliothèque de classes sont des hypothèses pédagogiques ; les contrôles réglementaires suivent une base UE (les règles nationales peuvent être plus strictes) et ne sont jamais déplacés ni supprimés. Aide à la planification, ne remplace ni les instructions du fabricant ni la réglementation nationale.',
+    'Una vista semanal del trabajo preventivo. Los intervalos y horas de la biblioteca de clases son supuestos didácticos; las pruebas reglamentarias siguen una base UE (las normas nacionales pueden ser más estrictas) y nunca se mueven ni se eliminan. Ayuda de planificación, no sustituye las instrucciones del fabricante ni la normativa nacional.',
+    'Tygodniowy widok prac zapobiegawczych. Interwały i pracochłonność z biblioteki klas to założenia dydaktyczne; próby ustawowe odpowiadają poziomowi bazowemu UE (przepisy krajowe mogą być surowsze) i nigdy nie są przesuwane ani usuwane. Pomoc w planowaniu, nie zastępuje instrukcji producenta i przepisów krajowych.'),
+  /* panels */
+  'p.source': T7('Task source', 'Джерело завдань', 'Aufgabenquelle', 'Bron van taken', 'Source des tâches', 'Origen de las tareas', 'Źródło zadań'),
+  'p.plan': T7('Plan settings', 'Параметри плану', 'Planeinstellungen', 'Planinstellingen', 'Paramètres du plan', 'Ajustes del plan', 'Ustawienia planu'),
+  'p.windows': T7('Seasons and windows', 'Сезони та вікна', 'Saisons und Fenster', 'Seizoenen en vensters', 'Saisons et fenêtres', 'Temporadas y ventanas', 'Sezony i okna'),
+  'p.capacity': T7('In-house hours per week', 'Власні години на тиждень', 'Eigene Stunden pro Woche', 'Eigen uren per week', 'Heures internes par semaine', 'Horas propias por semana', 'Własne godziny na tydzień'),
+  'p.budget': T7('Rates and budget', 'Ставки та бюджет', 'Sätze und Budget', 'Tarieven en budget', 'Taux et budget', 'Tarifas y presupuesto', 'Stawki i budżet'),
+  'p.tasks': T7('Task list', 'Перелік завдань', 'Aufgabenliste', 'Takenlijst', 'Liste des tâches', 'Lista de tareas', 'Lista zadań'),
+  'p.io': T7('Export and register', 'Експорт і реєстр', 'Export und Register', 'Export en register', 'Export et registre', 'Exportación y registro', 'Eksport i rejestr'),
+  /* fields */
+  'f.view': T7('Show', 'Показати', 'Anzeigen', 'Toon', 'Afficher', 'Mostrar', 'Pokaż'),
+  'view.levelled': T7('Levelled plan', 'Вирівняний план', 'Geglätteter Plan', 'Afgevlakt plan', 'Plan lissé', 'Plan nivelado', 'Plan wygładzony'),
+  'view.naive': T7('As set up (no levelling)', 'Як задано (без вирівнювання)', 'Wie angelegt (ohne Glättung)', 'Zoals ingesteld (zonder afvlakken)', 'Tel que saisi (sans lissage)', 'Tal como se definió (sin nivelar)', 'Jak ustawiono (bez wygładzania)'),
+  'f.trade': T7('Heat map rows', 'Рядки теплової карти', 'Zeilen der Heatmap', 'Rijen van de heatmap', 'Lignes de la carte', 'Filas del mapa', 'Wiersze mapy'),
+  'trade.all': T7('All trades', 'Усі фахи', 'Alle Gewerke', 'Alle disciplines', 'Tous les métiers', 'Todos los oficios', 'Wszystkie branże'),
+  'f.week': T7('Selected week', 'Вибраний тиждень', 'Gewählte Woche', 'Gekozen week', 'Semaine choisie', 'Semana seleccionada', 'Wybrany tydzień'),
+  'f.year': T7('Plan year', 'Рік плану', 'Planjahr', 'Planjaar', 'Année du plan', 'Año del plan', 'Rok planu'),
+  'f.start': T7('First ISO week', 'Перший тиждень ISO', 'Erste ISO-Woche', 'Eerste ISO-week', 'Première semaine ISO', 'Primera semana ISO', 'Pierwszy tydzień ISO'),
+  'f.tol': T7('Work-order tolerance', 'Допуск наряду', 'Toleranz je Auftrag', 'Tolerantie per werkorder', 'Tolérance par ordre', 'Tolerancia por orden', 'Tolerancja zlecenia'),
+  'f.tol.h': T7('± share of the interval a work order may move; statutory tests ±0', '± частка інтервалу, на яку можна зсунути наряд; обов’язкові перевірки ±0', '± Anteil des Intervalls, um den ein Auftrag wandern darf; gesetzliche Prüfungen ±0', '± deel van het interval dat een werkorder mag schuiven; wettelijke keuringen ±0', '± part de l’intervalle dont un ordre peut bouger ; contrôles réglementaires ±0', '± fracción del intervalo que puede moverse una orden; pruebas reglamentarias ±0', '± część interwału, o którą może przesunąć się zlecenie; próby ustawowe ±0'),
+  'f.group': T7('One visit per', 'Один виїзд на', 'Ein Einsatz je', 'Eén bezoek per', 'Une intervention par', 'Una visita por', 'Jedna wizyta na'),
+  'g.asset': T7('asset', 'одиницю', 'Anlage', 'installatie', 'équipement', 'equipo', 'urządzenie'),
+  'g.location': T7('location', 'місце', 'Ort', 'locatie', 'lieu', 'ubicación', 'miejsce'),
+  'g.none': T7('task (no grouping)', 'завдання (без групування)', 'Aufgabe (ohne Bündelung)', 'taak (niet bundelen)', 'tâche (sans regroupement)', 'tarea (sin agrupar)', 'zadanie (bez grupowania)'),
+  'f.travel': T7('Travel / set-up per visit', 'Дорога / підготовка на виїзд', 'Anfahrt / Rüstzeit je Einsatz', 'Reistijd / voorbereiding per bezoek', 'Déplacement / préparation par intervention', 'Desplazamiento / preparación por visita', 'Dojazd / przygotowanie na wizytę'),
+  'f.rebase': T7('Re-baseline dates that miss their window', 'Переносити дати, що не потрапляють у вікно', 'Termine außerhalb des Fensters neu festlegen', 'Data buiten het venster opnieuw vastleggen', 'Recaler les dates hors fenêtre', 'Reprogramar fechas fuera de su ventana', 'Przestawić terminy poza oknem'),
+  'f.rebase.h': T7('Once: the anniversary moves into the allowed season and stays there', 'Одноразово: річниця переходить у дозволений сезон і там лишається', 'Einmalig: der Jahrestermin wandert in die zulässige Saison und bleibt dort', 'Eenmalig: de jaardatum verhuist naar het toegestane seizoen en blijft daar', 'Une fois : l’échéance annuelle passe dans la saison admise et y reste', 'Una vez: el aniversario pasa a la temporada permitida y se queda allí', 'Jednorazowo: rocznica przechodzi do dozwolonego sezonu i tam zostaje'),
+  'f.heatFrom': T7('Heating season from week', 'Опалювальний сезон з тижня', 'Heizperiode ab KW', 'Stookseizoen vanaf week', 'Saison de chauffe dès la semaine', 'Calefacción desde la semana', 'Sezon grzewczy od tygodnia'),
+  'f.heatTo': T7('… to week', '… до тижня', '… bis KW', '… tot week', '… jusqu’à la semaine', '… hasta la semana', '… do tygodnia'),
+  'f.coolFrom': T7('Cooling season from week', 'Сезон охолодження з тижня', 'Kühlperiode ab KW', 'Koelseizoen vanaf week', 'Saison de froid dès la semaine', 'Refrigeración desde la semana', 'Sezon chłodniczy od tygodnia'),
+  'f.pre': T7('Pre-season window', 'Передсезонне вікно', 'Vorsaisonfenster', 'Voorseizoensvenster', 'Fenêtre d’avant-saison', 'Ventana de pretemporada', 'Okno przedsezonowe'),
+  'f.sdFrom': T7('Site shutdown from week', 'Зупинка об’єкта з тижня', 'Betriebsstillstand ab KW', 'Stilstand vanaf week', 'Arrêt du site dès la semaine', 'Parada del sitio desde la semana', 'Postój obiektu od tygodnia'),
+  'f.sdTo': T7('Shutdown to week', 'Зупинка до тижня', 'Stillstand bis KW', 'Stilstand tot week', 'Arrêt jusqu’à la semaine', 'Parada hasta la semana', 'Postój do tygodnia'),
+  'f.sd.h': T7('Empty = no shutdown this year', 'Порожньо — зупинки цього року немає', 'Leer = kein Stillstand in diesem Jahr', 'Leeg = geen stilstand dit jaar', 'Vide = pas d’arrêt cette année', 'Vacío = sin parada este año', 'Puste = brak postoju w tym roku'),
+  'f.blackout': T7('Blackout weeks (no routine work)', 'Тижні без планових робіт', 'Sperrwochen (keine Routinearbeit)', 'Blokkadeweken (geen routinewerk)', 'Semaines gelées (pas de travaux courants)', 'Semanas bloqueadas (sin rutinas)', 'Tygodnie blokady (bez prac rutynowych)'),
+  'f.blackout.h': T7('ISO weeks separated by commas, e.g. 52, 1; statutory tests still happen', 'Тижні ISO через кому, напр. 52, 1; обов’язкові перевірки все одно виконуються', 'ISO-Wochen mit Komma, z. B. 52, 1; gesetzliche Prüfungen finden trotzdem statt', 'ISO-weken met komma’s, bv. 52, 1; wettelijke keuringen gaan door', 'Semaines ISO séparées par des virgules, p. ex. 52, 1 ; les contrôles réglementaires ont lieu quand même', 'Semanas ISO separadas por comas, p. ej. 52, 1; las pruebas reglamentarias se hacen igualmente', 'Tygodnie ISO po przecinku, np. 52, 1; próby ustawowe odbywają się mimo to'),
+  'f.cap.h': T7('Empty = unlimited (contracted out); the planner flags weeks above these hours', 'Порожньо — без обмежень (підрядник); планувальник позначає тижні понад ці години', 'Leer = unbegrenzt (Fremdvergabe); der Planer markiert Wochen über diesen Stunden', 'Leeg = onbeperkt (uitbesteed); de planner markeert weken boven deze uren', 'Vide = illimité (sous-traité) ; le planificateur signale les semaines au-delà', 'Vacío = ilimitado (subcontratado); el planificador marca las semanas por encima', 'Puste = bez limitu (podwykonawca); planer oznacza tygodnie powyżej tych godzin'),
+  'f.rate': T7('Rate', 'Ставка', 'Satz', 'Tarief', 'Taux', 'Tarifa', 'Stawka'),
+  'f.mat': T7('Materials (share of labour)', 'Матеріали (частка від праці)', 'Material (Anteil an der Arbeit)', 'Materiaal (aandeel van arbeid)', 'Fournitures (part de la main-d’œuvre)', 'Materiales (parte de la mano de obra)', 'Materiały (udział w robociźnie)'),
+  'f.callout': T7('Vendor call-out per visit', 'Плата за виклик підрядника', 'Anfahrtspauschale Fremdfirma', 'Voorrijkosten externe partij', 'Frais de déplacement prestataire', 'Cargo por visita del proveedor', 'Opłata za przyjazd serwisu'),
+  'f.tasks': T7('Tasks', 'Завдання', 'Aufgaben', 'Taken', 'Tâches', 'Tareas', 'Zadania'),
+  'c.asset': T7('Asset', 'Обладнання', 'Anlage', 'Installatie', 'Équipement', 'Equipo', 'Urządzenie'),
+  'c.task': T7('Task', 'Завдання', 'Aufgabe', 'Taak', 'Tâche', 'Tarea', 'Zadanie'),
+  'c.int': T7('Interval', 'Інтервал', 'Intervall', 'Interval', 'Intervalle', 'Intervalo', 'Interwał'),
+  'c.trade': T7('Trade', 'Фах', 'Gewerk', 'Discipline', 'Métier', 'Oficio', 'Branża'),
+  'c.hours': T7('Hours', 'Години', 'Stunden', 'Uren', 'Heures', 'Horas', 'Godziny'),
+  'c.window': T7('Window', 'Вікно', 'Fenster', 'Venster', 'Fenêtre', 'Ventana', 'Okno'),
+  'c.stat': T7('Statutory', 'Обов’язк.', 'Gesetzlich', 'Wettelijk', 'Réglem.', 'Reglam.', 'Ustawowe'),
+  'c.due': T7('Due week', 'Тиждень терміну', 'Fällig KW', 'Vervalweek', 'Semaine d’échéance', 'Semana de vencimiento', 'Tydzień terminu'),
+  'c.n': T7('Orders', 'Наряди', 'Aufträge', 'Orders', 'Ordres', 'Órdenes', 'Zlecenia'),
+  'cn.none': T7('any week', 'будь-який тиждень', 'jede Woche', 'elke week', 'toute semaine', 'cualquier semana', 'dowolny tydzień'),
+  'cn.not_heating': T7('outside heating season', 'поза опалювальним сезоном', 'außerhalb der Heizperiode', 'buiten het stookseizoen', 'hors saison de chauffe', 'fuera de la calefacción', 'poza sezonem grzewczym'),
+  'cn.not_cooling': T7('outside cooling season', 'поза сезоном охолодження', 'außerhalb der Kühlperiode', 'buiten het koelseizoen', 'hors saison de froid', 'fuera de la refrigeración', 'poza sezonem chłodniczym'),
+  'cn.pre_heating': T7('before heating season', 'перед опалювальним сезоном', 'vor der Heizperiode', 'vóór het stookseizoen', 'avant la saison de chauffe', 'antes de la calefacción', 'przed sezonem grzewczym'),
+  'cn.pre_cooling': T7('before cooling season', 'перед сезоном охолодження', 'vor der Kühlperiode', 'vóór het koelseizoen', 'avant la saison de froid', 'antes de la refrigeración', 'przed sezonem chłodniczym'),
+  'cn.shutdown': T7('in a shutdown', 'під час зупинки', 'im Stillstand', 'tijdens stilstand', 'pendant un arrêt', 'durante una parada', 'w czasie postoju'),
+  'cn.not_shutdown': T7('not in a shutdown (on load)', 'не під час зупинки (під навантаженням)', 'nicht im Stillstand (unter Last)', 'niet tijdens stilstand (onder last)', 'hors arrêt (en charge)', 'fuera de parada (en carga)', 'poza postojem (pod obciążeniem)'),
+  /* actions */
+  'a.fromReg': T7('Build from register (class routines + statutory)', 'Сформувати з реєстру (регламенти класів + обов’язкові)', 'Aus dem Register bilden (Klassenroutinen + gesetzlich)', 'Opbouwen uit register (klasseroutines + wettelijk)', 'Construire depuis le registre (gammes + réglementaire)', 'Generar desde el registro (rutinas + reglamentarias)', 'Zbuduj z rejestru (czynności klas + ustawowe)'),
+  'a.fromStrat': T7('Use strategy results', 'Використати результати стратегії', 'Strategieergebnisse verwenden', 'Strategieresultaten gebruiken', 'Utiliser les résultats de stratégie', 'Usar resultados de estrategia', 'Użyj wyników strategii'),
+  'a.cmms': T7('Work orders CSV (CMMS)', 'CSV нарядів (CMMS)', 'Aufträge CSV (CMMS)', 'Werkorders CSV (CMMS)', 'Ordres de travail CSV (GMAO)', 'Órdenes CSV (GMAO)', 'Zlecenia CSV (CMMS)'),
+  'a.cal': T7('Weekly calendar CSV', 'CSV тижневого календаря', 'Wochenkalender CSV', 'Weekkalender CSV', 'Calendrier hebdo CSV', 'Calendario semanal CSV', 'Kalendarz tygodniowy CSV'),
+  'a.json': T7('Register JSON (with plan)', 'JSON реєстру (з планом)', 'Register-JSON (mit Plan)', 'Register-JSON (met plan)', 'JSON du registre (avec plan)', 'JSON del registro (con plan)', 'JSON rejestru (z planem)'),
+  'a.save': T7('Save plan to my site register', 'Зберегти план у реєстрі об’єкта', 'Plan im Anlagenregister speichern', 'Plan opslaan in mijn register', 'Enregistrer le plan dans mon registre', 'Guardar el plan en mi registro', 'Zapisz plan w rejestrze obiektu'),
+  'a.add': T7('Add task', 'Додати завдання', 'Aufgabe hinzufügen', 'Taak toevoegen', 'Ajouter une tâche', 'Añadir tarea', 'Dodaj zadanie'),
+  /* source messages */
+  'src.preset': T7('Example plan — the task list is built into this page.', 'Приклад — перелік завдань вбудовано в сторінку.', 'Beispielplan — die Aufgabenliste ist in diese Seite eingebaut.', 'Voorbeeldplan — de takenlijst zit in deze pagina.', 'Plan d’exemple — la liste de tâches est intégrée à la page.', 'Plan de ejemplo — la lista de tareas está incluida en la página.', 'Plan przykładowy — lista zadań jest wbudowana w stronę.'),
+  'src.classes': T7('Baseline from the register: class routines (learning assumptions) plus statutory tasks from MEPCore. Replace them with your strategy results or manufacturer schedules.', 'Базовий план з реєстру: регламенти класів (навчальні припущення) плюс обов’язкові завдання з MEPCore. Замініть їх результатами стратегії або графіками виробника.', 'Grundplan aus dem Register: Klassenroutinen (Lernannahmen) plus gesetzliche Aufgaben aus MEPCore. Ersetzen Sie sie durch Ihre Strategieergebnisse oder Herstellerpläne.', 'Basisplan uit het register: klasseroutines (leeraannames) plus wettelijke taken uit MEPCore. Vervang ze door uw strategieresultaten of fabrieksschema’s.', 'Plan de base depuis le registre : gammes par classe (hypothèses pédagogiques) plus tâches réglementaires de MEPCore. Remplacez-les par vos résultats de stratégie ou les plans du fabricant.', 'Plan base desde el registro: rutinas por clase (supuestos didácticos) más tareas reglamentarias de MEPCore. Sustitúyalas por sus resultados de estrategia o los planes del fabricante.', 'Plan bazowy z rejestru: czynności klas (założenia dydaktyczne) plus zadania ustawowe z MEPCore. Zastąp je wynikami strategii lub harmonogramami producenta.'),
+  'src.strategy': T7('Tasks from the RCM strategy results in the register (%d); run-to-failure and redesign decisions are not scheduled.', 'Завдання з результатів стратегії RCM у реєстрі (%d); рішення «до відмови» і «переробити» не плануються.', 'Aufgaben aus den RCM-Strategieergebnissen im Register (%d); Betrieb bis zum Ausfall und Umkonstruktion werden nicht eingeplant.', 'Taken uit de RCM-strategieresultaten in het register (%d); run-to-failure en herontwerp worden niet ingepland.', 'Tâches issues des résultats RCM du registre (%d) ; fonctionnement jusqu’à défaillance et reconception ne sont pas planifiés.', 'Tareas de los resultados RCM del registro (%d); las decisiones de operar hasta el fallo y rediseño no se programan.', 'Zadania z wyników strategii RCM w rejestrze (%d); decyzje „do awarii” i „przeprojektować” nie są planowane.'),
+  'src.custom': T7('Your own task list.', 'Власний перелік завдань.', 'Eigene Aufgabenliste.', 'Eigen takenlijst.', 'Votre propre liste de tâches.', 'Su propia lista de tareas.', 'Własna lista zadań.'),
+  'src.noStrat': T7('The register has no strategy results yet — run the Maintenance Strategy (RCM) tool and save, then press Use.', 'У реєстрі ще немає результатів стратегії — запустіть інструмент «Стратегія ТО (RCM)», збережіть і натисніть «Використати».', 'Das Register enthält noch keine Strategieergebnisse — Instandhaltungsstrategie (RCM) ausführen, speichern, dann „Verwenden“.', 'Het register bevat nog geen strategieresultaten — draai de tool Onderhoudsstrategie (RCM), sla op en kies Gebruiken.', 'Le registre ne contient pas encore de résultats de stratégie — lancez l’outil Stratégie de maintenance (RCM), enregistrez puis Utiliser.', 'El registro aún no tiene resultados de estrategia — ejecute la herramienta Estrategia de mantenimiento (RCM), guarde y pulse Usar.', 'Rejestr nie ma jeszcze wyników strategii — uruchom narzędzie Strategia utrzymania (RCM), zapisz i naciśnij Użyj.'),
+  'src.noReg': T7('No assets in the register: load an example or import a register first.', 'У реєстрі немає обладнання: спершу завантажте приклад або імпортуйте реєстр.', 'Keine Anlagen im Register: zuerst ein Beispiel laden oder ein Register importieren.', 'Geen installaties in het register: laad eerst een voorbeeld of importeer een register.', 'Aucun équipement dans le registre : chargez d’abord un exemple ou importez un registre.', 'No hay equipos en el registro: cargue primero un ejemplo o importe un registro.', 'Brak urządzeń w rejestrze: najpierw wczytaj przykład lub zaimportuj rejestr.'),
+  'saved': T7('Plan saved to the site register (modules.mepplanner).', 'План збережено в реєстрі об’єкта (modules.mepplanner).', 'Plan im Anlagenregister gespeichert (modules.mepplanner).', 'Plan opgeslagen in het register (modules.mepplanner).', 'Plan enregistré dans le registre (modules.mepplanner).', 'Plan guardado en el registro (modules.mepplanner).', 'Plan zapisano w rejestrze (modules.mepplanner).'),
+  'save.blocked': T7('Browser storage is blocked — use Register JSON to keep the plan.', 'Сховище браузера заблоковане — збережіть план через JSON реєстру.', 'Browserspeicher gesperrt — Plan über Register-JSON sichern.', 'Browseropslag geblokkeerd — bewaar het plan via Register-JSON.', 'Stockage du navigateur bloqué — conservez le plan via le JSON du registre.', 'Almacenamiento del navegador bloqueado — guarde el plan con el JSON del registro.', 'Pamięć przeglądarki zablokowana — zachowaj plan przez JSON rejestru.'),
+  /* tiles */
+  't.peak': T7('Peak week (levelled)', 'Піковий тиждень (вирівняно)', 'Spitzenwoche (geglättet)', 'Piekweek (afgevlakt)', 'Semaine de pointe (lissé)', 'Semana pico (nivelado)', 'Tydzień szczytowy (wygładzony)'),
+  't.peakN': T7('Peak week (as set up)', 'Піковий тиждень (як задано)', 'Spitzenwoche (wie angelegt)', 'Piekweek (zoals ingesteld)', 'Semaine de pointe (tel que saisi)', 'Semana pico (sin nivelar)', 'Tydzień szczytowy (jak ustawiono)'),
+  't.over': T7('Hours above capacity', 'Години понад можливості', 'Stunden über Kapazität', 'Uren boven capaciteit', 'Heures au-delà de la capacité', 'Horas sobre la capacidad', 'Godziny ponad zdolność'),
+  't.hours': T7('Hours per year', 'Годин на рік', 'Stunden pro Jahr', 'Uren per jaar', 'Heures par an', 'Horas al año', 'Godzin rocznie'),
+  't.visits': T7('Visits (work orders)', 'Виїзди (наряди)', 'Einsätze (Aufträge)', 'Bezoeken (werkorders)', 'Interventions (ordres)', 'Visitas (órdenes)', 'Wizyty (zlecenia)'),
+  't.saved': T7('Travel hours saved by grouping', 'Години дороги, зекономлені групуванням', 'Durch Bündelung gesparte Anfahrtsstunden', 'Reisuren bespaard door bundelen', 'Heures de déplacement économisées', 'Horas de desplazamiento ahorradas', 'Godziny dojazdu zaoszczędzone grupowaniem'),
+  't.budget': T7('Budget per year', 'Бюджет на рік', 'Budget pro Jahr', 'Budget per jaar', 'Budget annuel', 'Presupuesto anual', 'Budżet roczny'),
+  't.stat': T7('Statutory work orders', 'Обов’язкові наряди', 'Gesetzliche Aufträge', 'Wettelijke werkorders', 'Ordres réglementaires', 'Órdenes reglamentarias', 'Zlecenia ustawowe'),
+  't.conf': T7('Conflicts to resolve', 'Конфлікти до розв’язання', 'Zu lösende Konflikte', 'Op te lossen conflicten', 'Conflits à résoudre', 'Conflictos por resolver', 'Konflikty do rozwiązania'),
+  'v.summary': T7('%n tasks → %o work orders in %v visits, %h h/yr. Peak week %p h (as set up: %q h). %e errors, %w warnings.',
+    '%n завдань → %o нарядів у %v виїздах, %h год/рік. Піковий тиждень %p год (як задано: %q год). Помилок: %e, попереджень: %w.',
+    '%n Aufgaben → %o Aufträge in %v Einsätzen, %h h/Jahr. Spitzenwoche %p h (wie angelegt: %q h). %e Fehler, %w Warnungen.',
+    '%n taken → %o werkorders in %v bezoeken, %h u/jaar. Piekweek %p u (zoals ingesteld: %q u). %e fouten, %w waarschuwingen.',
+    '%n tâches → %o ordres en %v interventions, %h h/an. Semaine de pointe %p h (tel que saisi : %q h). %e erreurs, %w avertissements.',
+    '%n tareas → %o órdenes en %v visitas, %h h/año. Semana pico %p h (sin nivelar: %q h). %e errores, %w avisos.',
+    '%n zadań → %o zleceń w %v wizytach, %h h/rok. Tydzień szczytowy %p h (jak ustawiono: %q h). Błędy: %e, ostrzeżenia: %w.'),
+  'v.empty': T7('No tasks yet: load an example or build the task list from your register.', 'Завдань ще немає: завантажте приклад або сформуйте перелік з реєстру.', 'Noch keine Aufgaben: Beispiel laden oder Aufgabenliste aus dem Register bilden.', 'Nog geen taken: laad een voorbeeld of bouw de takenlijst uit uw register.', 'Pas encore de tâches : chargez un exemple ou construisez la liste depuis le registre.', 'Aún no hay tareas: cargue un ejemplo o genere la lista desde el registro.', 'Brak zadań: wczytaj przykład albo zbuduj listę z rejestru.'),
+  'v.noengine': T7('mep-planner.js did not load.', 'mep-planner.js не завантажився.', 'mep-planner.js wurde nicht geladen.', 'mep-planner.js is niet geladen.', 'mep-planner.js ne s’est pas chargé.', 'mep-planner.js no se cargó.', 'mep-planner.js nie wczytał się.'),
+  /* tables */
+  'tab.conf': T7('Conflicts and warnings', 'Конфлікти й попередження', 'Konflikte und Warnungen', 'Conflicten en waarschuwingen', 'Conflits et avertissements', 'Conflictos y avisos', 'Konflikty i ostrzeżenia'),
+  'tab.week': T7('Week %w (%d): work orders', 'Тиждень %w (%d): наряди', 'KW %w (%d): Aufträge', 'Week %w (%d): werkorders', 'Semaine %w (%d) : ordres', 'Semana %w (%d): órdenes', 'Tydzień %w (%d): zlecenia'),
+  'tab.trades': T7('Hours by trade', 'Години за фахами', 'Stunden je Gewerk', 'Uren per discipline', 'Heures par métier', 'Horas por oficio', 'Godziny według branż'),
+  'tab.month': T7('Budget by month', 'Бюджет за місяцями', 'Budget je Monat', 'Budget per maand', 'Budget par mois', 'Presupuesto por mes', 'Budżet miesięczny'),
+  'tab.tasks': T7('Tasks and their weeks', 'Завдання та їхні тижні', 'Aufgaben und ihre Wochen', 'Taken en hun weken', 'Tâches et leurs semaines', 'Tareas y sus semanas', 'Zadania i ich tygodnie'),
+  'h.sev': T7('Level', 'Рівень', 'Stufe', 'Niveau', 'Niveau', 'Nivel', 'Poziom'),
+  'h.what': T7('What', 'Що', 'Was', 'Wat', 'Quoi', 'Qué', 'Co'),
+  'wk': T7('W', 'тиж. ', 'KW ', 'wk ', 'S', 'S', 'tydz. '),
+  'a11y.trade': T7('%t: %h h, peak %p h in %w', '%t: %h год, пік %p год у %w', '%t: %h h, Spitze %p h in %w', '%t: %h u, piek %p u in %w', '%t : %h h, pointe %p h en %w', '%t: %h h, pico %p h en %w', '%t: %h h, szczyt %p h w %w'),
+  'a11y.over': T7('%n weeks over capacity', '%n тижн. понад потужність', '%n Wochen über Kapazität', '%n weken boven capaciteit', '%n semaines au-delà de la capacité', '%n semanas por encima de la capacidad', '%n tyg. ponad wydajność'),
+  'h.wk': T7('Week', 'Тиждень', 'KW', 'Week', 'Semaine', 'Semana', 'Tydzień'),
+  'h.nominal': T7('Due', 'Термін', 'Fällig', 'Vervalt', 'Échéance', 'Vence', 'Termin'),
+  'h.shift': T7('Shift', 'Зсув', 'Verschiebung', 'Verschuiving', 'Décalage', 'Desplaz.', 'Przesunięcie'),
+  'h.visit': T7('Visit', 'Виїзд', 'Einsatz', 'Bezoek', 'Interv.', 'Visita', 'Wizyta'),
+  'h.mean': T7('Mean / week', 'Середнє / тиждень', 'Mittel / Woche', 'Gemiddeld / week', 'Moyenne / semaine', 'Media / semana', 'Średnio / tydzień'),
+  'h.peakN': T7('Peak as set up', 'Пік як задано', 'Spitze wie angelegt', 'Piek zoals ingesteld', 'Pointe tel que saisi', 'Pico sin nivelar', 'Szczyt jak ustawiono'),
+  'h.peakL': T7('Peak levelled', 'Пік вирівняний', 'Spitze geglättet', 'Piek afgevlakt', 'Pointe lissée', 'Pico nivelado', 'Szczyt wygładzony'),
+  'h.cap': T7('Capacity', 'Можливості', 'Kapazität', 'Capaciteit', 'Capacité', 'Capacidad', 'Zdolność'),
+  'h.overW': T7('Weeks over', 'Тижнів понад', 'Wochen darüber', 'Weken erboven', 'Semaines au-delà', 'Semanas por encima', 'Tygodnie ponad'),
+  'h.cost': T7('Cost', 'Вартість', 'Kosten', 'Kosten', 'Coût', 'Coste', 'Koszt'),
+  'h.month': T7('Month', 'Місяць', 'Monat', 'Maand', 'Mois', 'Mes', 'Miesiąc'),
+  'h.weeks': T7('Weeks', 'Тижні', 'Wochen', 'Weken', 'Semaines', 'Semanas', 'Tygodnie'),
+  'sev.error': T7('error', 'помилка', 'Fehler', 'fout', 'erreur', 'error', 'błąd'),
+  'sev.warn': T7('warning', 'попередження', 'Warnung', 'waarschuwing', 'avertissement', 'aviso', 'ostrzeżenie'),
+  'sev.info': T7('note', 'примітка', 'Hinweis', 'opmerking', 'note', 'nota', 'uwaga'),
+  'none.conf': T7('No conflicts.', 'Конфліктів немає.', 'Keine Konflikte.', 'Geen conflicten.', 'Aucun conflit.', 'Sin conflictos.', 'Brak konfliktów.'),
+  'none.week': T7('No work orders in this week.', 'У цьому тижні нарядів немає.', 'Keine Aufträge in dieser Woche.', 'Geen werkorders deze week.', 'Aucun ordre cette semaine.', 'No hay órdenes esta semana.', 'Brak zleceń w tym tygodniu.'),
+  'yes': T7('yes', 'так', 'ja', 'ja', 'oui', 'sí', 'tak'), 'no': T7('no', 'ні', 'nein', 'nee', 'non', 'no', 'nie'),
+  'total': T7('Total', 'Разом', 'Summe', 'Totaal', 'Total', 'Total', 'Razem'),
+  /* chart */
+  'chart.caption': T7('Weekly hours by trade (darker = closer to capacity, red = over), seasons and windows on top, total per week below (outline = as set up)', 'Години за тиждень за фахами (темніше — ближче до межі, червоне — понад), сезони й вікна вгорі, разом за тиждень унизу (контур — як задано)', 'Wochenstunden je Gewerk (dunkler = näher an der Kapazität, rot = darüber), oben Saisons und Fenster, unten Summe je Woche (Umriss = wie angelegt)', 'Weekuren per discipline (donkerder = dichter bij capaciteit, rood = erboven), seizoenen en vensters boven, totaal per week onder (omtrek = zoals ingesteld)', 'Heures hebdomadaires par métier (plus foncé = plus proche de la capacité, rouge = au-delà), saisons et fenêtres en haut, total par semaine en bas (contour = tel que saisi)', 'Horas semanales por oficio (más oscuro = más cerca de la capacidad, rojo = por encima), temporadas y ventanas arriba, total semanal abajo (contorno = sin nivelar)', 'Godziny tygodniowo według branż (ciemniej = bliżej limitu, czerwone = ponad), u góry sezony i okna, na dole suma tygodniowa (obrys = jak ustawiono)'),
+  'lg.heat': T7('heating season', 'опалювальний сезон', 'Heizperiode', 'stookseizoen', 'saison de chauffe', 'temporada de calefacción', 'sezon grzewczy'),
+  'lg.cool': T7('cooling season', 'сезон охолодження', 'Kühlperiode', 'koelseizoen', 'saison de froid', 'temporada de refrigeración', 'sezon chłodniczy'),
+  'lg.sd': T7('shutdown / blackout', 'зупинка / заборона', 'Stillstand / Sperre', 'stilstand / blokkade', 'arrêt / gel', 'parada / bloqueo', 'postój / blokada'),
+  'lg.over': T7('over capacity', 'понад можливості', 'über Kapazität', 'boven capaciteit', 'au-delà de la capacité', 'sobre la capacidad', 'ponad zdolność'),
+  'lg.stat': T7('statutory test in the week', 'обов’язкова перевірка в тижні', 'gesetzliche Prüfung in der Woche', 'wettelijke keuring in de week', 'contrôle réglementaire dans la semaine', 'prueba reglamentaria en la semana', 'próba ustawowa w tygodniu'),
+  'kind.cbm': T7('condition-based', 'за станом', 'zustandsorientiert', 'toestandsafhankelijk', 'conditionnelle', 'según condición', 'wg stanu'),
+  'kind.time': T7('scheduled', 'планове', 'zeitbasiert', 'periodiek', 'systématique', 'programada', 'okresowe'),
+  'kind.ff': T7('failure-finding', 'пошук прихованих відмов', 'Funktionsprüfung', 'functietest', 'recherche de panne cachée', 'búsqueda de fallos ocultos', 'wykrywanie ukrytych uszkodzeń'),
+  'kind.statutory': T7('statutory', 'обов’язкове', 'gesetzlich', 'wettelijk', 'réglementaire', 'reglamentaria', 'ustawowe'),
+  'u.h': T7('h', 'год', 'h', 'u', 'h', 'h', 'h'), 'u.d': T7('d', 'дн', 'd', 'd', 'j', 'd', 'd'), 'u.w': T7('weeks', 'тижн.', 'Wochen', 'weken', 'sem.', 'sem.', 'tyg.'),
+  'u.eur': T7('EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR'), 'u.eurh': T7('EUR/h', 'EUR/год', 'EUR/h', 'EUR/u', 'EUR/h', 'EUR/h', 'EUR/h'),
+  'u.hw': T7('h/week', 'год/тижд.', 'h/Woche', 'u/week', 'h/sem.', 'h/sem.', 'h/tydz.'), 'u.pct': T7('%', '%', '%', '%', '%', '%', '%'),
+  'rep.title': T7('MEP maintenance plan', 'План ТО інженерних систем', 'TGA-Wartungsplan', 'Onderhoudsplan installaties', 'Plan de maintenance des équipements techniques', 'Plan de mantenimiento de instalaciones', 'Plan konserwacji instalacji'),
+  'n.nocore': T7('mep-core.js did not load: no class routines, statutory tasks or register.', 'mep-core.js не завантажився: немає регламентів класів, обов’язкових завдань і реєстру.', 'mep-core.js nicht geladen: keine Klassenroutinen, gesetzlichen Aufgaben oder Register.', 'mep-core.js niet geladen: geen klasseroutines, wettelijke taken of register.', 'mep-core.js non chargé : ni gammes, ni tâches réglementaires, ni registre.', 'mep-core.js no se cargó: sin rutinas, tareas reglamentarias ni registro.', 'mep-core.js nie wczytał się: brak czynności klas, zadań ustawowych i rejestru.'),
+  'n.stat': T7('Statutory tests keep their legal dates (EU baseline; national rules may be stricter): the leveller works around them. If a week is over capacity because of statutory work alone, add hands or contract it out — it cannot be moved.', 'Обов’язкові перевірки зберігають законні дати (базовий рівень ЄС; національні правила можуть бути суворішими): вирівнювання обходить їх. Якщо тиждень перевантажений лише через обов’язкові роботи — залучіть людей або підрядника; перенести їх не можна.', 'Gesetzliche Prüfungen behalten ihre Termine (EU-Grundniveau; nationale Regeln können strenger sein): die Glättung arbeitet um sie herum. Ist eine Woche allein durch gesetzliche Arbeit überlastet, Personal ergänzen oder fremd vergeben — verschieben geht nicht.', 'Wettelijke keuringen houden hun data (EU-basis; nationale regels kunnen strenger zijn): het afvlakken werkt eromheen. Is een week alleen door wettelijk werk overbelast, zet extra mensen in of besteed uit — verschuiven kan niet.', 'Les contrôles réglementaires gardent leurs dates (base UE ; règles nationales parfois plus strictes) : le lissage les contourne. Si une semaine déborde à cause du seul réglementaire, renforcez ou sous-traitez — on ne peut pas le déplacer.', 'Las pruebas reglamentarias mantienen sus fechas (base UE; las normas nacionales pueden ser más estrictas): la nivelación trabaja alrededor. Si una semana se sobrecarga solo por trabajo reglamentario, añada personal o subcontrate: no se puede mover.', 'Próby ustawowe zachowują swoje terminy (poziom bazowy UE; przepisy krajowe mogą być surowsze): wygładzanie omija je. Jeśli tydzień jest przeciążony wyłącznie pracami ustawowymi, dołóż ludzi lub zleć na zewnątrz — nie da się ich przesunąć.'),
+  'n.edit': T7('Editing a statutory row changes your own plan only; the legal requirement stays with the statute and the national rules.', 'Зміна рядка обов’язкової перевірки змінює лише ваш план; вимога закону лишається чинною.', 'Das Ändern einer gesetzlichen Zeile ändert nur Ihren Plan; die gesetzliche Pflicht bleibt bestehen.', 'Een wettelijke regel wijzigen verandert alleen uw plan; de wettelijke plicht blijft.', 'Modifier une ligne réglementaire ne change que votre plan ; l’obligation légale demeure.', 'Editar una fila reglamentaria solo cambia su plan; la obligación legal se mantiene.', 'Edycja wiersza ustawowego zmienia tylko Twój plan; obowiązek prawny pozostaje.')
+};
+/* conflict texts: %t task, %a asset, %w week, %n nominal week, %x nearest week, %v value, %l limit, %s shift, %d date, %r trade */
+var CF = {
+  capacity: T7('%r: %v h in week %w against %l h available.', '%r: %v год у тижні %w при доступних %l год.', '%r: %v h in KW %w bei %l h verfügbar.', '%r: %v u in week %w bij %l u beschikbaar.', '%r : %v h en semaine %w pour %l h disponibles.', '%r: %v h en la semana %w frente a %l h disponibles.', '%r: %v h w tygodniu %w przy dostępnych %l h.'),
+  capacity_stat: T7('%r: %v h in week %w against %l h — statutory work alone exceeds capacity; it cannot be moved: add hands or contract it out.', '%r: %v год у тижні %w при %l год — лише обов’язкові роботи перевищують можливості; перенести їх не можна: залучіть людей або підрядника.', '%r: %v h in KW %w bei %l h — schon die gesetzlichen Arbeiten übersteigen die Kapazität; nicht verschiebbar: Personal ergänzen oder fremd vergeben.', '%r: %v u in week %w bij %l u — alleen het wettelijke werk overschrijdt de capaciteit; niet verschuifbaar: extra mensen of uitbesteden.', '%r : %v h en semaine %w pour %l h — le seul réglementaire dépasse la capacité ; non déplaçable : renforcez ou sous-traitez.', '%r: %v h en la semana %w frente a %l h — solo el trabajo reglamentario supera la capacidad; no se puede mover: más personal o subcontratar.', '%r: %v h w tygodniu %w przy %l h — same prace ustawowe przekraczają zdolność; nie da się ich przesunąć: dołóż ludzi lub zleć na zewnątrz.'),
+  window_unreachable: T7('%t (%a): due in week %n, outside its window (%c) and out of reach of the tolerance; nearest allowed week %x. Re-baseline the date once.', '%t (%a): термін у тижні %n поза вікном (%c) і поза допуском; найближчий дозволений тиждень %x. Перенесіть дату одноразово.', '%t (%a): fällig in KW %n, außerhalb des Fensters (%c) und außerhalb der Toleranz; nächste zulässige Woche %x. Termin einmalig neu festlegen.', '%t (%a): vervalt in week %n, buiten het venster (%c) en buiten de tolerantie; dichtstbijzijnde toegestane week %x. Leg de datum eenmalig opnieuw vast.', '%t (%a) : échéance semaine %n, hors fenêtre (%c) et hors tolérance ; semaine admise la plus proche %x. Recalez la date une fois.', '%t (%a): vence en la semana %n, fuera de su ventana (%c) y de la tolerancia; semana permitida más cercana %x. Reprograme la fecha una vez.', '%t (%a): termin w tygodniu %n poza oknem (%c) i poza tolerancją; najbliższy dozwolony tydzień %x. Przestaw termin jednorazowo.'),
+  rebaselined: T7('%t (%a): anniversary moved once from week %n into its window (%c) → week %w.', '%t (%a): річницю одноразово перенесено з тижня %n у вікно (%c) → тиждень %w.', '%t (%a): Jahrestermin einmalig von KW %n ins Fenster (%c) verlegt → KW %w.', '%t (%a): jaardatum eenmalig van week %n naar het venster (%c) verplaatst → week %w.', '%t (%a) : échéance déplacée une fois de la semaine %n dans sa fenêtre (%c) → semaine %w.', '%t (%a): aniversario movido una vez de la semana %n a su ventana (%c) → semana %w.', '%t (%a): rocznicę przeniesiono jednorazowo z tygodnia %n do okna (%c) → tydzień %w.'),
+  rebaselined_late: T7('%t (%a): moved from week %n to week %w (%s weeks later) to reach its window (%c) — the interval stretches once; consider an interim check.', '%t (%a): перенесено з тижня %n на тиждень %w (на %s тижн. пізніше), щоб потрапити у вікно (%c) — інтервал одноразово подовжується; розгляньте проміжну перевірку.', '%t (%a): von KW %n auf KW %w verlegt (%s Wochen später), um das Fenster (%c) zu erreichen — das Intervall dehnt sich einmal; Zwischenprüfung erwägen.', '%t (%a): van week %n naar week %w verplaatst (%s weken later) om het venster (%c) te halen — het interval rekt eenmalig op; overweeg een tussentijdse controle.', '%t (%a) : déplacé de la semaine %n à la semaine %w (%s semaines plus tard) pour atteindre sa fenêtre (%c) — l’intervalle s’allonge une fois ; envisagez un contrôle intermédiaire.', '%t (%a): movido de la semana %n a la %w (%s semanas más tarde) para entrar en su ventana (%c) — el intervalo se alarga una vez; considere una revisión intermedia.', '%t (%a): przeniesiono z tygodnia %n na %w (%s tyg. później), by trafić w okno (%c) — interwał jednorazowo się wydłuża; rozważ kontrolę pośrednią.'),
+  no_allowed_week: T7('%t (%a): no week of the year satisfies its window (%c); window ignored.', '%t (%a): жоден тиждень року не відповідає вікну (%c); вікно проігноровано.', '%t (%a): keine Woche des Jahres erfüllt das Fenster (%c); Fenster ignoriert.', '%t (%a): geen enkele week voldoet aan het venster (%c); venster genegeerd.', '%t (%a) : aucune semaine ne respecte la fenêtre (%c) ; fenêtre ignorée.', '%t (%a): ninguna semana cumple su ventana (%c); ventana ignorada.', '%t (%a): żaden tydzień nie spełnia okna (%c); okno pominięto.'),
+  no_shutdown_window: T7('%t (%a) needs a shutdown, but no shutdown week is set — enter one, or the task is planned in normal operation.', '%t (%a) потребує зупинки, але тиждень зупинки не задано — введіть його, інакше завдання плануватиметься в звичайному режимі.', '%t (%a) braucht einen Stillstand, aber keine Stillstandswoche ist gesetzt — eintragen, sonst wird im Normalbetrieb geplant.', '%t (%a) vraagt stilstand, maar er is geen stilstandsweek ingesteld — vul er een in, anders wordt in normaal bedrijf gepland.', '%t (%a) exige un arrêt, mais aucune semaine d’arrêt n’est saisie — saisissez-en une, sinon la tâche est planifiée en exploitation.', '%t (%a) requiere una parada, pero no hay semana de parada — introdúzcala o se planificará en servicio normal.', '%t (%a) wymaga postoju, ale nie ustawiono tygodnia postoju — wpisz go, inaczej zadanie trafi w normalną pracę.'),
+  overdue: T7('%t (%a): overdue since %d — planned in the first week.', '%t (%a): прострочено з %d — заплановано на перший тиждень.', '%t (%a): überfällig seit %d — in die erste Woche gelegt.', '%t (%a): achterstallig sinds %d — in de eerste week gepland.', '%t (%a) : en retard depuis le %d — planifié en première semaine.', '%t (%a): vencida desde %d — planificada en la primera semana.', '%t (%a): zaległe od %d — zaplanowane na pierwszy tydzień.'),
+  not_due_in_horizon: T7('%t (%a): next due %d, after this plan year.', '%t (%a): наступний термін %d, після цього року плану.', '%t (%a): nächste Fälligkeit %d, nach diesem Planjahr.', '%t (%a): volgende vervaldatum %d, na dit planjaar.', '%t (%a) : prochaine échéance %d, après l’année du plan.', '%t (%a): próximo vencimiento %d, después de este año.', '%t (%a): następny termin %d, po tym roku planu.'),
+  due_outside_horizon: T7('%t (%a): due week %w is not in this plan year.', '%t (%a): тиждень терміну %w не входить у цей рік плану.', '%t (%a): Fälligkeitswoche %w liegt nicht im Planjahr.', '%t (%a): vervalweek %w valt niet in dit planjaar.', '%t (%a) : la semaine d’échéance %w n’est pas dans l’année du plan.', '%t (%a): la semana de vencimiento %w no está en este año.', '%t (%a): tydzień terminu %w nie należy do roku planu.'),
+  undated_multi_year: T7('%t (%a): multi-year interval without a last date — assumed due now; enter the date of the last inspection.', '%t (%a): багаторічний інтервал без дати останнього виконання — вважається, що термін зараз; введіть дату останньої інспекції.', '%t (%a): mehrjähriges Intervall ohne letztes Datum — als jetzt fällig angenommen; Datum der letzten Prüfung eintragen.', '%t (%a): meerjarig interval zonder laatste datum — aangenomen dat het nu vervalt; vul de datum van de laatste keuring in.', '%t (%a) : intervalle pluriannuel sans dernière date — supposé dû maintenant ; saisissez la date de la dernière inspection.', '%t (%a): intervalo plurianual sin última fecha — se supone vencido ahora; introduzca la fecha de la última inspección.', '%t (%a): interwał wieloletni bez daty ostatniego wykonania — przyjęto termin teraz; wpisz datę ostatniej kontroli.'),
+  statutory_undated: T7('%t (%a): statutory test without a due week — placed at the earliest week; enter the date from the logbook.', '%t (%a): обов’язкова перевірка без тижня терміну — поставлено на найраніший тиждень; введіть дату з журналу.', '%t (%a): gesetzliche Prüfung ohne Fälligkeitswoche — in die früheste Woche gelegt; Datum aus dem Prüfbuch eintragen.', '%t (%a): wettelijke keuring zonder vervalweek — in de vroegste week gezet; vul de datum uit het logboek in.', '%t (%a) : contrôle réglementaire sans semaine d’échéance — placé au plus tôt ; saisissez la date du registre de sécurité.', '%t (%a): prueba reglamentaria sin semana de vencimiento — colocada lo antes posible; introduzca la fecha del libro de registro.', '%t (%a): próba ustawowa bez tygodnia terminu — umieszczona najwcześniej; wpisz datę z dziennika.'),
+  statutory_in_blackout: T7('%t (%a): statutory test in blackout week %w — it still has to be done; staff it.', '%t (%a): обов’язкова перевірка в тижні заборони %w — її все одно треба виконати; заплануйте людей.', '%t (%a): gesetzliche Prüfung in Sperrwoche %w — sie muss trotzdem stattfinden; Personal einplanen.', '%t (%a): wettelijke keuring in blokkadeweek %w — moet toch gebeuren; plan bezetting.', '%t (%a) : contrôle réglementaire en semaine gelée %w — il doit être fait ; prévoyez quelqu’un.', '%t (%a): prueba reglamentaria en semana bloqueada %w — debe hacerse igualmente; asigne personal.', '%t (%a): próba ustawowa w tygodniu blokady %w — trzeba ją wykonać; zaplanuj ludzi.'),
+  statutory_in_shutdown: T7('%t (%a): statutory test falls in the shutdown (week %w) — plan it with the shutdown team.', '%t (%a): обов’язкова перевірка припадає на зупинку (тиждень %w) — сплануйте її з командою зупинки.', '%t (%a): gesetzliche Prüfung fällt in den Stillstand (KW %w) — mit dem Stillstandsteam planen.', '%t (%a): wettelijke keuring valt in de stilstand (week %w) — plan met het stilstandsteam.', '%t (%a) : contrôle réglementaire pendant l’arrêt (semaine %w) — planifiez-le avec l’équipe d’arrêt.', '%t (%a): prueba reglamentaria durante la parada (semana %w) — planifíquela con el equipo de parada.', '%t (%a): próba ustawowa wypada w postoju (tydzień %w) — zaplanuj ją z zespołem postoju.'),
+  continuous_review: T7('%t (%a): continuous logging (BMS / online sensor) — the plan books the trend review every %i days, not each reading.', '%t (%a): безперервний запис (BMS / онлайн-датчик) — план враховує огляд трендів кожні %i дн., а не кожне вимірювання.', '%t (%a): kontinuierliche Aufzeichnung (GLT / Online-Sensor) — eingeplant wird die Trendauswertung alle %i Tage, nicht jede Messung.', '%t (%a): continue registratie (GBS / online sensor) — het plan boekt de trendanalyse elke %i dagen, niet elke meting.', '%t (%a) : enregistrement continu (GTB / capteur en ligne) — le plan compte l’analyse des tendances tous les %i jours, pas chaque mesure.', '%t (%a): registro continuo (BMS / sensor en línea) — el plan reserva la revisión de tendencias cada %i días, no cada lectura.', '%t (%a): zapis ciągły (BMS / czujnik online) — plan uwzględnia przegląd trendów co %i dni, a nie każdy odczyt.'),
+  sub_weekly: T7('%t (%a): manual task more often than weekly (every %i days) — shown as hours per week; consider a sensor or BMS alarm instead.', '%t (%a): ручне завдання частіше ніж щотижня (кожні %i дн.) — показано як години на тиждень; розгляньте датчик або тривогу BMS.', '%t (%a): manuelle Aufgabe öfter als wöchentlich (alle %i Tage) — als Wochenstunden dargestellt; Sensor oder GLT-Alarm erwägen.', '%t (%a): handmatige taak vaker dan wekelijks (elke %i dagen) — getoond als uren per week; overweeg een sensor of GBS-alarm.', '%t (%a) : tâche manuelle plus fréquente qu’hebdomadaire (tous les %i jours) — affichée en heures par semaine ; envisagez un capteur ou une alarme GTB.', '%t (%a): tarea manual más frecuente que semanal (cada %i días) — se muestra en horas por semana; considere un sensor o una alarma BMS.', '%t (%a): zadanie ręczne częściej niż co tydzień (co %i dni) — pokazane jako godziny tygodniowo; rozważ czujnik lub alarm BMS.'),
+  bad_date: T7('%t (%a): last-done date not understood (use YYYY-MM-DD).', '%t (%a): дату останнього виконання не розпізнано (формат РРРР-ММ-ДД).', '%t (%a): Datum der letzten Ausführung unklar (JJJJ-MM-TT).', '%t (%a): laatste uitvoeringsdatum niet herkend (JJJJ-MM-DD).', '%t (%a) : date de dernière exécution non reconnue (AAAA-MM-JJ).', '%t (%a): fecha de última ejecución no reconocida (AAAA-MM-DD).', '%t (%a): nie rozpoznano daty ostatniego wykonania (RRRR-MM-DD).')
+};
+
+function tx(k) { return I18N[k] || CF[k] || { en: k }; }
+function curLang() { return (window.DiagramUI && DiagramUI.current && DiagramUI.current.lang) || document.documentElement.lang || 'en'; }
+function pick(o) { var l = curLang(); if (o == null) return ''; if (typeof o === 'string') return o; return o[l] || o.en || ''; }
+function S(k, subs) { var s = pick(tx(k)); if (subs) Object.keys(subs).sort(function (a, b) { return b.length - a.length; }).forEach(function (p) { s = s.split('%' + p).join(subs[p]); }); return s; }
+function U(k) { return function () { return pick(tx(k)); }; }
+function fmt(v, d) { if (v == null || !isFinite(v)) return '—'; if (CORE && typeof CORE.fmt === 'function') { try { return CORE.fmt(v, curLang(), d); } catch (e) { /* fall through */ } } return Number(v).toFixed(d || 0); }
+function clone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function tradeName(t) { return CORE && CORE.TRADES && CORE.TRADES[t] ? pick(CORE.TRADES[t].name) : t; }
+/* display name in the UI language (demo sites, QA-21); an edited name wins; fallback = asset.name */
+function assetName(a) { if (CORE && typeof CORE.assetName === 'function') { try { var n = CORE.assetName(a, curLang()); if (n) return n; } catch (e) { /* fall back */ } } return a && a.name != null ? String(a.name) : ''; }
+function wkLabel(w) { return w == null ? '—' : S('wk') + w; }
+function constrName(c) { return S('cn.' + (c || 'none')); }
+
+/* ---- state ---- */
+function defaultOpts() {
+  var cap = {}, rate = {};
+  TRADES.forEach(function (t) { cap[t] = null; rate[t] = CORE && CORE.TRADES && CORE.TRADES[t] ? CORE.TRADES[t].rate_eur_h_default : 75; });
+  return { year: 2026, start_week: 1, tol_pct: 10, group_by: 'asset', travel_h: 0.5, rebaseline: false, heat_from: 40, heat_to: 17, cool_from: 18, cool_to: 39, pre_w: 6,
+    sd_from: null, sd_to: null, blackout: '', materials_pct: 15, callout: 150, cap: cap, rate: rate };
+}
+function rowOf(t, i) {
+  var name = t.task != null ? t.task : (t.name != null ? t.name : '');
+  return { id: t.id || ('T' + (i + 1)), asset_id: t.asset_id || '', name: typeof name === 'string' ? name : pick(name), name_lang: typeof name === 'string' ? null : curLang(), task: typeof name === 'string' ? null : clone(name),
+    kind: t.kind || (t.statutory_id ? 'statutory' : 'time'), statutory: !!(t.statutory_id || t.kind === 'statutory'), statutory_id: t.statutory_id || null, fm_id: t.fm_id || null,
+    interval_days: t.interval_days != null ? Math.round(t.interval_days * 100) / 100 : null, interval_months: t.interval_months != null ? t.interval_months : null,
+    trade: t.trade || 'hvac_mech', hours: t.hours != null ? t.hours : 1, constraint: t.constraint || 'none', due_week: t.due_week != null ? t.due_week : null, last_done: t.last_done || '',
+    location: t.location || '', materials_eur: t.materials_eur != null ? t.materials_eur : null, basis: t.basis || '', sources: t.sources || [], origin: t.origin || 'input' };
+}
+function presetState(id) {
+  var pr = PLAN ? PLAN.preset(id) : null; if (!pr) return null;
+  var o = defaultOpts(), po = pr.opts || {};
+  o.year = po.year || 2026; o.travel_h = po.travel_h != null ? po.travel_h : o.travel_h; o.group_by = po.group_by || 'asset'; o.rebaseline = !!po.rebaseline;
+  TRADES.forEach(function (t) { o.cap[t] = po.capacity_h_week && po.capacity_h_week[t] != null ? po.capacity_h_week[t] : null; });
+  if (po.shutdowns && po.shutdowns.length) { o.sd_from = po.shutdowns[0].from; o.sd_to = po.shutdowns[0].to; }
+  o.blackout = (po.blackout || []).join(', ');
+  return { src: 'preset', preset: id, doc: pr.doc, tasks: pr.tasks.map(rowOf), o: o, view: 'levelled', trade: 'all', week: 1, origin: 'preset' };
+}
+var DEFAULTS = presetState('quarterly_peak') || { src: 'custom', preset: null, doc: CORE ? CORE.register.empty() : { assets: [], modules: {} }, tasks: [], o: defaultOpts(), view: 'levelled', trade: 'all', week: 1, origin: 'preset' };
+var state = clone(DEFAULTS);
+function sanitize(o) {
+  var x = clone(DEFAULTS);
+  if (!o || typeof o !== 'object') return x;
+  if (o.doc && typeof o.doc === 'object' && Array.isArray(o.doc.assets)) x.doc = o.doc;
+  if (Array.isArray(o.tasks)) x.tasks = o.tasks.filter(function (r) { return r && typeof r === 'object'; }).slice(0, 2000).map(function (r, i) { var b = rowOf({}, i); Object.keys(b).forEach(function (k) { if (r[k] !== undefined) b[k] = r[k]; }); return b; });
+  if (o.o && typeof o.o === 'object') { var d = defaultOpts(); Object.keys(d).forEach(function (k) { if (o.o[k] !== undefined) d[k] = o.o[k]; }); if (!d.cap || typeof d.cap !== 'object') d.cap = defaultOpts().cap; if (!d.rate || typeof d.rate !== 'object') d.rate = defaultOpts().rate; x.o = d; }
+  ['src', 'preset', 'view', 'trade', 'origin'].forEach(function (k) { if (typeof o[k] === 'string') x[k] = o[k]; });
+  if (isFinite(o.week)) x.week = Math.max(1, Math.min(53, Math.round(o.week)));
+  return x;
+}
+
+/* ---- engine bridge ---- */
+function relocalise() {
+  var l = curLang();
+  state.tasks.forEach(function (r) { if (r.task && r.name_lang && r.name_lang !== l && r.name === (r.task[r.name_lang] || r.task.en)) { r.name = r.task[l] || r.task.en; r.name_lang = l; } });
+}
+function engineTasks() {
+  return state.tasks.map(function (r) {
+    var named = r.task && r.name === (r.task[r.name_lang] || r.task.en) ? r.task : r.name;
+    return { id: r.id, asset_id: r.asset_id, fm_id: r.fm_id, kind: r.statutory ? 'statutory' : (r.kind === 'statutory' ? 'time' : r.kind), statutory_id: r.statutory ? (r.statutory_id || 'user') : null,
+      task: named, interval_days: r.interval_days, interval_months: r.interval_months && r.interval_days && Math.abs(r.interval_months * 365.25 / 12 - r.interval_days) < 3 ? r.interval_months : null,
+      trade: r.trade, hours: r.hours, constraint: r.constraint === 'none' ? null : r.constraint, due_week: r.due_week, last_done: r.last_done || null, location: r.location,
+      materials_eur: r.materials_eur, basis: r.basis, sources: r.sources, origin: r.origin };
+  });
+}
+function engineOpts() {
+  var o = state.o, cap = {}, rates = {};
+  TRADES.forEach(function (t) { if (o.cap[t] != null && isFinite(o.cap[t])) cap[t] = +o.cap[t]; if (o.rate[t] != null && isFinite(o.rate[t])) rates[t] = +o.rate[t]; });
+  var assets = {}; (state.doc.assets || []).forEach(function (a) { if (a && a.id) assets[a.id] = { name: assetName(a), location: a.location, 'class': a['class'] }; });
+  var bo = String(o.blackout || '').split(/[,;\s]+/).map(function (s) { return parseInt(s, 10); }).filter(function (n) { return n >= 1 && n <= 53; });
+  return { year: o.year, start_week: o.start_week, tolerance: (o.tol_pct == null ? 10 : o.tol_pct) / 100, group_by: o.group_by, travel_h: o.travel_h, rebaseline: !!o.rebaseline,
+    seasons: { heating: { from: o.heat_from, to: o.heat_to }, cooling: { from: o.cool_from, to: o.cool_to } }, pre_season_weeks: o.pre_w,
+    shutdowns: o.sd_from != null && o.sd_to != null && isFinite(o.sd_from) && isFinite(o.sd_to) ? [{ id: 'sd', from: o.sd_from, to: o.sd_to }] : [],
+    blackout: bo, capacity_h_week: cap, rates: rates, materials_pct: o.materials_pct, vendor_callout_eur: o.callout, assets: assets,
+    labour_rate_eur_h: state.doc.site && isFinite(state.doc.site.labour_rate_eur_h) ? state.doc.site.labour_rate_eur_h : 75 };
+}
+var last = null, ui = null, stage = null, note = '';
+function solve() { return PLAN.compare(engineTasks(), engineOpts()); }
+function shown() { return last ? (state.view === 'naive' ? last.naive : last.levelled) : null; }
+
+/* ---- compute ---- */
+function taskLabel(id) { var r = state.tasks.filter(function (x) { return x.id === id; })[0]; return r ? (r.name || r.id) : id; }
+function conflictText(c) {
+  var k = c.code === 'capacity' && c.statutory_driven ? 'capacity_stat' : c.code;
+  if (!CF[k]) return c.code;
+  return S(k, { t: c.task_id ? taskLabel(c.task_id) : '', a: c.asset_id || '', w: c.iso_week != null ? c.iso_week : '', n: c.nominal_iso_week != null ? c.nominal_iso_week : '', x: c.nearest_iso_week != null ? c.nearest_iso_week : '',
+    v: fmt(c.value, 1), l: fmt(c.limit, 1), s: c.shift_w != null ? c.shift_w : '', d: c.due || '', r: c.trade ? tradeName(c.trade) : '', c: constrName(c.constraint), i: c.interval_days != null ? fmt(c.interval_days, c.interval_days < 10 ? 1 : 0) : '' });
+}
+function compute() {
+  if (!PLAN) return { verdict: { tone: 'bad', text: S('v.noengine') }, tiles: [] };
+  relocalise();
+  if (!state.tasks.length) { last = null; if (stage) stage.schedule(); return { verdict: { tone: 'warn', text: S('v.empty') }, tiles: [] }; }
+  last = solve();
+  if (stage) stage.schedule();
+  var P = shown(), L = last.levelled, N = last.naive, m = P.metrics;
+  var nErr = P.conflicts.filter(function (c) { return c.severity === 'error'; }).length, nWarn = P.conflicts.filter(function (c) { return c.severity === 'warn'; }).length;
+  var vt = S('v.summary', { n: P.tasks.length, o: m.occurrences, v: m.visits, h: fmt(m.hours_total, 0), p: fmt(L.metrics.peak_total, 1), q: fmt(N.metrics.peak_total, 1), e: nErr, w: nWarn });
+  var tiles = [
+    { label: tx('t.peak'), value: L.metrics.peak_total, precision: 1, unit: S('u.h'), hint: wkLabel(L.metrics.peak_total_week), learn: 'levelling', tone: L.metrics.peak_total < N.metrics.peak_total ? 'ok' : null },
+    { label: tx('t.peakN'), value: N.metrics.peak_total, precision: 1, unit: S('u.h'), hint: wkLabel(N.metrics.peak_total_week), learn: 'levelling' },
+    { label: tx('t.over'), value: m.overload_hours, precision: 1, unit: S('u.h'), tone: m.overload_hours > 0 ? 'bad' : 'ok', learn: 'capacity', hint: state.view === 'naive' ? S('view.naive') : S('view.levelled') },
+    { label: tx('t.hours'), value: m.hours_total, precision: 0, unit: S('u.h') },
+    { label: tx('t.visits'), value: m.visits + ' (' + m.occurrences + ')', learn: 'grouping' },
+    { label: tx('t.saved'), value: m.travel_saved_h, precision: 1, unit: S('u.h'), learn: 'grouping', tone: m.travel_saved_h > 0 ? 'ok' : null },
+    { label: tx('t.budget'), value: P.budget.total_eur, precision: 0, unit: S('u.eur'), learn: 'budget' },
+    { label: tx('t.stat'), value: m.statutory_occurrences, precision: 0, learn: 'statutory' },
+    { label: tx('t.conf'), value: nErr + nWarn, precision: 0, tone: nErr ? 'bad' : nWarn ? 'warn' : 'ok', learn: 'conflicts' }
+  ];
+  var tables = [];
+  var conf = P.conflicts.filter(function (c) { return c.severity !== 'info' || ['rebaselined', 'not_due_in_horizon', 'statutory_in_shutdown', 'due_outside_horizon', 'continuous_review'].indexOf(c.code) >= 0; });
+  tables.push({ title: tx('tab.conf'), head: [tx('h.sev'), tx('h.wk'), tx('h.what')],
+    rows: conf.length ? conf.slice(0, 200).map(function (c) { return { cells: [{ text: S('sev.' + c.severity), tone: c.severity === 'error' ? 'bad' : c.severity === 'warn' ? 'warn' : null }, c.iso_week != null ? String(c.iso_week) : '—', { text: conflictText(c), wrap: true }] }; })
+      : [{ cells: ['', '', S('none.conf')] }] });
+  var cal = P.weeks, slot = -1;
+  cal.forEach(function (w, i) { if (w.iso_week === state.week) slot = i; }); if (slot < 0) slot = 0;
+  var wk = cal[slot], orders = P.occurrences.filter(function (o) { return o.slot === slot && (state.trade === 'all' || o.trade === state.trade); });
+  tables.push({ title: function () { return S('tab.week', { w: wk.iso_week, d: wk.monday }); }, head: [tx('c.asset'), tx('c.task'), tx('c.trade'), { label: S('c.hours'), num: true }, tx('h.nominal'), { label: S('h.shift'), num: true }, tx('c.stat'), tx('h.visit')],
+    rows: orders.length ? orders.map(function (o) { return { cells: [o.asset_id, { text: taskLabel(o.task_id), wrap: true }, tradeName(o.trade), { value: o.hours, precision: 2 }, wkLabel(o.nominal_iso_week), { value: o.shift_w, precision: 0 }, o.statutory ? { text: S('yes'), tone: 'warn' } : '', o.visit] }; })
+      : [{ cells: [S('none.week'), '', '', '', '', '', '', ''] }] });
+  tables.push({ title: tx('tab.trades'), head: [tx('c.trade'), { label: S('t.hours'), num: true }, { label: S('h.mean'), num: true }, { label: S('h.peakN'), num: true }, { label: S('h.peakL'), num: true }, { label: S('h.cap'), num: true }, { label: S('h.overW'), num: true }, { label: S('f.rate'), num: true }, { label: S('h.cost'), num: true }],
+    rows: P.trades.map(function (t) { var x = P.metrics.trades[t], b = P.budget.by_trade[t] || {};
+      return { cells: [tradeName(t), { value: x.hours, precision: 0 }, { value: x.mean, precision: 1 }, { value: N.metrics.trades[t] ? N.metrics.trades[t].peak : null, precision: 1 }, { value: L.metrics.trades[t] ? L.metrics.trades[t].peak : null, precision: 1 },
+        x.capacity == null ? '—' : { value: x.capacity, precision: 0 }, { value: x.overload_weeks, precision: 0, tone: x.overload_weeks ? 'bad' : null }, { value: b.rate_eur_h, precision: 0 }, { value: b.total_eur, precision: 0 }] }; }) });
+  var months = P.budget.by_month.map(function (v, i) { var nm; try { nm = new Date(Date.UTC(2026, i, 15)).toLocaleString(curLang() === 'uk' ? 'uk-UA' : curLang(), { month: 'long', timeZone: 'UTC' }); } catch (e) { nm = String(i + 1); } return { cells: [nm, { value: v, precision: 0 }] }; });
+  months.push({ cells: [{ text: S('total') }, { value: P.budget.total_eur, precision: 0 }], weight: true });
+  tables.push({ title: tx('tab.month'), head: [tx('h.month'), { label: S('u.eur'), num: true }], rows: months });
+  tables.push({ title: tx('tab.tasks'), head: [tx('c.asset'), tx('c.task'), { label: S('c.int'), num: true }, tx('c.trade'), tx('c.window'), { label: S('c.n'), num: true }, tx('h.weeks')],
+    rows: P.tasks.map(function (t) { return { cells: [t.asset_id, { text: taskLabel(t.id) + (t.statutory ? ' §' : ''), wrap: true }, { value: t.interval_days, precision: 0 }, tradeName(t.trade), t.constraint ? constrName(t.constraint) : '—', { value: t.occurrences, precision: 0 }, { text: t.weeks.join(', '), wrap: true }], tone: t.rebaselined ? 'warn' : null }; }) });
+  var notes = [];
+  var src = state.src === 'strategy' ? S('src.strategy', { d: state.tasks.length }) : S('src.' + (state.src || 'custom'));
+  notes.push(src);
+  if (P.skipped.length) notes.push(P.skipped.map(function (s) { return s.id + ': ' + s.reasons.join(', '); }).join('; '));
+  if (!CORE) notes.push(S('n.nocore'));
+  notes.push(S('n.stat'));
+  if (note) notes.push(note);
+  compute.lastVerdict = vt;
+  return { verdict: { tone: nErr ? 'warn' : 'ok', text: vt }, tiles: tiles, tables: tables, notes: notes };
+}
+
+/* ---- chart: weekly heat map by trade + totals ---- */
+var GEO = null;
+function cssv(n, d) { try { var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || d; } catch (e) { return d; } }
+function drawPlan(g, w, h, opt) {
+  opt = opt || {};
+  var ink = opt.ink || cssv('--ink', '#12161d'), muted = opt.muted || cssv('--muted', '#5b6675'), line = opt.line || cssv('--line', '#e2e7ee'), bg = opt.bg || cssv('--panel', '#fff');
+  g.clearRect(0, 0, w, h); if (opt.bg) { g.fillStyle = bg; g.fillRect(0, 0, w, h); }
+  GEO = null;
+  if (!last) return;
+  var P = shown(), N = last.naive, rows = state.trade === 'all' ? P.trades.slice() : P.trades.filter(function (t) { return t === state.trade; });
+  var coarse = !!opt.coarse, fs = opt.fs || 12;
+  g.font = fs + 'px system-ui, sans-serif'; g.textBaseline = 'middle';
+  var lw = 40; rows.concat(['total']).forEach(function (t) { lw = Math.max(lw, g.measureText(t === 'total' ? S('total') : tradeName(t)).width + 12); });
+  lw = Math.min(lw, coarse ? 92 : Math.max(120, w * 0.28));
+  var top = 26, rh = coarse ? 18 : 22, barH = Math.max(70, Math.min(150, h - top - rows.length * rh - 40));
+  var NW = P.weeks.length, x0 = lw, cw = (w - lw - 8) / NW;
+  function fit(txt, maxW) { if (g.measureText(txt).width <= maxW) return txt; while (txt.length > 2 && g.measureText(txt + '…').width > maxW) txt = txt.slice(0, -1); return txt + '…'; }
+  /* season / window band */
+  var o = engineOpts();
+  P.weeks.forEach(function (wk, s) {
+    var x = x0 + s * cw, wn = wk.iso_week;
+    var heat = PLAN.inRange(wn, o.seasons.heating), cool = PLAN.inRange(wn, o.seasons.cooling);
+    g.fillStyle = heat ? 'rgba(242,140,40,0.45)' : cool ? 'rgba(40,150,220,0.40)' : 'rgba(128,128,128,0.15)';
+    g.fillRect(x, 4, cw - 1, 8);
+    var sd = o.shutdowns.some(function (r) { return PLAN.inRange(wn, r); }), bo = o.blackout.indexOf(wn) >= 0;
+    if (sd || bo) { g.fillStyle = sd ? 'rgba(60,60,60,0.75)' : 'rgba(120,120,120,0.45)'; g.fillRect(x, 14, cw - 1, 6); }
+  });
+  g.fillStyle = muted; g.textAlign = 'right'; g.fillText(coarse ? '' : S('h.wk'), lw - 6, 12);
+  /* heat map */
+  var maxH = 0; rows.forEach(function (t) { P.weeks.forEach(function (wk) { maxH = Math.max(maxH, wk.hours[t] + wk.travel[t]); }); });
+  rows.forEach(function (t, r) {
+    var y = top + r * rh, cap = P.metrics.trades[t].capacity;
+    g.fillStyle = ink; g.textAlign = 'right'; g.fillText(fit(tradeName(t), lw - 10), lw - 6, y + rh / 2);
+    P.weeks.forEach(function (wk, s) {
+      var v = wk.hours[t] + wk.travel[t], x = x0 + s * cw, ratio = cap ? v / cap : (maxH ? v / maxH : 0);
+      if (v <= 0) { g.fillStyle = 'rgba(128,128,128,0.06)'; }
+      else if (cap && v > cap + 1e-9) g.fillStyle = 'rgba(217,72,15,0.88)';
+      else g.fillStyle = 'rgba(55,99,230,' + (0.12 + 0.78 * Math.min(1, ratio)).toFixed(3) + ')';
+      g.fillRect(x, y, cw - 1, rh - 2);
+      var st = P.occurrences.some(function (q) { return q.slot === s && q.trade === t && q.statutory; });
+      if (st) { g.fillStyle = ink; g.beginPath(); g.arc(x + cw / 2, y + rh - 5, Math.max(1.5, Math.min(2.5, cw / 6)), 0, 2 * Math.PI); g.fill(); }
+      if (!coarse && cw >= 22 && v > 0) { g.fillStyle = ratio > 0.55 || (cap && v > cap) ? '#fff' : ink; g.textAlign = 'center'; g.font = (fs - 2) + 'px system-ui, sans-serif'; g.fillText(fmt(v, v < 10 ? 1 : 0), x + cw / 2, y + rh / 2 - 2); g.font = fs + 'px system-ui, sans-serif'; }
+    });
+  });
+  /* totals: levelled filled, as-set-up outline */
+  var yb = top + rows.length * rh + 10, base = yb + barH;
+  var tot = function (pl, s) { var a = 0; rows.forEach(function (t) { a += pl.weeks[s].hours[t] + pl.weeks[s].travel[t]; }); return a; };
+  var mx = 0; for (var s = 0; s < NW; s++) mx = Math.max(mx, tot(last.naive, s), tot(last.levelled, s));
+  mx = mx || 1;
+  g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, base + 0.5); g.lineTo(w - 8, base + 0.5); g.stroke();
+  g.fillStyle = muted; g.textAlign = 'right'; g.fillText(fmt(mx, 0) + ' ' + S('u.h'), lw - 6, yb + 6); g.fillText(S('total'), lw - 6, base - 8);
+  for (var s2 = 0; s2 < NW; s2++) {
+    var x = x0 + s2 * cw, vL = tot(P, s2), vN = tot(state.view === 'naive' ? last.levelled : N, s2);
+    g.fillStyle = 'rgba(55,99,230,0.75)'; var hh = barH * vL / mx; g.fillRect(x + 1, base - hh, cw - 3, hh);
+    g.strokeStyle = ink; g.lineWidth = 1; var hn = barH * vN / mx; g.strokeRect(x + 1.5, base - hn + 0.5, cw - 4, Math.max(0, hn - 0.5));
+  }
+  /* week labels */
+  g.fillStyle = muted; g.textAlign = 'center'; g.textBaseline = 'top';
+  P.weeks.forEach(function (wk, s) { if (wk.iso_week === 1 || (wk.iso_week - 1) % (coarse ? 8 : 4) === 0) g.fillText(String(wk.iso_week), x0 + s * cw + cw / 2, base + 4); });
+  g.textBaseline = 'middle';
+  /* selected week */
+  var sel = -1; P.weeks.forEach(function (wk, s) { if (wk.iso_week === state.week) sel = s; });
+  if (sel >= 0) { g.strokeStyle = ink; g.lineWidth = 2; g.strokeRect(x0 + sel * cw + 0.5, 2, cw - 1, base - 2); }
+  GEO = { x0: x0, cw: cw, top: 0, bottom: base + 20, weeks: P.weeks.map(function (wk) { return wk.iso_week; }) };
+}
+function weekAt(cv, ev) {
+  if (!GEO) return null; var b = cv.getBoundingClientRect(), x = ev.clientX - b.left, y = ev.clientY - b.top;
+  if (y < GEO.top || y > GEO.bottom) return null; var s = Math.floor((x - GEO.x0) / GEO.cw); return s >= 0 && s < GEO.weeks.length ? GEO.weeks[s] : null;
+}
+function selectWeek(w) { state.week = w; if (ui) { ui.sync(); ui.run(); } }
+var wired = null;
+function wireCanvas(st) {
+  var cv = st.cv; if (!cv || wired === cv) return; wired = cv;
+  cv.tabIndex = 0;
+  cv.addEventListener('click', function (ev) { var w = weekAt(cv, ev); if (w != null) selectWeek(w); });
+  cv.addEventListener('mousemove', function (ev) { var w = weekAt(cv, ev); cv.style.cursor = w != null ? 'pointer' : ''; if (w != null && last) { var P = shown(), wk = P.weeks.filter(function (x) { return x.iso_week === w; })[0]; cv.title = wkLabel(w) + ' ' + wk.monday + ': ' + fmt(wk.total, 1) + ' ' + S('u.h') + ', ' + wk.tasks + ' / ' + wk.visits; } });
+  cv.addEventListener('keydown', function (ev) {
+    if (!last || !GEO) return; var i = GEO.weeks.indexOf(state.week); if (i < 0) i = 0;
+    if (ev.key === 'ArrowRight') { ev.preventDefault(); selectWeek(GEO.weeks[Math.min(GEO.weeks.length - 1, i + 1)]); }
+    else if (ev.key === 'ArrowLeft') { ev.preventDefault(); selectWeek(GEO.weeks[Math.max(0, i - 1)]); }
+    else if (ev.key === 'Home') { ev.preventDefault(); selectWeek(GEO.weeks[0]); } else if (ev.key === 'End') { ev.preventDefault(); selectWeek(GEO.weeks[GEO.weeks.length - 1]); }
+  });
+}
+function a11yText() {
+  if (!last) return '';
+  var P = shown(), m = P.metrics;
+  return P.trades.map(function (t) { var x = m.trades[t]; return S('a11y.trade', { t: tradeName(t), h: fmt(x.hours, 0), p: fmt(x.peak, 1), w: wkLabel(x.peak_iso_week) }) + (x.overload_weeks ? ', ' + S('a11y.over', { n: x.overload_weeks }) : ''); }).join('; ');
+}
+function reportCanvas() { var c = document.createElement('canvas'), w = 900, h = 420; c.width = w * 2; c.height = h * 2; var g = c.getContext('2d'); g.scale(2, 2); drawPlan(g, w, h, { ink: '#1a1a1a', muted: '#555', line: '#bbb', bg: '#fff', fs: 11 }); return c; }
+
+/* ---- exports and register ---- */
+function download(name, type, text) {
+  var b = new Blob([text], { type: type }), u = URL.createObjectURL(b), el = document.createElement('a');
+  el.href = u; el.download = name; document.body.appendChild(el); el.click(); setTimeout(function () { URL.revokeObjectURL(u); el.remove(); }, 0);
+}
+function assetsMap() { var m = {}; (state.doc.assets || []).forEach(function (a) { if (a && a.id) m[a.id] = { name: assetName(a), location: a.location, 'class': a['class'] }; }); return m; }
+function cmmsCSV() { return last ? PLAN.csv(shown(), { lang: curLang(), assets: assetsMap() }) : ''; }
+function calendarCSV() { return last ? PLAN.calendarCsv(shown()) : ''; }
+function docWithPlan() {
+  var d = clone(state.doc);
+  if (!d.schema && CORE) d.schema = CORE.SCHEMA;
+  if (!d.modules || typeof d.modules !== 'object') d.modules = {};
+  if (!last) return d;
+  var payload = PLAN.moduleResult(last.levelled, { o: clone(state.o), src: state.src, preset: state.preset, tasks: engineTasks() });
+  if (CORE && CORE.register && typeof CORE.register.withModule === 'function') { try { return CORE.register.withModule(d, TOOL, payload); } catch (e) { /* fall back */ } }
+  payload.updatedAt = new Date().toISOString(); d.modules[TOOL] = payload; return d;
+}
+function exportJSON() {
+  var d = docWithPlan(), text;
+  try { text = CORE ? CORE.register.exportJSON(d) : JSON.stringify(d, null, 1); } catch (e) { text = JSON.stringify(d, null, 1); }
+  download('mep-register-' + (String((d.site && d.site.name) || 'site').replace(/[^\w.-]+/g, '_').slice(0, 40) || 'site') + '.json', 'application/json', text);
+}
+function saveToRegister() {
+  if (!CORE || !CORE.register) return;
+  var d = docWithPlan(), r = null;
+  try { r = CORE.register.save(d); } catch (e) { r = { ok: false }; }
+  note = r && r.ok !== false ? S('saved') : S('save.blocked');
+  state.origin = 'register';
+  if (bar) { try { bar.setDoc(d); } catch (e) { /* bar keeps its copy */ } }
+}
+function useStrategy(doc) {
+  var r = PLAN.tasksFromStrategy(doc || state.doc);
+  if (!r || !r.tasks.length) { note = S('src.noStrat'); return false; }
+  if (doc) state.doc = doc;
+  state.tasks = r.tasks.map(rowOf); state.src = 'strategy'; state.stratDate = r.updatedAt || ''; state.preset = null; note = '';
+  return true;
+}
+function fromRegister() {
+  var d = state.doc;
+  if (bar) { try { d = bar.getDoc(); } catch (e) { /* keep */ } }
+  if (!d || !d.assets || !d.assets.length) { note = S('src.noReg'); return; }
+  state.doc = d; state.tasks = PLAN.tasksFromClasses(d).map(rowOf); state.src = 'classes'; state.preset = null; note = '';
+}
+
+/* ---- presets ---- */
+var PL = {
+  quarterly_peak: [T7('Everything starts in week 1 → peaks', 'Усе стартує в тиждень 1 → піки', 'Alles startet in KW 1 → Spitzen', 'Alles start in week 1 → pieken', 'Tout commence en semaine 1 → pics', 'Todo empieza en la semana 1 → picos', 'Wszystko startuje w tygodniu 1 → szczyty'),
+    T7('The office register with class routines: every quarterly round was set up from week 1, so weeks 1, 14, 27 and 40 carry the year’s inspections and HVAC is overloaded. The levelled plan does the same hours with a peak several times lower — the legal tests stay on their dates.', 'Реєстр офісу з регламентами класів: усі щоквартальні обходи налаштовано з тижня 1, тож тижні 1, 14, 27 і 40 несуть інспекції року і ОВіК перевантажений. Вирівняний план виконує ті самі години з піком у кілька разів нижчим — обов’язкові перевірки лишаються на своїх датах.', 'Das Büroregister mit Klassenroutinen: jede Quartalsrunde wurde ab KW 1 angelegt, also tragen KW 1, 14, 27 und 40 die Inspektionen des Jahres und HLK ist überlastet. Der geglättete Plan schafft dieselben Stunden mit einer um ein Mehrfaches niedrigeren Spitze — die gesetzlichen Prüfungen bleiben auf ihren Terminen.', 'Het kantoorregister met klasseroutines: elke kwartaalronde is vanaf week 1 ingesteld, dus weken 1, 14, 27 en 40 dragen de inspecties van het jaar en W-installaties zijn overbelast. Het afgevlakte plan doet dezelfde uren met een piek die meerdere keren lager is — de wettelijke keuringen blijven op hun datum.', 'Le registre de bureaux avec les gammes types : chaque tournée trimestrielle a été créée dès la semaine 1, donc les semaines 1, 14, 27 et 40 portent les inspections de l’année et le CVC déborde. Le plan lissé fait les mêmes heures avec une pointe plusieurs fois plus basse — les contrôles réglementaires restent à leur date.', 'El registro de oficinas con rutinas por clase: cada ronda trimestral se creó desde la semana 1, así que las semanas 1, 14, 27 y 40 cargan las inspecciones del año y climatización se sobrecarga. El plan nivelado hace las mismas horas con un pico varias veces menor — las pruebas reglamentarias siguen en su fecha.', 'Rejestr biurowca z czynnościami klas: każdy obchód kwartalny ustawiono od tygodnia 1, więc tygodnie 1, 14, 27 i 40 niosą przeglądy całego roku, a HVAC jest przeciążony. Plan wygładzony robi te same godziny przy kilkakrotnie niższym szczycie — próby ustawowe zostają w swoich terminach.')],
+  grouping: [T7('Group visits: one trip per asset', 'Групування: один виїзд на обладнання', 'Einsätze bündeln: eine Anfahrt je Anlage', 'Bezoeken bundelen: één rit per installatie', 'Regrouper : un déplacement par équipement', 'Agrupar visitas: un viaje por equipo', 'Grupowanie: jeden dojazd na urządzenie'),
+    T7('A remote building with 1.5 h travel per visit. Monthly, quarterly and annual work on the same unit nest into the same weeks, so about a third of the trips disappear. Switch “One visit per” to “task” to see what the separate trips cost.', 'Віддалена будівля, 1,5 год дороги на виїзд. Щомісячні, щоквартальні й щорічні роботи на одній установці потрапляють у ті самі тижні, тож приблизно третина поїздок зникає. Перемкніть «Один виїзд на» на «завдання», щоб побачити ціну окремих поїздок.', 'Ein entferntes Gebäude mit 1,5 h Anfahrt je Einsatz. Monats-, Quartals- und Jahresarbeiten an derselben Anlage fallen in dieselben Wochen, etwa ein Drittel der Fahrten entfällt. Stellen Sie „Ein Einsatz je“ auf „Aufgabe“, um die Einzelfahrten zu sehen.', 'Een afgelegen gebouw met 1,5 u reistijd per bezoek. Maand-, kwartaal- en jaarwerk aan dezelfde kast valt in dezelfde weken, zodat ongeveer een derde van de ritten verdwijnt. Zet “Eén bezoek per” op “taak” om de losse ritten te zien.', 'Un bâtiment éloigné, 1,5 h de déplacement par intervention. Les travaux mensuels, trimestriels et annuels d’une même unité tombent dans les mêmes semaines : environ un tiers des déplacements disparaît. Passez « Une intervention par » à « tâche » pour voir le coût des trajets séparés.', 'Un edificio remoto con 1,5 h de desplazamiento por visita. Los trabajos mensuales, trimestrales y anuales de la misma unidad caen en las mismas semanas, y desaparece cerca de un tercio de los viajes. Cambie “Una visita por” a “tarea” para ver el coste de los viajes separados.', 'Odległy budynek, 1,5 h dojazdu na wizytę. Prace miesięczne, kwartalne i roczne przy tej samej centrali trafiają w te same tygodnie, więc znika około jednej trzeciej dojazdów. Przełącz „Jedna wizyta na” na „zadanie”, aby zobaczyć koszt osobnych dojazdów.')],
+  statutory_locked: [T7('Statutory tests cannot be moved', 'Обов’язкові перевірки не переносяться', 'Gesetzliche Prüfungen sind nicht verschiebbar', 'Wettelijke keuringen schuiven niet', 'Les contrôles réglementaires ne bougent pas', 'Las pruebas reglamentarias no se mueven', 'Prób ustawowych nie da się przesunąć'),
+    T7('Life-safety systems of a hospital wing with fixed legal dates. The leveller moves every routine job away from week 10, but the annual full-duration test of 220 emergency luminaires alone exceeds the electricians’ week: that overload stays and is labelled statutory — book extra hands or a contractor.', 'Системи безпеки крила лікарні з фіксованими законними датами. Вирівнювання прибирає з тижня 10 усі планові роботи, але щорічний тест повної тривалості 220 аварійних світильників сам перевищує тиждень електриків: це перевантаження лишається і позначене як обов’язкове — залучіть людей або підрядника.', 'Sicherheitssysteme eines Krankenhausflügels mit festen gesetzlichen Terminen. Die Glättung schiebt jede Routinearbeit aus KW 10, aber der jährliche Volldauertest von 220 Notleuchten allein übersteigt die Elektrikerwoche: diese Überlast bleibt und ist als gesetzlich markiert — Personal ergänzen oder Fremdfirma beauftragen.', 'Veiligheidssystemen van een ziekenhuisvleugel met vaste wettelijke data. Het afvlakken haalt elk routinewerk uit week 10, maar de jaarlijkse volledige-duurtest van 220 noodarmaturen overschrijdt alleen al de elektriciensweek: die overbelasting blijft en is als wettelijk gemarkeerd — extra mensen of een aannemer inzetten.', 'Systèmes de sécurité d’une aile d’hôpital aux dates légales fixes. Le lissage sort de la semaine 10 tout travail courant, mais l’essai annuel d’autonomie de 220 blocs de secours dépasse à lui seul la semaine des électriciens : cette surcharge reste, marquée réglementaire — renforcez ou sous-traitez.', 'Sistemas de seguridad de un ala de hospital con fechas legales fijas. La nivelación saca de la semana 10 todo el trabajo rutinario, pero la prueba anual de autonomía completa de 220 luminarias de emergencia supera por sí sola la semana de los electricistas: esa sobrecarga se queda y se marca como reglamentaria — más personal o un contratista.', 'Systemy bezpieczeństwa skrzydła szpitala ze stałymi terminami prawnymi. Wygładzanie usuwa z tygodnia 10 wszystkie prace rutynowe, ale coroczny test pełnego czasu 220 opraw awaryjnych sam przekracza tydzień elektryków: to przeciążenie zostaje i jest oznaczone jako ustawowe — dołóż ludzi lub wykonawcę.')],
+  chiller_winter: [T7('Chiller service in the heating season', 'Сервіс чилера — в опалювальний сезон', 'Kältemaschinenwartung in der Heizperiode', 'Koelmachineonderhoud in het stookseizoen', 'Entretien du groupe froid en saison de chauffe', 'Mantenimiento de la enfriadora en temporada de calefacción', 'Serwis agregatu w sezonie grzewczym'),
+    T7('The chillers were commissioned in July, so their annual service falls in the cooling peak; the boiler’s falls in January. ±10 % tolerance (±5 weeks) cannot reach the off-season: the planner flags them. Tick “Re-baseline” and the anniversaries move once — chillers to winter, the boiler to May (late, flagged: the interval stretches once).', 'Чилери введено в експлуатацію в липні, тож їхній щорічний сервіс припадає на пік охолодження, а котла — на січень. Допуск ±10 % (±5 тижнів) не дотягується до міжсезоння: планувальник позначає їх. Увімкніть «Переносити дати» — річниці зсуваються одноразово: чилери на зиму, котел на травень (пізніше, з позначкою: інтервал одноразово подовжується).', 'Die Kältemaschinen wurden im Juli in Betrieb genommen, ihre Jahreswartung fällt in die Kühlspitze; die des Kessels in den Januar. ±10 % Toleranz (±5 Wochen) erreicht die Nebensaison nicht: der Planer markiert sie. „Termine neu festlegen“ anhaken — die Jahrestermine wandern einmal: Kältemaschinen in den Winter, der Kessel in den Mai (spät, markiert: das Intervall dehnt sich einmal).', 'De koelmachines zijn in juli opgeleverd, dus hun jaaronderhoud valt in de koelpiek; dat van de ketel in januari. ±10 % tolerantie (±5 weken) haalt het tussenseizoen niet: de planner markeert ze. Vink “opnieuw vastleggen” aan en de jaardata verschuiven eenmalig — koelmachines naar de winter, de ketel naar mei (te laat, gemarkeerd: het interval rekt eenmalig op).', 'Les groupes froids ont été mis en service en juillet : leur entretien annuel tombe au pic de froid ; celui de la chaudière en janvier. La tolérance de ±10 % (±5 semaines) n’atteint pas l’intersaison : le planificateur les signale. Cochez « Recaler » et les échéances bougent une fois — groupes froids en hiver, chaudière en mai (en retard, signalé : l’intervalle s’allonge une fois).', 'Las enfriadoras se pusieron en marcha en julio, así que su mantenimiento anual cae en el pico de frío; el de la caldera en enero. La tolerancia de ±10 % (±5 semanas) no llega a la temporada baja: el planificador las marca. Active “Reprogramar” y los aniversarios se mueven una vez — enfriadoras al invierno, caldera a mayo (tarde, marcada: el intervalo se alarga una vez).', 'Agregaty uruchomiono w lipcu, więc ich roczny serwis wypada w szczycie chłodzenia, a kotła — w styczniu. Tolerancja ±10 % (±5 tygodni) nie sięga poza sezon: planer je oznacza. Zaznacz „Przestawić terminy”, a rocznice przesuną się raz — agregaty na zimę, kocioł na maj (później, z oznaczeniem: interwał jednorazowo się wydłuża).')],
+  shutdown: [T7('Shutdown work vs on-load thermography', 'Роботи на зупинці проти тепловізора під навантаженням', 'Stillstandsarbeit gegen Thermografie unter Last', 'Stilstandswerk tegenover thermografie onder last', 'Travaux d’arrêt contre thermographie en charge', 'Trabajo en parada frente a termografía en carga', 'Prace w postoju a termowizja pod obciążeniem'),
+    T7('A production site with a two-week summer shutdown (W31–32) and no routine work over Christmas. Switchboard cleaning and torque checks need the shutdown; thermography needs current flowing — in a shutdown week it sees nothing. The planner puts each on the right side of the shutdown.', 'Виробничий об’єкт із двотижневою літньою зупинкою (Т31–32) і без планових робіт на Різдво. Очищення й протяжка щитів потребують зупинки; тепловізійний контроль потребує струму — у тиждень зупинки він нічого не побачить. Планувальник ставить кожне по правильний бік зупинки.', 'Ein Produktionsstandort mit zwei Wochen Sommerstillstand (KW 31–32) und ohne Routinearbeit über Weihnachten. Reinigung und Anzugskontrolle der Verteilungen brauchen den Stillstand; Thermografie braucht Stromfluss — in der Stillstandswoche sieht sie nichts. Der Planer legt beides auf die richtige Seite.', 'Een productielocatie met twee weken zomerstilstand (W31–32) en geen routinewerk rond Kerst. Reinigen en aanhalen van verdeelinrichtingen vraagt stilstand; thermografie vraagt stroom — in een stilstandsweek ziet ze niets. De planner zet elk aan de juiste kant van de stilstand.', 'Un site de production avec deux semaines d’arrêt estival (S31–32) et pas de travaux courants à Noël. Nettoyage et resserrage des tableaux exigent l’arrêt ; la thermographie exige du courant — en semaine d’arrêt elle ne voit rien. Le planificateur place chacun du bon côté de l’arrêt.', 'Una planta con dos semanas de parada en verano (S31–32) y sin rutinas en Navidad. La limpieza y el apriete de los cuadros requieren la parada; la termografía requiere corriente — en una semana de parada no ve nada. El planificador pone cada una en el lado correcto de la parada.', 'Zakład produkcyjny z dwutygodniowym postojem letnim (T31–32) i bez prac rutynowych w Boże Narodzenie. Czyszczenie i dokręcanie rozdzielnic wymaga postoju; termowizja wymaga płynącego prądu — w tygodniu postoju nic nie zobaczy. Planer stawia każde po właściwej stronie postoju.')]
+};
+var CORE_SITES = ['office_12', 'datacentre_8', 'hospital_wing_10', 'school_8'];
+var CORE_SITE_NOTE = T7('Shared demo building of the MEP maintenance package: the baseline is built from the class routines and the statutory tasks. For the plan your RCM study gives, run the strategy tool on the same register and press Use.', 'Спільна демо-будівля пакета ТО: базовий план побудовано з регламентів класів і обов’язкових завдань. Для плану з вашого RCM-аналізу запустіть інструмент стратегії на тому ж реєстрі й натисніть «Використати».', 'Gemeinsames Demogebäude des Wartungspakets: der Grundplan entsteht aus Klassenroutinen und gesetzlichen Aufgaben. Für den Plan aus Ihrer RCM-Analyse das Strategiewerkzeug auf demselben Register ausführen und „Verwenden“ drücken.', 'Gedeeld demogebouw van het onderhoudspakket: het basisplan komt uit klasseroutines en wettelijke taken. Voor het plan uit uw RCM-analyse draait u de strategietool op hetzelfde register en kiest u Gebruiken.', 'Bâtiment de démonstration commun du paquet : le plan de base vient des gammes par classe et des tâches réglementaires. Pour le plan issu de votre étude RCM, lancez l’outil de stratégie sur le même registre puis Utiliser.', 'Edificio de demostración común del paquete: el plan base sale de las rutinas por clase y las tareas reglamentarias. Para el plan de su estudio RCM, ejecute la herramienta de estrategia sobre el mismo registro y pulse Usar.', 'Wspólny budynek demonstracyjny pakietu: plan bazowy powstaje z czynności klas i zadań ustawowych. Dla planu z Twojej analizy RCM uruchom narzędzie strategii na tym samym rejestrze i naciśnij Użyj.');
+function coreSiteState(k) {
+  if (!CORE || !PLAN) return null; var d = CORE.presetSite(k); if (!d) return null;
+  var o = defaultOpts(); return { src: 'classes', preset: k, doc: d, tasks: PLAN.tasksFromClasses(d).map(rowOf), o: o, view: 'levelled', trade: 'all', week: 1, origin: 'preset' };
+}
+function examples() {
+  var list = (PLAN ? PLAN.PRESET_IDS : []).filter(function (k) { return PL[k]; }).map(function (k) {
+    return { id: k, label: PL[k][0], note: PL[k][1], apply: function (t) { var x = presetState(k); Object.keys(x).forEach(function (q) { t[q] = x[q]; }); t.week = k === 'statutory_locked' ? 10 : k === 'shutdown' ? 31 : k === 'chiller_winter' ? 28 : 1; note = ''; } };
+  });
+  CORE_SITES.forEach(function (k) {
+    if (!CORE || !CORE.PRESET_SITES || !CORE.PRESET_SITES[k]) return;
+    var meta = CORE.PRESET_SITES[k].meta || {};
+    list.push({ id: k, label: meta.title || T7(k, k, k, k, k, k, k), note: CORE_SITE_NOTE, apply: function (t) { var x = coreSiteState(k); Object.keys(x).forEach(function (q) { t[q] = x[q]; }); note = ''; } });
+  });
+  return list;
+}
+
+/* ---- learn ---- */
+var LEARN = { version: 1,
+  intro: { title: T7('From tasks to a calendar', 'Від завдань до календаря', 'Von Aufgaben zum Kalender', 'Van taken naar een kalender', 'Des tâches au calendrier', 'De las tareas al calendario', 'Od zadań do kalendarza'),
+    body: T7('Pick an example, or build the task list from your site register, or press Use on the strategy results. The heat map shows hours per trade and week; click a week to see its work orders. Compare the levelled plan with “as set up”, and check the conflicts list before exporting the work orders to your CMMS.',
+      'Виберіть приклад, сформуйте перелік завдань з реєстру об’єкта або натисніть «Використати» біля результатів стратегії. Теплова карта показує години за фахами й тижнями; клацніть тиждень, щоб побачити його наряди. Порівняйте вирівняний план із варіантом «як задано» і перегляньте конфлікти, перш ніж експортувати наряди в CMMS.',
+      'Wählen Sie ein Beispiel, bilden Sie die Aufgabenliste aus Ihrem Register oder drücken Sie „Verwenden“ bei den Strategieergebnissen. Die Heatmap zeigt Stunden je Gewerk und Woche; ein Klick auf eine Woche zeigt ihre Aufträge. Vergleichen Sie den geglätteten Plan mit „wie angelegt“ und prüfen Sie die Konflikte vor dem Export ins CMMS.',
+      'Kies een voorbeeld, bouw de takenlijst uit uw register of kies Gebruiken bij de strategieresultaten. De heatmap toont uren per discipline en week; klik op een week voor de werkorders. Vergelijk het afgevlakte plan met “zoals ingesteld” en bekijk de conflicten vóór de export naar uw CMMS.',
+      'Choisissez un exemple, construisez la liste depuis votre registre ou cliquez Utiliser sur les résultats de stratégie. La carte montre les heures par métier et semaine ; cliquez une semaine pour voir ses ordres. Comparez le plan lissé avec « tel que saisi » et vérifiez les conflits avant d’exporter vers la GMAO.',
+      'Elija un ejemplo, genere la lista desde su registro o pulse Usar en los resultados de estrategia. El mapa muestra horas por oficio y semana; haga clic en una semana para ver sus órdenes. Compare el plan nivelado con “sin nivelar” y revise los conflictos antes de exportar al GMAO.',
+      'Wybierz przykład, zbuduj listę zadań z rejestru albo naciśnij „Użyj” przy wynikach strategii. Mapa pokazuje godziny branż w tygodniach; kliknij tydzień, aby zobaczyć jego zlecenia. Porównaj plan wygładzony z „jak ustawiono” i sprawdź konflikty przed eksportem do CMMS.') },
+  topics: {
+    grid: { title: T7('The yearly grid and the tolerance', 'Річна сітка й допуск', 'Jahresraster und Toleranz', 'Het jaarraster en de tolerantie', 'La grille annuelle et la tolérance', 'La rejilla anual y la tolerancia', 'Siatka roczna i tolerancja'),
+      body: T7('A quarterly task is four work orders 13 weeks apart, anchored at its next due date. Each order may slip a little — by default ±10 % of the interval, which is ±1 week for quarterly and ±5 weeks for annual, and nothing for monthly. Moving the whole grid is a once-only re-baseline, not levelling.',
+        'Щоквартальне завдання — це чотири наряди з кроком 13 тижнів від найближчого терміну. Кожен наряд може трохи зсунутися — типово на ±10 % інтервалу: ±1 тиждень для щоквартальних, ±5 для щорічних і нуль для щомісячних. Зсув усієї сітки — одноразове перенесення дат, а не вирівнювання.',
+        'Eine Quartalsaufgabe sind vier Aufträge im Abstand von 13 Wochen, verankert am nächsten Fälligkeitstermin. Jeder Auftrag darf etwas rutschen — standardmäßig ±10 % des Intervalls: ±1 Woche bei Quartals-, ±5 bei Jahresaufgaben, nichts bei Monatsaufgaben. Das ganze Raster zu verschieben ist eine einmalige Neufestlegung, keine Glättung.',
+        'Een kwartaaltaak is vier werkorders met 13 weken ertussen, verankerd aan de volgende vervaldatum. Elke order mag iets schuiven — standaard ±10 % van het interval: ±1 week per kwartaal, ±5 per jaar, niets per maand. Het hele raster verschuiven is een eenmalige herplanning, geen afvlakken.',
+        'Une tâche trimestrielle, ce sont quatre ordres espacés de 13 semaines, ancrés sur la prochaine échéance. Chaque ordre peut glisser un peu — par défaut ±10 % de l’intervalle : ±1 semaine en trimestriel, ±5 en annuel, rien en mensuel. Déplacer toute la grille est un recalage unique, pas un lissage.',
+        'Una tarea trimestral son cuatro órdenes separadas 13 semanas, ancladas en el próximo vencimiento. Cada orden puede deslizarse un poco — por defecto ±10 % del intervalo: ±1 semana en trimestral, ±5 en anual, nada en mensual. Mover toda la rejilla es una reprogramación única, no una nivelación.',
+        'Zadanie kwartalne to cztery zlecenia co 13 tygodni, zakotwiczone w najbliższym terminie. Każde zlecenie może się nieco przesunąć — domyślnie o ±10 % interwału: ±1 tydzień dla kwartalnych, ±5 dla rocznych, wcale dla miesięcznych. Przesunięcie całej siatki to jednorazowe przestawienie terminów, nie wygładzanie.') },
+    levelling: { title: T7('Levelling: same hours, lower peak', 'Вирівнювання: ті самі години, нижчий пік', 'Glättung: gleiche Stunden, niedrigere Spitze', 'Afvlakken: zelfde uren, lagere piek', 'Lissage : mêmes heures, pointe plus basse', 'Nivelación: mismas horas, pico menor', 'Wygładzanie: te same godziny, niższy szczyt'),
+      body: T7('When every routine was created on the same day, all quarterly work lands in the same four weeks. For undated routines the planner chooses where each series starts, then nudges single orders inside their windows, so that no trade’s week is far above its average and none is above its in-house hours. The yearly hours do not change.',
+        'Коли всі регламенти створено в один день, уся щоквартальна робота падає на ті самі чотири тижні. Для регламентів без дати планувальник обирає, де починається кожна серія, а потім зсуває окремі наряди в межах вікон, щоб жоден тиждень фаху не був набагато вищим за середній і не перевищував власних годин. Річні години не змінюються.',
+        'Wurden alle Routinen am selben Tag angelegt, landet die Quartalsarbeit in denselben vier Wochen. Bei undatierten Routinen wählt der Planer den Start jeder Serie und schiebt dann einzelne Aufträge innerhalb ihrer Fenster, damit keine Gewerkewoche weit über dem Mittel und keine über den eigenen Stunden liegt. Die Jahresstunden ändern sich nicht.',
+        'Als alle routines op dezelfde dag zijn aangemaakt, valt al het kwartaalwerk in dezelfde vier weken. Voor ongedateerde routines kiest de planner waar elke reeks start en schuift daarna losse orders binnen hun venster, zodat geen week van een discipline ver boven het gemiddelde of boven de eigen uren ligt. De jaaruren veranderen niet.',
+        'Si toutes les gammes ont été créées le même jour, tout le trimestriel tombe dans les mêmes quatre semaines. Pour les gammes non datées, le planificateur choisit le départ de chaque série puis décale des ordres isolés dans leurs fenêtres, pour qu’aucune semaine d’un métier ne dépasse de loin la moyenne ni les heures internes. Les heures annuelles ne changent pas.',
+        'Si todas las rutinas se crearon el mismo día, todo el trabajo trimestral cae en las mismas cuatro semanas. Para rutinas sin fecha el planificador elige dónde empieza cada serie y luego mueve órdenes sueltas dentro de sus ventanas, para que ninguna semana de un oficio quede muy por encima de la media ni de las horas propias. Las horas anuales no cambian.',
+        'Gdy wszystkie czynności utworzono tego samego dnia, cała praca kwartalna trafia w te same cztery tygodnie. Dla czynności bez daty planer wybiera start każdej serii, a potem przesuwa pojedyncze zlecenia w ich oknach, by żaden tydzień branży nie był dużo powyżej średniej ani ponad własne godziny. Godziny roczne się nie zmieniają.') },
+    grouping: { title: T7('Visits and travel time', 'Виїзди й час на дорогу', 'Einsätze und Anfahrtszeit', 'Bezoeken en reistijd', 'Interventions et déplacements', 'Visitas y desplazamientos', 'Wizyty i czas dojazdu'),
+      body: T7('Every visit costs set-up and travel — permits, keys, tools, the drive. Tasks of the same asset (or location) and trade in the same week share one visit, so the leveller prefers to nest quarterly and annual work into a monthly round. The tile shows the travel hours saved compared with one trip per work order.',
+        'Кожен виїзд коштує підготовки й дороги — допуски, ключі, інструмент, поїздка. Завдання одного обладнання (або місця) й фаху в одному тижні — це один виїзд, тому вирівнювання охоче вкладає щоквартальні й щорічні роботи в щомісячний обхід. Плитка показує зекономлені години дороги порівняно з окремою поїздкою на кожен наряд.',
+        'Jeder Einsatz kostet Rüst- und Anfahrtszeit — Freigaben, Schlüssel, Werkzeug, Fahrt. Aufgaben derselben Anlage (oder desselben Orts) und desselben Gewerks in derselben Woche teilen einen Einsatz; die Glättung schachtelt daher Quartals- und Jahresarbeit in den Monatsrundgang. Die Kachel zeigt die gesparten Anfahrtsstunden gegenüber einer Fahrt je Auftrag.',
+        'Elk bezoek kost voorbereiding en reistijd — vergunningen, sleutels, gereedschap, de rit. Taken van dezelfde installatie (of locatie) en discipline in dezelfde week delen één bezoek, dus het afvlakken nestelt kwartaal- en jaarwerk in de maandronde. De tegel toont de bespaarde reisuren tegenover één rit per werkorder.',
+        'Chaque intervention coûte préparation et déplacement — permis, clés, outillage, trajet. Les tâches d’un même équipement (ou lieu) et métier dans la même semaine partagent une intervention : le lissage emboîte donc le trimestriel et l’annuel dans la tournée mensuelle. La tuile montre les heures de déplacement économisées face à un trajet par ordre.',
+        'Cada visita cuesta preparación y desplazamiento — permisos, llaves, herramientas, el viaje. Las tareas de un mismo equipo (o ubicación) y oficio en la misma semana comparten una visita, por lo que la nivelación encaja el trabajo trimestral y anual en la ronda mensual. El indicador muestra las horas de viaje ahorradas frente a un viaje por orden.',
+        'Każda wizyta kosztuje przygotowanie i dojazd — pozwolenia, klucze, narzędzia, droga. Zadania tego samego urządzenia (lub miejsca) i branży w tym samym tygodniu to jedna wizyta, więc wygładzanie wkłada prace kwartalne i roczne w obchód miesięczny. Kafelek pokazuje zaoszczędzone godziny dojazdu wobec osobnego dojazdu na każde zlecenie.') },
+    statutory: { title: T7('Statutory tests stay put', 'Обов’язкові перевірки — на місці', 'Gesetzliche Prüfungen bleiben stehen', 'Wettelijke keuringen blijven staan', 'Les contrôles réglementaires restent en place', 'Las pruebas reglamentarias se quedan', 'Próby ustawowe zostają na miejscu'),
+      body: T7('F-gas leak checks, legionella monitoring, sprinkler pump runs, emergency lighting and fire alarm tests, generator runs and EPBD inspections keep their dates: tolerance zero, never dropped by the leveller. Unknown dates are assumed due now and flagged. If a week is overloaded by statutory work alone, the answer is staffing, not shifting.',
+        'Перевірки F-газів на витоки, контроль легіонели, пуски спринклерних насосів, тести аварійного освітлення й пожежної сигналізації, прогони генератора та інспекції EPBD зберігають свої дати: допуск нуль, вирівнювання їх ніколи не прибирає. Невідомі дати вважаються настанням терміну зараз і позначаються. Якщо тиждень перевантажений лише обов’язковими роботами, рішення — люди, а не перенесення.',
+        'F-Gas-Dichtheitskontrollen, Legionellenüberwachung, Sprinklerpumpenläufe, Prüfungen von Notbeleuchtung und Brandmeldeanlage, Probeläufe des Aggregats und EPBD-Inspektionen behalten ihre Termine: Toleranz null, nie von der Glättung gestrichen. Unbekannte Termine gelten als jetzt fällig und werden markiert. Ist eine Woche allein durch gesetzliche Arbeit überlastet, hilft Personal, nicht Verschieben.',
+        'F-gaslekcontroles, legionellabewaking, sprinklerpompproeven, tests van noodverlichting en brandmelding, proefdraaien van het aggregaat en EPBD-keuringen houden hun data: tolerantie nul, nooit geschrapt door het afvlakken. Onbekende data gelden als nu vervallen en worden gemarkeerd. Is een week alleen door wettelijk werk overbelast, dan helpt bezetting, niet schuiven.',
+        'Contrôles d’étanchéité F-gaz, surveillance légionelle, essais des pompes sprinkler, de l’éclairage de sécurité et de l’alarme incendie, essais du groupe et inspections EPBD gardent leurs dates : tolérance nulle, jamais supprimés par le lissage. Les dates inconnues sont supposées échues et signalées. Si une semaine déborde à cause du seul réglementaire, la réponse est l’effectif, pas le déplacement.',
+        'Los controles de fugas de gases fluorados, el control de legionela, los arranques de bombas de rociadores, las pruebas de alumbrado de emergencia y de alarma de incendios, las pruebas del grupo y las inspecciones EPBD conservan sus fechas: tolerancia cero, la nivelación nunca las elimina. Las fechas desconocidas se suponen vencidas y se marcan. Si una semana se sobrecarga solo por trabajo reglamentario, la respuesta es personal, no mover.',
+        'Kontrole szczelności F-gazów, monitoring legionelli, rozruchy pomp tryskaczowych, próby oświetlenia awaryjnego i sygnalizacji pożaru, próby agregatu i kontrole EPBD zachowują terminy: tolerancja zero, wygładzanie nigdy ich nie usuwa. Nieznane terminy uznaje się za przypadające teraz i oznacza. Jeśli tydzień jest przeciążony wyłącznie pracami ustawowymi, rozwiązaniem są ludzie, nie przesuwanie.') },
+    seasons: { title: T7('Seasons: service when the plant can stop', 'Сезони: сервіс, коли обладнання можна зупинити', 'Saisons: Wartung, wenn die Anlage stehen darf', 'Seizoenen: onderhoud wanneer de installatie mag stilstaan', 'Saisons : entretenir quand on peut arrêter', 'Temporadas: mantener cuando la planta puede parar', 'Sezony: serwis, gdy instalację można zatrzymać'),
+      body: T7('A chiller’s annual service takes it off-line for a day or more, so it belongs in the heating season; a boiler’s in summer. Frost protection is tested before winter, cooling towers and chillers are started up before summer. Season weeks are learning assumptions for central and north-west Europe — set your own.',
+        'Щорічний сервіс чилера виводить його з роботи на день і більше, тож йому місце в опалювальному сезоні; котла — влітку. Захист від замерзання перевіряють перед зимою, градирні й чилери запускають перед літом. Тижні сезонів — навчальні припущення для Центральної й Північно-Західної Європи; задайте власні.',
+        'Die Jahreswartung einer Kältemaschine nimmt sie einen Tag oder länger vom Netz, sie gehört in die Heizperiode; die des Kessels in den Sommer. Frostschutz wird vor dem Winter geprüft, Kühltürme und Kältemaschinen vor dem Sommer in Betrieb genommen. Die Saisonwochen sind Lernannahmen für Mittel- und Nordwesteuropa — eigene eintragen.',
+        'Het jaaronderhoud van een koelmachine haalt haar een dag of langer uit bedrijf, dus hoort het in het stookseizoen; dat van een ketel in de zomer. Vorstbeveiliging wordt vóór de winter getest, koeltorens en koelmachines vóór de zomer opgestart. De seizoensweken zijn leeraannames voor Midden- en Noordwest-Europa — vul uw eigen in.',
+        'L’entretien annuel d’un groupe froid l’arrête un jour ou plus : il a sa place en saison de chauffe ; celui d’une chaudière en été. L’antigel se teste avant l’hiver, tours et groupes froids se remettent en route avant l’été. Les semaines de saison sont des hypothèses pédagogiques pour l’Europe centrale et du Nord-Ouest — saisissez les vôtres.',
+        'El mantenimiento anual de una enfriadora la deja fuera de servicio un día o más, así que corresponde a la temporada de calefacción; el de la caldera, al verano. La protección antihielo se prueba antes del invierno; torres y enfriadoras se ponen en marcha antes del verano. Las semanas de temporada son supuestos didácticos para Europa central y noroccidental — ponga las suyas.',
+        'Roczny serwis agregatu wyłącza go na dzień lub dłużej, więc jego miejsce jest w sezonie grzewczym; kotła — latem. Ochronę przeciwzamrożeniową sprawdza się przed zimą, chłodnie i agregaty uruchamia przed latem. Tygodnie sezonów to założenia dydaktyczne dla Europy Środkowej i Północno-Zachodniej — wpisz własne.') },
+    shutdown: { title: T7('Shutdowns and blackout weeks', 'Зупинки й тижні без робіт', 'Stillstände und Sperrwochen', 'Stilstanden en blokkadeweken', 'Arrêts et semaines gelées', 'Paradas y semanas bloqueadas', 'Postoje i tygodnie blokady'),
+      body: T7('Some work needs the plant dead (switchboard cleaning, torque checks, protection tests), some needs it alive (thermography only sees hot joints under load). Blackout weeks — holidays, peak trading, exams — get no routine work, but statutory tests still happen and are flagged so that someone is rostered.',
+        'Частина робіт потребує знеструмленого обладнання (очищення щитів, протяжка, перевірка захистів), частина — працюючого (тепловізор бачить гарячі з’єднання лише під навантаженням). У тижні без робіт — свята, пікові продажі, іспити — планові роботи не ставляться, але обов’язкові перевірки відбуваються й позначаються, щоб хтось чергував.',
+        'Manche Arbeit braucht die Anlage spannungsfrei (Reinigung, Anzugskontrolle, Schutzprüfung), manche unter Last (Thermografie sieht heiße Verbindungen nur mit Stromfluss). Sperrwochen — Feiertage, Hochsaison, Prüfungen — bekommen keine Routinearbeit, gesetzliche Prüfungen finden trotzdem statt und werden markiert, damit jemand eingeteilt ist.',
+        'Sommig werk vraagt een spanningsloze installatie (reinigen, aanhalen, beveiligingstest), sommig een werkende (thermografie ziet hete verbindingen alleen onder last). Blokkadeweken — vakanties, piekverkoop, examens — krijgen geen routinewerk, maar wettelijke keuringen gaan door en worden gemarkeerd zodat iemand is ingeroosterd.',
+        'Certains travaux exigent l’installation hors tension (nettoyage, resserrage, essais des protections), d’autres en service (la thermographie ne voit les points chauds qu’en charge). Les semaines gelées — congés, pics d’activité, examens — n’ont pas de travaux courants, mais les contrôles réglementaires ont lieu et sont signalés pour que quelqu’un soit d’astreinte.',
+        'Algunos trabajos requieren la instalación sin tensión (limpieza, apriete, prueba de protecciones), otros en servicio (la termografía solo ve puntos calientes en carga). Las semanas bloqueadas — vacaciones, picos de venta, exámenes — no reciben rutinas, pero las pruebas reglamentarias se hacen igualmente y se marcan para asignar personal.',
+        'Część prac wymaga instalacji bez napięcia (czyszczenie, dokręcanie, próby zabezpieczeń), część — pracującej (termowizja widzi gorące połączenia tylko pod obciążeniem). Tygodnie blokady — święta, szczyt sprzedaży, egzaminy — nie dostają prac rutynowych, ale próby ustawowe się odbywają i są oznaczane, by ktoś miał dyżur.') },
+    capacity: { title: T7('In-house hours and overload', 'Власні години й перевантаження', 'Eigene Stunden und Überlast', 'Eigen uren en overbelasting', 'Heures internes et surcharge', 'Horas propias y sobrecarga', 'Własne godziny i przeciążenie'),
+      body: T7('Enter the hours per week your own team can give each trade to planned work (leave empty for contracted trades). Red cells are weeks above that line; the conflicts list says whether levelling could help or whether the overload is statutory and needs extra hands.',
+        'Введіть години на тиждень, які ваша команда може дати кожному фаху на планові роботи (порожньо — для фахів на підряді). Червоні клітинки — тижні понад цю межу; у конфліктах видно, чи допоможе вирівнювання, чи перевантаження обов’язкове й потрібні додаткові люди.',
+        'Tragen Sie die Wochenstunden ein, die Ihr eigenes Team je Gewerk für geplante Arbeit hat (leer bei fremdvergebenen Gewerken). Rote Zellen sind Wochen darüber; die Konfliktliste sagt, ob Glätten hilft oder ob die Überlast gesetzlich ist und Personal braucht.',
+        'Vul de uren per week in die uw eigen team per discipline aan gepland werk kan besteden (leeg voor uitbestede disciplines). Rode cellen zijn weken erboven; de conflictenlijst zegt of afvlakken helpt of dat de overbelasting wettelijk is en extra mensen vraagt.',
+        'Saisissez les heures par semaine que votre équipe peut consacrer au préventif par métier (vide pour les métiers sous-traités). Les cellules rouges sont les semaines au-dessus ; la liste des conflits indique si le lissage peut aider ou si la surcharge est réglementaire et exige du renfort.',
+        'Introduzca las horas semanales que su equipo puede dedicar al trabajo planificado por oficio (vacío para oficios subcontratados). Las celdas rojas son semanas por encima; la lista de conflictos indica si nivelar ayuda o si la sobrecarga es reglamentaria y necesita refuerzo.',
+        'Wpisz godziny tygodniowo, które Twój zespół może dać każdej branży na prace planowe (puste dla branż zleconych). Czerwone komórki to tygodnie powyżej tej linii; lista konfliktów mówi, czy wygładzanie pomoże, czy przeciążenie jest ustawowe i trzeba dołożyć ludzi.') },
+    conflicts: { title: T7('Reading the conflicts', 'Як читати конфлікти', 'Konflikte lesen', 'Conflicten lezen', 'Lire les conflits', 'Leer los conflictos', 'Jak czytać konflikty'),
+      body: T7('Errors need a decision: a week over capacity, a dated task whose window it cannot reach, an overdue order. Warnings need data: a statutory test without a date, a multi-year inspection with no last date. Notes record what the planner did for you, such as a re-baselined anniversary.',
+        'Помилки потребують рішення: тиждень понад можливості, завдання з датою, що не дотягується до свого вікна, прострочений наряд. Попередження потребують даних: обов’язкова перевірка без дати, багаторічна інспекція без останньої дати. Примітки фіксують, що планувальник зробив за вас, наприклад перенесену річницю.',
+        'Fehler verlangen eine Entscheidung: eine Woche über Kapazität, eine datierte Aufgabe außerhalb ihres Fensters, ein überfälliger Auftrag. Warnungen verlangen Daten: eine gesetzliche Prüfung ohne Termin, eine mehrjährige Inspektion ohne letztes Datum. Hinweise halten fest, was der Planer getan hat, etwa einen neu festgelegten Jahrestermin.',
+        'Fouten vragen een besluit: een week boven capaciteit, een gedateerde taak die haar venster niet haalt, een achterstallige order. Waarschuwingen vragen gegevens: een wettelijke keuring zonder datum, een meerjarige keuring zonder laatste datum. Opmerkingen leggen vast wat de planner voor u deed, zoals een herplande jaardatum.',
+        'Les erreurs appellent une décision : semaine au-delà de la capacité, tâche datée hors de portée de sa fenêtre, ordre en retard. Les avertissements appellent des données : contrôle réglementaire sans date, inspection pluriannuelle sans dernière date. Les notes consignent ce que le planificateur a fait, comme une échéance recalée.',
+        'Los errores exigen una decisión: semana por encima de la capacidad, tarea fechada que no alcanza su ventana, orden vencida. Los avisos exigen datos: prueba reglamentaria sin fecha, inspección plurianual sin última fecha. Las notas registran lo que hizo el planificador, como un aniversario reprogramado.',
+        'Błędy wymagają decyzji: tydzień ponad zdolność, zadanie z datą poza zasięgiem okna, zaległe zlecenie. Ostrzeżenia wymagają danych: próba ustawowa bez daty, wieloletnia kontrola bez ostatniej daty. Uwagi zapisują, co planer zrobił za Ciebie, np. przestawioną rocznicę.') },
+    budget: { title: T7('Budget and the CMMS export', 'Бюджет і експорт у CMMS', 'Budget und CMMS-Export', 'Budget en CMMS-export', 'Budget et export GMAO', 'Presupuesto y exportación al GMAO', 'Budżet i eksport do CMMS'),
+      body: T7('Cost = hours × trade rate + travel + materials (a share of labour unless a task gives its own) + a call-out fee per vendor visit, spread by the month of each work order. The CMMS CSV lists every work order with planned week and date, due date, tolerance window, trade, hours and visit; cells that start with = + − @ are prefixed so a spreadsheet cannot run them.',
+        'Вартість = години × ставка фаху + дорога + матеріали (частка від праці, якщо завдання не має власної суми) + плата за виклик підрядника, розподілена за місяцем кожного наряду. CSV для CMMS містить кожен наряд із запланованим тижнем і датою, терміном, вікном допуску, фахом, годинами й виїздом; клітинки, що починаються з = + − @, отримують префікс, щоб таблиця не виконала їх як формулу.',
+        'Kosten = Stunden × Satz + Anfahrt + Material (Anteil an der Arbeit, sofern die Aufgabe keinen eigenen Betrag hat) + Anfahrtspauschale je Fremdfirmeneinsatz, verteilt nach dem Monat jedes Auftrags. Die CMMS-CSV listet jeden Auftrag mit geplanter Woche und Datum, Fälligkeit, Toleranzfenster, Gewerk, Stunden und Einsatz; Zellen, die mit = + − @ beginnen, erhalten ein Präfix, damit eine Tabellenkalkulation sie nicht ausführt.',
+        'Kosten = uren × tarief + reistijd + materiaal (aandeel van arbeid tenzij de taak een eigen bedrag heeft) + voorrijkosten per bezoek van een externe partij, verdeeld naar de maand van elke werkorder. De CMMS-CSV bevat elke werkorder met geplande week en datum, vervaldatum, tolerantievenster, discipline, uren en bezoek; cellen die met = + − @ beginnen krijgen een voorvoegsel zodat een spreadsheet ze niet uitvoert.',
+        'Coût = heures × taux + déplacements + fournitures (part de la main-d’œuvre sauf montant propre) + frais par intervention de prestataire, réparti selon le mois de chaque ordre. Le CSV GMAO liste chaque ordre avec semaine et date prévues, échéance, fenêtre de tolérance, métier, heures et intervention ; les cellules commençant par = + − @ sont préfixées pour qu’un tableur ne les exécute pas.',
+        'Coste = horas × tarifa + desplazamientos + materiales (parte de la mano de obra salvo importe propio) + cargo por visita de proveedor, repartido por el mes de cada orden. El CSV para el GMAO lista cada orden con semana y fecha previstas, vencimiento, ventana de tolerancia, oficio, horas y visita; las celdas que empiezan por = + − @ llevan un prefijo para que una hoja de cálculo no las ejecute.',
+        'Koszt = godziny × stawka + dojazdy + materiały (udział w robociźnie, chyba że zadanie ma własną kwotę) + opłata za wizytę firmy zewnętrznej, rozłożony według miesiąca każdego zlecenia. CSV dla CMMS zawiera każde zlecenie z planowanym tygodniem i datą, terminem, oknem tolerancji, branżą, godzinami i wizytą; komórki zaczynające się od = + − @ dostają prefiks, by arkusz ich nie wykonał.') }
+  },
+  tour: [{ topic: 'grid', focus: '[data-dgu-field="f-tasks"]' }, { topic: 'levelling', focus: '.dgu-stage' }, { topic: 'grouping', focus: '[data-dgu-field="f-group"]' },
+         { topic: 'statutory' }, { topic: 'seasons', focus: '[data-dgu-field="f-heat-from"]' }, { topic: 'conflicts', focus: '.dgu-r-results' }, { topic: 'budget' }] };
+
+/* ---- interface ---- */
+var bar = null;
+function buildInterface() {
+  var hasBar = !!(CORE && CORE.ui && typeof CORE.ui.registerBar === 'function');
+  var tradeOpts = function () { return TRADES.map(function (t) { return { value: t, label: tradeName(t) }; }); };
+  var capFields = TRADES.map(function (t) {
+    return { id: 'f-cap-' + t, key: 'o.cap.' + t, type: 'number', label: function () { return tradeName(t); }, unit: U('u.hw'), min: 0, max: 400, step: 1 };
+  });
+  var rateFields = TRADES.map(function (t) {
+    return { id: 'f-rate-' + t, key: 'o.rate.' + t, type: 'number', label: function () { return S('f.rate') + ': ' + tradeName(t); }, unit: U('u.eurh'), min: 0, max: 1000, step: 5 };
+  });
+  ui = DiagramUI.app({
+    id: TOOL, mount: '#app', layout: 'calculator', compute: 'live', state: state, defaults: DEFAULTS,
+    subtitle: tx('subtitle'), learn: LEARN, footer: tx('footer'),
+    notices: [{ id: 'genre', tone: 'warn', sticky: true, title: tx('notice.t'), text: tx('notice.b') }],
+    panels: [
+      { id: 'regbar', slot: 'inputs', visible: hasBar, render: hasBar ? function (box) {
+          try { bar = CORE.ui.registerBar({ mount: box, toolId: TOOL, lang: curLang, getDoc: function () { return docWithPlan(); },
+            onUse: function (k, mod, doc) { if (k === 'mepstrategy') { useStrategy(doc); } else { state.doc = doc; } if (ui) { ui.sync(); ui.run(); } },
+            onChange: function (doc) { state.doc = doc; state.origin = 'register'; if (ui) { ui.sync(); ui.run(); } } }); } catch (e) { bar = null; }
+        } : undefined },
+      { id: 'source', slot: 'inputs', title: tx('p.source'), learn: 'grid', actions: [
+          { label: tx('a.fromReg'), run: function () { fromRegister(); ui.sync(); ui.run(); } },
+          { label: tx('a.fromStrat'), run: function () { var d = bar ? bar.getDoc() : state.doc; useStrategy(d); ui.sync(); ui.run(); } } ],
+        fields: [
+          { id: 'f-view', key: 'view', type: 'segmented', label: tx('f.view'), options: [{ value: 'levelled', label: tx('view.levelled') }, { value: 'naive', label: tx('view.naive') }], learn: 'levelling' },
+          { id: 'f-trade', key: 'trade', type: 'select', label: tx('f.trade'), options: function () { return [{ value: 'all', label: S('trade.all') }].concat(tradeOpts()); } },
+          { id: 'f-week', key: 'week', type: 'number', label: tx('f.week'), min: 1, max: 53, step: 1 } ] },
+      { id: 'plan', slot: 'inputs', title: tx('p.plan'), learn: 'grid', fields: [
+          { id: 'f-year', key: 'o.year', type: 'number', label: tx('f.year'), min: 2000, max: 2100, step: 1 },
+          { id: 'f-start', key: 'o.start_week', type: 'number', label: tx('f.start'), min: 1, max: 53, step: 1 },
+          { id: 'f-tol', key: 'o.tol_pct', type: 'number', label: tx('f.tol'), unit: U('u.pct'), min: 0, max: 50, step: 1, hint: tx('f.tol.h'), learn: 'grid' },
+          { id: 'f-group', key: 'o.group_by', type: 'segmented', label: tx('f.group'), options: [{ value: 'asset', label: tx('g.asset') }, { value: 'location', label: tx('g.location') }, { value: 'none', label: tx('g.none') }], learn: 'grouping' },
+          { id: 'f-travel', key: 'o.travel_h', type: 'number', label: tx('f.travel'), unit: U('u.h'), min: 0, max: 24, step: 0.25, learn: 'grouping' },
+          { id: 'f-rebase', key: 'o.rebaseline', type: 'toggle', label: tx('f.rebase'), hint: tx('f.rebase.h'), learn: 'seasons' } ] },
+      { id: 'windows', slot: 'inputs', title: tx('p.windows'), learn: 'seasons', collapsible: true, fields: [
+          { id: 'f-heat-from', key: 'o.heat_from', type: 'number', label: tx('f.heatFrom'), min: 1, max: 53, step: 1 },
+          { id: 'f-heat-to', key: 'o.heat_to', type: 'number', label: tx('f.heatTo'), min: 1, max: 53, step: 1 },
+          { id: 'f-cool-from', key: 'o.cool_from', type: 'number', label: tx('f.coolFrom'), min: 1, max: 53, step: 1 },
+          { id: 'f-cool-to', key: 'o.cool_to', type: 'number', label: tx('f.heatTo'), min: 1, max: 53, step: 1 },
+          { id: 'f-pre', key: 'o.pre_w', type: 'number', label: tx('f.pre'), unit: U('u.w'), min: 1, max: 20, step: 1 },
+          { id: 'f-sd-from', key: 'o.sd_from', type: 'number', label: tx('f.sdFrom'), min: 1, max: 53, step: 1, hint: tx('f.sd.h'), learn: 'shutdown' },
+          { id: 'f-sd-to', key: 'o.sd_to', type: 'number', label: tx('f.sdTo'), min: 1, max: 53, step: 1 },
+          { id: 'f-blackout', key: 'o.blackout', type: 'text', label: tx('f.blackout'), hint: tx('f.blackout.h'), learn: 'shutdown' } ] },
+      { id: 'capacity', slot: 'inputs', title: tx('p.capacity'), learn: 'capacity', collapsible: true, fields: [{ type: 'note', label: tx('f.cap.h') }].concat(capFields) },
+      { id: 'budget', slot: 'inputs', title: tx('p.budget'), learn: 'budget', collapsible: true, collapsed: true, fields: rateFields.concat([
+          { id: 'f-mat', key: 'o.materials_pct', type: 'number', label: tx('f.mat'), unit: U('u.pct'), min: 0, max: 300, step: 1 },
+          { id: 'f-callout', key: 'o.callout', type: 'number', label: tx('f.callout'), unit: U('u.eur'), min: 0, max: 5000, step: 10 } ]) },
+      { id: 'tasks', slot: 'inputs', title: tx('p.tasks'), learn: 'grid', collapsible: true, collapsed: true, fields: [
+          { type: 'note', label: tx('n.edit') },
+          { id: 'f-tasks', key: 'tasks', type: 'list', label: tx('f.tasks'), minRows: 0, maxRows: 2000, reorder: false, addLabel: tx('a.add'),
+            row: [{ key: 'asset_id', type: 'text', label: tx('c.asset'), width: '76px' },
+                  { key: 'name', type: 'text', label: tx('c.task'), width: '200px' },
+                  { key: 'interval_days', type: 'number', label: tx('c.int'), unit: U('u.d'), width: '64px', min: 1, step: 1 },
+                  { key: 'trade', type: 'select', label: tx('c.trade'), options: tradeOpts, width: '120px' },
+                  { key: 'hours', type: 'number', label: tx('c.hours'), unit: U('u.h'), width: '56px', min: 0, step: 0.25 },
+                  { key: 'constraint', type: 'select', label: tx('c.window'), options: function () { return CONSTR.map(function (c) { return { value: c, label: constrName(c) }; }); }, width: '120px' },
+                  { key: 'statutory', type: 'toggle', label: tx('c.stat'), width: '44px' },
+                  { key: 'due_week', type: 'number', label: tx('c.due'), width: '56px', min: 1, max: 53, step: 1 },
+                  { type: 'derived', label: tx('c.n'), width: '56px', value: function (row) { if (!last) return ''; var t = shown().tasks.filter(function (x) { return x.id === row.id; })[0]; return t ? t.occurrences : ''; } }],
+            newRow: function (rows) { var n = rows.length + 1, id = 'U' + n; while (rows.some(function (r) { return r.id === id; })) id = 'U' + (++n); state.src = 'custom'; var r = rowOf({ id: id, asset_id: (state.doc.assets && state.doc.assets[0] && state.doc.assets[0].id) || 'A-1', task: 'New task', interval_days: 91, trade: 'hvac_mech', hours: 1 }, n); r.name = ''; return r; } } ] },
+      { id: 'io', slot: 'inputs', title: tx('p.io'), collapsible: true, actionsAlign: 'end', actions: [
+          { label: tx('a.cmms'), run: function () { if (last) download('mepplanner-work-orders.csv', 'text/csv', cmmsCSV()); } },
+          { label: tx('a.cal'), run: function () { if (last) download('mepplanner-calendar.csv', 'text/csv', calendarCSV()); } },
+          { label: tx('a.json'), run: exportJSON },
+          { label: tx('a.save'), run: function () { saveToRegister(); ui.sync(); ui.run(); } } ] }
+    ],
+    on: { compute: function () { return compute(); }, rebuild: function (app) { stage = (app && app.stages && app.stages[0]) || stage; } }
+  });
+  ui.examples(examples());
+  stage = ui.stage({ caption: tx('chart.caption'), minHeight: 420, a11y: a11yText,
+    render: function (size, st) { var c = st.canvas(); wireCanvas(st); drawPlan(c, size.w, size.h, { coarse: size.density === 'coarse' });
+      if (st.cv) { st.cv.setAttribute('role', 'img'); st.cv.setAttribute('aria-label', S('chart.caption') + '. ' + a11yText()); } } });
+  if (stage && stage.legend) stage.legend({ items: [{ label: tx('lg.heat'), color: 'rgba(242,140,40,0.7)' }, { label: tx('lg.cool'), color: 'rgba(40,150,220,0.7)' }, { label: tx('lg.sd'), color: 'rgba(60,60,60,0.75)' },
+    { label: tx('lg.over'), color: 'rgba(217,72,15,0.88)' }, { label: tx('lg.stat'), color: '#333' }] });
+  window.__mepplanner = { state: state, ui: ui, get last() { return last; }, cmmsCSV: cmmsCSV, calendarCSV: calendarCSV, docWithPlan: docWithPlan };
+  ui.ready();
+}
+
+/* ---- record / report ---- */
+function record() {
+  if (!last) return null;
+  var P = last.levelled;
+  return {
+    inputs: { site: clone(state.doc.site || {}), source: state.src, preset: state.preset, tasks: engineTasks(), settings: clone(state.o) },
+    outputs: { metrics: clone(P.metrics), naive_metrics: clone(last.naive.metrics), budget: clone(P.budget), conflicts: clone(P.conflicts), weeks: P.weeks.map(function (w) { return { iso_week: w.iso_week, monday: w.monday, hours: w.hours, travel: w.travel, total: w.total, visits: w.visits }; }),
+      occurrences: P.occurrences.map(function (o) { return { id: o.id, asset_id: o.asset_id, trade: o.trade, iso_week: o.iso_week, date: o.date, due: o.nominal_date, hours: o.hours, statutory: o.statutory, visit: o.visit }; }) },
+    units: { hours: 'h', travel_h: 'h per visit', budget: 'EUR', capacity: 'h/week', interval_days: 'd', tolerance: 'fraction of interval' },
+    model: { version: PLAN ? PLAN.version : null, equations: [S('footer')], ranges: [], notes: [S('notice.b')] },
+    warnings: P.conflicts.filter(function (c) { return c.severity !== 'info'; }).slice(0, 50).map(conflictText)
+  };
+}
+function reportProfile(rec, ctx) {
+  var fig = null; try { fig = ctx.figure(reportCanvas(), { caption: S('chart.caption'), alt: a11yText() }); } catch (e) { fig = null; }
+  var P = last.levelled;
+  return { title: S('rep.title'),
+    project: [{ label: S('f.year'), value: state.o.year }, { label: S('p.source'), text: state.src }],
+    executive: { text: [compute.lastVerdict || ''], results: [{ label: S('t.peak'), value: P.metrics.peak_total }, { label: S('t.peakN'), value: last.naive.metrics.peak_total }, { label: S('t.hours'), value: P.metrics.hours_total }, { label: S('t.budget'), value: P.budget.total_eur }] },
+    results: P.conflicts.filter(function (c) { return c.severity !== 'info'; }).slice(0, 30).map(function (c) { return { label: S('sev.' + c.severity), text: conflictText(c) }; }),
+    figures: fig ? [fig] : [],
+    method: { equations: [S('footer')], notes: [S('notice.b')], references: ['EN 13306:2017 Maintenance terminology', 'EN 13460:2009 Documentation for maintenance', 'US DOE FEMP O&M Best Practices Guide, Release 3.0 (2010), ch. 9', 'Regulation (EU) 2024/573; Directive (EU) 2024/1275; EN 12845; EN 50172; HSE L8 / HSG274'] } };
+}
+function degrade() {
+  var h = document.createElement('h1'); h.textContent = 'MEP Maintenance Planner';
+  var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The record and the export are still available from the bar at the bottom of the page.';
+  var m = document.getElementById('app'); m.appendChild(h); m.appendChild(p);
+  if (PLAN && state.tasks.length) last = solve();
+}
+function installData() {
+  if (!window.Diagram) return;
+  Diagram.init({ id: TOOL, file: 'mepplanner.html',
+    state: { serialize: function () { return state; },
+             deserialize: function (o) { var x = sanitize(o); Object.keys(state).forEach(function (k) { delete state[k]; }); Object.assign(state, x); if (ui) { ui.sync(); ui.run(); } else if (PLAN && state.tasks.length) last = solve(); } },
+    record: record, report: { profile: reportProfile }, handoff: { provides: [], accepts: [] } });
+}
+/* boot: if this browser holds the user's register with strategy results, offer them through the bar (explicit Use); keep the example */
+(function adoptSharedRegister() {
+  if (!CORE || !CORE.register || typeof CORE.register.load !== 'function') return;
+  if (/[?&](s|in)=/.test(location.search)) return;
+  try { var d = CORE.register.load(); if (d && Array.isArray(d.assets) && d.assets.length) { state.doc = d; state.origin = 'register'; state.src = 'classes'; state.preset = null; state.tasks = PLAN ? PLAN.tasksFromClasses(d).map(rowOf) : []; } } catch (e) { /* storage blocked: the example stays */ }
+})();
+if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface(); else degrade();
+installData();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,7535 @@
+{
+ "tool": "repairreplace",
+ "author_note": "Revised against rev .2 on 2026-10-03; corrections recorded per case (key 'correction'), and 14 cases added for the rev .2 clarifications. Independent benchmark corpus written on 2026-10-03 by Claude (Anthropic, model Opus 5.5) acting as an independent benchmark author for tools.petrov.re. Written from the public specification SPEC-repairreplace.md revision 2026-10-03.1 and the owner's brief TZ-02 only, without access to the tool's code (repairreplace.html, core.js, core.py). Every expected value comes from a separate Python implementation of the specification text; cash flows were cross-checked by a second, structurally different route (fine sub-step integration with the regime chosen at each sub-step midpoint, plus closed-form annuities for constant-cost cases and hand-built year tables); Crow-AMSAA fits by hand and by Nelder-Mead on the NHPP likelihood; Weibull MLE fits by Brent root finding and by Nelder-Mead on the censored likelihood; renewal counts against a 16x finer grid, a fixed-seed Monte-Carlo simulation (400 000 histories) and the asymptote t/mu + sigma^2/(2 mu^2) - 1/2; switch-over thresholds by Brent root finding on the PV difference shifted by the tie tolerance.",
+ "reference": "The model is the deterministic expected-value life-cycle cost of IEC 60300-3-3: each option's costs (investment and outage at implementation and at like-for-like renewals, yearly opex, expected failures times the cost of one failure including its downtime, expected risk cost) are discounted at the real rate r, investments at their exact time and recurring costs at the end of each year, with a straight-line residual value credited at the horizon; options are ranked by present value and compared through the equivalent annual cost. Expected failure counts come from a homogeneous rate, a power-law NHPP (minimal repair; Crow-AMSAA estimates for time-terminated data, Rigdon & Basu 2000) or a Weibull renewal process (as good as new; renewal function solved by a Stieltjes-trapezoid scheme of the Xie 1989 type on the grid the specification prescribes; Weibull parameters by censored maximum likelihood, Lawless 2003).",
+ "reference_citations": [
+  "IEC 60300-3-3:2017 Dependability management - Part 3-3: Application guide - Life cycle costing. https://webstore.iec.ch/publication/27720",
+  "Crow, L.H. (1974) Reliability analysis for complex, repairable systems. In: Proschan, F., Serfling, R.J. (eds.) Reliability and Biometry, SIAM, Philadelphia, pp. 379-410.",
+  "Rigdon, S.E., Basu, A.P. (2000) Statistical Methods for the Reliability of Repairable Systems. Wiley, New York.",
+  "Lawless, J.F. (2003) Statistical Models and Methods for Lifetime Data, 2nd ed. Wiley, Hoboken (Weibull maximum likelihood with right censoring).",
+  "Xie, M. (1989) On the solution of renewal-type integral equations. Communications in Statistics - Simulation and Computation 18(1):281-293.",
+  "SPEC-repairreplace.md revision 2026-10-03.1. https://tools.petrov.re/_docs/SPEC-repairreplace.md"
+ ],
+ "tolerance": "All tolerances are relative. Default 1e-9 for PV, EAC, components and year-table values of cases using rate, nhpp or none models: these are closed-form sums, and the reference was matched to 1e-9 by an independent route. Cases with Weibull renewal counts carry tol 1e-4 (pv, eac, years, renewal); the reference values are the 2 000-step values of the rev .2 §4 scheme (Xie 1989), and each was checked against a 16x finer grid of the same scheme (agreement better than 2e-5). Renewal-dependent values are graded only inside the rev .2 domain beta >= 1, t_max/eta <= 60; the graded Weibull cases have beta 1-3.5 and t_max/eta <= 3. The beta = 1 case keeps the exact rate values (M = t/eta), which the scheme reproduces to 1e-7. Fitted parameters 1e-9 (bisection to 1e-12 relative). Thresholds 1e-6 as the specification allows; the reference threshold is the boundary of the preferred option including a change to a tie, i.e. where PV(challenger) - PV(preferred) = max(0.005 EUR, 1e-9 x largest |PV|); this boundary differs from the exact PV crossing by up to 1.4e-6 relative in case thresholds_rate_models, which therefore carries tol 2e-6 so that both readings pass. Integers, booleans, indices, lists of gap ids and refusal reasons are graded exactly. 'gaps' lists the complete set expected (order-free); 'no_gaps' lists gap ids that must be absent. Partial component dictionaries grade only the keys given.",
+ "not_benchmarked": [
+  "decision_approved and the input fingerprint (§9): not graded by the corpus per rev .2 §11 (internal hash).",
+  "Warnings text (scenario basis after a refused fit, never-implemented option): content and wording are not specified; only the resulting numbers and fit_refused codes are graded.",
+  "The margin PV(second) - PV(first) and the name of a lowest-cost inadmissible option: §6 defines them but §10 gives no expect key; the lowest_cost_inadmissible case grades pv, ranking and preferred instead.",
+  "The PVs of every sensitivity, band and threshold run: only the boolean sensitivity_changes, band preferred options/holds and threshold boundaries are graded.",
+  "Weibull renewal counts for beta < 1 (outside the graded domain of rev .2 §4): case weibull_beta07_new grades only the ranking.",
+  "Thresholds and sensitivity for studies with Weibull models, and studies where a threshold coincides with a renewal leaving the horizon (PV discontinuity).",
+  "Whether option_incomplete is also raised as a gap when the existing model is unresolved (rev .2 §8 says no option is then complete, but the option_incomplete row does not list that cause): cases with an unresolved existing model expect gaps = [existing_failure] only, following the literal gap table.",
+  "Non-integer horizon, report, PDF, state codec, presets UI and the seven languages."
+ ],
+ "cases": [
+  {
+   "id": "preset_control_identical_r0",
+   "intent": "TZ-02 control card: two options with identical cash flows at 0 % discount have equal LCC; tie, no arbitrary winner, criterion not met.",
+   "spec_ref": "§5, §6, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 0,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 10
+     }
+    },
+    "options": [
+     {
+      "name": "Repair A",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair B",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     143830.0,
+     143830.0
+    ],
+    "eac": [
+     14383.0,
+     14383.0
+    ],
+    "tied": [
+     0,
+     1
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": null,
+    "calculation_completed": true,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "preset_control_never_implemented",
+   "intent": "Control: a replacement whose lead time equals the horizon (t_impl = H) is never implemented and behaves as continue: equal PV, tie.",
+   "spec_ref": "§5, §6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace (lead = 12·H)",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 120,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     172966.86241373976
+    ],
+    "eac": [
+     22399.999999999978,
+     22399.999999999978
+    ],
+    "tied": [
+     0,
+     1
+    ],
+    "preferred": null,
+    "calculation_completed": true,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "preset_typical_pump",
+   "intent": "TZ-02 typical card: pump continue / repair / replace with capex, opex, outage, residual value and lead time; yearly flows for every option.",
+   "spec_ref": "§5, §6",
+   "input": {
+    "scope": "equipment",
+    "subject": "Typical: cooling-water pump, repair vs replace",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     164300.97630344692,
+     139550.25820261988,
+     132716.4513167764
+    ],
+    "eac": [
+     21277.72810258745,
+     18072.396874850012,
+     17187.38761870284
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 69495.6143626633,
+      "failure": 94805.36194078364,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 14878.519181403582,
+      "outage": 6348.168184065528,
+      "opex": 69495.6143626633,
+      "failure": 48827.956474487466,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 86766.19152248907,
+      "outage": 15425.100715109169,
+      "opex": 48473.266717966006,
+      "failure": 11749.946001246386,
+      "risk": 0.0,
+      "residual": -29698.05364003422
+     }
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 16936.1573218091,
+       "discounted": 16129.67363981819,
+       "failures": 0.6104736401391615
+      },
+      {
+       "year": 2,
+       "nominal": 17907.04222586643,
+       "discounted": 16242.215170853902,
+       "failures": 0.6851570942974177
+      },
+      {
+       "year": 3,
+       "nominal": 18914.594241566236,
+       "discounted": 16339.137666831863,
+       "failures": 0.762661095505095
+      },
+      {
+       "year": 4,
+       "nominal": 19957.523965955206,
+       "discounted": 16419.10435750964,
+       "failures": 0.8428864589196312
+      },
+      {
+       "year": 5,
+       "nominal": 21034.66924462169,
+       "discounted": 16481.213756170426,
+       "failures": 0.9257437880478223
+      },
+      {
+       "year": 6,
+       "nominal": 22144.97551197736,
+       "discounted": 16524.92168517859,
+       "failures": 1.011151962459797
+      },
+      {
+       "year": 7,
+       "nominal": 23287.480140364867,
+       "discounted": 16549.97736153329,
+       "failures": 1.0990369338742205
+      },
+      {
+       "year": 8,
+       "nominal": 24461.299803975555,
+       "discounted": 16556.37055371526,
+       "failures": 1.1893307541519658
+      },
+      {
+       "year": 9,
+       "nominal": 25665.62014930123,
+       "discounted": 16544.287588498722,
+       "failures": 1.2819707807154792
+      },
+      {
+       "year": 10,
+       "nominal": 26899.687257265967,
+       "discounted": 16514.074523337047,
+       "failures": 1.3768990197896898
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 34090.02618356577,
+       "discounted": 33312.426587912705,
+       "failures": 0.28384816796659806
+      },
+      {
+       "year": 2,
+       "nominal": 12567.490865122354,
+       "discounted": 11399.084684918234,
+       "failures": 0.2744223742401811
+      },
+      {
+       "year": 3,
+       "nominal": 13320.976848295602,
+       "discounted": 11507.160650725064,
+       "failures": 0.3323828344842771
+      },
+      {
+       "year": 4,
+       "nominal": 14121.171794238575,
+       "discounted": 11617.522982081395,
+       "failures": 0.39393629186450574
+      },
+      {
+       "year": 5,
+       "nominal": 14965.49034366884,
+       "discounted": 11725.853278295584,
+       "failures": 0.4588838725899107
+      },
+      {
+       "year": 6,
+       "nominal": 15851.7347821184,
+       "discounted": 11828.808557817105,
+       "failures": 0.5270565217014154
+      },
+      {
+       "year": 7,
+       "nominal": 16778.006757984214,
+       "discounted": 11923.816159696387,
+       "failures": 0.5983082121526317
+      },
+      {
+       "year": 8,
+       "nominal": 17742.644850633988,
+       "discounted": 12008.920421404677,
+       "failures": 0.6725111423564605
+      },
+      {
+       "year": 9,
+       "nominal": 18744.17899238982,
+       "discounted": 12082.664905676804,
+       "failures": 0.7495522301838324
+      },
+      {
+       "year": 10,
+       "nominal": 19781.29630538373,
+       "discounted": 12143.999974091923,
+       "failures": 0.8293304850295176
+      }
+     ],
+     "2": [
+      {
+       "year": 1,
+       "nominal": 120332.56022674195,
+       "discounted": 115841.34959640009,
+       "failures": 0.47596617128784147
+      },
+      {
+       "year": 2,
+       "nominal": 6880.0,
+       "discounted": 6240.362811791383,
+       "failures": 0.1
+      },
+      {
+       "year": 3,
+       "nominal": 6880.0,
+       "discounted": 5943.202677896555,
+       "failures": 0.1
+      },
+      {
+       "year": 4,
+       "nominal": 6880.0,
+       "discounted": 5660.193026568148,
+       "failures": 0.1
+      },
+      {
+       "year": 5,
+       "nominal": 6880.0,
+       "discounted": 5390.6600253029965,
+       "failures": 0.1
+      },
+      {
+       "year": 6,
+       "nominal": 6880.0,
+       "discounted": 5133.961928859997,
+       "failures": 0.1
+      },
+      {
+       "year": 7,
+       "nominal": 6880.0,
+       "discounted": 4889.487551295235,
+       "failures": 0.1
+      },
+      {
+       "year": 8,
+       "nominal": 6880.0,
+       "discounted": 4656.654810757366,
+       "failures": 0.1
+      },
+      {
+       "year": 9,
+       "nominal": 6880.0,
+       "discounted": 4434.909343578444,
+       "failures": 0.1
+      },
+      {
+       "year": 10,
+       "nominal": -41495.0,
+       "discounted": -25474.3304556738,
+       "failures": 0.1
+      }
+     ]
+    },
+    "preferred": 2,
+    "ranking": [
+     2,
+     1,
+     0
+    ],
+    "tied": [],
+    "calculation_completed": true,
+    "criterion_met": true,
+    "gaps": []
+   },
+   "correction": "Rev .2: components added. Rev .2 §5 states that failure downtime belongs to the 'failure' component and 'outage' holds implementation and renewal outages only, so components with failHours > 0 are now graded."
+  },
+  {
+   "id": "preset_typical_pump_thresholds",
+   "intent": "Typical pump: switch-over thresholds (lead time of the replacement — the TZ-02 Learn exercise —, downtime cost, discount rate, failure multiplier, capex of both options) and the one-at-a-time sensitivity at ±20 %.",
+   "spec_ref": "§7.1, §7.3",
+   "input": {
+    "scope": "equipment",
+    "subject": "Typical: cooling-water pump, repair vs replace",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "preferred": 2,
+    "sensitivity_changes": {
+     "discount": false,
+     "downtime": false,
+     "failures": true,
+     "opex": false,
+     "capex:1": false,
+     "lead:1": false,
+     "capex:2": true,
+     "lead:2": false
+    },
+    "threshold": {
+     "downtime": {
+      "below": 207.11184293031693,
+      "above": null
+     },
+     "discount": {
+      "below": null,
+      "above": 6.270925527438521
+     },
+     "failures": {
+      "below": 0.8156912468373776,
+      "above": null
+     },
+     "lead:1": {
+      "below": null,
+      "above": null
+     },
+     "capex:1": {
+      "below": 8110.401172190905,
+      "above": null
+     },
+     "lead:2": {
+      "below": null,
+      "above": 38.96203752420843
+     },
+     "capex:2": {
+      "below": null,
+      "above": 100777.33026444912
+     }
+    }
+   },
+   "tol": {
+    "pv": 1e-09,
+    "threshold": 1e-06
+   }
+  },
+  {
+   "id": "preset_problem_scenario_rate",
+   "intent": "TZ-02 problem card: only two failures recorded — both fits are refused (too_few_failures), the scenario rates given in the same models are used; PVs equal those of plain rate models 0.9 and 0.2.",
+   "spec_ref": "§4, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 600,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        3.5,
+        9.0
+       ],
+       "end": 12
+      },
+      "rate": 0.9
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         4.0,
+         7.5
+        ],
+        "suspensions": [
+         6.0
+        ]
+       },
+       "rate": 0.2
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     203544.9327333116,
+     232905.21058461466,
+     113156.37252721415
+    ],
+    "fit_refused": {
+     "existing": "too_few_failures",
+     "2": "too_few_failures"
+    },
+    "preferred": 2,
+    "calculation_completed": true,
+    "criterion_met": true,
+    "gaps": [],
+    "no_gaps": [
+     "two_options",
+     "unknown",
+     "horizon_range",
+     "discount_range",
+     "existing_failure",
+     "option_incomplete",
+     "constraint_unknown",
+     "constraint_na_reason"
+    ]
+   }
+  },
+  {
+   "id": "preset_problem_no_rate_existing",
+   "intent": "Problem card without a scenario rate on the existing item: the existing failure model is unresolved — gap existing_failure, calculation not completed, criterion not met.",
+   "spec_ref": "§4, §8, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 600,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        3.5,
+        9.0
+       ],
+       "end": 12
+      }
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         4.0,
+         7.5
+        ],
+        "suspensions": [
+         6.0
+        ]
+       },
+       "rate": 0.2
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "too_few_failures",
+     "2": "too_few_failures"
+    },
+    "gaps": [
+     "existing_failure"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "preset_problem_no_rate_new_item",
+   "intent": "Problem card: the replacement's Weibull fit is refused and no scenario rate is given — that option is incomplete (no PV, not ranked); the other two are still ranked; criterion not met.",
+   "spec_ref": "§4, §8, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 600,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         4.0,
+         7.5
+        ],
+        "suspensions": [
+         6.0
+        ]
+       }
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     187792.5934777746,
+     217152.87132907766,
+     null
+    ],
+    "fit_refused": {
+     "2": "too_few_failures"
+    },
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": 0,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "zero_discount_hand_table",
+   "intent": "r = 0: continue costs 5 × (1000 + 0.5 × 2000) = 10 000; replace at t = 0 costs 6000 + 10 h × 100 + 5 × 500 − residual 6000 × 5/10 = 6 500. EAC = PV / H.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 0,
+    "horizon": 5,
+    "downtimeCost": 100,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 8,
+     "opex": 1000,
+     "failCost": 2000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.5
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 6000,
+      "leadMonths": 0,
+      "outageHours": 10,
+      "after": "new",
+      "opex": 500,
+      "failCost": 0,
+      "failHours": 0,
+      "failure": {
+       "model": "none"
+      },
+      "life": 10,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     10000.0,
+     6500.0
+    ],
+    "eac": [
+     2000.0,
+     1300.0
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 5000.0,
+      "failure": 5000.0,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 6000.0,
+      "outage": 1000.0,
+      "opex": 2500.0,
+      "failure": 0.0,
+      "risk": 0.0,
+      "residual": -3000.0
+     }
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 2000.0,
+       "discounted": 2000.0,
+       "failures": 0.5
+      },
+      {
+       "year": 2,
+       "nominal": 2000.0,
+       "discounted": 2000.0,
+       "failures": 0.5
+      },
+      {
+       "year": 3,
+       "nominal": 2000.0,
+       "discounted": 2000.0,
+       "failures": 0.5
+      },
+      {
+       "year": 4,
+       "nominal": 2000.0,
+       "discounted": 2000.0,
+       "failures": 0.5
+      },
+      {
+       "year": 5,
+       "nominal": 2000.0,
+       "discounted": 2000.0,
+       "failures": 0.5
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 7500.0,
+       "discounted": 7500.0,
+       "failures": 0.0
+      },
+      {
+       "year": 2,
+       "nominal": 500.0,
+       "discounted": 500.0,
+       "failures": 0.0
+      },
+      {
+       "year": 3,
+       "nominal": 500.0,
+       "discounted": 500.0,
+       "failures": 0.0
+      },
+      {
+       "year": 4,
+       "nominal": 500.0,
+       "discounted": 500.0,
+       "failures": 0.0
+      },
+      {
+       "year": 5,
+       "nominal": -2500.0,
+       "discounted": -2500.0,
+       "failures": 0.0
+      }
+     ]
+    },
+    "preferred": 1,
+    "ranking": [
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "id": "fractional_lead_renewals_residual",
+   "intent": "Lead 18 months: investment at t = 1.5 shown in year 2; year 2 is cut into 0.5 y existing + 0.5 y new; renewals at 5.5 and 9.5 (years 6 and 10) with renewalCapex; residual 30000 × (4 − 0.5)/4 = 26 250 credited at t = 10.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 4,
+    "horizon": 10,
+    "downtimeCost": 200,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 10,
+     "opex": 5000,
+     "failCost": 3000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 40000,
+      "leadMonths": 18,
+      "outageHours": 24,
+      "after": "new",
+      "opex": 2000,
+      "failCost": 1000,
+      "failHours": 0,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.05
+      },
+      "life": 4,
+      "renewalCapex": 30000,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     55154.09129961418,
+     99920.13066566119
+    ],
+    "eac": [
+     6799.999999999993,
+     12319.24726735999
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 40554.47889677513,
+      "failure": 14599.61240283905,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 82561.90578133176,
+      "outage": 11701.319270103973,
+      "opex": 20493.241262852065,
+      "failure": 2897.223783050591,
+      "risk": 0.0,
+      "residual": -17733.559431677215
+     }
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 6800.0,
+       "discounted": 6538.461538461538,
+       "failures": 0.6
+      },
+      {
+       "year": 2,
+       "nominal": 6800.0,
+       "discounted": 6286.98224852071,
+       "failures": 0.6
+      },
+      {
+       "year": 3,
+       "nominal": 6800.0,
+       "discounted": 6045.175238962221,
+       "failures": 0.6
+      },
+      {
+       "year": 4,
+       "nominal": 6800.0,
+       "discounted": 5812.668499002135,
+       "failures": 0.6
+      },
+      {
+       "year": 5,
+       "nominal": 6800.0,
+       "discounted": 5589.104325963592,
+       "failures": 0.6
+      },
+      {
+       "year": 6,
+       "nominal": 6800.0,
+       "discounted": 5374.138774964991,
+       "failures": 0.6
+      },
+      {
+       "year": 7,
+       "nominal": 6800.0,
+       "discounted": 5167.44112977403,
+       "failures": 0.6
+      },
+      {
+       "year": 8,
+       "nominal": 6800.0,
+       "discounted": 4968.69339401349,
+       "failures": 0.6
+      },
+      {
+       "year": 9,
+       "nominal": 6800.0,
+       "discounted": 4777.5898019360475,
+       "failures": 0.6
+      },
+      {
+       "year": 10,
+       "nominal": 6800.0,
+       "discounted": 4593.83634801543,
+       "failures": 0.6
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 6800.0,
+       "discounted": 6538.461538461538,
+       "failures": 0.6
+      },
+      {
+       "year": 2,
+       "nominal": 49225.0,
+       "discounted": 46331.559580058565,
+       "failures": 0.325
+      },
+      {
+       "year": 3,
+       "nominal": 2050.0,
+       "discounted": 1822.4425352753753,
+       "failures": 0.05
+      },
+      {
+       "year": 4,
+       "nominal": 2050.0,
+       "discounted": 1752.3485916109378,
+       "failures": 0.05
+      },
+      {
+       "year": 5,
+       "nominal": 2050.0,
+       "discounted": 1684.950568856671,
+       "failures": 0.05
+      },
+      {
+       "year": 6,
+       "nominal": 36850.0,
+       "discounted": 29667.755930220726,
+       "failures": 0.05
+      },
+      {
+       "year": 7,
+       "nominal": 2050.0,
+       "discounted": 1557.8315170642295,
+       "failures": 0.05
+      },
+      {
+       "year": 8,
+       "nominal": 2050.0,
+       "discounted": 1497.914920254067,
+       "failures": 0.05
+      },
+      {
+       "year": 9,
+       "nominal": 2050.0,
+       "discounted": 1440.3028079366027,
+       "failures": 0.05
+      },
+      {
+       "year": 10,
+       "nominal": 10600.0,
+       "discounted": 7626.562675922465,
+       "failures": 0.05
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "lead_at_and_below_horizon",
+   "intent": "t_impl = 10 = H: never implemented, PV equals continue; t_impl = 119/12 < H: implemented with investment in table year 10 and a residual 60000 × (20 − 1/12)/20.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace lead 120 (= 12·H)",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 120,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace lead 119",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 119,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     172966.86241373976,
+     184657.36482949875
+    ],
+    "years": {
+     "2": [
+      {
+       "year": 1,
+       "nominal": 22400.0,
+       "discounted": 21333.333333333332,
+       "failures": 0.8
+      },
+      {
+       "year": 2,
+       "nominal": 22400.0,
+       "discounted": 20317.460317460314,
+       "failures": 0.8
+      },
+      {
+       "year": 3,
+       "nominal": 22400.0,
+       "discounted": 19349.96220710506,
+       "failures": 0.8
+      },
+      {
+       "year": 4,
+       "nominal": 22400.0,
+       "discounted": 18428.535435338155,
+       "failures": 0.8
+      },
+      {
+       "year": 5,
+       "nominal": 22400.0,
+       "discounted": 17550.986128893477,
+       "failures": 0.8
+      },
+      {
+       "year": 6,
+       "nominal": 22400.0,
+       "discounted": 16715.224884660456,
+       "failures": 0.8
+      },
+      {
+       "year": 7,
+       "nominal": 22400.0,
+       "discounted": 15919.261794914719,
+       "failures": 0.8
+      },
+      {
+       "year": 8,
+       "nominal": 22400.0,
+       "discounted": 15161.201709442588,
+       "failures": 0.8
+      },
+      {
+       "year": 9,
+       "nominal": 22400.0,
+       "discounted": 14439.239723278655,
+       "failures": 0.8
+      },
+      {
+       "year": 10,
+       "nominal": 41116.666666666635,
+       "discounted": 25442.15929507198,
+       "failures": 0.7416666666666649
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "renewal_exactly_at_horizon",
+   "intent": "Lead 0, life 5, H 10: investments at t = 0 and t = 5 (blank renewalCapex = capex); the renewal due at t = 10 = H is not made (strict <); the last item is fully used, residual 0.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 6,
+    "horizon": 10,
+    "downtimeCost": 250,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 50000,
+      "leadMonths": 0,
+      "outageHours": 20,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 0,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 5,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     94209.11425810808,
+     121123.4954824431
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 58880.696411317556,
+      "failure": 35328.41784679053,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 87362.90864330286,
+      "outage": 8736.290864330285,
+      "opex": 22080.261154244083,
+      "failure": 2944.034820565878,
+      "risk": 0.0,
+      "residual": -0.0
+     }
+    ],
+    "years": {
+     "1": [
+      {
+       "year": 1,
+       "nominal": 58400.0,
+       "discounted": 58207.54716981132,
+       "failures": 0.1
+      },
+      {
+       "year": 2,
+       "nominal": 3400.0,
+       "discounted": 3025.987896048415,
+       "failures": 0.1
+      },
+      {
+       "year": 3,
+       "nominal": 3400.0,
+       "discounted": 2854.705562309826,
+       "failures": 0.1
+      },
+      {
+       "year": 4,
+       "nominal": 3400.0,
+       "discounted": 2693.1184550092694,
+       "failures": 0.1
+      },
+      {
+       "year": 5,
+       "nominal": 58400.0,
+       "discounted": 43639.87729537773,
+       "failures": 0.1
+      },
+      {
+       "year": 6,
+       "nominal": 3400.0,
+       "discounted": 2396.8658374948996,
+       "failures": 0.1
+      },
+      {
+       "year": 7,
+       "nominal": 3400.0,
+       "discounted": 2261.1941863159427,
+       "failures": 0.1
+      },
+      {
+       "year": 8,
+       "nominal": 3400.0,
+       "discounted": 2133.20206256221,
+       "failures": 0.1
+      },
+      {
+       "year": 9,
+       "nominal": 3400.0,
+       "discounted": 2012.4547760020848,
+       "failures": 0.1
+      },
+      {
+       "year": 10,
+       "nominal": 3400.0,
+       "discounted": 1898.5422415114008,
+       "failures": 0.1
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "residual_straight_line",
+   "intent": "Life 8, H 10: renewal at t = 8 with renewalCapex 50 000; residual 50000 × (8 − 2)/8 = 37 500 credited at t = 10 (component −37500 × 1.06^−10).",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 6,
+    "horizon": 10,
+    "downtimeCost": 250,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 70000,
+      "leadMonths": 0,
+      "outageHours": 20,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 0,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 8,
+      "renewalCapex": 50000,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     94209.11425810808,
+     113592.17226429349
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 58880.696411317556,
+      "failure": 35328.41784679053,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 101370.61856709133,
+      "outage": 8137.061856709132,
+      "opex": 22080.261154244083,
+      "failure": 2944.034820565878,
+      "risk": 0.0,
+      "residual": -20939.80413431692
+     }
+    ],
+    "eac": [
+     12799.999999999984,
+     15433.536515367658
+    ]
+   }
+  },
+  {
+   "id": "negative_discount_rate",
+   "intent": "r = −2 % is inside (−100, 50]: DF = 0.98^−t > 1; EAC with a = (1 − 0.98^−8)/(−0.02).",
+   "spec_ref": "§2, §5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": -2,
+    "horizon": 8,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 6,
+      "outageHours": 10,
+      "after": "existing",
+      "ageAfter": 0,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     112265.88722416587,
+     137519.70083797115
+    ],
+    "eac": [
+     12799.999999999993,
+     15679.314654248112
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 70166.17951510366,
+      "failure": 42099.707709062204,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 20203.050891044215,
+      "outage": 5050.762722761054,
+      "opex": 70166.17951510366,
+      "failure": 42099.707709062204,
+      "risk": 0.0,
+      "residual": 0.0
+     }
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "discount_50_boundary",
+   "intent": "r = 50 % is the upper bound and is accepted; lead 12 months puts the investment at t = 1.0, table year 1.",
+   "spec_ref": "§2, §5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 50,
+    "horizon": 3,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 12,
+      "outageHours": 10,
+      "after": "existing",
+      "ageAfter": 0,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     18014.814814814814,
+     34681.48148148148
+    ],
+    "eac": [
+     12799.999999999998,
+     24642.105263157893
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 12800.0,
+       "discounted": 8533.333333333332,
+       "failures": 0.8
+      },
+      {
+       "year": 2,
+       "nominal": 12800.0,
+       "discounted": 5688.888888888889,
+       "failures": 0.8
+      },
+      {
+       "year": 3,
+       "nominal": 12800.0,
+       "discounted": 3792.592592592592,
+       "failures": 0.8
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 37800.0,
+       "discounted": 25199.999999999996,
+       "failures": 0.8
+      },
+      {
+       "year": 2,
+       "nominal": 12800.0,
+       "discounted": 5688.888888888889,
+       "failures": 0.8
+      },
+      {
+       "year": 3,
+       "nominal": 12800.0,
+       "discounted": 3792.592592592592,
+       "failures": 0.8
+      }
+     ]
+    },
+    "gaps": []
+   }
+  },
+  {
+   "id": "discount_above_range",
+   "intent": "Out-of-range discount_range: nothing is computed.",
+   "spec_ref": "§2, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 50.5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "discount_range"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "discount_minus_100",
+   "intent": "Out-of-range discount_range: nothing is computed.",
+   "spec_ref": "§2, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": -100,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "discount_range"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "horizon_zero",
+   "intent": "Out-of-range horizon_range: nothing is computed.",
+   "spec_ref": "§2, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 0,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "horizon_range"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "horizon_61",
+   "intent": "Out-of-range horizon_range: nothing is computed.",
+   "spec_ref": "§2, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 61,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "horizon_range"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "eac_constant_annual_cost",
+   "intent": "A constant yearly cost discounted at year ends has EAC equal to that cost: 4200 + 0.4 × (2500 + 6 × 300) = 5 920, and 5 920 + 0.05 × 20 000 = 6 920 with the risk.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 7,
+    "horizon": 12,
+    "downtimeCost": 300,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 5,
+     "opex": 4200,
+     "failCost": 2500,
+     "failHours": 6,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.4
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Continue with inspection risk",
+      "kind": "continue",
+      "risks": [
+       {
+        "name": "leak",
+        "p": 0.05,
+        "cost": 20000
+       }
+      ],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     47020.70287564066,
+     54963.38917220158
+    ],
+    "eac": [
+     5919.999999999995,
+     6919.999999999995
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 33359.28244555587,
+      "failure": 13661.420430084787,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 33359.28244555587,
+      "failure": 13661.420430084787,
+      "risk": 7942.686296560922,
+      "residual": 0.0
+     }
+    ],
+    "preferred": 0
+   },
+   "correction": "Rev .2: the 'failure' component (with failure downtime 0.4 x 6 h x 300 EUR/h per year) is now graded per rev .2 §5; in rev .1 it was withheld because the attribution was unspecified."
+  },
+  {
+   "id": "investment_table_year",
+   "intent": "Investment at t = 0 is shown in year 1, at t = 1.0 (lead 12) in year 1.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 3,
+    "horizon": 6,
+    "downtimeCost": 150,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.5
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace now",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 8,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 0,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair in 12 months",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 12,
+      "outageHours": 8,
+      "after": "existing",
+      "ageAfter": 3,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     59589.105882660064,
+     44444.11212847236,
+     80171.63015450473
+    ],
+    "years": {
+     "1": [
+      {
+       "year": 1,
+       "nominal": 64600.0,
+       "discounted": 64500.970873786406,
+       "failures": 0.1
+      },
+      {
+       "year": 2,
+       "nominal": 3400.0,
+       "discounted": 3204.8260910547647,
+       "failures": 0.1
+      },
+      {
+       "year": 3,
+       "nominal": 3400.0,
+       "discounted": 3111.481641800742,
+       "failures": 0.1
+      },
+      {
+       "year": 4,
+       "nominal": 3400.0,
+       "discounted": 3020.855962913342,
+       "failures": 0.1
+      },
+      {
+       "year": 5,
+       "nominal": 3400.0,
+       "discounted": 2932.8698669061573,
+       "failures": 0.1
+      },
+      {
+       "year": 6,
+       "nominal": -38600.0,
+       "discounted": -32326.892307989056,
+       "failures": 0.1
+      }
+     ],
+     "2": [
+      {
+       "year": 1,
+       "nominal": 32200.0,
+       "discounted": 31262.135922330097,
+       "failures": 0.5
+      },
+      {
+       "year": 2,
+       "nominal": 11000.0,
+       "discounted": 10368.555000471299,
+       "failures": 0.5
+      },
+      {
+       "year": 3,
+       "nominal": 11000.0,
+       "discounted": 10066.558252884755,
+       "failures": 0.5
+      },
+      {
+       "year": 4,
+       "nominal": 11000.0,
+       "discounted": 9773.357527072576,
+       "failures": 0.5
+      },
+      {
+       "year": 5,
+       "nominal": 11000.0,
+       "discounted": 9488.696628225804,
+       "failures": 0.5
+      },
+      {
+       "year": 6,
+       "nominal": 11000.0,
+       "discounted": 9212.326823520196,
+       "failures": 0.5
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "horizon_5",
+   "intent": "Same option set, H = 5: the ranking changes with the horizon (H 5 → continue, H 15 → refurbish, H 30 → replace with renewals at 12.5 and 24.5).",
+   "spec_ref": "§5, §6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 4,
+    "horizon": 5,
+    "downtimeCost": 300,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 10,
+     "opex": 7000,
+     "failCost": 4000,
+     "failHours": 16,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 9
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Refurbish",
+      "kind": "refurbish",
+      "capex": 10000,
+      "leadMonths": 3,
+      "outageHours": 12,
+      "after": "existing",
+      "ageAfter": 4,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 55000,
+      "leadMonths": 6,
+      "outageHours": 36,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 3000,
+      "failHours": 8,
+      "failure": {
+       "model": "nhpp",
+       "source": "entered",
+       "beta": 2.0,
+       "eta": 15
+      },
+      "life": 12,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     43178.29900289555,
+     50926.3638050503,
+     53034.15170658484
+    ],
+    "eac": [
+     9699.016670559566,
+     11439.44210222456,
+     11912.908414401803
+    ],
+    "ranking": [
+     0,
+     1,
+     2
+    ],
+    "preferred": 0,
+    "criterion_met": true
+   }
+  },
+  {
+   "id": "horizon_15",
+   "intent": "Same option set, H = 15: the ranking changes with the horizon (H 5 → continue, H 15 → refurbish, H 30 → replace with renewals at 12.5 and 24.5).",
+   "spec_ref": "§5, §6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 4,
+    "horizon": 15,
+    "downtimeCost": 300,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 10,
+     "opex": 7000,
+     "failCost": 4000,
+     "failHours": 16,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 9
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Refurbish",
+      "kind": "refurbish",
+      "capex": 10000,
+      "leadMonths": 3,
+      "outageHours": 12,
+      "after": "existing",
+      "ageAfter": 4,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 55000,
+      "leadMonths": 6,
+      "outageHours": 36,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 3000,
+      "failHours": 8,
+      "failure": {
+       "model": "nhpp",
+       "source": "entered",
+       "beta": 2.0,
+       "eta": 15
+      },
+      "life": 12,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     118347.51140432528,
+     117042.21619257003,
+     119522.08682773875
+    ],
+    "eac": [
+     10644.30540187131,
+     10526.90571421708,
+     10749.94800792182
+    ],
+    "ranking": [
+     1,
+     0,
+     2
+    ],
+    "preferred": 1,
+    "criterion_met": true
+   }
+  },
+  {
+   "id": "horizon_30",
+   "intent": "Same option set, H = 30: the ranking changes with the horizon (H 5 → continue, H 15 → refurbish, H 30 → replace with renewals at 12.5 and 24.5).",
+   "spec_ref": "§5, §6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 4,
+    "horizon": 30,
+    "downtimeCost": 300,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 10,
+     "opex": 7000,
+     "failCost": 4000,
+     "failHours": 16,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 9
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Refurbish",
+      "kind": "refurbish",
+      "capex": 10000,
+      "leadMonths": 3,
+      "outageHours": 12,
+      "after": "existing",
+      "ageAfter": 4,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 55000,
+      "leadMonths": 6,
+      "outageHours": 36,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 3000,
+      "failHours": 8,
+      "failure": {
+       "model": "nhpp",
+       "source": "entered",
+       "beta": 2.0,
+       "eta": 15
+      },
+      "life": 12,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     204183.19593188603,
+     194493.93719501226,
+     179884.05568240987
+    ],
+    "eac": [
+     11807.93446216876,
+     11247.603668883656,
+     10402.712772678815
+    ],
+    "ranking": [
+     2,
+     1,
+     0
+    ],
+    "preferred": 2,
+    "criterion_met": true
+   }
+  },
+  {
+   "id": "nhpp_refurbish_younger",
+   "intent": "NHPP (β 2, η 10), A₀ = 7: continue has ((7+y)² − (6+y)²)/100 failures in year y; refurbishing to age 2 at t = 0 gives ((2+y)² − (1+y)²)/100 — fewer failures.",
+   "spec_ref": "§4, §5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 6,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 7,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 10
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Refurbish to age 2",
+      "kind": "refurbish",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 2,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     58618.38286938498,
+     77482.13714830358
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 10700.000000000004,
+       "discounted": 10190.476190476193,
+       "failures": 0.1500000000000002
+      },
+      {
+       "year": 2,
+       "nominal": 11059.999999999998,
+       "discounted": 10031.74603174603,
+       "failures": 0.16999999999999993
+      },
+      {
+       "year": 3,
+       "nominal": 11420.0,
+       "discounted": 9865.025375229456,
+       "failures": 0.18999999999999995
+      },
+      {
+       "year": 4,
+       "nominal": 11780.000000000004,
+       "discounted": 9691.435153048371,
+       "failures": 0.2100000000000002
+      },
+      {
+       "year": 5,
+       "nominal": 12139.999999999996,
+       "discounted": 9512.007660927087,
+       "failures": 0.22999999999999976
+      },
+      {
+       "year": 6,
+       "nominal": 12500.000000000004,
+       "discounted": 9327.692457957846,
+       "failures": 0.2500000000000002
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 36900.0,
+       "discounted": 36476.19047619047,
+       "failures": 0.04999999999999999
+      },
+      {
+       "year": 2,
+       "nominal": 9260.0,
+       "discounted": 8399.092970521542,
+       "failures": 0.07000000000000003
+      },
+      {
+       "year": 3,
+       "nominal": 9620.0,
+       "discounted": 8310.1176978728,
+       "failures": 0.08999999999999997
+      },
+      {
+       "year": 4,
+       "nominal": 9980.0,
+       "discounted": 8210.57069842298,
+       "failures": 0.10999999999999999
+      },
+      {
+       "year": 5,
+       "nominal": 10340.0,
+       "discounted": 8101.660561283865,
+       "failures": 0.12999999999999995
+      },
+      {
+       "year": 6,
+       "nominal": 10700.000000000004,
+       "discounted": 7984.504744011917,
+       "failures": 0.1500000000000002
+      }
+     ]
+    },
+    "preferred": 0
+   }
+  },
+  {
+   "id": "nhpp_refurbish_midyear",
+   "intent": "NHPP split year: year 1 = N(7, 7.5) of the existing item + N(2, 2.5) after a refurbishment at t = 0.5 to age 2.",
+   "spec_ref": "§4, §5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 6,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 7,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 10
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Refurbish to age 2 after 6 months",
+      "kind": "refurbish",
+      "capex": 20000,
+      "leadMonths": 6,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 2,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     58618.38286938498,
+     76836.5717616115
+    ],
+    "years": {
+     "1": [
+      {
+       "year": 1,
+       "nominal": 37710.0,
+       "discounted": 36572.821090177975,
+       "failures": 0.09500000000000006
+      },
+      {
+       "year": 2,
+       "nominal": 9080.0,
+       "discounted": 8235.827664399092,
+       "failures": 0.059999999999999984
+      },
+      {
+       "year": 3,
+       "nominal": 9440.0,
+       "discounted": 8154.626930137134,
+       "failures": 0.08000000000000003
+      },
+      {
+       "year": 4,
+       "nominal": 9800.0,
+       "discounted": 8062.484252960442,
+       "failures": 0.10000000000000003
+      },
+      {
+       "year": 5,
+       "nominal": 10160.0,
+       "discounted": 7960.625851319542,
+       "failures": 0.12
+      },
+      {
+       "year": 6,
+       "nominal": 10520.0,
+       "discounted": 7850.185972617322,
+       "failures": 0.13999999999999996
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "rate_model_counts",
+   "intent": "Rate model: λ per year, independent of age (0.7 existing, 0.15 new).",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 8,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 6,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.7
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.15
+      },
+      "life": 10,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     133142.18284418085,
+     100962.3850730739
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 20600.0,
+       "discounted": 19619.04761904762,
+       "failures": 0.7
+      },
+      {
+       "year": 2,
+       "nominal": 20600.0,
+       "discounted": 18684.807256235825,
+       "failures": 0.7
+      },
+      {
+       "year": 3,
+       "nominal": 20600.0,
+       "discounted": 17795.054529748406,
+       "failures": 0.7
+      },
+      {
+       "year": 4,
+       "nominal": 20600.0,
+       "discounted": 16947.670980712766,
+       "failures": 0.7
+      },
+      {
+       "year": 5,
+       "nominal": 20600.0,
+       "discounted": 16140.639029250253,
+       "failures": 0.7
+      },
+      {
+       "year": 6,
+       "nominal": 20600.0,
+       "discounted": 15372.037170714526,
+       "failures": 0.7
+      },
+      {
+       "year": 7,
+       "nominal": 20600.0,
+       "discounted": 14640.0354006805,
+       "failures": 0.7
+      },
+      {
+       "year": 8,
+       "nominal": 20600.0,
+       "discounted": 13942.890857790951,
+       "failures": 0.7
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 84500.0,
+       "discounted": 84285.71428571429,
+       "failures": 0.15
+      },
+      {
+       "year": 2,
+       "nominal": 4500.0,
+       "discounted": 4081.632653061224,
+       "failures": 0.15
+      },
+      {
+       "year": 3,
+       "nominal": 4500.0,
+       "discounted": 3887.269193391642,
+       "failures": 0.15
+      },
+      {
+       "year": 4,
+       "nominal": 4500.0,
+       "discounted": 3702.1611365634685,
+       "failures": 0.15
+      },
+      {
+       "year": 5,
+       "nominal": 4500.0,
+       "discounted": 3525.867749108065,
+       "failures": 0.15
+      },
+      {
+       "year": 6,
+       "nominal": 4500.0,
+       "discounted": 3357.9692848648237,
+       "failures": 0.15
+      },
+      {
+       "year": 7,
+       "nominal": 4500.0,
+       "discounted": 3198.065985585546,
+       "failures": 0.15
+      },
+      {
+       "year": 8,
+       "nominal": -7500.0,
+       "discounted": -5076.295215215152,
+       "failures": 0.15
+      }
+     ]
+    },
+    "preferred": 1
+   }
+  },
+  {
+   "id": "weibull_beta1_equals_rate",
+   "intent": "Weibull β = 1 renewal counts equal a rate 1/η: 0.25 per year for the existing item, 0.125 for the new one; PVs equal those of rate models up to the renewal tolerance.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 8,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 5,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "weibull",
+      "source": "entered",
+      "beta": 1.0,
+      "eta": 4.0
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "entered",
+       "beta": 1.0,
+       "eta": 8.0
+      },
+      "life": 10,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     80790.15949282818,
+     99346.58188321734
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 12500.0,
+       "discounted": 11904.761904761905,
+       "failures": 0.25
+      },
+      {
+       "year": 2,
+       "nominal": 12500.0,
+       "discounted": 11337.868480725623,
+       "failures": 0.25
+      },
+      {
+       "year": 3,
+       "nominal": 12500.0,
+       "discounted": 10797.96998164345,
+       "failures": 0.25
+      },
+      {
+       "year": 4,
+       "nominal": 12500.0,
+       "discounted": 10283.780934898523,
+       "failures": 0.25
+      },
+      {
+       "year": 5,
+       "nominal": 12500.0,
+       "discounted": 9794.077080855735,
+       "failures": 0.25
+      },
+      {
+       "year": 6,
+       "nominal": 12500.0,
+       "discounted": 9327.692457957844,
+       "failures": 0.25
+      },
+      {
+       "year": 7,
+       "nominal": 12500.0,
+       "discounted": 8883.516626626517,
+       "failures": 0.25
+      },
+      {
+       "year": 8,
+       "nominal": 12500.0,
+       "discounted": 8460.492025358588,
+       "failures": 0.25
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 84250.0,
+       "discounted": 84047.61904761905,
+       "failures": 0.125
+      },
+      {
+       "year": 2,
+       "nominal": 4250.0,
+       "discounted": 3854.875283446712,
+       "failures": 0.125
+      },
+      {
+       "year": 3,
+       "nominal": 4250.0,
+       "discounted": 3671.309793758773,
+       "failures": 0.125
+      },
+      {
+       "year": 4,
+       "nominal": 4250.0,
+       "discounted": 3496.485517865498,
+       "failures": 0.125
+      },
+      {
+       "year": 5,
+       "nominal": 4250.0,
+       "discounted": 3329.98620749095,
+       "failures": 0.125
+      },
+      {
+       "year": 6,
+       "nominal": 4250.0,
+       "discounted": 3171.415435705667,
+       "failures": 0.125
+      },
+      {
+       "year": 7,
+       "nominal": 4250.0,
+       "discounted": 3020.395653053016,
+       "failures": 0.125
+      },
+      {
+       "year": 8,
+       "nominal": -7750.0,
+       "discounted": -5245.505055722324,
+       "failures": 0.125
+      }
+     ]
+    }
+   },
+   "tol": {
+    "pv": 0.0001,
+    "eac": 0.0001,
+    "years": 0.0001,
+    "renewal": 0.0001,
+    "fit": 1e-09
+   }
+  },
+  {
+   "id": "weibull_beta2_existing",
+   "intent": "Weibull β 2, η 5 renewal counts M(A₀+y) − M(A₀+y−1) for the existing item (A₀ 3, t_max 12) and after a repair to age 1.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 8,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 3,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "weibull",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 5.0
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 1,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     74325.79553059531,
+     98273.51906399077
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 11225.163173596944,
+       "discounted": 10690.631593901851,
+       "failures": 0.20674122907672715
+      },
+      {
+       "year": 2,
+       "nominal": 11516.614705377575,
+       "discounted": 10445.909029820928,
+       "failures": 0.22542401957548563
+      },
+      {
+       "year": 3,
+       "nominal": 11606.645098635336,
+       "discounted": 10026.256429012275,
+       "failures": 0.23119519863047022
+      },
+      {
+       "year": 4,
+       "nominal": 11594.084834027894,
+       "discounted": 9538.482285901773,
+       "failures": 0.23039005346332653
+      },
+      {
+       "year": 5,
+       "nominal": 11553.694688381442,
+       "discounted": 9052.622107734507,
+       "failures": 0.22780094156291297
+      },
+      {
+       "year": 6,
+       "nominal": 11523.405502550302,
+       "discounted": 8598.94260769027,
+       "failures": 0.22585932708655787
+      },
+      {
+       "year": 7,
+       "nominal": 11511.600213245825,
+       "discounted": 8181.0793514757315,
+       "failures": 0.22510257777216824
+      },
+      {
+       "year": 8,
+       "nominal": 11512.143888475159,
+       "discounted": 7791.872125057975,
+       "failures": 0.2251374287484076
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 36153.89942179829,
+       "discounted": 35689.42802076028,
+       "failures": 0.11242945011527508
+      },
+      {
+       "year": 2,
+       "nominal": 10646.116321100004,
+       "discounted": 9656.34133433107,
+       "failures": 0.1696228410961541
+      },
+      {
+       "year": 3,
+       "nominal": 11225.163173596944,
+       "discounted": 9696.717999003946,
+       "failures": 0.20674122907672715
+      },
+      {
+       "year": 4,
+       "nominal": 11516.614705377575,
+       "discounted": 9474.74741933871,
+       "failures": 0.22542401957548563
+      },
+      {
+       "year": 5,
+       "nominal": 11606.645098635336,
+       "discounted": 9094.110139693672,
+       "failures": 0.23119519863047022
+      },
+      {
+       "year": 6,
+       "nominal": 11594.084834027894,
+       "discounted": 8651.684613062833,
+       "failures": 0.23039005346332653
+      },
+      {
+       "year": 7,
+       "nominal": 11553.694688381442,
+       "discounted": 8210.99510905624,
+       "failures": 0.22780094156291297
+      },
+      {
+       "year": 8,
+       "nominal": 11523.405502550302,
+       "discounted": 7799.494428744008,
+       "failures": 0.22585932708655787
+      }
+     ]
+    },
+    "preferred": 0
+   },
+   "tol": {
+    "pv": 0.0001,
+    "eac": 0.0001,
+    "years": 0.0001,
+    "renewal": 0.0001,
+    "fit": 1e-09
+   },
+   "correction": "Rev .2: expected renewal counts, year values, PV and EAC are now the 2 000-step values of the rev .2 §4 scheme (the corpus grades against the scheme) instead of the 16x finer grid; changes are below 2e-5 relative."
+  },
+  {
+   "id": "weibull_beta07_new",
+   "intent": "Weibull β 0.7 (infant mortality), η 6 for the new item: renewal counts M(y) − M(y−1), t_max = H + 1 = 13. β 0.7 lies outside the graded renewal domain of rev .2 §4, so only the ranking (margin about 22 %) is graded.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 12,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 4,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.5
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 5000,
+      "failHours": 10,
+      "failure": {
+       "model": "weibull",
+       "source": "entered",
+       "beta": 0.7,
+       "eta": 6.0
+      },
+      "life": 15,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "preferred": 1,
+    "ranking": [
+     1,
+     0
+    ]
+   },
+   "correction": "Rev .2: pv and years removed. Beta 0.7 is outside the graded renewal domain of rev .2 §4 (beta >= 1, t_max/eta <= 60), so only preferred and ranking are graded; the margin is about 22 %."
+  },
+  {
+   "id": "model_none",
+   "intent": "Model none gives zero failures; only opex, investments and residual remain.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 6,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "none"
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "none"
+      },
+      "life": 10,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     40605.53653813957,
+     77317.90668252327
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 8000.0,
+       "discounted": 7619.047619047618,
+       "failures": 0.0
+      },
+      {
+       "year": 2,
+       "nominal": 8000.0,
+       "discounted": 7256.235827664398,
+       "failures": 0.0
+      },
+      {
+       "year": 3,
+       "nominal": 8000.0,
+       "discounted": 6910.700788251808,
+       "failures": 0.0
+      },
+      {
+       "year": 4,
+       "nominal": 8000.0,
+       "discounted": 6581.619798335055,
+       "failures": 0.0
+      },
+      {
+       "year": 5,
+       "nominal": 8000.0,
+       "discounted": 6268.209331747671,
+       "failures": 0.0
+      },
+      {
+       "year": 6,
+       "nominal": 8000.0,
+       "discounted": 5969.72317309302,
+       "failures": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "nhpp_fit_crow_amsaa",
+   "intent": "Crow-AMSAA time-terminated: n = 6, T = 9.5, β̂ = 6 / Σ ln(9.5/tᵢ) = 1.70084293, η̂ = 9.5 / 6^(1/β̂) = 3.31294655; the fitted model drives both options.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 9.5,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        2.1,
+        4.0,
+        5.5,
+        6.8,
+        7.9,
+        8.7
+       ],
+       "end": 9.5
+      }
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 3,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit": {
+     "existing": {
+      "model": "nhpp",
+      "beta": 1.7008429339026012,
+      "eta": 3.312946545554737
+     }
+    },
+    "pv": [
+     257817.80549057684,
+     215466.54557224934
+    ],
+    "calculation_completed": true
+   },
+   "tol": {
+    "pv": 1e-09,
+    "fit": 1e-09
+   }
+  },
+  {
+   "id": "weibull_fit_complete",
+   "intent": "Weibull MLE without suspensions (6 failures): β̂ ≈ 3.48222, η̂ ≈ 6.69163 (cross-checked with Brent root finding and Nelder–Mead on the likelihood).",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         3.2,
+         4.5,
+         5.1,
+         6.8,
+         7.4,
+         9.0
+        ]
+       }
+      },
+      "life": 15,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit": {
+     "1": {
+      "model": "weibull",
+      "beta": 3.482221814902599,
+      "eta": 6.691634157303581
+     }
+    },
+    "pv": [
+     172966.86241373976,
+     99625.09395473664
+    ]
+   },
+   "tol": {
+    "pv": 0.0001,
+    "eac": 0.0001,
+    "years": 0.0001,
+    "renewal": 0.0001,
+    "fit": 1e-09
+   },
+   "correction": "Rev .2: PV of the replacement is now the 2 000-step value of the rev .2 §4 scheme instead of the 16x finer grid (change 1.6e-8 relative); fitted beta and eta unchanged."
+  },
+  {
+   "id": "weibull_fit_censored",
+   "intent": "Weibull MLE with four right-censored suspensions: β̂ ≈ 2.62458, η̂ ≈ 9.06593.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         3.2,
+         4.5,
+         5.1,
+         6.8,
+         7.4,
+         9.0
+        ],
+        "suspensions": [
+         5.0,
+         8.0,
+         10.0,
+         10.0
+        ]
+       }
+      },
+      "life": 15,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit": {
+     "1": {
+      "model": "weibull",
+      "beta": 2.6245756258562167,
+      "eta": 9.065927220744745
+     }
+    },
+    "pv": [
+     172966.86241373976,
+     96707.88683451015
+    ]
+   },
+   "tol": {
+    "pv": 0.0001,
+    "eac": 0.0001,
+    "years": 0.0001,
+    "renewal": 0.0001,
+    "fit": 1e-09
+   },
+   "correction": "Rev .2: PV of the replacement is now the 2 000-step value of the rev .2 §4 scheme instead of the 16x finer grid (change 6e-9 relative); fitted beta and eta unchanged."
+  },
+  {
+   "id": "refuse_observation_end",
+   "intent": "Fit refused (observation_end); the rate 0.6 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        2.0,
+        5.0,
+        7.0
+       ],
+       "end": null
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "observation_end"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refuse_failure_after_end",
+   "intent": "Fit refused (failure_after_end); the rate 0.6 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        2.0,
+        5.0,
+        11.0
+       ],
+       "end": 10
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "failure_after_end"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refuse_nhpp_needs_repairable",
+   "intent": "Fit refused (nhpp_needs_repairable); the rate 0.6 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": false,
+      "history": {
+       "failures": [
+        2.0,
+        5.0,
+        7.0
+       ],
+       "end": 10
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "nhpp_needs_repairable"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refuse_degenerate",
+   "intent": "Fit refused (degenerate); the rate 0.15 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         5.0,
+         5.0,
+         5.0
+        ],
+        "suspensions": [
+         6.0
+        ]
+       },
+       "rate": 0.15
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "1": "degenerate"
+    },
+    "pv": [
+     172966.86241373976,
+     96330.40957510888
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refuse_no_root",
+   "intent": "Fit refused (no_root); the rate 0.15 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         10.0,
+         10.001,
+         10.002
+        ]
+       },
+       "rate": 0.15
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "1": "no_root"
+    },
+    "pv": [
+     172966.86241373976,
+     96330.40957510888
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refuse_weibull_needs_non_repairable",
+   "intent": "Fit refused (weibull_needs_non_repairable); the rate 0.15 given in the same model is used as a scenario value; the PVs equal those of a plain rate model.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": true,
+       "history": {
+        "failures": [
+         3.0,
+         5.0,
+         8.0
+        ]
+       },
+       "rate": 0.15
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "1": "weibull_needs_non_repairable"
+    },
+    "pv": [
+     172966.86241373976,
+     96330.40957510888
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "risks_expected_cost",
+   "intent": "Risks add Σ p·cost every year: 0.1 × 30 000 + 0.02 × 120 000 = 5 400 per year for continue, 500 for repair; risk component = that × a(5 %, 10).",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [
+       {
+        "name": "seal leak",
+        "p": 0.1,
+        "cost": 30000
+       },
+       {
+        "name": "motor burn-out",
+        "p": 0.02,
+        "cost": 120000
+       }
+      ],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [
+       {
+        "name": "rework",
+        "p": 0.05,
+        "cost": 10000
+       }
+      ],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     214664.23103133775,
+     204600.96568361885
+    ],
+    "preferred": 1,
+    "components": [
+     {
+      "risk": 41697.36861759798
+     },
+     {
+      "risk": 3860.867464592405
+     }
+    ]
+   }
+  },
+  {
+   "id": "risk_missing_cost",
+   "intent": "A risk without cost makes its option incomplete: no PV, not ranked; the others are ranked.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [
+       {
+        "name": "rework",
+        "p": 0.05,
+        "cost": null
+       }
+      ],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     null,
+     98382.58282799275
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     2,
+     0
+    ],
+    "preferred": 2,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "lowest_cost_inadmissible",
+   "intent": "The lowest-PV option (replace) has a rejected constraint: it keeps its PV but is not ranked; the preferred option is the lowest admissible one (repair). A rejected constraint is not a gap.",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Replacement pump not on the qualified supplier list",
+        "status": "rejected",
+        "reason": ""
+       }
+      ]
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     164300.97630344692,
+     139550.25820261988,
+     132716.4513167764
+    ],
+    "ranking": [
+     1,
+     0
+    ],
+    "preferred": 1,
+    "gaps": [],
+    "criterion_met": true
+   }
+  },
+  {
+   "id": "constraint_unknown_gap",
+   "intent": "A constraint with status unknown is a gap: preferred still reported, criterion not met.",
+   "spec_ref": "§6, §8, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Spare impeller available",
+        "status": "unknown",
+        "reason": ""
+       }
+      ]
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "preferred": 2,
+    "gaps": [
+     "constraint_unknown"
+    ],
+    "calculation_completed": true,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "constraint_no_status_gap",
+   "intent": "A constraint without a status counts as unknown.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Spare impeller available",
+        "reason": ""
+       }
+      ]
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "gaps": [
+     "constraint_unknown"
+    ],
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "constraint_na_without_reason",
+   "intent": "\"na\" without a reason is a gap constraint_na_reason.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Seismic qualification",
+        "status": "na",
+        "reason": ""
+       }
+      ]
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "gaps": [
+     "constraint_na_reason"
+    ],
+    "preferred": 2,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "constraint_na_with_reason_confirmed",
+   "intent": "\"na\" with a reason and \"confirmed\" are not gaps: criterion met.",
+   "spec_ref": "§8, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Seismic qualification",
+        "status": "na",
+        "reason": "Non-safety building"
+       },
+       {
+        "text": "Footprint fits",
+        "status": "confirmed",
+        "reason": ""
+       }
+      ]
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "gaps": [],
+    "preferred": 2,
+    "criterion_met": true,
+    "no_gaps": [
+     "two_options",
+     "unknown",
+     "horizon_range",
+     "discount_range",
+     "existing_failure",
+     "option_incomplete",
+     "constraint_unknown",
+     "constraint_na_reason"
+    ]
+   }
+  },
+  {
+   "id": "all_options_rejected",
+   "intent": "Every option rejected: nothing is ranked, no preferred option, criterion not met.",
+   "spec_ref": "§6, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Owner veto",
+        "status": "rejected",
+        "reason": ""
+       }
+      ]
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Owner veto",
+        "status": "rejected",
+        "reason": ""
+       }
+      ]
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": [
+       {
+        "text": "Owner veto",
+        "status": "rejected",
+        "reason": ""
+       }
+      ]
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "ranking": [],
+    "preferred": null,
+    "criterion_met": false,
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "unknown_discountRatePct",
+   "intent": "discountRatePct unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": null,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_horizon",
+   "intent": "horizon unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": null,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_downtimeCost",
+   "intent": "downtimeCost unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": null,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_existing_age",
+   "intent": "existing.age unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": null,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_existing_opex",
+   "intent": "existing.opex unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": null,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_existing_failCost",
+   "intent": "existing.failCost unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": null,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "unknown_existing_failHours",
+   "intent": "existing.failHours unknown: nothing is computed.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": null,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null
+    ],
+    "gaps": [
+     "unknown"
+    ],
+    "calculation_completed": false,
+    "criterion_met": false,
+    "preferred": null
+   }
+  },
+  {
+   "id": "option_missing_capex",
+   "intent": "Replace option misses capex: option_incomplete, no PV; continue and repair are still ranked.",
+   "spec_ref": "§3, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": null,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     200740.09821902643,
+     null
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": 0,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "option_missing_life",
+   "intent": "Replace option misses life (after = new): option_incomplete, no PV; continue and repair are still ranked.",
+   "spec_ref": "§3, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": null,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     200740.09821902643,
+     null
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": 0,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "option_missing_failure",
+   "intent": "Replace option misses eta of the new item's model: option_incomplete, no PV; continue and repair are still ranked.",
+   "spec_ref": "§3, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "nhpp",
+       "source": "entered",
+       "beta": 2.0,
+       "eta": null
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     200740.09821902643,
+     null
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": 0,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "option_missing_lead",
+   "intent": "Replace option misses leadMonths: option_incomplete, no PV; continue and repair are still ranked.",
+   "spec_ref": "§3, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": null,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     200740.09821902643,
+     null
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     0,
+     1
+    ],
+    "preferred": 0,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "option_missing_ageAfter",
+   "intent": "Repair (after = existing) misses ageAfter: option_incomplete.",
+   "spec_ref": "§3, §8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": null,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 6,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     null,
+     98382.58282799275
+    ],
+    "gaps": [
+     "option_incomplete"
+    ],
+    "ranking": [
+     2,
+     0
+    ],
+    "calculation_completed": false
+   }
+  },
+  {
+   "id": "single_option",
+   "intent": "One option only: gap two_options; criterion not met.",
+   "spec_ref": "§8",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "gaps": [
+     "two_options"
+    ],
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "near_tie_outside",
+   "intent": "Capex differs by 0.01 EUR at t = 0: margin 0.01 > max(0.005, 1e-9·|PV|) — A preferred.",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Quote A",
+      "kind": "repair",
+      "capex": 20000.0,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Quote B",
+      "kind": "repair",
+      "capex": 20000.01,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     126838.20709356558,
+     126838.21709356557
+    ],
+    "preferred": 0,
+    "ranking": [
+     0,
+     1
+    ],
+    "tied": [],
+    "criterion_met": true
+   }
+  },
+  {
+   "id": "near_tie_inside",
+   "intent": "Capex differs by 0.004 EUR: within 0.005 EUR — tied, no preferred.",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Quote A",
+      "kind": "repair",
+      "capex": 20000.0,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Quote B",
+      "kind": "repair",
+      "capex": 20000.004,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "preferred": null,
+    "ranking": [
+     0,
+     1
+    ],
+    "tied": [
+     0,
+     1
+    ],
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "relative_tie_large_pv",
+   "intent": "plant_lto scale, PV ≈ 1.01e9: tolerance 1e-9 × 1.01e9 ≈ 1.01 EUR > 0.5 EUR difference — tied.",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "plant_lto",
+    "subject": "synthetic",
+    "discountRatePct": 0,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 40,
+     "opex": 20000000.0,
+     "failCost": 5000000.0,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.2
+     }
+    },
+    "options": [
+     {
+      "name": "LTO programme A",
+      "kind": "repair",
+      "capex": 800000000.0,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "LTO programme B",
+      "kind": "repair",
+      "capex": 800000000.5,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     1010008000.0,
+     1010008000.5
+    ],
+    "preferred": null,
+    "tied": [
+     0,
+     1
+    ],
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "relative_tie_large_pv_outside",
+   "intent": "Same, difference 1.5 EUR > 1.01 EUR: A preferred.",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "plant_lto",
+    "subject": "synthetic",
+    "discountRatePct": 0,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 40,
+     "opex": 20000000.0,
+     "failCost": 5000000.0,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.2
+     }
+    },
+    "options": [
+     {
+      "name": "LTO programme A",
+      "kind": "repair",
+      "capex": 800000000.0,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "LTO programme B",
+      "kind": "repair",
+      "capex": 800000001.5,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "preferred": 0,
+    "tied": []
+   }
+  },
+  {
+   "id": "sensitivity_discount",
+   "intent": "Pump at r = 6 % (threshold 6.27 %): +20 % discount (7.2 %) flips the preference to repair; −20 % does not.",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 6,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     155980.57191323076,
+     133508.40818699638,
+     132123.15339236977
+    ],
+    "preferred": 2,
+    "sensitivity_changes": {
+     "discount": true,
+     "downtime": true,
+     "failures": true,
+     "opex": true,
+     "capex:1": true,
+     "lead:1": false,
+     "capex:2": true,
+     "lead:2": false
+    }
+   }
+  },
+  {
+   "id": "sensitivity_lead",
+   "intent": "Pump with replacement lead 33 months (threshold ≈ 39): +20 % lead (39.6) flips the preference; −20 % does not.",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 33,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     164300.97630344692,
+     139550.25820261988,
+     137885.5885890008
+    ],
+    "preferred": 2,
+    "sensitivity_changes": {
+     "discount": true,
+     "downtime": false,
+     "failures": true,
+     "opex": true,
+     "capex:1": true,
+     "lead:1": false,
+     "capex:2": true,
+     "lead:2": true
+    }
+   }
+  },
+  {
+   "id": "sensitivity_downtime",
+   "intent": "Pump with downtime cost 240 EUR/h (threshold ≈ 207): −20 % (192) flips the preference to repair.",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 240,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     140964.27182571558,
+     124991.80164296598,
+     123826.60768802345
+    ],
+    "preferred": 2,
+    "sensitivity_changes": {
+     "discount": true,
+     "downtime": true,
+     "failures": true,
+     "opex": true,
+     "capex:1": true,
+     "lead:1": false,
+     "capex:2": true,
+     "lead:2": false
+    }
+   }
+  },
+  {
+   "id": "sensitivity_all_false_5pct",
+   "intent": "Pump at a 5 % step: no single parameter changes the preference.",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 400,
+    "sensitivityPct": 5,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     164300.97630344692,
+     139550.25820261988,
+     132716.4513167764
+    ],
+    "preferred": 2,
+    "sensitivity_changes": {
+     "discount": false,
+     "downtime": false,
+     "failures": false,
+     "opex": false,
+     "capex:1": false,
+     "lead:1": false,
+     "capex:2": false,
+     "lead:2": false
+    }
+   }
+  },
+  {
+   "id": "band_holds",
+   "intent": "Rates at low and high ends (existing 0.6/1.0, new 0.05/0.2): replace preferred at both ends.",
+   "spec_ref": "§7.2",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8,
+      "rateLow": 0.6,
+      "rateHigh": 1.0
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1,
+       "rateLow": 0.05,
+       "rateHigh": 0.2
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     92469.54211051647
+    ],
+    "preferred": 1,
+    "band": {
+     "low_preferred": 1,
+     "high_preferred": 1,
+     "holds": true
+    }
+   }
+  },
+  {
+   "id": "band_breaks",
+   "intent": "Existing rate 0.8 with low 0.2 / high 1.2: at the low end continue wins, at base and high end replace — the preference does not hold.",
+   "spec_ref": "§7.2",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8,
+      "rateLow": 0.2,
+      "rateHigh": 1.2
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     92469.54211051647
+    ],
+    "preferred": 1,
+    "band": {
+     "low_preferred": 0,
+     "high_preferred": 1,
+     "holds": false
+    }
+   }
+  },
+  {
+   "id": "thresholds_rate_models",
+   "intent": "Continue vs replace at t = 0 with rate models (PV linear in downtime cost and in the failure multiplier): thresholds checked against the closed-form crossing; sides without a change are null.",
+   "spec_ref": "§7.3",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 200,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 10,
+     "opex": 6000,
+     "failCost": 3000,
+     "failHours": 10,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 1.0
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 40000,
+      "leadMonths": 0,
+      "outageHours": 24,
+      "after": "new",
+      "opex": 4000,
+      "failCost": 2000,
+      "failHours": 5,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.2
+      },
+      "life": 10,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     84939.08422103291,
+     80319.98067425012
+    ],
+    "preferred": 1,
+    "threshold": {
+     "downtime": {
+      "below": 98.47156452635923,
+      "above": null
+     },
+     "discount": {
+      "below": null,
+      "above": 7.072818418964744
+     },
+     "failures": {
+      "below": 0.864046728859345,
+      "above": null
+     },
+     "lead:1": {
+      "below": null,
+      "above": 44.278137400746346
+     },
+     "capex:1": {
+      "below": null,
+      "above": 44619.098563989006
+     }
+    }
+   },
+   "tol": {
+    "pv": 1e-09,
+    "threshold": 2e-06
+   }
+  },
+  {
+   "id": "weibull_ageafter_above_A0",
+   "intent": "Weibull existing item (β 2, η 4), A₀ = 2, after = existing with ageAfter 4 > A₀: the existing grid runs to t_max = max(2, 4) + 6 + 1 = 11 and the option uses M(4 + y) − M(3 + y); renewal process from age 0 (time since the position was first equipped).",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 6,
+    "downtimeCost": 400,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 2,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "weibull",
+      "source": "entered",
+      "beta": 2.0,
+      "eta": 4.0
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Swap in an older refurbished unit",
+      "kind": "refurbish",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 4,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     62488.57154735862,
+     89506.5833531426
+    ],
+    "years": {
+     "0": [
+      {
+       "year": 1,
+       "nominal": 11796.909745835628,
+       "discounted": 11235.152138891073,
+       "failures": 0.24339165037407876
+      },
+      {
+       "year": 2,
+       "nominal": 12360.288992222411,
+       "discounted": 11211.146478206269,
+       "failures": 0.27950570462964175
+      },
+      {
+       "year": 3,
+       "nominal": 12508.429614307206,
+       "discounted": 10805.251799423133,
+       "failures": 0.28900189835302603
+      },
+      {
+       "year": 4,
+       "nominal": 12474.039531431852,
+       "discounted": 10262.423193160752,
+       "failures": 0.2867974058610161
+      },
+      {
+       "year": 5,
+       "nominal": 12416.291960094646,
+       "discounted": 9728.489641246106,
+       "failures": 0.28309563846760555
+      },
+      {
+       "year": 6,
+       "nominal": 12390.669420794213,
+       "discounted": 9246.108296431285,
+       "failures": 0.28145316799962905
+      }
+     ],
+     "1": [
+      {
+       "year": 1,
+       "nominal": 38908.429614307206,
+       "discounted": 38312.79010886401,
+       "failures": 0.28900189835302603
+      },
+      {
+       "year": 2,
+       "nominal": 12474.039531431852,
+       "discounted": 11314.32157045973,
+       "failures": 0.2867974058610161
+      },
+      {
+       "year": 3,
+       "nominal": 12416.291960094646,
+       "discounted": 10725.659829473832,
+       "failures": 0.28309563846760555
+      },
+      {
+       "year": 4,
+       "nominal": 12390.669420794213,
+       "discounted": 10193.834396815491,
+       "failures": 0.28145316799962905
+      },
+      {
+       "year": 5,
+       "nominal": 12390.874864273257,
+       "discounted": 9708.574681594411,
+       "failures": 0.2814663374534139
+      },
+      {
+       "year": 6,
+       "nominal": 12397.76451629575,
+       "discounted": 9251.40276593514,
+       "failures": 0.28190798181383014
+      }
+     ]
+    },
+    "preferred": 0
+   },
+   "tol": {
+    "pv": 0.0001,
+    "eac": 0.0001,
+    "years": 0.0001,
+    "renewal": 0.0001,
+    "fit": 1e-09
+   }
+  },
+  {
+   "id": "fit_ignores_nonpositive_ages",
+   "intent": "Failure ages 0 and −1 are ignored before the fit: Crow-AMSAA on n = 3 (2.5, 5, 8), T = 9: β̂ = 3 / Σ ln(9/tᵢ), η̂ = 9 / 3^(1/β̂).",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 9.0,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        0,
+        -1,
+        2.5,
+        5.0,
+        8.0
+       ],
+       "end": 9.0
+      }
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 3,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit": {
+     "existing": {
+      "model": "nhpp",
+      "beta": 1.510191112424493,
+      "eta": 4.348186413032885
+     }
+    },
+    "pv": [
+     147658.90693622845,
+     152748.79969002135
+    ]
+   },
+   "tol": {
+    "pv": 1e-09,
+    "fit": 1e-09
+   }
+  },
+  {
+   "id": "fit_nonpositive_leaves_two",
+   "intent": "Weibull history 0, 4, 7: the 0 is ignored, two failures remain — too_few_failures; the scenario rate 0.15 is used.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         0,
+         4.0,
+         7.0
+        ],
+        "suspensions": [
+         -2.0,
+         5.0
+        ]
+       },
+       "rate": 0.15
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "1": "too_few_failures"
+    },
+    "pv": [
+     172966.86241373976,
+     96330.40957510888
+    ]
+   }
+  },
+  {
+   "id": "refusal_order_nhpp_repairable_first",
+   "intent": "NHPP not repairable and only 2 failures: the repairable check runs first; the scenario rate 0.6 is used.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": false,
+      "history": {
+       "failures": [
+        3.0,
+        6.0
+       ],
+       "end": 10
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "nhpp_needs_repairable"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refusal_order_nhpp_end_before_count",
+   "intent": "NHPP with unknown end and only 2 failures: observation_end is checked before too_few_failures; the scenario rate 0.6 is used.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        3.0,
+        6.0
+       ],
+       "end": null
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "observation_end"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refusal_nhpp_degenerate",
+   "intent": "NHPP with every failure at the end of observation: Σ ln(T/tᵢ) = 0 — degenerate; the scenario rate 0.6 is used.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        10.0,
+        10.0,
+        10.0
+       ],
+       "end": 10
+      },
+      "rate": 0.6
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "existing": "degenerate"
+    },
+    "pv": [
+     145168.61666867445,
+     173168.61666867445
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "refusal_order_weibull_count_first",
+   "intent": "Weibull with two equal failures: too_few_failures is checked before degenerate; the scenario rate 0.15 is used.",
+   "spec_ref": "§4",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "weibull",
+       "source": "fitted",
+       "repairable": false,
+       "history": {
+        "failures": [
+         5.0,
+         5.0
+        ]
+       },
+       "rate": 0.15
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "fit_refused": {
+     "1": "too_few_failures"
+    },
+    "pv": [
+     172966.86241373976,
+     96330.40957510888
+    ],
+    "calculation_completed": true
+   }
+  },
+  {
+   "id": "risks_never_implemented",
+   "intent": "An option never implemented (lead 120 = 12·H) still carries its risks every year: PV = PV(continue) + 1000 × a(5 %, 10); continue preferred.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace (lead = 12·H) with supplier risk",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 120,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [
+       {
+        "name": "supplier insolvency",
+        "p": 0.1,
+        "cost": 10000
+       }
+      ],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     180688.59734292456
+    ],
+    "components": [
+     {
+      "risk": 0.0,
+      "capex": 0.0,
+      "outage": 0.0
+     },
+     {
+      "risk": 7721.73492918481,
+      "capex": 0.0,
+      "outage": 0.0
+     }
+    ],
+    "preferred": 0,
+    "tied": []
+   }
+  },
+  {
+   "id": "life_zero",
+   "intent": "life = 0: no renewal and no residual value; replace PV = 6000 + 1000 + 10 × 500 = 12 000 at r = 0.",
+   "spec_ref": "§5",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 0,
+    "horizon": 10,
+    "downtimeCost": 100,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 8,
+     "opex": 1000,
+     "failCost": 2000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.5
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 6000,
+      "leadMonths": 0,
+      "outageHours": 10,
+      "after": "new",
+      "opex": 500,
+      "failCost": 0,
+      "failHours": 0,
+      "failure": {
+       "model": "none"
+      },
+      "life": 0,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     20000.0,
+     12000.0
+    ],
+    "components": [
+     {
+      "capex": 0.0,
+      "outage": 0.0,
+      "opex": 10000.0,
+      "failure": 10000.0,
+      "risk": 0.0,
+      "residual": 0.0
+     },
+     {
+      "capex": 6000.0,
+      "outage": 1000.0,
+      "opex": 5000.0,
+      "failure": 0.0,
+      "risk": 0.0,
+      "residual": 0.0
+     }
+    ],
+    "preferred": 1
+   }
+  },
+  {
+   "id": "band_scenario_rate",
+   "intent": "NHPP fit refused (2 failures); the scenario rate 0.8 with low 0.2 / high 1.2 takes part in the band: same numbers as band_breaks — continue at the low end, replace at base and high end.",
+   "spec_ref": "§4, §7.2",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "nhpp",
+      "source": "fitted",
+      "repairable": true,
+      "history": {
+       "failures": [
+        3.5,
+        9.0
+       ],
+       "end": 12
+      },
+      "rate": 0.8,
+      "rateLow": 0.2,
+      "rateHigh": 1.2
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     172966.86241373976,
+     92469.54211051647
+    ],
+    "preferred": 1,
+    "fit_refused": {
+     "existing": "too_few_failures"
+    },
+    "band": {
+     "low_preferred": 0,
+     "high_preferred": 1,
+     "holds": false
+    }
+   }
+  },
+  {
+   "id": "sensitivity_end_tie",
+   "intent": "Quote B capex 12 500 at −20 % equals quote A (10 000): that end is a tie, which counts as a change. Lead times are 0 and stay 0 (no change).",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Quote A",
+      "kind": "repair",
+      "capex": 10000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Quote B",
+      "kind": "repair",
+      "capex": 12500,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     116838.20709356558,
+     119338.20709356558
+    ],
+    "preferred": 0,
+    "sensitivity_changes": {
+     "discount": false,
+     "downtime": false,
+     "failures": false,
+     "opex": false,
+     "capex:0": false,
+     "lead:0": false,
+     "capex:1": true,
+     "lead:1": false
+    }
+   }
+  },
+  {
+   "id": "sensitivity_zero_downtime",
+   "intent": "Pump with downtime cost 0: the downtime parameter stays 0 at both ends — no change in its row.",
+   "spec_ref": "§7.1",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 0,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 9000,
+     "failCost": 5000,
+     "failHours": 20,
+     "failure": {
+      "model": "nhpp",
+      "source": "entered",
+      "beta": 2.5,
+      "eta": 8
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair pump",
+      "kind": "repair",
+      "capex": 15000,
+      "leadMonths": 2,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 6,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace pump",
+      "kind": "replace",
+      "capex": 90000,
+      "leadMonths": 9,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 6000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     105959.21510911855,
+     103154.11680348514,
+     110491.84224489403
+    ],
+    "preferred": 1,
+    "sensitivity_changes": {
+     "downtime": false
+    }
+   }
+  },
+  {
+   "id": "existing_unresolved_no_option_complete",
+   "intent": "Existing Weibull fit refused without a scenario rate: the existing model is unresolved, no option is complete — not even a replacement at t = 0 — so no PV at all; calculation not completed.",
+   "spec_ref": "§8, §9",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 24,
+     "failure": {
+      "model": "weibull",
+      "source": "fitted",
+      "repairable": false,
+      "history": {
+       "failures": [
+        4.0,
+        7.5
+       ]
+      }
+     }
+    },
+    "options": [
+     {
+      "name": "Continue as is",
+      "kind": "continue",
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Repair",
+      "kind": "repair",
+      "capex": 20000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Replace",
+      "kind": "replace",
+      "capex": 60000,
+      "leadMonths": 0,
+      "outageHours": 40,
+      "after": "new",
+      "opex": 3000,
+      "failCost": 4000,
+      "failHours": 12,
+      "failure": {
+       "model": "rate",
+       "source": "entered",
+       "rate": 0.1
+      },
+      "life": 20,
+      "renewalCapex": null,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     null,
+     null,
+     null
+    ],
+    "gaps": [
+     "existing_failure"
+    ],
+    "fit_refused": {
+     "existing": "too_few_failures"
+    },
+    "ranking": [],
+    "preferred": null,
+    "calculation_completed": false,
+    "criterion_met": false
+   }
+  },
+  {
+   "id": "tied_in_ranking_order",
+   "intent": "B and C within 0.005 EUR, C cheaper: ranking [2, 1, 0]; tied listed in ranking order [2, 1].",
+   "spec_ref": "§6",
+   "input": {
+    "scope": "equipment",
+    "subject": "synthetic",
+    "discountRatePct": 5,
+    "horizon": 10,
+    "downtimeCost": 500,
+    "sensitivityPct": 20,
+    "existing": {
+     "age": 12,
+     "opex": 8000,
+     "failCost": 6000,
+     "failHours": 0,
+     "failure": {
+      "model": "rate",
+      "source": "entered",
+      "rate": 0.8
+     }
+    },
+    "options": [
+     {
+      "name": "Quote A",
+      "kind": "repair",
+      "capex": 25000,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Quote B",
+      "kind": "repair",
+      "capex": 20000.003,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     },
+     {
+      "name": "Quote C",
+      "kind": "repair",
+      "capex": 20000.0,
+      "leadMonths": 0,
+      "outageHours": 16,
+      "after": "existing",
+      "ageAfter": 5,
+      "risks": [],
+      "constraints": []
+     }
+    ],
+    "approvalStatus": "draft",
+    "approvalBasis": "",
+    "approvalFingerprint": null
+   },
+   "expect": {
+    "pv": [
+     131838.20709356558,
+     126838.21009356558,
+     126838.20709356558
+    ],
+    "ranking": [
+     2,
+     1,
+     0
+    ],
+    "tied": [
+     2,
+     1
+    ],
+    "preferred": null,
+    "criterion_met": false
+   }
+  }
+ ]
+}

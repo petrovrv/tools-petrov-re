@@ -1,0 +1,6667 @@
+{
+ "tool": "hotworkrisk",
+ "author_note": "independent reference authored without access to the tool code",
+ "reference": "Scenario corpus for a single hot-work point on a 30 x 20 m plan (work point at (10,10) m). Control expectations come from US OSHA 29 CFR 1910.252/1910.253 (public NFPA 51B-lineage text: removal/guarding of combustibles, 35 ft relocation, openings, ducts, other side of walls, extinguishers, fire watch at least 30 min, explosive atmospheres, containers that held flammables, cylinder placement) and the HSE welding-risks page (fire watch 30 min, up to 60 min), plus spec 09/00 acceptance criteria (hidden-void reminder regardless of combustibles, illustrative labelling, insufficient data never clear, sorting). All distances and times are user-entered company-pack values, not legal values. Geometry (distance, bearing sector, segment crossing, point-to-segment) is computed independently by ref.py; 14 randomized cases use seed 20260916.",
+ "reference_citations": [
+  "US OSHA 29 CFR 1910.252 Fire prevention and suppression / containers, current eCFR text, https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-Q/section-1910.252 (paras (a)(1)(i)-(iii), (a)(2)(i),(ii),(iii)(A)(1)-(4),(iii)(B),(vi)(C),(vii),(viii),(ix),(x),(xii), (a)(3)(i)-(ii))",
+  "US OSHA 29 CFR 1910.253 Oxygen-fuel gas welding and cutting, current eCFR text, https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-Q/section-1910.253 (paras (b)(2)(ii), (b)(3)(ii), (b)(5)(i)(I), (b)(5)(iii)(A))",
+  "HSE (GB), Safety risks from welding - fire and explosion, https://www.hse.gov.uk/welding/other-welding-risks.htm (read 2026-09-16)",
+  "tools.petrov.re spec 09 Hot Work Risk Studio (MVP scope, rules, acceptance criteria) and spec 00-common s0.5",
+  "First-principles plane geometry: bench/hotworkrisk/ref.py (stdlib)"
+ ],
+ "tolerance": "Categorical outcomes exact. zone_radius rel 1e-9 (sum of user-entered decimals; no physics model). Distances abs 1e-4 m (floating point only; plan coordinates are given to 1e-6 m). All geometric boundary cases keep >= 0.05 m (or 0.05 m arc) from the zone edge so the result does not depend on whether the edge is inclusive; exact-equality cases are only used for the post-watch minimum, where the source says 'at least'.",
+ "cases": [
+  {
+   "id": "safe-baseline-all-controlled",
+   "intent": "headline: obvious safe arrangement (spec QA scenario library)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "timber pallets",
+      "x": 15.0,
+      "y": 10.0,
+      "control": "covered"
+     }
+    ],
+    "openings": [
+     {
+      "kind": "floor opening",
+      "x": 28.0,
+      "y": 18.0,
+      "control": "none"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "Only combustible at 5 m is covered (guard) - 29 CFR 1910.252(a)(1)(ii)."
+    },
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = r_welding + k*h = 11 + 1*0."
+    },
+    "HW-R-003_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "Opening at 19.698 m > R = 11 m, outside zone."
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "All modelled controls present -> best wording 'No unresolved finding in the modelled scope' (spec 00 s0.5: no permission/compliance claim). Fire watch, post-watch 30>=30, accessible checked extinguisher at 3 m, checklist answered."
+    }
+   }
+  },
+  {
+   "id": "unsafe-uncovered-combustible-5m",
+   "intent": "headline: combustible inside zone without removal/cover (conflict detection)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 15.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "5 m < 11 m; 29 CFR 1910.252(a)(1)(i)-(ii) movable hazards removed or guarded; (a)(2)(vii) relocate >=35 ft (10.7 m)."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i)-(iii)."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "combustible-5m-removed",
+   "intent": "negative: combustible in zone controlled by 'removed' is not uncontrolled",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 15.0,
+      "y": 10.0,
+      "control": "removed"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i) (taken to safe place) / (a)(1)(ii) (guards)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i)-(ii)."
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "All modelled controls present -> best wording 'No unresolved finding in the modelled scope' (spec 00 s0.5: no permission/compliance claim). "
+    }
+   }
+  },
+  {
+   "id": "combustible-5m-shielded",
+   "intent": "negative: combustible in zone controlled by 'shielded' is not uncontrolled",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 15.0,
+      "y": 10.0,
+      "control": "shielded"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i) (taken to safe place) / (a)(1)(ii) (guards)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i)-(ii)."
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "All modelled controls present -> best wording 'No unresolved finding in the modelled scope' (spec 00 s0.5: no permission/compliance claim). "
+    }
+   }
+  },
+  {
+   "id": "combustible-outside-zone-15m",
+   "intent": "negative: uncontrolled combustible beyond configured zone",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 25.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "15 m > R = 11 m."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "outside zone"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "All modelled controls present -> best wording 'No unresolved finding in the modelled scope' (spec 00 s0.5: no permission/compliance claim). "
+    }
+   }
+  },
+  {
+   "id": "boundary-circle-just-inside",
+   "intent": "boundary: zone radius both sides (0.05 m, exact equality deliberately avoided)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "wood shavings",
+      "x": 19.482978,
+      "y": 15.475,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "distance_m": {
+     "ref": 10.949999852,
+     "tol": {
+      "abs": 0.0001,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "Euclidean distance."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 10.9500 vs R = 11 m."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "point-in-circle"
+    }
+   }
+  },
+  {
+   "id": "boundary-circle-just-outside",
+   "intent": "boundary: zone radius both sides (0.05 m, exact equality deliberately avoided)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "wood shavings",
+      "x": 19.569581,
+      "y": 15.525,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "distance_m": {
+     "ref": 11.05000025,
+     "tol": {
+      "abs": 0.0001,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "Euclidean distance."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 11.0500 vs R = 11 m."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "point-in-circle"
+    }
+   }
+  },
+  {
+   "id": "flammable-liquid-covered-not-accepted",
+   "intent": "headline rule: movable flammable liquid in zone must be removed; cover is not enough",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "solvent drum",
+      "flammable_liquid": true,
+      "x": 14.0,
+      "y": 10.0,
+      "control": "covered"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-019_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i): movable fire hazards shall be taken to a safe place; guards ((a)(1)(ii)) only apply if they cannot be removed. Drum is movable."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "flammable-liquid-removed",
+   "intent": "negative: removed flammable liquid clears HW-R-019",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "solvent drum",
+      "flammable_liquid": true,
+      "x": 14.0,
+      "y": 10.0,
+      "control": "removed"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-019_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(1)(i)."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "removed"
+    }
+   }
+  },
+  {
+   "id": "elevated-4m-combustible-inside",
+   "intent": "headline: elevated work enlarges zone (declared pack model R = r + k*h)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 4.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 23.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 15,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11 + 1.0*4 = 15 m (user-entered company pack, not a legal value)."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 13.0 m vs R = 15 m; at h=0 R would be 11 m."
+    }
+   }
+  },
+  {
+   "id": "elevated-4m-combustible-outside",
+   "intent": "headline: elevated work enlarges zone (declared pack model R = r + k*h)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 4.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 25.5,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 15,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11 + 1.0*4 = 15 m (user-entered company pack, not a legal value)."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 15.5 m vs R = 15 m; at h=0 R would be 11 m."
+    }
+   }
+  },
+  {
+   "id": "activity-radius-welding",
+   "intent": "headline: activity hazard profile selects the pack radius; height term added",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 12.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 0.5,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 2.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 1.161165,
+      "y": 18.838835,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 13.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 12.0 + 0.5*2 = 13.0 m."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 12.5 m < R = 13.0 m (outside if height term ignored)."
+    },
+    "radius_basis_label": {
+     "ref": "company",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Pack kind printed next to radius (spec 09: distances not shown as legal requirement without source label)."
+    }
+   }
+  },
+  {
+   "id": "activity-radius-cutting",
+   "intent": "headline: activity hazard profile selects the pack radius; height term added",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 14.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 0.5,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "cutting",
+     "height_m": 2.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": -0.253048,
+      "y": 20.253048,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 15.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 14.0 + 0.5*2 = 15.0 m."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 14.5 m < R = 15.0 m (outside if height term ignored)."
+    },
+    "radius_basis_label": {
+     "ref": "company",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Pack kind printed next to radius (spec 09: distances not shown as legal requirement without source label)."
+    }
+   }
+  },
+  {
+   "id": "activity-radius-grinding",
+   "intent": "headline: activity hazard profile selects the pack radius; height term added",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 9.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 0.5,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "grinding",
+     "height_m": 2.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 3.282486,
+      "y": 16.717514,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 10.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 9.0 + 0.5*2 = 10.0 m."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 9.5 m < R = 10.0 m (outside if height term ignored)."
+    },
+    "radius_basis_label": {
+     "ref": "company",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Pack kind printed next to radius (spec 09: distances not shown as legal requirement without source label)."
+    }
+   }
+  },
+  {
+   "id": "activity-radius-heating",
+   "intent": "headline: activity hazard profile selects the pack radius; height term added",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 6.0,
+     "r_brazing": 5.0,
+     "k_elev": 0.5,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "heating",
+     "height_m": 2.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 5.403806,
+      "y": 14.596194,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 7.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 6.0 + 0.5*2 = 7.0 m."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 6.5 m < R = 7.0 m (outside if height term ignored)."
+    },
+    "radius_basis_label": {
+     "ref": "company",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Pack kind printed next to radius (spec 09: distances not shown as legal requirement without source label)."
+    }
+   }
+  },
+  {
+   "id": "activity-radius-brazing",
+   "intent": "headline: activity hazard profile selects the pack radius; height term added",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 4.0,
+     "k_elev": 0.5,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "brazing",
+     "height_m": 2.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 6.818019,
+      "y": 13.181981,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 4.0 + 0.5*2 = 5.0 m."
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 4.5 m < R = 5.0 m (outside if height term ignored)."
+    },
+    "radius_basis_label": {
+     "ref": "company",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Pack kind printed next to radius (spec 09: distances not shown as legal requirement without source label)."
+    }
+   }
+  },
+  {
+   "id": "negative-height-does-not-shrink-zone",
+   "intent": "negative input: negative height must be refused/clamped, never shrink the zone",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": -3.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 20.5,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_not_below_activity_radius": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Height below plan cannot reduce spark reach in a conservative advisory model; spec 00 s0.5 no safe-looking result from bad input."
+    },
+    "combustible_at_10.5m_not_reported_clear": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "If -3 m were applied, R = 8 m and the 10.5 m item would disappear; it must stay flagged (or input refused)."
+    }
+   }
+  },
+  {
+   "id": "sector-front-8m-45deg",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 15.656854,
+      "y": 15.656854,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 8.000 m, bearing 45.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-side-8m-90deg",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 10.0,
+      "y": 18.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 8.000 m, bearing 90.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-behind-2m",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 8.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 2.000 m, bearing 180.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-behind-4m",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 6.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 4.000 m, bearing 180.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-edge-59deg",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 14.120305,
+      "y": 16.857338,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 8.000 m, bearing 59.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-edge-61deg",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 13.878477,
+      "y": 16.996958,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 8.000 m, bearing 61.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-front-11.5m",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 21.5,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 11.500 m, bearing 0.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-behind-3.25m",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 6.75,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 3.250 m, bearing 180.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "sector-behind-3.35m",
+   "intent": "geometry: directed sparks = near-field circle (0.3R = 3.3 m) + 60 deg half-angle sector (pack values)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 0.0
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 6.65,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 3.350 m, bearing 180.0 deg vs direction 0; inside = d<=3.3 or (d<=11 and |dtheta|<=60)."
+    },
+    "HW-R-002_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "wall-does-not-shorten-zone",
+   "intent": "headline: combustible on other side of a wall is still in zone",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "insulation",
+      "x": 15.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 12.0,
+      "y1": 5.0,
+      "x2": 12.0,
+      "y2": 15.0,
+      "hides_space": false
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 8.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(x): precautions for combustibles on the other side of metal walls (conduction/radiation); (a)(2)(iii)(A)(4). Wall is not credited as a barrier."
+    },
+    "HW-R-002_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "opening-floor-opening-uncovered-6m",
+   "intent": "headline: opening in zone, no combustibles drawn at all",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [
+     {
+      "kind": "floor opening",
+      "x": 10.0,
+      "y": 16.0,
+      "control": "none"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-003_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(i) floor openings/cracks, (a)(2)(iii)(A)(3) openings within 35 ft"
+    },
+    "HW-R-004_reminder": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: hot work near hidden void/opening triggers inspection reminder regardless of visible combustibles."
+    },
+    "hidden_space_flags_at_least_1": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). uncovered opening"
+    }
+   }
+  },
+  {
+   "id": "opening-drain-uncovered-6m",
+   "intent": "headline: opening in zone, no combustibles drawn at all",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [
+     {
+      "kind": "drain",
+      "x": 10.0,
+      "y": 16.0,
+      "control": "none"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-003_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(i) floor openings/cracks, (a)(2)(iii)(A)(3) openings within 35 ft"
+    },
+    "HW-R-004_reminder": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: hot work near hidden void/opening triggers inspection reminder regardless of visible combustibles."
+    },
+    "hidden_space_flags_at_least_1": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). uncovered opening"
+    }
+   }
+  },
+  {
+   "id": "opening-duct-uncovered-6m",
+   "intent": "headline: opening in zone, no combustibles drawn at all",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [
+     {
+      "kind": "duct",
+      "x": 10.0,
+      "y": 16.0,
+      "control": "none"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-003_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(viii) ducts that might carry sparks shall be protected or shut down"
+    },
+    "HW-R-004_reminder": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: hot work near hidden void/opening triggers inspection reminder regardless of visible combustibles."
+    },
+    "hidden_space_flags_at_least_1": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). uncovered opening"
+    }
+   }
+  },
+  {
+   "id": "opening-covered-6m-reminder-stays",
+   "intent": "rule: covered opening closes HW-R-003 but inspection reminder stays",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [
+     {
+      "kind": "floor opening",
+      "x": 10.0,
+      "y": 16.0,
+      "control": "covered"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-003_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(i) precautions taken."
+    },
+    "HW-R-004_reminder": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 'regardless of visible combustibles'; spaces below/beyond are still to be inspected."
+    }
+   }
+  },
+  {
+   "id": "opening-outside-zone",
+   "intent": "negative: opening beyond zone",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [
+     {
+      "kind": "floor opening",
+      "x": 25.0,
+      "y": 18.0,
+      "control": "none"
+     }
+    ],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-003_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 17.000 m > 11 m."
+    },
+    "HW-R-004_reminder": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no opening or hidden-space wall in zone"
+    }
+   }
+  },
+  {
+   "id": "hidden-space-wall-in-zone",
+   "intent": "headline: wall hiding a void within zone triggers inspection reminder, no combustibles",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 14.0,
+      "y1": 2.0,
+      "x2": 14.0,
+      "y2": 18.0,
+      "hides_space": true
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "wall_min_distance_m": {
+     "ref": 4.0,
+     "tol": {
+      "abs": 1e-06,
+      "unit": "m"
+     },
+     "basis": "physics",
+     "derivation": "point-to-segment distance"
+    },
+    "HW-R-004_reminder": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "4 m < 11 m; 29 CFR 1910.252(a)(2)(x) other side; spec 09 hidden void rule."
+    },
+    "hidden_space_flags_at_least_1": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 09"
+    }
+   }
+  },
+  {
+   "id": "hidden-space-wall-outside-zone",
+   "intent": "negative: hidden-space wall 15 m away",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 25.0,
+      "y1": 2.0,
+      "x2": 25.0,
+      "y2": 18.0,
+      "hides_space": true
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-004_reminder": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "min distance 15.0 m > 11 m."
+    }
+   }
+  },
+  {
+   "id": "hidden-checklist-unanswered",
+   "intent": "insufficient data: other side of wall/floor checklist not answered",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": false,
+     "inspected": false
+    }
+   },
+   "checks": {
+    "HW-R-016_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 MVP 'Checklist hidden spaces/other side of wall/floor'; unanswered = missing data."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "fire-watch-absent",
+   "intent": "headline conflict: fire watch absent",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": false,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-005_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(iii)(A); HSE welding page 'A fire watch should be maintained during and after the hot work'."
+    },
+    "fire_watch_status_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "post-watch-not-stated",
+   "intent": "insufficient data: post-work watch period missing",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": null
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: post-work watch period user-defined; missing -> not clear (spec 00 s0.5)."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "post-watch-20-vs-min-30",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 20
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "20 < 30; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-29-vs-min-30",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 29
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 < 30; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-30-vs-min-30",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "30 >= 30; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-31-vs-min-30",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 31
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "31 >= 30; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-45-vs-min-60",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 60
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 45
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "45 < 60; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-60-vs-min-60",
+   "intent": "boundary: post-work watch vs user-entered site minimum ('at least')",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 60
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 60
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "60 >= 60; 'at least a half hour' 29 CFR 1910.252(a)(2)(iii)(B); HSE welding page 30 min, may be extended to 60 min. Minimum is user-entered."
+    }
+   }
+  },
+  {
+   "id": "post-watch-no-site-minimum",
+   "intent": "rule: no site minimum entered -> stated period accepted, no invented limit",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": null
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 15
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-006_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 'Illustrative distances cannot appear as legal requirements'; no limit entered, none may be invented (OSHA/HSE 30 min not applied as default)."
+    }
+   }
+  },
+  {
+   "id": "no-extinguisher",
+   "intent": "headline conflict: no extinguishing means",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-007_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(ii) suitable fire extinguishing equipment ready for instant use."
+    },
+    "extinguishing_readiness_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "extinguisher-behind-wall",
+   "intent": "headline conflict: extinguisher inaccessible (wall crosses straight access line)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 11.5,
+      "y1": 7.0,
+      "x2": 11.5,
+      "y2": 13.0,
+      "hides_space": false
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "line_crosses_wall": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "orientation test"
+    },
+    "HW-R-008_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 conflict 'extinguisher inaccessible'; straight-line access model declared by tool."
+    },
+    "extinguishing_readiness_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only extinguisher inaccessible"
+    }
+   }
+  },
+  {
+   "id": "extinguisher-wall-near-not-crossing",
+   "intent": "negative: wall close to but not crossing access line",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 11.5,
+      "y1": 11.0,
+      "x2": 11.5,
+      "y2": 14.0,
+      "hides_space": false
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "line_crosses_wall": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "segment ends at y=11, line at y=10"
+    },
+    "HW-R-008_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "no crossing"
+    }
+   }
+  },
+  {
+   "id": "extinguisher-reach-12m",
+   "intent": "boundary: extinguisher reach 10 m (user-entered pack value)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 22.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-009_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 12.0 m vs reach 10 m."
+    }
+   }
+  },
+  {
+   "id": "extinguisher-reach-10.5m",
+   "intent": "boundary: extinguisher reach 10 m (user-entered pack value)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 20.5,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-009_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 10.5 m vs reach 10 m."
+    }
+   }
+  },
+  {
+   "id": "extinguisher-reach-9.9m",
+   "intent": "boundary: extinguisher reach 10 m (user-entered pack value)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 19.9,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-009_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 9.9 m vs reach 10 m."
+    }
+   }
+  },
+  {
+   "id": "extinguisher-not-checked",
+   "intent": "rule: accessible extinguisher not checked",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": false
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-010_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(ii) 'maintained in a state of readiness'."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "two-extinguishers-one-accessible",
+   "intent": "rule: one accessible checked extinguisher satisfies 'at least one'",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [
+     {
+      "x1": 11.5,
+      "y1": 7.0,
+      "x2": 11.5,
+      "y2": 13.0,
+      "hides_space": false
+     }
+    ],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     },
+     {
+      "kind": "portable extinguisher",
+      "x": 7.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-007_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(ii)."
+    },
+    "at_least_one_accessible": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "(7,10) at 3 m, wall at x=11.5 not crossed"
+    }
+   }
+  },
+  {
+   "id": "flammable-atmosphere-no-test",
+   "intent": "headline: gas test required where flammable atmosphere possible",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "yes",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-011_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(vi)(C) hot work prohibited in presence of explosive atmospheres."
+    },
+    "gas_test_status_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "same"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "flammable-atmosphere-test-recorded",
+   "intent": "negative: test evidence recorded",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "yes",
+     "gas_free_test_recorded": true
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-011_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(2)(vi)(C)."
+    },
+    "gas_test_status_ok": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "evidence present"
+    }
+   }
+  },
+  {
+   "id": "flammable-atmosphere-unknown",
+   "intent": "insufficient data: atmosphere not assessed",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "unknown",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). unknown is missing data"
+    },
+    "gas_test_status_ok": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 00 s0.5"
+    }
+   }
+  },
+  {
+   "id": "cylinder-not-upright-secured",
+   "intent": "rule: cylinder not upright/secured",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [
+     {
+      "gas": "acetylene",
+      "x": 25.0,
+      "y": 15.0,
+      "upright": false,
+      "secured": false,
+      "shielded": false
+     }
+    ],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-012_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.253(b)(5)(iii)(A) fuel-gas cylinders valve end up in use; (b)(3)(ii) acetylene valve end up; (b)(2)(ii) not knocked over."
+    },
+    "HW-R-013_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d = 15.81 m > 11 m"
+    }
+   }
+  },
+  {
+   "id": "fuel-cylinder-in-zone-unshielded",
+   "intent": "headline: gas cylinder in spark zone",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [
+     {
+      "gas": "acetylene",
+      "x": 14.0,
+      "y": 10.0,
+      "upright": true,
+      "secured": true,
+      "shielded": false
+     }
+    ],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-013_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.253(b)(5)(i)(I) far enough away that sparks/slag/flame will not reach them, or fire-resistant shields."
+    },
+    "HW-R-014_emergency_note_present": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 gas fire logic: stop supply where applicable."
+    },
+    "emergency_note_does_not_require_unconditional_approach": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: no generic instruction that encourages unsafe intervention."
+    }
+   }
+  },
+  {
+   "id": "oxygen-cylinder-in-zone-shielded",
+   "intent": "negative: shielded cylinder",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [
+     {
+      "gas": "oxygen",
+      "x": 14.0,
+      "y": 10.0,
+      "upright": true,
+      "secured": true,
+      "shielded": true
+     }
+    ],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-013_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.253(b)(5)(i)(I) 'or fire-resistant shields'."
+    },
+    "HW-R-012_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "upright and secured"
+    }
+   }
+  },
+  {
+   "id": "cylinder-outside-zone-ok",
+   "intent": "negative: cylinder outside zone, upright, secured",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [
+     {
+      "gas": "propane",
+      "x": 22.5,
+      "y": 10.0,
+      "upright": true,
+      "secured": true,
+      "shielded": false
+     }
+    ],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-013_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "12.5 m > 11 m"
+    },
+    "HW-R-012_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "upright, secured"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "All modelled controls present -> best wording 'No unresolved finding in the modelled scope' (spec 00 s0.5: no permission/compliance claim). "
+    }
+   }
+  },
+  {
+   "id": "contained-flammables-not-isolated",
+   "intent": "rule: equipment that held flammables not isolated/purged",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": true,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-015_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(3)(i) cleaned so no flammable materials present; (a)(3)(ii) vented, purging recommended."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "contained-flammables-isolated-purged",
+   "intent": "negative: isolation and purge recorded",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": true,
+     "isolated": true,
+     "purged": true
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-015_open": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "source",
+     "derivation": "29 CFR 1910.252(a)(3)."
+    }
+   }
+  },
+  {
+   "id": "no-work-point",
+   "intent": "insufficient data: spatial checks without work point",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": null,
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 25.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-017_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 00 s0.5"
+    },
+    "overall_state": {
+     "ref": "insufficient data",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README vocabulary; zero uncontrolled combustibles must not be reported as clear."
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "no-activity",
+   "intent": "insufficient data: activity not stated (hazard profile unknown)",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": null,
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "HW-R-017_open": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "spec 09 input 'Activity -> hazard profile'; spec 00 s0.5"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "An open control or missing data exists, so the result must not be the no-unresolved-finding state (spec 00 s0.5). "
+    }
+   }
+  },
+  {
+   "id": "wrong-plan-schema-refused",
+   "intent": "negative: plan file with wrong schema",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/permitworkstudio-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "refused_with_visible_message": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "README: wrong schema refused; spec 00 state gate."
+    }
+   }
+  },
+  {
+   "id": "default-pack-labelled-illustrative",
+   "intent": "acceptance: shipped defaults are labelled illustrative",
+   "inputs": {
+    "rule_pack": "shipped default (not edited)",
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "radius_basis_label": {
+     "ref": "illustrative",
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09: 'defaults labelled illustrative'; 'Illustrative distances cannot appear as legal requirements without source label'."
+    },
+    "radius_presented_as_legal_requirement": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "same"
+    }
+   }
+  },
+  {
+   "id": "findings-sorted-by-distance",
+   "intent": "acceptance: review list sorted by criticality then distance; plan and list numbering agree",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "paper",
+      "x": 18.0,
+      "y": 10.0,
+      "control": "none"
+     },
+     {
+      "type": "rags",
+      "x": 13.0,
+      "y": 10.0,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 13.0,
+      "y": 10.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "uncontrolled_combustibles": {
+     "ref": 2,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "3 m and 8 m both < 11 m"
+    },
+    "nearer_combustible_listed_first": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 'Review mode lists hazards sorted by distance/criticality' (same severity)."
+    },
+    "every_spatial_finding_on_plan_and_list": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "Spec 09 acceptance criterion 1."
+    }
+   }
+  },
+  {
+   "id": "random-00",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "cutting",
+     "height_m": 0.0,
+     "spark_direction_deg": -93.2
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 19.712,
+      "y": 13.468,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=10.313, R=11.00, bearing 19.7 vs -93.2; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-01",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "brazing",
+     "height_m": 0.0,
+     "spark_direction_deg": -23.1
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 22.597,
+      "y": 8.821,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 5.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=12.652, R=5.00, bearing -5.3 vs -23.1; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-02",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "heating",
+     "height_m": 3.82,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 16.175,
+      "y": 9.113,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 8.82,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 5.0 + 1*3.82"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=6.238, R=8.82; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-03",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "cutting",
+     "height_m": 4.95,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 22.196,
+      "y": 1.378,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 15.95,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*4.95"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=14.936, R=15.95; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-04",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": 125.3
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 26.489,
+      "y": 9.604,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=16.494, R=11.00, bearing -1.4 vs 125.3; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-05",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "heating",
+     "height_m": 0.0,
+     "spark_direction_deg": 31.4
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 29.189,
+      "y": 9.566,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 5.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 5.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=19.194, R=5.00, bearing -1.3 vs 31.4; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-06",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": -2.2
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 20.865,
+      "y": 12.143,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=11.074, R=11.00, bearing 11.2 vs -2.2; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-07",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 4.242,
+      "y": 11.091,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=5.860, R=11.00; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-08",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "cutting",
+     "height_m": 0.0,
+     "spark_direction_deg": -44.2
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 19.66,
+      "y": 9.624,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=9.667, R=11.00, bearing -2.2 vs -44.2; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-09",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "heating",
+     "height_m": 2.62,
+     "spark_direction_deg": 55.2
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 11.677,
+      "y": 10.84,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 7.62,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 5.0 + 1*2.62"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=1.876, R=7.62, bearing 26.6 vs 55.2; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-10",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "heating",
+     "height_m": 2.48,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 18.756,
+      "y": 9.25,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 7.48,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 5.0 + 1*2.48"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=8.788, R=7.48; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-11",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "welding",
+     "height_m": 0.0,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 20.915,
+      "y": 12.375,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 0,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=11.170, R=11.00; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": true,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-12",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "grinding",
+     "height_m": 0.0,
+     "spark_direction_deg": 136.2
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 8.182,
+      "y": 16.845,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 11.0,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*0.0"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=7.082, R=11.00, bearing 104.9 vs 136.2; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  },
+  {
+   "id": "random-13",
+   "intent": "randomized geometry (seed 20260916), all other controls in place",
+   "inputs": {
+    "plan": {
+     "schema": "tools.petrov.re/hotworkrisk-plan/v1",
+     "width_m": 30,
+     "height_m": 20
+    },
+    "rule_pack": {
+     "kind": "company",
+     "source": "Bench site procedure BSP-HW rev 1 (fictitious, user-entered)",
+     "r_welding": 11.0,
+     "r_cutting": 11.0,
+     "r_grinding": 11.0,
+     "r_heating": 5.0,
+     "r_brazing": 5.0,
+     "k_elev": 1.0,
+     "near_field_fraction": 0.3,
+     "sector_half_angle_deg": 60.0,
+     "extinguisher_reach_m": 10.0,
+     "site_min_post_watch_min": 30
+    },
+    "work_point": {
+     "x": 10.0,
+     "y": 10.0,
+     "activity": "grinding",
+     "height_m": 2.71,
+     "spark_direction_deg": null
+    },
+    "combustibles": [
+     {
+      "type": "cardboard",
+      "x": 11.959,
+      "y": 19.051,
+      "control": "none"
+     }
+    ],
+    "openings": [],
+    "walls": [],
+    "cylinders": [],
+    "extinguishers": [
+     {
+      "kind": "portable extinguisher",
+      "x": 10.0,
+      "y": 11.0,
+      "checked": true
+     }
+    ],
+    "fire_watch": {
+     "assigned": true,
+     "post_work_watch_min": 30
+    },
+    "gas": {
+     "flammable_atmosphere_possible": "no",
+     "gas_free_test_recorded": false
+    },
+    "isolation": {
+     "equipment_contained_flammables": false,
+     "isolated": false,
+     "purged": false
+    },
+    "hidden_space_checklist": {
+     "answered": true,
+     "inspected": true
+    }
+   },
+   "checks": {
+    "zone_radius_m": {
+     "ref": 13.71,
+     "tol": {
+      "rel": 1e-09
+     },
+     "basis": "physics",
+     "derivation": "R = 11.0 + 1*2.71"
+    },
+    "uncontrolled_combustibles": {
+     "ref": 1,
+     "tol": "exact",
+     "basis": "physics",
+     "derivation": "d=9.261, R=13.71; margin >= 0.05 m"
+    },
+    "overall_no_unresolved": {
+     "ref": false,
+     "tol": "exact",
+     "basis": "acceptance-criterion",
+     "derivation": "only possible open item is this combustible"
+    }
+   }
+  }
+ ],
+ "not_benchmarked": [
+  "Exact equality at the zone radius (OSHA uses both 'closer than 35 ft' and 'at least 35 ft'; inclusivity is a site choice).",
+  "Shipped default distances (11 m, 5 m, 0.3R, 60 deg, 10 m reach): illustrative, not confirmed against NFPA 51B (paywalled) or VCA material (not accessible); cases supply their own pack values. Only the 'illustrative' label is tested.",
+  "VCA hot-work teaching content: not read; no expectation depends on it.",
+  "Severity ordering between different rule types; only same-severity distance ordering is tested.",
+  "PDF content (plan figure, checklist), mobile/print layout, 7-language strings, permalink/localStorage, safety-exchange handoff mapping, images: UI/QA properties.",
+  "HW-R-001 and HW-R-018 are tested only through zone_radius values; wording of HW-R-014 note tested only as a boolean property.",
+  "Ignition probability, spark trajectory, fire growth, fire resistance: out of scope per spec 09."
+ ],
+ "coverage": "Spec 09 MVP: work area and point, activities (5 profiles), height, spark direction sector, combustibles with remove/cover/shield, flammable liquids, openings/drains/ducts, hidden-space walls and checklist, cylinders, extinguishers (presence, access, reach, check), fire watch and user-defined post-work watch, gas test, isolation/purge; conflict detection (inaccessible extinguisher, absent fire watch, combustible inside zone); illustrative labelling; insufficient data; wrong-schema refusal; sort order and plan/list consistency."
+}

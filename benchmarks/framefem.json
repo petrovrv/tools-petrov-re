@@ -1,0 +1,6141 @@
+{
+  "schema": "tools.petrov.re/benchmark/v1",
+  "tool": "framefem",
+  "file": "framefem.html",
+  "reference": "Closed-form Euler–Bernoulli static, free-vibration and Euler-column buckling solutions plus axial-bar, SDOF and exact reduced-matrix P-Delta identities, recorded on 2026-09-05 by an independent harness. Each case is computed by framefem.html in Chromium through its own analyze(); nine further cases execute the page-generated standard-library Python exports for static, static end-release, P-Delta, P-Delta end-release, modal, modal end-release, buckling and buckling end-release states.",
+  "reference_citations": [
+    "Reference identities: simply supported UDL R=wL/2, Mmax=wL^2/8, delta=5wL^4/(384EI); central point load R=P/2, Mmax=PL/4, delta=PL^3/(48EI); cantilever tip force delta=PL^3/(3EI), theta=PL^2/(2EI); tip moment delta=ML^2/(2EI), theta=ML/EI; axial u=PL/EA; restrained thermal force N=EA alpha DeltaT. These are standard Euler–Bernoulli/axial-bar results derivable directly from equilibrium and EI v''=M / EA u'=N.",
+    "Modal references: simply-supported f_n=n^2*pi/(2L^2)*sqrt(EI/mu); cantilever f_n=beta_n^2/(2*pi*L^2)*sqrt(EI/mu), beta={1.8751040687,4.6940911330,7.8547574382}; SDOF f=(1/2*pi)*sqrt(k/m).",
+    "Buckling references: Euler Pcr=pi^2 EI/(K L)^2, with K=1 for pinned-pinned and K=2 for fixed-free; restrained thermal compression N=EA alpha DeltaT; eigenvalue factor lambda=Pcr/Pref.",
+    "Second-order references: Kg=0 reduces exactly to scaled linear statics; a one-element fixed-guided column with one transverse DOF gives u=H/(12EI/L^3 - 36P/(30L)); for a fixed-pinned released end, direct condensation of the 2x2 tangent [v,theta_h] gives u=H/(A-B^2/D); continuation beyond tangent singularity must be rejected.",
+    "Cross-check coverage additionally includes member end-moment release condensation (double-hinged and fixed-pinned UDL beams), fully restrained static reaction recovery, coordinate transformation (3-4-5 inclined member), nodal ground spring stiffness, linear load-combination superposition, two-element assembly consistency, stable zero-load solve, singular-mechanism rejection, consistent-mass modal convergence, exact internal-DOF member-release modal assembly, exact SDOF participation/effective mass and zero-mass rejection.",
+    "Python-export regression executes the generated scripts under bare python3. Static export includes member end-release condensation and released free-DOF filtering; modal export preserves released-end consistent mass with independent internal rotational DOFs; static/P-Delta use dense Gaussian elimination; modal/buckling use dense Cholesky congruence plus symmetric Jacobi, providing a solver path structurally different from the browser sparse PCG/subspace implementation."
+  ],
+  "external_references": [
+    {
+      "topic": "Euler-Bernoulli beam static deflection",
+      "publisher": "MIT OpenCourseWare",
+      "url": "https://live.ocw.mit.edu/courses/1-050-solid-mechanics-fall-2004/f9a4d5764b9b0f51ffaacbdf69f7aed8_emech10_04.pdf",
+      "cases": [
+        "cantilever_tip",
+        "cantilever_tip_moment",
+        "simply_supported_udl"
+      ]
+    },
+    {
+      "topic": "Cantilever beam natural frequencies",
+      "publisher": "Harvey Mudd College",
+      "url": "https://pages.hmc.edu/spjut/NewE80/PDFs/Lecture10-VibSysIDlecture-2015.pdf",
+      "cases": [
+        "modal_cantilever"
+      ]
+    },
+    {
+      "topic": "Euler column buckling",
+      "publisher": "University of Maryland",
+      "url": "https://huginn.eng.umd.edu/ebooks/staticsF2016/resources/_pdfs_/StaticsF16S17__.pdf",
+      "cases": [
+        "buckling_pinned_column",
+        "buckling_pinned_column_releases",
+        "buckling_cantilever_column"
+      ]
+    },
+    {
+      "topic": "Pinned-end Euler buckling derivation",
+      "publisher": "University of Illinois Urbana-Champaign",
+      "url": "https://mechref.engr.illinois.edu/sol/buckling.html",
+      "cases": [
+        "buckling_pinned_column",
+        "buckling_pinned_column_releases"
+      ]
+    }
+  ],
+  "tolerance": "Pass if |got-ref| <= max(tolAbs, tolRel*|ref|). Modal FE frequencies rel 8e-4; SDOF modal rel 1e-12/abs 1e-9; buckling factor rel 8e-5, reference N rel 1e-9; second-order rel 4e-9/abs 1e-15; static rel 2e-9, abs 1e-12 (1e-6 for force/moment when ref=0). Categorical: hinge rotations finite and nonzero; rejections require ok=false and matching diagnostic.",
+  "driver": "bench-src/run_framefem.mjs",
+  "driven": "http://127.0.0.1:8321/framefem.html?lang=en",
+  "run_at": "2026-10-17T21:38:52Z",
+  "total": 41,
+  "passed": 41,
+  "failed": 0,
+  "flagged": 0,
+  "page_errors": [],
+  "console_errors": [],
+  "worst_relative_error": 0.0006082410486724515,
+  "worst_metric": "modal_cantilever:f3",
+  "cases": [
+    {
+      "id": "ss_udl",
+      "note": "Simply supported beam, full UDL: R=wL/2, Mmax=wL^2/8, delta_max=5wL^4/(384EI).",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_A": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Vmax": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "delta_max": {
+          "got": 0.0019841269841269836,
+          "ref": 0.001984126984126984,
+          "unit": "m",
+          "abs": 4.336808689942018e-19,
+          "rel": 2.185751579730777e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "ss_point_center",
+      "note": "Simply supported beam, central point load: R=P/2, Mmax=PL/4, delta_max=PL^3/(48EI).",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "xi": 0.5,
+            "Px": 0,
+            "Py": -10000
+          }
+        ]
+      },
+      "cmp": {
+        "R_A": {
+          "got": 5000,
+          "ref": 5000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 5000,
+          "ref": 5000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 10000,
+          "ref": 10000,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Vmax": {
+          "got": 5000,
+          "ref": 5000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "delta_max": {
+          "got": 0.0007936507936507937,
+          "ref": 0.0007936507936507937,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "ss_point_offset",
+      "note": "Simply supported beam, offset point load: reactions and M at load point.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 6,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "xi": 0.3333333333333333,
+            "Px": 0,
+            "Py": -12000
+          }
+        ]
+      },
+      "cmp": {
+        "R_A": {
+          "got": 8000.000000000002,
+          "ref": 8000,
+          "unit": "N",
+          "abs": 1.8189894035458565e-12,
+          "rel": 2.2737367544323206e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 4000,
+          "ref": 4000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 16000.000000000004,
+          "ref": 16000,
+          "unit": "N m",
+          "abs": 3.637978807091713e-12,
+          "rel": 2.2737367544323206e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Vmax": {
+          "got": 8000.000000000002,
+          "ref": 8000,
+          "unit": "N",
+          "abs": 1.8189894035458565e-12,
+          "rel": 2.2737367544323206e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "cantilever_tip_force",
+      "note": "Cantilever, tip transverse force: delta=PL^3/(3EI), theta=PL^2/(2EI), Mroot=PL.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 0,
+            "Fy": -10000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_y": {
+          "got": 10000,
+          "ref": 10000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_M": {
+          "got": 40000.00000000002,
+          "ref": 40000,
+          "unit": "N m",
+          "abs": 2.1827872842550278e-11,
+          "rel": 5.456968210637569e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "tip_v": {
+          "got": 0.012698412698412705,
+          "ref": 0.012698412698412698,
+          "unit": "m",
+          "abs": 6.938893903907228e-18,
+          "rel": 5.464378949326942e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "tip_theta": {
+          "got": 0.004761904761904766,
+          "ref": 0.004761904761904762,
+          "unit": "rad",
+          "abs": 3.469446951953614e-18,
+          "rel": 7.285838599102589e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 40000.00000000002,
+          "ref": 40000,
+          "unit": "N m",
+          "abs": 2.1827872842550278e-11,
+          "rel": 5.456968210637569e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "cantilever_tip_moment",
+      "note": "Cantilever, tip moment: theta=ML/EI, delta=ML^2/(2EI), constant M.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 0,
+            "Fy": 0,
+            "Mz": 15000
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_M": {
+          "got": 15000.000000000015,
+          "ref": 15000,
+          "unit": "N m",
+          "abs": 1.4551915228366852e-11,
+          "rel": 9.701276818911235e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "tip_v": {
+          "got": 0.004017857142857143,
+          "ref": 0.0040178571428571425,
+          "unit": "m",
+          "abs": 8.673617379884035e-19,
+          "rel": 2.1587669923266935e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "tip_theta": {
+          "got": 0.0026785714285714286,
+          "ref": 0.0026785714285714286,
+          "unit": "rad",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 15000.000000000015,
+          "ref": 15000,
+          "unit": "N m",
+          "abs": 1.4551915228366852e-11,
+          "rel": 9.701276818911235e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "axial_tension",
+      "note": "Horizontal cantilever member under pure axial tip force: u=PL/EA and N=P.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 100000,
+            "Fy": 0,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_u": {
+          "got": 0.00015873015873015873,
+          "ref": 0.00015873015873015873,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Nmax": {
+          "got": 100000,
+          "ref": 100000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_x": {
+          "got": 100000,
+          "ref": 100000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "axial_ground_spring",
+      "note": "Axial member and nodal ground spring act in parallel: u=P/(EA/L+k).",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 100000000,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 100000,
+            "Fy": 0,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_u": {
+          "got": 0.000136986301369863,
+          "ref": 0.000136986301369863,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "bar_N": {
+          "got": 86301.3698630137,
+          "ref": 86301.3698630137,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "spring_share": {
+          "got": 13698.630136986301,
+          "ref": 13698.630136986301,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "thermal_free",
+      "note": "Cantilever member with uniform temperature change and free axial end: u=alpha*dT*L, N=0.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": 0,
+            "dT": 50
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_u": {
+          "got": 0.0024000000000000002,
+          "ref": 0.0024000000000000002,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Nmax": {
+          "got": 2.3283064365386963e-10,
+          "ref": 0,
+          "unit": "N",
+          "abs": 2.3283064365386963e-10,
+          "rel": 2.3283064365386963e-10,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_x": {
+          "got": -2.3283064365386963e-10,
+          "ref": 0,
+          "unit": "N",
+          "abs": 2.3283064365386963e-10,
+          "rel": 2.3283064365386963e-10,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "thermal_restrained",
+      "note": "Uniform temperature change with both axial ends restrained: |N|=EA alpha dT.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": true,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": 0,
+            "dT": 50
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "Nmax": {
+          "got": 1512000,
+          "ref": 1512000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_Ax": {
+          "got": 1512000,
+          "ref": 1512000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_Bx": {
+          "got": 1512000,
+          "ref": 1512000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "inclined_axial",
+      "note": "3-4-5 inclined cantilever member loaded along its local axis; tests global/local transformation.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 3,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 36000,
+            "Fy": 48000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "ux": {
+          "got": 0.00007142857142855959,
+          "ref": 0.00007142857142857142,
+          "unit": "m",
+          "abs": 1.1831356207248067e-17,
+          "rel": 1.6563898690147297e-13,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "uy": {
+          "got": 0.00009523809523809612,
+          "ref": 0.00009523809523809524,
+          "unit": "m",
+          "abs": 8.809142651444724e-19,
+          "rel": 9.24959978401696e-15,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Nmax": {
+          "got": 59999.99999999678,
+          "ref": 60000,
+          "unit": "N",
+          "abs": 3.2232492230832577e-9,
+          "rel": 5.3720820384720964e-14,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 2.8642452992722063e-11,
+          "ref": 0,
+          "unit": "N m",
+          "abs": 2.8642452992722063e-11,
+          "rel": 2.8642452992722063e-11,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "linear_combination",
+      "note": "1.35G+1.5Q on a simply supported beam; checks exact linear superposition of solved base cases.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "CO:ULS",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          },
+          {
+            "id": "Q",
+            "name": "Q"
+          }
+        ],
+        "combinations": [
+          {
+            "id": "ULS",
+            "name": "ULS",
+            "formula": "1.35*G + 1.5*Q"
+          }
+        ],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": [
+          {
+            "case": "Q",
+            "member": "E1",
+            "xi": 0.5,
+            "Px": 0,
+            "Py": -10000
+          }
+        ]
+      },
+      "cmp": {
+        "R_A": {
+          "got": 34500,
+          "ref": 34500,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 42000,
+          "ref": 42000,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "delta": {
+          "got": 0.0038690476190476183,
+          "ref": 0.003869047619047619,
+          "unit": "m",
+          "abs": 8.673617379884035e-19,
+          "rel": 2.241796492031566e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "mesh_split_udl",
+      "note": "Simply supported UDL beam split into two frame elements; must reproduce one-element closed form.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          },
+          {
+            "case": "G",
+            "member": "E2",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_A": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 20000.000000000007,
+          "ref": 20000,
+          "unit": "N m",
+          "abs": 7.275957614183426e-12,
+          "rel": 3.637978807091713e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "delta": {
+          "got": 0.001984126984126984,
+          "ref": 0.001984126984126984,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "ss_end_moment",
+      "note": "Simply supported beam with applied end moment: vertical reactions +/-M/L and |M|max=|M|.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 0,
+            "Fy": 0,
+            "Mz": 12000
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_A": {
+          "got": 3000.0000000000005,
+          "ref": 3000,
+          "unit": "N",
+          "abs": 4.547473508864641e-13,
+          "rel": 1.5158245029548803e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": -3000.0000000000005,
+          "ref": -3000,
+          "unit": "N",
+          "abs": 4.547473508864641e-13,
+          "rel": 1.5158245029548803e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 12000.000000000002,
+          "ref": 12000,
+          "unit": "N m",
+          "abs": 1.8189894035458565e-12,
+          "rel": 1.5158245029548803e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "stable_zero_load",
+      "note": "A stable frame with zero load must solve to exactly zero; the stability probe must not mistake zero RHS for evidence of stability.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "max_u": {
+          "got": 0,
+          "ref": 0,
+          "unit": "m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "max_N": {
+          "got": 0,
+          "ref": 0,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "max_M": {
+          "got": 0,
+          "ref": 0,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "mechanism_rejected",
+      "note": "Unrestrained member has rigid-body modes and must be rejected as singular, even with zero applied load.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "singular": {
+          "got": "Unstable or singular restraint/stiffness system: stiffness is singular or not positive definite",
+          "ref": "singular/unstable diagnosis",
+          "ok": true,
+          "rule": "ok=false and error matches /singular/i"
+        }
+      },
+      "errors": [
+        "Unstable or singular restraint/stiffness system: stiffness is singular or not positive definite"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "released_ss_udl",
+      "note": "Both member end moments released while nodal Rz DOFs are restrained: recovers the simply-supported UDL closed form and zero hinge moments.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_A": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "M_A": {
+          "got": 0,
+          "ref": 0,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "M_B": {
+          "got": 0,
+          "ref": 0,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "Mmax": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "delta": {
+          "got": 0.0019841269841269836,
+          "ref": 0.001984126984126984,
+          "unit": "m",
+          "abs": 4.336808689942018e-19,
+          "rel": 2.185751579730777e-16,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "released_fixed_pinned_udl",
+      "note": "One end moment released with every global nodal DOF restrained; static condensation still permits the internal hinge rotation and returns fixed-pinned reactions.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "R_A": {
+          "got": 25000,
+          "ref": 25000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "R_B": {
+          "got": 15000,
+          "ref": 15000,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "M_A": {
+          "got": 20000,
+          "ref": 20000,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-12,
+          "tol_rel": 2e-9,
+          "ok": true
+        },
+        "M_B": {
+          "got": 0,
+          "ref": 0,
+          "unit": "N m",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0.000001,
+          "tol_rel": 2e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_cantilever",
+      "note": "Undamped uniform cantilever, 8 consistent-mass frame elements; first three bending frequencies vs Euler-Bernoulli characteristic roots cosh(beta) cos(beta) = -1.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 1,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 1.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 2.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 3.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "f1": {
+          "got": 14.770017009170889,
+          "ref": 14.76998624313249,
+          "unit": "Hz",
+          "abs": 0.0000307660383995767,
+          "rel": 0.0000020830106333972925,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        },
+        "f2": {
+          "got": 92.56932492722885,
+          "ref": 92.56192377781568,
+          "unit": "Hz",
+          "abs": 0.007401149413169605,
+          "rel": 0.00007995889790423132,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        },
+        "f3": {
+          "got": 259.3337083309429,
+          "ref": 259.17606680827663,
+          "unit": "Hz",
+          "abs": 0.15764152266626752,
+          "rel": 0.0006082410486724515,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_simply_supported",
+      "note": "Undamped uniform simply-supported beam, 8 consistent-mass elements; first two bending modes f_n = n^2*pi/(2L^2)*sqrt(EI/mu).",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 5,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 1,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 1.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 2.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 3.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "f1": {
+          "got": 41.460661284188035,
+          "ref": 41.459979578368966,
+          "unit": "Hz",
+          "abs": 0.0006817058190691228,
+          "rel": 0.000016442502528988006,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        },
+        "f2": {
+          "got": 165.88298067945507,
+          "ref": 165.83991831347586,
+          "unit": "Hz",
+          "abs": 0.043062365979210426,
+          "rel": 0.000259662247890237,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_released_simply_supported",
+      "note": "End support Rz DOFs are fixed while the first/last member ends are explicitly released. Independent internal hinge rotations with consistent mass must recover the same simply-supported Euler-Bernoulli spectrum.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 5,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 1,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 1.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 2.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 3.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": false
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "f1": {
+          "got": 41.46066128418817,
+          "ref": 41.459979578368966,
+          "unit": "Hz",
+          "abs": 0.0006817058192041259,
+          "rel": 0.00001644250253224423,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        },
+        "f2": {
+          "got": 165.8829806794551,
+          "ref": 165.83991831347586,
+          "unit": "Hz",
+          "abs": 0.04306236597923885,
+          "rel": 0.0002596622478904084,
+          "tol_abs": 0,
+          "tol_rel": 0.0008,
+          "ok": true
+        },
+        "hingeA": {
+          "got": 0.05722208956720438,
+          "ref": "nonzero internal hinge rotation",
+          "ok": true,
+          "rule": "finite and |value| > 1e-9"
+        },
+        "hingeB": {
+          "got": -0.05722208956776293,
+          "ref": "nonzero internal hinge rotation",
+          "ok": true,
+          "rule": "finite and |value| > 1e-9"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_nodal_mass_sdof",
+      "note": "Axial bar stiffness k=EA/L with a single nodal mass and zero member mass reduces exactly to one DOF: f=(1/2pi)sqrt(k/m).",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 1,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 120,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 0
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "f1": {
+          "got": 364.6697869724998,
+          "ref": 364.6697869724997,
+          "unit": "Hz",
+          "abs": 1.1368683772161603e-13,
+          "rel": 3.1175282895094715e-16,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        },
+        "mass": {
+          "got": 120,
+          "ref": 120,
+          "unit": "kg",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_participation_sdof",
+      "note": "One active translational DOF with nodal mass m must have active mass m and 100% effective modal mass in X.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 1,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 120,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 0
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "active_mass_x": {
+          "got": 120,
+          "ref": 120,
+          "unit": "kg",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        },
+        "effective_mass_x": {
+          "got": 120,
+          "ref": 120,
+          "unit": "kg",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        },
+        "ratio_x": {
+          "got": 1,
+          "ref": 1,
+          "unit": "-",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        },
+        "gamma_sq": {
+          "got": 120,
+          "ref": 120,
+          "unit": "kg",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 1e-9,
+          "tol_rel": 1e-12,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "modal_zero_mass_rejected",
+      "note": "A stable stiffness model with zero member and nodal mass must be rejected rather than returning artificial frequencies.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 3,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 0
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "mass_error": {
+          "got": "Modal analysis requires positive member mass/length or nodal mass.",
+          "ref": "positive mass required",
+          "ok": true,
+          "rule": "ok=false and error matches /mass/i"
+        }
+      },
+      "errors": [
+        "Modal analysis requires positive member mass/length or nodal mass."
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "buckling_pinned_column",
+      "note": "Pinned-pinned uniform Euler column, 8 elements, reference compression P: lambda_cr = pi^2 EI/(L^2 P).",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": -100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "factor1": {
+          "got": 103.63424178861648,
+          "ref": 103.63084621143825,
+          "unit": "-",
+          "abs": 0.0033955771782245847,
+          "rel": 0.00003276608560444041,
+          "tol_abs": 0,
+          "tol_rel": 0.00008,
+          "ok": true
+        },
+        "scaled_Pcr": {
+          "got": 10363424.178861648,
+          "ref": 10363084.621143825,
+          "unit": "N",
+          "abs": 339.5577178224921,
+          "rel": 0.00003276608560444366,
+          "tol_abs": 0,
+          "tol_rel": 0.00008,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "buckling_cantilever_column",
+      "note": "Fixed-free uniform Euler column, 8 elements, reference compression P: lambda_cr = pi^2 EI/(4 L^2 P).",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": -100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "factor1": {
+          "got": 25.907764928201388,
+          "ref": 25.907711552859563,
+          "unit": "-",
+          "abs": 0.000053375341824590805,
+          "rel": 0.000002060210594659778,
+          "tol_abs": 0,
+          "tol_rel": 0.00008,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "buckling_thermal_column",
+      "note": "Pinned column with both axial ends restrained; uniform DeltaT creates N=EA alpha DeltaT and lambda_cr=P_Euler/N.",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E2",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E3",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E4",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E5",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E6",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E7",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          },
+          {
+            "case": "G",
+            "member": "E8",
+            "wx": 0,
+            "wy": 0,
+            "dT": 10
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "reference_N": {
+          "got": 302400,
+          "ref": 302400,
+          "unit": "N",
+          "abs": 0,
+          "rel": 0,
+          "tol_abs": 0,
+          "tol_rel": 1e-9,
+          "ok": true
+        },
+        "factor1": {
+          "got": 34.27058260205627,
+          "ref": 34.26945972600471,
+          "unit": "-",
+          "abs": 0.001122876051560695,
+          "rel": 0.00003276608562079613,
+          "tol_abs": 0,
+          "tol_rel": 0.00008,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "buckling_tension_rejected",
+      "note": "Pinned column in pure axial tension has signed stabilizing geometric stiffness and must not return a positive buckling factor.",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": 100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "diagnosis": {
+          "got": "No positive buckling eigenvalue was found for the selected pre-stress state. Compression may be absent or outweighed by tensile geometric stiffness.",
+          "ref": "no positive buckling eigenvalue",
+          "ok": true,
+          "rule": "ok=false and error matches /no positive buckling eigenvalue/i"
+        }
+      },
+      "errors": [
+        "No positive buckling eigenvalue was found for the selected pre-stress state. Compression may be absent or outweighed by tensile geometric stiffness."
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "secondorder_zero_prestress",
+      "note": "With zero axial pre-stress Kg=0, P-Delta continuation must reduce exactly to lambda K u=lambda F.",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 7,
+        "loadFactor": 1.7,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 0,
+            "Fy": -10000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_v": {
+          "got": 0.021587301587301603,
+          "ref": 0.02158730158730159,
+          "unit": "m",
+          "abs": 1.3877787807814457e-17,
+          "rel": 6.428681116855226e-16,
+          "tol_abs": 1e-15,
+          "tol_rel": 4e-9,
+          "ok": true
+        },
+        "amplification": {
+          "got": 1.0000000000000002,
+          "ref": 1,
+          "unit": "-",
+          "abs": 2.220446049250313e-16,
+          "rel": 2.220446049250313e-16,
+          "tol_abs": 1e-15,
+          "tol_rel": 4e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "The selected reference result has negligible axial pre-stress; second-order response therefore collapses to the linear-static result apart from load-factor scaling."
+      ],
+      "pass": true
+    },
+    {
+      "id": "secondorder_guided_column",
+      "note": "Fixed-guided one-element beam-column has one lateral DOF: u=H/(12EI/L^3 - 36P/(30L)) for the implemented initial-stress matrix.",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 10000,
+            "Fy": -1000000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_x": {
+          "got": 0.003508771929824561,
+          "ref": 0.0035087719298245615,
+          "unit": "m",
+          "abs": 4.336808689942018e-19,
+          "rel": 1.235990476633475e-16,
+          "tol_abs": 1e-15,
+          "tol_rel": 4e-9,
+          "ok": true
+        },
+        "amp": {
+          "got": 1.085027796215174,
+          "ref": 1.0850277962151738,
+          "unit": "-",
+          "abs": 2.220446049250313e-16,
+          "rel": 2.0464416275746475e-16,
+          "tol_abs": 1e-15,
+          "tol_rel": 4e-9,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "secondorder_beyond_critical_rejected",
+      "note": "Continuation beyond the one-DOF tangent singularity must stop instead of returning a post-critical displacement from PCG.",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 24,
+        "loadFactor": 6,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 10000,
+            "Fy": -2000000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "diagnosis": {
+          "got": "Continuation lost a positive-definite tangent at load factor 5.50000: non-positive/invalid diagonal at free DOF 1. The requested target is at or beyond an instability in this initial-stress model.",
+          "ref": "lost positive-definite tangent",
+          "ok": true,
+          "rule": "ok=false and error matches /positive-definite tangent/i"
+        }
+      },
+      "errors": [
+        "Continuation lost a positive-definite tangent at load factor 5.50000: non-positive/invalid diagonal at free DOF 1. The requested target is at or beyond an instability in this initial-stress model."
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "secondorder_fixed_pinned_release",
+      "note": "Fixed-pinned beam-column with the nodal Rz restrained but member end B released. Condensing the internal hinge rotation from the 2x2 tangent gives u=H/(A-B^2/D).",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 12,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 10000,
+            "Fy": -400000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "tip_x": {
+          "got": 0.014983438723276139,
+          "ref": 0.014983438723276125,
+          "unit": "m",
+          "abs": 1.3877787807814457e-17,
+          "rel": 9.262084668358481e-16,
+          "tol_abs": 1e-15,
+          "tol_rel": 4e-9,
+          "ok": true
+        },
+        "hinge_rotation": {
+          "got": -0.005654923215898832,
+          "ref": "nonzero internal hinge rotation",
+          "ok": true,
+          "rule": "finite and |value| > 1e-9"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "buckling_pinned_column_releases",
+      "note": "Pinned-pinned Euler column with support Rz fixed and kinematic pins supplied only by member end releases; lambda_cr=pi^2 EI/(L^2 P).",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": false
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": -100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "factor1": {
+          "got": 103.63424178861722,
+          "ref": 103.63084621143825,
+          "unit": "-",
+          "abs": 0.003395577178963549,
+          "rel": 0.00003276608561157115,
+          "tol_abs": 0,
+          "tol_rel": 0.00008,
+          "ok": true
+        },
+        "hingeA": {
+          "got": -0.000219658216222179,
+          "ref": "nonzero internal hinge rotation",
+          "ok": true,
+          "rule": "finite and |value| > 1e-9"
+        },
+        "hingeB": {
+          "got": 0.0002196582162214464,
+          "ref": "nonzero internal hinge rotation",
+          "ok": true,
+          "rule": "finite and |value| > 1e-9"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_static",
+      "note": "Generated standard-library Python independently reassembles and self-tests a linear-static frame.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 0,
+            "Fy": -10000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_released_ss",
+      "note": "Generated standard-library Python reproduces a double-end-released simply-supported UDL beam, including omission of released free nodal rotations.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_released_fixed_pinned",
+      "note": "Generated standard-library Python reproduces a fixed-pinned UDL beam whose released-end rotation exists only as an internal condensed displacement.",
+      "inputs": {
+        "analysis": "static",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 4,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [
+          {
+            "case": "G",
+            "member": "E1",
+            "wx": 0,
+            "wy": -10000,
+            "dT": 0
+          }
+        ],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_secondorder",
+      "note": "Generated standard-library Python reassembles the initial-stress P-Delta tangent and self-tests against the browser result.",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 10000,
+            "Fy": -1000000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_secondorder_release",
+      "note": "Generated standard-library Python preserves the internal released-end rotational DOF in the P-Delta tangent and self-tests against the browser result.",
+      "inputs": {
+        "analysis": "secondorder",
+        "modeCount": 6,
+        "modeIndex": 1,
+        "continuationSteps": 12,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 4,
+            "fixX": false,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N2",
+            "Fx": 10000,
+            "Fy": -400000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_modal",
+      "note": "Generated standard-library Python solves the modal eigenproblem by dense Cholesky congruence + Jacobi and self-tests against the sparse browser solver.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 1,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 1.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 2.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 3.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_modal_releases",
+      "note": "Generated standard-library Python preserves consistent-mass inertia at released member ends through independent internal rotational DOFs and self-tests the released simply-supported spectrum.",
+      "inputs": {
+        "analysis": "modal",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 1,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 1.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 2,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 2.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 3,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 3.5,
+            "y": 0,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 4,
+            "y": 0,
+            "fixX": false,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": false
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_buckling",
+      "note": "Generated standard-library Python solves the signed geometric-stiffness eigenproblem by dense Cholesky congruence + Jacobi and self-tests against the sparse browser solver.",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1"
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1"
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1"
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1"
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1"
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1"
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1"
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1"
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": -100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "id": "python_export_buckling_releases",
+      "note": "Generated standard-library Python uses independent released-end rotational DOFs in both elastic and geometric stiffness for Euler buckling and self-tests against the browser result.",
+      "inputs": {
+        "analysis": "buckling",
+        "modeCount": 4,
+        "modeIndex": 1,
+        "continuationSteps": 10,
+        "loadFactor": 1,
+        "snap": 0.25,
+        "resultSet": "LC:G",
+        "nodes": [
+          {
+            "id": "N0",
+            "x": 0,
+            "y": 0,
+            "fixX": true,
+            "fixY": true,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N1",
+            "x": 0,
+            "y": 0.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N2",
+            "x": 0,
+            "y": 1,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N3",
+            "x": 0,
+            "y": 1.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N4",
+            "x": 0,
+            "y": 2,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N5",
+            "x": 0,
+            "y": 2.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N6",
+            "x": 0,
+            "y": 3,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N7",
+            "x": 0,
+            "y": 3.5,
+            "fixX": false,
+            "fixY": false,
+            "fixR": false,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          },
+          {
+            "id": "N8",
+            "x": 0,
+            "y": 4,
+            "fixX": true,
+            "fixY": false,
+            "fixR": true,
+            "kx": 0,
+            "ky": 0,
+            "kr": 0,
+            "mass": 0,
+            "jr": 0
+          }
+        ],
+        "members": [
+          {
+            "id": "E1",
+            "a": "N0",
+            "b": "N1",
+            "section": "S1",
+            "releaseA": true,
+            "releaseB": false
+          },
+          {
+            "id": "E2",
+            "a": "N1",
+            "b": "N2",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E3",
+            "a": "N2",
+            "b": "N3",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E4",
+            "a": "N3",
+            "b": "N4",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E5",
+            "a": "N4",
+            "b": "N5",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E6",
+            "a": "N5",
+            "b": "N6",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E7",
+            "a": "N6",
+            "b": "N7",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": false
+          },
+          {
+            "id": "E8",
+            "a": "N7",
+            "b": "N8",
+            "section": "S1",
+            "releaseA": false,
+            "releaseB": true
+          }
+        ],
+        "sections": [
+          {
+            "id": "S1",
+            "name": "benchmark",
+            "E": 210000000000,
+            "A": 0.012,
+            "I": 0.00008,
+            "alpha": 0.000012,
+            "mu": 94.2
+          }
+        ],
+        "loadCases": [
+          {
+            "id": "G",
+            "name": "G"
+          }
+        ],
+        "combinations": [],
+        "nodalLoads": [
+          {
+            "case": "G",
+            "node": "N8",
+            "Fx": 0,
+            "Fy": -100000,
+            "Mz": 0
+          }
+        ],
+        "memberLoads": [],
+        "pointLoads": []
+      },
+      "cmp": {
+        "python_selftest": {
+          "got": "self-test: OK",
+          "ref": "self-test: OK",
+          "ok": true,
+          "rule": "generated Python exits 0 and prints self-test: OK"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "pass": true
+    }
+  ],
+  "not_benchmarked": [
+    "Large-displacement / corotational response; P-Delta is initial-stress continuation only.",
+    "Dynamic time-history response and damping.",
+    "Member section design checks."
+  ],
+  "build": "2026-10-17.r14-release-fix",
+  "manifest_revision": "2026-10-17.r14-release-fix",
+  "reference_provenance": "recorded",
+  "provenance_note": "Reference values are carried unchanged from bench-src/ref/framefem_ref.json, the closed-form values recorded on 2026-09-05 by an independent harness that is not in this tree; every graded figure is computed in this run by framefem.html in Chromium (the page analyze(), and for the nine Python cases the page-generated Python run with python3)."
+}

@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Water Storage &amp; Heater Sizing</title>
+<script type="application/json" id="diagram-tool-manifest">
+{
+  "schema": "tools.petrov.re/tool-manifest/v2",
+  "manifest_revision": "2026-11-06.plbdhw-1.5",
+  "id": "plbdhw",
+  "file": "plbdhw.html",
+  "listed": true,
+  "category": "plumbing",
+  "order": 30,
+  "title": {
+    "en": "Hot Water Storage & Heater Sizing",
+    "uk": "Підбір бака ГВП і потужності нагрівача",
+    "de": "Speicher- und Erzeugerauslegung Trinkwarmwasser",
+    "nl": "Boilervat en vermogen voor warm tapwater",
+    "fr": "Dimensionnement du ballon et du générateur ECS",
+    "es": "Dimensionado de acumulador y generador de ACS",
+    "pl": "Dobór zasobnika i mocy podgrzewacza c.w.u."
+  },
+  "summary": {
+    "en": "Storage volume against heater power for a design-day draw profile: the trade-off curve, reheat time, losses, instantaneous power, heat pump with booster and the 60 °C check.",
+    "uk": "Об'єм бака проти потужності нагрівача для профілю водорозбору розрахункової доби: крива компромісу, час нагріву, втрати, миттєва потужність, тепловий насос з догрівом і перевірка 60 °C.",
+    "de": "Speichervolumen gegen Erzeugerleistung für ein Zapfprofil des Auslegungstags: Abwägungskurve, Aufheizzeit, Verluste, Durchlaufleistung, Wärmepumpe mit Nachheizung und 60-°C-Prüfung.",
+    "nl": "Voorraadvolume tegenover toestelvermogen voor een tapprofiel van de ontwerpdag: de afwegingscurve, opwarmtijd, verliezen, doorstroomvermogen, warmtepomp met naverwarming en de 60 °C-controle.",
+    "fr": "Volume de stockage face à la puissance du générateur pour un profil de puisage du jour de dimensionnement : courbe de compromis, temps de réchauffage, pertes, puissance instantanée, pompe à chaleur avec appoint et contrôle 60 °C.",
+    "es": "Volumen de acumulación frente a potencia del generador para un perfil de consumo del día de diseño: curva de compromiso, tiempo de recalentamiento, pérdidas, potencia instantánea, bomba de calor con apoyo y comprobación de 60 °C.",
+    "pl": "Pojemność zasobnika wobec mocy podgrzewacza dla profilu poboru w dobie obliczeniowej: krzywa kompromisu, czas nagrzewania, straty, moc przepływowa, pompa ciepła z dogrzewaniem i kontrola 60 °C."
+  },
+  "description": {
+    "en": "Choose a building profile (dwellings, office, hotel, care home, school, sports showers) or load an example. The daily draw is spread on a 15-minute grid; the store must cover the worst cumulative deficit between draw and heater (sequent-peak method) and the short peak above the grid. The tool gives the volume for a heater power or the power for a volume, the nominal store size, reheat time, standing and circulation losses, the instantaneous alternative, the heat-pump share with booster and a legionella flag below 60 °C. The curve shows how volume buys power. Results go to the plumbing project file and the heater power to the heat generator selector.",
+    "uk": "Виберіть профіль будівлі (житло, офіс, готель, будинок догляду, школа, душові спортзалу) або завантажте приклад. Добовий водорозбір розподіляється по сітці 15 хвилин; бак має покрити найбільший накопичений дефіцит між водорозбором і нагрівачем (метод послідовного піку) та короткий пік понад сітку. Інструмент дає об'єм для заданої потужності або потужність для заданого об'єму, номінальний розмір бака, час нагріву, втрати бака й циркуляції, проточну альтернативу, частку теплового насоса з догрівом і позначку легіонели нижче 60 °C. Крива показує, як об'єм заміщує потужність. Результати йдуть у файл сантехнічного проєкту, а потужність нагрівача — в інструмент вибору теплогенератора.",
+    "de": "Wählen Sie ein Gebäudeprofil (Wohnungen, Büro, Hotel, Pflegeheim, Schule, Sportduschen) oder laden Sie ein Beispiel. Der Tagesbedarf wird auf ein 15-Minuten-Raster verteilt; der Speicher muss das größte kumulierte Defizit zwischen Zapfung und Erzeuger (Sequent-Peak-Verfahren) und die kurze Spitze oberhalb des Rasters decken. Das Werkzeug liefert das Volumen zu einer Leistung oder die Leistung zu einem Volumen, die Nenngröße, die Aufheizzeit, Bereitschafts- und Zirkulationsverluste, die Durchlauf-Alternative, den Wärmepumpenanteil mit Nachheizung und einen Legionellen-Hinweis unter 60 °C. Die Kurve zeigt, wie Volumen Leistung ersetzt. Die Ergebnisse gehen in die Sanitär-Projektdatei, die Erzeugerleistung an die Wärmeerzeugerauswahl.",
+    "nl": "Kies een gebouwprofiel (woningen, kantoor, hotel, woonzorgcentrum, school, sportdouches) of laad een voorbeeld. Het dagverbruik wordt verdeeld over een raster van 15 minuten; het voorraadvat moet het grootste cumulatieve tekort tussen tappen en toestel dekken (sequent-peak-methode) en de korte piek boven het raster. De tool geeft het volume bij een vermogen of het vermogen bij een volume, de nominale vatgrootte, opwarmtijd, stilstands- en circulatieverliezen, het doorstroomalternatief, het aandeel van de warmtepomp met naverwarming en een legionellavlag onder 60 °C. De curve toont hoe volume vermogen vervangt. Resultaten gaan naar het sanitair projectbestand en het toestelvermogen naar de warmteopwekkerkeuze.",
+    "fr": "Choisissez un profil de bâtiment (logements, bureaux, hôtel, maison de repos, école, douches de salle de sport) ou chargez un exemple. Le puisage journalier est réparti sur une grille de 15 minutes ; le ballon doit couvrir le plus grand déficit cumulé entre puisage et générateur (méthode du pic séquentiel) et la courte pointe au-delà de la grille. L'outil donne le volume pour une puissance ou la puissance pour un volume, la taille nominale, le temps de réchauffage, les pertes statiques et de bouclage, l'alternative instantanée, la part de la pompe à chaleur avec appoint et un signal légionelle sous 60 °C. La courbe montre comment le volume remplace la puissance. Les résultats vont dans le fichier du projet sanitaire et la puissance vers le sélecteur de générateur de chaleur.",
+    "es": "Elija un perfil de edificio (viviendas, oficina, hotel, residencia, colegio, duchas deportivas) o cargue un ejemplo. El consumo diario se reparte en una malla de 15 minutos; el acumulador debe cubrir el mayor déficit acumulado entre consumo y generador (método del pico secuencial) y el pico corto por encima de la malla. La herramienta da el volumen para una potencia o la potencia para un volumen, el tamaño nominal, el tiempo de recalentamiento, las pérdidas estáticas y de recirculación, la alternativa instantánea, la fracción de la bomba de calor con apoyo y un aviso de legionela por debajo de 60 °C. La curva muestra cómo el volumen sustituye potencia. Los resultados van al archivo del proyecto de fontanería y la potencia al selector de generador de calor.",
+    "pl": "Wybierz profil budynku (mieszkania, biuro, hotel, dom opieki, szkoła, natryski hali sportowej) albo wczytaj przykład. Pobór dobowy jest rozkładany na siatkę 15-minutową; zasobnik musi pokryć największy skumulowany deficyt między poborem a podgrzewaczem (metoda sekwencyjnego szczytu) i krótki szczyt ponad siatką. Narzędzie podaje pojemność dla mocy albo moc dla pojemności, wielkość nominalną, czas nagrzewania, straty postojowe i cyrkulacji, wariant przepływowy, udział pompy ciepła z dogrzewaniem i flagę legionelli poniżej 60 °C. Krzywa pokazuje, jak pojemność zastępuje moc. Wyniki trafiają do pliku projektu sanitarnego, a moc podgrzewacza do doboru źródła ciepła."
+  },
+  "status": "benchmarked",
+  "independent_validation": false,
+  "limitations": {
+    "en": "One design day with stated profile shapes and litres per user (learning assumptions, replace with project data), constant heater power inside the availability window, ideal control. Stratification only as a usable-volume share; the day deficit and the short peak buffer are not added. Standing loss from the Ecodesign limit unless given, 20 °C room. No distribution heat-up or waiting time (that is DHW Circulation). DIN 4708 N-number sizing is not implemented. Design aid, not a substitute for the standards, the water utility's rules and national/regional regulations.",
+    "uk": "Одна розрахункова доба із заданими формами профілю та літрами на користувача (навчальні припущення, замініть даними проєкту), стала потужність нагрівача у вікні доступності, ідеальне регулювання. Стратифікація — лише як частка корисного об'єму; добовий дефіцит і буфер короткого піку не сумуються. Втрати бака — за межею Ecodesign, якщо не задано, приміщення 20 °C. Без прогріву мережі й часу очікування (це інструмент циркуляції ГВП). Метод N-числа DIN 4708 не реалізовано. Допоміжний інструмент проєктування, не замінює стандартів, правил водоканалу та національних/регіональних норм.",
+    "de": "Ein Auslegungstag mit angegebenen Profilformen und Litern je Nutzer (Lernannahmen, durch Projektdaten ersetzen), konstante Erzeugerleistung im Freigabefenster, ideale Regelung. Schichtung nur als nutzbarer Volumenanteil; Tagesdefizit und kurzer Spitzenpuffer werden nicht addiert. Bereitschaftsverlust nach Ecodesign-Grenzwert, sofern nicht angegeben, Raum 20 °C. Kein Aufheizen der Leitungen, keine Wartezeit (das leistet die Zirkulationsauslegung). Die Kennzahlmethode N nach DIN 4708 ist nicht umgesetzt. Planungshilfe, kein Ersatz für die Normen, die Vorgaben des Wasserversorgers und nationale/regionale Vorschriften.",
+    "nl": "Eén ontwerpdag met vermelde profielvormen en liters per gebruiker (leeraannames, vervang door projectgegevens), constant toestelvermogen binnen het beschikbaarheidsvenster, ideale regeling. Stratificatie alleen als bruikbaar volumeaandeel; dagtekort en korte piekbuffer worden niet opgeteld. Stilstandsverlies volgens de Ecodesign-grens tenzij opgegeven, ruimte 20 °C. Geen opwarming van leidingen of wachttijd (dat doet de circulatietool). De N-kengetalmethode van DIN 4708 is niet geïmplementeerd. Ontwerphulpmiddel, geen vervanging van de normen, de voorschriften van de waterleverancier en nationale/regionale regelgeving.",
+    "fr": "Un seul jour de dimensionnement avec des formes de profil et des litres par usager déclarés (hypothèses pédagogiques, à remplacer par les données du projet), puissance constante dans la plage de disponibilité, régulation idéale. Stratification seulement comme part de volume utile ; le déficit journalier et le tampon de pointe ne s'additionnent pas. Pertes statiques selon la limite Ecodesign sauf valeur donnée, local à 20 °C. Pas de mise en température du réseau ni de temps d'attente (c'est l'outil bouclage ECS). La méthode du coefficient N de la DIN 4708 n'est pas implémentée. Aide à la conception, ne remplace ni les normes, ni les règles du distributeur d'eau, ni la réglementation nationale/régionale.",
+    "es": "Un único día de diseño con formas de perfil y litros por usuario declarados (supuestos didácticos, sustitúyalos por datos del proyecto), potencia constante dentro de la ventana de disponibilidad, control ideal. Estratificación solo como fracción de volumen útil; el déficit diario y el colchón de pico no se suman. Pérdidas estáticas según el límite Ecodesign salvo valor dado, local a 20 °C. Sin calentamiento de la red ni tiempo de espera (eso es la herramienta de recirculación). El método del índice N de DIN 4708 no está implementado. Ayuda de diseño, no sustituye las normas, las reglas de la compañía de aguas ni la normativa nacional/regional.",
+    "pl": "Jedna doba obliczeniowa z podanymi kształtami profilu i litrami na użytkownika (założenia dydaktyczne, zastąp danymi projektu), stała moc podgrzewacza w oknie dostępności, idealna regulacja. Uwarstwienie tylko jako udział pojemności użytecznej; deficyt dobowy i bufor krótkiego szczytu nie są sumowane. Strata postojowa według limitu Ecodesign, o ile nie podano, pomieszczenie 20 °C. Bez nagrzewania sieci i czasu oczekiwania (to narzędzie cyrkulacji c.w.u.). Metoda wskaźnika N wg DIN 4708 nie jest zaimplementowana. Pomoc projektowa, nie zastępuje norm, wymagań przedsiębiorstwa wodociągowego ani przepisów krajowych/regionalnych."
+  },
+  "intended_use": "preliminary design",
+  "catalog_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "tool_languages": [
+    "en",
+    "uk",
+    "de",
+    "nl",
+    "fr",
+    "es",
+    "pl"
+  ],
+  "dependencies": [
+    "plumbing-core.js",
+    "plb-dhw.js"
+  ],
+  "network_access": {
+    "mode": "none"
+  },
+  "validation": {
+    "basis": {
+      "en": "Cumulative demand/supply curve sizing of DHW stores in the manner of EN 12831-3:2017 and CIBSE Guide G, evaluated as the cyclic maximum deficit (sequent-peak) exactly at every 15-minute step and draw-event boundary; the design peak adds its excess above the step's mean draw once per day at its worst moment, carried in the cyclic depletion and in the daily energy; DVGW W 551 large/small class and the 3-litre pipe rule; Ecodesign standing-loss limit of Regulation (EU) 814/2013; c_w = 1.163 Wh/(L·K). Method: _plb/dhw/METHOD.md.",
+      "uk": "Підбір баків ГВП за інтегральними кривими споживання/подачі на зразок EN 12831-3:2017 і CIBSE Guide G, обчислений як циклічний максимальний дефіцит (послідовний пік) точно на кожній межі 15-хвилинного кроку та події водорозбору; розрахунковий пік додає своє перевищення над середнім водорозбором кроку раз на добу в найгірший момент, у циклічному дефіциті й у добовій енергії; клас великої/малої установки за DVGW W 551 і правило 3 літрів; межа втрат Ecodesign за Регламентом (ЄС) 814/2013; c_w = 1,163 Вт·год/(л·К). Метод: _plb/dhw/METHOD.md.",
+      "de": "Speicherauslegung über Summenlinien von Bedarf und Erzeugung nach Art von EN 12831-3:2017 und CIBSE Guide G, ausgewertet als zyklisches Maximaldefizit (Sequent-Peak) exakt an jeder Grenze der 15-Minuten-Schritte und der Zapfereignisse; die Auslegungsspitze fügt ihren Überschuss über die mittlere Zapfung des Schritts einmal pro Tag zum ungünstigsten Zeitpunkt hinzu, im zyklischen Defizit und in der Tagesenergie; DVGW-W-551-Klasse Groß-/Kleinanlage und 3-Liter-Regel; Ecodesign-Verlustgrenze der Verordnung (EU) 814/2013; c_w = 1,163 Wh/(L·K). Methode: _plb/dhw/METHOD.md.",
+      "nl": "Dimensionering van voorraadvaten met cumulatieve vraag- en aanbodcurven op de wijze van EN 12831-3:2017 en CIBSE Guide G, berekend als cyclisch maximaal tekort (sequent-peak) exact op elke grens van de stappen van 15 minuten en van de tapmomenten; de ontwerppiek voegt haar overschot boven het gemiddelde tappen van de stap eenmaal per dag op het ongunstigste moment toe, in het cyclische tekort en in de dagenergie; DVGW W 551-klasse groot/klein en de 3-literregel; Ecodesign-verlieslimiet van Verordening (EU) 814/2013; c_w = 1,163 Wh/(L·K). Methode: _plb/dhw/METHOD.md.",
+      "fr": "Dimensionnement des ballons par courbes cumulées de besoin et de production à la manière de l'EN 12831-3:2017 et du CIBSE Guide G, évalué comme déficit maximal cyclique (pic séquentiel) exactement à chaque limite des pas de 15 minutes et des puisages ; la pointe de calcul ajoute son excédent sur le puisage moyen du pas une fois par jour au pire moment, dans le déficit cyclique et dans l'énergie journalière ; classe grande/petite installation DVGW W 551 et règle des 3 litres ; limite de pertes Ecodesign du règlement (UE) 814/2013 ; c_w = 1,163 Wh/(L·K). Méthode : _plb/dhw/METHOD.md.",
+      "es": "Dimensionado de acumuladores con curvas acumuladas de demanda y aporte al modo de EN 12831-3:2017 y CIBSE Guide G, evaluado como déficit máximo cíclico (pico secuencial) exactamente en cada límite de los pasos de 15 minutos y de los consumos; el pico de diseño añade su exceso sobre el consumo medio del paso una vez al día en el peor momento, en el déficit cíclico y en la energía diaria; clase de instalación grande/pequeña DVGW W 551 y regla de los 3 litros; límite de pérdidas Ecodesign del Reglamento (UE) 814/2013; c_w = 1,163 Wh/(L·K). Método: _plb/dhw/METHOD.md.",
+      "pl": "Dobór zasobników metodą krzywych sumowych zapotrzebowania i dostawy na wzór EN 12831-3:2017 i CIBSE Guide G, liczony jako cykliczny maksymalny deficyt (sekwencyjny szczyt) dokładnie na każdej granicy kroków 15-minutowych i zdarzeń poboru; szczyt obliczeniowy dodaje swoją nadwyżkę ponad średni pobór kroku raz na dobę w najgorszym momencie, w deficycie cyklicznym i w energii dobowej; klasa dużej/małej instalacji wg DVGW W 551 i zasada 3 litrów; limit strat Ecodesign rozporządzenia (UE) 814/2013; c_w = 1,163 Wh/(L·K). Metoda: _plb/dhw/METHOD.md."
+    },
+    "independent_validation": false,
+    "benchmarks": [
+      {
+        "id": "plbdhw-method-2026-11-06",
+        "reference": {
+          "en": "82 cases computed on the page: 17 named (the seven examples and their points — 24 flats, office losses, hotel above and below the knee, sports showers, heat pump alone/with booster/with a too small booster, night tariff vs all-day, volume-to-power mode, given losses, infeasible heater, event across midnight, 55 °C school, district heat 65 °C with f 0.75) plus 40 seeded random cases over all profiles, heat sources, availability windows and loss modes. Expected values: for 57 cases a Python implementation of the published method (a consistency check, it shares the method with the page); 7 external anchors computed by hand from the energy balance, the Ecodesign 814/2013 formula and the DVGW W 551 definition (one draw against a constant heater, the same with a burst, a burst outside the heater window, a night tariff, a 200 L standing loss, the 400 L / 3 L limits). Plus 11 input-rule cases from the method text (r3): seven invalid draw events must give an error with the event number, an event typed as text numbers equals the hand anchor, and DVGW W 551 counts a one- or two-family house as a small installation whatever the store and pipe volume. r4 (deep review, rev 2): the design peak keeps its meaning — the excess of the peak flow above the step's mean draw — but is applied once a day at its worst moment, carried in the cyclic depletion, on an exact time grid (draw events integrated at their boundaries), and its excess energy is in the daily energy; anchor A2 re-derived (12.6785 kWh, 218.03 L, 300 L) and 7 hand cases added: a 160 L draw in 10 min against 5 kW (4.7491 kWh, 100 L; also across a step boundary), the same with q_peak 0.2667 L/s × 10 min (excess 1.8608 kWh: 6.6099 kWh, 120 L) and with t_peak 0, a peak without any profile against 0.1 kW (infeasible, minimum 0.13084 kW; an 80 L store needs exactly 0.13084 kW) and the 3-litre rule in a one-family house.",
+          "uk": "82 випадків, обчислених на сторінці: 17 іменованих (сім прикладів і їхня суть — 24 квартири, втрати офісу, готель вище й нижче зламу, душові спортзалу, тепловий насос сам/з догрівачем/із замалим догрівачем, нічний тариф проти цілодобового, режим «потужність для об'єму», задані втрати, нездійсненний нагрівач, подія через північ, школа 55 °C, централізоване тепло 65 °C з f 0,75) плюс 40 псевдовипадкових випадків з фіксованим зерном по всіх профілях, джерелах тепла, вікнах доступності й режимах втрат. Очікувані значення: для 57 випадків — реалізація опублікованого методу на Python (перевірка узгодженості, метод той самий, що й на сторінці); 7 зовнішніх опорних випадків, обчислених вручну з енергетичного балансу, формули Ecodesign 814/2013 і визначення DVGW W 551 (один водорозбір проти сталого нагрівача, те саме зі сплеском, сплеск поза вікном нагрівача, нічний тариф, втрати бака 200 л, межі 400 л / 3 л). Плюс 11 випадків правил введення з тексту методу (r3): сім некоректних подій водорозбору мають давати помилку з номером події, подія, введена числами-текстом, дорівнює ручному опорному випадку, а DVGW W 551 вважає одно- чи двосімейний будинок малою установкою незалежно від об'єму бака й труб. r4 (глибоке ревю, ред. 2): розрахунковий пік зберігає зміст — перевищення пікової витрати над середнім водорозбором кроку, — але застосовується раз на добу в найгірший момент, накопичується в циклічному дефіциті на точній часовій сітці (події інтегруються на своїх межах), а енергія перевищення входить у добову енергію; опору A2 перераховано (12,6785 кВт·год, 218,03 л, 300 л) і вручну додано 7 випадків: 160 л за 10 хв проти 5 кВт (4,7491 кВт·год, 100 л; також через межу кроку), те саме з q_піку 0,2667 л/с × 10 хв (перевищення 1,8608 кВт·год: 6,6099 кВт·год, 120 л) і з t_піку 0, пік без профілю проти 0,1 кВт (нездійсненно, мінімум 0,13084 кВт; бак 80 л потребує рівно 0,13084 кВт) і правило 3 літрів в одноквартирному будинку.",
+          "de": "82 auf der Seite berechnete Fälle: 17 benannte (die sieben Beispiele und ihre Pointen — 24 Wohnungen, Büroverluste, Hotel ober- und unterhalb des Knies, Sportduschen, Wärmepumpe allein/mit Nachheizung/mit zu kleiner Nachheizung, Nachttarif gegen ganztägig, Modus Leistung zum Volumen, angegebene Verluste, nicht machbarer Erzeuger, Ereignis über Mitternacht, Schule mit 55 °C, Fernwärme 65 °C mit f 0,75) und 40 Zufallsfälle mit festem Startwert über alle Profile, Erzeuger, Freigabefenster und Verlustarten. Sollwerte: für 57 Fälle eine Python-Umsetzung der veröffentlichten Methode (Konsistenzprüfung, gleiche Methode wie die Seite); 7 externe Ankerfälle, von Hand aus der Energiebilanz, der Ecodesign-Formel 814/2013 und der Definition nach DVGW W 551 gerechnet (eine Zapfung gegen konstante Leistung, dieselbe mit Stoß, Stoß außerhalb des Freigabefensters, Nachttarif, Bereitschaftsverlust 200 L, Grenzen 400 L / 3 L). Dazu 11 Fälle zu den Eingaberegeln aus dem Methodentext (r3): sieben ungültige Zapfereignisse müssen einen Fehler mit der Ereignisnummer ergeben, ein als Text-Zahlen eingegebenes Ereignis entspricht dem Handanker, und DVGW W 551 zählt ein Ein- oder Zweifamilienhaus unabhängig von Speicher- und Leitungsvolumen als Kleinanlage. r4 (Tiefenprüfung, Rev. 2): die Auslegungsspitze behält ihre Bedeutung — der Überschuss des Spitzendurchflusses über die mittlere Zapfung des Schritts —, wird aber einmal pro Tag zum ungünstigsten Zeitpunkt angesetzt, im zyklischen Defizit aufsummiert, auf einem exakten Zeitraster (Zapfereignisse an ihren Grenzen integriert), und ihre Überschussenergie zählt zur Tagesenergie; Anker A2 neu hergeleitet (12,6785 kWh, 218,03 L, 300 L) und 7 handgerechnete Fälle ergänzt: 160 L in 10 min gegen 5 kW (4,7491 kWh, 100 L; auch über eine Schrittgrenze), dasselbe mit q_Spitze 0,2667 L/s × 10 min (Überschuss 1,8608 kWh: 6,6099 kWh, 120 L) und mit t_Spitze 0, eine Spitze ohne Profil gegen 0,1 kW (nicht machbar, mindestens 0,13084 kW; ein 80-L-Speicher braucht genau 0,13084 kW) und die 3-Liter-Regel im Einfamilienhaus.",
+          "nl": "82 op de pagina berekende gevallen: 17 benoemde (de zeven voorbeelden en hun kern — 24 appartementen, kantoorverliezen, hotel boven en onder de knik, sportdouches, warmtepomp alleen/met naverwarming/met te kleine naverwarming, nachttarief tegenover de hele dag, modus vermogen bij volume, opgegeven verliezen, onhaalbaar toestel, moment over middernacht, school op 55 °C, warmtenet 65 °C met f 0,75) plus 40 willekeurige gevallen met vaste startwaarde over alle profielen, warmtebronnen, beschikbaarheidsvensters en verlieswijzen. Verwachte waarden: voor 57 gevallen een Python-implementatie van de gepubliceerde methode (consistentiecontrole, dezelfde methode als de pagina); 7 externe ankergevallen, met de hand berekend uit de energiebalans, de Ecodesign-formule 814/2013 en de definitie van DVGW W 551 (één tapping tegen een constant toestel, dezelfde met stoot, stoot buiten het toestelvenster, nachttarief, stilstandsverlies 200 L, grenzen 400 L / 3 L). Plus 11 gevallen voor de invoerregels uit de methodetekst (r3): zeven ongeldige tapmomenten moeten een fout met het momentnummer geven, een moment ingevoerd als tekstgetallen is gelijk aan het handanker, en DVGW W 551 rekent een één- of tweegezinswoning tot de kleine installaties, ongeacht boiler- en leidingvolume. r4 (diepe review, rev. 2): de ontwerppiek behoudt haar betekenis — het overschot van het piekdebiet boven het gemiddelde tappen van de stap — maar wordt eenmaal per dag op het ongunstigste moment toegepast, opgeteld in het cyclische tekort, op een exact tijdraster (tapmomenten op hun grenzen geïntegreerd), en haar overschotenergie telt mee in de dagenergie; anker A2 herberekend (12,6785 kWh, 218,03 L, 300 L) en 7 met de hand berekende gevallen toegevoegd: 160 L in 10 min tegen 5 kW (4,7491 kWh, 100 L; ook over een stapgrens), hetzelfde met q_piek 0,2667 L/s × 10 min (overschot 1,8608 kWh: 6,6099 kWh, 120 L) en met t_piek 0, een piek zonder profiel tegen 0,1 kW (niet haalbaar, minimum 0,13084 kW; een vat van 80 L vraagt precies 0,13084 kW) en de 3-literregel in een eengezinswoning.",
+          "fr": "82 cas calculés sur la page : 17 nommés (les sept exemples et leur enseignement — 24 logements, pertes des bureaux, hôtel au-dessus et au-dessous du coude, douches sportives, PAC seule/avec appoint/avec appoint trop petit, heures creuses face à toute la journée, mode puissance pour un volume, pertes données, générateur insuffisant, puisage à cheval sur minuit, école à 55 °C, réseau de chaleur 65 °C avec f 0,75) plus 40 cas aléatoires à graine fixe sur tous les profils, sources, plages de disponibilité et modes de pertes. Valeurs attendues : pour 57 cas une implémentation Python de la méthode publiée (contrôle de cohérence, même méthode que la page) ; 7 ancrages externes calculés à la main à partir du bilan énergétique, de la formule Ecodesign 814/2013 et de la définition DVGW W 551 (un puisage contre une puissance constante, le même avec un à-coup, un à-coup hors plage de chauffe, heures creuses, pertes statiques 200 L, limites 400 L / 3 L). Plus 11 cas de règles de saisie tirés du texte de la méthode (r3) : sept puisages invalides doivent donner une erreur avec le numéro du puisage, un puisage saisi en nombres texte égale l'ancrage manuel, et la DVGW W 551 range une maison individuelle ou bifamiliale parmi les petites installations quels que soient les volumes du ballon et des conduites. r4 (revue approfondie, rév. 2) : la pointe de calcul garde son sens — l'excédent du débit de pointe sur le puisage moyen du pas — mais elle est appliquée une fois par jour au pire moment, cumulée dans le déficit cyclique, sur une grille temporelle exacte (puisages intégrés à leurs limites), et son énergie excédentaire entre dans l'énergie journalière ; ancre A2 recalculée (12,6785 kWh, 218,03 L, 300 L) et 7 cas calculés à la main ajoutés : 160 L en 10 min contre 5 kW (4,7491 kWh, 100 L ; aussi à cheval sur une limite de pas), le même avec q_pointe 0,2667 L/s × 10 min (excédent 1,8608 kWh : 6,6099 kWh, 120 L) et avec t_pointe 0, une pointe sans profil contre 0,1 kW (irréalisable, minimum 0,13084 kW ; un ballon de 80 L demande exactement 0,13084 kW) et la règle des 3 litres dans une maison individuelle.",
+          "es": "82 casos calculados en la página: 17 con nombre (los siete ejemplos y su clave — 24 viviendas, pérdidas de oficina, hotel por encima y por debajo del codo, duchas deportivas, bomba de calor sola/con apoyo/con apoyo demasiado pequeño, tarifa nocturna frente a todo el día, modo potencia para un volumen, pérdidas dadas, generador insuficiente, consumo que cruza la medianoche, colegio a 55 °C, red de calor a 65 °C con f 0,75) más 40 casos aleatorios con semilla fija en todos los perfiles, fuentes, ventanas de disponibilidad y modos de pérdidas. Valores esperados: para 57 casos una implementación en Python del método publicado (comprobación de coherencia, mismo método que la página); 7 anclas externas calculadas a mano a partir del balance energético, la fórmula Ecodesign 814/2013 y la definición DVGW W 551 (un consumo frente a potencia constante, el mismo con golpe, golpe fuera de la ventana del generador, tarifa nocturna, pérdidas estáticas de 200 L, límites 400 L / 3 L). Más 11 casos de reglas de entrada tomados del texto del método (r3): siete consumos no válidos deben dar un error con el número del consumo, un consumo escrito como números en texto coincide con el ancla manual, y la DVGW W 551 considera instalación pequeña una vivienda unifamiliar o bifamiliar sea cual sea el volumen del acumulador y de las tuberías. r4 (revisión a fondo, rev. 2): el pico de diseño conserva su sentido — el exceso del caudal punta sobre el consumo medio del paso — pero se aplica una vez al día en el peor momento, acumulado en el déficit cíclico, sobre una malla temporal exacta (consumos integrados en sus límites), y su energía en exceso entra en la energía diaria; ancla A2 recalculada (12,6785 kWh, 218,03 L, 300 L) y 7 casos calculados a mano añadidos: 160 L en 10 min frente a 5 kW (4,7491 kWh, 100 L; también a caballo de un límite de paso), lo mismo con q_pico 0,2667 L/s × 10 min (exceso 1,8608 kWh: 6,6099 kWh, 120 L) y con t_pico 0, un pico sin perfil frente a 0,1 kW (no viable, mínimo 0,13084 kW; un acumulador de 80 L necesita exactamente 0,13084 kW) y la regla de los 3 litros en una vivienda unifamiliar.",
+          "pl": "82 przypadków policzonych na stronie: 17 nazwanych (siedem przykładów i ich sedno — 24 mieszkania, straty biura, hotel powyżej i poniżej kolana, natryski sportowe, pompa ciepła sama/z dogrzewaczem/ze zbyt małym dogrzewaczem, taryfa nocna wobec całodobowej, tryb moc dla pojemności, podane straty, niewystarczający podgrzewacz, zdarzenie przez północ, szkoła 55 °C, ciepło sieciowe 65 °C z f 0,75) oraz 40 losowych przypadków ze stałym ziarnem we wszystkich profilach, źródłach ciepła, oknach dostępności i rodzajach strat. Wartości oczekiwane: dla 57 przypadków implementacja opublikowanej metody w Pythonie (sprawdzenie spójności, ta sama metoda co strona); 7 zewnętrznych przypadków kotwiczących policzonych ręcznie z bilansu energii, wzoru Ecodesign 814/2013 i definicji DVGW W 551 (jeden pobór przy stałej mocy, to samo z impulsem, impuls poza oknem pracy, taryfa nocna, strata postojowa 200 L, granice 400 L / 3 L). Do tego 11 przypadków reguł wprowadzania z tekstu metody (r3): siedem błędnych poborów musi dać błąd z numerem poboru, pobór wpisany jako liczby tekstowe równa się ręcznej kotwicy, a DVGW W 551 uznaje dom jedno- lub dwurodzinny za małą instalację niezależnie od pojemności zasobnika i przewodów. r4 (dogłębny przegląd, wer. 2): szczyt obliczeniowy zachowuje znaczenie — nadwyżka przepływu szczytowego ponad średni pobór kroku — ale jest stosowany raz na dobę w najgorszym momencie, sumowany w deficycie cyklicznym, na dokładnej siatce czasu (zdarzenia całkowane na swoich granicach), a energia nadwyżki wchodzi do energii dobowej; kotwicę A2 przeliczono (12,6785 kWh, 218,03 L, 300 L) i dodano 7 przypadków policzonych ręcznie: 160 L w 10 min przy 5 kW (4,7491 kWh, 100 L; także przez granicę kroku), to samo z q_szczytu 0,2667 L/s × 10 min (nadwyżka 1,8608 kWh: 6,6099 kWh, 120 L) i z t_szczytu 0, szczyt bez profilu przy 0,1 kW (niewykonalne, minimum 0,13084 kW; zasobnik 80 L wymaga dokładnie 0,13084 kW) oraz zasada 3 litrów w domu jednorodzinnym."
+        },
+        "citations": [
+          "EN 12831-3:2017 Domestic hot water systems heat load and characterisation of needs (cumulative demand/supply curves).",
+          "CIBSE Guide G (2014) Public health and plumbing engineering — hot water storage and recovery.",
+          "Commission Regulation (EU) No 814/2013, Annex II (standing-loss limit).",
+          "Method: _plb/dhw/METHOD.md (plbdhw-1.3); reference generator bench-src/ref/gen_plbdhw.py."
+        ],
+        "cases": 82,
+        "passed": 82,
+        "tolerance": {
+          "en": "Relative 1e-6 on every numeric output (volume, powers, energies, losses, shares, reheat time, mixed-water capacity); exact on feasibility, governing criterion, nominal size and the legionella and heat-pump flags; the first headline tile must show the nominal volume or the required power.",
+          "uk": "Відносно 1e-6 для кожного числового результату (об'єм, потужності, енергії, втрати, частки, час нагріву, об'єм змішаної води); точно для здійсненності, визначального критерію, номінального розміру і позначок легіонели та теплового насоса; перша головна плитка має показувати номінальний об'єм або потрібну потужність.",
+          "de": "Relativ 1e-6 auf jedes Zahlenergebnis (Volumen, Leistungen, Energien, Verluste, Anteile, Aufheizzeit, Mischwassermenge); exakt bei Machbarkeit, maßgebendem Kriterium, Nenngröße und den Legionellen- und Wärmepumpenhinweisen; die erste Kopfkachel muss das Nennvolumen oder die erforderliche Leistung zeigen.",
+          "nl": "Relatief 1e-6 op elke numerieke uitkomst (volume, vermogens, energieën, verliezen, aandelen, opwarmtijd, mengwatervolume); exact op haalbaarheid, bepalend criterium, nominale grootte en de legionella- en warmtepompvlaggen; de eerste koptegel moet het nominale volume of het benodigde vermogen tonen.",
+          "fr": "Relatif 1e-6 sur chaque résultat numérique (volume, puissances, énergies, pertes, parts, temps de réchauffage, volume d'eau mitigée) ; exact pour la faisabilité, le critère dimensionnant, la taille nominale et les signaux légionelle et PAC ; la première tuile principale doit afficher le volume nominal ou la puissance requise.",
+          "es": "Relativa 1e-6 en cada resultado numérico (volumen, potencias, energías, pérdidas, fracciones, tiempo de recalentamiento, volumen de agua mezclada); exacta en viabilidad, criterio que manda, tamaño nominal y avisos de legionela y bomba de calor; la primera ficha principal debe mostrar el volumen nominal o la potencia necesaria.",
+          "pl": "Względnie 1e-6 dla każdego wyniku liczbowego (pojemność, moce, energie, straty, udziały, czas nagrzewania, objętość wody zmieszanej); dokładnie dla wykonalności, kryterium decydującego, wielkości nominalnej oraz flag legionelli i pompy ciepła; pierwszy kafelek główny musi pokazywać pojemność nominalną lub wymaganą moc."
+        },
+        "artifact": "benchmarks/plbdhw.json"
+      }
+    ],
+    "citations": [
+      "EN 12831-3:2017 Energy performance of buildings — Method for calculation of the design heat load — Part 3: Domestic hot water systems heat load and characterisation of needs.",
+      "CIBSE Guide G: Public health and plumbing engineering (2014), hot water storage and recovery.",
+      "Commission Regulation (EU) No 814/2013 (ecodesign, water heaters and hot water storage tanks), Annex II; Commission Delegated Regulation (EU) No 812/2013, Annex II.",
+      "HSE HSG274 Part 2 (2014) Legionnaires' disease: control in hot and cold water systems; DVGW W 551 (2004); Besluit van de Vlaamse Regering van 9 februari 2007 betreffende de preventie van legionella in leidingwater.",
+      "Method: _plb/dhw/METHOD.md (plbdhw-1.3); reference generator bench-src/ref/gen_plbdhw.py."
+    ]
+  },
+  "report": {
+    "pdf": true,
+    "source_attribution": true
+  },
+  "python_export": {
+    "supported": false,
+    "requires": [],
+    "reason": "The independent reference implementation is bench-src/ref/gen_plbdhw.py."
+  },
+  "handoff": {
+    "provides": [
+      "Q",
+      "T"
+    ],
+    "accepts": [
+      "Q"
+    ]
+  },
+  "state_codec": {
+    "permalink": true,
+    "record": "tools.petrov.re/calculation-record/v1"
+  },
+  "workflow": {
+    "entry": "calculate",
+    "medium": "liquid",
+    "lifecycle": [
+      "basic",
+      "detailed"
+    ]
+  },
+  "ui": {
+    "framework": "tools.petrov.re/ui/v1",
+    "level": 3
+  }
+}
+</script>
+<script src="site-disclaimer.js" defer></script>
+<script src="diagram-common.js" defer></script>
+<script src="diagram-ui.js" defer></script>
+<script src="plumbing-core.js" defer></script>
+<script src="plb-dhw.js" defer></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+'use strict';
+/* ===== plbdhw page: the model is plb-dhw.js (PLBDhw), the project document is plumbing-core.js (PLBCore) ===== */
+var TOOL = 'plbdhw';
+function T7(en, uk, de, nl, fr, es, pl) { return { en: en, uk: uk, de: de, nl: nl, fr: fr, es: es, pl: pl }; }
+var CORE = window.PLBCore || null, ENG = window.PLBDhw || null;
+
+var I18N = {
+  subtitle: T7('How much store for how much heater? Volume buys power — until the peak or the daily energy decides.',
+    'Скільки бака на скільки нагрівача? Об\'єм заміщує потужність — доки не вирішить пік або добова енергія.',
+    'Wie viel Speicher für wie viel Erzeuger? Volumen ersetzt Leistung — bis die Spitze oder die Tagesenergie entscheidet.',
+    'Hoeveel vat voor hoeveel toestel? Volume vervangt vermogen — tot de piek of de dagenergie beslist.',
+    'Quel ballon pour quel générateur ? Le volume remplace la puissance — jusqu\'à ce que la pointe ou l\'énergie du jour décide.',
+    '¿Cuánto acumulador para cuánto generador? El volumen sustituye potencia — hasta que decide el pico o la energía diaria.',
+    'Ile zasobnika na ile podgrzewacza? Pojemność zastępuje moc — dopóki nie zdecyduje szczyt albo energia dobowa.'),
+  footer: T7('E = V·1.163·(T_use − T_cold)/1000 kWh per litre drawn; 15-min grid, net x_i = D_i + P_L·Δt − P·Δt·A_i; store energy = max over windows of (Σx + peak excess in the window), excess e_i = max(0, P_inst − D_i/Δt) once a day for t_peak, exact at step and event boundaries; daily energy includes the excess; V = E·1000/(1.163·(T_store − T_cold)·f). Heat pump: a = (T_hp − T_cold)/(T_store − T_cold), P_eff = min(P/a, P_boost/(1 − a)). Standing loss S = (16.66 + 8.33·V^0.4)·(T_store − 20)/45 W (Reg. (EU) 814/2013). Reheat t = V·1.163·ΔT/(P − P_L). Method _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_вик − T_хол)/1000 кВт·год на літр розбору; сітка 15 хв, x_i = D_i + P_L·Δt − P·Δt·A_i; енергія бака = max за вікнами (Σx + перевищення піку у вікні), перевищення e_i = max(0, P_мит − D_i/Δt) раз на добу протягом t_пік, точно на межах кроків і подій; добова енергія містить перевищення; V = E·1000/(1,163·(T_бак − T_хол)·f). Тепловий насос: a = (T_тн − T_хол)/(T_бак − T_хол), P_еф = min(P/a, P_дог/(1 − a)). Втрати бака S = (16,66 + 8,33·V^0,4)·(T_бак − 20)/45 Вт (Регл. (ЄС) 814/2013). Нагрів t = V·1,163·ΔT/(P − P_L). Метод _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_Nutz − T_kalt)/1000 kWh je gezapftem Liter; 15-min-Raster, x_i = D_i + P_L·Δt − P·Δt·A_i; Speicherenergie = max über Fenster (Σx + Spitzenüberschuss im Fenster), Überschuss e_i = max(0, P_DL − D_i/Δt) einmal täglich für t_Spitze, exakt an Schritt- und Ereignisgrenzen; Tagesenergie enthält den Überschuss; V = E·1000/(1,163·(T_Sp − T_kalt)·f). Wärmepumpe: a = (T_WP − T_kalt)/(T_Sp − T_kalt), P_eff = min(P/a, P_NH/(1 − a)). Bereitschaftsverlust S = (16,66 + 8,33·V^0,4)·(T_Sp − 20)/45 W (VO (EU) 814/2013). Aufheizen t = V·1,163·ΔT/(P − P_L). Methode _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_gebruik − T_koud)/1000 kWh per getapte liter; raster 15 min, x_i = D_i + P_L·Δt − P·Δt·A_i; vatenergie = max over vensters (Σx + piekoverschot in het venster), overschot e_i = max(0, P_doorstr − D_i/Δt) eenmaal per dag gedurende t_piek, exact op stap- en tapgrenzen; dagenergie bevat het overschot; V = E·1000/(1,163·(T_vat − T_koud)·f). Warmtepomp: a = (T_wp − T_koud)/(T_vat − T_koud), P_eff = min(P/a, P_naverw/(1 − a)). Stilstandsverlies S = (16,66 + 8,33·V^0,4)·(T_vat − 20)/45 W (Verord. (EU) 814/2013). Opwarmen t = V·1,163·ΔT/(P − P_L). Methode _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_usage − T_froide)/1000 kWh par litre puisé ; grille 15 min, x_i = D_i + P_L·Δt − P·Δt·A_i ; énergie du ballon = max sur les fenêtres (Σx + excédent de pointe dans la fenêtre), excédent e_i = max(0, P_inst − D_i/Δt) une fois par jour pendant t_pointe, exacte aux limites des pas et des puisages ; l\'énergie journalière inclut l\'excédent ; V = E·1000/(1,163·(T_ballon − T_froide)·f). PAC : a = (T_pac − T_froide)/(T_ballon − T_froide), P_eff = min(P/a, P_appoint/(1 − a)). Pertes statiques S = (16,66 + 8,33·V^0,4)·(T_ballon − 20)/45 W (règl. (UE) 814/2013). Réchauffage t = V·1,163·ΔT/(P − P_L). Méthode _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_uso − T_fría)/1000 kWh por litro consumido; malla 15 min, x_i = D_i + P_L·Δt − P·Δt·A_i; energía del acumulador = máx. sobre ventanas (Σx + exceso del pico en la ventana), exceso e_i = máx(0, P_inst − D_i/Δt) una vez al día durante t_pico, exacta en los límites de pasos y eventos; la energía diaria incluye el exceso; V = E·1000/(1,163·(T_acum − T_fría)·f). Bomba de calor: a = (T_bc − T_fría)/(T_acum − T_fría), P_ef = min(P/a, P_apoyo/(1 − a)). Pérdidas estáticas S = (16,66 + 8,33·V^0,4)·(T_acum − 20)/45 W (Regl. (UE) 814/2013). Recalentamiento t = V·1,163·ΔT/(P − P_L). Método _plb/dhw/METHOD.md.',
+    'E = V·1,163·(T_użytk − T_zimna)/1000 kWh na pobrany litr; siatka 15 min, x_i = D_i + P_L·Δt − P·Δt·A_i; energia zasobnika = maks. po oknach (Σx + nadwyżka szczytu w oknie), nadwyżka e_i = maks(0, P_przep − D_i/Δt) raz na dobę przez t_szczyt, dokładnie na granicach kroków i zdarzeń; energia dobowa zawiera nadwyżkę; V = E·1000/(1,163·(T_zas − T_zimna)·f). Pompa ciepła: a = (T_pc − T_zimna)/(T_zas − T_zimna), P_ef = min(P/a, P_dogrz/(1 − a)). Strata postojowa S = (16,66 + 8,33·V^0,4)·(T_zas − 20)/45 W (rozp. (UE) 814/2013). Nagrzewanie t = V·1,163·ΔT/(P − P_L). Metoda _plb/dhw/METHOD.md.'),
+  'notice.t': T7('What this sizing is', 'Що це за підбір', 'Was diese Auslegung ist', 'Wat deze dimensionering is', 'Ce qu\'est ce dimensionnement', 'Qué es este dimensionado', 'Czym jest ten dobór'),
+  'notice.b': T7('A first sizing for one design day. Profile shapes and litres per user are stated learning assumptions — replace them with project data. Design aid, not a substitute for the standards, the water utility\'s rules and national/regional regulations.',
+    'Перший підбір для однієї розрахункової доби. Форми профілю та літри на користувача — явно зазначені навчальні припущення; замініть їх даними проєкту. Допоміжний інструмент проєктування, не замінює стандартів, правил водоканалу та національних/регіональних норм.',
+    'Eine erste Auslegung für einen Auslegungstag. Profilformen und Liter je Nutzer sind ausgewiesene Lernannahmen — durch Projektdaten ersetzen. Planungshilfe, kein Ersatz für die Normen, die Vorgaben des Wasserversorgers und nationale/regionale Vorschriften.',
+    'Een eerste dimensionering voor één ontwerpdag. Profielvormen en liters per gebruiker zijn vermelde leeraannames — vervang ze door projectgegevens. Ontwerphulpmiddel, geen vervanging van de normen, de voorschriften van de waterleverancier en nationale/regionale regelgeving.',
+    'Un premier dimensionnement pour un jour de calcul. Les formes de profil et les litres par usager sont des hypothèses pédagogiques déclarées — remplacez-les par les données du projet. Aide à la conception, ne remplace ni les normes, ni les règles du distributeur d\'eau, ni la réglementation nationale/régionale.',
+    'Un primer dimensionado para un día de diseño. Las formas de perfil y los litros por usuario son supuestos didácticos declarados: sustitúyalos por datos del proyecto. Ayuda de diseño, no sustituye las normas, las reglas de la compañía de aguas ni la normativa nacional/regional.',
+    'Pierwszy dobór dla jednej doby obliczeniowej. Kształty profilu i litry na użytkownika to jawne założenia dydaktyczne — zastąp je danymi projektu. Pomoc projektowa, nie zastępuje norm, wymagań przedsiębiorstwa wodociągowego ani przepisów krajowych/regionalnych.'),
+  /* panels */
+  'p.demand': T7('Draw profile', 'Профіль водорозбору', 'Zapfprofil', 'Tapprofiel', 'Profil de puisage', 'Perfil de consumo', 'Profil poboru'),
+  'p.temps': T7('Temperatures', 'Температури', 'Temperaturen', 'Temperaturen', 'Températures', 'Temperaturas', 'Temperatury'),
+  'p.heater': T7('Heater and store', 'Нагрівач і бак', 'Erzeuger und Speicher', 'Toestel en voorraadvat', 'Générateur et ballon', 'Generador y acumulador', 'Podgrzewacz i zasobnik'),
+  'p.losses': T7('Losses', 'Втрати', 'Verluste', 'Verliezen', 'Pertes', 'Pérdidas', 'Straty'),
+  'p.io': T7('Export and project', 'Експорт і проєкт', 'Export und Projekt', 'Export en project', 'Export et projet', 'Exportación y proyecto', 'Eksport i projekt'),
+  /* fields */
+  'f.type': T7('Building profile', 'Профіль будівлі', 'Gebäudeprofil', 'Gebouwprofiel', 'Profil du bâtiment', 'Perfil del edificio', 'Profil budynku'),
+  'f.units': T7('Number of users', 'Кількість користувачів', 'Anzahl Nutzer', 'Aantal gebruikers', 'Nombre d\'usagers', 'Número de usuarios', 'Liczba użytkowników'),
+  'f.lpu': T7('Daily use per user at T_use', 'Добове споживання на користувача при T_вик', 'Tagesbedarf je Nutzer bei T_Nutz', 'Dagverbruik per gebruiker bij T_gebruik', 'Besoin journalier par usager à T_usage', 'Consumo diario por usuario a T_uso', 'Dobowe zużycie na użytkownika przy T_użytk'),
+  'f.lpu.h': T7('Mixed water at the tap temperature. The default is a learning assumption for the profile; replace it with project data.',
+    'Змішана вода при температурі в точці розбору. Типове значення — навчальне припущення для профілю; замініть його даними проєкту.',
+    'Mischwasser mit Zapftemperatur. Der Vorgabewert ist eine Lernannahme für das Profil; durch Projektdaten ersetzen.',
+    'Mengwater op taptemperatuur. De standaardwaarde is een leeraanname voor het profiel; vervang ze door projectgegevens.',
+    'Eau mitigée à la température de puisage. La valeur par défaut est une hypothèse pédagogique du profil ; remplacez-la par les données du projet.',
+    'Agua mezclada a la temperatura de uso. El valor por defecto es un supuesto didáctico del perfil; sustitúyalo por datos del proyecto.',
+    'Woda zmieszana o temperaturze poboru. Wartość domyślna to założenie dydaktyczne profilu; zastąp ją danymi projektu.'),
+  'f.events': T7('Draw events (e.g. showers after a match)', 'Події водорозбору (напр. душ після матчу)', 'Zapfereignisse (z. B. Duschen nach dem Spiel)', 'Tapmomenten (bv. douches na een wedstrijd)', 'Puisages ponctuels (p. ex. douches après un match)', 'Consumos puntuales (p. ej. duchas tras un partido)', 'Pobory zdarzeniowe (np. natryski po meczu)'),
+  'f.ev.start': T7('Start', 'Початок', 'Beginn', 'Begin', 'Début', 'Inicio', 'Początek'),
+  'f.ev.dur': T7('Duration', 'Тривалість', 'Dauer', 'Duur', 'Durée', 'Duración', 'Czas trwania'),
+  'f.ev.litres': T7('Litres at T_use', 'Літри при T_вик', 'Liter bei T_Nutz', 'Liter bij T_gebruik', 'Litres à T_usage', 'Litros a T_uso', 'Litry przy T_użytk'),
+  'f.qpeak': T7('Design peak flow (mixed water)', 'Розрахункова пікова витрата (змішана вода)', 'Spitzendurchfluss (Mischwasser)', 'Ontwerppiekdebiet (mengwater)', 'Débit de pointe de calcul (eau mitigée)', 'Caudal punta de diseño (agua mezclada)', 'Obliczeniowy przepływ szczytowy (woda zmieszana)'),
+  'f.qpeak.h': T7('Simultaneous flow at the taps, e.g. 0.15 L/s per running shower (DIN 1988-300 order of magnitude). Sets the instantaneous power; for the store, the part of this flow above the profile\'s mean draw in that 15-minute step counts once a day, for the peak duration, at the worst moment (only while the profile draws; with no profile at all the whole peak counts). That excess is also in the daily energy.',
+    'Одночасна витрата в точках розбору, напр. 0,15 л/с на один увімкнений душ (порядок величин DIN 1988-300). Визначає миттєву потужність; для бака раз на добу протягом тривалості піку в найгірший момент рахується частина цієї витрати понад середній водорозбір профілю в тому 15-хвилинному кроці (лише поки профіль розбирає воду; без профілю — весь пік). Це перевищення входить і в добову енергію.',
+    'Gleichzeitiger Durchfluss an den Zapfstellen, z. B. 0,15 L/s je laufender Dusche (Größenordnung DIN 1988-300). Bestimmt die Durchlaufleistung; für den Speicher zählt einmal täglich, für die Spitzendauer und zum ungünstigsten Zeitpunkt, der Teil dieses Durchflusses über der mittleren Zapfung des Profils in diesem 15-Minuten-Schritt (nur solange das Profil zapft; ohne Profil die ganze Spitze). Dieser Überschuss geht auch in die Tagesenergie ein.',
+    'Gelijktijdig debiet aan de tappunten, bv. 0,15 L/s per lopende douche (grootteorde DIN 1988-300). Bepaalt het doorstroomvermogen; voor het vat telt eenmaal per dag, gedurende de piekduur en op het ongunstigste moment, het deel van dit debiet boven het gemiddelde tappen van het profiel in die stap van 15 minuten (alleen zolang het profiel tapt; zonder profiel de hele piek). Dat overschot zit ook in de dagenergie.',
+    'Débit simultané aux points de puisage, p. ex. 0,15 L/s par douche en marche (ordre de grandeur DIN 1988-300). Fixe la puissance instantanée ; pour le ballon compte une fois par jour, pendant la durée de pointe et au pire moment, la part de ce débit au-dessus du puisage moyen du profil dans ce pas de 15 minutes (seulement pendant que le profil puise ; sans profil, toute la pointe). Cet excédent entre aussi dans l\'énergie journalière.',
+    'Caudal simultáneo en los grifos, p. ej. 0,15 L/s por ducha abierta (orden de magnitud DIN 1988-300). Fija la potencia instantánea; para el acumulador cuenta una vez al día, durante la duración del pico y en el peor momento, la parte de este caudal por encima del consumo medio del perfil en ese paso de 15 minutos (solo mientras el perfil consume; sin perfil, todo el pico). Ese exceso también entra en la energía diaria.',
+    'Przepływ jednoczesny w punktach poboru, np. 0,15 L/s na każdy pracujący natrysk (rząd wielkości DIN 1988-300). Wyznacza moc przepływową; dla zasobnika liczy się raz na dobę, przez czas trwania szczytu i w najgorszym momencie, część tego przepływu ponad średni pobór profilu w tym kroku 15-minutowym (tylko gdy profil pobiera wodę; bez profilu cały szczyt). Ta nadwyżka wchodzi też do energii dobowej.'),
+  'f.tpeak': T7('Peak duration', 'Тривалість піку', 'Spitzendauer', 'Piekduur', 'Durée de la pointe', 'Duración del pico', 'Czas trwania szczytu'),
+  'f.tcold': T7('Cold water', 'Холодна вода', 'Kaltwasser', 'Koud water', 'Eau froide', 'Agua fría', 'Woda zimna'),
+  'f.tuse': T7('Use (mixed) temperature', 'Температура використання (змішана)', 'Nutztemperatur (gemischt)', 'Gebruikstemperatuur (gemengd)', 'Température d\'usage (mitigée)', 'Temperatura de uso (mezclada)', 'Temperatura użytkowa (zmieszana)'),
+  'f.tstore': T7('Store set point', 'Уставка бака', 'Speichersolltemperatur', 'Insteltemperatuur vat', 'Consigne du ballon', 'Consigna del acumulador', 'Nastawa zasobnika'),
+  'f.fuse': T7('Usable share of the volume', 'Корисна частка об\'єму', 'Nutzbarer Volumenanteil', 'Bruikbaar volumeaandeel', 'Part utile du volume', 'Fracción útil del volumen', 'Użyteczny udział pojemności'),
+  'f.fuse.h': T7('Stratification: well-stratified stores about 0.85–0.95, mixed stores 0.6–0.75 (learning assumption).',
+    'Стратифікація: добре стратифіковані баки близько 0,85–0,95, перемішані 0,6–0,75 (навчальне припущення).',
+    'Schichtung: gut geschichtete Speicher etwa 0,85–0,95, durchmischte 0,6–0,75 (Lernannahme).',
+    'Stratificatie: goed gelaagde vaten ongeveer 0,85–0,95, gemengde 0,6–0,75 (leeraanname).',
+    'Stratification : ballons bien stratifiés environ 0,85–0,95, ballons brassés 0,6–0,75 (hypothèse pédagogique).',
+    'Estratificación: acumuladores bien estratificados aprox. 0,85–0,95, mezclados 0,6–0,75 (supuesto didáctico).',
+    'Uwarstwienie: dobrze uwarstwione zasobniki ok. 0,85–0,95, wymieszane 0,6–0,75 (założenie dydaktyczne).'),
+  'f.heater': T7('Heat source', 'Джерело тепла', 'Wärmeerzeuger', 'Warmtebron', 'Source de chaleur', 'Fuente de calor', 'Źródło ciepła'),
+  'f.mode': T7('Solve for', 'Шукати', 'Gesucht', 'Bereken', 'Calculer', 'Calcular', 'Szukane'),
+  'f.pkw': T7('Heater power', 'Потужність нагрівача', 'Erzeugerleistung', 'Toestelvermogen', 'Puissance du générateur', 'Potencia del generador', 'Moc podgrzewacza'),
+  'f.pkw.hp': T7('Heat pump heat output', 'Теплова потужність теплового насоса', 'Wärmeleistung der Wärmepumpe', 'Warmtevermogen van de warmtepomp', 'Puissance calorifique de la PAC', 'Potencia térmica de la bomba de calor', 'Moc grzewcza pompy ciepła'),
+  'f.vl': T7('Store volume', 'Об\'єм бака', 'Speichervolumen', 'Vatvolume', 'Volume du ballon', 'Volumen del acumulador', 'Pojemność zasobnika'),
+  'f.thp': T7('Heat pump maximum outlet temperature', 'Максимальна температура подачі теплового насоса', 'Maximale Vorlauftemperatur der Wärmepumpe', 'Maximale aanvoertemperatuur warmtepomp', 'Température maximale de sortie de la PAC', 'Temperatura máxima de salida de la bomba de calor', 'Maksymalna temperatura zasilania pompy ciepła'),
+  'f.pboost': T7('Booster heater power', 'Потужність догрівача', 'Leistung der Nachheizung', 'Vermogen naverwarming', 'Puissance de l\'appoint', 'Potencia del apoyo', 'Moc dogrzewacza'),
+  'f.pboost.h': T7('Electric element or boiler that lifts the top of the store from the heat-pump limit to the set point. 0 = none: the store is held at the heat-pump limit.',
+    'Електронагрівач або котел, що піднімає верх бака від межі теплового насоса до уставки. 0 = немає: бак тримається на межі теплового насоса.',
+    'Heizstab oder Kessel, der den oberen Speicherteil von der Wärmepumpengrenze auf den Sollwert hebt. 0 = keine: der Speicher bleibt auf der Wärmepumpengrenze.',
+    'Elektrisch element of ketel dat de top van het vat van de warmtepompgrens naar de insteltemperatuur brengt. 0 = geen: het vat blijft op de warmtepompgrens.',
+    'Résistance ou chaudière qui porte le haut du ballon de la limite de la PAC à la consigne. 0 = aucun : le ballon reste à la limite de la PAC.',
+    'Resistencia o caldera que eleva la parte alta del acumulador desde el límite de la bomba de calor hasta la consigna. 0 = ninguno: el acumulador se queda en el límite de la bomba.',
+    'Grzałka lub kocioł podnoszący górę zasobnika od granicy pompy ciepła do nastawy. 0 = brak: zasobnik pozostaje na granicy pompy ciepła.'),
+  'f.win': T7('Heater may run from', 'Нагрівач може працювати з', 'Erzeuger darf laufen ab', 'Toestel mag werken vanaf', 'Générateur autorisé de', 'El generador puede funcionar desde', 'Podgrzewacz może pracować od'),
+  'f.win2': T7('to', 'до', 'bis', 'tot', 'à', 'hasta', 'do'),
+  'f.win.h': T7('Hours of the day, e.g. 22 to 7 for an off-peak tariff. Equal values = always available.',
+    'Години доби, напр. з 22 до 7 для нічного тарифу. Однакові значення = доступний завжди.',
+    'Tagesstunden, z. B. 22 bis 7 für einen Niedertarif. Gleiche Werte = immer verfügbar.',
+    'Uren van de dag, bv. 22 tot 7 voor een nachttarief. Gelijke waarden = altijd beschikbaar.',
+    'Heures du jour, p. ex. 22 à 7 pour un tarif heures creuses. Valeurs égales = toujours disponible.',
+    'Horas del día, p. ej. de 22 a 7 para una tarifa valle. Valores iguales = siempre disponible.',
+    'Godziny doby, np. od 22 do 7 dla taryfy nocnej. Równe wartości = zawsze dostępny.'),
+  'f.lossmode': T7('Store standing loss', 'Втрати бака в режимі очікування', 'Bereitschaftsverlust des Speichers', 'Stilstandsverlies van het vat', 'Pertes statiques du ballon', 'Pérdidas estáticas del acumulador', 'Strata postojowa zasobnika'),
+  'f.lossw': T7('Given standing loss', 'Задані втрати очікування', 'Angegebener Bereitschaftsverlust', 'Opgegeven stilstandsverlies', 'Pertes statiques données', 'Pérdidas estáticas dadas', 'Podana strata postojowa'),
+  'f.circw': T7('Circulation loop loss', 'Втрати циркуляційного контуру', 'Verlust der Zirkulation', 'Verlies circulatieleiding', 'Pertes de la boucle', 'Pérdidas del bucle de recirculación', 'Strata pętli cyrkulacji'),
+  'f.circw.h': T7('Heat lost by the circulation loop, constant over the day; from DHW Circulation & Balancing if you have it.',
+    'Тепло, втрачене циркуляційним контуром, стале протягом доби; з інструмента «Циркуляція ГВП і балансування», якщо є.',
+    'Wärmeverlust der Zirkulation, über den Tag konstant; aus „Zirkulation und Abgleich“, falls vorhanden.',
+    'Warmteverlies van de circulatieleiding, constant over de dag; uit „Circulatie en inregeling” als u dat hebt.',
+    'Chaleur perdue par la boucle, constante sur la journée ; issue de l\'outil « Bouclage ECS et équilibrage » si disponible.',
+    'Calor perdido por el bucle de recirculación, constante durante el día; de «Recirculación de ACS y equilibrado» si lo tiene.',
+    'Ciepło tracone przez pętlę cyrkulacji, stałe w ciągu doby; z narzędzia „Cyrkulacja c.w.u. i równoważenie”, jeśli jest.'),
+  /* options */
+  'ty.residential': T7('Dwellings', 'Житло', 'Wohnungen', 'Woningen', 'Logements', 'Viviendas', 'Mieszkania'),
+  'ty.office': T7('Office', 'Офіс', 'Büro', 'Kantoor', 'Bureaux', 'Oficina', 'Biuro'),
+  'ty.hotel': T7('Hotel', 'Готель', 'Hotel', 'Hotel', 'Hôtel', 'Hotel', 'Hotel'),
+  'ty.care': T7('Care home / hospital ward', 'Будинок догляду / лікарняне відділення', 'Pflegeheim / Krankenstation', 'Woonzorgcentrum / ziekenhuisafdeling', 'Maison de repos / unité de soins', 'Residencia / planta de hospital', 'Dom opieki / oddział szpitalny'),
+  'ty.school': T7('School', 'Школа', 'Schule', 'School', 'École', 'Colegio', 'Szkoła'),
+  'ty.sports': T7('Sports showers (events)', 'Душові спортзалу (події)', 'Sportduschen (Ereignisse)', 'Sportdouches (momenten)', 'Douches sportives (événements)', 'Duchas deportivas (eventos)', 'Natryski sportowe (zdarzenia)'),
+  'un.residential': T7('persons', 'осіб', 'Personen', 'personen', 'personnes', 'personas', 'osób'),
+  'un.office': T7('staff', 'працівників', 'Beschäftigte', 'medewerkers', 'employés', 'empleados', 'pracowników'),
+  'un.hotel': T7('guests', 'гостей', 'Gäste', 'gasten', 'clients', 'huéspedes', 'gości'),
+  'un.care': T7('beds', 'ліжок', 'Betten', 'bedden', 'lits', 'camas', 'łóżek'),
+  'un.school': T7('pupils', 'учнів', 'Schüler', 'leerlingen', 'élèves', 'alumnos', 'uczniów'),
+  'un.sports': T7('persons (base use)', 'осіб (базове споживання)', 'Personen (Grundbedarf)', 'personen (basisverbruik)', 'personnes (besoin de base)', 'personas (consumo base)', 'osób (zużycie podstawowe)'),
+  'he.boiler': T7('Boiler', 'Котел', 'Kessel', 'Ketel', 'Chaudière', 'Caldera', 'Kocioł'),
+  'he.electric': T7('Electric', 'Електричний', 'Elektrisch', 'Elektrisch', 'Électrique', 'Eléctrico', 'Elektryczny'),
+  'he.heatpump': T7('Heat pump', 'Тепловий насос', 'Wärmepumpe', 'Warmtepomp', 'Pompe à chaleur', 'Bomba de calor', 'Pompa ciepła'),
+  'he.district': T7('District heat', 'Централізоване', 'Fernwärme', 'Warmtenet', 'Réseau de chaleur', 'Red de calor', 'Ciepło sieciowe'),
+  'mo.power': T7('Volume for a power', 'Об\'єм для потужності', 'Volumen zur Leistung', 'Volume bij vermogen', 'Volume pour une puissance', 'Volumen para una potencia', 'Pojemność dla mocy'),
+  'mo.volume': T7('Power for a volume', 'Потужність для об\'єму', 'Leistung zum Volumen', 'Vermogen bij volume', 'Puissance pour un volume', 'Potencia para un volumen', 'Moc dla pojemności'),
+  'lm.ecodesign': T7('Ecodesign limit', 'Межа Ecodesign', 'Ecodesign-Grenzwert', 'Ecodesign-grens', 'Limite Ecodesign', 'Límite Ecodesign', 'Limit Ecodesign'),
+  'lm.given': T7('Given value', 'Задане значення', 'Angegebener Wert', 'Opgegeven waarde', 'Valeur donnée', 'Valor dado', 'Podana wartość'),
+  /* units */
+  'u.kw': 'kW', 'u.w': 'W', 'u.l': 'L', 'u.lps': 'L/s', 'u.c': '°C', 'u.h': 'h', 'u.min': 'min', 'u.kwhd': 'kWh/d',
+  'u.lpud': T7('L/user·d', 'л/корист.·доба', 'L/Nutzer·d', 'L/gebruiker·d', 'L/usager·j', 'L/usuario·d', 'L/użytk.·d'),
+  /* actions */
+  'a.csv': T7('Curve and profile CSV', 'Крива й профіль CSV', 'Kurve und Profil CSV', 'Curve en profiel CSV', 'Courbe et profil CSV', 'Curva y perfil CSV', 'Krzywa i profil CSV'),
+  'a.json': T7('Results JSON', 'Результати JSON', 'Ergebnisse JSON', 'Resultaten JSON', 'Résultats JSON', 'Resultados JSON', 'Wyniki JSON'),
+  'a.useproj': T7('Take users from project', 'Взяти користувачів із проєкту', 'Nutzer aus dem Projekt übernehmen', 'Gebruikers uit project overnemen', 'Reprendre les usagers du projet', 'Tomar usuarios del proyecto', 'Pobierz użytkowników z projektu'),
+  'a.save': T7('Save result to project', 'Зберегти результат у проєкт', 'Ergebnis im Projekt speichern', 'Resultaat in project opslaan', 'Enregistrer le résultat dans le projet', 'Guardar resultado en el proyecto', 'Zapisz wynik w projekcie'),
+  'a.add': T7('Add event', 'Додати подію', 'Ereignis hinzufügen', 'Moment toevoegen', 'Ajouter un puisage', 'Añadir consumo', 'Dodaj zdarzenie'),
+  /* tiles */
+  't.vol': T7('Store volume (nominal)', 'Об\'єм бака (номінальний)', 'Speichervolumen (Nenngröße)', 'Vatvolume (nominaal)', 'Volume du ballon (nominal)', 'Volumen del acumulador (nominal)', 'Pojemność zasobnika (nominalna)'),
+  't.vreq': T7('Required volume', 'Потрібний об\'єм', 'Erforderliches Volumen', 'Benodigd volume', 'Volume requis', 'Volumen necesario', 'Wymagana pojemność'),
+  't.pow': T7('Heater power', 'Потужність нагрівача', 'Erzeugerleistung', 'Toestelvermogen', 'Puissance du générateur', 'Potencia del generador', 'Moc podgrzewacza'),
+  't.preq': T7('Required heater power', 'Потрібна потужність нагрівача', 'Erforderliche Erzeugerleistung', 'Benodigd toestelvermogen', 'Puissance requise', 'Potencia necesaria', 'Wymagana moc podgrzewacza'),
+  't.inst': T7('Instantaneous power instead', 'Миттєва потужність натомість', 'Durchlaufleistung stattdessen', 'Doorstroomvermogen in plaats daarvan', 'Puissance instantanée à la place', 'Potencia instantánea en su lugar', 'Moc przepływowa zamiast tego'),
+  't.reheat': T7('Reheat from cold', 'Нагрів з холодного стану', 'Aufheizen aus kalt', 'Opwarmen vanaf koud', 'Réchauffage à froid', 'Recalentamiento desde frío', 'Nagrzanie od zimnego'),
+  't.day': T7('Daily draw energy', 'Добова енергія водорозбору', 'Tagesenergie der Zapfung', 'Dagenergie tappen', 'Énergie puisée par jour', 'Energía diaria consumida', 'Dobowa energia poboru'),
+  't.loss': T7('Losses share of the heat', 'Частка втрат у теплі', 'Verlustanteil an der Wärme', 'Aandeel verliezen in de warmte', 'Part des pertes dans la chaleur', 'Fracción de pérdidas en el calor', 'Udział strat w cieple'),
+  't.mixed': T7('Mixed water in the store', 'Змішана вода в баку', 'Mischwasser im Speicher', 'Mengwater in het vat', 'Eau mitigée dans le ballon', 'Agua mezclada en el acumulador', 'Woda zmieszana w zasobniku'),
+  't.boost': T7('Booster energy', 'Енергія догріву', 'Energie der Nachheizung', 'Energie naverwarming', 'Énergie de l\'appoint', 'Energía del apoyo', 'Energia dogrzewania'),
+  't.tstore': T7('Store held at', 'Бак утримується при', 'Speicher gehalten auf', 'Vat gehouden op', 'Ballon maintenu à', 'Acumulador mantenido a', 'Zasobnik utrzymywany w'),
+  /* verdicts */
+  'v.ok': T7('%P kW with a %V L store (needs %R L) covers the design day; %G. Instantaneous would need %I kW.',
+    '%P кВт з баком %V л (потрібно %R л) покривають розрахункову добу; %G. Миттєвий нагрів потребував би %I кВт.',
+    '%P kW mit einem %V-L-Speicher (erforderlich %R L) decken den Auslegungstag; %G. Durchlauf bräuchte %I kW.',
+    '%P kW met een vat van %V L (nodig %R L) dekt de ontwerpdag; %G. Doorstroom zou %I kW vragen.',
+    '%P kW avec un ballon de %V L (besoin %R L) couvrent le jour de calcul ; %G. En instantané il faudrait %I kW.',
+    '%P kW con un acumulador de %V L (necesita %R L) cubren el día de diseño; %G. Instantáneo necesitaría %I kW.',
+    '%P kW z zasobnikiem %V L (potrzeba %R L) pokrywa dobę obliczeniową; %G. Przepływowo trzeba by %I kW.'),
+  'v.okv': T7('A %V L store needs at least %P kW; %G. Instantaneous would need %I kW.',
+    'Бак %V л потребує щонайменше %P кВт; %G. Миттєвий нагрів потребував би %I кВт.',
+    'Ein %V-L-Speicher braucht mindestens %P kW; %G. Durchlauf bräuchte %I kW.',
+    'Een vat van %V L vraagt minstens %P kW; %G. Doorstroom zou %I kW vragen.',
+    'Un ballon de %V L demande au moins %P kW ; %G. En instantané il faudrait %I kW.',
+    'Un acumulador de %V L necesita al menos %P kW; %G. Instantáneo necesitaría %I kW.',
+    'Zasobnik %V L wymaga co najmniej %P kW; %G. Przepływowo trzeba by %I kW.'),
+  'g.day': T7('the daily deficit governs', 'визначає добовий дефіцит', 'das Tagesdefizit ist maßgebend', 'het dagtekort is bepalend', 'le déficit journalier dimensionne', 'manda el déficit diario', 'decyduje deficyt dobowy'),
+  'g.peak': T7('the short peak governs', 'визначає короткий пік', 'die kurze Spitze ist maßgebend', 'de korte piek is bepalend', 'la pointe courte dimensionne', 'manda el pico corto', 'decyduje krótki szczyt'),
+  'g.combined': T7('the deficit plus the short peak on top of it govern', 'визначає дефіцит разом із коротким піком поверх нього', 'maßgebend ist das Defizit plus die kurze Spitze darauf', 'het tekort plus de korte piek erbovenop is bepalend', 'le déficit plus la pointe courte qui s\'y ajoute dimensionnent', 'mandan el déficit más el pico corto que se le suma', 'decyduje deficyt wraz z krótkim szczytem na nim'),
+  'g.none': T7('the heater alone follows the draw', 'нагрівач сам встигає за водорозбором', 'der Erzeuger folgt der Zapfung allein', 'het toestel volgt het tappen alleen', 'le générateur suit seul le puisage', 'el generador sigue solo al consumo', 'podgrzewacz sam nadąża za poborem'),
+  'v.infeasible': T7('Not feasible: in the hours it may run the heater cannot deliver the daily draw plus losses (%E kWh/d needs more than %P kW).',
+    'Нездійсненно: за години дозволеної роботи нагрівач не може дати добовий водорозбір із втратами (%E кВт·год/доба потребує понад %P кВт).',
+    'Nicht machbar: in den freigegebenen Stunden kann der Erzeuger Tagesbedarf plus Verluste nicht liefern (%E kWh/d brauchen mehr als %P kW).',
+    'Niet haalbaar: in de toegestane uren kan het toestel het dagverbruik plus verliezen niet leveren (%E kWh/d vraagt meer dan %P kW).',
+    'Irréalisable : dans les heures autorisées le générateur ne peut fournir le puisage journalier et les pertes (%E kWh/j demandent plus de %P kW).',
+    'No viable: en las horas permitidas el generador no puede aportar el consumo diario más las pérdidas (%E kWh/d necesitan más de %P kW).',
+    'Niewykonalne: w dozwolonych godzinach podgrzewacz nie dostarczy poboru dobowego wraz ze stratami (%E kWh/d wymaga ponad %P kW).'),
+  'v.invalid': T7('Check the temperatures: the store must be warmer than the use temperature, and both warmer than the cold water.',
+    'Перевірте температури: бак має бути теплішим за температуру використання, а обидві — теплішими за холодну воду.',
+    'Temperaturen prüfen: der Speicher muss wärmer als die Nutztemperatur sein und beide wärmer als das Kaltwasser.',
+    'Controleer de temperaturen: het vat moet warmer zijn dan de gebruikstemperatuur en beide warmer dan het koude water.',
+    'Vérifiez les températures : le ballon doit être plus chaud que l\'usage, et les deux plus chauds que l\'eau froide.',
+    'Revise las temperaturas: el acumulador debe estar más caliente que el uso, y ambos más que el agua fría.',
+    'Sprawdź temperatury: zasobnik musi być cieplejszy niż temperatura użytkowa, a obie wyższe niż woda zimna.'),
+  /* flags */
+  'fl.legionella_below_60': T7('Store below 60 °C: HSG274 Part 2 and DVGW W 551 ask for at least 60 °C in the store/at the heater outlet; in Flanders the Legionellabesluit (2007) requires a management plan with temperatures for high-risk establishments. Regional rules may be stricter — check with DHW Circulation and Legionella Risk.',
+    'Бак нижче 60 °C: HSG274 Part 2 і DVGW W 551 вимагають щонайменше 60 °C у баку/на виході нагрівача; у Фландрії Legionellabesluit (2007) вимагає плану управління з температурами для закладів високого ризику. Регіональні правила можуть бути суворішими — перевірте в інструментах циркуляції ГВП і ризику легіонели.',
+    'Speicher unter 60 °C: HSG274 Part 2 und DVGW W 551 verlangen mindestens 60 °C im Speicher/am Erzeugeraustritt; in Flandern verlangt der Legionellabesluit (2007) für Hochrisikoeinrichtungen einen Beherrschungsplan mit Temperaturen. Regionale Regeln können strenger sein — mit Zirkulation und Legionellenrisiko prüfen.',
+    'Vat onder 60 °C: HSG274 Part 2 en DVGW W 551 vragen minstens 60 °C in het vat/aan de uitgang van het toestel; in Vlaanderen eist het Legionellabesluit (2007) voor risico-inrichtingen een beheersplan met temperaturen. Regionale regels kunnen strenger zijn — controleer met de circulatie- en legionellatool.',
+    'Ballon sous 60 °C : HSG274 Part 2 et DVGW W 551 demandent au moins 60 °C dans le ballon/à la sortie du générateur ; en Flandre le Legionellabesluit (2007) impose un plan de gestion avec températures aux établissements à risque. Les règles régionales peuvent être plus strictes — vérifiez avec les outils bouclage et légionelle.',
+    'Acumulador por debajo de 60 °C: HSG274 Part 2 y DVGW W 551 piden al menos 60 °C en el acumulador/a la salida del generador; en Flandes el Legionellabesluit (2007) exige un plan de gestión con temperaturas en establecimientos de riesgo. Las normas regionales pueden ser más estrictas: compruébelo con las herramientas de recirculación y legionela.',
+    'Zasobnik poniżej 60 °C: HSG274 Part 2 i DVGW W 551 wymagają co najmniej 60 °C w zasobniku/na wyjściu podgrzewacza; we Flandrii Legionellabesluit (2007) wymaga planu zarządzania z temperaturami dla obiektów wysokiego ryzyka. Przepisy regionalne mogą być surowsze — sprawdź narzędziami cyrkulacji i ryzyka legionelli.'),
+  'fl.hp_cannot_reach': T7('The heat pump alone cannot reach the set point: the store is held at its maximum outlet temperature. Add a booster or lower the set point knowingly.',
+    'Тепловий насос сам не досягає уставки: бак утримується на його максимальній температурі подачі. Додайте догрівач або свідомо знизьте уставку.',
+    'Die Wärmepumpe allein erreicht den Sollwert nicht: der Speicher bleibt auf ihrer maximalen Vorlauftemperatur. Nachheizung vorsehen oder den Sollwert bewusst senken.',
+    'De warmtepomp alleen haalt de insteltemperatuur niet: het vat blijft op haar maximale aanvoertemperatuur. Voorzie naverwarming of verlaag de insteltemperatuur bewust.',
+    'La PAC seule n\'atteint pas la consigne : le ballon reste à sa température maximale de sortie. Ajoutez un appoint ou abaissez la consigne en connaissance de cause.',
+    'La bomba de calor sola no alcanza la consigna: el acumulador se queda en su temperatura máxima de salida. Añada un apoyo o baje la consigna conscientemente.',
+    'Sama pompa ciepła nie osiąga nastawy: zasobnik pozostaje na jej maksymalnej temperaturze zasilania. Dodaj dogrzewacz albo świadomie obniż nastawę.'),
+  'fl.booster_limits': T7('The booster is too small for the heat pump: it limits the effective heating power.',
+    'Догрівач замалий для теплового насоса: він обмежує ефективну потужність нагріву.',
+    'Die Nachheizung ist für die Wärmepumpe zu klein: sie begrenzt die wirksame Heizleistung.',
+    'De naverwarming is te klein voor de warmtepomp: ze beperkt het effectieve vermogen.',
+    'L\'appoint est trop petit pour la PAC : il limite la puissance effective.',
+    'El apoyo es demasiado pequeño para la bomba de calor: limita la potencia efectiva.',
+    'Dogrzewacz jest za mały dla pompy ciepła: ogranicza efektywną moc grzania.'),
+  'fl.losses_dominate': T7('More than half of the heat goes into standing and circulation losses — consider point-of-use heaters or a shorter loop.',
+    'Понад половину тепла йде на втрати бака й циркуляції — розгляньте локальні нагрівачі або коротший контур.',
+    'Mehr als die Hälfte der Wärme geht in Bereitschafts- und Zirkulationsverluste — dezentrale Erwärmung oder eine kürzere Zirkulation erwägen.',
+    'Meer dan de helft van de warmte gaat naar stilstands- en circulatieverliezen — overweeg decentrale toestellen of een kortere lus.',
+    'Plus de la moitié de la chaleur part en pertes statiques et de bouclage — envisagez une production décentralisée ou une boucle plus courte.',
+    'Más de la mitad del calor se va en pérdidas estáticas y de recirculación: considere calentadores en punto de uso o un bucle más corto.',
+    'Ponad połowa ciepła idzie na straty postojowe i cyrkulacji — rozważ podgrzewacze miejscowe lub krótszą pętlę.'),
+  'fl.ecodesign_extrapolated': T7('Above 2000 L the Ecodesign loss formula is extrapolated; enter the manufacturer\'s standing loss.',
+    'Понад 2000 л формула втрат Ecodesign екстрапольована; введіть втрати очікування від виробника.',
+    'Über 2000 L ist die Ecodesign-Verlustformel extrapoliert; den Bereitschaftsverlust des Herstellers eingeben.',
+    'Boven 2000 L is de Ecodesign-verliesformule geëxtrapoleerd; voer het stilstandsverlies van de fabrikant in.',
+    'Au-delà de 2000 L la formule Ecodesign est extrapolée ; saisissez les pertes statiques du fabricant.',
+    'Por encima de 2000 L la fórmula Ecodesign está extrapolada; introduzca las pérdidas estáticas del fabricante.',
+    'Powyżej 2000 L wzór strat Ecodesign jest ekstrapolowany; wpisz stratę postojową producenta.'),
+  'fl.inst_above_connection': T7('An electric instantaneous heater would need more than 9.2 kW — above a usual 40 A single-phase household connection (learning assumption for Belgium).',
+    'Електричний проточний нагрівач потребував би понад 9,2 кВт — більше за звичайне однофазне побутове підключення 40 А (навчальне припущення для Бельгії).',
+    'Ein elektrischer Durchlauferhitzer bräuchte mehr als 9,2 kW — mehr als ein üblicher einphasiger 40-A-Hausanschluss (Lernannahme für Belgien).',
+    'Een elektrische doorstromer zou meer dan 9,2 kW vragen — meer dan een gewone eenfasige aansluiting van 40 A (leeraanname voor België).',
+    'Un chauffe-eau électrique instantané demanderait plus de 9,2 kW — au-delà d\'un raccordement domestique monophasé courant de 40 A (hypothèse pédagogique pour la Belgique).',
+    'Un calentador eléctrico instantáneo necesitaría más de 9,2 kW, por encima de una acometida doméstica monofásica habitual de 40 A (supuesto didáctico para Bélgica).',
+    'Elektryczny podgrzewacz przepływowy wymagałby ponad 9,2 kW — więcej niż typowe jednofazowe przyłącze 40 A (założenie dydaktyczne dla Belgii).'),
+  'fl.window_limited': T7('The heater runs only %H h a day: the store must carry the hours without heating.',
+    'Нагрівач працює лише %H год на добу: бак має покрити години без нагріву.',
+    'Der Erzeuger läuft nur %H h am Tag: der Speicher muss die Stunden ohne Heizung tragen.',
+    'Het toestel werkt maar %H u per dag: het vat moet de uren zonder verwarming overbruggen.',
+    'Le générateur ne fonctionne que %H h par jour : le ballon doit porter les heures sans chauffe.',
+    'El generador solo funciona %H h al día: el acumulador debe cubrir las horas sin calentamiento.',
+    'Podgrzewacz pracuje tylko %H h na dobę: zasobnik musi pokryć godziny bez grzania.'),
+  'fl.w551_large': T7('DVGW W 551 large installation (store > 400 L or > 3 L in one pipe run): water leaving the heater ≥ 60 °C at all times, circulation return ≥ 55 °C, preheat stages heated to 60 °C once a day; regional rules may be stricter.',
+    'Велика установка за DVGW W 551 (бак > 400 л або > 3 л в одній ділянці трубопроводу): вода на виході нагрівача завжди ≥ 60 °C, зворотна циркуляція ≥ 55 °C, ступені попереднього нагріву раз на добу нагріваються до 60 °C; регіональні правила можуть бути суворішими.',
+    'Großanlage nach DVGW W 551 (Speicher > 400 L oder > 3 L in einem Leitungsstrang): Austritt am Erwärmer ständig ≥ 60 °C, Zirkulationsrücklauf ≥ 55 °C, Vorwärmstufen einmal täglich auf 60 °C; regionale Regeln können strenger sein.',
+    'Grote installatie volgens DVGW W 551 (vat > 400 L of > 3 L in één leidingtraject): water uit het toestel steeds ≥ 60 °C, circulatieretour ≥ 55 °C, voorverwarmingstrappen eenmaal per dag op 60 °C; regionale regels kunnen strenger zijn.',
+    'Grande installation selon DVGW W 551 (ballon > 400 L ou > 3 L dans un tronçon) : eau en sortie du générateur toujours ≥ 60 °C, retour de bouclage ≥ 55 °C, étages de préchauffage portés à 60 °C une fois par jour ; les règles régionales peuvent être plus strictes.',
+    'Instalación grande según DVGW W 551 (acumulador > 400 L o > 3 L en un tramo): agua a la salida del generador siempre ≥ 60 °C, retorno de recirculación ≥ 55 °C, etapas de precalentamiento a 60 °C una vez al día; las normas regionales pueden ser más estrictas.',
+    'Duża instalacja wg DVGW W 551 (zasobnik > 400 L lub > 3 L w jednym odcinku): woda na wyjściu podgrzewacza zawsze ≥ 60 °C, powrót cyrkulacji ≥ 55 °C, stopnie podgrzewu wstępnego raz na dobę do 60 °C; przepisy regionalne mogą być surowsze.'),
+  'fl.w551_large_below_60': T7('Hazard: a W 551 large installation held below 60 °C — raise the set point or add a booster; check with Legionella Risk.',
+    'Небезпека: велика установка за W 551 утримується нижче 60 °C — підвищте уставку або додайте догрів; перевірте в інструменті ризику легіонели.',
+    'Gefahr: eine W-551-Großanlage unter 60 °C — Sollwert anheben oder Nachheizung vorsehen; mit Legionellenrisiko prüfen.',
+    'Gevaar: een grote W 551-installatie onder 60 °C — verhoog het setpoint of voeg naverwarming toe; controleer met Legionellarisico.',
+    'Danger : une grande installation W 551 maintenue sous 60 °C — relevez la consigne ou ajoutez un appoint ; vérifiez avec Risque légionelles.',
+    'Peligro: una instalación grande W 551 mantenida por debajo de 60 °C — suba la consigna o añada apoyo; compruebe con Riesgo de legionela.',
+    'Zagrożenie: duża instalacja W 551 utrzymywana poniżej 60 °C — podnieś nastawę lub dodaj dogrzewanie; sprawdź w narzędziu ryzyka legionelli.'),
+  'fl.w551_preheat_daily': T7('The heat-pump part of the store is a preheat stage: in a W 551 large installation it must reach 60 °C once a day (booster or legionella circuit).',
+    'Частина бака від теплового насоса — ступінь попереднього нагріву: у великій установці за W 551 вона має раз на добу досягати 60 °C (догрів або антилегіонельний контур).',
+    'Der Wärmepumpenteil des Speichers ist eine Vorwärmstufe: in einer W-551-Großanlage muss er einmal täglich 60 °C erreichen (Nachheizung oder Legionellenschaltung).',
+    'Het warmtepompdeel van het vat is een voorverwarmingstrap: in een grote W 551-installatie moet het eenmaal per dag 60 °C halen (naverwarming of legionellaschakeling).',
+    'La partie PAC du ballon est un étage de préchauffage : dans une grande installation W 551 elle doit atteindre 60 °C une fois par jour (appoint ou cycle anti-légionelles).',
+    'La parte de bomba de calor del acumulador es una etapa de precalentamiento: en una instalación grande W 551 debe alcanzar 60 °C una vez al día (apoyo o ciclo antilegionela).',
+    'Część zasobnika od pompy ciepła to stopień podgrzewu wstępnego: w dużej instalacji W 551 musi raz na dobę osiągnąć 60 °C (dogrzewanie lub układ antylegionellowy).'),
+  'fl.w551_pipe_unknown': T7('W 551 class not settled: the store is ≤ 400 L, enter the largest pipe volume heater → tap (more than 3 L = large installation).',
+    'Клас за W 551 не визначено: бак ≤ 400 л, введіть найбільший об\'єм трубопроводу нагрівач → кран (понад 3 л = велика установка).',
+    'W-551-Klasse offen: Speicher ≤ 400 L, größtes Leitungsvolumen Erwärmer → Zapfstelle eingeben (mehr als 3 L = Großanlage).',
+    'W 551-klasse open: vat ≤ 400 L, vul het grootste leidingvolume toestel → tappunt in (meer dan 3 L = grote installatie).',
+    'Classe W 551 non établie : ballon ≤ 400 L, saisissez le plus grand volume de conduite générateur → puisage (plus de 3 L = grande installation).',
+    'Clase W 551 sin determinar: acumulador ≤ 400 L, introduzca el mayor volumen de tubería generador → grifo (más de 3 L = instalación grande).',
+    'Klasa W 551 nieustalona: zasobnik ≤ 400 L, podaj największą objętość rury podgrzewacz → punkt poboru (ponad 3 L = duża instalacja).'),
+  'fl.w551_pipe_3l': T7('More than 3 L of water in one pipe run between the heater and a draw-off point without circulation: the DVGW 3-litre rule (W 551) applies to every installation, also in one- and two-family houses — add circulation or trace heating, or shorten the run.',
+    'Понад 3 л води в одній ділянці між нагрівачем і точкою водорозбору без циркуляції: правило 3 літрів DVGW (W 551) діє для всіх установок, також в одно- й двосімейних будинках — додайте циркуляцію чи електрообігрів або скоротіть ділянку.',
+    'Mehr als 3 L Wasser in einem Leitungsstrang zwischen Erwärmer und Zapfstelle ohne Zirkulation: die 3-Liter-Regel des DVGW (W 551) gilt für alle Installationen, auch im Ein- und Zweifamilienhaus — Zirkulation oder Begleitheizung vorsehen oder den Strang kürzen.',
+    'Meer dan 3 L water in één leiding tussen toestel en tappunt zonder circulatie: de DVGW-3-literregel (W 551) geldt voor elke installatie, ook in één- en tweegezinswoningen — voorzie circulatie of tracing, of maak de leiding korter.',
+    'Plus de 3 L d\'eau dans un tronçon entre le générateur et un puisage sans bouclage : la règle des 3 litres du DVGW (W 551) s\'applique à toute installation, y compris en maison individuelle ou bifamiliale — prévoyez un bouclage ou un traçage, ou raccourcissez le tronçon.',
+    'Más de 3 L de agua en un tramo entre el generador y un punto de consumo sin recirculación: la regla de los 3 litros del DVGW (W 551) se aplica a toda instalación, también en viviendas unifamiliares y bifamiliares — prevea recirculación o traceado, o acorte el tramo.',
+    'Ponad 3 L wody w jednym odcinku między podgrzewaczem a punktem poboru bez cyrkulacji: zasada 3 litrów DVGW (W 551) obowiązuje w każdej instalacji, także w domach jedno- i dwurodzinnych — dodaj cyrkulację lub przewód grzejny albo skróć odcinek.'),
+  'r.pkd': T7('Design peak excess above the profile (in the daily volume)',
+    'Перевищення розрахункового піку над профілем (у добовому об\'ємі)',
+    'Überschuss der Auslegungsspitze über dem Profil (im Tagesvolumen)',
+    'Overschot van de ontwerppiek boven het profiel (in het dagvolume)',
+    'Excédent de la pointe de calcul sur le profil (inclus dans le volume journalier)',
+    'Exceso del pico de diseño sobre el perfil (en el volumen diario)',
+    'Nadwyżka szczytu obliczeniowego ponad profil (w objętości dobowej)'),
+  'fl.no_store_needed': T7('No draw and no loss to cover: no store is needed.', 'Немає водорозбору й втрат: бак не потрібен.', 'Keine Zapfung und keine Verluste: kein Speicher nötig.', 'Geen tappen en geen verlies: geen vat nodig.', 'Ni puisage ni pertes : aucun ballon n\'est nécessaire.', 'Sin consumo ni pérdidas: no hace falta acumulador.', 'Brak poboru i strat: zasobnik nie jest potrzebny.'),
+  'fl.no_heater_hours': T7('The heater window contains no 15-minute step: the heater never runs.', 'Вікно нагрівача не містить жодного 15-хвилинного кроку: нагрівач ніколи не працює.', 'Das Freigabefenster enthält keinen 15-Minuten-Schritt: der Erzeuger läuft nie.', 'Het toestelvenster bevat geen stap van 15 minuten: het toestel draait nooit.', 'La plage de chauffe ne contient aucun pas de 15 minutes : le générateur ne fonctionne jamais.', 'La ventana del generador no contiene ningún paso de 15 minutos: el generador nunca funciona.', 'Okno pracy nie obejmuje żadnego kroku 15-minutowego: podgrzewacz nigdy nie pracuje.'),
+  'fl.defaults_used': T7('Empty fields were replaced by their default values.', 'Порожні поля замінено типовими значеннями.', 'Leere Felder wurden durch ihre Standardwerte ersetzt.', 'Lege velden zijn vervangen door hun standaardwaarden.', 'Les champs vides ont été remplacés par leurs valeurs par défaut.', 'Los campos vacíos se sustituyeron por sus valores por defecto.', 'Puste pola zastąpiono wartościami domyślnymi.'),
+  'v.badevent': T7('Draw event no. %N: enter a start from 0 to below 24 h, a duration above 0 up to 24 h and the litres (0 or more).',
+    'Подія водорозбору № %N: введіть початок від 0 до менше ніж 24 год, тривалість понад 0 до 24 год і літри (0 або більше).',
+    'Zapfereignis Nr. %N: Beginn von 0 bis unter 24 h, Dauer über 0 bis 24 h und Liter (0 oder mehr) eingeben.',
+    'Tapmoment nr. %N: vul een begin van 0 tot onder 24 h, een duur boven 0 tot 24 h en de liters (0 of meer) in.',
+    'Puisage n° %N : saisissez un début de 0 à moins de 24 h, une durée de plus de 0 à 24 h et les litres (0 ou plus).',
+    'Consumo n.º %N: introduzca un inicio de 0 a menos de 24 h, una duración de más de 0 hasta 24 h y los litros (0 o más).',
+    'Pobór nr %N: podaj początek od 0 do poniżej 24 h, czas trwania powyżej 0 do 24 h i litry (0 lub więcej).'),
+  'f.12f': T7('One- or two-family house (W 551 small installation)', 'Одно- чи двосімейний будинок (мала установка за W 551)', 'Ein- oder Zweifamilienhaus (Kleinanlage nach W 551)', 'Eén- of tweegezinswoning (kleine installatie volgens W 551)', 'Maison individuelle ou bifamiliale (petite installation selon W 551)', 'Vivienda unifamiliar o bifamiliar (instalación pequeña según W 551)', 'Dom jedno- lub dwurodzinny (mała instalacja wg W 551)'),
+  'f.12f.h': T7('DVGW W 551: small installation whatever the store and pipe volume', 'DVGW W 551: мала установка незалежно від об’єму накопичувача й труб', 'DVGW W 551: Kleinanlage unabhängig von Speicher- und Leitungsvolumen', 'DVGW W 551: kleine installatie, ongeacht boiler- en leidingvolume', 'DVGW W 551 : petite installation quels que soient les volumes du ballon et des conduites', 'DVGW W 551: instalación pequeña sea cual sea el volumen del acumulador y de las tuberías', 'DVGW W 551: mała instalacja niezależnie od pojemności zasobnika i przewodów'),
+  'fl.w551_small_one_two_family': T7('DVGW W 551 small installation: in a one- or two-family house the store and pipe volumes do not make it a large installation (the large-installation requirements do not apply).', 'Мала установка за DVGW W 551: в одно- чи двосімейному будинку об’єми накопичувача й труб не роблять її великою (вимоги до великих установок не діють).', 'Kleinanlage nach DVGW W 551: im Ein- oder Zweifamilienhaus machen Speicher- und Leitungsvolumen sie nicht zur Großanlage (die Anforderungen an Großanlagen gelten nicht).', 'Kleine installatie volgens DVGW W 551: in een één- of tweegezinswoning maken boiler- en leidingvolume er geen grote installatie van (de eisen voor grote installaties gelden niet).', 'Petite installation selon DVGW W 551 : dans une maison individuelle ou bifamiliale, les volumes du ballon et des conduites n’en font pas une grande installation (les exigences des grandes installations ne s’appliquent pas).', 'Instalación pequeña según DVGW W 551: en una vivienda unifamiliar o bifamiliar los volúmenes del acumulador y de las tuberías no la convierten en instalación grande (no se aplican los requisitos de instalación grande).', 'Mała instalacja wg DVGW W 551: w domu jedno- lub dwurodzinnym pojemność zasobnika i przewodów nie czyni jej dużą instalacją (wymagania dla dużych instalacji nie obowiązują).'),
+  'v.badinput': T7('Value outside the allowed range or not a number: %F.', 'Значення поза допустимим діапазоном або не число: %F.', 'Wert außerhalb des zulässigen Bereichs oder keine Zahl: %F.', 'Waarde buiten het toegelaten bereik of geen getal: %F.', 'Valeur hors de la plage admise ou non numérique : %F.', 'Valor fuera del rango admitido o no numérico: %F.', 'Wartość poza dopuszczalnym zakresem lub nie liczba: %F.'),
+  'f.vpipe': T7('Largest pipe volume heater → tap', 'Найбільший об\'єм труби нагрівач → кран', 'Größtes Leitungsvolumen Erwärmer → Zapfstelle', 'Grootste leidingvolume toestel → tappunt', 'Plus grand volume de conduite générateur → puisage', 'Mayor volumen de tubería generador → grifo', 'Największa objętość rury podgrzewacz → punkt poboru'),
+  'f.vpipe.h': T7('Water in one pipe run without circulation between the heater and a draw-off point (DVGW W 551: more than 3 L = large installation). Leave empty if unknown.',
+    'Вода в одній ділянці без циркуляції між нагрівачем і точкою водорозбору (DVGW W 551: понад 3 л = велика установка). Залиште порожнім, якщо невідомо.',
+    'Wasserinhalt eines Leitungsstrangs ohne Zirkulation zwischen Erwärmer und Zapfstelle (DVGW W 551: mehr als 3 L = Großanlage). Leer lassen, wenn unbekannt.',
+    'Water in één leidingtraject zonder circulatie tussen toestel en tappunt (DVGW W 551: meer dan 3 L = grote installatie). Leeg laten indien onbekend.',
+    'Eau contenue dans un tronçon sans bouclage entre le générateur et un puisage (DVGW W 551 : plus de 3 L = grande installation). Laissez vide si inconnu.',
+    'Agua en un tramo sin recirculación entre el generador y un punto de consumo (DVGW W 551: más de 3 L = instalación grande). Déjelo vacío si se desconoce.',
+    'Woda w jednym odcinku bez cyrkulacji między podgrzewaczem a punktem poboru (DVGW W 551: ponad 3 L = duża instalacja). Zostaw puste, jeśli nieznane.'),
+  'fl.infeasible': T7('Infeasible combination.', 'Нездійсненне поєднання.', 'Nicht machbare Kombination.', 'Niet haalbare combinatie.', 'Combinaison irréalisable.', 'Combinación no viable.', 'Niewykonalne połączenie.'),
+  /* tables */
+  'tab.values': T7('Values', 'Значення', 'Werte', 'Waarden', 'Valeurs', 'Valores', 'Wartości'),
+  'tab.curve': T7('Storage against power', 'Об\'єм проти потужності', 'Volumen gegen Leistung', 'Volume tegenover vermogen', 'Volume face à la puissance', 'Volumen frente a potencia', 'Pojemność wobec mocy'),
+  'h.q': T7('Quantity', 'Величина', 'Größe', 'Grootheid', 'Grandeur', 'Magnitud', 'Wielkość'),
+  'h.v': T7('Value', 'Значення', 'Wert', 'Waarde', 'Valeur', 'Valor', 'Wartość'),
+  'h.unit': T7('Unit', 'Одиниця', 'Einheit', 'Eenheid', 'Unité', 'Unidad', 'Jednostka'),
+  'r.dvol': T7('Daily volume at T_use', 'Добовий об\'єм при T_вик', 'Tagesvolumen bei T_Nutz', 'Dagvolume bij T_gebruik', 'Volume journalier à T_usage', 'Volumen diario a T_uso', 'Objętość dobowa przy T_użytk'),
+  'r.peak': T7('Peak hour', 'Пікова година', 'Spitzenstunde', 'Piekuur', 'Heure de pointe', 'Hora punta', 'Godzina szczytu'),
+  'r.pmin': T7('Daily average power over the available hours', 'Середня добова потужність за доступні години', 'Mittlere Leistung über die freigegebenen Stunden', 'Gemiddeld vermogen over de beschikbare uren', 'Puissance moyenne sur les heures disponibles', 'Potencia media en las horas disponibles', 'Średnia moc w dostępnych godzinach'),
+  'r.peff': T7('Effective heating power (all generators)', 'Ефективна потужність нагріву (усі генератори)', 'Wirksame Heizleistung (alle Erzeuger)', 'Effectief vermogen (alle toestellen)', 'Puissance effective (tous générateurs)', 'Potencia efectiva (todos los generadores)', 'Efektywna moc grzania (wszystkie źródła)'),
+  'r.estore': T7('Usable store energy', 'Корисна енергія бака', 'Nutzbare Speicherenergie', 'Bruikbare vatenergie', 'Énergie utile du ballon', 'Energía útil del acumulador', 'Energia użyteczna zasobnika'),
+  'r.sloss': T7('Store standing loss', 'Втрати бака в очікуванні', 'Bereitschaftsverlust', 'Stilstandsverlies', 'Pertes statiques', 'Pérdidas estáticas', 'Strata postojowa'),
+  'r.lday': T7('Losses per day (store + loop)', 'Втрати за добу (бак + контур)', 'Verluste je Tag (Speicher + Zirkulation)', 'Verliezen per dag (vat + lus)', 'Pertes par jour (ballon + boucle)', 'Pérdidas al día (acumulador + bucle)', 'Straty na dobę (zasobnik + pętla)'),
+  'r.hpshare': T7('Heat pump share of the stored heat', 'Частка теплового насоса в накопиченому теплі', 'Wärmepumpenanteil an der gespeicherten Wärme', 'Aandeel warmtepomp in de opgeslagen warmte', 'Part de la PAC dans la chaleur stockée', 'Fracción de la bomba de calor en el calor acumulado', 'Udział pompy ciepła w zmagazynowanym cieple'),
+  'r.boostp': T7('Booster power needed', 'Потрібна потужність догріву', 'Erforderliche Nachheizleistung', 'Benodigd naverwarmingsvermogen', 'Puissance d\'appoint nécessaire', 'Potencia de apoyo necesaria', 'Wymagana moc dogrzewania'),
+  'r.hours': T7('Heater hours per day', 'Години роботи нагрівача на добу', 'Erzeugerstunden je Tag', 'Toesteluren per dag', 'Heures de chauffe par jour', 'Horas de generador al día', 'Godziny pracy podgrzewacza na dobę'),
+  /* chart */
+  'chart.caption': T7('Left: store volume needed for each heater power, your point marked, instantaneous power dashed. Right: the design day — draw per hour (bars) against the heat the heater can give (line).',
+    'Ліворуч: потрібний об\'єм бака для кожної потужності нагрівача, ваша точка позначена, миттєва потужність — штрихом. Праворуч: розрахункова доба — водорозбір за годину (стовпці) проти тепла, яке може дати нагрівач (лінія).',
+    'Links: erforderliches Speichervolumen je Erzeugerleistung, Ihr Punkt markiert, Durchlaufleistung gestrichelt. Rechts: der Auslegungstag — Zapfung je Stunde (Balken) gegen die Wärme, die der Erzeuger liefern kann (Linie).',
+    'Links: benodigd vatvolume per toestelvermogen, uw punt gemarkeerd, doorstroomvermogen gestreept. Rechts: de ontwerpdag — tappen per uur (staven) tegenover de warmte die het toestel kan leveren (lijn).',
+    'À gauche : volume de ballon nécessaire pour chaque puissance, votre point marqué, puissance instantanée en tirets. À droite : le jour de calcul — puisage par heure (barres) face à la chaleur que le générateur peut fournir (ligne).',
+    'Izquierda: volumen de acumulador necesario para cada potencia, su punto marcado, potencia instantánea a trazos. Derecha: el día de diseño — consumo por hora (barras) frente al calor que puede dar el generador (línea).',
+    'Po lewej: wymagana pojemność zasobnika dla każdej mocy, Twój punkt zaznaczony, moc przepływowa przerywaną linią. Po prawej: doba obliczeniowa — pobór na godzinę (słupki) wobec ciepła, które może dać podgrzewacz (linia).'),
+  'chart.x': T7('Heating power, kW', 'Потужність нагріву, кВт', 'Heizleistung, kW', 'Vermogen, kW', 'Puissance, kW', 'Potencia, kW', 'Moc grzania, kW'),
+  'chart.y': T7('Store volume, L', 'Об\'єм бака, л', 'Speichervolumen, L', 'Vatvolume, L', 'Volume du ballon, L', 'Volumen, L', 'Pojemność, L'),
+  'chart.hx': T7('Hour of the day', 'Година доби', 'Stunde des Tages', 'Uur van de dag', 'Heure du jour', 'Hora del día', 'Godzina doby'),
+  'chart.hy': T7('kWh per hour', 'кВт·год за годину', 'kWh je Stunde', 'kWh per uur', 'kWh par heure', 'kWh por hora', 'kWh na godzinę'),
+  'chart.inst': T7('instantaneous', 'миттєвий', 'Durchlauf', 'doorstroom', 'instantané', 'instantáneo', 'przepływowy'),
+  'chart.none': T7('No feasible point in this range.', 'У цьому діапазоні немає здійсненних точок.', 'Kein machbarer Punkt in diesem Bereich.', 'Geen haalbaar punt in dit bereik.', 'Aucun point réalisable dans cette plage.', 'Ningún punto viable en este rango.', 'Brak wykonalnych punktów w tym zakresie.'),
+  'lg.draw': T7('draw', 'водорозбір', 'Zapfung', 'tappen', 'puisage', 'consumo', 'pobór'),
+  'lg.supply': T7('heater + losses', 'нагрівач + втрати', 'Erzeuger + Verluste', 'toestel + verliezen', 'générateur + pertes', 'generador + pérdidas', 'podgrzewacz + straty'),
+  'lg.curve': T7('volume for power', 'об\'єм для потужності', 'Volumen zur Leistung', 'volume bij vermogen', 'volume pour puissance', 'volumen para potencia', 'pojemność dla mocy'),
+  /* notes */
+  'n.assume': T7('Profile shape and litres per user are learning assumptions; the nominal size is the next common size, not a product.',
+    'Форма профілю й літри на користувача — навчальні припущення; номінальний розмір — найближчий поширений розмір, а не виріб.',
+    'Profilform und Liter je Nutzer sind Lernannahmen; die Nenngröße ist die nächste übliche Größe, kein Produkt.',
+    'Profielvorm en liters per gebruiker zijn leeraannames; de nominale grootte is de volgende gangbare maat, geen product.',
+    'La forme du profil et les litres par usager sont des hypothèses pédagogiques ; la taille nominale est la taille courante suivante, pas un produit.',
+    'La forma del perfil y los litros por usuario son supuestos didácticos; el tamaño nominal es el siguiente tamaño habitual, no un producto.',
+    'Kształt profilu i litry na użytkownika to założenia dydaktyczne; wielkość nominalna to najbliższy typowy rozmiar, a nie wyrób.'),
+  'n.nocore': T7('plumbing-core.js did not load: the project bar is not available; the CSV and JSON exports still work.',
+    'plumbing-core.js не завантажився: панель проєкту недоступна; експорт CSV і JSON працює.',
+    'plumbing-core.js wurde nicht geladen: die Projektleiste fehlt; CSV- und JSON-Export funktionieren.',
+    'plumbing-core.js is niet geladen: de projectbalk ontbreekt; CSV- en JSON-export werken wel.',
+    'plumbing-core.js n\'a pas été chargé : la barre de projet manque ; les exports CSV et JSON fonctionnent.',
+    'plumbing-core.js no se cargó: falta la barra de proyecto; las exportaciones CSV y JSON funcionan.',
+    'plumbing-core.js nie załadował się: brak paska projektu; eksport CSV i JSON działa.'),
+  'n.saved': T7('Result saved in the project (modules.plbdhw).', 'Результат збережено в проєкті (modules.plbdhw).', 'Ergebnis im Projekt gespeichert (modules.plbdhw).', 'Resultaat opgeslagen in het project (modules.plbdhw).', 'Résultat enregistré dans le projet (modules.plbdhw).', 'Resultado guardado en el proyecto (modules.plbdhw).', 'Wynik zapisany w projekcie (modules.plbdhw).'),
+  'n.used': T7('Taken from the project: %S.', 'Взято з проєкту: %S.', 'Aus dem Projekt übernommen: %S.', 'Overgenomen uit het project: %S.', 'Repris du projet : %S.', 'Tomado del proyecto: %S.', 'Pobrano z projektu: %S.'),
+  'n.nouse': T7('The project has no value this tool can use.', 'У проєкті немає значення, яке може використати цей інструмент.', 'Das Projekt enthält keinen Wert, den dieses Werkzeug nutzen kann.', 'Het project bevat geen waarde die deze tool kan gebruiken.', 'Le projet ne contient aucune valeur utilisable par cet outil.', 'El proyecto no tiene ningún valor que esta herramienta pueda usar.', 'Projekt nie zawiera wartości, której to narzędzie może użyć.'),
+  'rep.title': T7('Hot water storage and heater sizing', 'Підбір бака ГВП і потужності нагрівача', 'Auslegung von Trinkwarmwasserspeicher und Erzeuger', 'Dimensionering van boilervat en toestel', 'Dimensionnement du ballon et du générateur ECS', 'Dimensionado del acumulador y del generador de ACS', 'Dobór zasobnika i podgrzewacza c.w.u.')
+};
+function tx(k) { return I18N[k] || { en: k }; }
+function curLang() { return (window.DiagramUI && DiagramUI.current && DiagramUI.current.lang) || document.documentElement.lang || 'en'; }
+function pick(o) { var l = curLang(); return typeof o === 'string' ? o : ((o && o[l]) || (o && o.en) || ''); }
+function S(k, subs) { var s = pick(tx(k)); if (subs) Object.keys(subs).sort(function (a, b) { return b.length - a.length; }).forEach(function (p) { s = s.split('%' + p).join(subs[p]); }); return s; }
+function U(k) { return function () { return pick(tx(k)); }; }
+function opts(prefix, keys) { return keys.map(function (k) { return { value: k, label: tx(prefix + k) }; }); }
+function clone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function F(n, d) { if (CORE && typeof CORE.fmt === 'function') return CORE.fmt(n, curLang(), d); if (n == null || !isFinite(n)) return '—'; return Number(n).toFixed(d == null ? 1 : d); }
+function fmtV(n) { return F(n, 0); }
+function fmtP(n) { return F(n, n >= 100 ? 0 : 1); }
+
+/* ---- presets: name and the "aha" in 7 languages ---- */
+var PL = {
+  apartments_24: [T7('24 flats: storage instead of 150 kW', '24 квартири: бак замість 150 кВт', '24 Wohnungen: Speicher statt 150 kW', '24 appartementen: vat in plaats van 150 kW', '24 logements : un ballon au lieu de 150 kW', '24 viviendas: acumulador en vez de 150 kW', '24 mieszkania: zasobnik zamiast 150 kW'),
+    T7('57 residents, 70 L/day each. A 30 kW boiler with a 400 L store does what an instantaneous heater would need about 150 kW for. Move the power: doubling it saves only about 100 L — the short peak, not the day, sets the store.',
+      '57 мешканців, по 70 л/добу. Котел 30 кВт з баком 400 л робить те, на що проточному нагрівачу знадобилося б близько 150 кВт. Змініть потужність: подвоєння економить лише близько 100 л — бак визначає короткий пік, а не доба.',
+      '57 Bewohner, je 70 L/Tag. Ein 30-kW-Kessel mit 400-L-Speicher leistet, wofür ein Durchlauferhitzer etwa 150 kW bräuchte. Leistung verschieben: Verdoppeln spart nur etwa 100 L — die kurze Spitze, nicht der Tag, bestimmt den Speicher.',
+      '57 bewoners, elk 70 L/dag. Een ketel van 30 kW met een vat van 400 L doet wat een doorstromer met ongeveer 150 kW zou doen. Verschuif het vermogen: verdubbelen spaart maar ongeveer 100 L — de korte piek, niet de dag, bepaalt het vat.',
+      '57 habitants, 70 L/jour chacun. Une chaudière de 30 kW avec un ballon de 400 L fait ce qui demanderait environ 150 kW en instantané. Déplacez la puissance : la doubler n\'économise qu\'environ 100 L — c\'est la pointe courte, pas la journée, qui fixe le ballon.',
+      '57 residentes, 70 L/día cada uno. Una caldera de 30 kW con un acumulador de 400 L hace lo que un instantáneo haría con unos 150 kW. Mueva la potencia: duplicarla solo ahorra unos 100 L; el pico corto, no el día, fija el acumulador.',
+      '57 mieszkańców, po 70 L/dobę. Kocioł 30 kW z zasobnikiem 400 L robi to, do czego podgrzewacz przepływowy potrzebowałby ok. 150 kW. Zmień moc: podwojenie oszczędza tylko ok. 100 L — zasobnik wyznacza krótki szczyt, a nie doba.')],
+  office_8f: [T7('Office: the losses are the load', 'Офіс: втрати і є навантаженням', 'Büro: die Verluste sind die Last', 'Kantoor: de verliezen zijn de last', 'Bureaux : les pertes sont la charge', 'Oficina: las pérdidas son la carga', 'Biuro: straty są obciążeniem'),
+    T7('600 staff wash hands with 2 L of warm water a day. The 2 kW circulation loop and the store lose about as much heat as all taps and the daily peak draw — about half of the energy. Point-of-use heaters or a shorter loop would change the picture.',
+    '600 працівників миють руки 2 л теплої води на добу. Циркуляційний контур 2 кВт і бак втрачають приблизно стільки тепла, скільки забирають усі крани разом із добовим піком, — близько половини енергії. Локальні нагрівачі або коротший контур змінили б картину.',
+    '600 Beschäftigte waschen sich mit 2 L Warmwasser am Tag die Hände. Die 2-kW-Zirkulation und der Speicher verlieren etwa so viel Wärme, wie alle Zapfstellen samt Tagesspitze entnehmen — rund die Hälfte der Energie. Dezentrale Erwärmung oder eine kürzere Zirkulation würden das Bild ändern.',
+    '600 medewerkers wassen hun handen met 2 L warm water per dag. De circulatie van 2 kW en het vat verliezen ongeveer evenveel warmte als alle kranen samen met de dagpiek tappen — ongeveer de helft van de energie. Decentrale toestellen of een kortere lus zouden het beeld veranderen.',
+    '600 employés se lavent les mains avec 2 L d\'eau chaude par jour. La boucle de 2 kW et le ballon perdent à peu près autant de chaleur que tous les robinets et la pointe du jour n\'en puisent — environ la moitié de l\'énergie. Une production décentralisée ou une boucle plus courte changerait le tableau.',
+    '600 empleados se lavan las manos con 2 L de agua caliente al día. El bucle de 2 kW y el acumulador pierden más o menos tanto calor como consumen todos los grifos con el pico del día: cerca de la mitad de la energía. Calentadores en punto de uso o un bucle más corto cambiarían el panorama.',
+    '600 pracowników myje ręce 2 L ciepłej wody dziennie. Pętla cyrkulacji 2 kW i zasobnik tracą mniej więcej tyle ciepła, ile pobierają wszystkie baterie razem ze szczytem dobowym — około połowy energii. Podgrzewacze miejscowe albo krótsza pętla zmieniłyby obraz.')],
+  hotel_120: [T7('Hotel: the knee of the curve', 'Готель: злам кривої', 'Hotel: das Knie der Kurve', 'Hotel: de knik in de curve', 'Hôtel : le coude de la courbe', 'Hotel: el codo de la curva', 'Hotel: kolano krzywej'),
+    T7('180 guests, a breakfast-time peak. At 65 kW the store is about 1750 L (2000 L nominal). Go down to 30 kW and the long morning deficit grows under the same peak: the store more than doubles to about 4100 L. Above the knee extra kW buy little volume.',
+    '180 гостей, пік під час сніданку. При 65 кВт бак близько 1750 л (номінал 2000 л). Знизьте до 30 кВт — і під тим самим піком росте довгий ранковий дефіцит: бак більш ніж подвоюється, до близько 4100 л. Вище зламу додаткові кВт мало що дають.',
+    '180 Gäste, eine Spitze zur Frühstückszeit. Bei 65 kW sind es etwa 1750 L (Nenngröße 2000 L). Bei 30 kW wächst unter derselben Spitze das lange Morgendefizit: der Speicher wird mehr als doppelt so groß, etwa 4100 L. Oberhalb des Knies bringen weitere kW kaum Volumen.',
+    '180 gasten, een piek rond het ontbijt. Bij 65 kW is het vat ongeveer 1750 L (nominaal 2000 L). Ga naar 30 kW en onder dezelfde piek groeit het lange ochtendtekort: het vat wordt meer dan dubbel zo groot, ongeveer 4100 L. Boven de knik leveren extra kW weinig volume op.',
+    '180 clients, une pointe au petit-déjeuner. À 65 kW le ballon fait environ 1750 L (2000 L nominal). Descendez à 30 kW et le long déficit du matin grandit sous la même pointe : le ballon fait plus que doubler, environ 4100 L. Au-dessus du coude, des kW en plus n\'économisent presque plus de volume.',
+    '180 huéspedes, un pico a la hora del desayuno. Con 65 kW el acumulador ronda 1750 L (2000 L nominal). Baje a 30 kW y, con el mismo pico, crece el largo déficit de la mañana: el acumulador más que se duplica, unos 4100 L. Por encima del codo, más kW apenas ahorran volumen.',
+    '180 gości, szczyt w porze śniadania. Przy 65 kW zasobnik ma ok. 1750 L (nominalnie 2000 L). Zejdź do 30 kW, a przy tym samym szczycie rośnie długi poranny deficyt: zasobnik rośnie ponad dwukrotnie, do ok. 4100 L. Powyżej kolana dodatkowe kW dają niewiele pojemności.')],
+  sports_hall: [T7('Sports hall: 20 showers at once', 'Спортзал: 20 душів одночасно', 'Sporthalle: 20 Duschen gleichzeitig', 'Sporthal: 20 douches tegelijk', 'Salle de sport : 20 douches à la fois', 'Pabellón: 20 duchas a la vez', 'Hala sportowa: 20 natrysków naraz'),
+    T7('Six match ends a day, 1600 L of showers in 30 minutes each, 20 showers running together. Instantaneous heating would need about 380 kW; a 40 kW boiler with a 2000 L store does the same job. The showers plus one 15-minute peak on top of them set the store.',
+      'Шість завершень матчів на добу, по 1600 л душу за 30 хвилин, 20 душів одночасно. Проточний нагрів потребував би близько 380 кВт; котел 40 кВт з баком 2000 л виконує ту саму роботу. Бак визначають душі разом з одним 15-хвилинним піком понад них.',
+      'Sechs Spielenden am Tag, jeweils 1600 L Duschwasser in 30 Minuten, 20 Duschen gleichzeitig. Durchlauf bräuchte etwa 380 kW; ein 40-kW-Kessel mit 2000-L-Speicher erledigt dasselbe. Die Duschen plus eine 15-Minuten-Spitze darauf bestimmen den Speicher.',
+      'Zes wedstrijdeinden per dag, elk 1600 L douchewater in 30 minuten, 20 douches tegelijk. Doorstroom zou ongeveer 380 kW vragen; een ketel van 40 kW met een vat van 2000 L doet hetzelfde. De douches plus één piek van 15 minuten erbovenop bepalen het vat.',
+      'Six fins de match par jour, 1600 L de douches en 30 minutes chacune, 20 douches en même temps. L\'instantané demanderait environ 380 kW ; une chaudière de 40 kW avec un ballon de 2000 L fait le même travail. Les douches plus une pointe de 15 minutes en sus fixent le ballon.',
+      'Seis finales de partido al día, 1600 L de duchas en 30 minutos cada uno, 20 duchas a la vez. El instantáneo necesitaría unos 380 kW; una caldera de 40 kW con un acumulador de 2000 L hace lo mismo. Las duchas más un pico de 15 minutos encima fijan el acumulador.',
+      'Sześć końców meczów dziennie, po 1600 L wody pod natryskami w 30 minut, 20 natrysków naraz. Podgrzew przepływowy wymagałby ok. 380 kW; kocioł 40 kW z zasobnikiem 2000 L robi to samo. Zasobnik wyznaczają natryski plus jeden 15-minutowy szczyt ponad nie.')],
+  care_home_80_hp: [T7('Care home, heat pump alone: 55 °C', 'Будинок догляду, лише тепловий насос: 55 °C', 'Pflegeheim, nur Wärmepumpe: 55 °C', 'Woonzorgcentrum, alleen warmtepomp: 55 °C', 'Maison de repos, PAC seule : 55 °C', 'Residencia, solo bomba de calor: 55 °C', 'Dom opieki, sama pompa ciepła: 55 °C'),
+    T7('A 40 kW heat pump that tops out at 55 °C holds the store at 55 °C: the store gets bigger and the legionella flag goes up — in a high-risk building. Load the next example to add a booster.',
+      'Тепловий насос 40 кВт з максимумом 55 °C тримає бак на 55 °C: бак більшає, а прапорець легіонели піднімається — у будівлі високого ризику. Завантажте наступний приклад, щоб додати догрівач.',
+      'Eine 40-kW-Wärmepumpe mit höchstens 55 °C hält den Speicher auf 55 °C: der Speicher wird größer und der Legionellen-Hinweis erscheint — in einem Hochrisikogebäude. Das nächste Beispiel ergänzt eine Nachheizung.',
+      'Een warmtepomp van 40 kW die maximaal 55 °C haalt, houdt het vat op 55 °C: het vat wordt groter en de legionellavlag gaat omhoog — in een risicogebouw. Laad het volgende voorbeeld om naverwarming toe te voegen.',
+      'Une PAC de 40 kW limitée à 55 °C maintient le ballon à 55 °C : le ballon grossit et le signal légionelle apparaît — dans un bâtiment à risque. Chargez l\'exemple suivant pour ajouter un appoint.',
+      'Una bomba de calor de 40 kW que llega como máximo a 55 °C mantiene el acumulador a 55 °C: el acumulador crece y salta el aviso de legionela, en un edificio de riesgo. Cargue el ejemplo siguiente para añadir un apoyo.',
+      'Pompa ciepła 40 kW o maksimum 55 °C utrzymuje zasobnik w 55 °C: zasobnik rośnie, a flaga legionelli się zapala — w budynku wysokiego ryzyka. Wczytaj następny przykład, by dodać dogrzewacz.')],
+  care_home_80_hp_boost: [T7('Care home, heat pump + 9 kW booster', 'Будинок догляду, тепловий насос + догрівач 9 кВт', 'Pflegeheim, Wärmepumpe + 9 kW Nachheizung', 'Woonzorgcentrum, warmtepomp + 9 kW naverwarming', 'Maison de repos, PAC + appoint 9 kW', 'Residencia, bomba de calor + apoyo 9 kW', 'Dom opieki, pompa ciepła + dogrzewacz 9 kW'),
+    T7('A 9 kW booster lifts the last 5 K from 55 to 60 °C. It supplies only 10 % of the heat — (60 − 55)/(60 − 10) — yet removes the legionella flag and makes the store smaller.',
+      'Догрівач 9 кВт піднімає останні 5 К з 55 до 60 °C. Він дає лише 10 % тепла — (60 − 55)/(60 − 10), — але знімає прапорець легіонели й зменшує бак.',
+      'Eine 9-kW-Nachheizung hebt die letzten 5 K von 55 auf 60 °C. Sie liefert nur 10 % der Wärme — (60 − 55)/(60 − 10) —, beseitigt aber den Legionellen-Hinweis und verkleinert den Speicher.',
+      'Een naverwarming van 9 kW brengt de laatste 5 K van 55 naar 60 °C. Ze levert maar 10 % van de warmte — (60 − 55)/(60 − 10) — maar haalt de legionellavlag weg en verkleint het vat.',
+      'Un appoint de 9 kW porte les 5 derniers K de 55 à 60 °C. Il ne fournit que 10 % de la chaleur — (60 − 55)/(60 − 10) — mais supprime le signal légionelle et réduit le ballon.',
+      'Un apoyo de 9 kW sube los últimos 5 K de 55 a 60 °C. Aporta solo el 10 % del calor — (60 − 55)/(60 − 10) — pero elimina el aviso de legionela y reduce el acumulador.',
+      'Dogrzewacz 9 kW podnosi ostatnie 5 K z 55 do 60 °C. Daje tylko 10 % ciepła — (60 − 55)/(60 − 10) — ale usuwa flagę legionelli i zmniejsza zasobnik.')],
+  flat_night_tariff: [T7('One flat, electric night tariff', 'Одна квартира, електрика за нічним тарифом', 'Eine Wohnung, elektrisch im Nachttarif', 'Eén woning, elektrisch op nachttarief', 'Un logement, électrique en heures creuses', 'Una vivienda, eléctrico en tarifa nocturna', 'Jedno mieszkanie, prąd w taryfie nocnej'),
+    T7('2.5 residents, a 2.4 kW element allowed only from 22:00 to 7:00. The store must carry the whole day: about 180 L instead of about 55 L if the element could run any time. Instantaneous would need about 19 kW — more than the household connection.',
+      '2,5 мешканця, тен 2,4 кВт дозволений лише з 22:00 до 7:00. Бак має покрити весь день: близько 180 л замість близько 55 л, якби тен міг працювати будь-коли. Проточний нагрів потребував би близько 19 кВт — більше за побутове підключення.',
+      '2,5 Bewohner, ein 2,4-kW-Heizstab nur von 22:00 bis 7:00 freigegeben. Der Speicher muss den ganzen Tag tragen: etwa 180 L statt etwa 55 L bei jederzeitigem Betrieb. Durchlauf bräuchte etwa 19 kW — mehr als der Hausanschluss.',
+      '2,5 bewoners, een element van 2,4 kW alleen toegelaten van 22:00 tot 7:00. Het vat moet de hele dag overbruggen: ongeveer 180 L in plaats van ongeveer 55 L als het element altijd mocht werken. Doorstroom zou ongeveer 19 kW vragen — meer dan de huisaansluiting.',
+      '2,5 habitants, une résistance de 2,4 kW autorisée seulement de 22 h à 7 h. Le ballon doit porter toute la journée : environ 180 L au lieu d\'environ 55 L si la résistance pouvait chauffer à tout moment. L\'instantané demanderait environ 19 kW — plus que le raccordement.',
+      '2,5 residentes, una resistencia de 2,4 kW permitida solo de 22:00 a 7:00. El acumulador debe cubrir todo el día: unos 180 L en vez de unos 55 L si pudiera calentar a cualquier hora. El instantáneo necesitaría unos 19 kW, más que la acometida.',
+      '2,5 mieszkańca, grzałka 2,4 kW dozwolona tylko od 22:00 do 7:00. Zasobnik musi pokryć cały dzień: ok. 180 L zamiast ok. 55 L, gdyby grzałka mogła pracować zawsze. Podgrzew przepływowy wymagałby ok. 19 kW — więcej niż przyłącze.')]
+};
+var PRESET_IDS = ['apartments_24', 'office_8f', 'hotel_120', 'sports_hall', 'care_home_80_hp', 'care_home_80_hp_boost', 'flat_night_tariff'];
+
+/* ---- state ---- */
+var KEYS = ENG ? Object.keys(ENG.DEFAULTS) : [];
+function baseState() { var s = ENG ? clone(ENG.DEFAULTS) : {}; return s; }
+function presetState(id) { var s = baseState(); var p = ENG && ENG.PRESETS[id]; if (p) Object.keys(p.state).forEach(function (k) { s[k] = clone(p.state[k]); }); return s; }
+var DEFAULTS = ENG ? presetState('apartments_24') : {};
+var state = clone(DEFAULTS), last = null, ui = null, stage = null, note = '';
+var projDoc = null;  /* the plumbing project document (not part of the permalink) */
+function sanitize(o) { var s = baseState(); o = o || {}; KEYS.forEach(function (k) { if (o[k] !== undefined) s[k] = clone(o[k]); }); return s; }
+
+function solve() { if (!ENG) return null; return ENG.solve(state); }
+
+/* ---- project document ---- */
+function emptyProject() { return CORE ? CORE.project.empty() : { schema: 'tools.petrov.re/plumbing/v1', revision: 1, project: {}, zones: [], modules: {} }; }
+function modulePayload() { return { state: clone(sanitize(state)), results: ENG.moduleResults(last), summary: ENG.moduleSummary(last) }; }
+function stampedDoc() {
+  var d = projDoc || emptyProject();
+  if (!last || !CORE) return d;
+  try { return CORE.project.withModule(d, TOOL, modulePayload()); } catch (e) { return d; }
+}
+var TYPE_MAP = { residential: 'residential', office: 'office', hotel: 'hotel', hospital: 'care', care_home: 'care', school: 'school', sports: 'sports', retail: 'office', restaurant: 'hotel', industrial: 'office' };
+function useProject() {
+  var d = projDoc, said = [];
+  if (!d || !d.project) { note = S('n.nouse'); return; }
+  var ty = TYPE_MAP[d.project.building_type];
+  if (ty && ty !== state.type) { state.type = ty; state.l_per_unit = ENG.DEMAND[ty].l; said.push(S('f.type') + ' = ' + S('ty.' + ty)); }
+  var persons = (typeof d.project.persons === 'number' && d.project.persons > 0) ? d.project.persons : null;
+  if (persons == null && CORE) { try { var t = CORE.fixtureTotals(d); if (t && t.persons > 0) persons = t.persons; } catch (e) { /* none */ } }
+  if (persons != null && state.type !== 'sports') { state.units = persons; said.push(S('f.units') + ' = ' + persons); }
+  note = said.length ? S('n.used', { S: said.join('; ') }) : S('n.nouse');
+}
+function useModule(k, mod) {
+  var r = (mod && mod.results) || {}, sm = (mod && mod.summary) || {}, v = null;
+  if (k === 'plbcirc') {
+    ['Q_loss_W', 'q_loss_w', 'loss_w', 'heat_loss_w'].forEach(function (key) { if (v == null && typeof r[key] === 'number' && isFinite(r[key])) v = r[key]; if (v == null && typeof sm[key] === 'number' && isFinite(sm[key])) v = sm[key]; });
+    if (v != null && v >= 0) { state.circ_w = Math.round(v); note = S('n.used', { S: S('f.circw') + ' = ' + Math.round(v) + ' W' }); return; }
+  }
+  if (k === 'plbfixtures') { useProject(); return; }
+  note = S('n.nouse');
+}
+
+var ERR_FIELD = { units: 'f.units', l_per_unit: 'f.lpu', t_cold: 'f.tcold', t_use: 'f.tuse', t_store: 'f.tstore', f_use: 'f.fuse', p_kw: 'f.pkw', v_l: 'f.vl',
+  t_hp_max: 'f.thp', p_boost_kw: 'f.pboost', win_start: 'f.win', win_end: 'f.win2', loss_w: 'f.lossw', circ_w: 'f.circw', q_peak_lps: 'f.qpeak', t_peak_min: 'f.tpeak',
+  v_pipe_l: 'f.vpipe', events: 'f.events', one_two_family: 'f.12f' };
+var EV_ERR = /^(type|missing|range):events:(\d+)$/;
+/* ---- compute ---- */
+function compute() {
+  if (!ENG) return { verdict: { tone: 'bad', text: 'plb-dhw.js did not load.' }, tiles: [] };
+  last = solve();
+  if (stage) stage.schedule();
+  refreshBar();
+  var r = last, notes = [];
+  if (!r.valid) {
+    var evNo = r.errors.map(function (e) { var m = EV_ERR.exec(e); return m ? Number(m[2]) + 1 : null; }).filter(function (x, i, a) { return x != null && a.indexOf(x) === i; });
+    var bad = r.errors.filter(function (e) { return !EV_ERR.test(e); }).map(function (e) { var k = e === 'hp_max_not_above_cold' ? 't_hp_max' : (e.indexOf(':') > 0 ? e.split(':')[1] : null); return k && ERR_FIELD[k] ? S(ERR_FIELD[k]) : null; })
+      .filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+    var txt = bad.length ? S('v.badinput', { F: bad.join(', ') }) + (r.errors.some(function (e) { return /_cold$|_store$/.test(e) && e !== 'hp_max_not_above_cold'; }) ? ' ' + S('v.invalid') : '') : '';
+    if (evNo.length) txt = (txt ? txt + ' ' : '') + S('v.badevent', { N: evNo.join(', ') });
+    return { verdict: { tone: 'bad', text: txt || S('v.invalid') }, tiles: [] };
+  }
+  var gov = S('g.' + (r.governs || 'none'));
+  var verdict;
+  if (!r.feasible) verdict = { tone: 'bad', text: S('v.infeasible', { E: F(r.daily_energy_kwh + r.loss_day_kwh, 1), P: fmtP(state.mode === 'volume' ? r.p_min_kw : state.p_kw) }) };
+  else if (state.mode === 'volume') verdict = { tone: r.flags.indexOf('legionella_below_60') >= 0 ? 'warn' : 'ok', text: S('v.okv', { V: fmtV(state.v_l), P: fmtP(r.p_main_kw), G: gov, I: fmtP(r.p_inst_kw) }) };
+  else verdict = { tone: r.flags.indexOf('legionella_below_60') >= 0 ? 'warn' : 'ok', text: S('v.ok', { P: fmtP(state.p_kw), V: fmtV(r.v_nominal_l), R: fmtV(r.v_store_l), G: gov, I: fmtP(r.p_inst_kw) }) };
+  var feas = !!r.feasible;
+  var tiles = state.mode === 'volume' ? [
+    { label: tx('t.preq'), value: feas ? r.p_main_kw : null, precision: 1, hint: 'kW', tone: feas ? 'ok' : 'bad', learn: 'curve' },
+    { label: tx('t.vol'), value: state.v_l, precision: 0, hint: 'L', learn: 'curve' }
+  ] : [
+    { label: tx('t.vol'), value: feas ? r.v_nominal_l : null, precision: 0, hint: feas ? S('t.vreq') + ' ' + fmtV(r.v_store_l) + ' L' : 'L', tone: feas ? 'ok' : 'bad', learn: 'curve' },
+    { label: tx('t.pow'), value: state.p_kw, precision: 1, hint: 'kW', learn: 'curve' }
+  ];
+  tiles = tiles.concat([
+    { label: tx('t.inst'), value: r.p_inst_kw, precision: 1, hint: 'kW', learn: 'instant' },
+    { label: tx('t.reheat'), value: feas && isFinite(r.reheat_h) ? r.reheat_h : null, precision: 2, hint: 'h', learn: 'reheat' },
+    { label: tx('t.day'), value: r.daily_energy_kwh, precision: 1, hint: 'kWh/d' },
+    { label: tx('t.loss'), value: feas ? 100 * r.loss_share : null, precision: 0, hint: '%', tone: r.flags.indexOf('losses_dominate') >= 0 ? 'warn' : null, learn: 'losses' },
+    { label: tx('t.tstore'), value: r.t_store_eff_c, precision: 0, hint: '°C', tone: r.t_store_eff_c < 60 ? 'warn' : 'ok', learn: 'legionella' }
+  ]);
+  if (state.heater === 'heatpump') tiles.push({ label: tx('t.boost'), value: feas ? r.booster_kwh_day : null, precision: 1, hint: 'kWh/d', learn: 'heatpump' });
+  if (feas) tiles.push({ label: tx('t.mixed'), value: r.mixed_capacity_l, precision: 0, hint: 'L', headline: false, learn: 'mixing' });
+  var rows = [
+    [tx('r.dvol'), r.daily_volume_l, 0, 'L'],
+    [tx('r.pkd'), r.peak_volume_l, 0, 'L'],
+    [tx('r.peak'), r.peak_hour_kwh, 1, 'kWh/h'],
+    [tx('r.hours'), r.hours_available, 2, 'h'],
+    [tx('r.pmin'), r.p_min_kw, 1, 'kW'],
+    [tx('r.peff'), feas ? r.p_eff_kw : null, 1, 'kW'],
+    [tx('r.estore'), feas ? r.e_store_kwh : null, 1, 'kWh'],
+    [tx('r.sloss'), r.store_loss_w, 0, 'W'],
+    [tx('r.lday'), r.loss_day_kwh, 1, 'kWh/d']
+  ];
+  if (state.heater === 'heatpump') { rows.push([tx('r.hpshare'), 100 * r.hp_share, 0, '%']); rows.push([tx('r.boostp'), feas ? r.p_boost_needed_kw : null, 1, 'kW']); }
+  var tables = [{ title: tx('tab.values'), head: [tx('h.q'), { label: tx('h.v'), num: true }, tx('h.unit')],
+    rows: rows.map(function (x) { return { cells: [x[0], { value: (typeof x[1] === 'number' && isFinite(x[1])) ? x[1] : null, precision: x[2] }, x[3]] }; }) }];
+  if (r.curve && r.curve.length) {
+    var step = Math.max(1, Math.round(r.curve.length / 8)), cr = [];
+    for (var i = 0; i < r.curve.length; i += step) cr.push({ cells: [{ value: r.curve[i].p_kw, precision: 1 }, { value: r.curve[i].v_l, precision: 0 }] });
+    tables.push({ title: tx('tab.curve'), head: [{ label: 'kW', num: true }, { label: 'L', num: true }], rows: cr });
+  }
+  r.flags.forEach(function (f) { if (f !== 'infeasible' && I18N['fl.' + f]) notes.push(S('fl.' + f, { H: F(r.hours_available, 1) })); });
+  notes.push(S('n.assume'));
+  if (!CORE) notes.push(S('n.nocore'));
+  if (note) notes.push(note);
+  return { verdict: verdict, tiles: tiles, tables: tables, notes: notes };
+}
+
+/* ---- CSV / JSON ---- */
+function csvOut(rows, cols) {
+  if (CORE && typeof CORE.csv === 'function') { try { return CORE.csv(rows, cols); } catch (e) { /* local */ } }
+  function cell(v) { var s = String(v == null ? '' : v); if (typeof v !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  return [cols.join(',')].concat(rows.map(function (r) { return cols.map(function (c) { return cell(r[c]); }).join(','); })).join('\r\n') + '\r\n';
+}
+function curveCSV() {
+  var rows = [], r = last;
+  (r.curve || []).forEach(function (p) { rows.push({ table: 'curve', p_eff_kw: +p.p_kw.toFixed(4), v_store_l: +p.v_l.toFixed(2) }); });
+  r.profile.draw_kwh.forEach(function (d, i) { rows.push({ table: 'profile', step: i, time_h: i * ENG.DT, draw_kwh: +d.toFixed(5), heater_available: r.profile.available[i] }); });
+  return csvOut(rows, ['table', 'p_eff_kw', 'v_store_l', 'step', 'time_h', 'draw_kwh', 'heater_available']);
+}
+function resultsJSON() { return JSON.stringify({ tool: TOOL, version: ENG.version, state: sanitize(state), results: ENG.moduleResults(last), summary: ENG.moduleSummary(last) }, null, 2); }
+function download(name, type, text) {
+  var b = new Blob([text], { type: type }), u = URL.createObjectURL(b), el = document.createElement('a');
+  el.href = u; el.download = name; document.body.appendChild(el); el.click(); setTimeout(function () { URL.revokeObjectURL(u); el.remove(); }, 0);
+}
+
+/* ---- chart ---- */
+function draw(ctx, w, h, opt) {
+  opt = opt || {};
+  ctx.clearRect(0, 0, w, h);
+  if (!last || !last.valid) return;
+  var cs = getComputedStyle(document.documentElement), ink = opt.ink || cs.getPropertyValue('--ink').trim() || '#222', muted = opt.muted || cs.getPropertyValue('--muted').trim() || '#777',
+      line = opt.line || cs.getPropertyValue('--line').trim() || '#ccc', acc = opt.acc || cs.getPropertyValue('--accent').trim() || '#3763e6', font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+  var fs = opt.fs || 12, wide = w >= 640;
+  var boxes = wide ? [[0, 0, w * 0.55, h], [w * 0.55, 0, w * 0.45, h]] : [[0, 0, w, h * 0.55], [0, h * 0.55, w, h * 0.45]];
+  ctx.font = '400 ' + fs + 'px ' + font; ctx.textBaseline = 'middle';
+  function ticks(max) { var raw = max / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), st = [1, 2, 2.5, 5, 10].map(function (m) { return m * mag; }).filter(function (v) { return v >= raw; })[0] || 10 * mag, out = [];
+    for (var v = 0; v <= max + 1e-9; v += st) out.push(v); return out; }
+  function axes(b, xmax, ymax, xl, yl, xt) {
+    var L = b[0] + 54, R = b[0] + b[2] - 12, T = b[1] + 22, B = b[1] + b[3] - 40;
+    ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.fillStyle = muted; ctx.textAlign = 'right';
+    ticks(ymax).forEach(function (yv) { var y = B - (B - T) * yv / ymax; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.fillText(F(yv, ymax >= 40 ? 0 : 1), L - 4, y); });
+    ctx.textAlign = 'center';
+    (xt || ticks(xmax)).forEach(function (xv) { var x = L + (R - L) * xv / xmax; ctx.fillText(F(xv, xmax >= 40 ? 0 : 1), x, B + 12); });
+    ctx.fillText(xl, (L + R) / 2, B + 28);
+    ctx.save(); ctx.translate(b[0] + 12, (T + B) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(yl, 0, 0); ctx.restore();
+    return { X: function (v) { return L + (R - L) * v / xmax; }, Y: function (v) { return B - (B - T) * v / ymax; }, L: L, R: R, T: T, B: B };
+  }
+  /* 1: volume vs power */
+  var c = last.curve || [], b1 = boxes[0];
+  var px = last.feasible ? last.p_eff_kw : null, pv = last.feasible ? last.v_store_l : null;
+  var xmax = Math.max(last.p_inst_kw * 1.05, px || 0, c.length ? c[c.length - 1].p_kw : 1) || 1;
+  var ymax = Math.max(pv || 0, c.length ? c[0].v_l : 0, 10) * 1.1;
+  var A = axes(b1, xmax, ymax, S('chart.x'), S('chart.y'));
+  if (!c.length) { ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.fillText(S('chart.none'), (A.L + A.R) / 2, (A.T + A.B) / 2); }
+  ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.beginPath();
+  c.forEach(function (p, i) { var x = A.X(p.p_kw), y = A.Y(Math.min(p.v_l, ymax)); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = muted; ctx.beginPath(); ctx.moveTo(A.X(last.p_inst_kw), A.T); ctx.lineTo(A.X(last.p_inst_kw), A.B); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = muted; ctx.textAlign = 'right'; ctx.fillText(S('chart.inst'), A.X(last.p_inst_kw) - 4, A.T + 8);
+  if (px != null && isFinite(pv)) { ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(A.X(px), A.Y(Math.min(pv, ymax)), 6, 0, 2 * Math.PI); ctx.fill();
+    ctx.textAlign = 'left'; ctx.fillText(fmtP(px) + ' kW · ' + fmtV(pv) + ' L', Math.min(A.X(px) + 9, A.R - 120), A.Y(Math.min(pv, ymax)) - 12); }
+  /* 2: hourly profile */
+  var d = last.profile.draw_kwh, av = last.profile.available, hr = [], sup = [];
+  for (var hh = 0; hh < 24; hh++) { hr.push(d[4 * hh] + d[4 * hh + 1] + d[4 * hh + 2] + d[4 * hh + 3]); var a = (av[4 * hh] + av[4 * hh + 1] + av[4 * hh + 2] + av[4 * hh + 3]) / 4; sup.push(last.feasible ? last.p_eff_kw * a - last.loss_kw : 0); }
+  var y2 = Math.max(Math.max.apply(null, hr), Math.max.apply(null, sup), 0.1) * 1.15;
+  var B2 = axes(boxes[1], 24, y2, S('chart.hx'), S('chart.hy'), [0, 6, 12, 18, 24]);
+  var bw = (B2.R - B2.L) / 24;
+  ctx.fillStyle = acc; ctx.globalAlpha = 0.45;
+  hr.forEach(function (v, i) { var y = B2.Y(v); ctx.fillRect(B2.L + i * bw + 1, y, Math.max(1, bw - 2), B2.B - y); });
+  ctx.globalAlpha = 1;
+  if (last.feasible) { ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); sup.forEach(function (v, i) { var y = B2.Y(Math.max(0, v)); if (i) ctx.lineTo(B2.L + i * bw, y); else ctx.moveTo(B2.L, y); ctx.lineTo(B2.L + (i + 1) * bw, y); }); ctx.stroke(); }
+}
+function a11yText() {
+  if (!last || !last.valid) return '';
+  var c = last.curve || [];
+  return S('chart.x') + ' / ' + S('chart.y') + ': ' + c.filter(function (p, i) { return i % 8 === 0; }).map(function (p) { return fmtP(p.p_kw) + ' kW → ' + fmtV(p.v_l) + ' L'; }).join('; ');
+}
+function reportCanvas() { var cv = document.createElement('canvas'), w = 900, h = 380; cv.width = w * 2; cv.height = h * 2; var g = cv.getContext('2d'); g.scale(2, 2); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+  draw(g, w, h, { ink: '#1a1a1a', muted: '#555', line: '#ccc', acc: '#2f5bd3', fs: 12 }); return cv; }
+
+/* ---- record ---- */
+function record() {
+  if (!last || !last.valid) return null;
+  return { inputs: sanitize(state), outputs: ENG.moduleResults(last),
+    units: { p_kw: 'kW', v_l: 'L', t: '°C', energy: 'kWh', loss_w: 'W', q_peak_lps: 'L/s', reheat_h: 'h' },
+    model: { version: ENG.version, equations: [S('footer')], ranges: [], notes: [S('notice.b'), S('n.assume')] },
+    warnings: last.flags.filter(function (f) { return I18N['fl.' + f]; }).map(function (f) { return S('fl.' + f, { H: F(last.hours_available, 1) }); }) };
+}
+function reportProfile(rec, ctx) {
+  var fig = null; try { fig = ctx.figure(reportCanvas(), { caption: S('chart.caption'), alt: a11yText() }); } catch (e) { fig = null; }
+  var r = last;
+  return { title: S('rep.title'),
+    executive: { text: [r.feasible ? (state.mode === 'volume' ? S('v.okv', { V: fmtV(state.v_l), P: fmtP(r.p_main_kw), G: S('g.' + (r.governs || 'none')), I: fmtP(r.p_inst_kw) }) : S('v.ok', { P: fmtP(state.p_kw), V: fmtV(r.v_nominal_l), R: fmtV(r.v_store_l), G: S('g.' + (r.governs || 'none')), I: fmtP(r.p_inst_kw) })) : S('fl.infeasible')] },
+    checks: r.flags.filter(function (f) { return I18N['fl.' + f]; }).map(function (f) { return { status: f === 'window_limited' ? 'pass' : 'attention', title: S('fl.' + f, { H: F(r.hours_available, 1) }) }; }),
+    figures: fig ? [fig] : [],
+    method: { equations: [S('footer')], notes: [S('notice.b')], references: ['EN 12831-3:2017', 'CIBSE Guide G (2014)', 'Regulation (EU) 814/2013 Annex II; Regulation (EU) 812/2013 Annex II', 'HSE HSG274 Part 2 (2014); DVGW W 551; Vlaams Legionellabesluit 9.2.2007'] } };
+}
+
+/* ---- learn ---- */
+var LEARN = { version: 1,
+  intro: { title: T7('Store or power?', 'Бак чи потужність?', 'Speicher oder Leistung?', 'Vat of vermogen?', 'Ballon ou puissance ?', '¿Acumulador o potencia?', 'Zasobnik czy moc?'),
+    body: T7('Pick an example from the list or set the building profile, the number of users and the litres per user. Enter a heater power to get the store volume — or switch to "Power for a volume". The left chart shows every power/volume pair that works; the right chart shows when the water is drawn and what the heater can give.',
+      'Виберіть приклад зі списку або задайте профіль будівлі, кількість користувачів і літри на користувача. Введіть потужність нагрівача, щоб отримати об\'єм бака, — або перемкніть на «Потужність для об\'єму». Лівий графік показує всі робочі пари потужність/об\'єм; правий — коли розбирається вода і що може дати нагрівач.',
+      'Wählen Sie ein Beispiel aus der Liste oder setzen Sie Gebäudeprofil, Nutzerzahl und Liter je Nutzer. Geben Sie eine Erzeugerleistung ein, um das Speichervolumen zu erhalten — oder schalten Sie auf „Leistung zum Volumen“. Das linke Diagramm zeigt alle funktionierenden Paare aus Leistung und Volumen, das rechte, wann gezapft wird und was der Erzeuger liefern kann.',
+      'Kies een voorbeeld uit de lijst of stel het gebouwprofiel, het aantal gebruikers en de liters per gebruiker in. Geef een toestelvermogen om het vatvolume te krijgen — of schakel naar „Vermogen bij volume”. De linkergrafiek toont elk werkend paar vermogen/volume; de rechter wanneer er getapt wordt en wat het toestel kan leveren.',
+      'Choisissez un exemple dans la liste ou réglez le profil du bâtiment, le nombre d\'usagers et les litres par usager. Saisissez une puissance pour obtenir le volume du ballon — ou passez à « Puissance pour un volume ». Le graphique de gauche montre tous les couples puissance/volume qui conviennent ; celui de droite, quand l\'eau est puisée et ce que le générateur peut fournir.',
+      'Elija un ejemplo de la lista o fije el perfil del edificio, el número de usuarios y los litros por usuario. Introduzca una potencia para obtener el volumen del acumulador, o cambie a «Potencia para un volumen». El gráfico izquierdo muestra todos los pares potencia/volumen válidos; el derecho, cuándo se consume el agua y qué puede aportar el generador.',
+      'Wybierz przykład z listy albo ustaw profil budynku, liczbę użytkowników i litry na użytkownika. Wpisz moc podgrzewacza, by otrzymać pojemność zasobnika — albo przełącz na „Moc dla pojemności”. Lewy wykres pokazuje wszystkie działające pary moc/pojemność; prawy — kiedy pobierana jest woda i co może dać podgrzewacz.') },
+  topics: {
+    profile: { title: T7('The design day', 'Розрахункова доба', 'Der Auslegungstag', 'De ontwerpdag', 'Le jour de calcul', 'El día de diseño', 'Doba obliczeniowa'),
+      body: T7('The daily volume (users × litres) is spread over 24 hours by a typical shape and then over 15-minute steps; shower peaks are added as events. The shapes are learning assumptions — a busy day, not an average one. If you have metered data, enter it as events.',
+        'Добовий об\'єм (користувачі × літри) розподіляється на 24 години за типовою формою, а далі — на кроки по 15 хвилин; піки душу додаються як події. Форми — навчальні припущення: напружена доба, а не середня. Якщо маєте виміри, введіть їх як події.',
+        'Das Tagesvolumen (Nutzer × Liter) wird nach einer typischen Form auf 24 Stunden und dann auf 15-Minuten-Schritte verteilt; Duschspitzen kommen als Ereignisse hinzu. Die Formen sind Lernannahmen — ein starker, kein mittlerer Tag. Messdaten als Ereignisse eingeben.',
+        'Het dagvolume (gebruikers × liters) wordt volgens een typische vorm over 24 uur en daarna over stappen van 15 minuten verdeeld; douchepieken komen erbij als momenten. De vormen zijn leeraannames — een drukke, geen gemiddelde dag. Hebt u meetgegevens, voer ze in als momenten.',
+        'Le volume journalier (usagers × litres) est réparti sur 24 heures selon une forme type, puis sur des pas de 15 minutes ; les pointes de douche s\'ajoutent comme événements. Les formes sont des hypothèses pédagogiques — une journée chargée, pas moyenne. Si vous avez des mesures, saisissez-les comme événements.',
+        'El volumen diario (usuarios × litros) se reparte en 24 horas según una forma típica y luego en pasos de 15 minutos; los picos de ducha se añaden como eventos. Las formas son supuestos didácticos: un día cargado, no medio. Si tiene datos medidos, introdúzcalos como eventos.',
+        'Objętość dobowa (użytkownicy × litry) jest rozkładana na 24 godziny według typowego kształtu, a potem na kroki 15-minutowe; szczyty natrysków dodaje się jako zdarzenia. Kształty to założenia dydaktyczne — dzień intensywny, nie przeciętny. Dane pomiarowe wpisz jako zdarzenia.') },
+    curve: { title: T7('Volume buys power', 'Об\'єм заміщує потужність', 'Volumen ersetzt Leistung', 'Volume vervangt vermogen', 'Le volume remplace la puissance', 'El volumen sustituye potencia', 'Pojemność zastępuje moc'),
+      body: T7('Add the draw minus the heater output step by step: the largest running deficit over any stretch of the day (sequent peak) is the energy the store must hold. Less power, more deficit, bigger store. Below the daily average no store is big enough; at the instantaneous power no store is needed.',
+        'Додавайте крок за кроком водорозбір мінус потужність нагрівача: найбільший накопичений дефіцит на будь-якому відрізку доби (послідовний пік) — це енергія, яку має тримати бак. Менша потужність — більший дефіцит — більший бак. Нижче середньої добової жоден бак не досить великий; при миттєвій потужності бак не потрібен.',
+        'Zapfung minus Erzeugerleistung Schritt für Schritt aufsummieren: das größte laufende Defizit über einen beliebigen Abschnitt des Tages (Sequent Peak) ist die Energie, die der Speicher halten muss. Weniger Leistung, mehr Defizit, größerer Speicher. Unter dem Tagesmittel reicht kein Speicher; bei Durchlaufleistung braucht es keinen.',
+        'Tel stap voor stap het tappen min het toestelvermogen op: het grootste lopende tekort over een willekeurig stuk van de dag (sequent peak) is de energie die het vat moet bevatten. Minder vermogen, meer tekort, groter vat. Onder het daggemiddelde is geen vat groot genoeg; bij doorstroomvermogen is er geen nodig.',
+        'Cumulez pas à pas le puisage moins la production : le plus grand déficit courant sur un intervalle quelconque de la journée (pic séquentiel) est l\'énergie que le ballon doit contenir. Moins de puissance, plus de déficit, ballon plus grand. Sous la moyenne journalière aucun ballon ne suffit ; à la puissance instantanée aucun n\'est nécessaire.',
+        'Sume paso a paso el consumo menos el aporte del generador: el mayor déficit acumulado en cualquier tramo del día (pico secuencial) es la energía que debe guardar el acumulador. Menos potencia, más déficit, acumulador mayor. Por debajo de la media diaria ningún acumulador basta; con la potencia instantánea no hace falta ninguno.',
+        'Sumuj krok po kroku pobór minus moc podgrzewacza: największy narastający deficyt na dowolnym odcinku doby (sekwencyjny szczyt) to energia, którą musi mieć zasobnik. Mniejsza moc, większy deficyt, większy zasobnik. Poniżej średniej dobowej żaden zasobnik nie wystarczy; przy mocy przepływowej żaden nie jest potrzebny.') },
+    instant: { title: T7('Instantaneous power and the short peak', 'Миттєва потужність і короткий пік', 'Durchlaufleistung und kurze Spitze', 'Doorstroomvermogen en korte piek', 'Puissance instantanée et pointe courte', 'Potencia instantánea y pico corto', 'Moc przepływowa i krótki szczyt'),
+      body: T7('Without a store the heater must follow the peak flow: P = q·3600·1.163·(T_use − T_cold)/1000, about 19 kW per shower. A 15-minute profile spreads the draw over the step, so the store must also hold the peak above the step\'s mean draw, (P_inst − D/Δt)·t_peak. It is applied once a day at the worst moment and added to the deficit already built up (a peak early in a long deficit still counts at its end); the heater output during the peak is part of that deficit. Its energy is in the daily balance, so a heater too small to recover it within the day is reported as not feasible. Draws are integrated exactly between step and event boundaries.',
+    'Без бака нагрівач має встигати за піковою витратою: P = q·3600·1,163·(T_вик − T_хол)/1000, близько 19 кВт на один душ. 15-хвилинний профіль розподіляє водорозбір по кроку, тож бак має ще й покрити пік понад середній водорозбір кроку, (P_мит − D/Δt)·t_піку. Він застосовується раз на добу в найгірший момент і додається до вже накопиченого дефіциту (пік на початку довгого дефіциту враховується і в його кінці); потужність нагрівача під час піку входить у цей дефіцит. Його енергія — у добовому балансі, тож нагрівач, замалий, щоб відновити її за добу, позначається як нездійсненний. Водорозбір інтегрується точно між межами кроків і подій.',
+    'Ohne Speicher muss der Erzeuger dem Spitzendurchfluss folgen: P = q·3600·1,163·(T_Nutz − T_kalt)/1000, etwa 19 kW je Dusche. Ein 15-Minuten-Profil verteilt die Zapfung über den Schritt, deshalb muss der Speicher zusätzlich die Spitze über der mittleren Zapfung des Schritts tragen, (P_DL − D/Δt)·t_Spitze. Sie wird einmal täglich zum ungünstigsten Zeitpunkt angesetzt und auf das schon aufgelaufene Defizit addiert (eine Spitze früh in einem langen Defizit zählt noch an dessen Ende); die Erzeugerleistung während der Spitze steckt in diesem Defizit. Ihre Energie steht in der Tagesbilanz; ein Erzeuger, der sie nicht innerhalb des Tages nachheizen kann, gilt als nicht machbar. Die Zapfung wird exakt zwischen Schritt- und Ereignisgrenzen integriert.',
+    'Zonder vat moet het toestel het piekdebiet volgen: P = q·3600·1,163·(T_gebruik − T_koud)/1000, ongeveer 19 kW per douche. Een profiel van 15 minuten spreidt het tappen over de stap, dus moet het vat ook de piek boven het gemiddelde tappen van de stap dekken, (P_doorstr − D/Δt)·t_piek. Ze wordt eenmaal per dag op het ongunstigste moment toegepast en bij het al opgebouwde tekort opgeteld (een piek vroeg in een lang tekort telt nog aan het einde ervan); het toestelvermogen tijdens de piek zit in dat tekort. Haar energie staat in de dagbalans, zodat een toestel dat ze niet binnen de dag kan bijwarmen als niet haalbaar wordt gemeld. Het tappen wordt exact tussen stap- en gebeurtenisgrenzen geïntegreerd.',
+    'Sans ballon le générateur doit suivre le débit de pointe : P = q·3600·1,163·(T_usage − T_froide)/1000, environ 19 kW par douche. Un profil au pas de 15 minutes répartit le puisage sur le pas, le ballon doit donc aussi couvrir la pointe au-dessus du puisage moyen du pas, (P_inst − D/Δt)·t_pointe. Elle est appliquée une fois par jour au pire moment et ajoutée au déficit déjà accumulé (une pointe au début d\'un long déficit compte encore à sa fin) ; la puissance du générateur pendant la pointe fait partie de ce déficit. Son énergie entre dans le bilan journalier : un générateur trop petit pour la récupérer dans la journée est signalé irréalisable. Le puisage est intégré exactement entre les limites des pas et des puisages.',
+    'Sin acumulador el generador debe seguir el caudal punta: P = q·3600·1,163·(T_uso − T_fría)/1000, unos 19 kW por ducha. Un perfil de 15 minutos reparte el consumo en el paso, así que el acumulador también debe cubrir el pico por encima del consumo medio del paso, (P_inst − D/Δt)·t_pico. Se aplica una vez al día en el peor momento y se suma al déficit ya acumulado (un pico al principio de un déficit largo cuenta todavía al final); la potencia del generador durante el pico forma parte de ese déficit. Su energía está en el balance diario, de modo que un generador demasiado pequeño para recuperarla en el día se marca como no viable. El consumo se integra exactamente entre los límites de pasos y eventos.',
+    'Bez zasobnika podgrzewacz musi nadążać za przepływem szczytowym: P = q·3600·1,163·(T_użytk − T_zimna)/1000, ok. 19 kW na natrysk. Profil 15-minutowy rozkłada pobór na cały krok, więc zasobnik musi też pokryć szczyt ponad średni pobór kroku, (P_przep − D/Δt)·t_szczytu. Stosuje się go raz na dobę w najgorszym momencie i dodaje do już narosłego deficytu (szczyt na początku długiego deficytu liczy się jeszcze na jego końcu); moc podgrzewacza w czasie szczytu jest częścią tego deficytu. Jego energia jest w bilansie dobowym, więc podgrzewacz zbyt mały, by odrobić ją w ciągu doby, jest oznaczany jako niewykonalny. Pobór jest całkowany dokładnie między granicami kroków i zdarzeń.') },
+    window: { title: T7('Heater hours: night tariff, heat-pump windows', 'Години нагрівача: нічний тариф, вікна теплового насоса', 'Erzeugerstunden: Nachttarif, Wärmepumpenfenster', 'Toesteluren: nachttarief, warmtepompvensters', 'Heures de chauffe : heures creuses, plages de PAC', 'Horas del generador: tarifa nocturna, ventanas de bomba de calor', 'Godziny podgrzewacza: taryfa nocna, okna pompy ciepła'),
+      body: T7('If the heater may run only part of the day, the store must carry the rest. The daily average power rises to (daily energy + losses)/hours, and the deficit grows with every hour without heating.',
+        'Якщо нагрівач може працювати лише частину доби, решту має покрити бак. Середня потужність зростає до (добова енергія + втрати)/години, а дефіцит росте з кожною годиною без нагріву.',
+        'Darf der Erzeuger nur einen Teil des Tages laufen, muss der Speicher den Rest tragen. Die mittlere Leistung steigt auf (Tagesenergie + Verluste)/Stunden, das Defizit wächst mit jeder Stunde ohne Heizung.',
+        'Mag het toestel maar een deel van de dag werken, dan moet het vat de rest dragen. Het gemiddelde vermogen stijgt tot (dagenergie + verliezen)/uren en het tekort groeit met elk uur zonder verwarming.',
+        'Si le générateur ne peut fonctionner qu\'une partie de la journée, le ballon doit porter le reste. La puissance moyenne monte à (énergie journalière + pertes)/heures et le déficit croît avec chaque heure sans chauffe.',
+        'Si el generador solo puede funcionar parte del día, el acumulador debe cubrir el resto. La potencia media sube a (energía diaria + pérdidas)/horas y el déficit crece con cada hora sin calentamiento.',
+        'Jeśli podgrzewacz może pracować tylko przez część doby, resztę musi pokryć zasobnik. Średnia moc rośnie do (energia dobowa + straty)/godziny, a deficyt rośnie z każdą godziną bez grzania.') },
+    heatpump: { title: T7('Heat pump and booster', 'Тепловий насос і догрівач', 'Wärmepumpe und Nachheizung', 'Warmtepomp en naverwarming', 'Pompe à chaleur et appoint', 'Bomba de calor y apoyo', 'Pompa ciepła i dogrzewacz'),
+      body: T7('A heat pump heats efficiently only up to its maximum outlet temperature. The booster supplies the share (T_store − T_hp)/(T_store − T_cold) of every stored kWh; the effective power is limited by whichever of the two runs out first. Without a booster the store stays at the heat-pump limit.',
+        'Тепловий насос ефективно гріє лише до своєї максимальної температури подачі. Догрівач дає частку (T_бак − T_тн)/(T_бак − T_хол) кожної накопиченої кВт·год; ефективну потужність обмежує той із двох, що вичерпається першим. Без догрівача бак лишається на межі теплового насоса.',
+        'Eine Wärmepumpe heizt effizient nur bis zu ihrer maximalen Vorlauftemperatur. Die Nachheizung liefert den Anteil (T_Sp − T_WP)/(T_Sp − T_kalt) jeder gespeicherten kWh; die wirksame Leistung begrenzt, wer von beiden zuerst nicht mehr reicht. Ohne Nachheizung bleibt der Speicher auf der Wärmepumpengrenze.',
+        'Een warmtepomp verwarmt efficiënt tot haar maximale aanvoertemperatuur. De naverwarming levert het aandeel (T_vat − T_wp)/(T_vat − T_koud) van elke opgeslagen kWh; het effectieve vermogen wordt begrensd door wie van beide het eerst tekortschiet. Zonder naverwarming blijft het vat op de warmtepompgrens.',
+        'Une PAC chauffe efficacement seulement jusqu\'à sa température maximale de sortie. L\'appoint fournit la part (T_ballon − T_pac)/(T_ballon − T_froide) de chaque kWh stocké ; la puissance effective est limitée par celui des deux qui s\'épuise d\'abord. Sans appoint, le ballon reste à la limite de la PAC.',
+        'Una bomba de calor calienta con eficiencia solo hasta su temperatura máxima de salida. El apoyo aporta la fracción (T_acum − T_bc)/(T_acum − T_fría) de cada kWh acumulado; la potencia efectiva la limita el que antes se quede corto. Sin apoyo, el acumulador se queda en el límite de la bomba.',
+        'Pompa ciepła grzeje wydajnie tylko do swojej maksymalnej temperatury zasilania. Dogrzewacz daje udział (T_zas − T_pc)/(T_zas − T_zimna) każdej zmagazynowanej kWh; efektywną moc ogranicza ten z dwóch, który pierwszy nie nadąża. Bez dogrzewacza zasobnik pozostaje na granicy pompy ciepła.') },
+    losses: { title: T7('Standing and circulation losses', 'Втрати очікування і циркуляції', 'Bereitschafts- und Zirkulationsverluste', 'Stilstands- en circulatieverliezen', 'Pertes statiques et de bouclage', 'Pérdidas estáticas y de recirculación', 'Straty postojowe i cyrkulacji'),
+      body: T7('The store loses heat all day: by default the EU Ecodesign limit S = 16.66 + 8.33·V^0.4 W (Regulation 814/2013, at 45 K), scaled to your set point; a real product may be better. A circulation loop adds its own loss. Where little water is drawn, the losses can exceed the draw.',
+        'Бак втрачає тепло цілу добу: за замовчуванням — межа ЄС Ecodesign S = 16,66 + 8,33·V^0,4 Вт (Регламент 814/2013, при 45 К), перерахована на вашу уставку; реальний виріб може бути кращим. Циркуляційний контур додає свої втрати. Де води розбирають мало, втрати можуть перевищити водорозбір.',
+        'Der Speicher verliert den ganzen Tag Wärme: standardmäßig der EU-Ecodesign-Grenzwert S = 16,66 + 8,33·V^0,4 W (Verordnung 814/2013, bei 45 K), auf Ihren Sollwert umgerechnet; ein reales Produkt kann besser sein. Eine Zirkulation fügt ihren eigenen Verlust hinzu. Wo wenig gezapft wird, können die Verluste die Zapfung übersteigen.',
+        'Het vat verliest de hele dag warmte: standaard de EU-Ecodesign-grens S = 16,66 + 8,33·V^0,4 W (Verordening 814/2013, bij 45 K), omgerekend naar uw insteltemperatuur; een echt product kan beter zijn. Een circulatieleiding voegt haar eigen verlies toe. Waar weinig getapt wordt, kunnen de verliezen het tappen overtreffen.',
+        'Le ballon perd de la chaleur toute la journée : par défaut la limite Ecodesign de l\'UE S = 16,66 + 8,33·V^0,4 W (règlement 814/2013, à 45 K), ramenée à votre consigne ; un produit réel peut faire mieux. Une boucle ajoute ses propres pertes. Là où l\'on puise peu, les pertes peuvent dépasser le puisage.',
+        'El acumulador pierde calor todo el día: por defecto el límite Ecodesign de la UE S = 16,66 + 8,33·V^0,4 W (Reglamento 814/2013, a 45 K), escalado a su consigna; un producto real puede ser mejor. Un bucle de recirculación añade sus propias pérdidas. Donde se consume poco, las pérdidas pueden superar el consumo.',
+        'Zasobnik traci ciepło przez całą dobę: domyślnie limit UE Ecodesign S = 16,66 + 8,33·V^0,4 W (rozporządzenie 814/2013, przy 45 K), przeliczony na Twoją nastawę; rzeczywisty wyrób może być lepszy. Pętla cyrkulacji dodaje własne straty. Tam, gdzie pobór jest mały, straty mogą przewyższyć pobór.') },
+    reheat: { title: T7('Reheat time', 'Час нагріву', 'Aufheizzeit', 'Opwarmtijd', 'Temps de réchauffage', 'Tiempo de recalentamiento', 'Czas nagrzewania'),
+      body: T7('From cold water to the set point with the heater minus the losses: t = V·1.163·(T_store − T_cold)/1000/(P − P_L). It tells how long the building waits after the store has been emptied, e.g. after a thermal disinfection or a fault.',
+        'Від холодної води до уставки потужністю нагрівача мінус втрати: t = V·1,163·(T_бак − T_хол)/1000/(P − P_L). Показує, скільки чекатиме будівля після спорожнення бака, напр. після термодезінфекції чи аварії.',
+        'Von Kaltwasser auf den Sollwert mit der Erzeugerleistung abzüglich Verluste: t = V·1,163·(T_Sp − T_kalt)/1000/(P − P_L). Zeigt, wie lange das Gebäude nach dem Leeren des Speichers wartet, z. B. nach einer thermischen Desinfektion oder Störung.',
+        'Van koud water naar de insteltemperatuur met het toestelvermogen min de verliezen: t = V·1,163·(T_vat − T_koud)/1000/(P − P_L). Het zegt hoe lang het gebouw wacht nadat het vat leeg is, bv. na een thermische desinfectie of een storing.',
+        'De l\'eau froide à la consigne avec la puissance moins les pertes : t = V·1,163·(T_ballon − T_froide)/1000/(P − P_L). Il dit combien de temps le bâtiment attend après la vidange du ballon, p. ex. après une désinfection thermique ou une panne.',
+        'Del agua fría a la consigna con la potencia menos las pérdidas: t = V·1,163·(T_acum − T_fría)/1000/(P − P_L). Indica cuánto espera el edificio tras vaciarse el acumulador, p. ej. después de una desinfección térmica o una avería.',
+        'Od wody zimnej do nastawy mocą podgrzewacza minus straty: t = V·1,163·(T_zas − T_zimna)/1000/(P − P_L). Mówi, jak długo budynek czeka po opróżnieniu zasobnika, np. po dezynfekcji termicznej lub awarii.') },
+    mixing: { title: T7('Mixing: why 60 °C stores more', 'Змішування: чому 60 °C вміщує більше', 'Mischen: warum 60 °C mehr speichert', 'Mengen: waarom 60 °C meer opslaat', 'Mitigeage : pourquoi 60 °C stocke plus', 'Mezcla: por qué 60 °C almacena más', 'Mieszanie: dlaczego 60 °C mieści więcej'),
+      body: T7('One litre at 60 °C mixed with cold water at 10 °C gives 50/30 ≈ 1.7 L at 40 °C. A hotter store holds more usable water per litre of volume, and the usable share f accounts for the cold layer at the bottom.',
+        'Один літр при 60 °C, змішаний з холодною водою 10 °C, дає 50/30 ≈ 1,7 л при 40 °C. Гарячіший бак містить більше корисної води на літр об\'єму, а корисна частка f враховує холодний шар унизу.',
+        'Ein Liter mit 60 °C ergibt mit Kaltwasser von 10 °C gemischt 50/30 ≈ 1,7 L mit 40 °C. Ein heißerer Speicher hält mehr nutzbares Wasser je Liter Volumen; der nutzbare Anteil f berücksichtigt die kalte Schicht unten.',
+        'Eén liter van 60 °C gemengd met koud water van 10 °C geeft 50/30 ≈ 1,7 L van 40 °C. Een warmer vat bevat meer bruikbaar water per liter volume; het bruikbare aandeel f houdt rekening met de koude laag onderaan.',
+        'Un litre à 60 °C mélangé à de l\'eau froide à 10 °C donne 50/30 ≈ 1,7 L à 40 °C. Un ballon plus chaud contient plus d\'eau utile par litre de volume, et la part utile f tient compte de la couche froide du bas.',
+        'Un litro a 60 °C mezclado con agua fría a 10 °C da 50/30 ≈ 1,7 L a 40 °C. Un acumulador más caliente guarda más agua útil por litro de volumen, y la fracción útil f tiene en cuenta la capa fría del fondo.',
+        'Litr wody o 60 °C zmieszany z wodą zimną 10 °C daje 50/30 ≈ 1,7 L o 40 °C. Cieplejszy zasobnik mieści więcej wody użytkowej na litr pojemności, a udział użyteczny f uwzględnia zimną warstwę na dole.') },
+    legionella: { title: T7('Why 60 °C', 'Чому 60 °C', 'Warum 60 °C', 'Waarom 60 °C', 'Pourquoi 60 °C', 'Por qué 60 °C', 'Dlaczego 60 °C'),
+      body: T7('Legionella multiplies between about 25 and 50 °C. HSG274 Part 2 and DVGW W 551 ask for at least 60 °C in the store or at the heater outlet; in Flanders the Legionellabesluit (2007) requires high-risk establishments (care, hospitals, hotels and others) to manage temperatures in a written plan. DVGW W 551 counts a store above 400 L or more than 3 L in one pipe run as a large installation — except in one- and two-family houses, which are always small installations (tick the box). Regional rules may be stricter — check them; the Legionella Risk tool goes further.',
+        'Легіонела розмножується приблизно між 25 і 50 °C. HSG274 Part 2 і DVGW W 551 вимагають щонайменше 60 °C у баку або на виході нагрівача; у Фландрії Legionellabesluit (2007) зобов\'язує заклади високого ризику (догляд, лікарні, готелі та інші) керувати температурами за письмовим планом. DVGW W 551 вважає великою установкою бак понад 400 л або понад 3 л в одній ділянці труби — крім одно- й двосімейних будинків, які завжди є малими установками (позначте прапорець). Регіональні правила можуть бути суворішими — перевірте їх; інструмент ризику легіонели йде далі.',
+        'Legionellen vermehren sich etwa zwischen 25 und 50 °C. HSG274 Part 2 und DVGW W 551 verlangen mindestens 60 °C im Speicher oder am Erzeugeraustritt; in Flandern verlangt der Legionellabesluit (2007) von Hochrisikoeinrichtungen (Pflege, Krankenhäuser, Hotels u. a.) ein schriftliches Beherrschungskonzept mit Temperaturen. DVGW W 551 zählt einen Speicher über 400 L oder mehr als 3 L in einem Leitungsstrang als Großanlage — außer in Ein- und Zweifamilienhäusern, die immer Kleinanlagen sind (Kästchen ankreuzen). Regionale Regeln können strenger sein — prüfen; das Legionellenwerkzeug geht weiter.',
+        'Legionella vermenigvuldigt zich ongeveer tussen 25 en 50 °C. HSG274 Part 2 en DVGW W 551 vragen minstens 60 °C in het vat of aan de uitgang van het toestel; in Vlaanderen verplicht het Legionellabesluit (2007) risico-inrichtingen (zorg, ziekenhuizen, hotels en andere) de temperaturen te beheersen in een schriftelijk beheersplan. DVGW W 551 rekent een vat boven 400 L of meer dan 3 L in één leiding tot de grote installaties — behalve in één- en tweegezinswoningen, die altijd kleine installaties zijn (vink het vakje aan). Regionale regels kunnen strenger zijn — controleer ze; de legionellatool gaat verder.',
+        'Les légionelles se multiplient entre environ 25 et 50 °C. HSG274 Part 2 et DVGW W 551 demandent au moins 60 °C dans le ballon ou à la sortie du générateur ; en Flandre le Legionellabesluit (2007) impose aux établissements à risque (soins, hôpitaux, hôtels et autres) de gérer les températures dans un plan écrit. La DVGW W 551 classe en grande installation un ballon de plus de 400 L ou plus de 3 L dans une conduite — sauf dans les maisons individuelles et bifamiliales, qui sont toujours de petites installations (cochez la case). Les règles régionales peuvent être plus strictes — vérifiez-les ; l\'outil légionelle va plus loin.',
+        'La legionela se multiplica aproximadamente entre 25 y 50 °C. HSG274 Part 2 y DVGW W 551 piden al menos 60 °C en el acumulador o a la salida del generador; en Flandes el Legionellabesluit (2007) obliga a los establecimientos de riesgo (cuidados, hospitales, hoteles y otros) a gestionar las temperaturas en un plan escrito. La DVGW W 551 considera instalación grande un acumulador de más de 400 L o más de 3 L en un tramo de tubería, salvo en viviendas unifamiliares y bifamiliares, que siempre son instalaciones pequeñas (marque la casilla). Las normas regionales pueden ser más estrictas: compruébelas; la herramienta de legionela va más allá.',
+        'Legionella namnaża się mniej więcej między 25 a 50 °C. HSG274 Part 2 i DVGW W 551 wymagają co najmniej 60 °C w zasobniku lub na wyjściu podgrzewacza; we Flandrii Legionellabesluit (2007) nakłada na obiekty wysokiego ryzyka (opieka, szpitale, hotele i inne) obowiązek pisemnego planu zarządzania temperaturami. DVGW W 551 uznaje za dużą instalację zasobnik ponad 400 L lub ponad 3 L w jednym odcinku przewodu — z wyjątkiem domów jedno- i dwurodzinnych, które zawsze są małymi instalacjami (zaznacz pole). Przepisy regionalne mogą być surowsze — sprawdź je; narzędzie ryzyka legionelli idzie dalej.') }
+  },
+  tour: [{ topic: 'profile', focus: '[data-dgu-field="f-type"]' }, { topic: 'curve', focus: '.dgu-stage' }, { topic: 'instant', focus: '[data-dgu-field="f-q-peak-lps"]' },
+         { topic: 'window', focus: '[data-dgu-field="f-win-start"]' }, { topic: 'heatpump', focus: '[data-dgu-field="f-heater"]' }, { topic: 'losses', focus: '.dgu-r-results' }, { topic: 'legionella' }] };
+
+function examples() {
+  return PRESET_IDS.map(function (k) { return { id: k, label: PL[k][0], note: PL[k][1], apply: function (t) { var s = presetState(k); Object.keys(t).forEach(function (x) { delete t[x]; }); Object.assign(t, s); note = '';
+    if (CORE && ENG.PRESETS[k].project && bar) { try { projDoc = CORE.presetProject(ENG.PRESETS[k].project); bar.setDoc(projDoc, { save: false }); } catch (e) { /* keep */ } } } }; });
+}
+
+/* ---- project bar (PLBCore.ui.projectBar) ---- */
+var barBox = null, bar = null, barLang = '';
+function refreshBar() {
+  if (!bar) return;
+  if (barLang !== curLang()) { barLang = curLang(); try { bar.refresh(); } catch (e) { /* ignore */ } }
+}
+function mountBar() {
+  if (!barBox || !CORE || !CORE.ui || typeof CORE.ui.projectBar !== 'function') return;
+  if (bar && barBox.contains(bar.element)) { refreshBar(); return; }
+  try { if (bar) bar.destroy(); } catch (e) { /* gone */ }
+  try {
+    bar = CORE.ui.projectBar({ mount: barBox, toolId: TOOL, lang: curLang, syncTabs: false, doc: projDoc || undefined, getDoc: stampedDoc, consumes: ['plbfixtures', 'plbcirc'],
+      onChange: function (d) { projDoc = d; note = ''; if (ui) { ui.sync(); ui.run(); } },
+      onUse: function (k, mod, d) { projDoc = d; useModule(k, mod); if (ui) { ui.sync(); ui.run(); } } });
+    if (bar) { projDoc = bar.getDoc(); barLang = curLang(); }
+  } catch (e) { bar = null; }
+  if (bar && bar.element) Array.prototype.forEach.call(bar.element.querySelectorAll('input[type=file]'), function (f) { if (!f.getAttribute('aria-label')) f.setAttribute('aria-label', 'Import JSON'); });
+}
+function saveToProject() {
+  if (!CORE || !last) return;
+  try { var d = stampedDoc(); var r = CORE.project.save(d); projDoc = d; if (bar) bar.setDoc(d, { save: false }); note = r && r.ok === false ? '' : S('n.saved'); } catch (e) { note = String(e && e.message || e); }
+}
+
+/* ---- interface ---- */
+function num(key, extra) { return Object.assign({ id: 'f-' + key.replace(/_/g, '-'), key: key, type: 'number' }, extra || {}); }
+function buildInterface() {
+  var hasBar = !!(CORE && CORE.ui && typeof CORE.ui.projectBar === 'function');
+  var isHP = function () { return state.heater === 'heatpump'; };
+  ui = DiagramUI.app({
+    id: TOOL, mount: '#app', layout: 'calculator', compute: 'live', state: state, defaults: DEFAULTS,
+    subtitle: tx('subtitle'), learn: LEARN, footer: tx('footer'),
+    notices: [{ id: 'genre', tone: 'warn', sticky: false, title: tx('notice.t'), text: tx('notice.b') }],
+    panels: [
+      { id: 'projbar', slot: 'inputs', visible: hasBar, render: hasBar ? function (box) { barBox = box; mountBar(); } : undefined },
+      { id: 'demand', slot: 'inputs', title: tx('p.demand'), learn: 'profile', fields: [
+        { id: 'f-type', type: 'select', label: tx('f.type'), options: opts('ty.', ['residential', 'office', 'hotel', 'care', 'school', 'sports']), learn: 'profile',
+          get: function () { return state.type; }, set: function (v) { if (v !== state.type && ENG.DEMAND[v]) { state.type = v; state.l_per_unit = ENG.DEMAND[v].l; } } },
+        num('units', { label: tx('f.units'), unit: function () { return pick(tx('un.' + (ENG.DEMAND[state.type] ? state.type : 'residential'))); }, min: 0, max: 100000, step: 1 }),
+        num('l_per_unit', { label: tx('f.lpu'), unit: U('u.lpud'), min: 0, max: 1000, step: 1, hint: tx('f.lpu.h') }),
+        { id: 'f-events', key: 'events', type: 'list', label: tx('f.events'), minRows: 0, maxRows: 24, addLabel: tx('a.add'),
+          row: [{ key: 'start_h', type: 'number', label: tx('f.ev.start'), min: 0, max: 23.75, step: 0.25, width: '80px' },
+                { key: 'dur_h', type: 'number', label: tx('f.ev.dur'), min: 0.25, max: 24, step: 0.25, width: '80px' },
+                { key: 'litres', type: 'number', label: tx('f.ev.litres'), min: 0, step: 50 }],
+          newRow: function () { return { start_h: 18, dur_h: 0.5, litres: 800 }; } },
+        num('q_peak_lps', { label: tx('f.qpeak'), unit: U('u.lps'), min: 0, max: 100, step: 0.05, hint: tx('f.qpeak.h'), learn: 'instant' }),
+        num('t_peak_min', { label: tx('f.tpeak'), unit: U('u.min'), min: 0, max: 120, step: 1 }) ] },
+      { id: 'temps', slot: 'inputs', title: tx('p.temps'), learn: 'mixing', fields: [
+        num('t_cold', { label: tx('f.tcold'), unit: U('u.c'), min: 0, max: 30, step: 1 }),
+        num('t_use', { label: tx('f.tuse'), unit: U('u.c'), min: 30, max: 60, step: 1 }),
+        num('t_store', { label: tx('f.tstore'), unit: U('u.c'), min: 40, max: 85, step: 1, learn: 'legionella' }),
+        num('f_use', { label: tx('f.fuse'), min: 0.3, max: 1, step: 0.05, hint: tx('f.fuse.h') }) ] },
+      { id: 'heater', slot: 'inputs', title: tx('p.heater'), learn: 'curve', fields: [
+        { id: 'f-heater', key: 'heater', type: 'segmented', label: tx('f.heater'), options: opts('he.', ['boiler', 'electric', 'heatpump', 'district']), learn: 'heatpump' },
+        { id: 'f-mode', key: 'mode', type: 'segmented', label: tx('f.mode'), options: opts('mo.', ['power', 'volume']) },
+        num('p_kw', { label: function () { return pick(tx(isHP() ? 'f.pkw.hp' : 'f.pkw')); }, unit: U('u.kw'), min: 0, max: 10000, step: 0.5, visible: function () { return state.mode !== 'volume'; } }),
+        num('v_l', { label: tx('f.vl'), unit: U('u.l'), min: 0, max: 100000, step: 50, visible: function () { return state.mode === 'volume'; } }),
+        num('t_hp_max', { label: tx('f.thp'), unit: U('u.c'), min: 35, max: 80, step: 1, visible: isHP }),
+        num('p_boost_kw', { label: tx('f.pboost'), unit: U('u.kw'), min: 0, max: 1000, step: 0.5, hint: tx('f.pboost.h'), visible: isHP }),
+        num('win_start', { id: 'f-win-start', label: tx('f.win'), unit: U('u.h'), min: 0, max: 23, step: 1, hint: tx('f.win.h'), learn: 'window' }),
+        num('win_end', { id: 'f-win-end', label: tx('f.win2'), unit: U('u.h'), min: 0, max: 23, step: 1 }) ] },
+      { id: 'losses', slot: 'inputs', title: tx('p.losses'), learn: 'losses', collapsible: true, fields: [
+        { id: 'f-loss-mode', key: 'loss_mode', type: 'segmented', label: tx('f.lossmode'), options: opts('lm.', ['ecodesign', 'given']) },
+        num('loss_w', { label: tx('f.lossw'), unit: U('u.w'), min: 0, max: 5000, step: 5, visible: function () { return state.loss_mode === 'given'; } }),
+        num('circ_w', { label: tx('f.circw'), unit: U('u.w'), min: 0, max: 50000, step: 50, hint: tx('f.circw.h') }),
+        num('v_pipe_l', { label: tx('f.vpipe'), unit: U('u.l'), min: 0, max: 1000, step: 0.5, hint: tx('f.vpipe.h'), learn: 'legionella' }),
+        { id: 'f-12f', key: 'one_two_family', type: 'toggle', label: tx('f.12f'), hint: tx('f.12f.h'), learn: 'legionella' } ] },
+      { id: 'io', slot: 'inputs', title: tx('p.io'), collapsible: true, actionsAlign: 'end', actions: [
+        { label: tx('a.csv'), run: function () { if (last && last.valid) download('plbdhw-curve-profile.csv', 'text/csv', curveCSV()); } },
+        { label: tx('a.json'), run: function () { if (last && last.valid) download('plbdhw-results.json', 'application/json', resultsJSON()); } }
+      ].concat(hasBar ? [
+        { label: tx('a.useproj'), run: function () { if (bar) projDoc = bar.getDoc(); useProject(); ui.sync(); ui.run(); } },
+        { label: tx('a.save'), run: function () { saveToProject(); ui.sync(); ui.run(); } }
+      ] : []) }
+    ],
+    on: { compute: function () { return compute(); }, rebuild: function (app) { stage = (app && app.stages && app.stages[0]) || stage; } }
+  });
+  ui.examples(examples());
+  stage = ui.stage({ caption: tx('chart.caption'), minHeight: 340, a11y: a11yText,
+    render: function (size, st) { var c = st.canvas(); draw(c, size.w, size.h, {}); if (st.cv) st.cv.setAttribute('aria-label', S('chart.caption') + ' ' + a11yText()); } });
+  if (stage && stage.legend) stage.legend({ items: [{ label: tx('lg.curve'), color: 'var(--accent)' }, { label: tx('lg.draw'), color: 'var(--accent)' }, { label: tx('lg.supply'), color: 'var(--ink)' }] });
+  window.__plbdhw = { state: state, ui: ui, get last() { return last; }, curveCSV: curveCSV, resultsJSON: resultsJSON, PRESET_IDS: PRESET_IDS, strings: function () { return { I18N: I18N, PL: PL, LEARN: LEARN }; }, stampedDoc: stampedDoc };
+  ui.ready();
+}
+function degrade() {
+  var h = document.createElement('h1'); h.textContent = 'Hot Water Storage & Heater Sizing';
+  var p = document.createElement('p'); p.textContent = 'The interactive interface could not load. The record and the export are still available from the bar at the bottom of the page.';
+  var m = document.getElementById('app'); m.appendChild(h); m.appendChild(p);
+  if (ENG) last = solve();
+}
+function installData() {
+  if (!window.Diagram) return;
+  Diagram.init({ id: TOOL, file: 'plbdhw.html',
+    state: { serialize: function () { return sanitize(state); },
+             deserialize: function (o) { var x = sanitize(o); Object.keys(state).forEach(function (k) { delete state[k]; }); Object.assign(state, x); if (ui) { ui.sync(); ui.run(); } else if (ENG) last = solve(); } },
+    record: record, report: { profile: reportProfile },
+    handoff: { provides: ['Q', 'T'], accepts: ['Q'],
+      build: function () { if (!last || !last.valid || !last.feasible) return null;
+        return { quantities: { Q: { value: (state.mode === 'volume' ? last.p_main_kw : state.p_kw) * 1000, unit: 'W' }, T: { value: last.t_store_eff_c + 273.15, unit: 'K' } } }; },
+      apply: function (p) { var q = (p && p.quantities) || {}; if (q.Q && isFinite(q.Q.value) && q.Q.value > 0) { state.p_kw = Math.round(q.Q.value / 100) / 10; state.mode = 'power'; } if (ui) { ui.sync(); ui.run(); } } } });
+}
+if (window.DiagramUI && DiagramUI.api === 'tools.petrov.re/ui/v1') buildInterface(); else degrade();
+installData();
+});
+</script>
+</body>
+</html>
